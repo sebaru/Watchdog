@@ -47,7 +47,7 @@
  struct CMD_CRITERE_HISTO_MSGS
   { guint  num;                                                                /* Numero unique historique */
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
-    gchar  objet[NBR_CARAC_LIBELLE_MSG_UTF8+1];
+    gchar  groupage[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     guint  type;                                                       /* Etat, prealarme, defaut, alarme */
     guint  date_create_min;
     guint  date_create_max;

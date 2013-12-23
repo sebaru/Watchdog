@@ -103,12 +103,12 @@
      { memset( requete.libelle, 0, sizeof(requete.libelle) ); }
   
 
-    if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_objet) ) )         /* Tri par objet */
-     { g_snprintf( requete.objet, sizeof(requete.objet), "%s",
-                   gtk_entry_get_text( GTK_ENTRY(infos->Entry_objet) ) );
+    if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_groupage) ) )   /* Tri par groupage */
+     { g_snprintf( requete.groupage, sizeof(requete.groupage), "%s",
+                   gtk_entry_get_text( GTK_ENTRY(infos->Entry_groupage) ) );
      }
     else
-     { memset( requete.objet, 0, sizeof(requete.objet) ); }
+     { memset( requete.groupage, 0, sizeof(requete.groupage) ); }
 
     if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_debut) ) )         /* Tri par debut */
      { requete.date_create_min = gnome_date_edit_get_time( GNOME_DATE_EDIT(infos->Date_debut) ); }
@@ -147,8 +147,8 @@
     actif = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_type) );         /* Tri par type */
     gtk_widget_set_sensitive( infos->Option_type, actif );
 
-    actif = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_objet) );       /* Tri par objet */
-    gtk_widget_set_sensitive( infos->Entry_objet, actif );
+    actif = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_groupage) ); /* Tri par groupage */
+    gtk_widget_set_sensitive( infos->Entry_groupage, actif );
 
     actif = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(infos->Check_debut) );        /* Tri par date */
     gtk_widget_set_sensitive( infos->Date_debut, actif );
@@ -248,14 +248,14 @@
     gtk_entry_set_max_length( GTK_ENTRY(infos->Entry_libelle), NBR_CARAC_LIBELLE_MSG );
     gtk_table_attach_defaults( GTK_TABLE(table), infos->Entry_libelle, 1, 4, 3, 4 );
 
-    infos->Check_objet = gtk_check_button_new_with_label( _("By objet") );
-    gtk_table_attach_defaults( GTK_TABLE(table), infos->Check_objet, 0, 1, 4, 5 );
-    g_signal_connect_swapped( G_OBJECT(infos->Check_objet), "toggled",
+    infos->Check_groupage = gtk_check_button_new_with_label( _("By groupe/page") );
+    gtk_table_attach_defaults( GTK_TABLE(table), infos->Check_groupage, 0, 1, 4, 5 );
+    g_signal_connect_swapped( G_OBJECT(infos->Check_groupage), "toggled",
                               G_CALLBACK(Rafraichir_sensibilite), page );
 
-    infos->Entry_objet = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(infos->Entry_objet), NBR_CARAC_LIBELLE_MSG );
-    gtk_table_attach_defaults( GTK_TABLE(table), infos->Entry_objet, 1, 4, 4, 5 );
+    infos->Entry_groupage = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(infos->Entry_groupage), NBR_CARAC_LIBELLE_MSG );
+    gtk_table_attach_defaults( GTK_TABLE(table), infos->Entry_groupage, 1, 4, 4, 5 );
 
     infos->Check_debut = gtk_check_button_new_with_label( _("After") );
     gtk_table_attach_defaults( GTK_TABLE(table), infos->Check_debut, 0, 1, 5, 6 );

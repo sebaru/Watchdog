@@ -150,8 +150,8 @@
     GtkWidget *Entry_nom_ack;
     GtkWidget *Check_libelle;
     GtkWidget *Entry_libelle; 
-    GtkWidget *Check_objet;
-    GtkWidget *Entry_objet;
+    GtkWidget *Check_groupage;
+    GtkWidget *Entry_groupage;
     GtkWidget *Check_debut;
     GtkWidget *Date_debut;
     GtkWidget *Check_fin;
