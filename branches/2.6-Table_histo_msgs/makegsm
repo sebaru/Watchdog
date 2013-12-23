@@ -1,0 +1,8 @@
+#/bin/sh
+espeak -s 90 -v mb/mb-fr4 "Pour l'étage tapé 1" > test.seb ; mbrola-linux-i386 fr4 test.seb test.au ; aplay test.au ; sox test.au -r 8000 -c1 Watchdog-menu-1-etage.gsm
+espeak -s 90 -v mb/mb-fr4 "Pour le rez de chaussé tapé 2" > test.seb ; mbrola-linux-i386 fr4 test.seb test.au ; aplay test.au ; sox test.au -r 8000 -c1 Watchdog-menu-2-rdc.gsm
+espeak -s 90 -v mb/mb-fr4 "Pour le sous sol tapé 3" > test.seb ; mbrola-linux-i386 fr4 test.seb test.au ; aplay test.au ; sox test.au -r 8000 -c1 Watchdog-menu-3-ssol.gsm
+espeak -s 90 -v mb/mb-fr4 "Pour la chambre seb tapé 1" > test.seb ; mbrola-linux-i386 fr4 test.seb test.au ; aplay test.au ; sox test.au -r 8000 -c1 Watchdog-menu-11-chseb.gsm
+espeak -s 90 -v mb/mb-fr4 "Ouvrir le rideau sébastien tapé 1" > test.seb ; mbrola-linux-i386 fr4 test.seb test.au ; aplay test.au ; sox test.au -r 8000 -c1 Watchdog-menu-11.gsm
+espeak -s 90 -v mb/mb-fr4 "Fermer le rideau sébastien tapé 2" > test.seb ; mbrola-linux-i386 fr4 test.seb test.au ; aplay test.au ; sox test.au -r 8000 -c1 Watchdog-menu-12.gsm
+

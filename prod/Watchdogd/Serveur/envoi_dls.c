@@ -1,0 +1,396 @@
+/**********************************************************************************************************/
+/* Watchdogd/Serveur/envoi_dls.c        Configuration du DLS de Watchdog v2.0                             */
+/* Projet WatchDog version 2.0       Gestion d'habitat                       dim 08 mar 2009 14:28:35 CET */
+/* Auteur: LEFEVRE Sebastien                                                                              */
+/**********************************************************************************************************/
+/*
+ * envoi_dls.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2010 - Sebastien Lefevre
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+ 
+ #include <glib.h>
+ #include <sys/prctl.h>
+ #include <string.h>
+ #include <sys/stat.h>
+ #include <sys/types.h>
+ #include <fcntl.h>
+ #include <unistd.h>
+ #include <sys/file.h>                                            /* Gestion des verrous sur les fichiers */
+ #include <sys/wait.h>
+
+/******************************************** Prototypes de fonctions *************************************/
+ #include "watchdogd.h"
+ #include "Sous_serveur.h"
+
+/**********************************************************************************************************/
+/* Proto_effacer_fichier_dls: Suppression du code d'un plugin avant reception du nouveau code client      */
+/* Entrée: le client demandeur et l'id du fichier plugin                                                  */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_effacer_fichier_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls )
+  { gchar chaine[80];
+    gint id_fichier;
+    g_snprintf( chaine, sizeof(chaine), "%d.dls.new", edit_dls->id );
+    unlink ( chaine );
+    id_fichier = open( chaine, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+    close(id_fichier);
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "Proto_effacer_fichier_plugin_dls : Zeroing... %s", chaine );
+  }
+/**********************************************************************************************************/
+/* Proto_effacer_plugin_dls: Destruction du plugin en parametre                                           */
+/* Entrée: le client demandeur et le groupe en question                                                   */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_effacer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
+  { gboolean retour;
+
+    pthread_mutex_lock( &Partage->com_dls.synchro );
+    Partage->com_dls.liste_plugin_reset = g_list_append ( Partage->com_dls.liste_plugin_reset,
+                                                          GINT_TO_POINTER(rezo_dls->id) );
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+
+    retour = Retirer_plugin_dlsDB( rezo_dls );
+    if (retour)
+     { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_DEL_PLUGIN_DLS_OK,
+                     (gchar *)rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+     }
+    else
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Unable to delete plugin %s", rezo_dls->nom);
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+     }
+  }
+/**********************************************************************************************************/
+/* Proto_editer_msg: Le client desire editer un msg                                                       */
+/* Entrée: le client demandeur et le msg en question                                                      */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
+  { struct CMD_TYPE_PLUGIN_DLS *dls;
+
+    dls = Rechercher_plugin_dlsDB( rezo_dls->id );
+
+    if (dls)
+     { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_EDIT_PLUGIN_DLS_OK,
+                  (gchar *)dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+       g_free(dls);                                                                 /* liberation mémoire */
+     }
+    else
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Unable to locate plugin DLS %s", rezo_dls->nom);
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+     }
+  }
+/**********************************************************************************************************/
+/* Proto_valider_editer_msg: Le client valide l'edition d'un msg                                          */
+/* Entrée: le client demandeur et le msg en question                                                      */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_valider_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
+  { struct CMD_TYPE_PLUGIN_DLS *result;
+    gboolean retour;
+
+    retour = Modifier_plugin_dlsDB ( rezo_dls );
+    if (retour==FALSE)
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Unable to edit plugin DLS %s", rezo_dls->nom);
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+     }
+    else { result = Rechercher_plugin_dlsDB( rezo_dls->id );
+           if (result) 
+            { pthread_mutex_lock( &Partage->com_dls.synchro );
+              Partage->com_dls.liste_plugin_reset =
+                              g_list_append ( Partage->com_dls.liste_plugin_reset,
+                                              GINT_TO_POINTER(result->id) );
+              pthread_mutex_unlock( &Partage->com_dls.synchro );
+                      
+              Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_VALIDE_EDIT_PLUGIN_DLS_OK,
+                            (gchar *)result, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+              g_free(result);
+            }
+           else
+            { struct CMD_GTK_MESSAGE erreur;
+              g_snprintf( erreur.message, sizeof(erreur.message),
+                          "Unable to locate plugin DLS %s", rezo_dls->nom);
+              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+            }
+         }
+  }
+/**********************************************************************************************************/
+/* Proto_editer_source_dls: Edition d'un programme DLS                                                    */
+/* Entrée: le client demandeur et le groupe en question                                                   */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_editer_source_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
+  { gchar chaine[80];
+
+    client->transfert.buffer = g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );
+    if (!client->transfert.buffer)
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message), "Not enough memory" );
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+       return;
+     }
+
+    g_snprintf( chaine, sizeof(chaine), "%d.dls", rezo_dls->id );
+    client->transfert.fd = open( chaine, O_RDONLY );
+    if (client->transfert.fd < 0)
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message), "Unable to open %s", chaine );
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+       g_free(client->transfert.buffer);
+       return;
+     }
+    client->transfert.index = 0;
+    lockf( client->transfert.fd, F_LOCK, 0 );                                  /* Verrouillage du fichier */
+    ((struct CMD_TYPE_SOURCE_DLS *)client->transfert.buffer)->id = rezo_dls->id;
+    Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_EDIT_SOURCE_DLS_OK,
+                  (gchar *)rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+    Client_mode( client, ENVOI_SOURCE_DLS );
+  }
+/**********************************************************************************************************/
+/* Proto_valider_source_dls: Le client nous envoie un prg DLS qu'il nous faudra compiler ensuite          */
+/* Entrée: le client demandeur et le groupe en question                                                   */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_valider_source_dls( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls,
+                                gchar *buffer )
+  { gchar chaine[80];
+    if (!client->id_creation_plugin_dls)
+     { gint id_fichier;
+       g_snprintf( chaine, sizeof(chaine), "%d.dls.new", edit_dls->id );
+       id_fichier = open( chaine, O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR );
+       if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
+                   "Proto_valider_source_dls: append failed %d", edit_dls->id );
+          return;
+        }
+       lockf( id_fichier, F_LOCK, 0 );
+       client->id_creation_plugin_dls = id_fichier;
+     }
+    
+    write( client->id_creation_plugin_dls, buffer, edit_dls->taille );
+  }
+/**********************************************************************************************************/
+/* Proto_compiler_source_dls: Compilation de la source DLS                                                */
+/* Entrée: le client demandeur et le groupe en question                                                   */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void *Proto_compiler_source_dls( struct CLIENT *client )
+  { struct CMD_GTK_MESSAGE erreur;
+
+    close( client->id_creation_plugin_dls );                               /* Fermeture du fichier plugin */
+    client->id_creation_plugin_dls = 0;
+
+    switch ( Compiler_source_dls ( TRUE, TRUE, client->dls.id, erreur.message, sizeof(erreur.message) ) )
+     { case DLS_COMPIL_ERROR_LOAD_SOURCE:
+            g_snprintf( erreur.message, sizeof(erreur.message),
+                       "Unable to open file for compilation ID %d", client->dls.id );
+            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                           (gchar *)&erreur, sizeof(erreur) );
+            break;
+       case DLS_COMPIL_ERROR_LOAD_LOG:
+            g_snprintf( erreur.message, sizeof(erreur.message),
+                       "Unable to open og file for DLS %d", client->dls.id );
+            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                           (gchar *)&erreur, sizeof(erreur) );
+            break;
+       case DLS_COMPIL_OK_WITH_WARNINGS:
+            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_WARNING,
+                           (gchar *)&erreur, sizeof(erreur) );
+            break;
+       case DLS_COMPIL_ERROR_TRAD:
+            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                           (gchar *)&erreur, sizeof(erreur) );
+            break;
+       case DLS_COMPIL_ERROR_FORK_GCC:
+            g_snprintf( erreur.message, sizeof(erreur.message), "Gcc fork failed !" );
+            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                           (gchar *)&erreur, sizeof(erreur) );
+            break;
+       case DLS_COMPIL_OK:
+            g_snprintf( erreur.message, sizeof(erreur.message),
+                      "-> Compilation OK\nReset plugin OK" );
+            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_INFO,
+                           (gchar *)&erreur, sizeof(erreur) );
+            break;
+     }
+    pthread_exit( NULL );
+  }
+/**********************************************************************************************************/
+/* Proto_ajouter_groupe: Un client nous demande d'ajouter un groupe Watchdog                              */
+/* Entrée: le groupe à créer                                                                              */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_ajouter_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
+  { struct CMD_TYPE_PLUGIN_DLS *result;
+    gint id;
+
+    id = Ajouter_plugin_dlsDB ( rezo_dls );
+    if (id == -1)
+     { struct CMD_GTK_MESSAGE erreur;
+       g_snprintf( erreur.message, sizeof(erreur.message),
+                   "Unable to add plugin %s", rezo_dls->nom);
+       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+     }
+    else { result = Rechercher_plugin_dlsDB( id );
+           if (!result) 
+            { struct CMD_GTK_MESSAGE erreur;
+              g_snprintf( erreur.message, sizeof(erreur.message),
+                          "Unable to add plugin %s", rezo_dls->nom);
+              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+            }
+           else
+            { gchar chaine[80];
+              gint id_fichier;
+
+              g_snprintf(chaine, sizeof(chaine), "%d.dls", result->id );
+              id_fichier = open( chaine, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+              if (id_fichier == -1)
+               { struct CMD_GTK_MESSAGE erreur;
+                 g_snprintf( erreur.message, sizeof(erreur.message),
+                             "Unable to create file %s:\n", chaine );
+                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+               }
+              else { g_snprintf(chaine, sizeof(chaine), "/* %d.dls: %s */\n", result->id, result->nom );
+                     write(id_fichier, chaine, strlen(chaine) );
+                     close(id_fichier); 
+
+                     Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_ADD_PLUGIN_DLS_OK,      /* Tout va bien */
+                                   (gchar *)result, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+                     g_free(result);
+                   }
+            }
+         }
+  }
+/**********************************************************************************************************/
+/* Envoyer_groupes: Envoi des groupes au client GID_USERS                                                 */
+/* Entrée: Néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void *Envoyer_plugins_dls_thread_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
+  { struct CMD_ENREG nbr;
+    struct CMD_TYPE_PLUGIN_DLS *dls;
+    struct DB *db;
+    
+    prctl(PR_SET_NAME, "W-EnvoiDLS", 0, 0, 0 );
+
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+              "Envoyer_plugins_dls_thread_tag: Starting (TAG=%d, SSTAG=%d, SSTAGFIN=%d)",
+               tag, sstag, sstag_fin );
+          
+    if ( ! Recuperer_plugins_dlsDB( &db ) )
+     { return(NULL);
+     }                                                                           /* Si pas de histos (??) */
+
+    nbr.num = db->nbr_result;
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d plugins", nbr.num );
+    Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
+                   (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+
+    for( ; ; )
+     { dls = Recuperer_plugins_dlsDB_suite( &db );
+       if (!dls)
+        { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
+          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                   "Envoyer_plugins_dls_thread_tag: End (TAG=%d, SSTAG=%d, SSTAGFIN=%d)",
+                    tag, sstag, sstag_fin );
+          return(NULL);
+        }
+
+       Envoi_client ( client, tag, sstag,
+                      (gchar *)dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+       g_free(dls);
+     }
+  }
+/**********************************************************************************************************/
+/* Envoyer_plugins_dls_thread: Envoi la liste des plugin D.L.S au client                                  */
+/* Entrée: Néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void *Envoyer_plugins_dls_thread ( struct CLIENT *client )
+  { Envoyer_plugins_dls_thread_tag ( client, TAG_DLS, SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS,
+                                                      SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS_FIN
+                                   );
+    Unref_client( client );                                           /* Déréférence la structure cliente */
+    pthread_exit ( NULL );
+  }
+/**********************************************************************************************************/
+/* Envoyer_plugins_dls_thread: Envoi la liste des plugin D.L.S au client                                  */
+/* Entrée: Néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void *Envoyer_plugins_dls_pour_mnemo_thread ( struct CLIENT *client )
+  { Envoyer_plugins_dls_thread_tag ( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO,
+                                                             SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO_FIN
+                                   );
+    Unref_client( client );                                           /* Déréférence la structure cliente */
+    pthread_exit ( NULL );
+  }
+/**********************************************************************************************************/
+/* Envoyer_source_dls: Envoi d'un programme D.L.S                                                         */
+/* Entrée: Néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ gboolean Envoyer_source_dls ( struct CLIENT *client )
+  { gint taille, nbr_carac, taille_valide, taille_buffer;
+    struct CMD_TYPE_SOURCE_DLS *edit_dls;
+    gchar *buffer;
+    gchar *test;
+
+    if (!client->transfert.buffer) return(TRUE);
+    if (client->transfert.fd<0) return(TRUE);
+    edit_dls = (struct CMD_TYPE_SOURCE_DLS *)client->transfert.buffer;
+    buffer = client->transfert.buffer + sizeof(struct CMD_TYPE_SOURCE_DLS);
+    taille_buffer = Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_SOURCE_DLS);
+
+    taille = read ( client->transfert.fd,
+                    buffer + client->transfert.index,
+                    taille_buffer - client->transfert.index );
+    if (taille<=0)                                                         /* Détection de fin de fichier */
+     { g_free(client->transfert.buffer);
+       client->transfert.buffer = NULL;
+       close(client->transfert.fd);
+       client->transfert.fd = 0;
+       return(TRUE);
+     }
+    nbr_carac = g_utf8_strlen( buffer, taille );
+    test = g_utf8_offset_to_pointer( buffer, nbr_carac );
+    taille_valide = test - buffer;
+    
+    edit_dls->taille = taille_valide;
+    Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_SOURCE_DLS,
+                   (gchar *)client->transfert.buffer, taille_valide + sizeof(struct CMD_TYPE_SOURCE_DLS) );
+    memcpy( buffer, buffer + taille_valide, taille-taille_valide );
+    return(FALSE);
+  }
+/*--------------------------------------------------------------------------------------------------------*/
