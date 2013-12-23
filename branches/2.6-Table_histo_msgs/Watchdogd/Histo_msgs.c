@@ -104,8 +104,9 @@
         }
        else
         { g_snprintf( requete, sizeof(requete),                                            /* Requete SQL */
-                      "UPDATE %s SET alive=0,date_fin='%d'"
-                      " WHERE alive=1 AND num='%d'", NOM_TABLE_HISTO_MSGS,
+                      "UPDATE %s as histo, %s as msg SET histo.alive=0,histo.date_fin='%d'"
+                      " WHERE histo.alive=1 AND histo.id_msg = msg.id AND msg.num='%d'",
+                      NOM_TABLE_HISTO_MSGS, NOM_TABLE_MSG,
                       (int)histo->date_fin, histo->msg.num );
         }
      }
