@@ -238,11 +238,8 @@ CREATE TABLE IF NOT EXISTS `histo_bit` (
 
 CREATE TABLE IF NOT EXISTS `histo_msgs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `num` int(11) NOT NULL DEFAULT '0',
+  `id_num` int(11) NOT NULL DEFAULT '0',
   `alive` tinyint(1) NOT NULL,
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `type` int(11) NOT NULL DEFAULT '0',
-  `num_syn` int(11) NOT NULL DEFAULT '0',
   `nom_ack` varchar(97) COLLATE utf8_unicode_ci DEFAULT NULL,
   `date_create_sec` int(11) NOT NULL DEFAULT '0',
   `date_create_usec` int(11) DEFAULT '0',
@@ -250,7 +247,6 @@ CREATE TABLE IF NOT EXISTS `histo_msgs` (
   `date_fin` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `date_create_sec` (`date_create_sec`),
-  KEY `type` (`type`),
   KEY `alive` (`alive`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
@@ -695,7 +691,7 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `libelle_audio` text COLLATE utf8_unicode_ci NOT NULL,
   `libelle_sms` text COLLATE utf8_unicode_ci NOT NULL,
   `type` int(11) NOT NULL DEFAULT '0',
-  `num_syn` int(11) NOT NULL DEFAULT '0',
+  `id_syn` int(11) NOT NULL DEFAULT '0',
   `bit_voc` int(11) DEFAULT NULL,
   `enable` tinyint(1) NOT NULL DEFAULT '0',
   `sms` int(11) NOT NULL DEFAULT '0',

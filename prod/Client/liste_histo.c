@@ -46,7 +46,7 @@
     COLONNE_NUM,
     COLONNE_GROUPE_PAGE,
     COLONNE_TYPE,
-    COLONNE_NUM_SYN,
+    COLONNE_ID_SYN,
     COLONNE_DATE_CREATE,
     COLONNE_ACK,
     COLONNE_LIBELLE,
@@ -131,11 +131,11 @@
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     while ( lignes )
-     { guint num_syn;
+     { guint id_syn;
        gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
-       gtk_tree_model_get( store, &iter, COLONNE_NUM_SYN, &num_syn, -1 );                  /* Recup du id */
+       gtk_tree_model_get( store, &iter, COLONNE_ID_SYN, &id_syn, -1 );                  /* Recup du id */
 
-       Changer_vue_directe ( num_syn );
+       Changer_vue_directe ( id_syn );
 
        gtk_tree_selection_unselect_iter( selection, &iter );
        lignes = lignes->next;
@@ -221,7 +221,7 @@
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, histo->id,
                          COLONNE_NUM, histo->msg.num,
-                         COLONNE_NUM_SYN, histo->msg.num_syn,
+                         COLONNE_ID_SYN, histo->msg.id_syn,
                          COLONNE_GROUPE_PAGE, groupe_page,
                          COLONNE_TYPE, Type_vers_string(histo->msg.type),
                          COLONNE_DATE_CREATE, date,
