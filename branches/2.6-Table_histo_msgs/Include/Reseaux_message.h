@@ -60,7 +60,7 @@
     guchar type;                                                       /* Etat, prealarme, defaut, alarme */
     gboolean enable;                              /* Flag pour la gestion par exemple de l'inhibition ... */
     guint  sms;                                                                         /* Envoi de sms ? */
-    guint  num_syn;                     /* Numéro du fichier syn correspondant(pas l'index dans la table) */
+    guint  id_syn;                                         /* Numéro ID du synoptique rattaché au message */
     guint  bit_voc;                                       /* Numéro du Monostable associé au profil vocal */
     guint  vitesse_voc;                                              /* Vitesse de restitution de la voix */
     guint  type_voc;                                                          /* Type de voix a restituer */

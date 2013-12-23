@@ -82,11 +82,10 @@
         }
           
        g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
-                   "INSERT INTO %s(alive,num,libelle,type,num_syn,nom_ack,date_create_sec,date_create_usec)"
+                   "INSERT INTO %s(alive,id_msg,nom_ack,date_create_sec,date_create_usec)"
                    " VALUES "
-                   "('%d','%d','%s','%d','%d','%s','%d','%d')", NOM_TABLE_HISTO_MSGS, TRUE,
-                   histo->msg.num, libelle,
-                   histo->msg.type, histo->msg.num_syn, 
+                   "('%d','%d','%s','%d','%d')", NOM_TABLE_HISTO_MSGS, TRUE,
+                   histo->msg.id, 
                    nom_ack, (int)histo->date_create_sec, (int)histo->date_create_usec );
        g_free(libelle);
      }
@@ -149,32 +148,29 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,alive,%s.num,%s.libelle,type,num_syn,%s.groupe,%s.page,"
-                "nom_ack,date_create_sec,date_create_usec,"
-                "date_fixe,date_fin"
-                " FROM %s,%s"
-                " WHERE %s.num_syn = %s.id ",
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_HISTO_MSGS, NOM_TABLE_HISTO_MSGS,
-                NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, /* From */
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE /* Where */
+                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, msg.id_syn,"
+                "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
+                "histo.date_fixe,histo.date_fin"
+                " FROM %s as histo,%s as syn, %s as msg"
+                " WHERE msg.id_syn = syn.id AND histo.id_msg = msg.id",
+                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG /* From */
               );
 
     memset( critereSQL, 0, sizeof(critereSQL) );
     if (critere->num != -1)
-     { g_snprintf( critereSQL, sizeof(critereSQL), " AND num=%d", critere->num );
+     { g_snprintf( critereSQL, sizeof(critereSQL), " AND msg.num=%d", critere->num );
        g_strlcat( requete, critereSQL, sizeof(requete) );
      }
     if (critere->type != -1)
-     { g_snprintf( critereSQL, sizeof(critereSQL), " AND type=%d", critere->type );
+     { g_snprintf( critereSQL, sizeof(critereSQL), " AND msg.type=%d", critere->type );
        g_strlcat( requete, critereSQL, sizeof(requete) );
      }
     if (critere->date_create_min!=-1)
-     { g_snprintf( critereSQL, sizeof(critereSQL), " AND date_create_sec>=%d", (int)critere->date_create_min );
+     { g_snprintf( critereSQL, sizeof(critereSQL), " AND histo.date_create_sec>=%d", (int)critere->date_create_min );
        g_strlcat( requete, critereSQL, sizeof(requete) );
      }
     if (critere->date_create_max!=-1)
-     { g_snprintf( critereSQL, sizeof(critereSQL), " AND date_create_sec<=%d", (int)critere->date_create_max );
+     { g_snprintf( critereSQL, sizeof(critereSQL), " AND histo.date_create_sec<=%d", (int)critere->date_create_max );
        g_strlcat( requete, critereSQL, sizeof(requete) );
      }
     if ( *(critere->nom_ack) )
@@ -182,7 +178,7 @@
        critere->nom_ack[sizeof(critere->nom_ack)-1] = 0;                          /* Anti buffer overflow */
        norm = Normaliser_chaine( critere->nom_ack);
        if (norm)
-        { g_snprintf( critereSQL, sizeof(critereSQL), " AND nom_ack LIKE '%%%s%%'", norm );
+        { g_snprintf( critereSQL, sizeof(critereSQL), " AND histo.nom_ack LIKE '%%%s%%'", norm );
           g_strlcat( requete, critereSQL, sizeof(requete) );
           g_free(norm);
         }
@@ -192,22 +188,23 @@
        critere->libelle[sizeof(critere->libelle)-1] = 0;                          /* Anti buffer overflow */
        norm = Normaliser_chaine( critere->libelle );
        if (norm)
-        { g_snprintf( critereSQL, sizeof(critereSQL), " AND libelle LIKE '%%%s%%'", norm );
+        { g_snprintf( critereSQL, sizeof(critereSQL), " AND msg.libelle LIKE '%%%s%%'", norm );
           g_strlcat( requete, critereSQL, sizeof(requete) );
           g_free(norm);
         }
      }
-    if ( *(critere->objet) )
+    if ( *(critere->groupage) )
      { gchar *norm;
-       critere->objet[sizeof(critere->objet)-1] = 0;                              /* Anti buffer overflow */
-       norm = Normaliser_chaine( critere->objet );
+       critere->groupage[sizeof(critere->groupage)-1] = 0;                        /* Anti buffer overflow */
+       norm = Normaliser_chaine( critere->groupage );
        if (norm)
-        { g_snprintf( critereSQL, sizeof(critereSQL), " AND objet LIKE '%%%s%%'", norm );
+        { g_snprintf( critereSQL, sizeof(critereSQL),
+                      " AND (syn.groupe LIKE '%%%s%%' OR syn.page LIKE '%%%s%%')", norm, norm );
           g_strlcat( requete, critereSQL, sizeof(requete) );
           g_free(norm);
         }
      }
-    g_strlcat( requete, " ORDER BY date_create_sec,date_create_usec LIMIT 500;", sizeof(requete) );
+    g_strlcat( requete, " ORDER BY histo.date_create_sec, histo.date_create_usec LIMIT 500;", sizeof(requete) );
  
     db = Init_DB_SQL();       
     if (!db)
@@ -231,15 +228,13 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,alive,%s.num,%s.libelle,type,num_syn,%s.groupe,%s.page,"
-                "nom_ack,date_create_sec,date_create_usec,"
-                "date_fixe,date_fin"
-                " FROM %s,%s"
-                " WHERE %s.num_syn = %s.id AND alive = 1 ORDER BY date_create_sec,date_create_usec",
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_HISTO_MSGS, NOM_TABLE_HISTO_MSGS,
-                NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, /* From */
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE /* Where */
+                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, msg.id_syn,"
+                "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
+                "histo.date_fixe,histo.date_fin"
+                " FROM %s as histo,%s as syn, %s as msg"
+                " WHERE msg.id_syn = syn.id AND histo.id_msg = msg.id"
+                " AND alive = 1 ORDER BY histo.date_create_sec, histo.date_create_usec",
+                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG /* From */
               );
  
     db = Init_DB_SQL();       
@@ -264,16 +259,14 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,alive,%s.num,%s.libelle,type,num_syn,%s.groupe,%s.page,"
-                "nom_ack,date_create_sec,date_create_usec,"
-                "date_fixe,date_fin"
-                " FROM %s,%s"
-                " WHERE %s.num_syn = %s.id AND %s.id =%d",
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_HISTO_MSGS, NOM_TABLE_HISTO_MSGS,
-                NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, /* From */
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, /* Where */
-                NOM_TABLE_HISTO_MSGS, id
+                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, msg.id_syn,"
+                "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
+                "histo.date_fixe,histo.date_fin"
+                " FROM %s as histo,%s as syn, %s as msg"
+                " WHERE msg.id_syn = syn.id AND histo.id_msg = msg.id"
+                " AND histo.id = %d",
+                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, /* From */
+                id
               );
  
     db = Init_DB_SQL();       
@@ -320,7 +313,7 @@
        histo_msgs->alive            = atoi(db->row[1]);
        histo_msgs->msg.num          = atoi(db->row[2]);
        histo_msgs->msg.type         = atoi(db->row[4]);
-       histo_msgs->msg.num_syn      = atoi(db->row[5]);
+       histo_msgs->msg.id_syn      = atoi(db->row[5]);
        histo_msgs->date_create_sec  = atoi(db->row[9]);
        histo_msgs->date_create_usec = atoi(db->row[10]);
        histo_msgs->date_fixe        = atoi(db->row[11]);

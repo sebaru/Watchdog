@@ -91,10 +91,10 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "INSERT INTO %s(num,libelle,libelle_audio,libelle_sms,"
-                "type,num_syn,bit_voc,enable,sms,type_voc,vitesse_voc,time_repeat) VALUES "
+                "type,id_syn,bit_voc,enable,sms,type_voc,vitesse_voc,time_repeat) VALUES "
                 "(%d,'%s','%s','%s',%d,%d,%d,%s,%d,%d,%d,%d)", NOM_TABLE_MSG, msg->num,
                 libelle, libelle_audio, libelle_sms, msg->type,
-                msg->num_syn, msg->bit_voc, (msg->enable ? "true" : "false"),
+                msg->id_syn, msg->bit_voc, (msg->enable ? "true" : "false"),
                 msg->sms, msg->type_voc, msg->vitesse_voc, msg->time_repeat
               );
     g_free(libelle);
@@ -127,10 +127,10 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,num,%s.libelle,type,num_syn,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
+                "SELECT %s.id,num,%s.libelle,type,id_syn,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
                 "type_voc,vitesse_voc,time_repeat"
                 " FROM %s,%s"
-                " WHERE %s.num_syn = %s.id"
+                " WHERE %s.id_syn = %s.id"
                 " ORDER BY groupe,page,num",
                 NOM_TABLE_MSG, NOM_TABLE_MSG,
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, /* From */
@@ -176,7 +176,7 @@
        msg->id          = atoi(db->row[0]);
        msg->num         = atoi(db->row[1]);
        msg->type        = atoi(db->row[3]);
-       msg->num_syn     = atoi(db->row[4]);
+       msg->id_syn     = atoi(db->row[4]);
        msg->bit_voc     = atoi(db->row[5]);
        msg->enable      = atoi(db->row[6]);
        msg->sms         = atoi(db->row[9]);
@@ -197,10 +197,10 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,num,%s.libelle,type,num_syn,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
+                "SELECT %s.id,num,%s.libelle,type,id_syn,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
                 "type_voc,vitesse_voc,time_repeat"
                 " FROM %s,%s"
-                " WHERE %s.num_syn = %s.id AND num=%d LIMIT 1",
+                " WHERE %s.id_syn = %s.id AND num=%d LIMIT 1",
                 NOM_TABLE_MSG, NOM_TABLE_MSG,
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE,     /* From */
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, num /* Where */
@@ -238,10 +238,10 @@
      }
    
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,num,%s.libelle,type,num_syn,bit_voc,enable,groupe,page,sms,libelle_audio,"
+                "SELECT %s.id,num,%s.libelle,type,id_syn,bit_voc,enable,groupe,page,sms,libelle_audio,"
                 "libelle_sms,type_voc,vitesse_voc,time_repeat"
                 " FROM %s,%s"
-                " WHERE %s.num_syn = %s.id AND %s.id=%d LIMIT 1",
+                " WHERE %s.id_syn = %s.id AND %s.id=%d LIMIT 1",
                 NOM_TABLE_MSG, NOM_TABLE_MSG,
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE,     /* From */
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, id /* Where */
@@ -287,10 +287,10 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "num=%d,libelle='%s',type=%d,num_syn=%d,bit_voc=%d,enable=%s,sms=%d,"
+                "num=%d,libelle='%s',type=%d,id_syn=%d,bit_voc=%d,enable=%s,sms=%d,"
                 "libelle_audio='%s',libelle_sms='%s',type_voc=%d,vitesse_voc=%d,time_repeat=%d "
                 "WHERE id=%d",
-                NOM_TABLE_MSG, msg->num, libelle, msg->type, msg->num_syn, msg->bit_voc,
+                NOM_TABLE_MSG, msg->num, libelle, msg->type, msg->id_syn, msg->bit_voc,
                                (msg->enable ? "true" : "false"), msg->sms,
                                libelle_audio, libelle_sms, msg->type_voc, msg->vitesse_voc,
                                msg->time_repeat,
