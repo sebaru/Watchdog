@@ -89,6 +89,7 @@
     prctl(PR_SET_NAME, "W-Tellstick", 0, 0, 0 );
     memset( &Cfg_tellstick, 0, sizeof(Cfg_tellstick) );         /* Mise a zero de la structure de travail */
     Cfg_tellstick.lib = lib;                   /* Sauvegarde de la structure pointant sur cette librairie */
+    Cfg_tellstick.lib->TID = pthread_self();                            /* Sauvegarde du TID pour le pere */
     Tellstick_Lire_config ();                           /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_tellstick.lib->Thread_debug, LOG_NOTICE,

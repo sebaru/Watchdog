@@ -546,6 +546,7 @@
     prctl(PR_SET_NAME, "W-RS485", 0, 0, 0 );
     memset( &Cfg_rs485, 0, sizeof(Cfg_rs485) );                 /* Mise a zero de la structure de travail */
     Cfg_rs485.lib = lib;                       /* Sauvegarde de la structure pointant sur cette librairie */
+    Cfg_rs485.lib->TID = pthread_self();                                /* Sauvegarde du TID pour le pere */
     Rs485_Lire_config ();                               /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,

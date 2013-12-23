@@ -53,21 +53,38 @@
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
  gboolean Start_librairie ( struct LIBRAIRIE *lib )
-  { if (!lib) return(FALSE);
+  { pthread_attr_t attr;
+    pthread_t tid;
+    if (!lib) return(FALSE);
     if (lib->Thread_run == TRUE)
      { Info_new( Config.log, Config.log_msrv, LOG_INFO,
                  "Start_librairie: thread %s already seems to be running", lib->nom_fichier );
        return(FALSE);
      }
-    if ( pthread_create( &lib->TID, NULL, (void *)lib->Run_thread, lib ) )
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+
+    if ( pthread_attr_init(&attr) )                             /* Initialisation des attributs du thread */
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "Start_librairie: pthread_attr_init failed (%s)",
+                lib->nom_fichier );
+       return(FALSE);
+     }
+
+    if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) )           /* On le détache au boot */
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "Start_librairie: pthread_setdetachstate failed (%s)",
+                lib->nom_fichier );
+       return(FALSE);
+     }
+
+    if ( pthread_create( &tid, &attr, (void *)lib->Run_thread, lib ) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "Start_librairie: pthread_create failed (%s)",
                 lib->nom_fichier );
        return(FALSE);
      }
-    pthread_detach( lib->TID );       /* On le détache pour qu'il puisse se terminer sur erreur tout seul */
+    pthread_attr_destroy(&attr);                                                    /* Libération mémoire */
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-             "Start_librairie: Starting thread %s OK", lib->nom_fichier );
+             "Start_librairie: Starting thread %s OK (TID=%p)", lib->nom_fichier, tid );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -80,11 +97,10 @@
     if ( lib->TID != 0 )
      { Info_new( Config.log, Config.log_msrv, LOG_INFO,
                 "Stop_librairie: thread %s, stopping in progress", lib->nom_fichier );
+
+       lib->Thread_run = FALSE;                                         /* On demande au thread de s'arreter */
+       while( lib->TID != 0 ) sched_yield();                                             /* Attente fin thread */
      }
-
-    lib->Thread_run = FALSE;                                         /* On demande au thread de s'arreter */
-    while( lib->TID!=0 ) sched_yield();                                             /* Attente fin thread */
-
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
              "Stop_librairie: thread %s stopped", lib->nom_fichier );
     return(TRUE);

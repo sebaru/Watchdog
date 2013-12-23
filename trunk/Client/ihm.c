@@ -259,8 +259,8 @@
                   break;
              case TYPE_PAGE_HISTO_COURBE:
                   break;
-             case TYPE_PAGE_HISTO_HARD:
-                  if ( ((struct TYPE_INFO_HISTO_HARD *)page->infos)->page_id != id )
+             case TYPE_PAGE_HISTO_MSGS:
+                  if ( ((struct TYPE_INFO_HISTO_MSGS *)page->infos)->page_id != id )
                    { liste = liste->next; continue; }
                   break;
              case TYPE_PAGE_SUPERVISION:

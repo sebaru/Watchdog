@@ -33,35 +33,17 @@
  #include "Utilisateur_DB.h"
  #include "Message_DB.h"
 
- #define NOM_TABLE_HISTO       "histo"
- #define NOM_TABLE_HISTO_HARD  "histo_hard"
-
- struct HISTODB
-  { struct CMD_TYPE_MESSAGE msg;
-    gchar nom_ack [ NBR_CARAC_LOGIN_UTF8 + 1 ];
-    guint date_create_sec;
-    guint date_create_usec;
-    time_t date_fixe;
-  };
-
- struct HISTO_HARDDB
-  { struct HISTODB histo;
-    time_t date_fin;
-  };
+ #define NOM_TABLE_HISTO_MSGS  "histo_msgs"
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Clear_histoDB ( void );
- extern gboolean Retirer_histoDB ( guint id );
- extern gboolean Ajouter_histoDB ( struct HISTODB *histo );
- extern gboolean Recuperer_histoDB ( struct DB **db );
- extern struct HISTODB *Recuperer_histoDB_suite( struct DB **db );
- extern gboolean Modifier_histoDB ( struct CMD_TYPE_HISTO *histo );
- extern struct HISTODB *Rechercher_histoDB( gint id );
-
- extern gboolean Ajouter_histo_hardDB ( struct HISTO_HARDDB *histo );
- extern gboolean Recuperer_histo_hardDB ( struct DB **db,
-                                           struct CMD_REQUETE_HISTO_HARD *critere );
- extern struct HISTO_HARDDB *Recuperer_histo_hardDB_suite( struct DB **db );
+ extern gboolean Ajouter_histo_msgsDB ( struct CMD_TYPE_HISTO *histo );
+ extern gboolean Modifier_histo_msgsDB ( struct CMD_TYPE_HISTO *histo );
+ extern struct CMD_TYPE_HISTO *Rechercher_histo_msgsDB_by_id ( guint id );
+ extern gboolean Recuperer_histo_msgsDB_alive ( struct DB **db );
+ extern gboolean Recuperer_histo_msgsDB ( struct DB **db,
+                                           struct CMD_CRITERE_HISTO_MSGS *critere );
+ extern struct CMD_TYPE_HISTO *Recuperer_histo_msgsDB_suite( struct DB **db );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

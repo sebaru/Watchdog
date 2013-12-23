@@ -630,6 +630,7 @@
     prctl(PR_SET_NAME, "W-UPS", 0, 0, 0 );
     memset( &Cfg_ups, 0, sizeof(Cfg_ups) );                     /* Mise a zero de la structure de travail */
     Cfg_ups.lib = lib;                         /* Sauvegarde de la structure pointant sur cette librairie */
+    Cfg_ups.lib->TID = pthread_self();                                  /* Sauvegarde du TID pour le pere */
     Ups_Lire_config ();                                 /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,

@@ -79,6 +79,7 @@
     prctl(PR_SET_NAME, "W-Lirc", 0, 0, 0 );
     memset( &Cfg_lirc, 0, sizeof(Cfg_lirc) );                   /* Mise a zero de la structure de travail */
     Cfg_lirc.lib = lib;                        /* Sauvegarde de la structure pointant sur cette librairie */
+    Cfg_lirc.lib->TID = pthread_self();                                 /* Sauvegarde du TID pour le pere */
     Lirc_Lire_config ();                                /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_lirc.lib->Thread_debug, LOG_NOTICE,

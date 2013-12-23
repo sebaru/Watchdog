@@ -42,7 +42,7 @@
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
     gboolean enable;                                                /* Is this tread is enabled at boot ? */
     gboolean reload;                                  /* Demande rechargement des SMS en bases de données */
-    GSList *Liste_sms;                                             /* liste de struct MSGDB msg a envoyer */
+    GSList *Liste_histos;                                             /* liste de struct MSGDB msg a envoyer */
     gchar smsbox_username[TAILLE_SMSBOX_USERNAME+1];                                       /* User SMSBOX */
     gchar smsbox_password[TAILLE_SMSBOX_PASSWORD+1];                         /* Mot de passe envoi SMSBOX */
     GSList *Liste_contact_SMS;                    /* Liste de structures SMS issues de la base de données */

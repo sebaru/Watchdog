@@ -615,6 +615,7 @@
     prctl(PR_SET_NAME, "W-RFXCOM", 0, 0, 0 );
     memset( &Cfg_rfxcom, 0, sizeof(Cfg_rfxcom) );               /* Mise a zero de la structure de travail */
     Cfg_rfxcom.lib = lib;                      /* Sauvegarde de la structure pointant sur cette librairie */
+    Cfg_rfxcom.lib->TID = pthread_self();                               /* Sauvegarde du TID pour le pere */
     Rfxcom_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_NOTICE,

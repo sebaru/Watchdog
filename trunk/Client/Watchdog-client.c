@@ -110,8 +110,8 @@
     GNOMEUIINFO_END
   };
  GnomeUIInfo Menu_view[]=                                                    /*!< Définition du menu view */
-  { GNOMEUIINFO_ITEM_STOCK( N_("_Histo hard"), N_("histo_hard"),
-                            Menu_want_histo_hard, GNOME_STOCK_PIXMAP_BOOK_BLUE ),
+  { GNOMEUIINFO_ITEM_STOCK( N_("_Historique MSGS"), N_("Show Historique"),
+                            Menu_want_histo_msgs, GNOME_STOCK_PIXMAP_BOOK_BLUE ),
     GNOMEUIINFO_ITEM_STOCK( N_("_Courbes"), N_("Show Curves"),
                             Menu_want_courbe, GNOME_STOCK_MENU_CONVERT ),
     GNOMEUIINFO_ITEM_STOCK( N_("Histo Courbes"), N_("Histo Curves"),

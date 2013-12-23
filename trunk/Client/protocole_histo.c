@@ -40,7 +40,7 @@
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
  void Gerer_protocole_histo ( struct CONNEXION *connexion )
-  { static GList *Arrivee_histo_hard = NULL;
+  { static GList *Arrivee_histo_msgs = NULL;
     static gint32 page_id;
 
     switch ( Reseau_ss_tag ( connexion ) )
@@ -62,28 +62,28 @@
                Proto_cacher_un_histo( histo );
              }
             break;
-       case SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD:
-             { struct CMD_TYPE_HISTO_HARD *histo;
+       case SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS:
+             { struct CMD_RESPONSE_HISTO_MSGS *response;
                Set_progress_plusun();
 
-               histo = (struct CMD_TYPE_HISTO_HARD *)g_try_malloc0( sizeof( struct CMD_TYPE_HISTO_HARD ) );
-               if (!histo) return; 
-               memcpy( histo, connexion->donnees, sizeof(struct CMD_TYPE_HISTO_HARD ) );
-               Arrivee_histo_hard = g_list_append( Arrivee_histo_hard, histo );
-               page_id = histo->page_id;                        /* Sauvegarde de la page pour futur clear */
+               response = (struct CMD_RESPONSE_HISTO_MSGS *)g_try_malloc0( sizeof( struct CMD_RESPONSE_HISTO_MSGS ) );
+               if (!response) return; 
+               memcpy( response, connexion->donnees, sizeof(struct CMD_RESPONSE_HISTO_MSGS ) );
+               Arrivee_histo_msgs = g_list_append( Arrivee_histo_msgs, response );
+               page_id = response->page_id;                     /* Sauvegarde de la page pour futur clear */
              }
             break;
-       case SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD_FIN:
-             { printf("histo_hard 1\n");
-               Proto_effacer_liste_histo_hard(page_id);
-               printf("histo_hard 2\n");
-               g_list_foreach( Arrivee_histo_hard, (GFunc)Proto_afficher_un_histo_hard, NULL );
-               printf("histo_hard 3\n");
-               g_list_foreach( Arrivee_histo_hard, (GFunc)g_free, NULL );
-               printf("histo_hard 4\n");
-               g_list_free( Arrivee_histo_hard );
-               printf("histo_hard 5\n");
-               Arrivee_histo_hard = NULL;
+       case SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS_FIN:
+             { printf("histo_msgs 1\n");
+               Proto_effacer_liste_histo_msgs(page_id);
+               printf("histo_msgs 2\n");
+               g_list_foreach( Arrivee_histo_msgs, (GFunc)Proto_afficher_un_histo_msgs, NULL );
+               printf("histo_msgs 3\n");
+               g_list_foreach( Arrivee_histo_msgs, (GFunc)g_free, NULL );
+               printf("histo_msgs 4\n");
+               g_list_free( Arrivee_histo_msgs );
+               printf("histo_msgs 5\n");
+               Arrivee_histo_msgs = NULL;
              }
             break;
      }
@@ -103,7 +103,6 @@
                histo = (struct CMD_TYPE_HISTO *)g_try_malloc0( sizeof( struct CMD_TYPE_HISTO ) );
                if (!histo) return; 
                memcpy( histo, connexion->donnees, sizeof(struct CMD_TYPE_HISTO ) );
-     printf("Reception histo %s\n", histo->libelle );
                Arrivee_histo = g_list_append( Arrivee_histo, histo );
              }
             break;

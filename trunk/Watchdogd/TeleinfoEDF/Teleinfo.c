@@ -161,9 +161,10 @@
     fd_set fdselect;
 
     prctl(PR_SET_NAME, "W-TINFOEDF", 0, 0, 0 );
-    memset( &Cfg_teleinfo, 0, sizeof(Cfg_teleinfo) );               /* Mise a zero de la structure de travail */
-    Cfg_teleinfo.lib = lib;                      /* Sauvegarde de la structure pointant sur cette librairie */
-    Teleinfo_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
+    memset( &Cfg_teleinfo, 0, sizeof(Cfg_teleinfo) );           /* Mise a zero de la structure de travail */
+    Cfg_teleinfo.lib = lib;                    /* Sauvegarde de la structure pointant sur cette librairie */
+    Cfg_teleinfo.lib->TID = pthread_self();                             /* Sauvegarde du TID pour le pere */
+    Teleinfo_Lire_config ();                            /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Demarrage . . . TID = %p", pthread_self() );

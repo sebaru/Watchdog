@@ -352,7 +352,7 @@
        if (cpt_1_minute < Partage->top)                                   /* Update DB toutes les minutes */
         { for( cpt=0; cpt<NBR_SCENARIO; cpt++)
            { Checker_scenario( cpt ); }
-          Gerer_message_repeat();
+          Gerer_histo_repeat();
           Print_SQL_status(); /* Print SQL status ! */
           cpt_1_minute = Partage->top + 600;                             /* Sauvegarde toutes les minutes */
         }

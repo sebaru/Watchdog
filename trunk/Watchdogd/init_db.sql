@@ -218,24 +218,6 @@ INSERT INTO `groups` (`id`, `name`, `comment`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `histo`
---
-
-CREATE TABLE IF NOT EXISTS `histo` (
-  `id` int(11) NOT NULL DEFAULT '0',
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `type` int(11) NOT NULL DEFAULT '0',
-  `num_syn` int(11) NOT NULL DEFAULT '0',
-  `nom_ack` text COLLATE utf8_unicode_ci,
-  `date_create_sec` int(11) NOT NULL DEFAULT '0',
-  `date_create_usec` int(11) NOT NULL DEFAULT '0',
-  `date_fixe` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `histo_bit`
 --
 
@@ -251,11 +233,13 @@ CREATE TABLE IF NOT EXISTS `histo_bit` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `histo_hard`
+-- Structure de la table `histo_msgs`
 --
 
-CREATE TABLE IF NOT EXISTS `histo_hard` (
-  `id` int(11) NOT NULL DEFAULT '0',
+CREATE TABLE IF NOT EXISTS `histo_msgs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `num` int(11) NOT NULL DEFAULT '0',
+  `alive` tinyint(1) NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `type` int(11) NOT NULL DEFAULT '0',
   `num_syn` int(11) NOT NULL DEFAULT '0',
@@ -264,10 +248,11 @@ CREATE TABLE IF NOT EXISTS `histo_hard` (
   `date_create_usec` int(11) DEFAULT '0',
   `date_fixe` int(11) NOT NULL DEFAULT '0',
   `date_fin` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
   KEY `date_create_sec` (`date_create_sec`),
   KEY `type` (`type`),
-  KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  KEY `alive` (`alive`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
 -- --------------------------------------------------------
 
@@ -660,7 +645,7 @@ INSERT INTO `mnemos` (`type`, `num`, `num_plugin`, `acronyme`, `libelle`, `comma
 (7, 0, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
 (7, 2, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
 (1, 4, 1, 'AUDIO_START', 'Emission de message Audio.', ''),
-(1, 5, 1, 'AUDIO_END', 'Fin d''emission de message Audio.', '');
+(1, 5, 1, 'AUDIO_END', 'Fin d''emission de message Audio.', ''),
 (1, 6, 1, 'AUDIO_INHIB', 'Inhibition des messages vocaux (hors alerte).', '');
 -- --------------------------------------------------------
 
@@ -690,10 +675,10 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
 --
 
 CREATE TABLE IF NOT EXISTS `config` (
-  `instance_id` varchar[80] COLLATE utf8_unicode_ci NOT NULL,
-  `nom_thread` varchar[80] COLLATE utf8_unicode_ci NOT NULL,
-  `nom` varchar[80] COLLATE utf8_unicode_ci NOT NULL,
-  `valeur` varchar[128] COLLATE utf8_unicode_ci NOT NULL,
+  `instance_id` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
+  `nom_thread` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
+  `nom` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
+  `valeur` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
   UNIQUE KEY `instance_id` (`instance_id`,`nom_thread`,`nom`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 

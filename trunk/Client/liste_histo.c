@@ -42,7 +42,8 @@
  extern struct CONFIG Config;                                          /* Configuration generale watchdog */
 
  enum
-  { COLONNE_NUM,
+  { COLONNE_ID,
+    COLONNE_NUM,
     COLONNE_GROUPE_PAGE,
     COLONNE_TYPE,
     COLONNE_NUM_SYN,
@@ -104,7 +105,8 @@
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     while ( lignes )
      { gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
-       gtk_tree_model_get( store, &iter, COLONNE_NUM, &histo.id, -1 );                 /* Recup du id */
+       gtk_tree_model_get( store, &iter, COLONNE_ID, &histo.id, -1 );                      /* Recup du id */
+       gtk_tree_model_get( store, &iter, COLONNE_NUM, &histo.msg.num, -1 );               /* Recup du num */
 
        Envoi_serveur( TAG_HISTO, SSTAG_CLIENT_ACK_HISTO, (gchar *)&histo, sizeof(struct CMD_TYPE_HISTO) );
        gtk_tree_selection_unselect_iter( selection, &iter );
@@ -195,10 +197,10 @@
     else       { g_snprintf( chaine, sizeof(chaine), _("Erreur") ); }
     date_create = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
 
-    g_snprintf( date, sizeof(date), "%s.%03d", date_create, (histo->date_create_usec/1000) );
+    g_snprintf( date, sizeof(date), "%s.%03d", date_create, ((int)histo->date_create_usec/1000) );
     g_free( date_create );
 
-    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", histo->groupe, histo->page );
+    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", histo->msg.groupe, histo->msg.page );
 
     if (histo->date_fixe)
      { gchar *date_fixe;
@@ -213,19 +215,20 @@
        g_free( date_fixe );
      }
     else
-     { g_snprintf( ack, sizeof(ack), _("no") ); }
+     { g_snprintf( ack, sizeof(ack), "(%s)", histo->nom_ack ); }
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_histo) );               /* Acquisition du modele */
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
-                         COLONNE_NUM, histo->id,
-                         COLONNE_NUM_SYN, histo->num_syn,
+                         COLONNE_ID, histo->id,
+                         COLONNE_NUM, histo->msg.num,
+                         COLONNE_NUM_SYN, histo->msg.num_syn,
                          COLONNE_GROUPE_PAGE, groupe_page,
-                         COLONNE_TYPE, Type_vers_string(histo->type),
+                         COLONNE_TYPE, Type_vers_string(histo->msg.type),
                          COLONNE_DATE_CREATE, date,
                          COLONNE_ACK, ack,
-                         COLONNE_LIBELLE, histo->libelle,
-                         COLONNE_COULEUR_FOND, &COULEUR_FOND[histo->type],
-                         COLONNE_COULEUR_TEXTE, &COULEUR_TEXTE[histo->type],
+                         COLONNE_LIBELLE, histo->msg.libelle,
+                         COLONNE_COULEUR_FOND, &COULEUR_FOND[histo->msg.type],
+                         COLONNE_COULEUR_TEXTE, &COULEUR_TEXTE[histo->msg.type],
                          -1
                        );
   }
@@ -244,13 +247,13 @@
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )                                                    /* A la recherche de l'iter perdu */
-     { gtk_tree_model_get( store, &iter, COLONNE_NUM, &id, -1 );
-       if ( id == histo->id ) break;
+     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
+       if ( id == histo->id )
+        { Rafraichir_visu_histo( &iter, histo );
+          break;
+        }
        valide = gtk_tree_model_iter_next( store, &iter );
      }
-
-    if (valide)
-     { Rafraichir_visu_histo( &iter, histo ); }
   }
 /**********************************************************************************************************/
 /* Afficher_un_message: Ajout d'un message dans la liste des messages à l'écran                           */
@@ -284,15 +287,16 @@
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
-    guint id;
+    guint num;
 
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )
-     { gtk_tree_model_get( store, &iter, COLONNE_NUM, &id, -1 );
+     { gtk_tree_model_get( store, &iter, COLONNE_NUM, &num, -1 );
 /* printf("Del_histo: id = %d, cible = %d\n", id, histo->id); */
-       if ( id == histo->id ) gtk_list_store_remove( GTK_LIST_STORE(store), &iter );
+       if ( num == histo->msg.num ) 
+        { if (gtk_list_store_remove( GTK_LIST_STORE(store), &iter )) continue; }
        valide = gtk_tree_model_iter_next( store, &iter );
      }
   }
@@ -334,7 +338,8 @@
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
-    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,
+    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                          /* ID */
+                                              G_TYPE_UINT,                                         /* NUM */
                                               G_TYPE_STRING,
                                               G_TYPE_STRING,                               /* Groupe page */
                                               G_TYPE_UINT,                                     /* Num_syn */

@@ -67,8 +67,8 @@
     gint  timeout_connexion;                       /* Temps max d'attente de reponse de la part du client */
     RSA *rsa;                                                      /* Clefs publique et privée du serveur */
     GSList *Clients;                                             /* Liste des clients en cours de gestion */
-    GSList *Liste_message;                                                     /* Envoi d'un histo aux clients */
-    GSList *Liste_motif;                                                  /* Destruction d'un histo client */
+    GSList *Liste_histo;                                                  /* Envoi d'un histo aux clients */
+    GSList *Liste_motif;                                                 /* Destruction d'un histo client */
   } Cfg_ssrv;
 
  struct CAPTEUR
@@ -270,7 +270,7 @@ extern void Proto_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNE
                                        gint taille, gchar *buffer );
  extern void Proto_ajouter_icone_fin_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone );
  
- extern void *Proto_envoyer_histo_hard_thread ( struct CLIENT *client );       /* Dans envoi_histo_hard.c */
+ extern void *Proto_envoyer_histo_msgs_thread ( struct CLIENT *client );       /* Dans envoi_histo_hard.c */
 
                                                                                    /* Dans envoi_courbe.c */
  extern void Proto_ajouter_courbe_thread ( struct CLIENT *client );

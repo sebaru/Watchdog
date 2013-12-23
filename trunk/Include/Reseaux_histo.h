@@ -29,39 +29,28 @@
  #define _RESEAUX_HISTO_H_
 
  struct CMD_TYPE_HISTO
-  { guint  id;                                                                /* Numero unique historique */
-    gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
-    gchar  groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
-    gchar  page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
-    guint  type;                                                       /* Etat, prealarme, defaut, alarme */
-    guint  num_syn;                                                /* Numéro du fichier syn correspondant */
+  { guint id;                                                        /* id unique dans la base de données */
+    gboolean alive;                                             /* Le message est-il encore d'actualité ? */
+    struct CMD_TYPE_MESSAGE msg;
+    gchar nom_ack [ NBR_CARAC_LOGIN_UTF8 + 1 ];
     guint date_create_sec;
     guint date_create_usec;
     guint date_fixe;
-    gchar  nom_ack[NBR_CARAC_LOGIN_UTF8+1];
-  };
-
- struct CMD_TYPE_HISTO_HARD
-  { guint num;                                           /* Numero du message correspondant (pas son id) */
-    gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
-    gchar  groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
-    gchar  page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
-    guint  type;                                                       /* Etat, prealarme, defaut, alarme */
-    guint  date_create_sec;
-    guint  date_create_usec;
-    guint date_fixe;
     guint date_fin;
-    gchar  nom_ack[NBR_CARAC_LOGIN_UTF8+1];
-    gint32 page_id;
   };
 
- struct CMD_REQUETE_HISTO_HARD
-  { guint  id;                                                                /* Numero unique historique */
+ struct CMD_RESPONSE_HISTO_MSGS
+  { struct CMD_TYPE_HISTO histo;
+    gint32 page_id;                    /* Numéro de la page du client sur laquelle afficher les résultats */
+  };
+
+ struct CMD_CRITERE_HISTO_MSGS
+  { guint  num;                                                                /* Numero unique historique */
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  objet[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     guint  type;                                                       /* Etat, prealarme, defaut, alarme */
-    guint date_create_min;
-    guint date_create_max;
+    guint  date_create_min;
+    guint  date_create_max;
     gchar  nom_ack[NBR_CARAC_LOGIN_UTF8+1];
     gint32 page_id;
   };
@@ -75,9 +64,9 @@
     SSTAG_CLIENT_ACK_HISTO,
     SSTAG_SERVEUR_ACK_HISTO,
     
-    SSTAG_CLIENT_REQUETE_HISTO_HARD,          /* Le client fait une requete sur l'historique de smessages */
-    SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD,                     /* Reponse à une requete histo_hard */
-    SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_HARD_FIN,
+    SSTAG_CLIENT_REQUETE_HISTO_MSGS,          /* Le client fait une requete sur l'historique de smessages */
+    SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS,                     /* Reponse à une requete histo_hard */
+    SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS_FIN,
   };
 
 #endif

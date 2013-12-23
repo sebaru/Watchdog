@@ -183,9 +183,9 @@
  extern gboolean Decharger_librairie_par_prompt ( gchar *nom_fichier );
 
  extern void Gerer_arrive_MSGxxx_dls ( void );                                   /* Dans distrib_MSGxxx.c */
- extern void Gerer_message_repeat ( void );
- extern void Abonner_distribution_message ( void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg) );
- extern void Desabonner_distribution_message ( void (*Gerer_message) (struct CMD_TYPE_MESSAGE *msg) );
+ extern void Gerer_histo_repeat ( void );
+ extern void Abonner_distribution_histo ( void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo) );
+ extern void Desabonner_distribution_histo ( void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo) );
 
  extern void Abonner_distribution_sortie ( void (*Gerer_sortie) (gint num) );      /* Dans distrib_Axxx.c */
  extern void Desabonner_distribution_sortie ( void (*Gerer_sortie) (gint num) );

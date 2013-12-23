@@ -334,9 +334,10 @@
 /**********************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { prctl(PR_SET_NAME, "W-SATELLITE", 0, 0, 0 );
-    memset( &Cfg_satellite, 0, sizeof(Cfg_satellite) );               /* Mise a zero de la structure de travail */
-    Cfg_satellite.lib = lib;                      /* Sauvegarde de la structure pointant sur cette librairie */
-    Satellite_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
+    memset( &Cfg_satellite, 0, sizeof(Cfg_satellite) );         /* Mise a zero de la structure de travail */
+    Cfg_satellite.lib = lib;                   /* Sauvegarde de la structure pointant sur cette librairie */
+    Cfg_satellite.lib->TID = pthread_self();                            /* Sauvegarde du TID pour le pere */
+    Satellite_Lire_config ();                           /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Demarrage . . . TID = %p", pthread_self() );
@@ -354,8 +355,8 @@
     Abonner_distribution_entree    ( Satellite_Gerer_entree );   /* Abonnement à la diffusion des entrees */
     Abonner_distribution_entreeANA ( Satellite_Gerer_entreeANA );/* Abonnement à la diffusion des entrees */
 
-    Cfg_satellite.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
-    while(Cfg_satellite.lib->Thread_run == TRUE)                            /* On tourne tant que necessaire */
+    Cfg_satellite.lib->Thread_run = TRUE;                                           /* Le thread tourne ! */
+    while(Cfg_satellite.lib->Thread_run == TRUE)                         /* On tourne tant que necessaire */
      { usleep(10000);
        sched_yield();
 
