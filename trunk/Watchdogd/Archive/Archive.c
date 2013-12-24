@@ -29,6 +29,7 @@
  #include <sys/time.h>
  #include <sys/prctl.h>
  #include <unistd.h>
+ #include <rrd.h>
 
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
 
@@ -79,7 +80,28 @@
     pthread_mutex_unlock( &Partage->com_arch.synchro );
   }
 /**********************************************************************************************************/
-/* Main: Fonction principale du RS485                                                                     */
+/* Ajouter_archRRA: Ajout d'un enregistrement dans les fichiers RRAs                                      */
+/* Entrée: une structure d'archivage                                                                      */
+/* Sortie: néant                                                                                          */
+/**********************************************************************************************************/
+ static void Ajouter_archRRD ( struct ARCHDB *arch )
+  { gchar fichier[80], update[80];
+    gchar *params[3];
+    gint result;
+
+    params[0] = "rrdupdate";
+    g_snprintf( fichier, sizeof(fichier), "RRA/%02d-%04d.rrd", arch->type, arch->num );
+    params[1] = fichier;
+    g_snprintf( update,  sizeof(update), "%d:%f", arch->date_sec, arch->valeur );
+    params[2] = update;
+    result = rrd_update( 3, params );
+    if (result)
+     { Info_new( Config.log, Config.log_arch, LOG_ERR,
+                "Ajouter_archRRD: RRD error %s", rrd_get_error() );
+     }
+  }
+/**********************************************************************************************************/
+/* Main: Fonction principale du thread                                                                    */
 /**********************************************************************************************************/
  void Run_arch ( void )
   { struct DB *db;
@@ -132,7 +154,7 @@
                     g_slist_length(Partage->com_arch.liste_arch) );
           Partage->com_arch.taille_arch--;
           pthread_mutex_unlock( &Partage->com_arch.synchro );
-
+          Ajouter_archRRD( arch );
           Ajouter_archDB ( db, arch );
           g_free(arch);
           Info_new( Config.log, Config.log_arch, LOG_DEBUG, "Run_arch: archive saved" );
