@@ -40,7 +40,7 @@
  void Lire_config_cli ( struct CONFIG_CLI *config_cli, char *fichier_config_cli )
   { gchar *chaine, *fichier;
     GKeyFile *gkf;
-    GError *error;
+    GError *error=NULL;
 
     if (!config_cli) return;
 
