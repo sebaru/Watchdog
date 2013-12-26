@@ -68,6 +68,30 @@
     Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
+/* Admin_user_list : liste les utilisateurs de Watchdog et leurs privilèges                               */
+/* Entrée: La connexion connexion ADMIN                                                                   */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
+/**********************************************************************************************************/
+ static void Admin_user_list ( struct CONNEXION *connexion )
+  { struct CMD_TYPE_UTILISATEUR *util;
+    gchar chaine[80];
+    struct DB *db;
+
+    if ( ! Recuperer_utilisateurDB( &db ) )                           /* Chargement de la base de données */
+     { g_snprintf( chaine, sizeof(chaine), " Error : DB Connexion failed\n" );
+       Admin_write ( connexion, chaine );
+     }                                                                           /* Si pas de histos (??) */
+
+    g_snprintf( chaine, sizeof(chaine), " -------- Users List ------------\n" );
+    Admin_write ( connexion, chaine );
+    for ( ; ; )
+     { util = Recuperer_utilisateurDB_suite( &db );
+       if (!util) return;                                                      /* Fin, ou erreur, on sort */
+       Admin_print_user ( connexion, util );
+       g_free(util);
+     }
+  }
+/**********************************************************************************************************/
 /* Admin_running: Appellée lorsque l'admin envoie une commande en mode run dans la ligne de commande      */
 /* Entrée: La connexion connexione et la ligne de commande, et le buffer de sortie                        */
 /* Sortie: Néant                                                                                          */
@@ -81,6 +105,9 @@
        Admin_write ( connexion, "  list                    - Liste les users Watchdog\n" );
        Admin_write ( connexion, "  setpassword $name $pwd - Set password $pwd to name\n" );
        Admin_write ( connexion, "  help                    - This help\n" );
+     } else
+    if ( ! strcmp ( commande, "list" ) )
+     { Admin_user_list ( connexion );
      } else
     if ( ! strcmp ( commande, "setpassword" ) )
      { struct CMD_TYPE_UTILISATEUR *util;

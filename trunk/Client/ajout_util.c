@@ -302,7 +302,7 @@
     Edit_util.date_expire = gnome_date_edit_get_time( GNOME_DATE_EDIT(Calendar) );
     Edit_util.expire      = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_expire));
     Edit_util.changepass  = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_changepass));
-    Edit_util.enable       = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_enable));
+    Edit_util.enable      = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_enable));
     Edit_util.cansetpass = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_cansetpass));
     Edit_util.setpassnow = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_setpassnow));
 
