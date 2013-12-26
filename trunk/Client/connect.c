@@ -101,7 +101,7 @@ one_again:
                 return(FALSE);
        case GTK_RESPONSE_OK:
         { gchar *code1, *code2;
-          struct CMD_UTIL_SETPASSWORD util;
+          struct CMD_TYPE_UTILISATEUR util;
 
           code1 = (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_code1) );
           code2 = (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_code2) );
@@ -117,9 +117,12 @@ one_again:
            }
 
           util.id = Client_en_cours.id;
+#ifdef bouh
+
           memcpy( util.code_en_clair, code1, sizeof(util.code_en_clair) );
+#endif
           Envoi_serveur( TAG_CONNEXION, SSTAG_CLIENT_SETPASSWORD,
-                        (gchar *)&util, sizeof(struct CMD_UTIL_SETPASSWORD) );
+                        (gchar *)&util, sizeof(struct CMD_TYPE_UTILISATEUR) );
           gtk_widget_destroy( dialog );                                        /* Fermeture de la fenetre */
          }
       }

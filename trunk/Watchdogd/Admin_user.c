@@ -27,20 +27,55 @@
  
  #include <glib.h>
  #include <unistd.h>                                                                  /* Pour gethostname */
- #include <openssl/rand.h> /* Pour l'utilisation du SALT */
- #include "watchdogd.h"
+ #include <openssl/rand.h>
+ #include <time.h>
 
+ #include "watchdogd.h"
+/**********************************************************************************************************/
+/* Admin_print_user : Affiche le user en parametre sur la console d'admin CLI                             */
+/* Entrée: La connexion connexion ADMIN                                                                   */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
+/**********************************************************************************************************/
+ static void Admin_print_user ( struct CONNEXION *connexion, struct CMD_TYPE_UTILISATEUR *util )
+  { gchar date_expire[20], date_creation[20], date_modif[20];
+    gchar chaine[256];
+    struct tm *temps;
+    time_t time;
+
+    time = util->date_expire;
+    temps = localtime( (time_t *)&time );
+    if (temps) { strftime  ( date_expire, sizeof(date_expire), "%F %T", temps ); }
+    else       { g_snprintf( date_expire, sizeof(date_expire), "Erreur" );    }
+
+    time = util->date_modif;
+    temps = localtime( (time_t *)&time );
+    if (temps) { strftime  ( date_modif, sizeof(date_modif), "%F %T", temps ); }
+    else       { g_snprintf( date_modif, sizeof(date_modif), "Erreur" );    }
+
+    time = util->date_expire;
+    temps = localtime( (time_t *)&time );
+    if (temps) { strftime  ( date_creation, sizeof(date_creation), "%F %T", temps ); }
+    else       { g_snprintf( date_creation, sizeof(date_creation), "Erreur" );    }
+
+    g_snprintf( chaine, sizeof(chaine),
+              " [%03d]%20s -> enable=%d, expire=%d, date_expire=%s, changepass=%d, cansetpass=%d\n"
+              "   |                       -> date_creation=%s, date_modif=%s\n"
+              "   |                       -> salt=%20s, hash=%20s\n"
+              "   |---------> %s\n",
+                util->id, util->nom, util->enable, util->expire, date_expire, util->changepass,
+                util->cansetpass, date_creation, date_modif, util->salt, util->hash, util->commentaire
+              );
+    Admin_write ( connexion, chaine );
+  }
 /**********************************************************************************************************/
 /* Admin_running: Appellée lorsque l'admin envoie une commande en mode run dans la ligne de commande      */
-/* Entrée: La connexion connexione et la ligne de commande, et le buffer de sortie                           */
+/* Entrée: La connexion connexione et la ligne de commande, et le buffer de sortie                        */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_user ( struct CONNEXION *connexion, gchar *ligne )
-  { struct LIBRAIRIE *lib;
-    GSList *liste;
-    gchar commande[128], chaine[128];
+  { gchar commande[128], chaine[128];
 
-    sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
+    sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'running'\n" );
        Admin_write ( connexion, "  list                    - Liste les users Watchdog\n" );
@@ -49,10 +84,9 @@
      } else
     if ( ! strcmp ( commande, "setpassword" ) )
      { struct CMD_TYPE_UTILISATEUR *util;
-       gchar name[80], pwd[80], salt[21];
-       struct DB *db;
+       gchar name[80], pwd[80];
 
-       sscanf ( ligne, "%s %s %s %s", command, name, pwd );                /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %s %s", commande, name, pwd );            /* Découpage de la ligne de commande */
 
        util = Rechercher_utilisateurDB_by_name ( name );
        if (!util)
@@ -61,28 +95,23 @@
         }
        else
         { EVP_MD_CTX *mdctx;
-          const EVP_MD *md;
-          unsigned char md_value[EVP_MAX_MD_SIZE];
-          int md_len, i;
-          RAND_pseudo_bytes( &util->salt, sizeof(util->salt)-1 );
-          salt[sizeof(util->salt)-1] = 0; /* Last value */
-          /*OpenSSL_add_all_digests();*/
+          guint md_len;
+          memset ( util->salt, 0, sizeof(util->salt) );
+          memset ( util->hash, 0, sizeof(util->hash) );
+          RAND_pseudo_bytes( (guchar *)util->salt, sizeof(util->salt)-1 ); /* Récupération d'un nouveau SALT */
 
           mdctx = EVP_MD_CTX_create();
           EVP_DigestInit_ex (mdctx, EVP_sha512(), NULL);
-          EVP_DigestUpdate  (mdctx, util->salt, strlen(util->salt));
+          EVP_DigestUpdate  (mdctx, util->salt, sizeof(util->salt));
           EVP_DigestUpdate  (mdctx, pwd,  strlen(pwd));
-          EVP_DigestFinal_ex(mdctx, util->hash, &md_len);
+          EVP_DigestFinal_ex(mdctx, (guchar *)util->hash, &md_len);
           EVP_MD_CTX_destroy(mdctx);
-          /*util.cansetpass = TRUE;
-          util.setpassnow = TRUE;
-          util.actif = TRUE;
-          util.expire = FALSE;
-          util.changepass = FALSE;*/
-          if( Modifier_utilisateurDB( Config.crypto_key, &util ) )
+
+          if( Modifier_utilisateurDB_set_password( util ) )
            { g_snprintf( chaine, sizeof(chaine), " Password set to %s\n", util->hash ); }
           else
            { g_snprintf( chaine, sizeof(chaine), " Error while setting password\n" ); }
+          g_free(util);
           Admin_write ( connexion, chaine );
         }
      } else

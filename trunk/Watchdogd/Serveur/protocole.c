@@ -72,9 +72,9 @@
                case TAG_CAMERA      : Gerer_protocole_camera       ( client ); break;
                case TAG_ADMIN       : Gerer_protocole_admin        ( client ); break;
                case TAG_CONNEXION   : if (Reseau_ss_tag(connexion) == SSTAG_CLIENT_SETPASSWORD )
-                                       { struct CMD_UTIL_SETPASSWORD *util;
-                                         util = (struct CMD_UTIL_SETPASSWORD *)connexion->donnees;
-                                         printf("Set password for %d: %s\n", util->id, util->code_en_clair );
+                                       { struct CMD_TYPE_UTILISATEUR *util;
+                                         util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
+                                         printf("Set password for %d: %s\n", util->id, util->hash );
                                          Proto_set_password( client, util );
                                        }
              }
@@ -110,8 +110,8 @@
 /************************************** Client en attente nouveau password ********************************/
     else if ( client->mode == ATTENTE_NEW_PASSWORD && Reseau_tag(connexion)    == TAG_CONNEXION
                                                    && Reseau_ss_tag(connexion) == SSTAG_CLIENT_SETPASSWORD )
-          { struct CMD_UTIL_SETPASSWORD *util;
-            util = (struct CMD_UTIL_SETPASSWORD *)connexion->donnees;
+          { struct CMD_TYPE_UTILISATEUR *util;
+            util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
             Proto_set_password( client, util );
           }
   }

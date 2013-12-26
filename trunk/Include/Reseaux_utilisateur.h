@@ -35,23 +35,21 @@
  #define NBR_CARAC_COMMENTAIRE       40
  #define NBR_CARAC_COMMENTAIRE_UTF8  (2*NBR_CARAC_COMMENTAIRE)
 
- struct CMD_UTIL_SETPASSWORD
-  { guint  id;
-    gchar  code_en_clair[ NBR_CARAC_LOGIN_UTF8+1 ];
-  };
  struct CMD_TYPE_UTILISATEUR
-  { guint  id;
-    gchar  nom[ NBR_CARAC_LOGIN_UTF8+1 ];
-    gchar  commentaire[ NBR_CARAC_COMMENTAIRE_UTF8+1 ];
-    gboolean cansetpass;
-    gboolean setpassnow;
-    gchar    code_en_clair[ NBR_CARAC_LOGIN_UTF8+1 ];
-    guint    date_modif;
-    guint    date_expire;
-    gboolean actif;
+  { guint    id;
+    gchar    nom[ NBR_CARAC_LOGIN_UTF8+1 ];
+    gchar    salt[ 21 ];
+    gchar    hash[ 21 ];
+    gchar    commentaire[ NBR_CARAC_COMMENTAIRE_UTF8+1 ];
+    gboolean enable;
     gboolean expire;
     gboolean changepass;
-    guint    gids[NBR_MAX_GROUPE_PAR_UTIL];
+    gboolean cansetpass;
+    gboolean setpassnow;
+    guint    date_creation;
+    guint    date_modif;
+    guint    date_expire;
+    guint    gids[NBR_MAX_GROUPE_PAR_UTIL];                          /* Numéro des groupes d'appartenance */
   };
 
  struct CMD_TYPE_GROUPE

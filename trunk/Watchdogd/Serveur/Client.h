@@ -91,7 +91,7 @@
   { gchar machine[TAILLE_MACHINE+1];                          /* Le nom (ou adrIP) de sa machine distante */
     gint  ssrv_id;                                                   /* Numero de sous serveur de gestion */
     struct REZO_CLI_IDENT ident;                                 /* Nom complet de l'utilisateur en cours */
-    struct UTILISATEURDB *util;
+    struct CMD_TYPE_UTILISATEUR *util;
     guchar mode;                        /* Ce client est-il valide ou est-ce un gogol qui veut rentrer ?? */
     guchar defaut;                                                            /* Defaut d'envoi au client */
     time_t date_connexion;                                                              /* Date connexion */

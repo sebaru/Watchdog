@@ -48,7 +48,7 @@
  static GtkWidget *Entry_id;                                                     /* L'id de l'utilisateur */
  static GtkWidget *Entry_last;                                                   /* L'id de l'utilisateur */
  static GtkWidget *Entry_comment;                                  /* Commentaire associé à l'utilisateur */
- static GtkWidget *Check_actif;                                   /* Le compte utilisateur est-il actif ? */
+ static GtkWidget *Check_enable;                                   /* Le compte utilisateur est-il enable ? */
  static GtkWidget *Check_cansetpass;                      /* L'utilisateur peut-il changer son password ? */
  static GtkWidget *Check_setpassnow;                                      /* Pour changer le password now */
  static GtkWidget *Check_changepass;   /* L'utilisateur doit-il changer son password au prochain login ?? */
@@ -175,10 +175,10 @@
 /* sortie: kedal                                                                                          */
 /**********************************************************************************************************/
  static void Changer_setpassnow ( void )
-  { gboolean actif;
-    actif = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_setpassnow));
-    gtk_widget_set_sensitive( Entry_pass1, actif );
-    gtk_widget_set_sensitive( Entry_pass2, actif );
+  { gboolean enable;
+    enable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_setpassnow));
+    gtk_widget_set_sensitive( Entry_pass1, enable );
+    gtk_widget_set_sensitive( Entry_pass2, enable );
   }
 /**********************************************************************************************************/
 /* Proto_afficher_un_groupe_existant: ajoute un groupe dans la liste des groupes existants                */
@@ -294,13 +294,15 @@
                 "%s", gtk_entry_get_text(GTK_ENTRY(Entry_nom) ) );
     g_snprintf( Edit_util.commentaire, sizeof(Edit_util.commentaire),
                 "%s", gtk_entry_get_text(GTK_ENTRY(Entry_comment) ) );
+#ifdef bouh
     g_snprintf( Edit_util.code_en_clair, sizeof(Edit_util.code_en_clair),
                 "%s", gtk_entry_get_text(GTK_ENTRY(Entry_pass1) ) );
+#endif
 
     Edit_util.date_expire = gnome_date_edit_get_time( GNOME_DATE_EDIT(Calendar) );
     Edit_util.expire      = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_expire));
     Edit_util.changepass  = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_changepass));
-    Edit_util.actif       = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_actif));
+    Edit_util.enable       = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_enable));
     Edit_util.cansetpass = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_cansetpass));
     Edit_util.setpassnow = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_setpassnow));
 
@@ -425,8 +427,8 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_pass2, 3, 4, 4, 5 );
     gtk_widget_set_sensitive( Entry_pass2, FALSE );
 
-    Check_actif = gtk_check_button_new_with_label ( _("Account enabled") );
-    gtk_table_attach_defaults( GTK_TABLE(table), Check_actif, 0, 2, 2, 3 );
+    Check_enable = gtk_check_button_new_with_label ( _("Account enabled") );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_enable, 0, 2, 2, 3 );
 
     Check_changepass = gtk_check_button_new_with_label ( _("Have to change his password at logon") );
     gtk_table_attach_defaults( GTK_TABLE(table), Check_changepass, 0, 2, 3, 4 );
@@ -496,7 +498,7 @@
        gtk_entry_set_text( GTK_ENTRY(Entry_id), chaine );
        gtk_entry_set_text( GTK_ENTRY(Entry_comment), edit_util->commentaire );
 
-       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_actif), edit_util->actif );
+       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_enable), edit_util->enable );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_changepass), edit_util->changepass );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_cansetpass), edit_util->cansetpass );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_expire), edit_util->expire );
@@ -511,7 +513,7 @@
     else
      { gtk_entry_set_text( GTK_ENTRY(Entry_id), "?" );
        gtk_entry_set_text( GTK_ENTRY(Entry_last), "?" );
-       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( Check_actif ), TRUE );
+       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( Check_enable ), TRUE );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( Check_changepass ), TRUE );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( Check_cansetpass ), TRUE );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( Check_expire ), TRUE );

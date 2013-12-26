@@ -50,13 +50,13 @@
 /* Proto_set_password: changement de password                                                             */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- void Proto_set_password ( struct CLIENT *client, struct CMD_UTIL_SETPASSWORD *util )
+ void Proto_set_password ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *util )
   { if (util->id != client->util->id)
      { Client_mode ( client, DECONNECTE );
        return;
      }
 
-    Set_password( Config.crypto_key, util );
+    Modifier_utilisateurDB_set_password( util );
     Client_mode ( client, DECONNECTE );                        /* On deconnecte le client tout de suite ! */
   }
 /**********************************************************************************************************/
@@ -68,6 +68,7 @@
     gchar *clef, *crypt;
     gint id;
 
+#ifdef bouh
     clef = Recuperer_clef( client->ident.nom, &id );
     if (!clef)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, 
@@ -133,6 +134,7 @@
     Autoriser_client ( client );
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
              "Tester_autorisation: Autorisation sent for %s", client->util->nom );
+#endif
     return( ENVOI_DONNEES );
   }
 /*--------------------------------------------------------------------------------------------------------*/

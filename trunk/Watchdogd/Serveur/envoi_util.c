@@ -33,47 +33,20 @@
  #include "watchdogd.h"
  #include "Sous_serveur.h"
 /**********************************************************************************************************/
-/* Preparer_envoi_util: convertit une structure UTILISATEUR en structure CMD_TYPE_UTILISATEUR             */
-/* Entrée: un client et un utilisateur                                                                    */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static struct CMD_TYPE_UTILISATEUR *Preparer_envoi_utilisateur ( struct UTILISATEURDB *util )
-  { struct CMD_TYPE_UTILISATEUR *rezo_util;
-
-    rezo_util = (struct CMD_TYPE_UTILISATEUR *)g_try_malloc0( sizeof(struct CMD_TYPE_UTILISATEUR) );
-    if (!rezo_util) { return(NULL); }
-
-    rezo_util->id = util->id;
-    memcpy( &rezo_util->nom,         util->nom, sizeof(rezo_util->nom) );
-    memcpy( &rezo_util->commentaire, util->commentaire, sizeof(rezo_util->commentaire) );
-    return( rezo_util );
-  }
-/**********************************************************************************************************/
 /* Proto_editer_utilisateur: Le client desire editer un utilisateur                                       */
 /* Entrée: le client demandeur et l'utilisateur en question                                               */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_editer_utilisateur ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *rezo_util )
-  { struct CMD_TYPE_UTILISATEUR edit_util;
-    struct UTILISATEURDB *util;
+  { struct CMD_TYPE_UTILISATEUR *util;
 
-    util = Rechercher_utilisateurDB( rezo_util->id );
+    util = Rechercher_utilisateurDB_by_id( rezo_util->id );
 
     if (util)
-     { edit_util.id            = util->id;                                  /* Recopie des info editables */
-       memcpy( &edit_util.nom, util->nom, sizeof(edit_util.nom) );
-       memcpy( &edit_util.commentaire, util->commentaire, sizeof(edit_util.commentaire) );
-       memcpy( &edit_util.gids, util->gids, sizeof(edit_util.gids) );
-       g_snprintf( edit_util.code_en_clair, sizeof(edit_util.code_en_clair), "secret" );
-       edit_util.cansetpass  = util->cansetpass;
-       edit_util.date_modif  = util->date_modif;
-       edit_util.date_expire = util->date_expire;
-       edit_util.actif       = util->actif;
-       edit_util.expire      = util->expire;
-       edit_util.changepass  = util->changepass;
-
+     { memset(util->salt, 0, sizeof(util->salt ) );                       /* RAZ des informations privées */
+       memset(util->hash, 0, sizeof(util->hash ) );                       /* RAZ des informations privées */
        Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_EDIT_UTIL_OK,
-                     (gchar *)&edit_util, sizeof(struct CMD_TYPE_UTILISATEUR) );
+                     (gchar *)util, sizeof(struct CMD_TYPE_UTILISATEUR) );
        g_free(util);                                                                /* liberation mémoire */
        Client_mode( client, ENVOI_GROUPE_FOR_UTIL );
      }
@@ -91,41 +64,15 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_valider_editer_utilisateur ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *rezo_util )
-  { struct UTILISATEURDB *result;
-    gboolean retour;
-
-    retour = Modifier_utilisateurDB ( Config.crypto_key, rezo_util );
-    if (retour==FALSE)
+  { if (Modifier_utilisateurDB ( rezo_util ) == FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
                    "Unable to edit user %s", rezo_util->nom);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_utilisateurDB( rezo_util->id );
-           if (result) 
-            { struct CMD_TYPE_UTILISATEUR *util;
-              util = Preparer_envoi_utilisateur ( result );
-              g_free(result);
-              if (!util)
-                { struct CMD_GTK_MESSAGE erreur;
-                  g_snprintf( erreur.message, sizeof(erreur.message),
-                               "Not enough memory" );
-                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-                }
-              else { Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_VALIDE_EDIT_UTIL_OK,
-                                   (gchar *)util, sizeof(struct CMD_TYPE_UTILISATEUR) );
-                     g_free(util);
-                  }
-            }
-           else
-            { struct CMD_GTK_MESSAGE erreur;
-              g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Permission Denied for user %s (%d)", rezo_util->nom, rezo_util->id );
-              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-            }
+    else { Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_VALIDE_EDIT_UTIL_OK,
+                         (gchar *)rezo_util, sizeof(struct CMD_TYPE_UTILISATEUR) );
          }
   }
 /**********************************************************************************************************/
@@ -156,40 +103,29 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_ajouter_utilisateur ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *rezo_util )
-  { struct UTILISATEURDB *result;
+  { struct CMD_TYPE_UTILISATEUR *util;
     gint id;
 
-    id = Ajouter_utilisateurDB ( Config.crypto_key, rezo_util );
+    id = Ajouter_utilisateurDB ( rezo_util );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to add group %s", rezo_util->nom);
+                   "Unable to add user %s", rezo_util->nom);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_utilisateurDB( id );
-           if (!result) 
+    else { util = Rechercher_utilisateurDB_by_id( id );
+           if (!util) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to add group %s", rezo_util->nom);
+                          "Unable to load user %s", rezo_util->nom);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { struct CMD_TYPE_UTILISATEUR *util;
-              util = Preparer_envoi_utilisateur ( result );
-              g_free(result);
-              if (!util)
-                { struct CMD_GTK_MESSAGE erreur;
-                  g_snprintf( erreur.message, sizeof(erreur.message),
-                               "Creation ok,\nnot enough memory to view." );
-                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-                }
-              else { Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_ADD_UTIL_OK,
-                                   (gchar *)util, sizeof(struct CMD_TYPE_UTILISATEUR) );
-                     g_free(util);
-                   }
+            { Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_ADD_UTIL_OK,
+                            (gchar *)util, sizeof(struct CMD_TYPE_UTILISATEUR) );
+              g_free(util);
             }
          }
   }
@@ -199,8 +135,7 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void *Envoyer_utilisateurs_thread ( struct CLIENT *client )
-  { struct CMD_TYPE_UTILISATEUR *rezo_util;
-    struct UTILISATEURDB *util;
+  { struct CMD_TYPE_UTILISATEUR *util;
     struct CMD_ENREG nbr;
     struct DB *db;
     prctl(PR_SET_NAME, "W-EnvoiUTIL", 0, 0, 0 );
@@ -222,13 +157,11 @@
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }
-       rezo_util = Preparer_envoi_utilisateur ( util );
+       memset(util->salt, 0, sizeof(util->salt ) );                       /* RAZ des informations privées */
+       memset(util->hash, 0, sizeof(util->hash ) );                       /* RAZ des informations privées */
+       Envoi_client ( client, TAG_UTILISATEUR, SSTAG_SERVEUR_ADDPROGRESS_UTIL,      /* Envoi des infos */
+                      (gchar *)util, sizeof(struct CMD_TYPE_UTILISATEUR) );
        g_free(util);
-       if (rezo_util)
-        { Envoi_client ( client, TAG_UTILISATEUR, SSTAG_SERVEUR_ADDPROGRESS_UTIL,      /* Envoi des infos */
-                         (gchar *)rezo_util, sizeof(struct CMD_TYPE_UTILISATEUR) );
-          g_free(rezo_util);
-        }
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -35,7 +35,7 @@
 /************************************ Prototypes des fonctions ********************************************/
  #include "watchdogd.h"
 
- static gchar *UTILISATEURDB_RESERVE[NBR_UTILISATEUR_RESERVE][2]=
+ static gchar *CMD_TYPE_UTILISATEUR_RESERVE[NBR_UTILISATEUR_RESERVE][2]=
   { { "root", "Watchdog administrator" }
   };
 
@@ -46,7 +46,7 @@
 /**********************************************************************************************************/
  gchar *Nom_utilisateur_reserve( gint id )
   { if (id>=NBR_UTILISATEUR_RESERVE) return( "Unknown" );
-    else { return( UTILISATEURDB_RESERVE[id][0] ); }
+    else { return( CMD_TYPE_UTILISATEUR_RESERVE[id][0] ); }
   }
 /**********************************************************************************************************/
 /* Commentaire_groupe_reserve: renvoie le commentaire en clair du groupe reserve d'id id                  */
@@ -55,7 +55,7 @@
 /**********************************************************************************************************/
  gchar *Commentaire_utilisateur_reserve( gint id )
   { if (id>=NBR_UTILISATEUR_RESERVE) return( "Unknown" );
-    else return( UTILISATEURDB_RESERVE[id][1] );
+    else return( CMD_TYPE_UTILISATEUR_RESERVE[id][1] );
   }
 /**********************************************************************************************************/
 /* Retirer_utilisateur: Elimine un utilisateur dans la base de données                                    */
@@ -91,57 +91,87 @@
     return(retour);
   }
 /**********************************************************************************************************/
-/* Ajouter_utilisateur: Ajout d'un utilisateur dans la base de données                                    */
+/* Modifier_utilisateurDB: Modification d'u nutilisateur Watchdog                                         */
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gint Ajouter_utilisateurDB( guchar *clef, struct CMD_TYPE_UTILISATEUR *util )
-  { gchar *nom, *comment, *code_crypt, *crypt;
-    gchar requete[1024];
+ static gint Ajouter_Modifier_utilisateurDB( gboolean ajout, struct CMD_TYPE_UTILISATEUR *util )
+  { gchar requete[1024], chaine[100];
+    gchar *nom, *comment, *salt, *hash;
     gboolean retour;
     struct DB *db;
     gint id;
 
-    if(g_utf8_strlen(util->code_en_clair, -1))
-         { crypt = Crypter( clef, util->code_en_clair ); }
-    else { crypt = Crypter( clef, "bouh" ); }
-
-    if (!crypt)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Ajouter_utilisateurDB: failed to encrypt password for %s", util->nom );
-       return(-1);
-
-     }
-
-    nom        = Normaliser_chaine ( util->nom );                /* Formatage correct des chaines */
-    comment    = Normaliser_chaine ( util->commentaire );
-    code_crypt = Normaliser_chaine ( crypt );
-    g_free(crypt);
-
-    if (!(nom && comment && code_crypt))
+    nom        = Normaliser_chaine ( util->nom );                        /* Formatage correct des chaines */
+    if (!nom)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Ajouter_utilisateurDB: Normalisation impossible" );
        return(-1);
      }
+    comment    = Normaliser_chaine ( util->commentaire );
+    if (!comment)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "Ajouter_utilisateurDB: Normalisation impossible" );
+       g_free(nom);
+       return(-1);
+     }
+    salt = Normaliser_chaine ( util->salt );
+    if (!salt)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_utilisateurDB: Normalisation salt impossible" );
+       g_free(nom);
+       g_free(comment);
+       return(FALSE);
+     }
 
-    g_snprintf( requete, sizeof(requete),                                              /* Requete SQL */
-                "INSERT INTO %s"             
-                "(name,changepass,cansetpass,crypt,comment,login_failed,enable,"
-                "date_create,enable_expire,date_expire,date_modif)"
-                "VALUES ('%s', %s, %s, '%s', '%s', '0', true, %d, %s, '%d', '%d' );",
-                NOM_TABLE_UTIL, nom,
-                (util->changepass ? "true" : "false"),
-                (util->cansetpass ? "true" : "false"), code_crypt,
-                comment, (gint)time(NULL),
-                (util->expire ? "true" : "false"), (gint)util->date_expire,
-                (gint)time(NULL) );
+    hash = Normaliser_chaine ( util->hash );
+    if (!hash)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_utilisateurDB: Normalisation hash impossible" );
+       g_free(nom);
+       g_free(comment);
+       g_free(salt);
+       return(FALSE);
+     }
+
+
+    if (ajout)
+     { g_snprintf( requete, sizeof(requete),                                              /* Requete SQL */
+                   "INSERT INTO %s"             
+                   "(name,changepass,cansetpass,comment,login_failed,enable,"
+                   "comment,date_create,enable_expire,date_expire,date_modif)"
+                   "VALUES ('%s', '%s', '%s', 0, 1, '%s', %d, '%s', '%d', '%d' );",
+                   NOM_TABLE_UTIL, nom,
+                   (util->changepass ? "true" : "false"),
+                   (util->cansetpass ? "true" : "false"),
+                   comment, (gint)time(NULL),
+                   (util->expire ? "true" : "false"), (gint)util->date_expire,
+                   (gint)time(NULL) );
+     }
+    else
+     { g_snprintf( requete, sizeof(requete),                                              /* Requete SQL */
+                   "UPDATE %s SET "             
+                   "changepass=%s,comment='%s',enable=%s,enable_expire=%s,"
+                   "cansetpass=%s,date_expire=%d,date_modif='%d'",
+                   NOM_TABLE_UTIL, (util->changepass ? "true" : "false"), comment,
+                                   (util->enable ? "true" : "false"),
+                                   (util->expire ? "true" : "false"),
+                                   (util->cansetpass ? "true" : "false"),
+                                   (gint)util->date_expire,
+                                   (gint)time(NULL) );
+       if (util->setpassnow)
+        { g_snprintf( chaine, sizeof(chaine), "salt='%s',hash='%s'", salt, hash );
+          g_strlcat ( requete, chaine, sizeof(requete) );
+        }
+       g_snprintf( chaine, sizeof(chaine), " WHERE id='%d'", util->id ); 
+       g_strlcat ( requete, chaine, sizeof(requete) );
+     }
     g_free(nom);
-    g_free(code_crypt);
     g_free(comment);
+    g_free(salt);
+    g_free(hash);
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_utilisateurDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_utilisateurDB: DB connexion failed" );
        return(-1);
      }
 
@@ -150,75 +180,73 @@
      { Libere_DB_SQL(&db); 
        return(-1);
      }
-    id = Recuperer_last_ID_SQL ( db );
+    if (ajout) id = Recuperer_last_ID_SQL ( db );
+    else id=1;                                          /* Retour = 1 pour une modification d'utilisateur */
     Libere_DB_SQL(&db);
-    Groupe_set_groupe_utilDB ( id, (guint *)&util->gids );      /* Positionnement des groupes */ 
+    Groupe_set_groupe_utilDB ( util->id, (guint *)&util->gids );            /* Positionnement des groupes */ 
     return(id);
   }
 /**********************************************************************************************************/
-/* Modifier_utilisateurDB: Modification d'u nutilisateur Watchdog                                         */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
-/* Sortie: -1 si pb, id sinon                                                                             */
+/* Ajouter_utilisateurDB : Ajoute un utilisateur en base de données                                       */
+/* Entrées: une structure CMD_TYPE_UTILISATEUR complétée                                                  */
+/* Sortie: -1 si probleme                                                                                 */
 /**********************************************************************************************************/
- gboolean Modifier_utilisateurDB( guchar *clef, struct CMD_TYPE_UTILISATEUR *util )
-  { gchar requete[1024], chaine[100];
-    gchar *comment;
-    gchar *crypt;
+ gint Ajouter_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util )
+  { return( Ajouter_Modifier_utilisateurDB ( TRUE, util ) ); }
+/**********************************************************************************************************/
+/* Modifier_utilisateurDB: Modification d'u nutilisateur Watchdog                                         */
+/* Entrées: une structure CMD_TYPE_UTILISATEUR complétée                                                  */
+/* Sortie: FALSE si probleme                                                                              */
+/**********************************************************************************************************/
+ gint Modifier_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util )
+  { return( Ajouter_Modifier_utilisateurDB ( FALSE, util ) ); }
+/**********************************************************************************************************/
+/* Set_password: Correspond au changement de password de l'utilisateur                                    */
+/* Entrées: un log, une db, un id utilisateur, une clef, un password                                      */
+/* Sortie: FALSE si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Modifier_utilisateurDB_set_password( struct CMD_TYPE_UTILISATEUR *util )
+  { gchar requete[200];
+    gchar *salt, *hash;
     gboolean retour;
     struct DB *db;
 
-    comment = Normaliser_chaine ( util->commentaire );
-    if (!comment)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_utilisateurDB: Normalisation impossible" );
+    salt = Normaliser_chaine ( (gchar *)util->salt );
+    if (!salt)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_utilisateurDB: Normalisation salt impossible" );
        return(FALSE);
      }
 
-    g_snprintf( requete, sizeof(requete),                                              /* Requete SQL */
-                "UPDATE %s SET "             
-                "changepass=%s,comment='%s',enable=%s,enable_expire=%s,"
-                "cansetpass=%s,date_expire=%d,date_modif='%d'",
-                NOM_TABLE_UTIL, (util->changepass ? "true" : "false"), comment,
-                                (util->actif ? "true" : "false"),
-                                (util->expire ? "true" : "false"),
-                                (util->cansetpass ? "true" : "false"),
-                                (gint)util->date_expire,
-                                (gint)time(NULL) );
-    g_free(comment);
-
-    if (util->setpassnow)
-     { gchar *code_crypt;
-       if(g_utf8_strlen(util->code_en_clair, -1))
-            { crypt = Crypter( clef, util->code_en_clair ); }
-       else { crypt = Crypter( clef, "bouh" ); }
-       if (!crypt)
-        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_utilisateurDB: cryptage password impossible" );
-          return(FALSE);
-        }
-
-       code_crypt = Normaliser_chaine ( crypt );
-       g_free(crypt);
-       if (!code_crypt)
-        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_utilisateurDB: Normalisation code crypte impossible" );
-          return(FALSE);
-        }
-       g_snprintf( chaine, sizeof(chaine), ",crypt='%s'", code_crypt );
-       g_strlcat ( requete, chaine, sizeof(requete) );
-       g_free(code_crypt);
+    hash = Normaliser_chaine ( (gchar *)util->hash );
+    if (!hash)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_utilisateurDB: Normalisation hash impossible" );
+       g_free(salt);
+       return(FALSE);
      }
 
-    g_snprintf( chaine, sizeof(chaine), " WHERE id='%d'", util->id ); 
-    g_strlcat ( requete, chaine, sizeof(requete) );
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "UPDATE %s SET "             
+                "salt='%s',hash='%s',date_modif='%d'",
+                NOM_TABLE_UTIL, salt, hash, (gint)time(NULL) );
+    g_free(salt);
+    g_free(hash);
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_utilisateurDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_utilisateurDB_set_password: DB connexion failed" );
        return(FALSE);
      }
 
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
-    Groupe_set_groupe_utilDB ( util->id, (guint *)&util->gids );
-    return(retour);
+    if ( ! retour )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "Modifier_utilisateurDB_set_password: update failed %d (%s)", util->id, util->nom );
+       return(FALSE);
+     }
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                "Modifier_utilisateurDB_set_password: update ok for id=%d (%s)", util->id, util->nom );
+    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Rechercher_utilsDB: Recuperation de tous les champs des utilisateurs                                   */
@@ -251,8 +279,8 @@
 /* Entrées: un log, une db et un id d'utilisateur                                                         */
 /* Sortie: une structure utilisateur, ou null si erreur                                                   */
 /**********************************************************************************************************/
- struct UTILISATEURDB *Recuperer_utilisateurDB_suite( struct DB **db_orig )
-  { struct UTILISATEURDB *util;
+ struct CMD_TYPE_UTILISATEUR *Recuperer_utilisateurDB_suite( struct DB **db_orig )
+  { struct CMD_TYPE_UTILISATEUR *util;
     struct DB *db;
 
     db = *db_orig;                      /* Récupération du pointeur initialisé par la fonction précédente */
@@ -263,15 +291,15 @@
        return(NULL);
      }
 
-    util = (struct UTILISATEURDB *)g_try_malloc0( sizeof(struct UTILISATEURDB) );
+    util = (struct CMD_TYPE_UTILISATEUR *)g_try_malloc0( sizeof(struct CMD_TYPE_UTILISATEUR) );
     if (!util) Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                        "Recuperer_utilsDB_suite: Erreur allocation mémoire" );
+                        "Recuperer_utilisateurDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &util->nom, db->row[0], sizeof(util->nom) );                  /* Recopie dans la structure */
        memcpy( &util->commentaire, db->row[3], sizeof(util->commentaire) );
        util->id            = atoi(db->row[1]);
        util->changepass    = atoi(db->row[2]);
-       util->actif         = atoi(db->row[4]);
+       util->enable         = atoi(db->row[4]);
        util->date_creation = atoi(db->row[5]);
        util->expire        = atoi(db->row[6]);
        util->date_expire   = atoi(db->row[7]);
@@ -285,9 +313,9 @@
 /* Entrées: un log, une db et un id d'utilisateur                                                         */
 /* Sortie: une structure utilisateur, ou null si erreur                                                   */
 /**********************************************************************************************************/
- struct UTILISATEURDB *Rechercher_utilisateurDB( gint id )
-  { gchar requete[200];
-    struct UTILISATEURDB *util;
+ struct CMD_TYPE_UTILISATEUR *Rechercher_utilisateurDB_by_id( gint id )
+  { struct CMD_TYPE_UTILISATEUR *util;
+    gchar requete[512];
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
@@ -316,9 +344,9 @@
 /* Entrées: un log, une db et un id d'utilisateur                                                         */
 /* Sortie: une structure utilisateur, ou null si erreur                                                   */
 /**********************************************************************************************************/
- struct UTILISATEURDB *Rechercher_utilisateurDB_by_name( gchar *nom )
-  { gchar requete[200], *name;
-    struct UTILISATEURDB *util;
+ struct CMD_TYPE_UTILISATEUR *Rechercher_utilisateurDB_by_name( gchar *nom )
+  { struct CMD_TYPE_UTILISATEUR *util;
+    gchar requete[200], *name;
     struct DB *db;
 
     name       = Normaliser_chaine ( nom );                              /* Formatage correct des chaines */

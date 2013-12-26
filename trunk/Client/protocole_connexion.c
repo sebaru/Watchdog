@@ -78,8 +78,8 @@
              }
             break;
        case SSTAG_SERVEUR_CHANGEPASS:
-             { struct CMD_UTIL_SETPASSWORD *util;
-               util = (struct CMD_UTIL_SETPASSWORD *)connexion->donnees;
+             { struct CMD_TYPE_UTILISATEUR *util;
+               util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
                Client_en_cours.id = util->id;
                if (!Changer_password()) Deconnecter();
              }
