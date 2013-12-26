@@ -311,4 +311,43 @@
     if (util) Groupe_get_groupe_utilDB ( util->id, (guint *)&util->gids );
     return( util );
   }
+/**********************************************************************************************************/
+/* Rechercher_utilDB: Recuperation de tous les champs des utilisateurs                                    */
+/* Entrées: un log, une db et un id d'utilisateur                                                         */
+/* Sortie: une structure utilisateur, ou null si erreur                                                   */
+/**********************************************************************************************************/
+ struct UTILISATEURDB *Rechercher_utilisateurDB_by_name( gchar *nom )
+  { gchar requete[200], *name;
+    struct UTILISATEURDB *util;
+    struct DB *db;
+
+    name       = Normaliser_chaine ( nom );                              /* Formatage correct des chaines */
+    if (!name)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "Recherche_utilisateurDB_by_name: Normalisation impossible" );
+       return(NULL);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT name,id,changepass,comment,enable,date_create,"
+                "enable_expire,date_expire,cansetpass,date_modif,salt,hash "
+                "FROM %s WHERE name='%s' LIMIT 1", NOM_TABLE_UTIL, nom );
+    g_free(name);
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_utilisateurDB_by_name: DB connexion failed" );
+       return(NULL);
+     }
+
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
+
+    util = Recuperer_utilisateurDB_suite( &db );
+    Libere_DB_SQL( &db );
+    if (util) Groupe_get_groupe_utilDB ( util->id, (guint *)&util->gids );
+    return( util );
+  }
 /*--------------------------------------------------------------------------------------------------------*/

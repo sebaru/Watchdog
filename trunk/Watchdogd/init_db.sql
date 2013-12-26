@@ -958,6 +958,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `changepass` tinyint(1) NOT NULL DEFAULT '0',
   `cansetpass` tinyint(1) NOT NULL DEFAULT '0',
   `crypt` varchar(24) COLLATE utf8_unicode_ci NOT NULL,
+  `hash` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `comment` varchar(240) COLLATE utf8_unicode_ci DEFAULT NULL,
   `login_failed` int(11) NOT NULL DEFAULT '0',
   `enable` tinyint(1) NOT NULL DEFAULT '0',
