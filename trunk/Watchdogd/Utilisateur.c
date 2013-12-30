@@ -150,7 +150,7 @@
      { g_snprintf( requete, sizeof(requete),                                              /* Requete SQL */
                    "UPDATE %s SET "             
                    "changepass=%s,comment='%s',enable=%s,enable_expire=%s,"
-                   "cansetpass=%s,date_expire=%d,date_modif='%d'",
+                   "cansetpass=%s,date_expire='%d',date_modif='%d'",
                    NOM_TABLE_UTIL, (util->changepass ? "true" : "false"), comment,
                                    (util->enable ? "true" : "false"),
                                    (util->expire ? "true" : "false"),
@@ -260,7 +260,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT name,id,changepass,comment,enable,date_create,"
-                "enable_expire,date_expire,cansetpass,date_modif "
+                "enable_expire,date_expire,cansetpass,date_modif,salt,hash "
                 "FROM %s", NOM_TABLE_UTIL );
 
     db = Init_DB_SQL();       
@@ -295,11 +295,13 @@
     if (!util) Info_new( Config.log, Config.log_msrv, LOG_ERR,
                         "Recuperer_utilisateurDB_suite: Erreur allocation mémoire" );
     else
-     { memcpy( &util->nom, db->row[0], sizeof(util->nom) );                  /* Recopie dans la structure */
-       memcpy( &util->commentaire, db->row[3], sizeof(util->commentaire) );
+     { g_snprintf( util->nom,         sizeof(util->nom),         "%s", db->row[0] );/* Recopie dans la structure */
+       g_snprintf( util->commentaire, sizeof(util->commentaire), "%s", db->row[3] );
+       memcpy( &util->salt, db->row[10], sizeof(util->salt)-1 );
+       memcpy( &util->hash, db->row[11], sizeof(util->hash)-1 );
        util->id            = atoi(db->row[1]);
        util->changepass    = atoi(db->row[2]);
-       util->enable         = atoi(db->row[4]);
+       util->enable        = atoi(db->row[4]);
        util->date_creation = atoi(db->row[5]);
        util->expire        = atoi(db->row[6]);
        util->date_expire   = atoi(db->row[7]);
@@ -320,7 +322,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT name,id,changepass,comment,enable,date_create,"
-                "enable_expire,date_expire,cansetpass,date_modif "
+                "enable_expire,date_expire,cansetpass,date_modif,salt,hash "
                 "FROM %s WHERE id=%d LIMIT 1", NOM_TABLE_UTIL, id );
 
     db = Init_DB_SQL();       

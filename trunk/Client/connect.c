@@ -271,6 +271,7 @@ one_again:
     Entry_code = gtk_entry_new();
     gtk_entry_set_visibility( GTK_ENTRY(Entry_code), FALSE );
     gtk_entry_set_max_length( GTK_ENTRY(Entry_code), NBR_CARAC_LOGIN );
+    gtk_entry_set_text( GTK_ENTRY(Entry_code), Config_cli.passwd );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_code, 1, 3, 2, 3 );
 
     g_signal_connect_swapped( Entry_host, "activate", (GCallback)gtk_widget_grab_focus, Entry_nom );

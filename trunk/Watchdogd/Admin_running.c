@@ -51,6 +51,7 @@
        Admin_write ( connexion, "  set                   - Sous-menu d'affectation des bits internes\n" );
        Admin_write ( connexion, "  modbus                - Sous-menu de gestion des equipements MODBUS\n" );
        Admin_write ( connexion, "  dls                   - D.L.S. Status\n" );
+       Admin_write ( connexion, "  user                  - Manage Watchdog Users\n" );
        Admin_write ( connexion, "  log_level loglevel    - Set Log Level (debug, info, notice, warning, error)\n" );
        Admin_write ( connexion, "  debug switch          - Toggle debug Switch (list, all, none, dls, arch, db, msrv or library name)\n" );
 

@@ -701,7 +701,7 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
-INSERT INTO `msgs` (`id`, `num`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `num_syn`, `bit_voc`, `enable`, `sms`, `type_voc`, `vitesse_voc`, `time_repeat`) VALUES
+INSERT INTO `msgs` (`id`, `num`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `id_syn`, `bit_voc`, `enable`, `sms`, `type_voc`, `vitesse_voc`, `time_repeat`) VALUES
 (1, 0, 'Warning, system is halting', 'Warning, system is halting', 'Warning, system is halting', 0, 1, 1, TRUE, FALSE, 1, 150, 0),
 (2, 1, 'Warning, system is rebooting', 'Warning, system is rebooting', 'Warning, system is rebooting', 0, 1, 1, TRUE, FALSE, 1, 150, 0);
 
@@ -957,7 +957,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `name` varchar(96) COLLATE utf8_unicode_ci NOT NULL,
   `changepass` tinyint(1) NOT NULL DEFAULT '0',
   `cansetpass` tinyint(1) NOT NULL DEFAULT '0',
-  `crypt` varchar(24) COLLATE utf8_unicode_ci NOT NULL,
+  `salt` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `hash` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `comment` varchar(240) COLLATE utf8_unicode_ci DEFAULT NULL,
   `login_failed` int(11) NOT NULL DEFAULT '0',

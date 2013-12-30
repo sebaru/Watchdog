@@ -38,9 +38,10 @@
 /**********************************************************************************************************/
  static void Admin_print_user ( struct CONNEXION *connexion, struct CMD_TYPE_UTILISATEUR *util )
   { gchar date_expire[20], date_creation[20], date_modif[20];
-    gchar chaine[256];
+    gchar chaine[512], salt[80], hash[80];
     struct tm *temps;
     time_t time;
+    gint cpt;
 
     time = util->date_expire;
     temps = localtime( (time_t *)&time );
@@ -57,13 +58,22 @@
     if (temps) { strftime  ( date_creation, sizeof(date_creation), "%F %T", temps ); }
     else       { g_snprintf( date_creation, sizeof(date_creation), "Erreur" );    }
 
+    memset( salt, 0, sizeof(salt) );                                                     /* Mise en forme */
+    for (cpt=0; cpt<sizeof(util->salt); cpt++)
+     { g_snprintf( &salt[2*cpt], 3, "%02X", (guchar) util->salt[cpt] ); }
+
+    memset( hash, 0, sizeof(hash) );                                                     /* Mise en forme */
+    for (cpt=0; cpt<sizeof(util->hash); cpt++)
+     { g_snprintf( &hash[2*cpt], 3, "%02X", (guchar) util->hash[cpt] ); }
+
     g_snprintf( chaine, sizeof(chaine),
-              " [%03d]%20s -> enable=%d, expire=%d, date_expire=%s, changepass=%d, cansetpass=%d\n"
-              "   |                       -> date_creation=%s, date_modif=%s\n"
-              "   |                       -> salt=%20s, hash=%20s\n"
-              "   |---------> %s\n",
+              " [%03d]%12s -> enable=%d, expire=%d, date_expire=%s, changepass=%d, cansetpass=%d\n"
+              "   |               -> date_creation=%s, date_modif=%s\n"
+              "   |               -> salt=%s\n"
+              "   |               -> hash=%s\n"
+              "   |----------------> %s\n",
                 util->id, util->nom, util->enable, util->expire, date_expire, util->changepass,
-                util->cansetpass, date_creation, date_modif, util->salt, util->hash, util->commentaire
+                util->cansetpass, date_creation, date_modif, salt, hash, util->commentaire
               );
     Admin_write ( connexion, chaine );
   }
@@ -135,7 +145,8 @@
           EVP_MD_CTX_destroy(mdctx);
 
           if( Modifier_utilisateurDB_set_password( util ) )
-           { g_snprintf( chaine, sizeof(chaine), " Password set to %s\n", util->hash ); }
+           { g_snprintf( chaine, sizeof(chaine), " Password set to %20s:%20s for user %s\n",
+                         util->salt, util->hash, util->nom ); }
           else
            { g_snprintf( chaine, sizeof(chaine), " Error while setting password\n" ); }
           g_free(util);
