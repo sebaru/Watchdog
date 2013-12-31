@@ -33,7 +33,6 @@
 
  struct REZO_CLI_IDENT
   { gchar  nom [ NBR_CARAC_LOGIN_UTF8 + 1 ];
-    gchar  password [ NBR_CARAC_LOGIN_UTF8 + 1 ];
     gchar  version [ TAILLE_VERSION + 1 ];
     time_t version_d;                                                    /* Version des données du client */
   };

@@ -312,8 +312,8 @@
 
     gtk_widget_show_all( F_client );                               /* Affichage de le fenetre de controle */
     if (Config_cli.gui_tech == FALSE)
-     { memcpy( Client_en_cours.user, Config_cli.user,        sizeof(Client_en_cours.user) );
-       memcpy( Client_en_cours.host,  Config_cli.host,       sizeof(Client_en_cours.host) );
+     { memcpy( Client_en_cours.util.nom, Config_cli.user,    sizeof(Client_en_cours.util.nom) );
+       memcpy( Client_en_cours.host,     Config_cli.host,    sizeof(Client_en_cours.host) );
        memcpy( Client_en_cours.password, Config_cli.passwd,  sizeof(Client_en_cours.password) );
        Connecter_au_serveur();
      }

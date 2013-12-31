@@ -359,10 +359,10 @@
                    "Connecter_module: connexion refused by module %d (%s) family=%d",
                     module->modbus.id, module->modbus.ip, rp->ai_family );
         }
-       close(connexion);
+       close(connexion);                                   /* Suppression de la socket qui n'a pu aboutir */
      }
-
     freeaddrinfo(result);
+    if (rp == NULL) return(FALSE);                                                 /* Erreur de connexion */
 
     fcntl( connexion, F_SETFL, SO_KEEPALIVE | SO_REUSEADDR );
     module->connexion = connexion;                                                    /* Sauvegarde du fd */
