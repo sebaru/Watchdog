@@ -125,7 +125,7 @@
  extern gboolean Tester_update_capteur( struct CAPTEUR *capteur );                      /* Dans capteur.c */
  extern struct CMD_ETAT_BIT_CAPTEUR *Formater_capteur( struct CAPTEUR *capteur );
 
- extern gint Tester_autorisation ( struct CLIENT *client );              /* Dans ident.c */
+ extern void Tester_autorisation ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *util );/* Dans ident.c */
  extern void Proto_set_password ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *util );
 
  extern void Client_mode ( struct CLIENT *client, gint mode );                          /* Dans Serveur.c */

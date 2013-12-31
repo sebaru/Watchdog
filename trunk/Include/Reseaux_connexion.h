@@ -44,12 +44,14 @@
 
  enum 
   { SSTAG_CLIENT_IDENT,                                               /* Le client s'identifie au serveur */
+    SSTAG_SERVEUR_WANT_HASH,                                 /* Le serveur donne un salt, et veut un hash */
+    SSTAG_CLIENT_SEND_HASH,
 
     SSTAG_SERVEUR_AUTORISE,                                       /* Le serveur autorise ou non le client */
     SSTAG_SERVEUR_REFUSE,                                         /* Le serveur autorise ou non le client */
     SSTAG_SERVEUR_ACCOUNT_DISABLED,                                /* Le compte utilisateur est desactivé */
     SSTAG_SERVEUR_ACCOUNT_EXPIRED,                                    /* Le compte utilisateur est expiré */
-    SSTAG_SERVEUR_CHANGEPASS,                                  /* L'utilisateur doit changer son password */
+    SSTAG_SERVEUR_NEEDCHANGEPWD,                               /* L'utilisateur doit changer son password */
     SSTAG_CLIENT_SETPASSWORD,
     SSTAG_SERVEUR_CLI_VALIDE,                       /* Le client est passé valide du point de vue serveur */
     SSTAG_CLIENT_OFF,                                                          /* Le client se deconnecte */

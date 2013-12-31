@@ -175,10 +175,11 @@
   { switch (mode)
      { case ATTENTE_CONNEXION_SSL       : return("ATTENTE_CONNEXION_SSL");
        case ENVOI_INTERNAL              : return("ENVOI_INTERNAL");
-       case ATTENTE_IDENT               : return("ATTENTE_IDENT");
-       case ENVOI_AUTORISATION          : return("ENVOI_AUTORISATION");
-       case ATTENTE_NEW_PASSWORD        : return("ATTENTE_NEW_PASSWORD");
-       case ENVOI_DONNEES               : return("ENVOI_DONNEES");
+       case WAIT_FOR_IDENT              : return("WAIT_FOR_IDENT");
+       case WAIT_FOR_HASH               : return("WAIT_FOR_HASH");
+/*       case ENVOI_AUTORISATION          : return("ENVOI_AUTORISATION");*/
+       case WAIT_FOR_NEWPWD             : return("WAIT_FOR_NEWPWD");
+/*       case ENVOI_DONNEES               : return("ENVOI_DONNEES");*/
        case ENVOI_HISTO                 : return("ENVOI_HISTO");
 
        case ENVOI_GROUPE_FOR_UTIL       : return("ENVOI_GROUPE_FOR_UTIL");

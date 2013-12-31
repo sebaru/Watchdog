@@ -51,7 +51,7 @@
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Proto_set_password ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *util )
-  { if (util->id != client->util->id)
+  { if (util->id != client->util->id)                                        /* Le client est-il le bon ? */
      { Client_mode ( client, DECONNECTE );
        return;
      }
@@ -63,78 +63,47 @@
 /* Tester_autorisation: envoi de l'autorisation ou non au client                                          */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- gint Tester_autorisation ( struct CLIENT *client )
-  { struct CMD_TYPE_UTILISATEUR util;
-    gchar *clef, *crypt;
-    gint id;
-
-#ifdef bouh
-    clef = Recuperer_clef( client->ident.nom, &id );
-    if (!clef)
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, 
-               "Tester_autorisation: Unable to retrieve the key of user %s", client->ident.nom );
-       Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
-       return(DECONNECTE);
-     }
-          
-    client->util = Rechercher_utilisateurDB( id );
-    if (!client->util)
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, 
-               "Tester_autorisation: Unable to retrieve the user %s", client->ident.nom );
-       Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
-       return(DECONNECTE);
-     }
-    memcpy( &client->util->code, clef, sizeof( client->util->code ) );    
-    g_free(clef);
-/***************************************** Identification du client ***************************************/
-    crypt = Crypter( Config.crypto_key, client->ident.password );
-    if (!crypt)
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, 
-               "Tester_autorisation: Password encryption error for user %s", client->util->nom );
-       Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
-       return(DECONNECTE);
-     }
-
-    if (memcmp( crypt, client->util->code, sizeof( client->util->code ) ))       /* Comparaison des codes */
+ void Tester_autorisation ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *util )
+  { 
+/*************************************** Authentification du client ***************************************/
+    if (memcmp( util->hash, client->util->hash, sizeof( client->util->hash ) ))  /* Comparaison des codes */
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  
                "Tester_autorisation: Password error for %s", client->util->nom );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
-       g_free(crypt);
        Ajouter_one_login_failed( client->util->id, Config.max_login_failed );                /* Dommage ! */
-                                 
-       return(DECONNECTE);
+       Client_mode (client, DECONNECTE);
+       return;
      }
-    g_free(crypt);
-
 /********************************************* Compte du client *******************************************/
-    if (!client->util->actif)                              /* Est-ce que son compte est toujours actif ?? */
+    if (!client->util->enable)                             /* Est-ce que son compte est toujours actif ?? */
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  
                 "Tester_autorisation: Account disabled for %s", client->util->nom );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_ACCOUNT_DISABLED, NULL, 0 );
-       return(DECONNECTE);
+       Client_mode (client, DECONNECTE);
+       return;
      }
 
     if (client->util->expire && client->util->date_expire<time(NULL) )   /* Expiration temporel du compte */
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, 
                 "Tester_autorisation: Account expired for %s", client->util->nom );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_ACCOUNT_EXPIRED, NULL, 0 );
-       return(DECONNECTE);
+       Client_mode (client, DECONNECTE);
+       return;
      }
 
-    if (client->util->changepass)                       /* L'utilisateur doit-il changer son mot de passe */
+    if (client->util->mustchangepwd)                    /* L'utilisateur doit-il changer son mot de passe */
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  
-                "Tester_autorisation: User %s have to change his password", client->util->nom );
-       util.id = client->util->id;
-       Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CHANGEPASS,
-                     (gchar *)&util, sizeof(struct CMD_TYPE_UTILISATEUR) );
-       return(ATTENTE_NEW_PASSWORD);
+                "Tester_autorisation: User %s(id=%d) have to change his password",
+                 client->util->nom, client->util->id );
+       Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_NEEDCHANGEPWD, NULL, 0 );
+       Client_mode (client, WAIT_FOR_NEWPWD);
+       return;
      }
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
              "Tester_autorisation: Envoi Autorisation for %s", client->util->nom );
     Autoriser_client ( client );
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
              "Tester_autorisation: Autorisation sent for %s", client->util->nom );
-#endif
-    return( ENVOI_DONNEES );
+    Client_mode (client, ENVOI_HISTO);
   }
 /*--------------------------------------------------------------------------------------------------------*/

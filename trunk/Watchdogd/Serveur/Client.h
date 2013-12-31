@@ -41,12 +41,12 @@
  enum
   { ENVOI_INTERNAL,                              /* Envoi des informations internes à la librairie Reseau */
     ATTENTE_CONNEXION_SSL,                                           /* Veut-il crypter les connexions ?? */
-    ATTENTE_IDENT,                                /* Permet de demander l'identification de l'utilisateur */
-    ENVOI_AUTORISATION,                                                 /* Envoi de l'autorisation ou pas */
+    WAIT_FOR_IDENT,                                /* Permet de demander l'identification du client lourd */
+    SEND_SALT,                                    /* Permet de demander l'identification de l'utilisateur */
+    WAIT_FOR_HASH,                              /* Permet de demander l'authentification de l'utilisateur */
+    WAIT_FOR_NEWPWD,                                    /* Si l'utilisateur doit changer son mot de passe */
 
-    ATTENTE_NEW_PASSWORD,                               /* Si l'utilisateur doit changer son mot de passe */
-
-    ENVOI_DONNEES,                                        /* Envoi des données GIF... au client si besoin */
+/*    ENVOI_DONNEES,                                        /* Envoi des données GIF... au client si besoin */
     ENVOI_HISTO,
 
     VALIDE_NON_ROOT,

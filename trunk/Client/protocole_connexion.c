@@ -77,11 +77,13 @@
                Deconnecter_sale();
              }
             break;
-       case SSTAG_SERVEUR_CHANGEPASS:
-             { struct CMD_TYPE_UTILISATEUR *util;
-               util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
-               Client_en_cours.id = util->id;
-               if (!Changer_password()) Deconnecter();
+       case SSTAG_SERVEUR_NEEDCHANGEPWD:
+             { if (!Changer_password()) Deconnecter();
+             }
+            break;
+       case SSTAG_SERVEUR_WANT_HASH:
+             { printf("Proto_connexion : Want HASH\n");
+               Deconnecter();
              }
             break;
 

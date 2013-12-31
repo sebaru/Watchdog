@@ -67,12 +67,12 @@
      { g_snprintf( &hash[2*cpt], 3, "%02X", (guchar) util->hash[cpt] ); }
 
     g_snprintf( chaine, sizeof(chaine),
-              " [%03d]%12s -> enable=%d, expire=%d, date_expire=%s, changepass=%d, cansetpass=%d\n"
+              " [%03d]%12s -> enable=%d, expire=%d, date_expire=%s, mustchangepwd=%d, cansetpass=%d\n"
               "   |               -> date_creation=%s, date_modif=%s\n"
               "   |               -> salt=%s\n"
               "   |               -> hash=%s\n"
               "   |----------------> %s\n",
-                util->id, util->nom, util->enable, util->expire, date_expire, util->changepass,
+                util->id, util->nom, util->enable, util->expire, date_expire, util->mustchangepwd,
                 util->cansetpass, date_creation, date_modif, salt, hash, util->commentaire
               );
     Admin_write ( connexion, chaine );
@@ -112,14 +112,46 @@
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'running'\n" );
+       Admin_write ( connexion, "  add $name $comment      - Add user $name with $commment\n" );
        Admin_write ( connexion, "  list                    - Liste les users Watchdog\n" );
-       Admin_write ( connexion, "  setpassword $name $pwd - Set password $pwd to name\n" );
+       Admin_write ( connexion, "  passwd $name $pwd       - Set password $pwd to user $name\n" );
+       Admin_write ( connexion, "  show $name              - Show user $name\n" );
        Admin_write ( connexion, "  help                    - This help\n" );
      } else
     if ( ! strcmp ( commande, "list" ) )
      { Admin_user_list ( connexion );
      } else
-    if ( ! strcmp ( commande, "setpassword" ) )
+    if ( ! strcmp ( commande, "show" ) )
+     { struct CMD_TYPE_UTILISATEUR *util;
+       gchar name[80];
+
+       sscanf ( ligne, "%s %s", commande, name );                    /* Découpage de la ligne de commande */
+
+       util = Rechercher_utilisateurDB_by_name ( name );
+       if (!util)
+        { g_snprintf( chaine, sizeof(chaine), " User %s not found in Database\n", name );
+          Admin_write ( connexion, chaine );
+        }
+       else
+        { Admin_print_user ( connexion, util );
+          g_free(util);
+        }
+     } else
+    if ( ! strcmp ( commande, "add" ) )
+     { struct CMD_TYPE_UTILISATEUR util;
+
+       sscanf ( ligne, "%s %s %s", commande, util.nom, util.commentaire );/* Découpage de la ligne de commande */
+       if (Ajouter_utilisateurDB ( &util ) == -1)
+        { g_snprintf( chaine, sizeof(chaine), " User %s couldn't be added in Database\n", util.nom );
+          Admin_write ( connexion, chaine );
+        }
+       else
+        { g_snprintf( chaine, sizeof(chaine), " User %s added. UID = %d\n", util.nom, util.id );
+          Admin_write ( connexion, chaine );
+        }
+
+     } else
+    if ( ! strcmp ( commande, "passwd" ) )
      { struct CMD_TYPE_UTILISATEUR *util;
        gchar name[80], pwd[80];
 
@@ -145,8 +177,7 @@
           EVP_MD_CTX_destroy(mdctx);
 
           if( Modifier_utilisateurDB_set_password( util ) )
-           { g_snprintf( chaine, sizeof(chaine), " Password set to %20s:%20s for user %s\n",
-                         util->salt, util->hash, util->nom ); }
+           { g_snprintf( chaine, sizeof(chaine), " Password set for user %s\n", util->nom ); }
           else
            { g_snprintf( chaine, sizeof(chaine), " Error while setting password\n" ); }
           g_free(util);

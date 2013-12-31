@@ -118,13 +118,14 @@
                   Client_mode ( client, ATTENTE_CONNEXION_SSL );
                 }
                else
-                { Client_mode ( client, ATTENTE_IDENT ); }
+                { Client_mode ( client, WAIT_FOR_IDENT ); }
                Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_END,                /* Tag de fin */
                              NULL, 0 );
                break;                 
           case ATTENTE_CONNEXION_SSL:
                Connecter_ssl ( client );                        /* Tentative de connexion securisée */
                break;
+#ifdef bouh
           case ENVOI_AUTORISATION :
                 { gint new_mode;
                   new_mode = Tester_autorisation( client );
@@ -143,6 +144,7 @@
           case ENVOI_DONNEES      :
                if(Envoyer_gif( client )) Client_mode (client, ENVOI_HISTO);
                break;
+#endif
           case ENVOI_HISTO        :
                Client_mode( client, VALIDE_NON_ROOT );
                Ref_client( client );                       /* Indique que la structure est utilisée */
@@ -353,7 +355,7 @@
           Envoyer_new_motif_au_client (client);
         }
 /****************************************** Ecoute du client  *********************************************/
-       if (client->mode >= ATTENTE_IDENT) Ecouter_client( client );
+       if (client->mode >= SEND_SALT) Ecouter_client( client );
 
        if (Partage->top > client->pulse && client->mode == VALIDE)                /* Gestion du KEEPALIVE */
         { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_PULSE, NULL, 0 );

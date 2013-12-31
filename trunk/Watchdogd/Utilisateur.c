@@ -137,11 +137,9 @@
      { g_snprintf( requete, sizeof(requete),                                              /* Requete SQL */
                    "INSERT INTO %s"             
                    "(name,changepass,cansetpass,comment,login_failed,enable,"
-                   "comment,date_create,enable_expire,date_expire,date_modif)"
-                   "VALUES ('%s', '%s', '%s', 0, 1, '%s', %d, '%s', '%d', '%d' );",
+                   "date_create,enable_expire,date_expire,date_modif)"
+                   "VALUES ('%s', 1, 1, '%s', 0, 1, %d, '%s', '%d', '%d' );",
                    NOM_TABLE_UTIL, nom,
-                   (util->changepass ? "true" : "false"),
-                   (util->cansetpass ? "true" : "false"),
                    comment, (gint)time(NULL),
                    (util->expire ? "true" : "false"), (gint)util->date_expire,
                    (gint)time(NULL) );
@@ -149,15 +147,15 @@
     else
      { g_snprintf( requete, sizeof(requete),                                              /* Requete SQL */
                    "UPDATE %s SET "             
-                   "changepass=%s,comment='%s',enable=%s,enable_expire=%s,"
-                   "cansetpass=%s,date_expire='%d',date_modif='%d'",
-                   NOM_TABLE_UTIL, (util->changepass ? "true" : "false"), comment,
-                                   (util->enable ? "true" : "false"),
-                                   (util->expire ? "true" : "false"),
-                                   (util->cansetpass ? "true" : "false"),
+                   "mustchangepwd=%d,comment='%s',enable=%d,enable_expire=%d,"
+                   "cansetpass=%d,date_expire='%d',date_modif='%d'",
+                   NOM_TABLE_UTIL, util->mustchangepwd, comment,
+                                   util->enable,
+                                   util->expire,
+                                   util->cansetpass,
                                    (gint)util->date_expire,
                                    (gint)time(NULL) );
-       if (util->setpassnow)
+       if (util->setpwdnow)
         { g_snprintf( chaine, sizeof(chaine), "salt='%s',hash='%s'", salt, hash );
           g_strlcat ( requete, chaine, sizeof(requete) );
         }
@@ -180,7 +178,9 @@
      { Libere_DB_SQL(&db); 
        return(-1);
      }
-    if (ajout) id = Recuperer_last_ID_SQL ( db );
+    if (ajout) { id = Recuperer_last_ID_SQL ( db );
+                 util->id = id;
+               }
     else id=1;                                          /* Retour = 1 pour une modification d'utilisateur */
     Libere_DB_SQL(&db);
     Groupe_set_groupe_utilDB ( util->id, (guint *)&util->gids );            /* Positionnement des groupes */ 
@@ -259,7 +259,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT name,id,changepass,comment,enable,date_create,"
+                "SELECT name,id,mustchangepwd,comment,enable,date_create,"
                 "enable_expire,date_expire,cansetpass,date_modif,salt,hash "
                 "FROM %s", NOM_TABLE_UTIL );
 
@@ -300,7 +300,7 @@
        memcpy( &util->salt, db->row[10], sizeof(util->salt)-1 );
        memcpy( &util->hash, db->row[11], sizeof(util->hash)-1 );
        util->id            = atoi(db->row[1]);
-       util->changepass    = atoi(db->row[2]);
+       util->mustchangepwd = atoi(db->row[2]);
        util->enable        = atoi(db->row[4]);
        util->date_creation = atoi(db->row[5]);
        util->expire        = atoi(db->row[6]);
@@ -321,7 +321,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT name,id,changepass,comment,enable,date_create,"
+                "SELECT name,id,mustchangepwd,comment,enable,date_create,"
                 "enable_expire,date_expire,cansetpass,date_modif,salt,hash "
                 "FROM %s WHERE id=%d LIMIT 1", NOM_TABLE_UTIL, id );
 
@@ -359,7 +359,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT name,id,changepass,comment,enable,date_create,"
+                "SELECT name,id,mustchangepwd,comment,enable,date_create,"
                 "enable_expire,date_expire,cansetpass,date_modif,salt,hash "
                 "FROM %s WHERE name='%s' LIMIT 1", NOM_TABLE_UTIL, nom );
     g_free(name);
