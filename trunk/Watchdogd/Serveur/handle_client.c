@@ -355,7 +355,7 @@
           Envoyer_new_motif_au_client (client);
         }
 /****************************************** Ecoute du client  *********************************************/
-       if (client->mode >= SEND_SALT) Ecouter_client( client );
+       if (client->mode >= WAIT_FOR_IDENT) Ecouter_client( client );
 
        if (Partage->top > client->pulse && client->mode == VALIDE)                /* Gestion du KEEPALIVE */
         { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_PULSE, NULL, 0 );

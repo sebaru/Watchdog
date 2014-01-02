@@ -211,6 +211,7 @@
  extern gboolean Changer_password ( void );
 
  extern void Envoyer_identification ( void );                                             /* Dans ident.c */
+ extern void Envoyer_authentiifcation ( struct CMD_TYPE_UTILISATEUR *util );
 
  extern void Ecouter_serveur ( void );                                                /* Dans protocole.c */
  extern void Gerer_protocole_gtk_message ( struct CONNEXION *connexion );

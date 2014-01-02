@@ -351,7 +351,8 @@
 
        if (connect(connexion, rp->ai_addr, rp->ai_addrlen) != -1)
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                   "Connecter_module %d (%s)", module->modbus.id, module->modbus.ip );
+                   "Connecter_module %d (%s) family=%d",
+                    module->modbus.id, module->modbus.ip, rp->ai_family );
           break;                  /* Success */
         }
        else

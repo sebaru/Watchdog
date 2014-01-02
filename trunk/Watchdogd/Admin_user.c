@@ -38,7 +38,7 @@
 /**********************************************************************************************************/
  static void Admin_print_user ( struct CONNEXION *connexion, struct CMD_TYPE_UTILISATEUR *util )
   { gchar date_expire[20], date_creation[20], date_modif[20];
-    gchar chaine[512], salt[80], hash[80];
+    gchar chaine[1024], salt[2*EVP_MAX_MD_SIZE+1], hash[2*EVP_MAX_MD_SIZE+1];
     struct tm *temps;
     time_t time;
     gint cpt;
@@ -58,12 +58,12 @@
     if (temps) { strftime  ( date_creation, sizeof(date_creation), "%F %T", temps ); }
     else       { g_snprintf( date_creation, sizeof(date_creation), "Erreur" );    }
 
-    memset( salt, 0, sizeof(salt) );                                                     /* Mise en forme */
-    for (cpt=0; cpt<sizeof(util->salt); cpt++)
+    memset( &salt, 0, sizeof(salt) );                                                     /* Mise en forme */
+    for (cpt=0; cpt<sizeof(util->salt)-1; cpt++)
      { g_snprintf( &salt[2*cpt], 3, "%02X", (guchar) util->salt[cpt] ); }
 
-    memset( hash, 0, sizeof(hash) );                                                     /* Mise en forme */
-    for (cpt=0; cpt<sizeof(util->hash); cpt++)
+    memset( &hash, 0, sizeof(hash) );                                                     /* Mise en forme */
+    for (cpt=0; cpt<sizeof(util->hash)-1; cpt++)
      { g_snprintf( &hash[2*cpt], 3, "%02X", (guchar) util->hash[cpt] ); }
 
     g_snprintf( chaine, sizeof(chaine),
@@ -169,13 +169,29 @@
           memset ( util->hash, 0, sizeof(util->hash) );
           RAND_pseudo_bytes( (guchar *)util->salt, sizeof(util->salt)-1 ); /* Récupération d'un nouveau SALT */
 
+{ gchar salt[EVP_MAX_MD_SIZE+1], hash[EVP_MAX_MD_SIZE+1];
+gchar chaine[512];
+  gint cpt;
+
           mdctx = EVP_MD_CTX_create();
           EVP_DigestInit_ex (mdctx, EVP_sha512(), NULL);
-          EVP_DigestUpdate  (mdctx, util->salt, sizeof(util->salt));
+          EVP_DigestUpdate  (mdctx, util->salt, sizeof(util->salt)-1);
           EVP_DigestUpdate  (mdctx, pwd,  strlen(pwd));
           EVP_DigestFinal_ex(mdctx, (guchar *)util->hash, &md_len);
           EVP_MD_CTX_destroy(mdctx);
 
+    memset( salt, 0, sizeof(salt) );                                                     /* Mise en forme */
+    for (cpt=0; cpt<sizeof(util->salt); cpt++)
+     { g_snprintf( &salt[2*cpt], 3, "%02X", (guchar) util->salt[cpt] ); }
+    g_snprintf( chaine, sizeof(chaine), " SALT %s\n", salt );
+    Admin_write ( connexion, chaine );
+
+    memset( hash, 0, sizeof(hash) );                                                     /* Mise en forme */
+    for (cpt=0; cpt<sizeof(util->hash); cpt++)
+     { g_snprintf( &hash[2*cpt], 3, "%02X", (guchar) util->hash[cpt] ); }
+    g_snprintf( chaine, sizeof(chaine), " HASH %s\n", hash );
+    Admin_write ( connexion, chaine );
+}
           if( Modifier_utilisateurDB_set_password( util ) )
            { g_snprintf( chaine, sizeof(chaine), " Password set for user %s\n", util->nom ); }
           else

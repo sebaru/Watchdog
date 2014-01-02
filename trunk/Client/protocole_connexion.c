@@ -82,8 +82,10 @@
              }
             break;
        case SSTAG_SERVEUR_WANT_HASH:
-             { printf("Proto_connexion : Want HASH\n");
-               Deconnecter();
+             { struct CMD_TYPE_UTILISATEUR *util;
+               util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;               
+               printf("Proto_connexion : Want HASH\n");
+               Envoyer_authentification(util);
              }
             break;
 

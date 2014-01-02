@@ -217,12 +217,13 @@ one_again:
 
        if (connect(connexion, rp->ai_addr, rp->ai_addrlen) != -1)
         { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
-                   "Connecter_au_serveur: Connect OK to %s", Client_en_cours.host );
+                   "Connecter_au_serveur: Connect OK to %s (%s) family=%d",
+                    Client_en_cours.host, service, rp->ai_family );
           break;                  /* Success */
         }
        else
         { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, 
-                    "Connecter_au_serveur: connexion refused by server %s:%s (%s) family=%d",
+                    "Connecter_au_serveur: connexion refused by server %s (%s) family=%d",
                     Client_en_cours.host, service, rp->ai_family );
         }
        close(connexion);

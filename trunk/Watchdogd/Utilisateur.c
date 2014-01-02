@@ -206,7 +206,7 @@
 /* Sortie: FALSE si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Modifier_utilisateurDB_set_password( struct CMD_TYPE_UTILISATEUR *util )
-  { gchar requete[200];
+  { gchar requete[512];
     gchar *salt, *hash;
     gboolean retour;
     struct DB *db;
