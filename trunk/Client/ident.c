@@ -28,7 +28,8 @@
  #include <glib.h>
  #include <bonobo/bonobo-i18n.h>
  #include <string.h>
- 
+ #include <openssl/rand.h>
+
  #include "config.h"
  #include "Reseaux.h"
  #include "client.h"
@@ -65,39 +66,42 @@
 /* Envoyer_identification: envoi de l'identification cliente au serveur                                   */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- void Envoyer_authentification ( struct CMD_TYPE_UTILISATEUR *util )
-  { gchar salt[EVP_MAX_MD_SIZE+1], hash[EVP_MAX_MD_SIZE+1];
-    gint cpt;
+ void Calcul_password_hash ( gboolean new_salt, gchar *password )
+  { gchar hash[EVP_MAX_MD_SIZE];
     EVP_MD_CTX *mdctx;
-    guint md_len;
-    memset( util->hash, 0, sizeof(util->hash) );                                         /* Mise en forme */
-
-    memset( salt, 0, sizeof(salt) );                                                     /* Mise en forme */
-    for (cpt=0; cpt<sizeof(util->salt); cpt++)
-     { g_snprintf( &salt[2*cpt], 3, "%02X", (guchar) util->salt[cpt] ); }
-
+    guint cpt,md_len;
+    memset( Client_en_cours.util.hash, 0, sizeof(Client_en_cours.util.hash) );           /* Mise en forme */
     memset( hash, 0, sizeof(hash) );                                                     /* Mise en forme */
-    for (cpt=0; cpt<sizeof(util->hash); cpt++)
-     { g_snprintf( &hash[2*cpt], 3, "%02X", (guchar) util->hash[cpt] ); }
-    printf("1- salt:%s\n hash:%s\n", salt, hash );
 
-    mdctx = EVP_MD_CTX_create();
+    if (new_salt)
+     { gchar salt[EVP_MAX_MD_SIZE];
+       memset ( Client_en_cours.util.salt, 0, sizeof(Client_en_cours.util.salt) );
+       RAND_pseudo_bytes( (guchar *)salt, sizeof(salt) );               /* Récupération d'un nouveau SALT */
+       for (cpt=0; cpt<sizeof(salt); cpt++)                             /* Mise en forme au format HEX */
+        { g_snprintf( &Client_en_cours.util.salt[2*cpt], 3, "%02X", (guchar)salt[cpt] ); }
+     }
+    mdctx = EVP_MD_CTX_create();                                                        /* Calcul du HASH */
     EVP_DigestInit_ex (mdctx, EVP_sha512(), NULL);
-    EVP_DigestUpdate  (mdctx, util->salt, sizeof(util->salt)-1);
-    EVP_DigestUpdate  (mdctx, Client_en_cours.password,  strlen(Client_en_cours.password));
-    EVP_DigestFinal_ex(mdctx, (guchar *)util->hash, &md_len);
+    EVP_DigestUpdate  (mdctx, Client_en_cours.util.nom, strlen(Client_en_cours.util.nom) );
+    EVP_DigestUpdate  (mdctx, Client_en_cours.util.salt, sizeof(Client_en_cours.util.salt)-1 );
+    EVP_DigestUpdate  (mdctx, password,  strlen(password));
+    EVP_DigestFinal_ex(mdctx, (guchar *)hash, &md_len);
     EVP_MD_CTX_destroy(mdctx);
     printf("2- Hash calculated: longueur %d\n", md_len );
 
-    memset( salt, 0, sizeof(salt) );                                                     /* Mise en forme */
-    for (cpt=0; cpt<sizeof(util->salt); cpt++)
-     { g_snprintf( &salt[2*cpt], 3, "%02X", (guchar) util->salt[cpt] ); }
-
-    memset( hash, 0, sizeof(hash) );                                                     /* Mise en forme */
-    for (cpt=0; cpt<sizeof(util->hash); cpt++)
-     { g_snprintf( &hash[2*cpt], 3, "%02X", (guchar) util->hash[cpt] ); }
-    printf("3- salt:%s\n hash:%s\n", salt, hash );
-    if ( !Envoi_serveur( TAG_CONNEXION, SSTAG_CLIENT_SEND_HASH, (gchar *)util, sizeof(struct CMD_TYPE_UTILISATEUR) ) )
+    for (cpt=0; cpt<sizeof(hash); cpt++)                                   /* Mise en forme au format HEX */
+     { g_snprintf( &Client_en_cours.util.hash[2*cpt], 3, "%02X", (guchar)hash[cpt] ); }
+    printf("3- salt:%s\n4- hash:%s\n", Client_en_cours.util.salt, Client_en_cours.util.hash );
+  }
+/**********************************************************************************************************/
+/* Envoyer_identification: envoi de l'identification cliente au serveur                                   */
+/* Entrée/Sortie: rien                                                                                    */
+/**********************************************************************************************************/
+ void Envoyer_authentification ( struct CMD_TYPE_UTILISATEUR *util )
+  { memcpy ( &Client_en_cours.util, util, sizeof(struct CMD_TYPE_UTILISATEUR) );            /* Sauvegarde */
+    Calcul_password_hash ( FALSE, Client_en_cours.password );
+    if ( !Envoi_serveur( TAG_CONNEXION, SSTAG_CLIENT_SEND_HASH,
+                        (gchar *)&Client_en_cours.util, sizeof(struct CMD_TYPE_UTILISATEUR) ) )
      { Deconnecter();
        return;
      }

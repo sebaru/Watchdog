@@ -38,8 +38,8 @@
  struct CMD_TYPE_UTILISATEUR
   { guint    id;
     gchar    nom[ NBR_CARAC_LOGIN_UTF8+1 ];
-    gchar    salt[ EVP_MAX_MD_SIZE+1 ];
-    gchar    hash[ EVP_MAX_MD_SIZE+1 ];
+    gchar    salt[ 2*EVP_MAX_MD_SIZE+1 ];
+    gchar    hash[ 2*EVP_MAX_MD_SIZE+1 ];
     gchar    commentaire[ NBR_CARAC_COMMENTAIRE_UTF8+1 ];
     gboolean enable;
     gboolean expire;

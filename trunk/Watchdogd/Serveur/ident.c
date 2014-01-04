@@ -56,7 +56,10 @@
        return;
      }
 
-    Modifier_utilisateurDB_set_password( util );
+    if (client->util->cansetpass == TRUE && Modifier_utilisateurDB_set_password( util ))
+     { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_PWDCHANGED, NULL, 0 ); }
+    else
+     { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CANNOTCHANGEPWD, NULL, 0 ); }
     Client_mode ( client, DECONNECTE );                        /* On deconnecte le client tout de suite ! */
   }
 /**********************************************************************************************************/
@@ -93,7 +96,7 @@
 
     if (client->util->mustchangepwd)                    /* L'utilisateur doit-il changer son mot de passe */
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  
-                "Tester_autorisation: User %s(id=%d) have to change his password",
+                "Tester_autorisation: User %s(id=%d) has to change his password",
                  client->util->nom, client->util->id );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_NEEDCHANGEPWD, NULL, 0 );
        Client_mode (client, WAIT_FOR_NEWPWD);

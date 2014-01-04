@@ -46,7 +46,6 @@
     WAIT_FOR_HASH,                              /* Permet de demander l'authentification de l'utilisateur */
     WAIT_FOR_NEWPWD,                                    /* Si l'utilisateur doit changer son mot de passe */
 
-/*    ENVOI_DONNEES,                                        /* Envoi des données GIF... au client si besoin */
     ENVOI_HISTO,
 
     VALIDE_NON_ROOT,

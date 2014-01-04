@@ -77,6 +77,24 @@
                Deconnecter_sale();
              }
             break;
+       case SSTAG_SERVEUR_PWDCHANGED:
+             { dialog = gtk_message_dialog_new ( GTK_WINDOW(F_client), GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                 GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE,
+                                                 _("Your password was changed") );
+               g_signal_connect_swapped( dialog, "response",
+                                         G_CALLBACK(gtk_widget_destroy), dialog );
+               gtk_widget_show_all(dialog);
+             }
+            break;
+       case SSTAG_SERVEUR_CANNOTCHANGEPWD:
+             { dialog = gtk_message_dialog_new ( GTK_WINDOW(F_client), GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                 GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE,
+                                                 _("You cannot changed your password") );
+               g_signal_connect_swapped( dialog, "response",
+                                         G_CALLBACK(gtk_widget_destroy), dialog );
+               gtk_widget_show_all(dialog);
+             }
+            break;
        case SSTAG_SERVEUR_NEEDCHANGEPWD:
              { if (!Changer_password()) Deconnecter();
              }

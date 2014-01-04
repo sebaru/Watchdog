@@ -35,28 +35,6 @@
 /************************************ Prototypes des fonctions ********************************************/
  #include "watchdogd.h"
 
- static gchar *CMD_TYPE_UTILISATEUR_RESERVE[NBR_UTILISATEUR_RESERVE][2]=
-  { { "root", "Watchdog administrator" }
-  };
-
-/**********************************************************************************************************/
-/* Nom_groupe_reserve: renvoie le nom en clair du groupe reserve d'id id                                  */
-/* Entrée: l'id du groupe                                                                                 */
-/* Sortie: une chaine de caractere non freable                                                            */
-/**********************************************************************************************************/
- gchar *Nom_utilisateur_reserve( gint id )
-  { if (id>=NBR_UTILISATEUR_RESERVE) return( "Unknown" );
-    else { return( CMD_TYPE_UTILISATEUR_RESERVE[id][0] ); }
-  }
-/**********************************************************************************************************/
-/* Commentaire_groupe_reserve: renvoie le commentaire en clair du groupe reserve d'id id                  */
-/* Entrée: l'id du groupe                                                                                 */
-/* Sortie: une chaine de caractere non freable                                                            */
-/**********************************************************************************************************/
- gchar *Commentaire_utilisateur_reserve( gint id )
-  { if (id>=NBR_UTILISATEUR_RESERVE) return( "Unknown" );
-    else return( CMD_TYPE_UTILISATEUR_RESERVE[id][1] );
-  }
 /**********************************************************************************************************/
 /* Retirer_utilisateur: Elimine un utilisateur dans la base de données                                    */
 /* Entrées: un log, une db, un nom                                                                        */
@@ -69,7 +47,7 @@
 
     if (util->id < NBR_UTILISATEUR_RESERVE) 
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, 
-                "Retirer_utilisateurDB: elimination failed: id reserve %s", util->nom );
+                "Retirer_utilisateurDB: elimination failed: id (%d) reserve %s", util->id, util->nom );
        return(FALSE);
      }
 
@@ -136,12 +114,12 @@
     if (ajout)
      { g_snprintf( requete, sizeof(requete),                                              /* Requete SQL */
                    "INSERT INTO %s"             
-                   "(name,changepass,cansetpass,comment,login_failed,enable,"
+                   "(name,mustchangepwd,cansetpass,comment,login_failed,enable,"
                    "date_create,enable_expire,date_expire,date_modif)"
-                   "VALUES ('%s', 1, 1, '%s', 0, 1, %d, '%s', '%d', '%d' );",
+                   "VALUES ('%s', 1, 1, '%s', 0, 1, %d, %d, '%d', '%d' );",
                    NOM_TABLE_UTIL, nom,
                    comment, (gint)time(NULL),
-                   (util->expire ? "true" : "false"), (gint)util->date_expire,
+                   util->expire, (gint)util->date_expire,
                    (gint)time(NULL) );
      }
     else
@@ -226,8 +204,9 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "salt='%s',hash='%s',date_modif='%d'",
-                NOM_TABLE_UTIL, salt, hash, (gint)time(NULL) );
+                "salt='%s',hash='%s',date_modif='%d',mustchangepwd=0 WHERE id=%d"
+                " AND (mustchangepwd=1 OR id<%d OR (mustchangepwd=0 AND cansetpass=1))",
+                NOM_TABLE_UTIL, salt, hash, (gint)time(NULL), util->id, NBR_UTILISATEUR_RESERVE );
     g_free(salt);
     g_free(hash);
 

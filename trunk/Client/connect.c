@@ -101,7 +101,6 @@ one_again:
                 return(FALSE);
        case GTK_RESPONSE_OK:
         { gchar *code1, *code2;
-          struct CMD_TYPE_UTILISATEUR util;
 
           code1 = (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_code1) );
           code2 = (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_code2) );
@@ -116,13 +115,9 @@ one_again:
              goto one_again;
            }
 
-          util.id = Client_en_cours.id;
-#ifdef bouh
-
-          memcpy( util.code_en_clair, code1, sizeof(util.code_en_clair) );
-#endif
+          Calcul_password_hash( TRUE, code1 );
           Envoi_serveur( TAG_CONNEXION, SSTAG_CLIENT_SETPASSWORD,
-                        (gchar *)&util, sizeof(struct CMD_TYPE_UTILISATEUR) );
+                        (gchar *)&Client_en_cours.util, sizeof(struct CMD_TYPE_UTILISATEUR) );
           gtk_widget_destroy( dialog );                                        /* Fermeture de la fenetre */
          }
       }
@@ -173,10 +168,7 @@ one_again:
 /* Sortie: les variables globales sont initialisées, FALSE si pb                                          */
 /**********************************************************************************************************/
  gboolean Connecter_au_serveur ( void )
-  { struct sockaddr_in src;                                            /* Données locales: pas le serveur */
-    struct hostent *host;
-
-    struct addrinfo *result, *rp;
+  { struct addrinfo *result, *rp;
     struct addrinfo hints;
     gint s;
     gchar service[10];

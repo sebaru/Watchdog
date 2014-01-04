@@ -105,7 +105,7 @@
        sched_yield();
 
        if (client->mode == DECONNECTE)                                        /* Deconnection des clients */
-        { Unref_client( client );
+        { /*Unref_client( client );*/
           break;
         }
 
@@ -365,7 +365,7 @@
 
 /********************************************* Arret du hangle_client *************************************/
 
-    if (Cfg_ssrv.lib->Thread_run == FALSE)            /* Arret demandé par MSRV. Nous prevenons le client */
+/*  if (Cfg_ssrv.lib->Thread_run == FALSE)            /* Arret demandé par MSRV. Nous prevenons le client */
      { Deconnecter(client); }
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,

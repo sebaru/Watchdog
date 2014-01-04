@@ -38,6 +38,7 @@
 
  enum                                                /* Enumeration des utilisateurs spéciaux de watchdog */
   { UID_ROOT,
+    UID_GUEST,
     NBR_UTILISATEUR_RESERVE
   };
 

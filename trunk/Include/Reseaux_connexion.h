@@ -52,6 +52,8 @@
     SSTAG_SERVEUR_ACCOUNT_EXPIRED,                                    /* Le compte utilisateur est expiré */
     SSTAG_SERVEUR_NEEDCHANGEPWD,                               /* L'utilisateur doit changer son password */
     SSTAG_CLIENT_SETPASSWORD,
+    SSTAG_SERVEUR_CANNOTCHANGEPWD,                  /* L'utilisateur ne peut pas changer son mot de passe */
+    SSTAG_SERVEUR_PWDCHANGED,                            /* L'utilisateur a bien modifié son mot de passe */
     SSTAG_SERVEUR_CLI_VALIDE,                       /* Le client est passé valide du point de vue serveur */
     SSTAG_CLIENT_OFF,                                                          /* Le client se deconnecte */
     SSTAG_SERVEUR_OFF,                                                             /* Le serveur se coupe */

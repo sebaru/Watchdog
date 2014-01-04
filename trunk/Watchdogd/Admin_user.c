@@ -33,15 +33,14 @@
  #include "watchdogd.h"
 /**********************************************************************************************************/
 /* Admin_print_user : Affiche le user en parametre sur la console d'admin CLI                             */
-/* Entrée: La connexion connexion ADMIN                                                                   */
-/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
+/* EntrÃ©e: La connexion connexion ADMIN                                                                   */
+/* Sortie: Rien, tout est envoyÃ© dans le pipe Admin                                                       */
 /**********************************************************************************************************/
  static void Admin_print_user ( struct CONNEXION *connexion, struct CMD_TYPE_UTILISATEUR *util )
   { gchar date_expire[20], date_creation[20], date_modif[20];
-    gchar chaine[1024], salt[2*EVP_MAX_MD_SIZE+1], hash[2*EVP_MAX_MD_SIZE+1];
+    gchar chaine[1024];
     struct tm *temps;
     time_t time;
-    gint cpt;
 
     time = util->date_expire;
     temps = localtime( (time_t *)&time );
@@ -53,18 +52,10 @@
     if (temps) { strftime  ( date_modif, sizeof(date_modif), "%F %T", temps ); }
     else       { g_snprintf( date_modif, sizeof(date_modif), "Erreur" );    }
 
-    time = util->date_expire;
+    time = util->date_creation;
     temps = localtime( (time_t *)&time );
     if (temps) { strftime  ( date_creation, sizeof(date_creation), "%F %T", temps ); }
     else       { g_snprintf( date_creation, sizeof(date_creation), "Erreur" );    }
-
-    memset( &salt, 0, sizeof(salt) );                                                     /* Mise en forme */
-    for (cpt=0; cpt<sizeof(util->salt)-1; cpt++)
-     { g_snprintf( &salt[2*cpt], 3, "%02X", (guchar) util->salt[cpt] ); }
-
-    memset( &hash, 0, sizeof(hash) );                                                     /* Mise en forme */
-    for (cpt=0; cpt<sizeof(util->hash)-1; cpt++)
-     { g_snprintf( &hash[2*cpt], 3, "%02X", (guchar) util->hash[cpt] ); }
 
     g_snprintf( chaine, sizeof(chaine),
               " [%03d]%12s -> enable=%d, expire=%d, date_expire=%s, mustchangepwd=%d, cansetpass=%d\n"
@@ -73,21 +64,21 @@
               "   |               -> hash=%s\n"
               "   |----------------> %s\n",
                 util->id, util->nom, util->enable, util->expire, date_expire, util->mustchangepwd,
-                util->cansetpass, date_creation, date_modif, salt, hash, util->commentaire
+                util->cansetpass, date_creation, date_modif, util->salt, util->hash, util->commentaire
               );
     Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
-/* Admin_user_list : liste les utilisateurs de Watchdog et leurs privilèges                               */
-/* Entrée: La connexion connexion ADMIN                                                                   */
-/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
+/* Admin_user_list : liste les utilisateurs de Watchdog et leurs privilÃ¨ges                               */
+/* EntrÃ©e: La connexion connexion ADMIN                                                                   */
+/* Sortie: Rien, tout est envoyÃ© dans le pipe Admin                                                       */
 /**********************************************************************************************************/
  static void Admin_user_list ( struct CONNEXION *connexion )
   { struct CMD_TYPE_UTILISATEUR *util;
     gchar chaine[80];
     struct DB *db;
 
-    if ( ! Recuperer_utilisateurDB( &db ) )                           /* Chargement de la base de données */
+    if ( ! Recuperer_utilisateurDB( &db ) )                           /* Chargement de la base de donnÃ©es */
      { g_snprintf( chaine, sizeof(chaine), " Error : DB Connexion failed\n" );
        Admin_write ( connexion, chaine );
      }                                                                           /* Si pas de histos (??) */
@@ -102,14 +93,14 @@
      }
   }
 /**********************************************************************************************************/
-/* Admin_running: Appellée lorsque l'admin envoie une commande en mode run dans la ligne de commande      */
-/* Entrée: La connexion connexione et la ligne de commande, et le buffer de sortie                        */
-/* Sortie: Néant                                                                                          */
+/* Admin_running: AppellÃ©e lorsque l'admin envoie une commande en mode run dans la ligne de commande      */
+/* EntrÃ©e: La connexion connexione et la ligne de commande, et le buffer de sortie                        */
+/* Sortie: NÃ©ant                                                                                          */
 /**********************************************************************************************************/
  void Admin_user ( struct CONNEXION *connexion, gchar *ligne )
-  { gchar commande[128], chaine[128];
+  { gchar commande[128], chaine[256];
 
-    sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
+    sscanf ( ligne, "%s", commande );                                /* DÃ©coupage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'running'\n" );
        Admin_write ( connexion, "  add $name $comment      - Add user $name with $commment\n" );
@@ -125,7 +116,7 @@
      { struct CMD_TYPE_UTILISATEUR *util;
        gchar name[80];
 
-       sscanf ( ligne, "%s %s", commande, name );                    /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %s", commande, name );                    /* DÃ©coupage de la ligne de commande */
 
        util = Rechercher_utilisateurDB_by_name ( name );
        if (!util)
@@ -140,7 +131,7 @@
     if ( ! strcmp ( commande, "add" ) )
      { struct CMD_TYPE_UTILISATEUR util;
 
-       sscanf ( ligne, "%s %s %s", commande, util.nom, util.commentaire );/* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %s %[^\n]", commande, util.nom, util.commentaire );/* DÃ©coupage de la ligne de commande */
        if (Ajouter_utilisateurDB ( &util ) == -1)
         { g_snprintf( chaine, sizeof(chaine), " User %s couldn't be added in Database\n", util.nom );
           Admin_write ( connexion, chaine );
@@ -155,7 +146,7 @@
      { struct CMD_TYPE_UTILISATEUR *util;
        gchar name[80], pwd[80];
 
-       sscanf ( ligne, "%s %s %s", commande, name, pwd );            /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %s %s", commande, name, pwd );            /* DÃ©coupage de la ligne de commande */
 
        util = Rechercher_utilisateurDB_by_name ( name );
        if (!util)
@@ -163,35 +154,33 @@
           Admin_write ( connexion, chaine );
         }
        else
-        { EVP_MD_CTX *mdctx;
-          guint md_len;
+        { gchar salt[EVP_MAX_MD_SIZE], hash[EVP_MAX_MD_SIZE];
+          EVP_MD_CTX *mdctx;
+          guint md_len, cpt;
+          memset( salt, 0, sizeof(salt) );                                             /* RAZ des buffers */
+          memset( hash, 0, sizeof(hash) );                                             /* RAZ des buffers */
           memset ( util->salt, 0, sizeof(util->salt) );
           memset ( util->hash, 0, sizeof(util->hash) );
-          RAND_pseudo_bytes( (guchar *)util->salt, sizeof(util->salt)-1 ); /* Récupération d'un nouveau SALT */
 
-{ gchar salt[EVP_MAX_MD_SIZE+1], hash[EVP_MAX_MD_SIZE+1];
-gchar chaine[512];
-  gint cpt;
+          RAND_pseudo_bytes( (guchar *)salt, sizeof(salt) );            /* RÃ©cupÃ©ration d'un nouveau SALT */
+          for (cpt=0; cpt<sizeof(salt); cpt++)                             /* Mise en forme au format HEX */
+           { g_snprintf( &util->salt[2*cpt], 3, "%02X", (guchar)salt[cpt] ); }
+          g_snprintf( chaine, sizeof(chaine), " SALT %s\n", util->salt );
+          Admin_write ( connexion, chaine );
 
-          mdctx = EVP_MD_CTX_create();
+          mdctx = EVP_MD_CTX_create();                                  /* Creation du HASH correspondant */
           EVP_DigestInit_ex (mdctx, EVP_sha512(), NULL);
+          EVP_DigestUpdate  (mdctx, util->nom, strlen(util->nom) );
           EVP_DigestUpdate  (mdctx, util->salt, sizeof(util->salt)-1);
           EVP_DigestUpdate  (mdctx, pwd,  strlen(pwd));
-          EVP_DigestFinal_ex(mdctx, (guchar *)util->hash, &md_len);
+          EVP_DigestFinal_ex(mdctx, (guchar *)&hash, &md_len);
           EVP_MD_CTX_destroy(mdctx);
 
-    memset( salt, 0, sizeof(salt) );                                                     /* Mise en forme */
-    for (cpt=0; cpt<sizeof(util->salt); cpt++)
-     { g_snprintf( &salt[2*cpt], 3, "%02X", (guchar) util->salt[cpt] ); }
-    g_snprintf( chaine, sizeof(chaine), " SALT %s\n", salt );
-    Admin_write ( connexion, chaine );
+          for (cpt=0; cpt<sizeof(hash); cpt++)                             /* Mise en forme au format HEX */
+           { g_snprintf( &util->hash[2*cpt], 3, "%02X", (guchar)hash[cpt] ); }
+          g_snprintf( chaine, sizeof(chaine), " HASH %s\n", util->hash );
+          Admin_write ( connexion, chaine );
 
-    memset( hash, 0, sizeof(hash) );                                                     /* Mise en forme */
-    for (cpt=0; cpt<sizeof(util->hash); cpt++)
-     { g_snprintf( &hash[2*cpt], 3, "%02X", (guchar) util->hash[cpt] ); }
-    g_snprintf( chaine, sizeof(chaine), " HASH %s\n", hash );
-    Admin_write ( connexion, chaine );
-}
           if( Modifier_utilisateurDB_set_password( util ) )
            { g_snprintf( chaine, sizeof(chaine), " Password set for user %s\n", util->nom ); }
           else

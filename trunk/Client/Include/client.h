@@ -53,7 +53,7 @@
 
  struct CLIENT
   { guint32 mode;
-    guint32 id;
+    guint32 id; /* necessaire ?? */
     GList *gids;
     struct CONNEXION *connexion;
     gchar host[TAILLE_NOM_SERVEUR+1];
