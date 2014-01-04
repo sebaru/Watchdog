@@ -176,8 +176,6 @@ one_again:
 
     Log( _("Trying to connect") );
 
-
-
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
     hints.ai_socktype = SOCK_STREAM; /* Datagram socket */

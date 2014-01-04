@@ -87,7 +87,7 @@
     EVP_DigestUpdate  (mdctx, password,  strlen(password));
     EVP_DigestFinal_ex(mdctx, (guchar *)hash, &md_len);
     EVP_MD_CTX_destroy(mdctx);
-    printf("2- Hash calculated: longueur %d\n", md_len );
+    printf("2- Hash calculated: longueur %d for %s\n", md_len, Client_en_cours.util.nom );
 
     for (cpt=0; cpt<sizeof(hash); cpt++)                                   /* Mise en forme au format HEX */
      { g_snprintf( &Client_en_cours.util.hash[2*cpt], 3, "%02X", (guchar)hash[cpt] ); }

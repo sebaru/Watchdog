@@ -956,7 +956,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(96) COLLATE utf8_unicode_ci NOT NULL,
   `mustchangepwd` tinyint(1) NOT NULL DEFAULT '0',
-  `cansetpass` tinyint(1) NOT NULL DEFAULT '0',
+  `cansetpwd` tinyint(1) NOT NULL DEFAULT '0',
   `salt` varchar(130) COLLATE utf8_unicode_ci NOT NULL,
   `hash` varchar(130) COLLATE utf8_unicode_ci NOT NULL,
   `comment` varchar(240) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -970,7 +970,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=2 ;
 
-INSERT INTO `users` (`id`, `name`, `mustchangepwd`, `cansetpass`, `salt`, `hash`, `comment`, `login_failed`, `enable`, `date_create`, `enable_expire`, `date_expire`, `date_modif`) VALUES
+INSERT INTO `users` (`id`, `name`, `mustchangepwd`, `cansetpwd`, `salt`, `hash`, `comment`, `login_failed`, `enable`, `date_create`, `enable_expire`, `date_expire`, `date_modif`) VALUES
 (0, 'root', 1, 1, 'DAABBD177CC38489DD70B61010C336439798F53F814920510C2A93A5BB4A64AA6A5E2F70CC85EBEF6E1D2E3F3E4592FAC0963068EF81E2B37549058A628DA943', 'C420585111C6F0E833D822E1FE562053E7722E1457186EE93C0F5590F4469CC089FFC6A1DC8878A9F54EDB5802F1D6B4111106D11ABFF1CFFB03714C7F52D393', 'Utilisateur Root', 0, 1, 0, 0, 0, 0),
 (1, 'guest', 0, 0, '0FE3B94BCC1E52AC4BEE0DE31D6306890854EAFC77F855FBD9D17BB0D7256A5E23ED8D58FA85E345FE71D046211745B6B50382CD939DC7FDAA2FBE6B7D586069', '6E14D7124DF5FC4C018D845F351553F751265C37834455B96EE3014BCA7CFE53B87CAD8FFA739B39C4A5BCD61E267560EAA7F2AEFFAB3C457B1E0F6BE5BCF8C4', 'Utilisateur Guest', 0, 1, 0, 0, 0, 0);
 

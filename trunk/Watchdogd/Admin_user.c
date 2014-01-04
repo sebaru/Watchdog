@@ -58,13 +58,13 @@
     else       { g_snprintf( date_creation, sizeof(date_creation), "Erreur" );    }
 
     g_snprintf( chaine, sizeof(chaine),
-              " [%03d]%12s -> enable=%d, expire=%d, date_expire=%s, mustchangepwd=%d, cansetpass=%d\n"
+              " [%03d]%12s -> enable=%d, expire=%d, date_expire=%s, mustchangepwd=%d, cansetpwd=%d\n"
               "   |               -> date_creation=%s, date_modif=%s\n"
               "   |               -> salt=%s\n"
               "   |               -> hash=%s\n"
               "   |----------------> %s\n",
                 util->id, util->nom, util->enable, util->expire, date_expire, util->mustchangepwd,
-                util->cansetpass, date_creation, date_modif, util->salt, util->hash, util->commentaire
+                util->cansetpwd, date_creation, date_modif, util->salt, util->hash, util->commentaire
               );
     Admin_write ( connexion, chaine );
   }
@@ -104,6 +104,7 @@
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'running'\n" );
        Admin_write ( connexion, "  add $name $comment      - Add user $name with $commment\n" );
+       Admin_write ( connexion, "  cansetpwd $name $bool   - Set CanSetPwd flag to true or false\n" );
        Admin_write ( connexion, "  list                    - Liste les users Watchdog\n" );
        Admin_write ( connexion, "  passwd $name $pwd       - Set password $pwd to user $name\n" );
        Admin_write ( connexion, "  show $name              - Show user $name\n" );
@@ -141,6 +142,29 @@
           Admin_write ( connexion, chaine );
         }
 
+     } else
+    if ( ! strcmp ( commande, "cansetpwd" ) )
+     { struct CMD_TYPE_UTILISATEUR *util;
+       gchar name[80], cansetpwd[80];
+
+       sscanf ( ligne, "%s %s %s", commande, name, cansetpwd );      /* Découpage de la ligne de commande */
+
+       util = Rechercher_utilisateurDB_by_name ( name );
+       if (!util)
+        { g_snprintf( chaine, sizeof(chaine), " User %s not found in Database\n", name );
+          Admin_write ( connexion, chaine );
+        }
+       else
+        { if (!strcmp( cansetpwd, "true" ) ) util->cansetpwd = 1;
+                                        else util->cansetpwd = 0;
+          if( Modifier_utilisateurDB_set_cansetpwd( util ) )
+           { g_snprintf( chaine, sizeof(chaine), " Flag CanSetPwd to %d set for user %s\n",
+                         util->cansetpwd, util->nom ); }
+          else
+           { g_snprintf( chaine, sizeof(chaine), " Error while setting CanSetPwd\n" ); }
+          g_free(util);
+          Admin_write ( connexion, chaine );
+        }
      } else
     if ( ! strcmp ( commande, "passwd" ) )
      { struct CMD_TYPE_UTILISATEUR *util;

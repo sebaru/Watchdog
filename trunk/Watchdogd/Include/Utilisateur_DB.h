@@ -69,7 +69,7 @@
  extern gboolean Groupe_set_groupe_utilDB( guint id_util, guint *gids );
  extern gboolean Groupe_get_groupe_utilDB( guint id, guint *gids );
 
- extern gboolean Recuperer_utilisateurDB( struct DB **db );
+ extern gboolean Recuperer_utilisateurDB( struct DB **db );                         /* Dans Utilisateur.c */
  extern struct CMD_TYPE_UTILISATEUR *Recuperer_utilisateurDB_suite( struct DB **db );
  extern gboolean Retirer_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util );
  extern gint Ajouter_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util );
@@ -78,6 +78,7 @@
  extern gboolean Modifier_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util );
  extern gchar *Nom_utilisateur_reserve( gint id );
  extern gboolean Modifier_utilisateurDB_set_password( struct CMD_TYPE_UTILISATEUR *util );
+ extern gboolean Modifier_utilisateurDB_set_cansetpwd( struct CMD_TYPE_UTILISATEUR *util );
 
  extern gboolean Raz_login_failed( guint id );                                     /* Dans login_failed.c */
  extern gboolean Ajouter_one_login_failed( guint id, gint max_login_failed );

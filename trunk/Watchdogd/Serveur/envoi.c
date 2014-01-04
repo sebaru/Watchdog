@@ -80,22 +80,6 @@
     else client->defaut=0;                                                    /* Ok, pas de defaut client */
     return(retour);
   }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Envoi_clients: Envoi le buffer à tous les clients connectés au système                                 */
-/* Entrée: le buffer à envoyer                                                                            */
-/**********************************************************************************************************/
- void Envoi_clients( gint ss_id, gint tag, gint ss_tag, gchar *buffer, gint taille )
-  { struct CLIENT *client;
-    GList *liste;
-    liste = Partage->Sous_serveur[ss_id].Clients;
-    while( liste )                        /* On prend chaque client un par un, et on lui envoie le buffer */
-     { client = (struct CLIENT *)liste->data;
-       if (client->mode>=VALIDE) Envoi_client( client, tag, ss_tag, buffer, taille );
-       liste=liste->next;
-     }
-  }
-#endif
 /**********************************************************************************************************/
 /* Envoyer_donnees: Transmet les données pour le fonctionnement correct du client distant                 */
 /* Entrée: structure cliente distante                                                                     */

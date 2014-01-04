@@ -149,6 +149,9 @@
      { gchar debug[128];
 
        sscanf ( ligne, "%s %s", commande, debug );
+       g_snprintf( chaine, sizeof(chaine),
+                       " Log level is %d\n", Config.log->log_level );
+       Admin_write ( connexion, chaine );
 
        if ( ! strcmp ( debug, "all"       ) )
         { Config.log_msrv = TRUE;
@@ -209,21 +212,21 @@
           g_snprintf( chaine, sizeof(chaine), "  -> Debug is now %s for db\n",
                       (Config.log_db ? " enabled" : "disabled") );
           Admin_write ( connexion, chaine );
-        }
+        } else
        if ( ! strcmp ( debug, "dls"   ) )
         { if (Config.log_dls == TRUE) Config.log_dls = FALSE;
           else Config.log_dls = TRUE;
           g_snprintf( chaine, sizeof(chaine), "  -> Debug is now %s for dls\n",
                       (Config.log_dls ? " enabled" : "disabled") );
           Admin_write ( connexion, chaine );
-        }
+        } else
        if ( ! strcmp ( debug, "arch"   ) )
         { if (Config.log_arch == TRUE) Config.log_arch = FALSE;
           else Config.log_arch = TRUE;
           g_snprintf( chaine, sizeof(chaine), "  -> Debug is now %s for arch\n",
                       (Config.log_arch ? " enabled" : "disabled") );
           Admin_write ( connexion, chaine );
-        }
+        } else
        if ( ! strcmp ( debug, "msrv"   ) )
         { if (Config.log_msrv == TRUE) Config.log_msrv = FALSE;
           else Config.log_msrv = TRUE;

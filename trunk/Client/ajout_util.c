@@ -49,7 +49,7 @@
  static GtkWidget *Entry_last;                                                   /* L'id de l'utilisateur */
  static GtkWidget *Entry_comment;                                  /* Commentaire associé à l'utilisateur */
  static GtkWidget *Check_enable;                                   /* Le compte utilisateur est-il enable ? */
- static GtkWidget *Check_cansetpass;                      /* L'utilisateur peut-il changer son password ? */
+ static GtkWidget *Check_cansetpwd;                      /* L'utilisateur peut-il changer son password ? */
  static GtkWidget *Check_setpwdnow;                                      /* Pour changer le password now */
  static GtkWidget *Check_mustchangepwd;   /* L'utilisateur doit-il changer son password au prochain login ?? */
  static GtkWidget *Entry_pass1, *Entry_pass2;                            /* Acquisition des passwords ... */
@@ -303,7 +303,7 @@
     Edit_util.expire        = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_expire));
     Edit_util.mustchangepwd = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_mustchangepwd));
     Edit_util.enable        = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_enable));
-    Edit_util.cansetpass    = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_cansetpass));
+    Edit_util.cansetpwd     = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_cansetpwd));
     Edit_util.setpwdnow     = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_setpwdnow));
 
     gids = Recuperer_groupes_util();
@@ -433,8 +433,8 @@
     Check_mustchangepwd = gtk_check_button_new_with_label ( _("Have to change his password at logon") );
     gtk_table_attach_defaults( GTK_TABLE(table), Check_mustchangepwd, 0, 2, 3, 4 );
 
-    Check_cansetpass = gtk_check_button_new_with_label ( _("Can change his password") );
-    gtk_table_attach_defaults( GTK_TABLE(table), Check_cansetpass, 0, 2, 4, 5 );
+    Check_cansetpwd = gtk_check_button_new_with_label ( _("Can change his password") );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_cansetpwd, 0, 2, 4, 5 );
 
     Check_expire = gtk_check_button_new_with_label ( _("Account expire") );
     gtk_table_attach_defaults( GTK_TABLE(table), Check_expire, 0, 1, 5, 6 );
@@ -500,7 +500,7 @@
 
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_enable), edit_util->enable );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_mustchangepwd), edit_util->mustchangepwd );
-       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_cansetpass), edit_util->cansetpass );
+       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_cansetpwd), edit_util->cansetpwd );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_expire), edit_util->expire );
 
        temps = edit_util->date_modif;
@@ -515,7 +515,7 @@
        gtk_entry_set_text( GTK_ENTRY(Entry_last), "?" );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( Check_enable ), TRUE );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( Check_mustchangepwd ), TRUE );
-       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( Check_cansetpass ), TRUE );
+       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( Check_cansetpwd ), TRUE );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( Check_expire ), TRUE );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( Check_setpwdnow ), TRUE );
        gnome_date_edit_set_time( GNOME_DATE_EDIT(Calendar), time(NULL) + 86400*31*2 );  /* Valable 2 mois */

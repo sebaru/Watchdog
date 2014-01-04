@@ -56,7 +56,7 @@
        return;
      }
 
-    if (client->util->cansetpass == TRUE && Modifier_utilisateurDB_set_password( util ))
+    if (Modifier_utilisateurDB_set_password( util ))
      { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_PWDCHANGED, NULL, 0 ); }
     else
      { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CANNOTCHANGEPWD, NULL, 0 ); }

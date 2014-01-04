@@ -43,7 +43,7 @@
     gchar    commentaire[ NBR_CARAC_COMMENTAIRE_UTF8+1 ];
     gboolean enable;
     gboolean expire;
-    gboolean cansetpass;
+    gboolean cansetpwd;
     gboolean mustchangepwd;                                /* L'utilisateut doit changer son mot de passe */
     gboolean setpwdnow;                       /* True sile user souhaite modifier son mot de passe actuel */
     guint    date_creation;

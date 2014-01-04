@@ -114,7 +114,7 @@
     if (ajout)
      { g_snprintf( requete, sizeof(requete),                                              /* Requete SQL */
                    "INSERT INTO %s"             
-                   "(name,mustchangepwd,cansetpass,comment,login_failed,enable,"
+                   "(name,mustchangepwd,cansetpwd,comment,login_failed,enable,"
                    "date_create,enable_expire,date_expire,date_modif)"
                    "VALUES ('%s', 1, 1, '%s', 0, 1, %d, %d, '%d', '%d' );",
                    NOM_TABLE_UTIL, nom,
@@ -126,11 +126,11 @@
      { g_snprintf( requete, sizeof(requete),                                              /* Requete SQL */
                    "UPDATE %s SET "             
                    "mustchangepwd=%d,comment='%s',enable=%d,enable_expire=%d,"
-                   "cansetpass=%d,date_expire='%d',date_modif='%d'",
+                   "cansetpwd=%d,date_expire='%d',date_modif='%d'",
                    NOM_TABLE_UTIL, util->mustchangepwd, comment,
                                    util->enable,
                                    util->expire,
-                                   util->cansetpass,
+                                   util->cansetpwd,
                                    (gint)util->date_expire,
                                    (gint)time(NULL) );
        if (util->setpwdnow)
@@ -205,7 +205,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "salt='%s',hash='%s',date_modif='%d',mustchangepwd=0 WHERE id=%d"
-                " AND (mustchangepwd=1 OR id<%d OR (mustchangepwd=0 AND cansetpass=1))",
+                " AND (mustchangepwd=1 OR id<%d OR (mustchangepwd=0 AND cansetpwd=1))",
                 NOM_TABLE_UTIL, salt, hash, (gint)time(NULL), util->id, NBR_UTILISATEUR_RESERVE );
     g_free(salt);
     g_free(hash);
@@ -228,6 +228,37 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
+/* Set_password: Correspond au changement de password de l'utilisateur                                    */
+/* Entrées: un log, une db, un id utilisateur, une clef, un password                                      */
+/* Sortie: FALSE si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Modifier_utilisateurDB_set_cansetpwd( struct CMD_TYPE_UTILISATEUR *util )
+  { gchar requete[512];
+    gboolean retour;
+    struct DB *db;
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "UPDATE %s SET "             
+                "cansetpwd=%d,date_modif='%d' WHERE id=%d",
+                NOM_TABLE_UTIL, util->cansetpwd, (gint)time(NULL), util->id );
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_utilisateurDB_set_cansetpwd: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    if ( ! retour )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "Modifier_utilisateurDB_set_cansetpwd: update failed %d (%s)", util->id, util->nom );
+       return(FALSE);
+     }
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                "Modifier_utilisateurDB_set_cansetpwd: update ok for id=%d (%s)", util->id, util->nom );
+    return(TRUE);
+  }
+/**********************************************************************************************************/
 /* Rechercher_utilsDB: Recuperation de tous les champs des utilisateurs                                   */
 /* Entrées: un log, une db et un id d'utilisateur                                                         */
 /* Sortie: une structure utilisateur, ou null si erreur                                                   */
@@ -239,7 +270,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT name,id,mustchangepwd,comment,enable,date_create,"
-                "enable_expire,date_expire,cansetpass,date_modif,salt,hash "
+                "enable_expire,date_expire,cansetpwd,date_modif,salt,hash "
                 "FROM %s", NOM_TABLE_UTIL );
 
     db = Init_DB_SQL();       
@@ -284,7 +315,7 @@
        util->date_creation = atoi(db->row[5]);
        util->expire        = atoi(db->row[6]);
        util->date_expire   = atoi(db->row[7]);
-       util->cansetpass    = atoi(db->row[8]);
+       util->cansetpwd    = atoi(db->row[8]);
        util->date_modif    = atoi(db->row[9]);
      }
     return( util );
@@ -301,7 +332,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT name,id,mustchangepwd,comment,enable,date_create,"
-                "enable_expire,date_expire,cansetpass,date_modif,salt,hash "
+                "enable_expire,date_expire,cansetpwd,date_modif,salt,hash "
                 "FROM %s WHERE id=%d LIMIT 1", NOM_TABLE_UTIL, id );
 
     db = Init_DB_SQL();       
@@ -339,7 +370,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT name,id,mustchangepwd,comment,enable,date_create,"
-                "enable_expire,date_expire,cansetpass,date_modif,salt,hash "
+                "enable_expire,date_expire,cansetpwd,date_modif,salt,hash "
                 "FROM %s WHERE name='%s' LIMIT 1", NOM_TABLE_UTIL, nom );
     g_free(name);
 

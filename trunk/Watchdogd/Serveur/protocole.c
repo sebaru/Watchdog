@@ -74,7 +74,6 @@
                case TAG_CONNEXION   : if (Reseau_ss_tag(connexion) == SSTAG_CLIENT_SETPASSWORD )
                                        { struct CMD_TYPE_UTILISATEUR *util;
                                          util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
-                                         printf("Set password for %d: %s\n", util->id, util->hash );
                                          Proto_set_password( client, util );
                                        }
              }
