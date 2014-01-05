@@ -3,7 +3,7 @@
 
 %define _topdir	 	/home/sebastien/Essai/Watchdog
 %define name		Watchdog
-%define version 	2.6.latest
+%define version 	2.8.latest
 %define release         1
 Summary: 		Watchdog
 License: 		GPL
