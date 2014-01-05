@@ -77,9 +77,9 @@
              { struct CMD_TYPE_UTILISATEUR *util;
                Set_progress_plusun();
 
-               util = (struct CMD_TYPE_UTILISATEUR *)g_try_malloc0( sizeof( struct CMD_TYPE_UTILISATEUR ) );
+               util = (struct CMD_TYPE_UTILISATEUR *)g_try_malloc0( sizeof(struct CMD_TYPE_UTILISATEUR) );
                if (!util) return; 
-               memcpy( util, connexion->donnees, sizeof(struct CMD_TYPE_GROUPE ) );
+               memcpy( util, connexion->donnees, sizeof(struct CMD_TYPE_UTILISATEUR) );
                Arrivee_util = g_list_append( Arrivee_util, util );
              }
             break;

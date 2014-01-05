@@ -157,10 +157,6 @@
           Unref_client( client );                                     /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }
-{ gint dummy;
-dummy = sizeof(util->salt);
-printf("%d", dummy );
-}
        memset(&util->salt, 0, sizeof(util->salt) );                       /* RAZ des informations privées */
        memset(&util->hash, 0, sizeof(util->hash) );                       /* RAZ des informations privées */
        Envoi_client ( client, TAG_UTILISATEUR, SSTAG_SERVEUR_ADDPROGRESS_UTIL,      /* Envoi des infos */
