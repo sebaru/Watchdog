@@ -95,9 +95,9 @@
              { struct CMD_TYPE_GROUPE *groupe;
                Set_progress_plusun();
 
-               groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
+               groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof(struct CMD_TYPE_GROUPE) );
                if (!groupe) return; 
-               memcpy( groupe, connexion->donnees, sizeof(struct CMD_TYPE_GROUPE ) );
+               memcpy( groupe, connexion->donnees, sizeof(struct CMD_TYPE_GROUPE) );
                Arrivee_groupe_for_util = g_list_append( Arrivee_groupe_for_util, groupe );
              }
             break;

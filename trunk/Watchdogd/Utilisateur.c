@@ -74,7 +74,7 @@
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
  static gint Ajouter_Modifier_utilisateurDB( gboolean ajout, struct CMD_TYPE_UTILISATEUR *util )
-  { gchar requete[1024], chaine[100];
+  { gchar requete[512], chaine[512];
     gchar *nom, *comment, *salt, *hash;
     gboolean retour;
     struct DB *db;
@@ -134,7 +134,7 @@
                                    (gint)util->date_expire,
                                    (gint)time(NULL) );
        if (util->setpwdnow)
-        { g_snprintf( chaine, sizeof(chaine), "salt='%s',hash='%s'", salt, hash );
+        { g_snprintf( chaine, sizeof(chaine), ",salt='%s',hash='%s'", salt, hash );
           g_strlcat ( requete, chaine, sizeof(requete) );
         }
        g_snprintf( chaine, sizeof(chaine), " WHERE id='%d'", util->id ); 

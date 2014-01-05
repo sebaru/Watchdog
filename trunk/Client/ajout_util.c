@@ -28,7 +28,8 @@
  #include <gnome.h>
  
  #include "Reseaux.h"
- 
+ #include "client.h"
+
  enum
   {  COLONNE_ID,
      COLONNE_NOM,
@@ -40,7 +41,8 @@
 
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG Config;                                          /* Configuration generale watchdog */
- 
+ extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
+
  static GtkWidget *Liste_grps, *Liste_grp_util;                            /* Liste des groupes existants */
  static GtkWidget *Check_expire;                                         /* Le bouton d'expiration ou non */
  static GtkWidget *Calendar;                                 /* Le calendrier pour l'expiration du compte */
@@ -294,10 +296,6 @@
                 "%s", gtk_entry_get_text(GTK_ENTRY(Entry_nom) ) );
     g_snprintf( Edit_util.commentaire, sizeof(Edit_util.commentaire),
                 "%s", gtk_entry_get_text(GTK_ENTRY(Entry_comment) ) );
-#ifdef bouh
-    g_snprintf( Edit_util.code_en_clair, sizeof(Edit_util.code_en_clair),
-                "%s", gtk_entry_get_text(GTK_ENTRY(Entry_pass1) ) );
-#endif
 
     Edit_util.date_expire   = gnome_date_edit_get_time( GNOME_DATE_EDIT(Calendar) );
     Edit_util.expire        = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_expire));
@@ -311,19 +309,23 @@
 
     switch(reponse)
      { case GTK_RESPONSE_OK:
-            if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_setpwdnow)) &&
-                g_utf8_collate( gtk_entry_get_text(GTK_ENTRY(Entry_pass1) ),
-                                gtk_entry_get_text(GTK_ENTRY(Entry_pass2) )
-                              )
-               )
-             { GtkWidget *dialog;
-               dialog = gtk_message_dialog_new ( GTK_WINDOW(F_ajout),
-                                                 GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
-                                                 GTK_MESSAGE_ERROR,
-                                                 GTK_BUTTONS_CLOSE, _("Passwords do not match") );
-               g_signal_connect_swapped( dialog, "response",
-                                         G_CALLBACK(gtk_widget_destroy), dialog );
-               return(TRUE);
+            if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_setpwdnow)))
+             { if (g_utf8_collate( gtk_entry_get_text(GTK_ENTRY(Entry_pass1) ),
+                                   gtk_entry_get_text(GTK_ENTRY(Entry_pass2) )
+                                 )
+                  )
+                { GtkWidget *dialog;
+                  dialog = gtk_message_dialog_new ( GTK_WINDOW(F_ajout),
+                                                    GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
+                                                    GTK_MESSAGE_ERROR,
+                                                    GTK_BUTTONS_CLOSE, _("Passwords do not match") );
+                  g_signal_connect_swapped( dialog, "response",
+                                            G_CALLBACK(gtk_widget_destroy), dialog );
+                  return(TRUE);
+                }
+               Calcul_password_hash( TRUE, (gchar *)gtk_entry_get_text(GTK_ENTRY(Entry_pass1)));
+               memcpy (&Edit_util.salt, Client_en_cours.util.salt, sizeof(Edit_util.salt));
+               memcpy (&Edit_util.hash, Client_en_cours.util.hash, sizeof(Edit_util.hash));
              }
            Envoi_serveur( TAG_UTILISATEUR, (edition ? SSTAG_CLIENT_VALIDE_EDIT_UTIL
                                                     : SSTAG_CLIENT_ADD_UTIL),
