@@ -185,6 +185,18 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
+/* Http_Add_titanium_response_header : Ajoute les header HTTP de connexion pour titanium                  */
+/* Entrée: la repsonse MHD                                                                                */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Http_Add_titanium_response_header ( struct MHD_Connection *connection, struct MHD_Response *response )
+  { const gchar *x_titanium;
+    x_titanium = MHD_lookup_connection_value (connection, MHD_HEADER_KIND, "X-Titanium-Id");
+    if (!x_titanium) x_titanium = "unknown";
+    MHD_add_response_header ( response, "Access-Control-Allow-Origin", "*" );
+    MHD_add_response_header ( response, "X-Titanium-Id", x_titanium);
+  }
+/**********************************************************************************************************/
 /* Liberer_certificat: Libere la mémoire allouée précédemment pour stocker les certificats                */
 /* Entrée: néant                                                                                          */
 /* Sortie: Néant                                                                                          */
@@ -366,6 +378,15 @@
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getgif" ) )
      { if ( Http_Traiter_request_getgif ( connection ) == FALSE)              /* Traitement de la requete */
+        { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
+                                                      (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
+          if (response == NULL) return(MHD_NO);
+          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
+          MHD_destroy_response (response);
+        }
+     }
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getdls" ) )
+     { if ( Http_Traiter_request_getdls ( connection ) == FALSE)              /* Traitement de la requete */
         { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
                                                       (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
           if (response == NULL) return(MHD_NO);
