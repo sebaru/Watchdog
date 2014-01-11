@@ -101,7 +101,6 @@ one_again:
                 return(FALSE);
        case GTK_RESPONSE_OK:
         { gchar *code1, *code2;
-          struct CMD_UTIL_SETPASSWORD util;
 
           code1 = (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_code1) );
           code2 = (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_code2) );
@@ -116,10 +115,9 @@ one_again:
              goto one_again;
            }
 
-          util.id = Client_en_cours.id;
-          memcpy( util.code_en_clair, code1, sizeof(util.code_en_clair) );
+          Calcul_password_hash( TRUE, code1 );
           Envoi_serveur( TAG_CONNEXION, SSTAG_CLIENT_SETPASSWORD,
-                        (gchar *)&util, sizeof(struct CMD_UTIL_SETPASSWORD) );
+                        (gchar *)&Client_en_cours.util, sizeof(struct CMD_TYPE_UTILISATEUR) );
           gtk_widget_destroy( dialog );                                        /* Fermeture de la fenetre */
          }
       }
@@ -170,43 +168,58 @@ one_again:
 /* Sortie: les variables globales sont initialisées, FALSE si pb                                          */
 /**********************************************************************************************************/
  gboolean Connecter_au_serveur ( void )
-  { struct sockaddr_in src;                                            /* Données locales: pas le serveur */
-    struct hostent *host;
+  { struct addrinfo *result, *rp;
+    struct addrinfo hints;
+    gint s;
+    gchar service[10];
     int connexion;
 
     Log( _("Trying to connect") );
-       
-    if ( !(host = gethostbyname( Client_en_cours.host )) )                     /* On veut l'adresse IP */
+
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
+    hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
+    hints.ai_flags = 0;
+    hints.ai_protocol = 0;          /* Any protocol */
+
+    g_snprintf( service, sizeof(service), "%d", Config_cli.port_ihm );
+    s = getaddrinfo( Client_en_cours.host, service, &hints, &result);
+    if (s != 0)
      { Log( _("DNS failed") );
        Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, 
-                 _("Connecter_au_serveur: DNS failed %s"), Client_en_cours.host );
+                 _("Connecter_au_serveur: DNS failed %s(%s)"), Client_en_cours.host, gai_strerror(s) );
        return(FALSE);
      }
-    else Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
-                   _("Connecter_au_serveur: DNS Request OK %s"), Client_en_cours.host );
 
-    src.sin_family = host->h_addrtype;
-    memcpy( (char*)&src.sin_addr, host->h_addr, host->h_length );                 /* On recopie les infos */
-    src.sin_port = htons( Config_cli.port );
+   /* getaddrinfo() returns a list of address structures.
+       Try each address until we successfully connect(2).
+       If socket(2) (or connect(2)) fails, we (close the socket
+       and) try the next address. */
 
-    if ( (connexion = socket( AF_INET, SOCK_STREAM, 0)) == -1)                          /* Protocol = TCP */
-     { Log( _("Socket creation failed") );
-       Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, 
-                 _("Connecter_au_serveur: Socket creation failed") );
-       return(FALSE);
-     }
-    else Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
-               _("Connecter_au_serveur: Socket creation OK") );
+    for (rp = result; rp != NULL; rp = rp->ai_next)
+     {
+        connexion = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        if (connexion == -1)
+         { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, 
+                    "Connecter_au_serveur: Socket creation failed" );
+           continue;
+         }
 
-    if (connect (connexion, (struct sockaddr *)&src, sizeof(src)) == -1)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, 
-                 _("Connecter_au_serveur: connexion refused by server %s"), Client_en_cours.host );
-       Log(_("connexion refused by server"));
+       if (connect(connexion, rp->ai_addr, rp->ai_addrlen) != -1)
+        { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
+                   "Connecter_au_serveur: Connect OK to %s (%s) family=%d",
+                    Client_en_cours.host, service, rp->ai_family );
+          break;                  /* Success */
+        }
+       else
+        { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, 
+                    "Connecter_au_serveur: connexion refused by server %s (%s) family=%d",
+                    Client_en_cours.host, service, rp->ai_family );
+        }
        close(connexion);
-       return(FALSE);
      }
-    else Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
-                   _("Connecter_au_serveur: Connect OK to %s"), Client_en_cours.host );
+    freeaddrinfo(result);
+    if (rp == NULL) return(FALSE);                                                 /* Erreur de connexion */
 
     Connexion = Nouvelle_connexion( Config_cli.log, connexion, -1 );          /* Creation de la structure */
     if (!Connexion)
@@ -268,12 +281,11 @@ one_again:
     Entry_code = gtk_entry_new();
     gtk_entry_set_visibility( GTK_ENTRY(Entry_code), FALSE );
     gtk_entry_set_max_length( GTK_ENTRY(Entry_code), NBR_CARAC_LOGIN );
-#warning "To be cleaned UP"
-    gtk_entry_set_text( GTK_ENTRY(Entry_code), "bouh" );
+    gtk_entry_set_text( GTK_ENTRY(Entry_code), Config_cli.passwd );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_code, 1, 3, 2, 3 );
 
     g_signal_connect_swapped( Entry_host, "activate", (GCallback)gtk_widget_grab_focus, Entry_nom );
-    g_signal_connect_swapped( Entry_nom, "activate", (GCallback)gtk_widget_grab_focus, Entry_code );
+    g_signal_connect_swapped( Entry_nom,  "activate", (GCallback)gtk_widget_grab_focus, Entry_code );
 
     gtk_widget_grab_focus( Entry_nom );
     gtk_widget_show_all( frame );
@@ -283,13 +295,12 @@ one_again:
          { gtk_widget_destroy( F_ident );
            return;
          }
-    else { memcpy( Client_en_cours.user,     gtk_entry_get_text( GTK_ENTRY(Entry_nom) ),
-                   sizeof(Client_en_cours.user) );
-           memcpy( Client_en_cours.host,     gtk_entry_get_text( GTK_ENTRY(Entry_host) ),
+    else { memcpy( Client_en_cours.host,     gtk_entry_get_text( GTK_ENTRY(Entry_host) ),
                    sizeof(Client_en_cours.host) );
+           memcpy( Client_en_cours.util.nom, gtk_entry_get_text( GTK_ENTRY(Entry_nom) ),
+                   sizeof(Client_en_cours.util.nom) );
            memcpy( Client_en_cours.password, gtk_entry_get_text( GTK_ENTRY(Entry_code) ),
                    sizeof(Client_en_cours.password) );
-
 
            gtk_widget_destroy( F_ident );                                      /* Fermeture de la fenetre */
            if (Connecter_au_serveur())                          /* Essai de connexion au serveur Watchdog */

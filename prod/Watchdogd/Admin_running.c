@@ -49,9 +49,9 @@
        Admin_write ( connexion, "  clear_histo           - Clear Histo DB\n" );
        Admin_write ( connexion, "  get                   - Sous-menu de lecture des bits internes\n" );
        Admin_write ( connexion, "  set                   - Sous-menu d'affectation des bits internes\n" );
-       Admin_write ( connexion, "  setrootpasswd         - Set the Watchdog root password\n" );
        Admin_write ( connexion, "  modbus                - Sous-menu de gestion des equipements MODBUS\n" );
        Admin_write ( connexion, "  dls                   - D.L.S. Status\n" );
+       Admin_write ( connexion, "  user                  - Manage Watchdog Users\n" );
        Admin_write ( connexion, "  log_level loglevel    - Set Log Level (debug, info, notice, warning, error)\n" );
        Admin_write ( connexion, "  debug switch          - Toggle debug Switch (list, all, none, dls, arch, db, msrv or library name)\n" );
 
@@ -79,37 +79,6 @@
      } else
     if ( ! strcmp ( commande, "dbcfg" ) )
      { Admin_dbcfg_thread( connexion, "global", ligne + 7 );
-     } else
-    if ( ! strcmp ( commande, "setrootpasswd" ) )
-     { struct CMD_TYPE_UTILISATEUR util;
-       gchar password[80];
-       struct DB *db;
-
-       sscanf ( ligne, "%s %s", commande, password );                /* Découpage de la ligne de commande */
-
-       db = Init_DB_SQL();       
-       if (!db)
-        { g_snprintf( chaine, sizeof(chaine), " Unable to connect to Database\n" );
-          Admin_write ( connexion, chaine );
-        }
-       else
-        { util.id = 0;
-          g_snprintf( util.nom, sizeof(util.nom), "root" );
-          g_snprintf( util.commentaire, sizeof(util.commentaire), "Watchdog root user" );
-          util.cansetpass = TRUE;
-          util.setpassnow = TRUE;
-          g_snprintf( util.code_en_clair, sizeof(util.code_en_clair), "%s", password );
-          util.actif = TRUE;
-          util.expire = FALSE;
-          util.changepass = FALSE;
-          memset ( &util.gids, 0, sizeof(util.gids) );
-          if( Modifier_utilisateurDB( Config.crypto_key, &util ) )
-           { g_snprintf( chaine, sizeof(chaine), " Password set\n" ); }
-          else
-           { g_snprintf( chaine, sizeof(chaine), " Error while setting password\n" ); }
-          Admin_write ( connexion, chaine );
-          Libere_DB_SQL( &db );
-        }
      } else
     if ( ! strcmp ( commande, "clear_histo" ) )
      { Clear_histoDB ();                                            /* Clear de la table histo au boot */
@@ -180,6 +149,9 @@
      { gchar debug[128];
 
        sscanf ( ligne, "%s %s", commande, debug );
+       g_snprintf( chaine, sizeof(chaine),
+                       " Log level is %d\n", Config.log->log_level );
+       Admin_write ( connexion, chaine );
 
        if ( ! strcmp ( debug, "all"       ) )
         { Config.log_msrv = TRUE;
@@ -240,21 +212,21 @@
           g_snprintf( chaine, sizeof(chaine), "  -> Debug is now %s for db\n",
                       (Config.log_db ? " enabled" : "disabled") );
           Admin_write ( connexion, chaine );
-        }
+        } else
        if ( ! strcmp ( debug, "dls"   ) )
         { if (Config.log_dls == TRUE) Config.log_dls = FALSE;
           else Config.log_dls = TRUE;
           g_snprintf( chaine, sizeof(chaine), "  -> Debug is now %s for dls\n",
                       (Config.log_dls ? " enabled" : "disabled") );
           Admin_write ( connexion, chaine );
-        }
+        } else
        if ( ! strcmp ( debug, "arch"   ) )
         { if (Config.log_arch == TRUE) Config.log_arch = FALSE;
           else Config.log_arch = TRUE;
           g_snprintf( chaine, sizeof(chaine), "  -> Debug is now %s for arch\n",
                       (Config.log_arch ? " enabled" : "disabled") );
           Admin_write ( connexion, chaine );
-        }
+        } else
        if ( ! strcmp ( debug, "msrv"   ) )
         { if (Config.log_msrv == TRUE) Config.log_msrv = FALSE;
           else Config.log_msrv = TRUE;

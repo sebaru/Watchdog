@@ -36,26 +36,9 @@
  #define NOM_TABLE_GROUPE    "groups"
  #define NOM_TABLE_GIDS      "gids"
 
- #define NBR_CARAC_CODE_CRYPTE (TAILLE_CRYPTO_KEY + 8)      /* CRYPTO_KEY + 8 de largeur de bloc blowfish */
-
- struct UTILISATEURDB
-  { guint  id;
-    gchar  nom[ NBR_CARAC_LOGIN_UTF8+1 ];
-    gchar  code[ NBR_CARAC_CODE_CRYPTE ];
-    gchar  commentaire[ NBR_CARAC_COMMENTAIRE_UTF8+1 ];
-    time_t date_creation;
-    time_t date_modif;
-    time_t date_expire;
-    gboolean actif;
-    gboolean expire;
-    gboolean changepass;                                                 /* Doit changer son mot de passe */
-    gboolean cansetpass;                                                 /* Peut changer son mot de passe */
-    guint  login_failed;
-    guint  gids[NBR_MAX_GROUPE_PAR_UTIL];                            /* Numéro des groupes d'appartenance */
-  };
-
  enum                                                /* Enumeration des utilisateurs spéciaux de watchdog */
   { UID_ROOT,
+    UID_GUEST,
     NBR_UTILISATEUR_RESERVE
   };
 
@@ -86,17 +69,16 @@
  extern gboolean Groupe_set_groupe_utilDB( guint id_util, guint *gids );
  extern gboolean Groupe_get_groupe_utilDB( guint id, guint *gids );
 
- extern gboolean Recuperer_utilisateurDB( struct DB **db );
- extern struct UTILISATEURDB *Recuperer_utilisateurDB_suite( struct DB **db );
+ extern gboolean Recuperer_utilisateurDB( struct DB **db );                         /* Dans Utilisateur.c */
+ extern struct CMD_TYPE_UTILISATEUR *Recuperer_utilisateurDB_suite( struct DB **db );
  extern gboolean Retirer_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util );
- extern gint Ajouter_utilisateurDB( guchar *clef, struct CMD_TYPE_UTILISATEUR *util );
- extern struct UTILISATEURDB *Rechercher_utilisateurDB( gint id );
- extern gboolean Modifier_utilisateurDB( guchar *clef, struct CMD_TYPE_UTILISATEUR *util );
+ extern gint Ajouter_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util );
+ extern struct CMD_TYPE_UTILISATEUR *Rechercher_utilisateurDB_by_id( gint id );
+ extern struct CMD_TYPE_UTILISATEUR *Rechercher_utilisateurDB_by_name( gchar *nom );
+ extern gboolean Modifier_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util );
  extern gchar *Nom_utilisateur_reserve( gint id );
-
- extern gchar *Recuperer_clef ( gchar *nom, gint *id );                                    /* Dans clef.c */
- extern gchar *Crypter( guchar *clef, gchar *pass );
- extern gboolean Set_password( guchar *clef, struct CMD_UTIL_SETPASSWORD *util );
+ extern gboolean Modifier_utilisateurDB_set_password( struct CMD_TYPE_UTILISATEUR *util );
+ extern gboolean Modifier_utilisateurDB_set_cansetpwd( struct CMD_TYPE_UTILISATEUR *util );
 
  extern gboolean Raz_login_failed( guint id );                                     /* Dans login_failed.c */
  extern gboolean Ajouter_one_login_failed( guint id, gint max_login_failed );

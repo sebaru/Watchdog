@@ -37,12 +37,20 @@
  #include <sys/stat.h>
  #include <sys/types.h>
  #include <fcntl.h>
+ #include <curl/curl.h>
 
  #include "trame.h"
-
  #define DEBUG_TRAME
 /********************************* Définitions des prototypes programme ***********************************/
+ #include "Config_cli.h"
  #include "protocli.h"
+ #include "client.h"
+
+ extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
+ extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
+
+ static gchar *Gif_received_buffer;
+ static gint   Gif_received_size;
 
 /****************************** Inclusion des images XPM pour les menus ***********************************/
  extern GdkBitmap *Rmask, *Bmask, *Vmask, *Omask, *Jmask;
@@ -441,6 +449,115 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
             }
      }
   }
+
+/**********************************************************************************************************/
+/* Satellite_Receive_response : Recupere la reponse du serveur (master)                                   */
+/* Entrée : Les informations à sauvegarder                                                                */
+/**********************************************************************************************************/
+ static size_t CB_Receive_gif_data( char *ptr, size_t size, size_t nmemb, void *userdata )
+  { gchar *new_buffer;
+    Info_new( Config_cli.log, FALSE, LOG_DEBUG,
+              "CB_Receive_gif_data: Récupération de %d*%d octets depuis le master", size, nmemb );
+    new_buffer = g_try_realloc ( Gif_received_buffer,
+                                 Gif_received_size +  size*nmemb );
+    if (!new_buffer)                                                 /* Si erreur, on arrete le transfert */
+     { Info_new( Config_cli.log, FALSE, LOG_ERR,
+                "CB_Receive_gif_data: Memory Error realloc (%s).", strerror(errno) );
+       g_free(Gif_received_buffer);
+       Gif_received_buffer = NULL;
+       return(-1);
+     } else Gif_received_buffer = new_buffer;
+    memcpy( Gif_received_buffer + Gif_received_size, ptr, size*nmemb );
+    Gif_received_size += size*nmemb;
+    return(size*nmemb);
+  }
+
+/**********************************************************************************************************/
+/* Download_gif: Tente de récupérer un .gif depuis le serveur                                             */
+/* Entrée: l'id et le mode attendu                                                                        */
+/* Sortie: FALSE si probleme                                                                              */
+/**********************************************************************************************************/
+ static gboolean Download_gif ( gint id, gint mode )
+  { gchar erreur[CURL_ERROR_SIZE+1];
+    struct curl_slist *slist = NULL;
+    gchar url[128];
+    CURLcode res;
+    CURL *curl;
+
+    Gif_received_buffer = NULL;                           /* Init du tampon de reception à NULL */
+    Gif_received_size = 0;                                /* Init du tampon de reception à NULL */
+
+    curl = curl_easy_init();                                            /* Preparation de la requete CURL */
+    if (!curl)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
+                "Download_gif: cURL init failed" );
+       return(FALSE);
+     }
+
+    g_snprintf( url, sizeof(url), "%s:%d/getgif?gif=%d&mode=%d",
+                Client_en_cours.host, Config_cli.port_http, id, mode );
+printf("Try to get %s\n", url );
+    curl_easy_setopt(curl, CURLOPT_URL, url );
+       /*curl_easy_setopt(curl, CURLOPT_POST, 1 );
+       curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (void *)buf->content);
+       curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, buf->use);*/
+       /*slist = curl_slist_append(slist, "Content-Type: application/xml");*/
+/*       curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
+       curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_gif_data );
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "Watchdog Client - Trame libcurl");
+/*       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0 );*/
+/*     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0 );                                    Warning ! */
+/*       curl_easy_setopt(curl, CURLOPT_CAINFO, Cfg_satellite.https_file_ca );
+       curl_easy_setopt(curl, CURLOPT_SSLKEY, Cfg_satellite.https_file_key );
+       g_snprintf( chaine, sizeof(chaine), "./%s", Cfg_satellite.https_file_cert );
+       curl_easy_setopt(curl, CURLOPT_SSLCERT, chaine );*/
+
+    res = curl_easy_perform(curl);
+    if (!res)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
+                "Download_gif : Gif received" );
+     }
+    else
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
+                "Download_gif : Error : Gif NOT received" );
+       if (Gif_received_buffer) { g_free(Gif_received_buffer); }
+       return(FALSE);
+     }
+    curl_easy_cleanup(curl);
+    curl_slist_free_all(slist);
+
+
+    if (!Gif_received_buffer)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
+                "Download_gif : Gif not received !" );
+       return(FALSE);
+     }
+    else
+     { gchar nom_fichier[80];
+       gint fd;
+       if (mode) g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif.%02d", id, mode );
+            else g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif", id );
+       Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
+                "Download_gif : Saving GIF id %d, mode %d, size %d", id, mode, Gif_received_size );
+       unlink(nom_fichier);
+       fd = open( nom_fichier, O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR );
+       if (fd>0)
+        { write( fd, Gif_received_buffer, Gif_received_size );
+          close (fd);
+        }
+       else
+        { Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
+                   "Download_gif : Unable to save file %s", nom_fichier );
+        }
+       g_free(Gif_received_buffer);
+       Gif_received_buffer = FALSE;
+       if (fd<=0) return(FALSE);
+     }
+    return(TRUE);
+  }
 /**********************************************************************************************************/
 /* Charger_pixbuf: Tente de charger un ensemble de pixbuf representant un icone                           */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference         */
@@ -464,24 +581,29 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
        else   g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif", icone_id );
      
 #ifdef DEBUG_TRAME
-printf("Charger_pixbuf: %s\n", nom_fichier );
+printf("Charger_pixbuf_id: %s\n", nom_fichier );
 #endif
 
        pixbuf = gdk_pixbuf_new_from_file ( nom_fichier, NULL );                     /* Creation du pixbuf */
 #ifdef DEBUG_TRAME
-printf("Charger_pixbuf: %s -> pixbuf = %p\n", nom_fichier, pixbuf );
+printf("Charger_pixbuf_id: %s -> pixbuf = %p\n", nom_fichier, pixbuf );
 #endif
        if (!pixbuf)
-        { if (i == 0)                                              /* Si chargement impossible, on arrete */
-           { pixbuf = gdk_pixbuf_new_from_file ( "default.gif", NULL ); }           /* Creation du pixbuf */
-          else break;
+        { /* Tentative de récupération depuis le serveur */
+          if (!Download_gif ( icone_id, i ))
+           { printf(" Download_gif failed\n" ); }
+          else pixbuf = gdk_pixbuf_new_from_file ( nom_fichier, NULL );                 /* 2nde tentative */
+          if (!pixbuf)                                   /* Si chargement impossible, on passe au default */
+           { if (i==0) pixbuf = gdk_pixbuf_new_from_file ( "default.gif", NULL );   /* Creation du pixbuf */
+             if (!pixbuf) return;                                              /* Last chance before quit */
+           }
         }
 
        trame_item->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
        trame_item->gif_hauteur = gdk_pixbuf_get_height( pixbuf );
 
 #ifdef DEBUG_TRAME
-printf("Charger_pixbuf: w/h %d, %d alpha %d\n", trame_item->gif_largeur,
+printf("Charger_pixbuf_id: w/h %d, %d alpha %d\n", trame_item->gif_largeur,
                                                 trame_item->gif_hauteur,
                                                 gdk_pixbuf_get_has_alpha(pixbuf) );
 #endif

@@ -312,6 +312,7 @@ printf("Want edit user %s %d\n", nom, rezo_util.id );
   { GtkTreeModel *store;
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_util) );                /* Acquisition du modele */
+printf(" new user : %d %s %s\n", util->id, util->nom, util->commentaire );
 
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, util->id,

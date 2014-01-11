@@ -268,7 +268,7 @@
     if (host)            g_snprintf( Config_cli.host,    sizeof(Config_cli.host),    "%s", host   );
     if (user)            g_snprintf( Config_cli.user,    sizeof(Config_cli.user),    "%s", user   );
     if (passwd)          g_snprintf( Config_cli.passwd,  sizeof(Config_cli.passwd),  "%s", passwd );
-    if (port!=-1)        Config_cli.port      = port;                  /* Priorite à la ligne de commande */
+    if (port!=-1)        Config_cli.port_ihm  = port;                  /* Priorite à la ligne de commande */
     if (gui_tech!=-1)    Config_cli.gui_tech  = gui_tech;              /* Priorite à la ligne de commande */
     if (debug_level!=-1) Config_cli.log_level = debug_level;
     Info_change_log_level( Config_cli.log, Config_cli.log_level );
@@ -312,8 +312,8 @@
 
     gtk_widget_show_all( F_client );                               /* Affichage de le fenetre de controle */
     if (Config_cli.gui_tech == FALSE)
-     { memcpy( Client_en_cours.user, Config_cli.user,        sizeof(Client_en_cours.user) );
-       memcpy( Client_en_cours.host,  Config_cli.host,       sizeof(Client_en_cours.host) );
+     { memcpy( Client_en_cours.util.nom, Config_cli.user,    sizeof(Client_en_cours.util.nom) );
+       memcpy( Client_en_cours.host,     Config_cli.host,    sizeof(Client_en_cours.host) );
        memcpy( Client_en_cours.password, Config_cli.passwd,  sizeof(Client_en_cours.password) );
        Connecter_au_serveur();
      }

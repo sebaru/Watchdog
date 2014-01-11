@@ -45,8 +45,25 @@
 /**********************************************************************************************************/
  void Gerer_protocole_connexion ( struct CONNEXION *connexion )
   { GtkWidget *dialog;
+
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_SERVEUR_REFUSE:
+     { case SSTAG_SERVEUR_PULSE:
+             { Set_progress_pulse(); break; }
+       case SSTAG_SERVEUR_CLI_VALIDE:
+             { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
+                         "Gerer_protocole_connexion : Client en mode VALIDE" );
+               Client_en_cours.mode = VALIDE;
+               if (Config_cli.gui_tech==FALSE)                                    /* Affichage GUI Client */
+                { Menu_want_supervision(); }                               
+               break;
+             }
+       case SSTAG_SERVEUR_OFF:
+             { printf("Recu SSTAG_SERVEUR_OFF\n");
+               Deconnecter();
+               Log ( _("Disconnected by server shutdown") );
+               break;
+             }
+       case SSTAG_SERVEUR_REFUSE:
              { dialog = gtk_message_dialog_new ( GTK_WINDOW(F_client),
                                                  GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
                                                  GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE,
@@ -77,11 +94,33 @@
                Deconnecter_sale();
              }
             break;
-       case SSTAG_SERVEUR_CHANGEPASS:
-             { struct CMD_UTIL_SETPASSWORD *util;
-               util = (struct CMD_UTIL_SETPASSWORD *)connexion->donnees;
-               Client_en_cours.id = util->id;
-               if (!Changer_password()) Deconnecter();
+       case SSTAG_SERVEUR_PWDCHANGED:
+             { dialog = gtk_message_dialog_new ( GTK_WINDOW(F_client), GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                 GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE,
+                                                 _("Your password has been changed") );
+               g_signal_connect_swapped( dialog, "response",
+                                         G_CALLBACK(gtk_widget_destroy), dialog );
+               gtk_widget_show_all(dialog);
+             }
+            break;
+       case SSTAG_SERVEUR_CANNOTCHANGEPWD:
+             { dialog = gtk_message_dialog_new ( GTK_WINDOW(F_client), GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                 GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE,
+                                                 _("You cannot changed your password") );
+               g_signal_connect_swapped( dialog, "response",
+                                         G_CALLBACK(gtk_widget_destroy), dialog );
+               gtk_widget_show_all(dialog);
+             }
+            break;
+       case SSTAG_SERVEUR_NEEDCHANGEPWD:
+             { if (!Changer_password()) Deconnecter();
+             }
+            break;
+       case SSTAG_SERVEUR_WANT_HASH:
+             { struct CMD_TYPE_UTILISATEUR *util;
+               util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;               
+               printf("Proto_connexion : Want HASH\n");
+               Envoyer_authentification(util);
              }
             break;
 
@@ -91,7 +130,7 @@
 
                ident = (struct REZO_SRV_IDENT *)connexion->donnees;
                g_snprintf( chaine, sizeof(chaine), _("Connected to %s@%s:%d  %s"),
-                           Client_en_cours.user, Client_en_cours.host, Config_cli.port, ident->comment );
+                           Client_en_cours.util.nom, Client_en_cours.host, Config_cli.port_ihm, ident->comment );
                gnome_appbar_push( GNOME_APPBAR(Barre_status), chaine );
                Log( _("Connected") );
                Client_en_cours.mode = CONNECTE;

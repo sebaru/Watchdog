@@ -53,7 +53,6 @@
 /**********************************************************************************************************/
  static void Gerer_protocole ( struct CONNEXION *connexion )
   { static gboolean ssl_needed = FALSE;
-    GtkWidget *dialog;
 
     switch ( Reseau_tag(connexion) )
      { case TAG_GTK_MESSAGE : Gerer_protocole_gtk_message ( connexion ); return;
@@ -79,65 +78,24 @@
                                  Envoyer_identification();           /* Envoi l'identification au serveur */
                                }
                               return;
-       case TAG_CONNEXION: 
-            switch ( Reseau_ss_tag ( connexion ) )
-             { case SSTAG_SERVEUR_OFF:
-                    { printf("Recu SSTAG_SERVEUR_OFF\n");
-                      dialog = gtk_message_dialog_new ( GTK_WINDOW(F_client), GTK_DIALOG_DESTROY_WITH_PARENT,
-                                                        GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE,
-                                                        _("Server is DOWN") );
-                      g_signal_connect_swapped( dialog, "response",
-                                                        G_CALLBACK(gtk_widget_destroy), dialog );
-                      gtk_widget_show_all(dialog);
-                      Deconnecter();
-                      Log ( _("Disconnected by server shutdown") );
-                      return;
-                    }
-             }
-     }
-/*************************************** Client en mode VALIDE ********************************************/
-    if ( Client_en_cours.mode >= VALIDE )                                       /* Le client valide  */
-     {
-       switch ( Reseau_tag(connexion) )
-        { case TAG_ICONE       : Gerer_protocole_icone        ( connexion ); break;
-          case TAG_DLS         : Gerer_protocole_dls          ( connexion ); break;
-          case TAG_UTILISATEUR : Gerer_protocole_utilisateur  ( connexion ); break;
-          case TAG_MESSAGE     : Gerer_protocole_message      ( connexion ); break;
-          case TAG_MNEMONIQUE  : Gerer_protocole_mnemonique   ( connexion ); break;
-          case TAG_SYNOPTIQUE  : Gerer_protocole_synoptique   ( connexion ); break;
-          case TAG_SUPERVISION : Gerer_protocole_supervision  ( connexion ); break;
-          case TAG_HISTO       : Gerer_protocole_histo        ( connexion ); break;
-          case TAG_ATELIER     : Gerer_protocole_atelier      ( connexion ); break;
-          case TAG_COURBE      : Gerer_protocole_courbe       ( connexion ); break;
-          case TAG_HISTO_COURBE: Gerer_protocole_histo_courbe ( connexion ); break;
-          case TAG_SCENARIO    : Gerer_protocole_scenario     ( connexion ); break;
-          case TAG_CAMERA      : Gerer_protocole_camera       ( connexion ); break;
-          case TAG_ADMIN       : Gerer_protocole_admin        ( connexion ); break;
-          case TAG_CONNEXION   : if ( Reseau_ss_tag( connexion ) == SSTAG_SERVEUR_PULSE ) 
-                                  { Set_progress_pulse(); }
-                                 break;
-          default : printf("Gerer_protocole : protocole inconnu %d\n", Reseau_tag(connexion) );
-        }
-     }
-    else if ( Client_en_cours.mode == CONNECTE )
-     {
-       switch ( Reseau_tag(connexion) )
-        { case TAG_HISTO    : Gerer_protocole_histo_connecte ( connexion ); break;
-          case TAG_CONNEXION: if (Reseau_ss_tag(connexion) == SSTAG_SERVEUR_CLI_VALIDE)
-                               { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
-                                           "Gerer_protocole : Client en mode VALIDE" );
-                                 Client_en_cours.mode = VALIDE;
-                                 if (Config_cli.gui_tech==FALSE)                    /* Affichage GUI Client */
-                                  { Menu_want_supervision(); }                               
-                               }
-                              break;
-          case TAG_FICHIER  : Gerer_protocole_fichier_connecte ( connexion ); break;
-        }
-
-     }
-/*************************************** Client en attente d'etre connecte ********************************/
-    else if ( Client_en_cours.mode == ATTENTE_AUTORISATION )
-     { Gerer_protocole_connexion( connexion ); }
+      case TAG_ICONE       : Gerer_protocole_icone        ( connexion ); break;
+      case TAG_DLS         : Gerer_protocole_dls          ( connexion ); break;
+      case TAG_UTILISATEUR : Gerer_protocole_utilisateur  ( connexion ); break;
+      case TAG_MESSAGE     : Gerer_protocole_message      ( connexion ); break;
+      case TAG_MNEMONIQUE  : Gerer_protocole_mnemonique   ( connexion ); break;
+      case TAG_SYNOPTIQUE  : Gerer_protocole_synoptique   ( connexion ); break;
+      case TAG_SUPERVISION : Gerer_protocole_supervision  ( connexion ); break;
+      case TAG_HISTO       : Gerer_protocole_histo        ( connexion ); break;
+      case TAG_ATELIER     : Gerer_protocole_atelier      ( connexion ); break;
+      case TAG_COURBE      : Gerer_protocole_courbe       ( connexion ); break;
+      case TAG_HISTO_COURBE: Gerer_protocole_histo_courbe ( connexion ); break;
+      case TAG_SCENARIO    : Gerer_protocole_scenario     ( connexion ); break;
+      case TAG_CAMERA      : Gerer_protocole_camera       ( connexion ); break;
+      case TAG_ADMIN       : Gerer_protocole_admin        ( connexion ); break;
+      case TAG_FICHIER     : Gerer_protocole_fichier_connecte ( connexion ); break;
+      case TAG_CONNEXION   : Gerer_protocole_connexion    ( connexion ); break;
+      default : printf("Gerer_protocole : protocole inconnu %d\n", Reseau_tag(connexion) );
+    }
   }
 /**********************************************************************************************************/
 /* Ecouter_serveur: Gestion des messages de controle du serveur                                           */

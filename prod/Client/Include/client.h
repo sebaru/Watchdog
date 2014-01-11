@@ -53,14 +53,14 @@
 
  struct CLIENT
   { guint32 mode;
-    guint32 id;
+    guint32 id; /* necessaire ?? */
     GList *gids;
     struct CONNEXION *connexion;
-    gchar host[TAILLE_NOM_SERVEUR+1];
-    gchar user[NBR_CARAC_LOGIN_UTF8+1];
-    gchar password[NBR_CARAC_LOGIN_UTF8+1];
+    gchar host[TAILLE_NOM_SERVEUR+1];                           /* Nom du serveur sur lequel se connecter */
+    struct CMD_TYPE_UTILISATEUR util;
+    gchar password[NBR_CARAC_LOGIN_UTF8+1];               /* sauvegarde du mot de passe pour la connexion */
     struct
-     { gint32 id_fichier_gif;                  /* Identificateur de fichier gif en cours d'envoi au serveur */
+     { gint32 id_fichier_gif;                /* Identificateur de fichier gif en cours d'envoi au serveur */
        gchar *buffer;                                        /* Doit contenir aussi l'entete CMD_ID_ICONE */
      } transfert;
   };

@@ -148,6 +148,7 @@
  void Proto_editer_source_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { gchar chaine[80];
 
+#ifdef bouh
     client->transfert.buffer = g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );
     if (!client->transfert.buffer)
      { struct CMD_GTK_MESSAGE erreur;
@@ -173,6 +174,7 @@
     Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_EDIT_SOURCE_DLS_OK,
                   (gchar *)rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     Client_mode( client, ENVOI_SOURCE_DLS );
+#endif
   }
 /**********************************************************************************************************/
 /* Proto_valider_source_dls: Le client nous envoie un prg DLS qu'il nous faudra compiler ensuite          */
@@ -367,6 +369,7 @@
     gchar *buffer;
     gchar *test;
 
+#ifdef bouh
     if (!client->transfert.buffer) return(TRUE);
     if (client->transfert.fd<0) return(TRUE);
     edit_dls = (struct CMD_TYPE_SOURCE_DLS *)client->transfert.buffer;
@@ -392,5 +395,6 @@
                    (gchar *)client->transfert.buffer, taille_valide + sizeof(struct CMD_TYPE_SOURCE_DLS) );
     memcpy( buffer, buffer + taille_valide, taille-taille_valide );
     return(FALSE);
+#endif
   }
 /*--------------------------------------------------------------------------------------------------------*/

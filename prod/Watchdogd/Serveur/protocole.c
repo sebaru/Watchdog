@@ -72,16 +72,15 @@
                case TAG_CAMERA      : Gerer_protocole_camera       ( client ); break;
                case TAG_ADMIN       : Gerer_protocole_admin        ( client ); break;
                case TAG_CONNEXION   : if (Reseau_ss_tag(connexion) == SSTAG_CLIENT_SETPASSWORD )
-                                       { struct CMD_UTIL_SETPASSWORD *util;
-                                         util = (struct CMD_UTIL_SETPASSWORD *)connexion->donnees;
-                                         printf("Set password for %d: %s\n", util->id, util->code_en_clair );
+                                       { struct CMD_TYPE_UTILISATEUR *util;
+                                         util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
                                          Proto_set_password( client, util );
                                        }
              }
           }
 /************************************** Client en attente identification **********************************/
-    else if ( client->mode == ATTENTE_IDENT && Reseau_tag(connexion)    == TAG_CONNEXION
-                                            && Reseau_ss_tag(connexion) == SSTAG_CLIENT_IDENT )
+    else if ( client->mode == WAIT_FOR_IDENT && Reseau_tag(connexion)    == TAG_CONNEXION
+                                             && Reseau_ss_tag(connexion) == SSTAG_CLIENT_IDENT )
           { int client_major, client_minor, client_micro;
             int server_major, server_minor, server_micro;
             struct REZO_CLI_IDENT *ident;
@@ -97,7 +96,24 @@
             sscanf ( VERSION,        "%d.%d.%d", &server_major, &server_minor, &server_micro );
 
             if ( client_major == server_major && client_minor == server_minor )
-             { Client_mode ( client, ENVOI_AUTORISATION ); }
+             { client->util = Rechercher_utilisateurDB_by_name ( ident->nom );
+               if (!client->util)
+                { struct CMD_GTK_MESSAGE gtkmessage;
+                  g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Wrong User" );
+                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                                (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
+                  Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, "Wrong User" );
+                  Client_mode ( client, DECONNECTE );
+                }
+               else
+                { struct CMD_TYPE_UTILISATEUR new_util;
+                  memcpy ( &new_util, client->util, sizeof(struct CMD_TYPE_UTILISATEUR) );
+                  memset ( &new_util.hash, 0, sizeof(new_util.hash) );
+                  Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_WANT_HASH,
+                                (gchar *)&new_util, sizeof(struct CMD_TYPE_UTILISATEUR) );
+                  Client_mode ( client, WAIT_FOR_HASH );
+                }
+             }
             else 
              { struct CMD_GTK_MESSAGE gtkmessage;
                g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Wrong version number" );
@@ -107,11 +123,18 @@
                Client_mode ( client, DECONNECTE );
              }
           }
+/************************************** Récupération du HASH du client ************************************/
+    else if ( client->mode == WAIT_FOR_HASH && Reseau_tag(connexion)    == TAG_CONNEXION
+                                            && Reseau_ss_tag(connexion) == SSTAG_CLIENT_SEND_HASH )
+          { struct CMD_TYPE_UTILISATEUR *util;
+            util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
+            Tester_autorisation ( client, util );
+          }
 /************************************** Client en attente nouveau password ********************************/
-    else if ( client->mode == ATTENTE_NEW_PASSWORD && Reseau_tag(connexion)    == TAG_CONNEXION
-                                                   && Reseau_ss_tag(connexion) == SSTAG_CLIENT_SETPASSWORD )
-          { struct CMD_UTIL_SETPASSWORD *util;
-            util = (struct CMD_UTIL_SETPASSWORD *)connexion->donnees;
+    else if ( client->mode == WAIT_FOR_NEWPWD && Reseau_tag(connexion)    == TAG_CONNEXION
+                                              && Reseau_ss_tag(connexion) == SSTAG_CLIENT_SETPASSWORD )
+          { struct CMD_TYPE_UTILISATEUR *util;
+            util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
             Proto_set_password( client, util );
           }
   }

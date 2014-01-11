@@ -33,7 +33,6 @@
  #include "protocli.h"
 
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG Config;                                          /* Configuration generale watchdog */
 
  static GtkWidget *F_ajout;                                            /* Widget de l'interface graphique */
  static GtkWidget *Spin_bit_motion;              /* Numéro du bit bistable pour la detection de mouvement */

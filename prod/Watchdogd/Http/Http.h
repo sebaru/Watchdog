@@ -34,6 +34,8 @@
  #define HTTP_DEFAUT_FILE_CERT         "http_serveursigne.pem"
  #define HTTP_DEFAUT_FILE_KEY          "http_serveurkey.pem"
  #define HTTP_DEFAUT_MAX_CONNEXION     100
+ #define HTTP_DEFAUT_PORT_HTTP         5560
+ #define HTTP_DEFAUT_PORT_HTTPS        5561
 
  struct HTTP_CONFIG
   { struct LIBRAIRIE *lib;

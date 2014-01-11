@@ -34,10 +34,11 @@
  #define TAILLE_NOM_SERVEUR        40
  
  struct CONFIG_CLI
-  { gint  port;                                                    /* Port d'ecoute des requetes clientes */
-    gchar host[TAILLE_NOM_SERVEUR+1];                                         /* Serveur Watchdog distant */
+  { gchar host[TAILLE_NOM_SERVEUR+1];                                         /* Serveur Watchdog distant */
     gchar user[NBR_CARAC_LOGIN_UTF8+1]; 
     gchar passwd[TAILLE_NOM_SERVEUR+1];                                       /* Serveur Watchdog distant */
+    guint port_ihm;                                          /* Port TCP du service IHM (5558 par défaut) */
+    guint port_http;                                        /* Port TCP du service HTTP (5560 par défaut) */
     gchar ssl_ca[80];                                                                   /* Paramètres SSL */
     gchar ssl_cert[80]; 
     gchar ssl_key[80]; 
@@ -52,10 +53,11 @@
  #define DEFAUT_SERVEUR                 "localhost"
  #define DEFAUT_USER                    "supervision"
  #define DEFAUT_PASSWD                  "supervision"
- #define DEFAUT_PORT                    5558
+ #define DEFAUT_PORT_IHM                5558
+ #define DEFAUT_PORT_HTTP               5560
  #define DEFAUT_LOG_LEVEL               LOG_INFO
  #define DEFAUT_TAILLE_BLOC_RESEAU      8192
- #define DEFAUT_SSL_CA                  "cacert.pem"     /* Certificat de l'autorite de certification */
+ #define DEFAUT_SSL_CA                  "cacert.pem"         /* Certificat de l'autorite de certification */
  #define DEFAUT_SSL_CERT                "clientsigne.pem"
  #define DEFAUT_SSL_KEY                 "clientkey.pem"
 

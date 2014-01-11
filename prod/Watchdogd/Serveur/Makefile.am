@@ -18,7 +18,7 @@ libwatchdog_server_ssrv_la_SOURCES    = Serveur.c protocole.c ident.c envoi.c \
                         envoi_bit_init.c envoi_scenario.c envoi_synoptique_scenario.c \
                         envoi_mnemonique.c envoi_classe.c envoi_icone.c \
                         envoi_courbe.c envoi_histo_courbe.c envoi_entreeana.c \
-                        accept.c liste.c \
+                        accept.c \
                         capteur.c ecoute.c ssl.c handle_client.c \
                         Sous_serveur.h Client.h admin_serveur.c
 

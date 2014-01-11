@@ -211,6 +211,8 @@
  extern gboolean Changer_password ( void );
 
  extern void Envoyer_identification ( void );                                             /* Dans ident.c */
+ extern void Envoyer_authentification ( struct CMD_TYPE_UTILISATEUR *util );
+ extern void Calcul_password_hash ( gboolean new_salt, gchar *password );
 
  extern void Ecouter_serveur ( void );                                                /* Dans protocole.c */
  extern void Gerer_protocole_gtk_message ( struct CONNEXION *connexion );
@@ -225,7 +227,6 @@
  extern void Gerer_protocole_histo ( struct CONNEXION *connexion );
  extern void Gerer_protocole_atelier ( struct CONNEXION *connexion );
  extern void Gerer_protocole_courbe ( struct CONNEXION *connexion );
- extern void Gerer_protocole_histo_connecte ( struct CONNEXION *connexion );
  extern void Gerer_protocole_fichier_connecte ( struct CONNEXION *connexion );
  extern void Gerer_protocole_connexion ( struct CONNEXION *connexion );
  extern void Gerer_protocole_histo_courbe ( struct CONNEXION *connexion );

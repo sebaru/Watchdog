@@ -187,6 +187,7 @@
        else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( connexion, ligne + 4 ); }
        else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( connexion, ligne + 4);  }
        else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( connexion, ligne + 4);  }
+       else if ( ! strcmp ( commande, "user"      ) ) { Admin_user     ( connexion, ligne + 5);  }
        else { gboolean found = FALSE;
               liste = Partage->com_msrv.Librairies;                  /* Parcours de toutes les librairies */
               while(liste)

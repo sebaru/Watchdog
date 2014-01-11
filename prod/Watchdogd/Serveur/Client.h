@@ -41,12 +41,11 @@
  enum
   { ENVOI_INTERNAL,                              /* Envoi des informations internes à la librairie Reseau */
     ATTENTE_CONNEXION_SSL,                                           /* Veut-il crypter les connexions ?? */
-    ATTENTE_IDENT,                                /* Permet de demander l'identification de l'utilisateur */
-    ENVOI_AUTORISATION,                                                 /* Envoi de l'autorisation ou pas */
+    WAIT_FOR_IDENT,                                /* Permet de demander l'identification du client lourd */
+    SEND_SALT,                                    /* Permet de demander l'identification de l'utilisateur */
+    WAIT_FOR_HASH,                              /* Permet de demander l'authentification de l'utilisateur */
+    WAIT_FOR_NEWPWD,                                    /* Si l'utilisateur doit changer son mot de passe */
 
-    ATTENTE_NEW_PASSWORD,                               /* Si l'utilisateur doit changer son mot de passe */
-
-    ENVOI_DONNEES,                                        /* Envoi des données GIF... au client si besoin */
     ENVOI_HISTO,
 
     VALIDE_NON_ROOT,
@@ -81,29 +80,15 @@
     DECONNECTE                                                                        /* Deconnexion SOFT */
   };
 
- struct LISTE_FICH
-  { gint taille;
-    gchar fichier_absolu[80];
-    gchar fichier[40];
-  };
-
  struct CLIENT                /* Définition de la structure de travail et de gestion des clients distants */
   { gchar machine[TAILLE_MACHINE+1];                          /* Le nom (ou adrIP) de sa machine distante */
     gint  ssrv_id;                                                   /* Numero de sous serveur de gestion */
     struct REZO_CLI_IDENT ident;                                 /* Nom complet de l'utilisateur en cours */
-    struct UTILISATEURDB *util;
+    struct CMD_TYPE_UTILISATEUR *util;
     guchar mode;                        /* Ce client est-il valide ou est-ce un gogol qui veut rentrer ?? */
     guchar defaut;                                                            /* Defaut d'envoi au client */
     time_t date_connexion;                                                              /* Date connexion */
     guint  pulse;                                                                      /* pulse du client */
-    struct
-     { int fd;                                        /* descripteur du fichier actuellement en transfert */
-       gchar *buffer;                                                        /* Buffer d'envoi de donnees */
-       gint en_cours;
-       gint index;                                    /* Pour la lecture 'propre' de capteurs DLS en UTF8 */
-       GList *fichiers;                                                        /* Une GList de LISTE_FICH */
-       gint taille;                                               /* Taille totale des fichiers à envoyer */
-     } transfert;
     struct CONNEXION *connexion;                       /* Connexion distante pour dialogue client-serveur */
 
     pthread_mutex_t mutex_struct_used;/* Zone critique: Compteurs du nombre d'utilisation de la structure */

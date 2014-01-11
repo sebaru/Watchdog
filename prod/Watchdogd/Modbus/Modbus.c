@@ -351,7 +351,8 @@
 
        if (connect(connexion, rp->ai_addr, rp->ai_addrlen) != -1)
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                   "Connecter_module %d (%s)", module->modbus.id, module->modbus.ip );
+                   "Connecter_module %d (%s) family=%d",
+                    module->modbus.id, module->modbus.ip, rp->ai_family );
           break;                  /* Success */
         }
        else
@@ -359,10 +360,10 @@
                    "Connecter_module: connexion refused by module %d (%s) family=%d",
                     module->modbus.id, module->modbus.ip, rp->ai_family );
         }
-       close(connexion);
+       close(connexion);                                   /* Suppression de la socket qui n'a pu aboutir */
      }
-
     freeaddrinfo(result);
+    if (rp == NULL) return(FALSE);                                                 /* Erreur de connexion */
 
     fcntl( connexion, F_SETFL, SO_KEEPALIVE | SO_REUSEADDR );
     module->connexion = connexion;                                                    /* Sauvegarde du fd */

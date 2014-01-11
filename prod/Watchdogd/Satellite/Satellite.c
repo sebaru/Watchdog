@@ -158,7 +158,7 @@
     Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
               "Satellite_Receive_response: Récupération de %d*%d octets depuis le master", size, nmemb );
     new_buffer = g_try_realloc ( Cfg_satellite.received_buffer,
-                                 Cfg_satellite.received_size +  size*nmemb );
+                                 Cfg_satellite.received_size + size*nmemb );
     if (!new_buffer)                                                 /* Si erreur, on arrete le transfert */
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_ERR,
                 "Satellite_Receive_response: Memory Error realloc (%s).", strerror(errno) );
@@ -167,6 +167,7 @@
        return(-1);
      } else Cfg_satellite.received_buffer = new_buffer;
     memcpy( Cfg_satellite.received_buffer + Cfg_satellite.received_size, ptr, size*nmemb );
+    Cfg_satellite.received_size += size*nmemb;
     return(size*nmemb);
   }
 /**********************************************************************************************************/

@@ -40,7 +40,7 @@
 /* Entrées: un id utilisateur, une liste de groupe, un id de groupe                                       */
 /* Sortie: false si pb                                                                                    */
 /**********************************************************************************************************/
- gboolean Tester_groupe_synoptique( struct UTILISATEURDB *util, guint syn_id )
+ gboolean Tester_groupe_synoptique( struct CMD_TYPE_UTILISATEUR *util, guint syn_id )
   { struct CMD_TYPE_SYNOPTIQUE *syn;
     gint cpt;
 
