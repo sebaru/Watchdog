@@ -130,7 +130,7 @@
 
                ident = (struct REZO_SRV_IDENT *)connexion->donnees;
                g_snprintf( chaine, sizeof(chaine), _("Connected to %s@%s:%d  %s"),
-                           Client_en_cours.util.nom, Client_en_cours.host, Config_cli.port, ident->comment );
+                           Client_en_cours.util.nom, Client_en_cours.host, Config_cli.port_ihm, ident->comment );
                gnome_appbar_push( GNOME_APPBAR(Barre_status), chaine );
                Log( _("Connected") );
                Client_en_cours.mode = CONNECTE;

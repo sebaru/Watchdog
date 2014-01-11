@@ -56,7 +56,7 @@
     guint32 id; /* necessaire ?? */
     GList *gids;
     struct CONNEXION *connexion;
-    gchar host[TAILLE_NOM_SERVEUR+1];
+    gchar host[TAILLE_NOM_SERVEUR+1];                           /* Nom du serveur sur lequel se connecter */
     struct CMD_TYPE_UTILISATEUR util;
     gchar password[NBR_CARAC_LOGIN_UTF8+1];               /* sauvegarde du mot de passe pour la connexion */
     struct

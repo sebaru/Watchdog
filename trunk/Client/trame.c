@@ -493,7 +493,8 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
        return(FALSE);
      }
 
-    g_snprintf( url, sizeof(url), "%s:5560/getgif?gif=%d&mode=%d", Client_en_cours.host, id, mode );
+    g_snprintf( url, sizeof(url), "%s:%d/getgif?gif=%d&mode=%d",
+                Client_en_cours.host, Config_cli.port_http, id, mode );
 printf("Try to get %s\n", url );
     curl_easy_setopt(curl, CURLOPT_URL, url );
        /*curl_easy_setopt(curl, CURLOPT_POST, 1 );
@@ -504,7 +505,7 @@ printf("Try to get %s\n", url );
        curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_gif_data );
-/*       curl_easy_setopt(curl, CURLOPT_VERBOSE, Cfg_satellite.lib->Thread_debug );*/
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "Watchdog Client - Trame libcurl");
 /*       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0 );
        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0 );                                   /* Warning ! */

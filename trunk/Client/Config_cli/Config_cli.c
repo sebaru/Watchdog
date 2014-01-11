@@ -91,9 +91,11 @@
        else
         { g_snprintf( config_cli->ssl_key, sizeof(config_cli->ssl_key), "%s", DEFAUT_SSL_KEY  ); }
 
-       config_cli->port = g_key_file_get_integer ( gkf, "SERVER", "port", NULL );
-       if (!config_cli->port) config_cli->port = DEFAUT_PORT;
+       config_cli->port_ihm = g_key_file_get_integer ( gkf, "SERVER", "port_ihm", NULL );
+       if (!config_cli->port_ihm) config_cli->port_ihm = DEFAUT_PORT_IHM;
 
+       config_cli->port_http = g_key_file_get_integer ( gkf, "SERVER", "port_http", NULL );
+       if (!config_cli->port_http) config_cli->port_http = DEFAUT_PORT_HTTP;
 /********************************************* Partie LOG *************************************************/
        chaine = g_key_file_get_string ( gkf, "LOG", "log_level", NULL );
        if (chaine)
@@ -128,7 +130,9 @@
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
               "Config host ------------- %s", config_cli->host );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
-              "Config port ------------- %d", config_cli->port );
+              "Config port_ihm --------- %d", config_cli->port_ihm );
+    Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
+              "Config port_http -------- %d", config_cli->port_http );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
               "Config user ------------- %s", config_cli->user );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,

@@ -268,7 +268,7 @@
     if (host)            g_snprintf( Config_cli.host,    sizeof(Config_cli.host),    "%s", host   );
     if (user)            g_snprintf( Config_cli.user,    sizeof(Config_cli.user),    "%s", user   );
     if (passwd)          g_snprintf( Config_cli.passwd,  sizeof(Config_cli.passwd),  "%s", passwd );
-    if (port!=-1)        Config_cli.port      = port;                  /* Priorite à la ligne de commande */
+    if (port!=-1)        Config_cli.port_ihm  = port;                  /* Priorite à la ligne de commande */
     if (gui_tech!=-1)    Config_cli.gui_tech  = gui_tech;              /* Priorite à la ligne de commande */
     if (debug_level!=-1) Config_cli.log_level = debug_level;
     Info_change_log_level( Config_cli.log, Config_cli.log_level );

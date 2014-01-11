@@ -182,7 +182,7 @@ one_again:
     hints.ai_flags = 0;
     hints.ai_protocol = 0;          /* Any protocol */
 
-    g_snprintf( service, sizeof(service), "%d", Config_cli.port );
+    g_snprintf( service, sizeof(service), "%d", Config_cli.port_ihm );
     s = getaddrinfo( Client_en_cours.host, service, &hints, &result);
     if (s != 0)
      { Log( _("DNS failed") );

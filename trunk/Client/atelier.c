@@ -421,6 +421,7 @@ printf("fin Detruire page atelier\n");
     memcpy( motif, rezo_motif, sizeof(struct CMD_TYPE_MOTIF) );
 
     trame_motif = Trame_ajout_motif ( TRUE, infos->Trame_atelier, motif );
+    if (!trame_motif) { g_free(motif); return; }                                           /* Si probleme */
     trame_motif->groupe_dpl = Nouveau_groupe();                   /* Numéro de groupe pour le deplacement */
 
     g_signal_connect( G_OBJECT(trame_motif->item), "button-press-event",
