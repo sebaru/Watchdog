@@ -37,12 +37,16 @@
  #include <sys/stat.h>
  #include <sys/types.h>
  #include <fcntl.h>
+ #include <curl/curl.h>
 
  #include "trame.h"
 
  #define DEBUG_TRAME
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
+
+ static gchar *Gif_received_buffer;
+ static gint Gif_received_size;
 
 /****************************** Inclusion des images XPM pour les menus ***********************************/
  extern GdkBitmap *Rmask, *Bmask, *Vmask, *Omask, *Jmask;
@@ -441,6 +445,89 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
             }
      }
   }
+
+/**********************************************************************************************************/
+/* Satellite_Receive_response : Recupere la reponse du serveur (master)                                   */
+/* Entrée : Les informations à sauvegarder                                                                */
+/**********************************************************************************************************/
+ static size_t CB_Receive_gif_data( char *ptr, size_t size, size_t nmemb, void *userdata )
+  { gchar *new_buffer;
+    Info_new( Config_cli.log, FALSE, LOG_DEBUG,
+              "CB_Receive_gif_data: Récupération de %d*%d octets depuis le master", size, nmemb );
+    new_buffer = g_try_realloc ( Gif_received_buffer,
+                                 Gif_received_size +  size*nmemb );
+    if (!new_buffer)                                                 /* Si erreur, on arrete le transfert */
+     { Info_new( Config_cli.log, FALSE, LOG_ERR,
+                "CB_Receive_gif_data: Memory Error realloc (%s).", strerror(errno) );
+       g_free(Gif_received_buffer);
+       Gif_received_buffer = NULL;
+       return(-1);
+     } else Gif_received_buffer = new_buffer;
+    memcpy( Gif_received_buffer + Gif_received_size, ptr, size*nmemb );
+    return(size*nmemb);
+  }
+
+/**********************************************************************************************************/
+/* Download_gif: Tente de récupérer un .gif depuis le serveur                                             */
+/* Entrée: l'id et le mode attendu                                                                        */
+/* Sortie: FALSE si probleme                                                                              */
+/**********************************************************************************************************/
+ static gboolean Download_gif ( gint id, gint mode )
+  { gchar erreur[CURL_ERROR_SIZE+1];
+    struct curl_slist *slist = NULL;
+    gchar url[128], chaine[128];
+    CURLcode res;
+
+    Gif_received_buffer = NULL;                           /* Init du tampon de reception à NULL */
+    Gif_received_size = 0;                                /* Init du tampon de reception à NULL */
+
+    curl = curl_easy_init();                                            /* Preparation de la requete CURL */
+    if (!curl)
+     { Info_new( Config_cli.log, FALSE, LOG_ERR,
+                "Download_gif: cURL init failed" );
+       return(FALSE);
+     }
+
+    g_snprintf( url, sizeof(url), "%s/getgif?id=%d&mode=%d", id, mode );
+    curl_easy_setopt(curl, CURLOPT_URL, url );
+       /*curl_easy_setopt(curl, CURLOPT_POST, 1 );
+       curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (void *)buf->content);
+       curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, buf->use);*/
+       /*slist = curl_slist_append(slist, "Content-Type: application/xml");*/
+/*       curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
+       curl_easy_setopt(curl, CURLOPT_HEADER, 1);*/
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_gif_data );
+    Gif_received_size = 0;
+/*       curl_easy_setopt(curl, CURLOPT_VERBOSE, Cfg_satellite.lib->Thread_debug );*/
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "Watchdog Client - Trame libcurl");
+/*       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0 );
+       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0 );                                   /* Warning ! */
+/*       curl_easy_setopt(curl, CURLOPT_CAINFO, Cfg_satellite.https_file_ca );
+       curl_easy_setopt(curl, CURLOPT_SSLKEY, Cfg_satellite.https_file_key );
+       g_snprintf( chaine, sizeof(chaine), "./%s", Cfg_satellite.https_file_cert );
+       curl_easy_setopt(curl, CURLOPT_SSLCERT, chaine );*/
+
+    res = curl_easy_perform(curl);
+    if (!res)
+     { Info_new( Config_cli.log, FALSE, LOG_DEBUG,
+                "Download_gif : Gif received" );
+     }
+    else
+     { Info_new( Config_cli.log, FALSE, LOG_WARNING,
+                "Download_gif : Error : Gif NOT received" );
+     }
+    curl_easy_cleanup(curl);
+    curl_slist_free_all(slist);
+
+    if (Gif_received_buffer)
+     { Info_new( Config_cli, FALSE, LOG_DEBUG,
+                "Download_gif : Saving GIF id %d, mode %d", id, mode );
+       g_free(Gif_received_buffer);
+       Gif_received_buffer = FALSE;
+     }
+    return(TRUE);
+  }
 /**********************************************************************************************************/
 /* Charger_pixbuf: Tente de charger un ensemble de pixbuf representant un icone                           */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference         */
@@ -472,7 +559,11 @@ printf("Charger_pixbuf: %s\n", nom_fichier );
 printf("Charger_pixbuf: %s -> pixbuf = %p\n", nom_fichier, pixbuf );
 #endif
        if (!pixbuf)
-        { if (i == 0)                                              /* Si chargement impossible, on arrete */
+        { /* Tentative de récupération depuis le serveur */
+          if (!Download_gif ( icone_id, i ))
+           { printf(" Download_gif failed\n" ); }
+          else pixbuf = gdk_pixbuf_new_from_file ( nom_fichier, NULL );                 /* 2nde tentative */
+          if (!pixbuf && i==0)                                     /* Si chargement impossible, on arrete */
            { pixbuf = gdk_pixbuf_new_from_file ( "default.gif", NULL ); }           /* Creation du pixbuf */
           else break;
         }

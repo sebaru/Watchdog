@@ -80,12 +80,6 @@
     DECONNECTE                                                                        /* Deconnexion SOFT */
   };
 
- struct LISTE_FICH
-  { gint taille;
-    gchar fichier_absolu[80];
-    gchar fichier[40];
-  };
-
  struct CLIENT                /* Définition de la structure de travail et de gestion des clients distants */
   { gchar machine[TAILLE_MACHINE+1];                          /* Le nom (ou adrIP) de sa machine distante */
     gint  ssrv_id;                                                   /* Numero de sous serveur de gestion */
@@ -95,14 +89,6 @@
     guchar defaut;                                                            /* Defaut d'envoi au client */
     time_t date_connexion;                                                              /* Date connexion */
     guint  pulse;                                                                      /* pulse du client */
-    struct
-     { int fd;                                        /* descripteur du fichier actuellement en transfert */
-       gchar *buffer;                                                        /* Buffer d'envoi de donnees */
-       gint en_cours;
-       gint index;                                    /* Pour la lecture 'propre' de capteurs DLS en UTF8 */
-       GList *fichiers;                                                        /* Une GList de LISTE_FICH */
-       gint taille;                                               /* Taille totale des fichiers à envoyer */
-     } transfert;
     struct CONNEXION *connexion;                       /* Connexion distante pour dialogue client-serveur */
 
     pthread_mutex_t mutex_struct_used;/* Zone critique: Compteurs du nombre d'utilisation de la structure */
