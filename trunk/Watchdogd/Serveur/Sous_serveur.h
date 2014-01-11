@@ -107,9 +107,7 @@
  extern void Gerer_protocole_admin( struct CLIENT *client );
 
                                                                                           /* Dans envoi.c */
- extern void Envoi_clients( gint ss_id, gint tag, gint sstag, gchar *buffer, gint taille );
  extern gint Envoi_client( struct CLIENT *client, gint tag, gint sstag, gchar *buffer, gint taille );
- gboolean Envoyer_gif( struct CLIENT *client );
 
  extern gboolean Envoyer_palette( struct CLIENT *client );                            /* Dans envoi_syn.c */
 
@@ -117,10 +115,6 @@
 
  extern void Connecter_ssl( struct CLIENT *client );                                     /* Dans accept.c */
 
-
- extern gint Ajouter_repertoire_liste( struct CLIENT *client, gchar *Repertoire,          /* Dans liste.c */
-                                       time_t version_d_client );
- extern void Liberer_liste( struct CLIENT *client );
 
  extern gboolean Tester_update_capteur( struct CAPTEUR *capteur );                      /* Dans capteur.c */
  extern struct CMD_ETAT_BIT_CAPTEUR *Formater_capteur( struct CAPTEUR *capteur );
