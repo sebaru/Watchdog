@@ -41,6 +41,7 @@
 /**********************************************************************************************************/
  void Gerer_protocole_histo ( struct CONNEXION *connexion )
   { static GList *Arrivee_histo_msgs = NULL;
+    static GList *Arrivee_histo = NULL;
     static gint32 page_id;
 
     switch ( Reseau_ss_tag ( connexion ) )
@@ -60,6 +61,24 @@
              { struct CMD_TYPE_HISTO *histo;
                histo = (struct CMD_TYPE_HISTO *)connexion->donnees;
                Proto_cacher_un_histo( histo );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_HISTO:
+             { struct CMD_TYPE_HISTO *histo;
+               Set_progress_plusun();
+               histo = (struct CMD_TYPE_HISTO *)g_try_malloc0( sizeof( struct CMD_TYPE_HISTO ) );
+               if (!histo) return; 
+               memcpy( histo, connexion->donnees, sizeof(struct CMD_TYPE_HISTO ) );
+               Arrivee_histo = g_list_append( Arrivee_histo, histo );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_HISTO_FIN:
+             { g_list_foreach( Arrivee_histo, (GFunc)Proto_afficher_un_histo, NULL );
+               g_list_foreach( Arrivee_histo, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_histo );
+     printf("Reception histo: affichage\n");
+               Arrivee_histo = NULL;
+               Chercher_page_notebook( TYPE_PAGE_HISTO, 0, TRUE );
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS:
@@ -84,35 +103,6 @@
                g_list_free( Arrivee_histo_msgs );
                printf("histo_msgs 5\n");
                Arrivee_histo_msgs = NULL;
-             }
-            break;
-     }
-  }
-/**********************************************************************************************************/
-/* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
-/* Entrée: la connexion avec le serveur                                                                   */
-/* Sortie: Kedal                                                                                          */
-/**********************************************************************************************************/
- void Gerer_protocole_histo_connecte ( struct CONNEXION *connexion )
-  { static GList *Arrivee_histo = NULL;
-
-    switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_SERVEUR_ADDPROGRESS_HISTO:
-             { struct CMD_TYPE_HISTO *histo;
-               Set_progress_plusun();
-               histo = (struct CMD_TYPE_HISTO *)g_try_malloc0( sizeof( struct CMD_TYPE_HISTO ) );
-               if (!histo) return; 
-               memcpy( histo, connexion->donnees, sizeof(struct CMD_TYPE_HISTO ) );
-               Arrivee_histo = g_list_append( Arrivee_histo, histo );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_HISTO_FIN:
-             { g_list_foreach( Arrivee_histo, (GFunc)Proto_afficher_un_histo, NULL );
-               g_list_foreach( Arrivee_histo, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_histo );
-     printf("Reception histo: affichage\n");
-               Arrivee_histo = NULL;
-               Chercher_page_notebook( TYPE_PAGE_HISTO, 0, TRUE );
              }
             break;
      }

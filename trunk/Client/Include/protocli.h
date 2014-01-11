@@ -227,7 +227,6 @@
  extern void Gerer_protocole_histo ( struct CONNEXION *connexion );
  extern void Gerer_protocole_atelier ( struct CONNEXION *connexion );
  extern void Gerer_protocole_courbe ( struct CONNEXION *connexion );
- extern void Gerer_protocole_histo_connecte ( struct CONNEXION *connexion );
  extern void Gerer_protocole_fichier_connecte ( struct CONNEXION *connexion );
  extern void Gerer_protocole_connexion ( struct CONNEXION *connexion );
  extern void Gerer_protocole_histo_courbe ( struct CONNEXION *connexion );
