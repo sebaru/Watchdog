@@ -29,12 +29,10 @@
  #define _RESEAUX_CONNEXION_H_
 
  #include "Reseaux_utilisateur.h"
- #include "Version.h"
 
  struct REZO_CLI_IDENT
   { gchar  nom [ NBR_CARAC_LOGIN_UTF8 + 1 ];
-    gchar  version [ TAILLE_VERSION + 1 ];
-    time_t version_d;                                                    /* Version des données du client */
+    gchar  version [32];
   };
 
  struct REZO_SRV_IDENT

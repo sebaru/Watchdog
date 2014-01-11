@@ -31,14 +31,9 @@
  struct CMD_FICHIER
   { gchar nom[80];
   };
- struct CMD_VERSION
-  { time_t version;
-  };
 
  enum 
   { SSTAG_SERVEUR_DEL_FICHIER,
-    SSTAG_SERVEUR_FICHIER,
-    SSTAG_SERVEUR_VERSION,
   };
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

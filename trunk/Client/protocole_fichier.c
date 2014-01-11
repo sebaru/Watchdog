@@ -54,28 +54,6 @@
                printf("Fichier %s effacé sur ordre serveur\n", cmd_fichier->nom );
              }
             break;
-       case SSTAG_SERVEUR_FICHIER:
-             { struct CMD_FICHIER *cmd_fichier;
-               guint taille, id;
-               cmd_fichier = (struct CMD_FICHIER *)connexion->donnees;
-               taille = connexion->entete.taille_donnees - sizeof(struct CMD_FICHIER);
-               printf("Recu fichier %s: taille %d\n", cmd_fichier->nom, taille );
-               id = open( cmd_fichier->nom, O_WRONLY | O_CREAT | O_APPEND, S_IWUSR | S_IRUSR );
-               if (id>0)
-                { write( id, connexion->donnees + sizeof(struct CMD_FICHIER), taille );
-                  close ( id );
-                }
-               Set_progress_plus( taille );
-             }
-            break;
-       case SSTAG_SERVEUR_VERSION:
-             { struct CMD_VERSION *cmd_version;
-               cmd_version = (struct CMD_VERSION *)connexion->donnees;
-               Changer_version_donnees( Config_cli.log, cmd_version->version );
-               Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
-                        "Nouvelle version données %d", cmd_version->version );
-             }
-            break;
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/
