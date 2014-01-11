@@ -58,6 +58,7 @@
     Cfg_http.http_port         = HTTP_DEFAUT_PORT_HTTP;
     Cfg_http.https_enable      = FALSE; 
     Cfg_http.https_port        = HTTP_DEFAUT_PORT_HTTPS;
+    Cfg_http.nbr_max_connexion = HTTP_DEFAUT_MAX_CONNEXION;
     g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", HTTP_DEFAUT_FILE_CERT );
     g_snprintf( Cfg_http.https_file_key,  sizeof(Cfg_http.https_file_key),  "%s", HTTP_DEFAUT_FILE_KEY );
     g_snprintf( Cfg_http.https_file_ca,   sizeof(Cfg_http.https_file_ca),   "%s", HTTP_DEFAUT_FILE_CA  );
@@ -525,7 +526,7 @@
         }
      }
 
-    if (Cfg_http.https_enable && Charger_certificat() )
+    if ( Cfg_http.https_enable && Charger_certificat() )
      { Cfg_http.https_server = MHD_start_daemon ( MHD_USE_SELECT_INTERNALLY | MHD_USE_SSL | MHD_USE_DEBUG,
                                                   Cfg_http.https_port, NULL, NULL, 
                                                  &Http_request_CB, NULL,
