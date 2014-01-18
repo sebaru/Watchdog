@@ -449,7 +449,6 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
             }
      }
   }
-
 /**********************************************************************************************************/
 /* Satellite_Receive_response : Recupere la reponse du serveur (master)                                   */
 /* Entrée : Les informations à sauvegarder                                                                */
@@ -471,7 +470,6 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
     Gif_received_size += size*nmemb;
     return(size*nmemb);
   }
-
 /**********************************************************************************************************/
 /* Download_gif: Tente de récupérer un .gif depuis le serveur                                             */
 /* Entrée: l'id et le mode attendu                                                                        */

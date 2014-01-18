@@ -79,7 +79,7 @@
                Proto_effacer_plugin_dls( client, dls );
              }
             break;
-       case SSTAG_CLIENT_EDIT_SOURCE_DLS:
+       case SSTAG_CLIENT_WANT_SOURCE_DLS:
              { struct CMD_TYPE_PLUGIN_DLS *dls;
                dls = (struct CMD_TYPE_PLUGIN_DLS *)connexion->donnees;
                Proto_editer_source_dls( client, dls );
@@ -118,7 +118,6 @@
                Proto_envoyer_type_num_mnemo_tag( TAG_DLS, SSTAG_SERVEUR_TYPE_NUM_MNEMO, client, mnemo );
              }
             break;
-
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

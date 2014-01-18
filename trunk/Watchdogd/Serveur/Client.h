@@ -75,8 +75,6 @@
     ENVOI_SYNOPTIQUE_FOR_ATELIER_PALETTE,              /* Envoi de la liste des syn pour choix de palette */
     ENVOI_PALETTE_FOR_ATELIER_PALETTE,
 
-    ENVOI_SOURCE_DLS,
-
     DECONNECTE                                                                        /* Deconnexion SOFT */
   };
 
@@ -115,7 +113,7 @@
     gint date_next_send_capteur;                         /* Date du prochain envoi des capteurs au client */
     struct CMD_WANT_SCENARIO_MOTIF sce;                     /* numéro du monostable du scenario a envoyer */
     struct CMD_CRITERE_HISTO_MSGS requete;                   /* Pour la sauvegarde de la requete en cours */
-    struct CMD_TYPE_SOURCE_DLS dls;                  /* Pour la sauvegarde de la compilation dls en cours */
+    struct CMD_TYPE_SOURCE_DLS dls;                     /* Pour la sauvegarde et compilation dls en cours */
 
     struct CMD_TYPE_SYNOPTIQUE syn;  /* Structure du synoptique en cours d'envoi (atelier ou supervision) */
 

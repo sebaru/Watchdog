@@ -72,7 +72,7 @@
                Proto_rafraichir_un_plugin_dls( dls );
              }
             break;
-       case SSTAG_SERVEUR_EDIT_SOURCE_DLS_OK:
+       case SSTAG_SERVEUR_SOURCE_DLS_START:
              { struct CMD_TYPE_PLUGIN_DLS *dls;
                dls = (struct CMD_TYPE_PLUGIN_DLS *)connexion->donnees;
                Creer_page_source_dls( dls );
@@ -84,6 +84,11 @@
                dls = (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees;
                buffer = (gchar *)dls + sizeof(struct CMD_TYPE_SOURCE_DLS);
                Proto_append_source_dls( dls, buffer );
+             }
+            break;
+       case SSTAG_SERVEUR_SOURCE_DLS_END:
+             { /*struct CMD_TYPE_SOURCE_DLS *dls;
+               dls = (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees;*/
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS:

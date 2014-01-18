@@ -181,7 +181,6 @@
        case ENVOI_HISTO                 : return("ENVOI_HISTO");
 
        case ENVOI_GROUPE_FOR_UTIL       : return("ENVOI_GROUPE_FOR_UTIL");
-       case ENVOI_SOURCE_DLS            : return("ENVOI_SOURCE_DLS");
        case ENVOI_MNEMONIQUE_FOR_COURBE : return("ENVOI_MNEMONIQUE_FOR_COURBE");
        case ENVOI_MNEMONIQUE_FOR_HISTO_COURBE : return("ENVOI_MNEMONIQUE_FOR_HISTO_COURBE");
        case ENVOI_MOTIF_ATELIER         : return("ENVOI_MOTIF_ATELIER");

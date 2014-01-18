@@ -125,26 +125,6 @@
           case ATTENTE_CONNEXION_SSL:
                Connecter_ssl ( client );                        /* Tentative de connexion securisée */
                break;
-#ifdef bouh
-          case ENVOI_AUTORISATION :
-                { gint new_mode;
-                  new_mode = Tester_autorisation( client );
-                  if (new_mode == ENVOI_DONNEES)/* Optimisation si pas necessaire */
-                   { version_serveur = Lire_version_donnees( Config.log );
-                     if ( version_serveur > client->ident.version_d )
-                      {  gint taille;
-                         taille = 0;
-                         taille += Ajouter_repertoire_liste( client, "Gif", client->ident.version_d );
-                         client->transfert.taille = taille;
-                      }
-                   }
-                  Client_mode ( client, new_mode );
-                }
-               break;
-          case ENVOI_DONNEES      :
-               if(Envoyer_gif( client )) Client_mode (client, ENVOI_HISTO);
-               break;
-#endif
           case ENVOI_HISTO        :
                Client_mode( client, VALIDE_NON_ROOT );
                Ref_client( client );                       /* Indique que la structure est utilisée */
@@ -170,9 +150,6 @@
                Ref_client( client );                       /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_propriete_synoptique_thread, client );
                pthread_detach( tid );
-               break;
-          case ENVOI_SOURCE_DLS   :
-               if(Envoyer_source_dls( client )) Client_mode(client, VALIDE);
                break;
           case ENVOI_MNEMONIQUE_FOR_COURBE:
                Client_mode( client, VALIDE );
