@@ -38,7 +38,7 @@
   { struct CONNEXION *connexion;
     connexion = client->connexion;
 
-    if ( ! Tester_groupe_util( client->util->id, client->util->gids, GID_ADMIN_CLI) )
+    if ( ! Tester_groupe_util( client->util, GID_ADMIN_CLI) )
      { struct CMD_GTK_MESSAGE gtkmessage;
        g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied..." );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,

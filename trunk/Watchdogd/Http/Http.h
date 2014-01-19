@@ -66,7 +66,15 @@
 
  struct HTTP_CONNEXION_INFO
   { gint     type;
-    gboolean request_processed;                 /* TRUE si la requete est complete et doit etre processée */
+    gchar    client_host[80];
+    gchar    client_service[20];
+    gchar    client_dn[120];
+    gchar    username[80];
+    gchar    issuer_dn[120];
+    gchar    user_agent[120], origine[80];
+    gint     ssl_algo, ssl_proto;
+    struct CMD_TYPE_UTILISATEUR *util;
+    gboolean dont_free;     /* TRUE si la requete est complete et doit etre processée par HTTP et non MHD */
     gchar   *buffer;                                   /* Le buffer recu dans le corps de la requete HTTP */
     gint     buffer_size;                                                    /* La taille utile du buffer */
   };
@@ -79,7 +87,8 @@
 /*************************************** Définitions des prototypes ***************************************/
  extern gboolean Http_Lire_config ( void );
  extern gboolean Http_Traiter_request_getsyn ( struct MHD_Connection *connection );
- extern gint Http_Traiter_request_getstatus ( struct MHD_Connection *connection );
+ extern gint Http_Traiter_request_getstatus ( struct MHD_Connection *connection,
+                                              struct HTTP_CONNEXION_INFO *infos );
  extern gboolean Http_Traiter_request_getgif ( struct MHD_Connection *connection );
  extern gboolean Http_Traiter_request_gifile ( struct MHD_Connection *connection );
  extern gboolean Http_Traiter_request_set_internal ( struct MHD_Connection *connection,

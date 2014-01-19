@@ -154,6 +154,7 @@
   { struct CMD_TYPE_HISTO histo;
     GSList *liste;
 
+    memset ( &histo, 0, sizeof(struct CMD_TYPE_HISTO) );
     histo.alive   = FALSE;
     histo.msg.num = num;
     time ( (time_t *)&histo.date_fin );

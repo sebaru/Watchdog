@@ -57,7 +57,6 @@
                      (gchar *)motif, sizeof(struct CMD_ETAT_BIT_CTRL) );
      }
     g_free(motif);
-
   }
 /**********************************************************************************************************/
 /* Envoyer_new_histo_au_client: Parcours la liste des histo et les envoi                                  */
@@ -75,7 +74,7 @@
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
        
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "Envoyer_new_histo: Histo traite : id = %06d, msg=%04d, libelle=%s",
+             "Envoyer_histo_au_client: Histo traite : id = %06d, msg=%04d, libelle=%s",
               histo->id, histo->msg.num, histo->msg.libelle );
 
     Envoi_client( client, TAG_HISTO, (histo->alive ? SSTAG_SERVEUR_SHOW_HISTO : SSTAG_SERVEUR_DEL_HISTO),

@@ -40,7 +40,7 @@
     connexion = client->connexion;
 
 #ifdef bouh
-    if ( ! Tester_groupe_util( client->util->id, client->util->gids, GID_SYNOPTIQUE) )
+    if ( ! Tester_groupe_util( client->util, GID_SYNOPTIQUE) )
      { struct CMD_GTK_MESSAGE gtkmessage;
        g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,

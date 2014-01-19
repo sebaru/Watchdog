@@ -65,13 +65,13 @@
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                     /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                "Ups_Lire_config: Database connexion failed. Using Default Parameters" );
+                "Http_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);
      }
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,                         /* Print Config */
-                "Ups_Lire_config: '%s' = %s", nom, valeur );
+                "Http_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "https_file_cert" ) )
         { g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "https_file_ca" ) )
@@ -94,7 +94,7 @@
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.lib->Thread_debug = TRUE;  }
        else
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                   "Ups_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
+                   "Http_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
         }
      }
     return(TRUE);
@@ -211,18 +211,16 @@
 /* Entrées : la session TLS                                                                               */
 /* Sortie  : TRUE si OK, FALSE si erreur                                                                  */
 /**********************************************************************************************************/
- static void Print_request( struct MHD_Connection * connection, const char *url, 
-                                 const char *method, const char *version, size_t *upload_data_size )
-  { gchar client_host[80], client_service[20], client_dn[120], issuer_dn[120];
-    const gchar *user_agent, *origine;
-    gnutls_certificate_status_t client_cert_status;
+ static gint Prepare_request( struct MHD_Connection *connection, const char *url, 
+                              const char *method, const char *version, size_t *upload_data_size,
+                              void **con_cls )
+  { const union MHD_ConnectionInfo *info;
+    struct HTTP_CONNEXION_INFO *infos;
     gnutls_x509_crt_t client_cert;
-    const union MHD_ConnectionInfo *info;
-    const gnutls_datum_t * pcert;
-    gint ssl_algo, ssl_proto, retour, size;
+    const gnutls_datum_t *pcert;
     struct sockaddr *client_addr;
     void *tls_session;
-    guint listsize;
+    gint retour, size;
 
     client_addr = MHD_get_connection_info (connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS)->client_addr;
     if (client_addr->sa_family == AF_INET)  size = sizeof(struct sockaddr_in);
@@ -230,158 +228,94 @@
     if (client_addr->sa_family == AF_INET6) size = sizeof(struct sockaddr_in6);
     else
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Verify_request :  MHD_CONNECTION_INFO_CLIENT_ADDRESS failed, wrong family" );
-       return;
+                "Prepare_request :  MHD_CONNECTION_INFO_CLIENT_ADDRESS failed, wrong family" );
+       return(MHD_NO);
      }
-    memset( client_host, 0, sizeof(client_host) );
-    memset( client_service, 0, sizeof(client_service) );
-    retour = getnameinfo( client_addr, size, client_host, sizeof(client_host),
-                          client_service, sizeof(client_service),
+
+    infos = (struct HTTP_CONNEXION_INFO *) g_try_malloc0 ( sizeof( struct HTTP_CONNEXION_INFO ) );
+    if (!infos)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Prepare_request: Memory Alloc ERROR infos" );
+       return(MHD_NO);
+     }
+
+    retour = getnameinfo( client_addr, size,
+                          infos->client_host,    sizeof(infos->client_host),
+                          infos->client_service, sizeof(infos->client_service),
                           NI_NUMERICHOST | NI_NUMERICSERV );
     if (retour) 
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Verify_request : GetName failed : %s", gai_strerror(retour) );
+                "Prepare_request : GetName failed : %s", gai_strerror(retour) );
+       g_free(infos);
+       return(MHD_NO);
      }
 
     info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_CIPHER_ALGO );
-    if ( info ) { ssl_algo = info->cipher_algorithm; }
-           else { ssl_algo = 0; }
+    if ( info ) { infos->ssl_algo = info->cipher_algorithm; }
 
     info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_PROTOCOL );
-    if ( info ) { ssl_proto = info->protocol; }
-           else { ssl_proto = 0; }
+    if ( info ) { infos->ssl_proto = info->protocol; }
 
     info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_GNUTLS_SESSION );
     if ( info ) { tls_session = info->tls_session; }
            else { tls_session = NULL; }
 
-    info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_GNUTLS_CLIENT_CERT );
-    if ( info ) { client_cert = info->client_cert; }
-           else { client_cert = NULL; }
+    g_snprintf( infos->user_agent, sizeof(infos->user_agent), "%s",
+                MHD_lookup_connection_value (connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT) );
 
-    user_agent = MHD_lookup_connection_value (connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT);
-    if (!user_agent) user_agent = "unknown";
+    g_snprintf( infos->origine,    sizeof(infos->origine),    "%s",
+                MHD_lookup_connection_value (connection, MHD_HEADER_KIND, "Origin") );
 
-    origine = MHD_lookup_connection_value (connection, MHD_HEADER_KIND, "Origin");
-    if (!origine) origine = "unknown";
 
     if (tls_session)
-     { if ( (retour = gnutls_certificate_verify_peers2(tls_session, &client_cert_status)) < 0)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                    "Verify_request: Failed to verify peers : %s", gnutls_strerror(retour) );
-          return;
-        }
-
+     { unsigned int listsize;
        pcert = gnutls_certificate_get_peers(tls_session, &listsize);
        if ( (pcert == NULL) || (listsize == 0))
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Verify_request: Failed to get peers" );
-          return;
+                   "Prepare_request: Failed to get peers" );
+          g_free(infos);
+          return(MHD_NO);
         }
 
        if ( (retour = gnutls_x509_crt_init(&client_cert)) < 0 )
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Verify_request: Failed to init cert : %s", gnutls_strerror(retour) );
-          return;
+                   "Prepare_request: Failed to init cert : %s", gnutls_strerror(retour) );
+          g_free(infos);
+          return(MHD_NO);
         }
 
        if ( (retour = gnutls_x509_crt_import(client_cert, &pcert[0], GNUTLS_X509_FMT_DER)) < 0 ) 
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Verify_request: Failed import cert", gnutls_strerror(retour) );
+                   "Prepare_request: Failed import cert", gnutls_strerror(retour) );
           gnutls_x509_crt_deinit(client_cert);
-          return;
+          g_free(infos);
+          return(MHD_NO);
         }  
 
-       size = sizeof(client_dn);
-       gnutls_x509_crt_get_dn(client_cert, client_dn, (size_t *)&size );
-       size = sizeof(issuer_dn);
-       gnutls_x509_crt_get_issuer_dn(client_cert, issuer_dn, (size_t *)&size );
+       size = sizeof(infos->client_dn);
+       gnutls_x509_crt_get_dn(client_cert, infos->client_dn, (size_t *)&size );
+       size = sizeof(infos->issuer_dn);
+       gnutls_x509_crt_get_issuer_dn(client_cert, infos->issuer_dn, (size_t *)&size );
+       size = sizeof(infos->username);
+       gnutls_x509_crt_get_dn_by_oid(client_cert, GNUTLS_OID_X520_COMMON_NAME, 0, 0,
+                                     infos->username, (size_t *)&size);
+       infos->util = Rechercher_utilisateurDB_by_name ( infos->username );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "New HTTPS %s %s %s request (Payload size %d) from Host=%s(%s)/Service=%s (Cipher=%s/Proto=%s/Issuer=%s). User-Agent=%s. Origin=%s",
-                 method, url, version, *upload_data_size,
-                 client_host, client_dn, client_service,
-                 gnutls_cipher_get_name (ssl_algo), gnutls_protocol_get_name (ssl_proto), issuer_dn,
-                 user_agent, origine
+                "Prepare_request : New HTTPS %s %s %s request (Payload size %d) from Host=%s(dn=%s cn=%s)/Service=%s (Cipher=%s/Proto=%s/Issuer=%s). User-Agent=%s. Origin=%s",
+                 method, url, version, (upload_data_size ? *upload_data_size : 0),
+                 infos->client_host, infos->client_dn, infos->username, infos->client_service,
+                 gnutls_cipher_get_name (infos->ssl_algo), gnutls_protocol_get_name (infos->ssl_proto),
+                 infos->issuer_dn, infos->user_agent, infos->origine
                );
        gnutls_x509_crt_deinit(client_cert);
      }
     else Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                  "New HTTP  %s %s %s request (Payload size %d) from Host=%s/Service=%s. User-Agent=%s. Origin=%s",
+                  "Prepare_request : New HTTP  %s %s %s request (Payload size %d) from Host=%s/Service=%s. User-Agent=%s. Origin=%s",
                    method, url, version, *upload_data_size,
-                   client_host, client_service, user_agent, origine
+                   infos->client_host, infos->client_service, infos->user_agent, infos->origine
                 );
-  }
-/**********************************************************************************************************/
-/* Get_client_cert : Recupere le certificat client depuis la session TLS                                  */
-/* Entrées : la session TLS                                                                               */
-/* Sortie  : TRUE si OK, FALSE si erreur                                                                  */
-/**********************************************************************************************************/
- struct CMD_TYPE_UTILISATEUR *Http_is_authenticated ( struct MHD_Connection *connection )
-  { gchar client_host[80], client_service[20], client_dn[120], issuer_dn[120];
-    const gchar *user_agent, *origine;
-    gnutls_certificate_status_t client_cert_status;
-    gnutls_x509_crt_t client_cert;
-    const union MHD_ConnectionInfo *info;
-    const gnutls_datum_t * pcert;
-    gint ssl_algo, ssl_proto, retour, size;
-    struct sockaddr *client_addr;
-    void *tls_session;
-    guint listsize;
-
-    info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_CIPHER_ALGO );
-    if ( info ) { ssl_algo = info->cipher_algorithm; }
-           else { ssl_algo = 0; }
-
-    info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_PROTOCOL );
-    if ( info ) { ssl_proto = info->protocol; }
-           else { ssl_proto = 0; }
-
-    info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_GNUTLS_SESSION );
-    if ( info ) { tls_session = info->tls_session; }
-           else { tls_session = NULL; }
-
-    info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_GNUTLS_CLIENT_CERT );
-    if ( info ) { client_cert = info->client_cert; }
-           else { client_cert = NULL; }
-
-    if (!tls_session) return(NULL);
-
-    if ( (retour = gnutls_certificate_verify_peers2(tls_session, &client_cert_status)) < 0)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_is_authenticated: Failed to verify peers : %s", gnutls_strerror(retour) );
-       return(NULL);
-     }
-
-    pcert = gnutls_certificate_get_peers(tls_session, &listsize);
-    if ( (pcert == NULL) || (listsize == 0))
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Http_is_authenticated: Failed to get peers" );
-       return(NULL);
-     }
-
-    if ( (retour = gnutls_x509_crt_init(&client_cert)) < 0 )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Http_is_authenticated: Failed to init cert : %s", gnutls_strerror(retour) );
-       return(NULL);
-     }
-
-    if ( (retour = gnutls_x509_crt_import(client_cert, &pcert[0], GNUTLS_X509_FMT_DER)) < 0 ) 
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Http_is_authenticated: Failed import cert", gnutls_strerror(retour) );
-       gnutls_x509_crt_deinit(client_cert);
-       return(NULL);
-     }  
-
-    size = sizeof(client_dn);
-    gnutls_x509_crt_get_dn(client_cert, client_dn, (size_t *)&size );
-    size = sizeof(issuer_dn);
-    gnutls_x509_crt_get_issuer_dn(client_cert, issuer_dn, (size_t *)&size );
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "Http_is_authenticated CA_dn %s Client_dn %s",
-              issuer_dn, client_dn
-            );
-    gnutls_x509_crt_deinit(client_cert);
-    return(NULL);
+    *con_cls = infos;
+    return(MHD_YES);
   }
 /**********************************************************************************************************/
 /* Http request_CB : Renvoi une reponse suite a une demande d'un client (appellée par libmicrohttpd)      */
@@ -396,19 +330,14 @@
   { const char *Wrong_method     = "<html><body>Wrong method. Sorry... </body></html>";
     const char *Not_found        = "<html><body>URI not found on this server. Sorry... </body></html>";
     const char *Internal_error   = "<html><body>An internal server error has occured!..</body></html>";
-    const char *Authent_needed   = "<html><body>Authentification needed!..</body></html>";
     const char *Options_response = "<html><body>This is the response to HTTP OPTIONS Method!..</body></html>";
+    struct HTTP_CONNEXION_INFO *infos;
     struct MHD_Response *response;
 
-    Print_request ( connection, url, method, version, upload_data_size );
-
-#ifdef bouh
-    if (!*con_cls)                                       /* On attend le body avant de traiter la requete */
-     { *con_cls = connection;
-       return(MHD_YES);
-     }
-#endif
-
+    if (!*con_cls)
+     { return(Prepare_request(connection, url, method, version, upload_data_size, con_cls)); }
+    else infos = *con_cls;
+    
     if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getsyn" ) )
      { if ( Http_Traiter_request_getsyn ( connection ) == FALSE)              /* Traitement de la requete */
         { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
@@ -437,7 +366,7 @@
         }
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/status" ) )
-     { return( Http_Traiter_request_getstatus ( connection ) ); }
+     { return( Http_Traiter_request_getstatus ( connection, infos ) ); }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getgif" ) )
      { if ( Http_Traiter_request_getgif ( connection ) == FALSE)              /* Traitement de la requete */
         { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
@@ -531,6 +460,7 @@
 /**********************************************************************************************************/
  void Http_Liberer_infos ( struct HTTP_CONNEXION_INFO *infos )
   {  if (infos->buffer) g_free(infos->buffer);
+     if (infos->util)   g_free(infos->util);
      g_free(infos);                                                  /* Libération mémoire le cas échéant */
   }
 /**********************************************************************************************************/
@@ -543,7 +473,7 @@
   { if (*con_cls)
      { struct HTTP_CONNEXION_INFO *infos;
        infos = *con_cls;
-       if (infos->request_processed == FALSE)             /* Si erreur pendant la reception de la requete */
+       if (infos->dont_free == FALSE)                     /* Si erreur pendant la reception de la requete */
         { Http_Liberer_infos ( infos ); }                                  /*  liberation mémoire par MHD */
      }
   }

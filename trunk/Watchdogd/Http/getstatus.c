@@ -38,24 +38,22 @@
 /* Entrées: la connexion MHD                                                                              */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
- gint Http_Traiter_request_getstatus ( struct MHD_Connection *connection )
+ gint Http_Traiter_request_getstatus ( struct MHD_Connection *connection, struct HTTP_CONNEXION_INFO *infos )
   { struct MHD_Response *response;
     xmlTextWriterPtr writer;
     xmlBufferPtr buf;
     gint retour, num;
     gchar host[128];
 
-
-    if (Http_is_authenticated( connection ) == NULL)
+    if ( (!infos) || (!infos->util) || (Tester_groupe_util(infos->util, GID_TOUTLEMONDE)==FALSE) )
      { response = MHD_create_response_from_buffer ( strlen (RESPONSE_AUTHENTICATION_NEEDED)+1,
-                                                    (void*) RESPONSE_AUTHENTICATION_NEEDED,
-                                                    MHD_RESPMEM_PERSISTENT);
+                                                     (void*)RESPONSE_AUTHENTICATION_NEEDED, MHD_RESPMEM_PERSISTENT);
        if (response == NULL) return(MHD_NO);
        MHD_queue_response ( connection, MHD_HTTP_UNAUTHORIZED, response);
        MHD_destroy_response (response);
        return(MHD_YES);
      }
-
+     
 //    syn_id_char = MHD_lookup_connection_value ( connection, MHD_GET_ARGUMENT_KIND, "syn_id" );
 //    if (!syn_id_char) { syn_id = 1; }
 //                 else { syn_id = atoi(syn_id_char); }
@@ -183,6 +181,6 @@
     MHD_add_response_header (response, "Content-Type", "application/xml");
     MHD_queue_response (connection, MHD_HTTP_OK, response);
     MHD_destroy_response (response);
-    return(TRUE);
+    return(MHD_YES);
   }
 /*--------------------------------------------------------------------------------------------------------*/

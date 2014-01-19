@@ -39,7 +39,7 @@
     pthread_t tid;
     connexion = client->connexion;
 
-    if ( ! Tester_groupe_util( client->util->id, client->util->gids, GID_DLS) )
+    if ( ! Tester_groupe_util( client->util, GID_DLS) )
      { struct CMD_GTK_MESSAGE gtkmessage;
        g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied..." );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
