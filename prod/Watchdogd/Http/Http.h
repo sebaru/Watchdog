@@ -37,6 +37,8 @@
  #define HTTP_DEFAUT_PORT_HTTP         5560
  #define HTTP_DEFAUT_PORT_HTTPS        5561
 
+ #define RESPONSE_INTERNAL_ERROR        "<html><body>An internal server error has occured!..</body></html>"    
+ #define RESPONSE_AUTHENTICATION_NEEDED "<html><body>Authentication Needed !</body></html>"    
  struct HTTP_CONFIG
   { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
@@ -64,7 +66,15 @@
 
  struct HTTP_CONNEXION_INFO
   { gint     type;
-    gboolean request_processed;                 /* TRUE si la requete est complete et doit etre processée */
+    gchar    client_host[80];
+    gchar    client_service[20];
+    gchar    client_dn[120];
+    gchar    username[80];
+    gchar    issuer_dn[120];
+    gchar    user_agent[120], origine[80];
+    gint     ssl_algo, ssl_proto;
+    struct CMD_TYPE_UTILISATEUR *util;
+    gboolean dont_free;     /* TRUE si la requete est complete et doit etre processée par HTTP et non MHD */
     gchar   *buffer;                                   /* Le buffer recu dans le corps de la requete HTTP */
     gint     buffer_size;                                                    /* La taille utile du buffer */
   };
@@ -77,13 +87,17 @@
 /*************************************** Définitions des prototypes ***************************************/
  extern gboolean Http_Lire_config ( void );
  extern gboolean Http_Traiter_request_getsyn ( struct MHD_Connection *connection );
- extern gboolean Http_Traiter_request_getstatus ( struct MHD_Connection *connection );
+ extern gint Http_Traiter_request_getstatus ( struct MHD_Connection *connection,
+                                              struct HTTP_CONNEXION_INFO *infos );
  extern gboolean Http_Traiter_request_getgif ( struct MHD_Connection *connection );
  extern gboolean Http_Traiter_request_gifile ( struct MHD_Connection *connection );
  extern gboolean Http_Traiter_request_set_internal ( struct MHD_Connection *connection,
                                                      const char *upload_data, 
                                                      size_t *upload_data_size, void **con_cls );
  extern gboolean Http_Traiter_request_setm ( struct MHD_Connection *connection );
+ extern void Http_Add_titanium_response_header ( struct MHD_Connection *connection,
+                                                 struct MHD_Response *response );
+ extern struct CMD_TYPE_UTILISATEUR *Http_is_authenticated ( struct MHD_Connection *connection );
  extern void Http_free_liste_satellites ( void );
  extern void Http_Check_satellites_states ( void );
  extern void Http_Traiter_XML_set_internal ( struct HTTP_CONNEXION_INFO *infos );

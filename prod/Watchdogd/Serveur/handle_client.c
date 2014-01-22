@@ -57,7 +57,6 @@
                      (gchar *)motif, sizeof(struct CMD_ETAT_BIT_CTRL) );
      }
     g_free(motif);
-
   }
 /**********************************************************************************************************/
 /* Envoyer_new_histo_au_client: Parcours la liste des histo et les envoi                                  */
@@ -75,7 +74,7 @@
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
        
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "Envoyer_new_histo: Histo traite : id = %06d, msg=%04d, libelle=%s",
+             "Envoyer_histo_au_client: Histo traite : id = %06d, msg=%04d, libelle=%s",
               histo->id, histo->msg.num, histo->msg.libelle );
 
     Envoi_client( client, TAG_HISTO, (histo->alive ? SSTAG_SERVEUR_SHOW_HISTO : SSTAG_SERVEUR_DEL_HISTO),
@@ -125,26 +124,6 @@
           case ATTENTE_CONNEXION_SSL:
                Connecter_ssl ( client );                        /* Tentative de connexion securisée */
                break;
-#ifdef bouh
-          case ENVOI_AUTORISATION :
-                { gint new_mode;
-                  new_mode = Tester_autorisation( client );
-                  if (new_mode == ENVOI_DONNEES)/* Optimisation si pas necessaire */
-                   { version_serveur = Lire_version_donnees( Config.log );
-                     if ( version_serveur > client->ident.version_d )
-                      {  gint taille;
-                         taille = 0;
-                         taille += Ajouter_repertoire_liste( client, "Gif", client->ident.version_d );
-                         client->transfert.taille = taille;
-                      }
-                   }
-                  Client_mode ( client, new_mode );
-                }
-               break;
-          case ENVOI_DONNEES      :
-               if(Envoyer_gif( client )) Client_mode (client, ENVOI_HISTO);
-               break;
-#endif
           case ENVOI_HISTO        :
                Client_mode( client, VALIDE_NON_ROOT );
                Ref_client( client );                       /* Indique que la structure est utilisée */
@@ -170,9 +149,6 @@
                Ref_client( client );                       /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_propriete_synoptique_thread, client );
                pthread_detach( tid );
-               break;
-          case ENVOI_SOURCE_DLS   :
-               if(Envoyer_source_dls( client )) Client_mode(client, VALIDE);
                break;
           case ENVOI_MNEMONIQUE_FOR_COURBE:
                Client_mode( client, VALIDE );

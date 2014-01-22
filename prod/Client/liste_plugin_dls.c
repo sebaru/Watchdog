@@ -178,7 +178,8 @@
     memcpy( &rezo_dls.nom, nom, sizeof(rezo_dls.nom) );
     g_free( nom );
     if (!Chercher_page_notebook (TYPE_PAGE_SOURCE_DLS, rezo_dls.id, TRUE))/* Page deja créé et affichée ? */
-     { Envoi_serveur( TAG_DLS, SSTAG_CLIENT_EDIT_SOURCE_DLS,
+     { Creer_page_source_dls ( &rezo_dls );
+     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_WANT_SOURCE_DLS,
                       (gchar *)&rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
      }
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);

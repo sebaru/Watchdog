@@ -131,7 +131,8 @@
      } else
     if ( ! strcmp ( commande, "add" ) )
      { struct CMD_TYPE_UTILISATEUR util;
-
+       util.expire = 0;
+       util.date_expire = 0;
        sscanf ( ligne, "%s %s %[^\n]", commande, util.nom, util.commentaire );/* Découpage de la ligne de commande */
        if (Ajouter_utilisateurDB ( &util ) == -1)
         { g_snprintf( chaine, sizeof(chaine), " User %s couldn't be added in Database\n", util.nom );

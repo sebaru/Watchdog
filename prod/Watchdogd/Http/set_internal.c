@@ -225,7 +225,7 @@ end:
     pthread_mutex_lock( &Cfg_http.lib->synchro );             /* On envoie au thread HTTP pour traitement */
     Cfg_http.Liste_XML_docs = g_slist_prepend ( Cfg_http.Liste_XML_docs, infos );
     infos->type = HTTP_CONNEXION_SET_INTERNAL;
-    infos->request_processed = TRUE;           /* Indique que la requete est traitée, pas de free mémoire */
+    infos->dont_free = TRUE;                   /* Indique que la requete est traitée, pas de free mémoire */
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
 
     response = MHD_create_response_from_buffer ( strlen (Handled_OK),

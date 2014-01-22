@@ -87,8 +87,8 @@
 
             ident = (struct REZO_CLI_IDENT *)connexion->donnees;
             Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-                     "Gerer_protocol: Identification du client (%d), nom=%s, version=%s, version_donnees=%d",
-                      connexion->socket, ident->nom, ident->version, ident->version_d );
+                     "Gerer_protocol: Identification du client (%d), nom=%s, version=%s",
+                      connexion->socket, ident->nom, ident->version );
             memcpy( &client->ident, ident, sizeof( struct REZO_CLI_IDENT ) );  /* Recopie pour sauvegarde */
             
                                                                         /* Vérification du MAJOR et MINOR */

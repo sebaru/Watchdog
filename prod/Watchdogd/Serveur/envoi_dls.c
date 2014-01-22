@@ -146,35 +146,56 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_editer_source_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
-  { gchar chaine[80];
+  { struct CMD_TYPE_SOURCE_DLS *source_dls;
+    gint taille, fd, taille_max_data;
+    gchar *buffer_all, *buffer_data;
+    gchar chaine[80];
 
-#ifdef bouh
-    client->transfert.buffer = g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );
-    if (!client->transfert.buffer)
+    Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_SOURCE_DLS_START,
+                  (gchar *)rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+
+    buffer_all = g_malloc0 ( Cfg_ssrv.taille_bloc_reseau );
+    if (!buffer_all)
      { struct CMD_GTK_MESSAGE erreur;
-       g_snprintf( erreur.message, sizeof(erreur.message), "Not enough memory" );
+       g_snprintf( erreur.message, sizeof(erreur.message), "Memory Error %s", chaine );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
+                "Proto_editer_source_dls: Memory alloc error" );
        return;
      }
+                                                 /* Utilisation du debut du buffer pour stocker structure */
+    source_dls = (struct CMD_TYPE_SOURCE_DLS *)buffer_all;
+    source_dls->id = rezo_dls->id;
+    buffer_data = buffer_all + sizeof(struct CMD_TYPE_SOURCE_DLS);       /* Index data dans le buffer_all */
+    taille_max_data = Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_SOURCE_DLS);
 
     g_snprintf( chaine, sizeof(chaine), "%d.dls", rezo_dls->id );
-    client->transfert.fd = open( chaine, O_RDONLY );
-    if (client->transfert.fd < 0)
+    fd = open( chaine, O_RDONLY );
+    if (fd < 0)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message), "Unable to open %s", chaine );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       g_free(client->transfert.buffer);
+       g_free(buffer_all);
        return;
      }
-    client->transfert.index = 0;
-    lockf( client->transfert.fd, F_LOCK, 0 );                                  /* Verrouillage du fichier */
-    ((struct CMD_TYPE_SOURCE_DLS *)client->transfert.buffer)->id = rezo_dls->id;
-    Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_EDIT_SOURCE_DLS_OK,
-                  (gchar *)rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-    Client_mode( client, ENVOI_SOURCE_DLS );
-#endif
+
+    lockf( fd, F_LOCK, 0 );                                                    /* Verrouillage du fichier */
+    for ( ; ; )                                                         /* On balance le fichier source ! */
+     { taille = read ( fd, buffer_data, taille_max_data );
+       if (taille<=0)                                                      /* Détection de fin de fichier */
+        { close(fd);
+          break;
+        }
+    
+       source_dls->taille = taille;
+       Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_SOURCE_DLS,
+                      buffer_all, taille + sizeof(struct CMD_TYPE_SOURCE_DLS) );
+     }
+    Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_SOURCE_DLS_END,
+                   buffer_all, sizeof(struct CMD_TYPE_SOURCE_DLS) );
+    g_free(buffer_all);
   }
 /**********************************************************************************************************/
 /* Proto_valider_source_dls: Le client nous envoie un prg DLS qu'il nous faudra compiler ensuite          */
@@ -357,44 +378,5 @@
                                    );
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit ( NULL );
-  }
-/**********************************************************************************************************/
-/* Envoyer_source_dls: Envoi d'un programme D.L.S                                                         */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- gboolean Envoyer_source_dls ( struct CLIENT *client )
-  { gint taille, nbr_carac, taille_valide, taille_buffer;
-    struct CMD_TYPE_SOURCE_DLS *edit_dls;
-    gchar *buffer;
-    gchar *test;
-
-#ifdef bouh
-    if (!client->transfert.buffer) return(TRUE);
-    if (client->transfert.fd<0) return(TRUE);
-    edit_dls = (struct CMD_TYPE_SOURCE_DLS *)client->transfert.buffer;
-    buffer = client->transfert.buffer + sizeof(struct CMD_TYPE_SOURCE_DLS);
-    taille_buffer = Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_SOURCE_DLS);
-
-    taille = read ( client->transfert.fd,
-                    buffer + client->transfert.index,
-                    taille_buffer - client->transfert.index );
-    if (taille<=0)                                                         /* Détection de fin de fichier */
-     { g_free(client->transfert.buffer);
-       client->transfert.buffer = NULL;
-       close(client->transfert.fd);
-       client->transfert.fd = 0;
-       return(TRUE);
-     }
-    nbr_carac = g_utf8_strlen( buffer, taille );
-    test = g_utf8_offset_to_pointer( buffer, nbr_carac );
-    taille_valide = test - buffer;
-    
-    edit_dls->taille = taille_valide;
-    Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_SOURCE_DLS,
-                   (gchar *)client->transfert.buffer, taille_valide + sizeof(struct CMD_TYPE_SOURCE_DLS) );
-    memcpy( buffer, buffer + taille_valide, taille-taille_valide );
-    return(FALSE);
-#endif
   }
 /*--------------------------------------------------------------------------------------------------------*/

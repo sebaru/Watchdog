@@ -230,14 +230,15 @@
 /* Entrées: un id utilisateur, une liste de groupe, un id de groupe                                       */
 /* Sortie: false si pb                                                                                    */
 /**********************************************************************************************************/
- gboolean Tester_groupe_util( guint id_util, guint *groupes, guint id_groupe )
+ gboolean Tester_groupe_util( struct CMD_TYPE_UTILISATEUR *util, guint id_groupe )
   { gint cpt;
-    if (id_util==UID_ROOT) return(TRUE);                             /* Le tech est dans tous les groupes */
+    if (!util) return(FALSE);
+    if ( util->id == UID_ROOT) return(TRUE);                         /* Le tech est dans tous les groupes */
+    if (!util->enable) return(FALSE);
     if (id_groupe==GID_TOUTLEMONDE) return(TRUE);
-
     cpt=0;
-    while( groupes[cpt] )
-     { if( groupes[cpt] == id_groupe ) return(TRUE);
+    while( util->gids[cpt] )
+     { if( util->gids[cpt] == id_groupe ) return(TRUE);
        cpt++;
      }
     return(FALSE);

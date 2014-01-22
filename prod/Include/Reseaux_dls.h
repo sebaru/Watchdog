@@ -87,12 +87,14 @@
     SSTAG_CLIENT_VALIDE_EDIT_PLUGIN_DLS,                         /* Le client renvoie les données editées */
     SSTAG_SERVEUR_VALIDE_EDIT_PLUGIN_DLS_OK,                   /* Le serveur valide les nouvelles données */
 
-    SSTAG_CLIENT_EDIT_SOURCE_DLS,                         /* Le client demande l'edition d'un utilisateur */
-    SSTAG_SERVEUR_EDIT_SOURCE_DLS_OK,          /* Le serveur accepte et envoi les données correspondantes */
-    SSTAG_SERVEUR_SOURCE_DLS,                                                         /* Envoi du prg DLS */
     SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_DEB,                     /* Le client renvoie les données editées */
     SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS,                         /* Le client renvoie les données editées */
     SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_FIN,                     /* Le client renvoie les données editées */
+
+    SSTAG_CLIENT_WANT_SOURCE_DLS,                 /* Le client demande de recupérer un fichier DLS source */
+    SSTAG_SERVEUR_SOURCE_DLS_START,
+    SSTAG_SERVEUR_SOURCE_DLS,
+    SSTAG_SERVEUR_SOURCE_DLS_END,
 
     SSTAG_CLIENT_WANT_SYN_FOR_PLUGIN_DLS,                       /* Envoi des synoptiques pour les plugins */
     SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_PLUGIN_DLS,

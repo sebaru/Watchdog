@@ -39,7 +39,7 @@
     pthread_t tid;
     connexion = client->connexion;
 
-    if ( ! Tester_groupe_util( client->util->id, client->util->gids, GID_TOUTLEMONDE) )
+    if ( ! Tester_groupe_util( client->util, GID_TOUTLEMONDE) )
      { struct CMD_GTK_MESSAGE gtkmessage;
        g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied for user..." );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
@@ -109,7 +109,7 @@
        case SSTAG_CLIENT_SUP_ADD_SCENARIO:
              { struct CMD_TYPE_SCENARIO *sce;
 
-               if ( ! Tester_groupe_util( client->util->id, client->util->gids, GID_SCENARIO) )
+               if ( ! Tester_groupe_util( client->util, GID_SCENARIO) )
                 { struct CMD_GTK_MESSAGE gtkmessage;
                   g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied..." );
                   Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
@@ -123,7 +123,7 @@
        case SSTAG_CLIENT_SUP_DEL_SCENARIO:
              { struct CMD_TYPE_SCENARIO *sce;
 
-               if ( ! Tester_groupe_util( client->util->id, client->util->gids, GID_SCENARIO) )
+               if ( ! Tester_groupe_util( client->util, GID_SCENARIO) )
                 { struct CMD_GTK_MESSAGE gtkmessage;
                   g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied..." );
                   Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,

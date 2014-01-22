@@ -41,22 +41,22 @@
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
  gboolean Http_Traiter_request_getgif ( struct MHD_Connection *connection )
-  { struct MHD_Response *response;
-    const gchar *gif_char, *mode_char, *x_titanium;
+  { const gchar *id_char, *mode_char;
+    struct MHD_Response *response;
     gchar nom_fichier[80];
-    gint gif, mode, fd;
+    gint id, mode, fd;
     struct stat sbuf;
 
-    gif_char  = MHD_lookup_connection_value ( connection, MHD_GET_ARGUMENT_KIND, "gif" );
+    id_char   = MHD_lookup_connection_value ( connection, MHD_GET_ARGUMENT_KIND, "id" );
     mode_char = MHD_lookup_connection_value ( connection, MHD_GET_ARGUMENT_KIND, "mode" );
 
-    if (!gif_char)  { gif = 1; }
-               else { gif = atoi(gif_char); }
+    if (!id_char)   { id = 1; }
+               else { id = atoi(id_char); }
     if (!mode_char) { mode = 0; }
                else { mode = atoi(mode_char); }
 
-    if (mode) { g_snprintf( nom_fichier, sizeof(nom_fichier), "Gif/%d.gif.%02d", gif, mode ); }
-         else { g_snprintf( nom_fichier, sizeof(nom_fichier), "Gif/%d.gif", gif ); }
+    if (mode) { g_snprintf( nom_fichier, sizeof(nom_fichier), "Gif/%d.gif.%02d", id, mode ); }
+         else { g_snprintf( nom_fichier, sizeof(nom_fichier), "Gif/%d.gif", id ); }
 
     fd = open ( nom_fichier, O_RDONLY);
     if ( fd == -1 || fstat (fd, &sbuf) == -1)
@@ -68,10 +68,7 @@
 
     response = MHD_create_response_from_fd_at_offset (sbuf.st_size, fd, 0);
     MHD_add_response_header (response, "Content-Type", "image/gif");
-    x_titanium = MHD_lookup_connection_value (connection, MHD_HEADER_KIND, "X-Titanium-Id");
-    if (!x_titanium) x_titanium = "unknown";
-    MHD_add_response_header ( response, "Access-Control-Allow-Origin", "*" );
-    MHD_add_response_header ( response, "X-Titanium-Id", x_titanium);
+    Http_Add_titanium_response_header ( connection, response );
     MHD_queue_response (connection, MHD_HTTP_OK, response);
     MHD_destroy_response (response);
     return(TRUE);

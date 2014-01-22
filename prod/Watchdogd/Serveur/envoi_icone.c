@@ -232,7 +232,8 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_ajouter_icone_fin_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone )
-  { Changer_version_donnees( Config.log, 0 );          /* Mise à jour de la date de dernière modification */
+  { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
+             "Proto_ajouter_icone_fin_file: Reception GIF OK %s", icone->libelle );
   }
 /**********************************************************************************************************/
 /* Envoyer_icones: Envoi des icones au client GID_ICONE                                                   */
