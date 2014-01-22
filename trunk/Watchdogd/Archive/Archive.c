@@ -154,7 +154,7 @@
                     g_slist_length(Partage->com_arch.liste_arch) );
           Partage->com_arch.taille_arch--;
           pthread_mutex_unlock( &Partage->com_arch.synchro );
-          Ajouter_archRRD( arch );
+          /*Ajouter_archRRD( arch );*/
           Ajouter_archDB ( db, arch );
           g_free(arch);
           Info_new( Config.log, Config.log_arch, LOG_DEBUG, "Run_arch: archive saved" );

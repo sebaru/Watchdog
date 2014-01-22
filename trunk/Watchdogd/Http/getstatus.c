@@ -45,7 +45,9 @@
     gint retour, num;
     gchar host[128];
 
-    if ( (!infos) || (!infos->util) || (Tester_groupe_util(infos->util, GID_TOUTLEMONDE)==FALSE) )
+    if ( Cfg_http.authenticate == TRUE &&
+         ((!infos) || (!infos->util) || (Tester_groupe_util(infos->util, GID_TOUTLEMONDE)==FALSE))
+       )
      { response = MHD_create_response_from_buffer ( strlen (RESPONSE_AUTHENTICATION_NEEDED)+1,
                                                      (void*)RESPONSE_AUTHENTICATION_NEEDED, MHD_RESPMEM_PERSISTENT);
        if (response == NULL) return(MHD_NO);

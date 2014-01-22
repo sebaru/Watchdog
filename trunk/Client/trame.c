@@ -492,7 +492,7 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
        return(FALSE);
      }
 
-    g_snprintf( url, sizeof(url), "%s:%d/getgif?gif=%d&mode=%d",
+    g_snprintf( url, sizeof(url), "%s:%d/getgif?id=%d&mode=%d",
                 Client_en_cours.host, Config_cli.port_http, id, mode );
 printf("Try to get %s\n", url );
     curl_easy_setopt(curl, CURLOPT_URL, url );

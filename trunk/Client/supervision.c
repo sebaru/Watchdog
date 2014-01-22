@@ -220,6 +220,10 @@
 
     memcpy( motif, rezo_motif, sizeof(struct CMD_TYPE_MOTIF) );
     trame_motif = Trame_ajout_motif ( FALSE, infos->Trame, motif );
+    if (!trame_motif) 
+     { printf("Erreur creation d'un nouveau motif\n");
+       return;                                                          /* Ajout d'un test anti seg-fault */
+     }
     trame_motif->groupe_dpl = Nouveau_groupe();                   /* Numéro de groupe pour le deplacement */
     trame_motif->rouge  = motif->rouge0;                                         /* Sauvegarde etat motif */
     trame_motif->vert   = motif->vert0;                                          /* Sauvegarde etat motif */

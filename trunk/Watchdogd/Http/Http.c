@@ -58,6 +58,7 @@
     Cfg_http.http_port         = HTTP_DEFAUT_PORT_HTTP;
     Cfg_http.https_enable      = FALSE; 
     Cfg_http.https_port        = HTTP_DEFAUT_PORT_HTTPS;
+    Cfg_http.authenticate      = TRUE; 
     Cfg_http.nbr_max_connexion = HTTP_DEFAUT_MAX_CONNEXION;
     g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", HTTP_DEFAUT_FILE_CERT );
     g_snprintf( Cfg_http.https_file_key,  sizeof(Cfg_http.https_file_key),  "%s", HTTP_DEFAUT_FILE_KEY );
@@ -90,6 +91,8 @@
         { Cfg_http.https_port = atoi(valeur);  }
        else if ( ! g_ascii_strcasecmp ( nom, "satellite_enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.satellite_enable = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "authenticate" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "false" ) ) Cfg_http.authenticate = FALSE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.lib->Thread_debug = TRUE;  }
        else
@@ -301,7 +304,8 @@
                                      infos->username, (size_t *)&size);
        infos->util = Rechercher_utilisateurDB_by_name ( infos->username );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "Prepare_request : New HTTPS %s %s %s request (Payload size %d) from Host=%s(dn=%s cn=%s)/Service=%s (Cipher=%s/Proto=%s/Issuer=%s). User-Agent=%s. Origin=%s",
+                "Prepare_request : New HTTPS %s %s %s request (Payload size %d) from Host=%s(dn=%s cn=%s)/Service=%s"
+                " (Cipher=%s/Proto=%s/Issuer=%s). User-Agent=%s. Origin=%s",
                  method, url, version, (upload_data_size ? *upload_data_size : 0),
                  infos->client_host, infos->client_dn, infos->username, infos->client_service,
                  gnutls_cipher_get_name (infos->ssl_algo), gnutls_protocol_get_name (infos->ssl_proto),
@@ -348,7 +352,7 @@
         }
      }
     else if ( Cfg_http.satellite_enable && ! strcasecmp( method, MHD_HTTP_METHOD_POST ) && ! strcasecmp ( url, "/set_internal" ) )
-     { if ( Http_Traiter_request_set_internal ( connection, upload_data, upload_data_size, con_cls ) == FALSE)        /* Traitement de la requete */
+     { if ( Http_Traiter_request_set_internal ( connection, upload_data, upload_data_size, infos ) == FALSE)        /* Traitement de la requete */
         { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
                                                       (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
           if (response == NULL) return(MHD_NO);

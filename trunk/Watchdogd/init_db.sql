@@ -213,7 +213,8 @@ INSERT INTO `groups` (`id`, `name`, `comment`) VALUES
 (7, 'Admin-histoDB', 'Members can ack/query histo'),
 (8, 'Admin-scenarioDB', 'Members can add/remove Scenario'),
 (9, 'Admin-Lowlevel I/O', 'Configuration MODBUS/RS485/ONDULEUR/...'),
-(10, 'Admin-CommandLineInterface', 'Command Line Interface Access');
+(10, 'Admin-CommandLineInterface', 'Command Line Interface Access'),
+(11, 'Admin-HttpSetInternal', 'Add SetInternal Capabilities');
 
 -- --------------------------------------------------------
 
