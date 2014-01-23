@@ -601,10 +601,10 @@ encore:
           if (Add_single_icone_to_item(trame_item, icone_id, i) == FALSE) return;            /* Si erreur */
         }
        goto encore;
-    }
+     }
 
-   for (i=1; ;i++)
-    { if (Add_single_icone_to_item(trame_item, icone_id, i) == FALSE) break; }
+    for (i=1; ;i++)
+     { if (Add_single_icone_to_item(trame_item, icone_id, i) == FALSE) break; }
   }
 /**********************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                       */
