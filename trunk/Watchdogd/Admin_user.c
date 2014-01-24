@@ -104,6 +104,7 @@
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'running'\n" );
        Admin_write ( connexion, "  add $name $comment      - Add user $name with $commment\n" );
+       Admin_write ( connexion, "  del $id                 - Erase user $id\n" );
        Admin_write ( connexion, "  cansetpwd $name $bool   - Set CanSetPwd flag to true or false\n" );
        Admin_write ( connexion, "  list                    - Liste les users Watchdog\n" );
        Admin_write ( connexion, "  passwd $name $pwd       - Set password $pwd to user $name\n" );
@@ -127,6 +128,18 @@
        else
         { Admin_print_user ( connexion, util );
           g_free(util);
+        }
+     } else
+    if ( ! strcmp ( commande, "del" ) )
+     { struct CMD_TYPE_UTILISATEUR util;
+       sscanf ( ligne, "%s %d", commande, &util.id );                /* Découpage de la ligne de commande */
+       if (Retirer_utilisateurDB ( &util ) == FALSE)
+        { g_snprintf( chaine, sizeof(chaine), " User %d couldn't be removed\n", util.id );
+          Admin_write ( connexion, chaine );
+        }
+       else
+        { g_snprintf( chaine, sizeof(chaine), " User %d removed\n", util.id );
+          Admin_write ( connexion, chaine );
         }
      } else
     if ( ! strcmp ( commande, "add" ) )
