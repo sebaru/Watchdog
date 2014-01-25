@@ -204,6 +204,8 @@ end:
        return(MHD_YES);
      }
 
+    if (*upload_data_size == 0 && infos->buffer_size == 0) return(MHD_YES);   /* Attente du premier chunk */
+
     if (*upload_data_size != 0)                                                   /* Transfert en cours ? */
      { gchar *new_buffer;
        new_buffer = g_try_realloc( infos->buffer, infos->buffer_size + *upload_data_size );
