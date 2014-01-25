@@ -350,6 +350,7 @@
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
           MHD_destroy_response (response);
         }
+       return MHD_YES;
      }
     else if ( Cfg_http.satellite_enable && ! strcasecmp( method, MHD_HTTP_METHOD_POST ) && ! strcasecmp ( url, "/set_internal" ) )
      { return ( Http_Traiter_request_set_internal ( connection, upload_data, upload_data_size, infos ) ); }
@@ -361,6 +362,7 @@
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
           MHD_destroy_response (response);
         }
+       return MHD_YES;
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/status" ) )
      { return( Http_Traiter_request_getstatus ( connection, infos ) ); }
@@ -372,6 +374,7 @@
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
           MHD_destroy_response (response);
         }
+       return MHD_YES;
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/gifile" ) )
      { if ( Http_Traiter_request_gifile ( connection ) == FALSE)              /* Traitement de la requete */
@@ -381,6 +384,7 @@
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
           MHD_destroy_response (response);
         }
+       return MHD_YES;
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/favicon.ico" ) )
      { struct stat sbuf;
@@ -401,6 +405,7 @@
        MHD_add_response_header (response, "Content-Type", "image/gif");
        MHD_queue_response (connection, MHD_HTTP_OK, response);
        MHD_destroy_response (response);
+       return MHD_YES;
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/xml" ) )
      { struct stat sbuf;
@@ -416,11 +421,12 @@
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
           MHD_destroy_response (response);
           return(MHD_YES);
-       }
-      response = MHD_create_response_from_fd_at_offset (sbuf.st_size, fd, 0);
-      MHD_add_response_header (response, "Content-Type", "application/xml");
-      MHD_queue_response (connection, MHD_HTTP_OK, response);
-      MHD_destroy_response (response);
+        }
+       response = MHD_create_response_from_fd_at_offset (sbuf.st_size, fd, 0);
+       MHD_add_response_header (response, "Content-Type", "application/xml");
+       MHD_queue_response (connection, MHD_HTTP_OK, response);
+       MHD_destroy_response (response);
+       return MHD_YES;
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_OPTIONS ) )
      { response = MHD_create_response_from_buffer ( strlen (Options_response)+1,
@@ -432,6 +438,7 @@
        MHD_add_response_header ( response, "Access-Control-Allow-Headers", "X-Titanium-Id" );
        MHD_queue_response (connection, MHD_HTTP_OK, response);
        MHD_destroy_response (response);
+       return MHD_YES;
      }
     else if ( strcasecmp( method, MHD_HTTP_METHOD_GET ) && strcasecmp( method, MHD_HTTP_METHOD_POST ) )
      { response = MHD_create_response_from_buffer ( strlen (Wrong_method)+1,
@@ -440,15 +447,15 @@
        MHD_queue_response ( connection, MHD_HTTP_METHOD_NOT_ALLOWED, response);     /* Method not allowed */
        MHD_destroy_response (response);
      }
-
-    else
+    else if ( strcasecmp( method, MHD_HTTP_METHOD_GET ) )
      { response = MHD_create_response_from_buffer ( strlen (Not_found)+1,
                                                    (void*) Not_found, MHD_RESPMEM_PERSISTENT);
        if (response == NULL) return(MHD_NO);
        MHD_queue_response ( connection, MHD_HTTP_NOT_FOUND, response);
        MHD_destroy_response (response);
+       return MHD_YES;
      }
-    return MHD_YES;
+    return MHD_NO;
   }
 /**********************************************************************************************************/
 /* Http Liberer_infos : Libere la mémoire réservée par la structure infos de reception de la requete      */
