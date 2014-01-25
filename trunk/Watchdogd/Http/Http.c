@@ -339,8 +339,10 @@
     struct MHD_Response *response;
 
     if (!*con_cls)
-     { return(Prepare_request(connection, url, method, version, upload_data_size, con_cls)); }
-    else infos = *con_cls;                 /* infos est g_freé via CB a la fin de la requete issue de MHD */
+     { if (Prepare_request(connection, url, method, version, upload_data_size, con_cls) == MHD_NO)
+        { return(MHD_NO); }
+     }
+    infos = *con_cls;                      /* infos est g_freé via CB a la fin de la requete issue de MHD */
     
     if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getsyn" ) )
      { if ( Http_Traiter_request_getsyn ( connection ) == FALSE)              /* Traitement de la requete */
@@ -448,7 +450,7 @@
        MHD_destroy_response (response);
        return MHD_YES;
      }
-    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) )
+    else /*if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) )*/
      { response = MHD_create_response_from_buffer ( strlen (Not_found)+1,
                                                    (void*) Not_found, MHD_RESPMEM_PERSISTENT);
        if (response == NULL) return(MHD_NO);
