@@ -202,7 +202,7 @@ end:
        MHD_add_response_header ( response, "Connection", "close" );
        MHD_queue_response ( connection, MHD_HTTP_UNAUTHORIZED, response);
        MHD_destroy_response (response);
-       return(MHD_YES);
+       return(MHD_NO);
      }
 
     if (*upload_data_size != 0)                                                   /* Transfert en cours ? */

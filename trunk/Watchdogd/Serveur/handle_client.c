@@ -88,7 +88,6 @@
 /**********************************************************************************************************/
  void Run_handle_client ( struct CLIENT *client )
   { static gint thread_count = 0;
-    time_t version_serveur;
     pthread_t tid;
     gchar nom[16];
 
