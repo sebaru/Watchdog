@@ -217,7 +217,7 @@ end:
        memcpy ( infos->buffer + infos->buffer_size, upload_data, *upload_data_size );          /* Recopie */
        infos->buffer_size += *upload_data_size;
        *upload_data_size = 0;              /* Indique à MHD que l'on a traité l'ensemble des octets recus */
-       return(TRUE);
+       return(MHD_YES);                                           /* On demande de continuer le transfert */
      }
 /*-------------------------------- Fin de transfert. On envoie une reponse OK ----------------------------*/
     pthread_mutex_lock( &Cfg_http.lib->synchro );             /* On envoie au thread HTTP pour traitement */
