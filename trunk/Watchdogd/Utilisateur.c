@@ -69,6 +69,48 @@
     return(retour);
   }
 /**********************************************************************************************************/
+/* Retirer_utilisateur: Elimine un utilisateur dans la base de données                                    */
+/* Entrées: un log, une db, un nom                                                                        */
+/* Sortie: true si pas de pb, false sinon                                                                 */
+/**********************************************************************************************************/
+ gboolean Set_enable_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util )
+  { gchar requete[512];
+    gboolean retour;
+    struct DB *db;
+
+    if (util->id == UID_ROOT || !strcmp(util->nom, "root")) 
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, 
+                "Set_enable_utilisateurDB: Root couldn't be disabled" );
+       return(FALSE);
+     }
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_utilisateurDB: DB connexion failed" );
+       return(FALSE);
+     }
+
+    if (util->id != -1)
+     { g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                   "UPDATE %s SET enable=%d WHERE id=%d", NOM_TABLE_UTIL, util->enable, util->id );
+     }
+    else
+     { gchar *nom;
+       nom        = Normaliser_chaine ( util->nom );                        /* Formatage correct des chaines */
+       if (!nom)
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                   "Set_enable_utilisateurDB: Normalisation impossible" );
+          return(FALSE);
+        }
+       g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                   "UPDATE %s SET enable=%d WHERE name='%s'", NOM_TABLE_UTIL, util->enable, nom );
+       g_free(nom);
+     }
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
+  }
+/**********************************************************************************************************/
 /* Modifier_utilisateurDB: Modification d'u nutilisateur Watchdog                                         */
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */

@@ -73,6 +73,7 @@
  extern gboolean Recuperer_utilisateurDB( struct DB **db );                         /* Dans Utilisateur.c */
  extern struct CMD_TYPE_UTILISATEUR *Recuperer_utilisateurDB_suite( struct DB **db );
  extern gboolean Retirer_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util );
+ extern gboolean Set_enable_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util );
  extern gint Ajouter_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util );
  extern struct CMD_TYPE_UTILISATEUR *Rechercher_utilisateurDB_by_id( gint id );
  extern struct CMD_TYPE_UTILISATEUR *Rechercher_utilisateurDB_by_name( gchar *nom );
