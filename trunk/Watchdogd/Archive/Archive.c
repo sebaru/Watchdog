@@ -114,6 +114,9 @@
        if (result)       
         { Info_new( Config.log, Config.log_arch, LOG_ERR,
                     "Ajouter_archRRD: Error creating RRD %s.", rrd_get_error() );
+        } else 
+        { Info_new( Config.log, Config.log_arch, LOG_INFO,
+                    "Ajouter_archRRD: Creation of RRD file %s OK", fichier );
         }
      }
   }

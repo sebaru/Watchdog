@@ -352,14 +352,7 @@
         }
      }
     else if ( Cfg_http.satellite_enable && ! strcasecmp( method, MHD_HTTP_METHOD_POST ) && ! strcasecmp ( url, "/set_internal" ) )
-     { if ( Http_Traiter_request_set_internal ( connection, upload_data, upload_data_size, infos ) == FALSE)        /* Traitement de la requete */
-        { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
-                                                      (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
-          if (response == NULL) return(MHD_NO);
-          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
-          MHD_destroy_response (response);
-        }
-     }
+     { return ( Http_Traiter_request_set_internal ( connection, upload_data, upload_data_size, infos ) ); }
     else if ( Cfg_http.satellite_enable && ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/setm" ) )
      { if ( Http_Traiter_request_setm ( connection ) == FALSE )              /* Traitement de la requete */
         { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
