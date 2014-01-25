@@ -340,7 +340,7 @@
 
     if (!*con_cls)
      { return(Prepare_request(connection, url, method, version, upload_data_size, con_cls)); }
-    else infos = *con_cls;
+    else infos = *con_cls;                 /* infos est g_freé via CB a la fin de la requete issue de MHD */
     
     if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getsyn" ) )
      { if ( Http_Traiter_request_getsyn ( connection ) == FALSE)              /* Traitement de la requete */
@@ -350,7 +350,6 @@
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
           MHD_destroy_response (response);
         }
-       g_free(infos);
        return MHD_YES;
      }
     else if ( Cfg_http.satellite_enable && ! strcasecmp( method, MHD_HTTP_METHOD_POST ) && ! strcasecmp ( url, "/set_internal" ) )
@@ -363,7 +362,6 @@
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
           MHD_destroy_response (response);
         }
-       g_free(infos);
        return MHD_YES;
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/status" ) )
@@ -376,7 +374,6 @@
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
           MHD_destroy_response (response);
         }
-       g_free(infos);
        return MHD_YES;
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/gifile" ) )
@@ -387,7 +384,6 @@
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
           MHD_destroy_response (response);
         }
-       g_free(infos);
        return MHD_YES;
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/favicon.ico" ) )
@@ -409,7 +405,6 @@
        MHD_add_response_header (response, "Content-Type", "image/gif");
        MHD_queue_response (connection, MHD_HTTP_OK, response);
        MHD_destroy_response (response);
-       g_free(infos);
        return MHD_YES;
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/xml" ) )
@@ -431,7 +426,6 @@
        MHD_add_response_header (response, "Content-Type", "application/xml");
        MHD_queue_response (connection, MHD_HTTP_OK, response);
        MHD_destroy_response (response);
-       g_free(infos);
        return MHD_YES;
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_OPTIONS ) )
@@ -444,7 +438,6 @@
        MHD_add_response_header ( response, "Access-Control-Allow-Headers", "X-Titanium-Id" );
        MHD_queue_response (connection, MHD_HTTP_OK, response);
        MHD_destroy_response (response);
-       g_free(infos);
        return MHD_YES;
      }
     else if ( strcasecmp( method, MHD_HTTP_METHOD_GET ) && strcasecmp( method, MHD_HTTP_METHOD_POST ) )
@@ -453,7 +446,6 @@
        if (response == NULL) return(MHD_NO);
        MHD_queue_response ( connection, MHD_HTTP_METHOD_NOT_ALLOWED, response);     /* Method not allowed */
        MHD_destroy_response (response);
-       g_free(infos);
        return MHD_YES;
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) )
@@ -462,7 +454,6 @@
        if (response == NULL) return(MHD_NO);
        MHD_queue_response ( connection, MHD_HTTP_NOT_FOUND, response);
        MHD_destroy_response (response);
-       g_free(infos);
        return MHD_YES;
      }
     return MHD_NO;
