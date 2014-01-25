@@ -199,6 +199,7 @@ end:
      { response = MHD_create_response_from_buffer ( strlen (RESPONSE_AUTHENTICATION_NEEDED)+1,
                                                      (void*)RESPONSE_AUTHENTICATION_NEEDED, MHD_RESPMEM_PERSISTENT);
        if (response == NULL) return(MHD_NO);
+       MHD_add_response_header ( response, "Connection", "close" );
        MHD_queue_response ( connection, MHD_HTTP_UNAUTHORIZED, response);
        MHD_destroy_response (response);
        return(MHD_YES);
