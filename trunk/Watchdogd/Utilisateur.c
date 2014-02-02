@@ -178,7 +178,7 @@
      { g_snprintf( requete, sizeof(requete),                                              /* Requete SQL */
                    "INSERT INTO %s"             
                    "(name,mustchangepwd,cansetpwd,comment,login_failed,enable,"
-                   "date_create,enable_expire,date_expire,date_modif,sms_enable,sms_phone,sms_allow_cde"
+                   "date_create,enable_expire,date_expire,date_modif,sms_enable,sms_phone,sms_allow_cde,"
                    "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_bit_presence,imsg_available)"
                    "VALUES ('%s', 1, 1, '%s', 0, 1, %d, %d, '%d', '%d','%d','%s','%d','%d','%s','%d','%d','%d' );",
                    NOM_TABLE_UTIL, nom,
