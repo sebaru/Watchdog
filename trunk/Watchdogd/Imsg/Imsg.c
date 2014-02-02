@@ -188,7 +188,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET imsg_available=%d WHERE imsg_jabberid=%s",
-                NOM_TABLE_IMSG, available, jabberid );
+                NOM_TABLE_UTIL, available, jabberid );
     g_free(jabberid);
 
     db = Init_DB_SQL();       
@@ -232,7 +232,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,name,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_bit_presence,imsg_available "
                 " FROM %s as user WHERE enable=1 AND imsg_allow_cde=1 AND imsg_jabberid LIKE '%s' LIMIT 1",
-                NOM_TABLE_IMSG, jabberid );
+                NOM_TABLE_UTIL, jabberid );
     g_free(jabberid);
 
     db = Init_DB_SQL();       

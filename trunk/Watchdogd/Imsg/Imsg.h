@@ -31,7 +31,6 @@
  #include <loudmouth/loudmouth.h>
 
  #define NOM_THREAD                "imsg"
- #define NOM_TABLE_IMSG            "imsg"
 
  #define DEFAUT_USERNAME_IMSG      "defaultuser"
  #define DEFAUT_SERVER_IMSG        "defaultserver.org"
