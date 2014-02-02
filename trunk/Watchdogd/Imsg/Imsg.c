@@ -198,7 +198,7 @@
        return;
      }
 
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE );                    /* Execution de la requete SQL */
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )                     /* Execution de la requete SQL */
      { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
                 "Imsg_Sauvegarder_statut_contact: Requete failed" );
        Libere_DB_SQL( &db );
