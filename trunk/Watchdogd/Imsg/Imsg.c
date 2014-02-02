@@ -176,10 +176,14 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Imsg_Sauvegarder_statut_contact ( gchar *jabber_id, gboolean available )
-  { gchar *jabberid, requete[80];
+  { gchar *jabberid, requete[512], hostonly[80], *ptr;
     struct DB *db;
 
-    jabberid = Normaliser_chaine ( jabber_id );
+    g_snprintf( hostonly, sizeof(hostonly), "%s", jabber_id );
+    ptr = strstr( hostonly, "/" );
+    if (ptr) *ptr=0;
+
+    jabberid = Normaliser_chaine ( hostonly );
     if (!jabberid)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Imsg_Sauvegarder_statut_contact: Normalisation jabberid impossible" );
