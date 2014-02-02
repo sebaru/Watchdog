@@ -209,6 +209,47 @@
              jabber_id, available );
   }
 /**********************************************************************************************************/
+/* Imsg_recipient_allow_command : Renvoie un contact IMSGDB si delui-ci dispose du flag allow_cde         */
+/* Entrée: le jabber_id                                                                                   */
+/* Sortie: struct IMSGDB *imsg                                                                            */
+/**********************************************************************************************************/
+ static struct IMSGDB *Imsg_recipient_allow_command ( gchar *jabber_id )
+  { gchar *jabberid, requete[80];
+    struct IMSGDB *imsg;
+    struct DB *db;
+
+    jabberid = Normaliser_chaine ( jabber_id );
+    if (!jabberid)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "Imsg_recipient_allow_command: Normalisation jabberid impossible" );
+       return(NULL);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT id,name,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_bit_presence,imsg_available "
+                " FROM %s as user WHERE enable=1 AND imsg_allow_cde=1 AND imsg_jabberid LIKE '%s' LIMIT 1",
+                NOM_TABLE_IMSG, jabberid );
+    g_free(jabberid);
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                "Imsg_recipient_allow_command: Database Connection Failed" );
+       return(NULL);
+     }
+
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE );                    /* Execution de la requete SQL */
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                "Imsg_recipient_allow_command: Requete failed" );
+       Libere_DB_SQL( &db );
+       return(NULL);
+     }
+
+    imsg = Recuperer_imsgDB_suite ( db );
+    Libere_DB_SQL( &db );
+    return(imsg);
+  }
+/**********************************************************************************************************/
 /* Mode_presence : Change la presence du server watchdog aupres du serveur XMPP                           */
 /* Entrée: la connexion xmpp                                                                              */
 /* Sortie: Néant                                                                                          */
@@ -302,7 +343,8 @@
  static LmHandlerResult Imsg_Reception_message ( LmMessageHandler *handler, LmConnection *connection,
                                                  LmMessage *message, gpointer data )
   { LmMessageNode *node, *body;
-    const gchar *from;
+    struct IMSGDB *imsg;
+    gchar *from;
     struct DB *db;
 
     node = lm_message_get_node ( message );
@@ -326,9 +368,8 @@
     if ( (!from) || (!strncmp ( from, Cfg_imsg.username, strlen(Cfg_imsg.username) )) )
      { return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS); }
 
-#ifdef bouh
-    if ( Imsg_recipient_send_command_authorized ( from ) == FALSE )
-#endif
+    imsg = Imsg_recipient_allow_command ( from );
+    if ( imsg == NULL )
      { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
                 "Imsg_Reception_message : unknown sender %s. Dropping message...", from );
        return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
@@ -358,10 +399,12 @@
         { gchar chaine[80];
           switch ( result_mnemo->type )
            { case MNEMO_MONOSTABLE:                                      /* Positionnement du bit interne */
-                  g_snprintf( chaine, sizeof(chaine), "Mise a un du bit M%03d", result_mnemo->num );
+                  g_snprintf( chaine, sizeof(chaine), "Mise a un du bit M%03d by %s",
+                              result_mnemo->num, imsg->user_name );
                   Imsg_Envoi_message_to( from, chaine );
                   Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
-                             "Imsg_Reception_message: Mise a un du bit M%03d = 1", result_mnemo->num );
+                             "Imsg_Reception_message: Mise a un du bit M%03d by %s",
+                            result_mnemo->num, imsg->user_name );
                   Envoyer_commande_dls(result_mnemo->num); 
                   break;
              case MNEMO_ENTREE:
@@ -375,13 +418,14 @@
              default: g_snprintf( chaine, sizeof(chaine), "Cannot handle command... Check Mnemo !" );
                       Imsg_Envoi_message_to( from, chaine );
                       Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
-                               "Imsg_Reception_message: Cannot handle commande type %d (num=%03d)",
-                                result_mnemo->type, result_mnemo->num );
+                               "Imsg_Reception_message: Cannot handle commande type %d (num=%03d) for %s",
+                                result_mnemo->type, result_mnemo->num, imsg->user_name );
                       break;
            }
           g_free(result_mnemo);
         }
      }
+    g_free(imsg);
     return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
   }
 /**********************************************************************************************************/
@@ -392,7 +436,7 @@
  static LmHandlerResult Imsg_Reception_presence ( LmMessageHandler *handler, LmConnection *connection,
                                                   LmMessage *message, gpointer data )
   { LmMessageNode *node_presence, *node_show, *node_status;
-    const gchar *type, *from, *show, *status;
+    gchar *type, *from, *show, *status;
     GError *error = NULL;
     LmMessage *m;
 
@@ -441,7 +485,7 @@
         }
        lm_message_unref (m);
 
-       Imsg_Sauvegarder_statut_contact ( (const)from, FALSE );  /* Par défaut, le contact est unavailable */
+       Imsg_Sauvegarder_statut_contact ( from, FALSE );         /* Par défaut, le contact est unavailable */
        return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
      }
     else if ( type && ( ! strcmp ( type, "unavailable" ) ) )    /* Gestion de la deconnexion des contacts */

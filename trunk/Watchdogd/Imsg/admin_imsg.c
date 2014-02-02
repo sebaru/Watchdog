@@ -53,10 +53,10 @@
   { gchar chaine[512];
 
     g_snprintf( chaine, sizeof(chaine),
-              " [%03d]%12s -> user_enable   = %d\n"
-              "   |               -> imsg_enable    = %d\n"
-              "   |               -> imsg_jabberid  = %s\n"
-              "   |               -> imsg_allow_cde = %d\n"
+              " [%03d]%12s -> user_enable       = %d\n"
+              "   |               -> imsg_enable       = %d\n"
+              "   |               -> imsg_jabberid     = %s\n"
+              "   |               -> imsg_allow_cde    = %d\n"
               "   |               -> imsg_bit_presence = %d\n"
               "   |               -> imsg_availability = %d\n"
               "   |----------------> %s\n",
