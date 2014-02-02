@@ -88,7 +88,7 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,name,enable,commentaire,sms_enable,sms_phone,sms.allow_cde "
+                "SELECT id,name,enable,comment,sms_enable,sms_phone,sms_allow_cde "
                 " FROM %s as user ORDER BY user.name",
                 NOM_TABLE_UTIL );
 
@@ -103,7 +103,7 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,name,enable,commentaire,sms_enable,sms_phone,sms.allow_cde "
+                "SELECT id,name,enable,comment,sms_enable,sms_phone,sms_allow_cde "
                 " FROM %s as user WHERE enable=1 AND sms_enable=1 ORDER BY user.name",
                 NOM_TABLE_UTIL );
 
@@ -234,7 +234,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,name,enable,commentaire,sms_enable,sms_phone,sms.allow_cde "
+                "SELECT id,name,enable,comment,sms_enable,sms_phone,sms_allow_cde "
                 " FROM %s as user WHERE enable=1 AND sms_allow_cde=1 AND sms_phone LIKE '%s'"
                 " ORDER BY user.name LIMIT 1",
                 NOM_TABLE_UTIL, phone );

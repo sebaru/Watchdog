@@ -54,7 +54,7 @@
   { gchar chaine[256];
 
     g_snprintf( chaine, sizeof(chaine),
-              " [%03d]%12s -> user_enable = %d\n"
+              " [%03d]%12s -> user_enable   = %d\n"
               "   |               -> sms_enable    = %d\n"
               "   |               -> sms_phone     = %s\n"
               "   |               -> sms_allow_cde = %d\n"
@@ -112,14 +112,6 @@
        Admin_write ( connexion, "  reload                - Reload contacts from Database\n" );
        Admin_write ( connexion, "  sms smsbox message    - Send 'message' via smsbox\n" );
        Admin_write ( connexion, "  sms gsm    message    - Send 'message' via gsm\n" );
-
-       Admin_write ( connexion, "  add enable,send_command,receive_sms,phone,name\n");
-       Admin_write ( connexion, "                        - Add a SMS contact\n" );
-       Admin_write ( connexion, "  set id,enable,send_command,receive_sms,phone,name\n");
-       Admin_write ( connexion, "                        - Change SMS id\n" );
-       Admin_write ( connexion, "  del id                - Delete SMS id\n" );
-       Admin_write ( connexion, "  enable id             - Enable SMS Contact SMS id\n" );
-       Admin_write ( connexion, "  disable id            - Disable SMS Contact SMS id\n" );
        Admin_write ( connexion, "  list                  - Liste les contacts SMS\n" );
        Admin_write ( connexion, "  help                  - This help\n" );
      }
