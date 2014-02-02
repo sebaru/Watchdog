@@ -47,13 +47,15 @@
  static GtkWidget *Check_expire;                                         /* Le bouton d'expiration ou non */
  static GtkWidget *Calendar;                                 /* Le calendrier pour l'expiration du compte */
  static GtkWidget *Entry_nom;                                                  /* Le nom de l'utilisateur */
- static GtkWidget *Entry_id;                                                     /* L'id de l'utilisateur */
  static GtkWidget *Entry_last;                                                   /* L'id de l'utilisateur */
  static GtkWidget *Entry_comment;                                  /* Commentaire associé à l'utilisateur */
- static GtkWidget *Check_enable;                                   /* Le compte utilisateur est-il enable ? */
+ static GtkWidget *Entry_sms_phone;                                   /* n° de telephone de l'utilisateur */
+ static GtkWidget *Check_enable;                                 /* Le compte utilisateur est-il enable ? */
  static GtkWidget *Check_cansetpwd;                      /* L'utilisateur peut-il changer son password ? */
- static GtkWidget *Check_setpwdnow;                                      /* Pour changer le password now */
- static GtkWidget *Check_mustchangepwd;   /* L'utilisateur doit-il changer son password au prochain login ?? */
+ static GtkWidget *Check_setpwdnow;                                       /* Pour changer le password now */
+ static GtkWidget *Check_mustchangepwd;/* L'utilisateur doit-il changer son password au prochain login ?? */
+ static GtkWidget *Check_sms_enable;                                           /* Lui envoit-on des SMS ? */
+ static GtkWidget *Check_sms_allow_cde;              /* Peut-on recevoir des sms de commande de sa part ? */
  static GtkWidget *Entry_pass1, *Entry_pass2;                            /* Acquisition des passwords ... */
  static GtkWidget *F_ajout;                                /* Widget visuel de la fenetre d'ajout/edition */
  static struct CMD_TYPE_UTILISATEUR Edit_util;                          /* Utilisateur en cours d'edition */
@@ -183,6 +185,28 @@
     gtk_widget_set_sensitive( Entry_pass2, enable );
   }
 /**********************************************************************************************************/
+/* Changer_enabled: Appelé quand l'utilisateur clique sur le toggle enabled                               */
+/* Entrée: rien                                                                                           */
+/* sortie: kedal                                                                                          */
+/**********************************************************************************************************/
+ static void Changer_enabled ( void )
+  { gboolean enable;
+    enable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_enable));
+    gtk_widget_set_sensitive( Entry_nom, enable );
+    gtk_widget_set_sensitive( Entry_comment, enable );
+  }
+/**********************************************************************************************************/
+/* Changer_sms_enable: Appelé quand l'utilisateur clique sur le toggle sms_enable                         */
+/* Entrée: rien                                                                                           */
+/* sortie: kedal                                                                                          */
+/**********************************************************************************************************/
+ static void Changer_sms_enable ( void )
+  { gboolean enable;
+    enable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_sms_enable));
+    gtk_widget_set_sensitive( Entry_sms_phone, enable );
+    gtk_widget_set_sensitive( Check_sms_allow_cde, enable );
+  }
+/**********************************************************************************************************/
 /* Proto_afficher_un_groupe_existant: ajoute un groupe dans la liste des groupes existants                */
 /* Entrée: rien                                                                                           */
 /* sortie: kedal                                                                                          */
@@ -296,6 +320,8 @@
                 "%s", gtk_entry_get_text(GTK_ENTRY(Entry_nom) ) );
     g_snprintf( Edit_util.commentaire, sizeof(Edit_util.commentaire),
                 "%s", gtk_entry_get_text(GTK_ENTRY(Entry_comment) ) );
+    g_snprintf( Edit_util.sms_phone, sizeof(Edit_util.sms_phone),
+                "%s", gtk_entry_get_text(GTK_ENTRY(Entry_sms_phone) ) );
 
     Edit_util.date_expire   = gnome_date_edit_get_time( GNOME_DATE_EDIT(Calendar) );
     Edit_util.expire        = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_expire));
@@ -303,6 +329,8 @@
     Edit_util.enable        = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_enable));
     Edit_util.cansetpwd     = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_cansetpwd));
     Edit_util.setpwdnow     = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_setpwdnow));
+    Edit_util.sms_enable    = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_sms_enable));
+    Edit_util.sms_allow_cde = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_sms_allow_cde));
 
     gids = Recuperer_groupes_util();
     memcpy( Edit_util.gids, gids, sizeof(Edit_util.gids) );
@@ -346,6 +374,7 @@
  void Menu_ajouter_editer_utilisateur ( struct CMD_TYPE_UTILISATEUR *edit_util )
   { GtkWidget *bouton, *frame, *vboite, *table, *texte, *scroll, *separateur;
     time_t temps;
+    guint i;
 
     if (edit_util)
      { memcpy( &Edit_util, edit_util, sizeof(struct CMD_TYPE_UTILISATEUR) );/*Save pour utilisation future*/
@@ -376,79 +405,76 @@
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(vboite), table, FALSE, FALSE, 0 );
 
-    texte = gtk_label_new( _("UserID") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 0, 1 );
-    gtk_misc_set_alignment( GTK_MISC(texte), 1.0, 0.5 );
-    Entry_id = gtk_entry_new();
-    gtk_editable_set_editable( GTK_EDITABLE(Entry_id), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_id, 1, 2, 0, 1 );
-    gtk_widget_set_sensitive( Entry_id, FALSE );
-
-    texte = gtk_label_new( _("Username") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, 0, 1 );
-    gtk_misc_set_alignment( GTK_MISC(texte), 1.0, 0.5 );
+    i=0;
+    Check_enable = gtk_check_button_new_with_label ( _("Account enabled") );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_enable, 0, 1, i, i+1 );
+    g_signal_connect( G_OBJECT(Check_enable), "clicked",
+                      G_CALLBACK(Changer_enabled), NULL );
     Entry_nom = gtk_entry_new();
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_nom, 3, 4, 0, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_nom, 1, 2, i, i+1 );
     gtk_entry_set_max_length( GTK_ENTRY(Entry_nom), NBR_CARAC_LOGIN );
 
-    texte = gtk_label_new( _("Last modification") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
+    Entry_comment = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_comment), NBR_CARAC_COMMENTAIRE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_comment, 2, 4, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("Last change") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     gtk_misc_set_alignment( GTK_MISC(texte), 1.0, 0.5 );
     Entry_last = gtk_entry_new();
     gtk_editable_set_editable( GTK_EDITABLE(Entry_last), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_last, 1, 2, 1, 2 );
-    gtk_widget_set_sensitive( Entry_last, FALSE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_last, 1, 4, i, i+1 );
 
-    texte = gtk_label_new( _("Comment") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, 1, 2 );
-    gtk_misc_set_alignment( GTK_MISC(texte), 1.0, 0.5 );
-    Entry_comment = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_comment), NBR_CARAC_COMMENTAIRE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_comment, 3, 4, 1, 2 );
 
+    i++;
+    Check_cansetpwd = gtk_check_button_new_with_label ( _("Can change his password") );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_cansetpwd, 2, 4, i, i+1 );
+
+    Check_mustchangepwd = gtk_check_button_new_with_label ( _("Have to change his password at logon") );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_mustchangepwd, 0, 2, i, i+1 );
+
+    i++;
     Check_setpwdnow = gtk_check_button_new_with_label ( _("Set password now") );
-    gtk_table_attach_defaults( GTK_TABLE(table), Check_setpwdnow, 2, 4, 2, 3 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_setpwdnow, 0, 1, i, i+1 );
     g_signal_connect( G_OBJECT(Check_setpwdnow), "clicked",
                       G_CALLBACK(Changer_setpwdnow), NULL );
 
-    texte = gtk_label_new( _("Password") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, 3, 4 );
-    gtk_misc_set_alignment( GTK_MISC(texte), 1.0, 0.5 );
     Entry_pass1 = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_pass1), NBR_CARAC_LOGIN );
     gtk_entry_set_visibility( GTK_ENTRY(Entry_pass1), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_pass1, 3, 4, 3, 4 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_pass1, 1, 2, i, i+1 );
     gtk_widget_set_sensitive( Entry_pass1, FALSE );
 
-    texte = gtk_label_new( _("Password (again)") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, 4, 5 );
+    texte = gtk_label_new( _("Password again") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
     gtk_misc_set_alignment( GTK_MISC(texte), 1.0, 0.5 );
     Entry_pass2 = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_pass2), NBR_CARAC_LOGIN );
     gtk_entry_set_visibility( GTK_ENTRY(Entry_pass2), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_pass2, 3, 4, 4, 5 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_pass2, 3, 4, i, i+1 );
     gtk_widget_set_sensitive( Entry_pass2, FALSE );
 
-    Check_enable = gtk_check_button_new_with_label ( _("Account enabled") );
-    gtk_table_attach_defaults( GTK_TABLE(table), Check_enable, 0, 2, 2, 3 );
-
-    Check_mustchangepwd = gtk_check_button_new_with_label ( _("Have to change his password at logon") );
-    gtk_table_attach_defaults( GTK_TABLE(table), Check_mustchangepwd, 0, 2, 3, 4 );
-
-    Check_cansetpwd = gtk_check_button_new_with_label ( _("Can change his password") );
-    gtk_table_attach_defaults( GTK_TABLE(table), Check_cansetpwd, 0, 2, 4, 5 );
-
+    i++;
     Check_expire = gtk_check_button_new_with_label ( _("Account expire") );
-    gtk_table_attach_defaults( GTK_TABLE(table), Check_expire, 0, 1, 5, 6 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_expire, 0, 1, i, i+1 );
     g_signal_connect( G_OBJECT(Check_expire), "clicked",
                       G_CALLBACK(Changer_compte_expire), NULL );
 
-    texte = gtk_label_new( _("Expiration date") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 1, 2, 5, 6 );
-    gtk_misc_set_alignment( GTK_MISC(texte), 1.0, 0.5 );
-
     Calendar = gnome_date_edit_new ((time_t) 0, TRUE, TRUE);
-    gtk_table_attach_defaults( GTK_TABLE(table), Calendar, 2, 4, 5, 6 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Calendar, 1, 4, i, i+1 );
+
+    i++;
+    Check_sms_enable = gtk_check_button_new_with_label ( _("Send SMS to") );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_sms_enable, 0, 1, i, i+1 );
+    g_signal_connect( G_OBJECT(Check_sms_enable), "clicked",
+                      G_CALLBACK(Changer_sms_enable), NULL );
+    Entry_sms_phone = gtk_entry_new();
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_sms_phone, 1, 3, i, i+1 );
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_nom), 80 );
+
+    Check_sms_allow_cde = gtk_check_button_new_with_label ( _("Allow CDE") );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_sms_allow_cde, 3, 4, i, i+1 );
 
 /***************************************** Gestion des groupes ********************************************/
     separateur = gtk_hseparator_new();
@@ -497,13 +523,15 @@
        gtk_editable_set_editable( GTK_EDITABLE( Entry_nom ), FALSE );
 
        g_snprintf( chaine, sizeof(chaine), "%d", edit_util->id );
-       gtk_entry_set_text( GTK_ENTRY(Entry_id), chaine );
        gtk_entry_set_text( GTK_ENTRY(Entry_comment), edit_util->commentaire );
 
-       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_enable), edit_util->enable );
+       gtk_entry_set_text( GTK_ENTRY(Entry_sms_phone), edit_util->sms_phone );
+       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_enable),        edit_util->enable );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_mustchangepwd), edit_util->mustchangepwd );
-       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_cansetpwd), edit_util->cansetpwd );
-       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_expire), edit_util->expire );
+       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_cansetpwd),     edit_util->cansetpwd );
+       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_expire),        edit_util->expire );
+       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_sms_enable),    edit_util->sms_enable );
+       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_sms_allow_cde), edit_util->sms_allow_cde );
 
        temps = edit_util->date_modif;
        strftime( chaine, sizeof(chaine), "%c", localtime((time_t *)&temps) );
@@ -513,8 +541,7 @@
        gnome_date_edit_set_time( GNOME_DATE_EDIT(Calendar), edit_util->date_expire );
      }
     else
-     { gtk_entry_set_text( GTK_ENTRY(Entry_id), "?" );
-       gtk_entry_set_text( GTK_ENTRY(Entry_last), "?" );
+     { gtk_entry_set_text( GTK_ENTRY(Entry_last), "?" );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( Check_enable ), TRUE );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( Check_mustchangepwd ), TRUE );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( Check_cansetpwd ), TRUE );
@@ -522,7 +549,10 @@
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( Check_setpwdnow ), TRUE );
        gnome_date_edit_set_time( GNOME_DATE_EDIT(Calendar), time(NULL) + 86400*31*2 );  /* Valable 2 mois */
      }
-
+    Changer_compte_expire();
+    Changer_setpwdnow();
+    Changer_enabled();
+    Changer_sms_enable ();
     gtk_widget_show_all( F_ajout );
   }
 /*--------------------------------------------------------------------------------------------------------*/

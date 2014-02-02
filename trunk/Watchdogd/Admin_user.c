@@ -60,11 +60,14 @@
     g_snprintf( chaine, sizeof(chaine),
               " [%03d]%12s -> enable=%d, expire=%d, date_expire=%s, mustchangepwd=%d, cansetpwd=%d\n"
               "   |               -> date_creation=%s, date_modif=%s\n"
+              "   |               -> sms_enable=%d, sms_phone=%s, sms_allow_cde=%d\n"
               "   |               -> salt=%s\n"
               "   |               -> hash=%s\n"
               "   |----------------> %s\n",
                 util->id, util->nom, util->enable, util->expire, date_expire, util->mustchangepwd,
-                util->cansetpwd, date_creation, date_modif, util->salt, util->hash, util->commentaire
+                util->cansetpwd, date_creation, date_modif,
+                util->sms_enable, util->sms_phone, util->sms_allow_cde,
+                util->salt, util->hash, util->commentaire
               );
     Admin_write ( connexion, chaine );
   }

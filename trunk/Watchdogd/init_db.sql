@@ -258,14 +258,13 @@ CREATE TABLE IF NOT EXISTS `histo_msgs` (
 --
 
 CREATE TABLE IF NOT EXISTS `sms` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL AUTO_INCREMENT REFERENCES `users`(`id`) ON DELETE CASCADE,
   `instance_id` text COLLATE utf8_unicode_ci NOT NULL,
   `enable` int(1) NOT NULL,
   `phone` text COLLATE utf8_unicode_ci NOT NULL,
-  `name` text COLLATE utf8_unicode_ci NOT NULL,
-  `phone_send_command` int(1) NOT NULL,
-  `phone_receive_sms` int(1) NOT NULL ,
-  PRIMARY KEY (`id`)
+  `send_command` int(1) NOT NULL,
+  `receive_sms` int(1) NOT NULL ,
+  PRIMARY KEY (`user_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
 
 -- --------------------------------------------------------
@@ -967,6 +966,9 @@ CREATE TABLE IF NOT EXISTS `users` (
   `enable_expire` tinyint(1) NOT NULL DEFAULT '0',
   `date_expire` int(11) DEFAULT NULL,
   `date_modif` int(11) DEFAULT NULL,
+  `sms_enable` tinyint(1) NOT NULL DEFAULT '0',
+  `sms_phone` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
+  `sms_allow_cde` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=2 ;
