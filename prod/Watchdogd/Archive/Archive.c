@@ -86,7 +86,7 @@
 /**********************************************************************************************************/
  static void Ajouter_archRRD ( struct ARCHDB *arch )
   { gchar fichier[80], update[80];
-    gchar *params[3];
+    gchar *params[11];
     gint result;
 
     params[0] = "rrdupdate";
@@ -94,10 +94,30 @@
     params[1] = fichier;
     g_snprintf( update,  sizeof(update), "%d:%f", arch->date_sec, arch->valeur );
     params[2] = update;
+    rrd_clear_error();
     result = rrd_update( 3, params );
     if (result)
      { Info_new( Config.log, Config.log_arch, LOG_ERR,
-                "Ajouter_archRRD: RRD error %s", rrd_get_error() );
+                "Ajouter_archRRD: RRD error %s. Trying to create RRD", rrd_get_error() );
+       params[0] = "create";
+       params[2] = "--start";
+       params[3] = "-1year";
+       params[4] = "--step";
+       params[5] = "10";
+       params[6] = "DS:val:GAUGE:1000:U:U";
+       params[7] = "RRA:MIN:0.5:3:1000";
+       params[8] = "RRA:MAX:0.5:3:1000";
+       params[9] = "RRA:AVERAGE:0.5:3:1000";
+       params[10] = "RRA:LAST:0.5:1:1000";
+       rrd_clear_error();
+       result = rrd_create( 11, params );
+       if (result)       
+        { Info_new( Config.log, Config.log_arch, LOG_ERR,
+                    "Ajouter_archRRD: Error creating RRD %s.", rrd_get_error() );
+        } else 
+        { Info_new( Config.log, Config.log_arch, LOG_INFO,
+                    "Ajouter_archRRD: Creation of RRD file %s OK", fichier );
+        }
      }
   }
 /**********************************************************************************************************/

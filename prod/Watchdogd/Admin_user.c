@@ -60,11 +60,18 @@
     g_snprintf( chaine, sizeof(chaine),
               " [%03d]%12s -> enable=%d, expire=%d, date_expire=%s, mustchangepwd=%d, cansetpwd=%d\n"
               "   |               -> date_creation=%s, date_modif=%s\n"
+              "   |               -> sms_enable =%d, sms_phone     =%30s, sms_allow_cde =%d\n"
+              "   |               -> imsg_enable=%d, imsg_jabber_id=%30s, imsg_allow_cde=%d\n"
+              "   |               -> imsg_bit_presence=B%04d, imsg_available=%d\n"
               "   |               -> salt=%s\n"
               "   |               -> hash=%s\n"
               "   |----------------> %s\n",
                 util->id, util->nom, util->enable, util->expire, date_expire, util->mustchangepwd,
-                util->cansetpwd, date_creation, date_modif, util->salt, util->hash, util->commentaire
+                util->cansetpwd, date_creation, date_modif,
+                util->sms_enable, util->sms_phone, util->sms_allow_cde,
+                util->imsg_enable, util->imsg_jabberid, util->imsg_allow_cde,
+                util->imsg_bit_presence, util->imsg_available,
+                util->salt, util->hash, util->commentaire
               );
     Admin_write ( connexion, chaine );
   }
@@ -104,6 +111,9 @@
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'running'\n" );
        Admin_write ( connexion, "  add $name $comment      - Add user $name with $commment\n" );
+       Admin_write ( connexion, "  del $name               - Erase user $name\n" );
+       Admin_write ( connexion, "  enable $name            - Allow user $name to connect\n" );
+       Admin_write ( connexion, "  disable $name           - Deny user $id to connect $name\n" );
        Admin_write ( connexion, "  cansetpwd $name $bool   - Set CanSetPwd flag to true or false\n" );
        Admin_write ( connexion, "  list                    - Liste les users Watchdog\n" );
        Admin_write ( connexion, "  passwd $name $pwd       - Set password $pwd to user $name\n" );
@@ -127,6 +137,45 @@
        else
         { Admin_print_user ( connexion, util );
           g_free(util);
+        }
+     } else
+    if ( ! strcmp ( commande, "del" ) )
+     { struct CMD_TYPE_UTILISATEUR util;
+       sscanf ( ligne, "%s %s", commande, util.nom );                /* Découpage de la ligne de commande */
+       util.id = -1;                                            /* suppression par nom plutot que par id */
+       if (Retirer_utilisateurDB ( &util ) == FALSE)
+        { g_snprintf( chaine, sizeof(chaine), " User %s couldn't be removed\n", util.nom );
+          Admin_write ( connexion, chaine );
+        }
+       else
+        { g_snprintf( chaine, sizeof(chaine), " User %s removed\n", util.nom );
+          Admin_write ( connexion, chaine );
+        }
+     } else
+    if ( ! strcmp ( commande, "enable" ) )
+     { struct CMD_TYPE_UTILISATEUR util;
+       sscanf ( ligne, "%s %s", commande, util.nom );                /* Découpage de la ligne de commande */
+       util.enable = TRUE;
+       if (Set_enable_utilisateurDB ( &util ) == FALSE)
+        { g_snprintf( chaine, sizeof(chaine), " User %s couldn't be enabled\n", util.nom );
+          Admin_write ( connexion, chaine );
+        }
+       else
+        { g_snprintf( chaine, sizeof(chaine), " User %s enabled\n", util.nom );
+          Admin_write ( connexion, chaine );
+        }
+     } else
+    if ( ! strcmp ( commande, "disable" ) )
+     { struct CMD_TYPE_UTILISATEUR util;
+       sscanf ( ligne, "%s %s", commande, util.nom );                /* Découpage de la ligne de commande */
+       util.enable = FALSE;
+       if (Set_enable_utilisateurDB ( &util ) == FALSE)
+        { g_snprintf( chaine, sizeof(chaine), " User %s couldn't be disabled\n", util.nom );
+          Admin_write ( connexion, chaine );
+        }
+       else
+        { g_snprintf( chaine, sizeof(chaine), " User %s disabled\n", util.nom );
+          Admin_write ( connexion, chaine );
         }
      } else
     if ( ! strcmp ( commande, "add" ) )

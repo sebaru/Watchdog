@@ -54,9 +54,13 @@
   { gchar chaine[256];
 
     g_snprintf( chaine, sizeof(chaine),
-               " Contact_SMS[%03d] -> enable=%d, phone=%s, name=%s, phone_send_command=%d, phone_receive_sms=%d\n",
-                 sms->id, sms->enable, sms->phone, sms->name,
-                 sms->phone_send_command, sms->phone_receive_sms
+              " [%03d]%12s -> user_enable   = %d\n"
+              "   |               -> sms_enable    = %d\n"
+              "   |               -> sms_phone     = %s\n"
+              "   |               -> sms_allow_cde = %d\n"
+              "   |----------------> %s\n",
+                sms->user_id, sms->user_name, sms->user_enable, sms->user_sms_enable, sms->user_sms_phone,
+                sms->user_sms_allow_cde, sms->user_comment
               );
     Admin_write ( connexion, chaine );
   }
@@ -66,50 +70,32 @@
 /* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
 /**********************************************************************************************************/
  static void Admin_sms_list ( struct CONNEXION *connexion )
-  { GSList *liste_sms;
-    gchar chaine[256];
+  { struct SMSDB *sms;
+    gchar chaine[80];
+    struct DB *db;
 
     g_snprintf( chaine, sizeof(chaine), " -- Liste des contacts SMS\n" );
     Admin_write ( connexion, chaine );
 
-    pthread_mutex_lock ( &Cfg_sms.lib->synchro );
-    liste_sms = Cfg_sms.Liste_contact_SMS;
-    while ( liste_sms )
-     { struct SMSDB *sms;
-       sms = (struct SMSDB *)liste_sms->data;
-       Admin_print_sms( connexion, sms );
-       liste_sms = liste_sms->next;
-     }
-    pthread_mutex_unlock ( &Cfg_sms.lib->synchro );
-  }
-/**********************************************************************************************************/
-/* Admin_Sms_Modifier_enable : Modifie le flag "enable" du contact SMS passé en parametre                 */
-/* Entrée: La connexion connexion ADMIN, le SMS Contact et le nouveau status                              */
-/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
-/**********************************************************************************************************/
- static void Admin_Sms_Modifier_enable ( struct CONNEXION *connexion, struct SMSDB *orig_sms, gboolean new_status )
-  { struct SMSDB *sms;
-    GSList *liste_sms;
-    gchar chaine[256];
-    
-    pthread_mutex_lock ( &Cfg_sms.lib->synchro );
-    liste_sms = Cfg_sms.Liste_contact_SMS;
-    while ( liste_sms )
-     { sms = (struct SMSDB *)liste_sms->data;
-       if ( orig_sms->id == sms->id ) break;
-       liste_sms = liste_sms->next;
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
+                "Admin_sms_list: Database Connection Failed" );
+       return;
      }
 
-    if (liste_sms)
-     { sms->enable = new_status;
-       Admin_print_sms( connexion, sms );
+/************************************* Chargement des informations en bases *******************************/
+    if ( ! Sms_Recuperer_smsDB( db ) )
+     { Libere_DB_SQL( &db );
+       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
+                "Admin_sms_list: Recuperer_sms Failed" );
+       return;
      }
-    else
-     { g_snprintf( chaine, sizeof(chaine),
-                   " Contact_SMS[%03d] -> Not found\n", orig_sms->id );
-       Admin_write ( connexion, chaine );
-     }
-    pthread_mutex_unlock ( &Cfg_sms.lib->synchro );
+
+    while ( (sms = Sms_Recuperer_smsDB_suite( db )) != NULL)
+     { Admin_print_sms ( connexion, sms ); }
+
+    Libere_DB_SQL( &db );
   }
 /**********************************************************************************************************/
 /* Admin_sms: Gere une commande 'admin sms' depuis une connexion admin                                    */
@@ -126,74 +112,11 @@
        Admin_write ( connexion, "  reload                - Reload contacts from Database\n" );
        Admin_write ( connexion, "  sms smsbox message    - Send 'message' via smsbox\n" );
        Admin_write ( connexion, "  sms gsm    message    - Send 'message' via gsm\n" );
-
-       Admin_write ( connexion, "  add enable,send_command,receive_sms,phone,name\n");
-       Admin_write ( connexion, "                        - Add a SMS contact\n" );
-       Admin_write ( connexion, "  set id,enable,send_command,receive_sms,phone,name\n");
-       Admin_write ( connexion, "                        - Change SMS id\n" );
-       Admin_write ( connexion, "  del id                - Delete SMS id\n" );
-       Admin_write ( connexion, "  enable id             - Enable SMS Contact SMS id\n" );
-       Admin_write ( connexion, "  disable id            - Disable SMS Contact SMS id\n" );
        Admin_write ( connexion, "  list                  - Liste les contacts SMS\n" );
        Admin_write ( connexion, "  help                  - This help\n" );
      }
     else if ( ! strcmp ( commande, "list" ) )
      { Admin_sms_list ( connexion );
-     }
-    else if ( ! strcmp ( commande, "add" ) )
-     { struct SMSDB sms;
-       gint retour;
-       sscanf ( ligne, "%s %d,%d,%d,%[^,],%[^\n]", commande,    /* Découpage de la ligne de commande */
-                &sms.enable, &sms.phone_send_command, &sms.phone_receive_sms,
-                sms.phone, sms.name
-              );
-       retour = Ajouter_smsDB ( &sms );
-       if (retour == -1)
-        { Admin_write ( connexion, "Error, SMS not added\n" ); }
-       else
-        { gchar chaine[80];
-          g_snprintf( chaine, sizeof(chaine), " SMS %s added. New ID=%d\n", sms.phone, retour );
-          Admin_write ( connexion, chaine );
-        }
-     }
-    else if ( ! strcmp ( commande, "set" ) )
-     { struct SMSDB sms;
-       gint retour;
-       sscanf ( ligne, "%s %d,%d,%d,%d,%[^,],%[^\n]", commande, /* Découpage de la ligne de commande */
-                &sms.id, &sms.enable, &sms.phone_send_command, &sms.phone_receive_sms,
-                sms.phone, sms.name
-              );
-       retour = Modifier_smsDB ( &sms );
-       if (retour == FALSE)
-        { Admin_write ( connexion, "Error, SMS not changed\n" ); }
-       else
-        { gchar chaine[80];
-          g_snprintf( chaine, sizeof(chaine), " SMS %s changed\n", sms.phone );
-          Admin_write ( connexion, chaine );
-        }
-     }
-    else if ( ! strcmp ( commande, "enable" ) )
-     { struct SMSDB sms;
-       sscanf ( ligne, "%s %d", commande, &sms.id );                 /* Découpage de la ligne de commande */
-       Admin_Sms_Modifier_enable( connexion, &sms, TRUE );
-     }
-    else if ( ! strcmp ( commande, "disable" ) )
-     { struct SMSDB sms;
-       sscanf ( ligne, "%s %d", commande, &sms.id );                 /* Découpage de la ligne de commande */
-       Admin_Sms_Modifier_enable( connexion, &sms, FALSE );
-     }
-    else if ( ! strcmp ( commande, "del" ) )
-     { struct SMSDB sms;
-       gboolean retour;
-       sscanf ( ligne, "%s %d", commande, &sms.id );                 /* Découpage de la ligne de commande */
-       retour = Retirer_smsDB ( &sms );
-       if (retour == FALSE)
-        { Admin_write ( connexion, "Error, SMS not erased\n" ); }
-       else
-        { gchar chaine[80];
-          g_snprintf( chaine, sizeof(chaine), " SMS %d erased\n", sms.id );
-          Admin_write ( connexion, chaine );
-        }
      }
     else if ( ! strcmp ( commande, "reload" ) )
      { Admin_sms_reload ( connexion ); }

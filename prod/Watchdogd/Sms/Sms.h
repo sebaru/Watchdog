@@ -29,7 +29,6 @@
  #define _SMS_H_
 
  #define NOM_THREAD                     "sms"
- #define NOM_TABLE_SMS                  "sms"
 
  #define TOP_MIN_ENVOI_SMS     1200                           /* 2 minutes sans envoi de SMS au démarrage */
  #define TAILLE_SMSBOX_USERNAME   32                                /* Nombre de caractere du user SMSBOX */
@@ -42,28 +41,29 @@
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
     gboolean enable;                                                /* Is this tread is enabled at boot ? */
     gboolean reload;                                  /* Demande rechargement des SMS en bases de données */
-    GSList *Liste_histos;                                             /* liste de struct MSGDB msg a envoyer */
+    GSList *Liste_histos;                                          /* liste de struct MSGDB msg a envoyer */
     gchar smsbox_username[TAILLE_SMSBOX_USERNAME+1];                                       /* User SMSBOX */
     gchar smsbox_password[TAILLE_SMSBOX_PASSWORD+1];                         /* Mot de passe envoi SMSBOX */
-    GSList *Liste_contact_SMS;                    /* Liste de structures SMS issues de la base de données */
-    guint bit_comm;
+    guint bit_comm;                                       /* Bit B d'état de la communication avec le GSM */
   } Cfg_sms;
 
  struct SMSDB
-  { gint id;
-    gboolean enable;
-    gchar phone[80];
-    gchar name[80];
-    gboolean phone_send_command;
-    gboolean phone_receive_sms;
+  { gint     user_id;                                                                 /* From users table */
+    gchar    user_name[80];
+    gboolean user_enable;
+    gchar    user_comment[80];
+    gboolean user_sms_enable;
+    gchar    user_sms_phone[80];
+    gboolean user_sms_allow_cde;
   };
 
 /*************************************** Définitions des prototypes ***************************************/
  extern gboolean Sms_Lire_config ( void );
- extern gboolean Retirer_smsDB ( struct SMSDB *sms );
- extern gint Modifier_smsDB( struct SMSDB *sms );
- extern gint Ajouter_smsDB( struct SMSDB *sms );
  extern void Envoyer_sms_smsbox_text ( gchar *texte );                                      /* Dans Sms.c */
  extern void Envoyer_sms_gsm_text ( gchar *texte );
+
+ extern gboolean Sms_Recuperer_smsDB ( struct DB *db );
+ extern struct SMSDB *Sms_Recuperer_smsDB_suite( struct DB *db );
+
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

@@ -556,14 +556,32 @@ printf("Try to get %s\n", url );
     return(TRUE);
   }
 /**********************************************************************************************************/
+/* Add_single_icone_to_item : Chargement d'un icone (ID+Mode) dans l'item en parametre                    */
+/* Entrée: L'item, l'icone_id et le mode attendu                                                          */
+/* Sortie: reussite                                                                                       */
+/**********************************************************************************************************/
+ static gboolean Add_single_icone_to_item ( struct TRAME_ITEM_MOTIF *trame_item, guint icone_id, guint mode )
+  { gchar nom_fichier[80];
+    GdkPixbuf *pixbuf;
+    
+    if (mode==0) g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif", icone_id );
+    else         g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif.%02d", icone_id, mode );
+    pixbuf = gdk_pixbuf_new_from_file ( nom_fichier, NULL );                            /* 2nde tentative */
+    if (!pixbuf) return(FALSE);                                        /* Chargement en erreur ou terminé */
+    trame_item->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
+    trame_item->gif_hauteur = gdk_pixbuf_get_height( pixbuf );
+    trame_item->images = g_list_append( trame_item->images, pixbuf );     /* Et ajout dans la liste */
+    trame_item->image  = trame_item->images;                          /* Synchro sur image numero 1 */
+    trame_item->nbr_images++;
+    return(TRUE);
+  }
+/**********************************************************************************************************/
 /* Charger_pixbuf: Tente de charger un ensemble de pixbuf representant un icone                           */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference         */
 /* Sortie: reussite                                                                                       */
 /**********************************************************************************************************/
  static void Charger_pixbuf_id ( struct TRAME_ITEM_MOTIF *trame_item, guint icone_id )
-  { gchar nom_fichier[80];
-    GdkPixbuf *pixbuf;
-    gboolean downloaded;
+  { gboolean downloaded;
     guint i;
 
     trame_item->image  = NULL;
@@ -575,43 +593,18 @@ printf("Try to get %s\n", url );
 
     downloaded = FALSE;
 encore:
-    g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif", icone_id );
-    pixbuf = gdk_pixbuf_new_from_file ( nom_fichier, NULL );                        /* Creation du pixbuf */
-
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
-             "Charger_pixbuf_id: %s -> pixbuf = %p", nom_fichier, pixbuf );
-
-    if (!pixbuf)
+    if (Add_single_icone_to_item(trame_item, icone_id, 0) == FALSE)
      { if (downloaded == TRUE) return;              /* Avons-nous deja tenté de le recuperer du serveur ? */
        downloaded = TRUE;
        for (i=0; ;i++)
-        { if (!Download_gif ( icone_id, i )) goto encore;                 /* Fin de telechargement des %i */
-          if (i==0) g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif", icone_id );
-          else      g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif.%02d", icone_id, i );
-          pixbuf = gdk_pixbuf_new_from_file ( nom_fichier, NULL );                      /* 2nde tentative */
-          if (!pixbuf) return;                                         /* Chargement en erreur ou terminé */
-          trame_item->images = g_list_append( trame_item->images, pixbuf );     /* Et ajout dans la liste */
-          trame_item->image  = trame_item->images;                          /* Synchro sur image numero 1 */
-          trame_item->nbr_images++;
+        { if (!Download_gif ( icone_id, i )) goto encore;       /* Fin de telechargement des %i ou erreur */
+          if (Add_single_icone_to_item(trame_item, icone_id, i) == FALSE) return;            /* Si erreur */
         }
        goto encore;
-    }
+     }
 
-   trame_item->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
-   trame_item->gif_hauteur = gdk_pixbuf_get_height( pixbuf );
-
-   trame_item->images = g_list_append( trame_item->images, pixbuf );        /* Et ajout dans la liste */
-   trame_item->image  = trame_item->images;                             /* Synchro sur image numero 1 */
-   trame_item->nbr_images++;
-
-   for (i=1; ;i++)
-    { g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif.%02d", icone_id, i );
-      pixbuf = gdk_pixbuf_new_from_file ( nom_fichier, NULL );                          /* 2nde tentative */
-      if (!pixbuf) return;                                                          /* Chargement terminé */
-      trame_item->images = g_list_append( trame_item->images, pixbuf );         /* Et ajout dans la liste */
-      trame_item->image  = trame_item->images;                              /* Synchro sur image numero 1 */
-      trame_item->nbr_images++;
-    }
+    for (i=1; ;i++)
+     { if (Add_single_icone_to_item(trame_item, icone_id, i) == FALSE) break; }
   }
 /**********************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                       */

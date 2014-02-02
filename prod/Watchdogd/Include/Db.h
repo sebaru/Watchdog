@@ -37,6 +37,8 @@
  #define TAILLE_DB_PASSWORD       30
  #define TAILLE_DB_DATABASE       20
 
+ #define NUM_EA_SYS_DBREQUEST_SIMULT   127      /* Numéro de l'EA de reference n° requete SQL simultanées */
+
  struct DB
   { MYSQL *mysql;
     MYSQL_RES *result;

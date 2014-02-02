@@ -50,6 +50,14 @@
     guint    date_modif;
     guint    date_expire;
     guint    gids[NBR_MAX_GROUPE_PAR_UTIL];                          /* Numéro des groupes d'appartenance */
+    gboolean sms_enable;
+    gchar    sms_phone[80];
+    gboolean sms_allow_cde;
+    gboolean imsg_enable;
+    gchar    imsg_jabberid[80];
+    gboolean imsg_allow_cde;
+    guint    imsg_bit_presence;
+    gboolean imsg_available;
   };
 
  struct CMD_TYPE_GROUPE

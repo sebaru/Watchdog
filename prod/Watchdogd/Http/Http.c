@@ -58,6 +58,7 @@
     Cfg_http.http_port         = HTTP_DEFAUT_PORT_HTTP;
     Cfg_http.https_enable      = FALSE; 
     Cfg_http.https_port        = HTTP_DEFAUT_PORT_HTTPS;
+    Cfg_http.authenticate      = TRUE; 
     Cfg_http.nbr_max_connexion = HTTP_DEFAUT_MAX_CONNEXION;
     g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", HTTP_DEFAUT_FILE_CERT );
     g_snprintf( Cfg_http.https_file_key,  sizeof(Cfg_http.https_file_key),  "%s", HTTP_DEFAUT_FILE_KEY );
@@ -90,6 +91,8 @@
         { Cfg_http.https_port = atoi(valeur);  }
        else if ( ! g_ascii_strcasecmp ( nom, "satellite_enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.satellite_enable = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "authenticate" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "false" ) ) Cfg_http.authenticate = FALSE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.lib->Thread_debug = TRUE;  }
        else
@@ -301,7 +304,8 @@
                                      infos->username, (size_t *)&size);
        infos->util = Rechercher_utilisateurDB_by_name ( infos->username );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "Prepare_request : New HTTPS %s %s %s request (Payload size %d) from Host=%s(dn=%s cn=%s)/Service=%s (Cipher=%s/Proto=%s/Issuer=%s). User-Agent=%s. Origin=%s",
+                "Prepare_request : New HTTPS %s %s %s request (Payload size %d) from Host=%s(dn=%s cn=%s)/Service=%s"
+                " (Cipher=%s/Proto=%s/Issuer=%s). User-Agent=%s. Origin=%s",
                  method, url, version, (upload_data_size ? *upload_data_size : 0),
                  infos->client_host, infos->client_dn, infos->username, infos->client_service,
                  gnutls_cipher_get_name (infos->ssl_algo), gnutls_protocol_get_name (infos->ssl_proto),
@@ -335,8 +339,10 @@
     struct MHD_Response *response;
 
     if (!*con_cls)
-     { return(Prepare_request(connection, url, method, version, upload_data_size, con_cls)); }
-    else infos = *con_cls;
+     { if (Prepare_request(connection, url, method, version, upload_data_size, con_cls) == MHD_NO)
+        { return(MHD_NO); }
+     }
+    infos = *con_cls;                      /* infos est g_freé via CB a la fin de la requete issue de MHD */
     
     if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getsyn" ) )
      { if ( Http_Traiter_request_getsyn ( connection ) == FALSE)              /* Traitement de la requete */
@@ -346,16 +352,10 @@
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
           MHD_destroy_response (response);
         }
+       return MHD_YES;
      }
     else if ( Cfg_http.satellite_enable && ! strcasecmp( method, MHD_HTTP_METHOD_POST ) && ! strcasecmp ( url, "/set_internal" ) )
-     { if ( Http_Traiter_request_set_internal ( connection, upload_data, upload_data_size, con_cls ) == FALSE)        /* Traitement de la requete */
-        { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
-                                                      (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
-          if (response == NULL) return(MHD_NO);
-          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
-          MHD_destroy_response (response);
-        }
-     }
+     { return ( Http_Traiter_request_set_internal ( connection, upload_data, upload_data_size, infos ) ); }
     else if ( Cfg_http.satellite_enable && ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/setm" ) )
      { if ( Http_Traiter_request_setm ( connection ) == FALSE )              /* Traitement de la requete */
         { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
@@ -364,6 +364,7 @@
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
           MHD_destroy_response (response);
         }
+       return MHD_YES;
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/status" ) )
      { return( Http_Traiter_request_getstatus ( connection, infos ) ); }
@@ -375,6 +376,7 @@
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
           MHD_destroy_response (response);
         }
+       return MHD_YES;
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/gifile" ) )
      { if ( Http_Traiter_request_gifile ( connection ) == FALSE)              /* Traitement de la requete */
@@ -384,6 +386,7 @@
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
           MHD_destroy_response (response);
         }
+       return MHD_YES;
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/favicon.ico" ) )
      { struct stat sbuf;
@@ -404,6 +407,7 @@
        MHD_add_response_header (response, "Content-Type", "image/gif");
        MHD_queue_response (connection, MHD_HTTP_OK, response);
        MHD_destroy_response (response);
+       return MHD_YES;
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/xml" ) )
      { struct stat sbuf;
@@ -419,11 +423,12 @@
           MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
           MHD_destroy_response (response);
           return(MHD_YES);
-       }
-      response = MHD_create_response_from_fd_at_offset (sbuf.st_size, fd, 0);
-      MHD_add_response_header (response, "Content-Type", "application/xml");
-      MHD_queue_response (connection, MHD_HTTP_OK, response);
-      MHD_destroy_response (response);
+        }
+       response = MHD_create_response_from_fd_at_offset (sbuf.st_size, fd, 0);
+       MHD_add_response_header (response, "Content-Type", "application/xml");
+       MHD_queue_response (connection, MHD_HTTP_OK, response);
+       MHD_destroy_response (response);
+       return MHD_YES;
      }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_OPTIONS ) )
      { response = MHD_create_response_from_buffer ( strlen (Options_response)+1,
@@ -435,6 +440,7 @@
        MHD_add_response_header ( response, "Access-Control-Allow-Headers", "X-Titanium-Id" );
        MHD_queue_response (connection, MHD_HTTP_OK, response);
        MHD_destroy_response (response);
+       return MHD_YES;
      }
     else if ( strcasecmp( method, MHD_HTTP_METHOD_GET ) && strcasecmp( method, MHD_HTTP_METHOD_POST ) )
      { response = MHD_create_response_from_buffer ( strlen (Wrong_method)+1,
@@ -442,16 +448,17 @@
        if (response == NULL) return(MHD_NO);
        MHD_queue_response ( connection, MHD_HTTP_METHOD_NOT_ALLOWED, response);     /* Method not allowed */
        MHD_destroy_response (response);
+       return MHD_YES;
      }
-
-    else
+    else /*if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) )*/
      { response = MHD_create_response_from_buffer ( strlen (Not_found)+1,
                                                    (void*) Not_found, MHD_RESPMEM_PERSISTENT);
        if (response == NULL) return(MHD_NO);
        MHD_queue_response ( connection, MHD_HTTP_NOT_FOUND, response);
        MHD_destroy_response (response);
+       return MHD_YES;
      }
-    return MHD_YES;
+    return MHD_NO;
   }
 /**********************************************************************************************************/
 /* Http Liberer_infos : Libere la mémoire réservée par la structure infos de reception de la requete      */

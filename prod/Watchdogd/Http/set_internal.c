@@ -189,22 +189,22 @@ end:
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
  gboolean Http_Traiter_request_set_internal ( struct MHD_Connection *connection, const char *upload_data, 
-                                              size_t *upload_data_size, void **con_cls )
+                                              size_t *upload_data_size, struct HTTP_CONNEXION_INFO *infos )
   { const char *Handled_OK = "<html><body>OK</body></html>";
-    struct HTTP_CONNEXION_INFO *infos;
     struct MHD_Response *response;
 
-    if (!*con_cls)
-     { infos = (struct HTTP_CONNEXION_INFO *) g_try_malloc0 ( sizeof( struct HTTP_CONNEXION_INFO ) );
-       if (!infos)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Http_Traiter_request_set_internal: Memory Alloc ERROR infos" );
-          return(FALSE);
-        }
+    if ( Cfg_http.authenticate == TRUE &&
+         ((!infos) || (!infos->util) || (Tester_groupe_util(infos->util, GID_HTTP_SET_INTERNAL)==FALSE))
+       )
+     { response = MHD_create_response_from_buffer ( strlen (RESPONSE_AUTHENTICATION_NEEDED)+1,
+                                                     (void*)RESPONSE_AUTHENTICATION_NEEDED, MHD_RESPMEM_PERSISTENT);
+       if (response == NULL) return(MHD_NO);
+       MHD_queue_response ( connection, MHD_HTTP_UNAUTHORIZED, response );
+       MHD_destroy_response (response);
+       return(MHD_YES);
+     }
 
-       *con_cls = (void *) infos;
-       return(TRUE);
-     } else infos = (struct HTTP_CONNEXION_INFO *)*con_cls;     /* Récupération de la structure de suivie */
+    if (*upload_data_size == 0 && infos->buffer_size == 0) return(MHD_YES);   /* Attente du premier chunk */
 
     if (*upload_data_size != 0)                                                   /* Transfert en cours ? */
      { gchar *new_buffer;
@@ -219,7 +219,7 @@ end:
        memcpy ( infos->buffer + infos->buffer_size, upload_data, *upload_data_size );          /* Recopie */
        infos->buffer_size += *upload_data_size;
        *upload_data_size = 0;              /* Indique à MHD que l'on a traité l'ensemble des octets recus */
-       return(TRUE);
+       return(MHD_YES);                                           /* On demande de continuer le transfert */
      }
 /*-------------------------------- Fin de transfert. On envoie une reponse OK ----------------------------*/
     pthread_mutex_lock( &Cfg_http.lib->synchro );             /* On envoie au thread HTTP pour traitement */

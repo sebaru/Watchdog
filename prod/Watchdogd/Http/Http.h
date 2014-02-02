@@ -54,6 +54,7 @@
     gchar *ssl_key;
     gchar https_file_ca[80];
     gchar *ssl_ca;
+    gboolean authenticate;                       /* TRUE si les requetes HTTPS doivent etre authentifiées */
     struct MHD_Daemon *http_server;
     struct MHD_Daemon *https_server;
     GSList *Liste_XML_docs;                      /* Une liste de document XML recu de la part des clients */
@@ -93,7 +94,7 @@
  extern gboolean Http_Traiter_request_gifile ( struct MHD_Connection *connection );
  extern gboolean Http_Traiter_request_set_internal ( struct MHD_Connection *connection,
                                                      const char *upload_data, 
-                                                     size_t *upload_data_size, void **con_cls );
+                                                     size_t *upload_data_size, struct HTTP_CONNEXION_INFO *infos );
  extern gboolean Http_Traiter_request_setm ( struct MHD_Connection *connection );
  extern void Http_Add_titanium_response_header ( struct MHD_Connection *connection,
                                                  struct MHD_Response *response );
