@@ -205,12 +205,12 @@
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )                     /* Execution de la requete SQL */
      { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
                 "Imsg_Sauvegarder_statut_contact: Requete failed" );
-       Libere_DB_SQL( &db );
-       return;
      }
-    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
-             "Imsg_Sauvegarder_statut_contact : jabber_id %s -> Availability updated to %d.",
-             jabber_id, available );
+    else { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
+                    "Imsg_Sauvegarder_statut_contact : jabber_id %s -> Availability updated to %d.",
+                     jabber_id, available );
+         } 
+    Libere_DB_SQL( &db );
   }
 /**********************************************************************************************************/
 /* Imsg_recipient_allow_command : Renvoie un contact IMSGDB si delui-ci dispose du flag allow_cde         */
