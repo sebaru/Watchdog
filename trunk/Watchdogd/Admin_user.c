@@ -62,6 +62,7 @@
               "   |               -> date_creation=%s, date_modif=%s\n"
               "   |               -> sms_enable =%d, sms_phone     =%30s, sms_allow_cde =%d\n"
               "   |               -> imsg_enable=%d, imsg_jabber_id=%30s, imsg_allow_cde=%d\n"
+              "   |               -> imsg_bit_presence=B%04d, imsg_available=%d\n"
               "   |               -> salt=%s\n"
               "   |               -> hash=%s\n"
               "   |----------------> %s\n",
@@ -69,6 +70,7 @@
                 util->cansetpwd, date_creation, date_modif,
                 util->sms_enable, util->sms_phone, util->sms_allow_cde,
                 util->imsg_enable, util->imsg_jabberid, util->imsg_allow_cde,
+                util->imsg_bit_presence, util->imsg_available,
                 util->salt, util->hash, util->commentaire
               );
     Admin_write ( connexion, chaine );

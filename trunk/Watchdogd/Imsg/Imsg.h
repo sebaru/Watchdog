@@ -39,18 +39,15 @@
  #define TIME_RECONNECT_IMSG       600                          /* 1 minute avant reconnexion si probleme */
 
  struct IMSGDB
-  { gint id;
-    gchar jabber_id[80];
-    gchar nom[80];
-    gboolean enable;
-    gboolean receive_imsg;
-    gboolean send_command;
-    guint bit_presence;
-  };
-
- struct IMSG_CONTACT
-  { struct IMSGDB imsg;
-    gboolean available;
+  { gint     user_id;
+    gchar    user_jabberid[80];
+    gchar    user_name[80];
+    gchar    user_comment[80];
+    guint    user_bit_presence;
+    gboolean user_enable;
+    gboolean user_imsg_enable;
+    gboolean user_allow_cde;
+    gboolean user_available;
   };
 
  struct IMSG_CONFIG
@@ -71,8 +68,7 @@
  extern gboolean Imsg_Lire_config ( void );
  extern void Imsg_Envoi_message_to ( const gchar *dest, gchar *message );
  extern void Imsg_Mode_presence ( gchar *type, gchar *show, gchar *status );
- extern gboolean Retirer_imsgDB ( struct IMSGDB *imsg );
- extern gint Modifier_imsgDB( struct IMSGDB *imsg );
- extern gint Ajouter_imsgDB( struct IMSGDB *imsg );
+ extern gboolean Recuperer_imsgDB ( struct DB *db );
+ extern struct IMSGDB *Recuperer_imsgDB_suite( struct DB *db );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

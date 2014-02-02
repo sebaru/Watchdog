@@ -29,7 +29,6 @@
  #define _SMS_H_
 
  #define NOM_THREAD                     "sms"
- #define NOM_TABLE_SMS                  "sms"
 
  #define TOP_MIN_ENVOI_SMS     1200                           /* 2 minutes sans envoi de SMS au démarrage */
  #define TAILLE_SMSBOX_USERNAME   32                                /* Nombre de caractere du user SMSBOX */

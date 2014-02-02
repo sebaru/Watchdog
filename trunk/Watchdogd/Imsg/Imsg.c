@@ -85,52 +85,42 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Retirer_imsgDB: Elimination d'un imsg                                                                  */
+/* Recuperer_liste_id_imsgDB: Recupération de la liste des ids des imsgs                                  */
 /* Entrée: un log et une database                                                                         */
-/* Sortie: false si probleme                                                                              */
+/* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Retirer_imsgDB ( struct IMSGDB *imsg )
-  { gchar requete[200];
-    gboolean retour;
-    struct DB *db;
-
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
-                "Retirer_imsgDB: Database Connection Failed" );
-       return(FALSE);
-     }
-
+ gboolean Recuperer_imsgDB ( struct DB *db )
+  { gchar requete[512];
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "DELETE FROM %s WHERE id=%d", NOM_TABLE_IMSG, imsg->id );
+                "SELECT id,name,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_bit_presence,imsg_available "
+                " FROM %s as user ORDER BY user.name",
+                NOM_TABLE_UTIL );
 
-    retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
-    Libere_DB_SQL( &db );
-    Cfg_imsg.reload = TRUE;                         /* Rechargement des contacts RS en mémoire de travaille */
-    return(retour);
+    return ( Lancer_requete_SQL ( db, requete ) );                         /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_imsgDB: Recupération de la liste des ids des imsgs                                  */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- static gboolean Recuperer_imsgDB ( struct DB *db )
+ static gboolean Recuperer_all_available_imsgDB ( struct DB *db )
   { gchar requete[512];
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,enable,receive_imsg,send_command,jabber_id,nom,bit_presence"
-                " FROM %s WHERE instance_id='%s' ORDER BY nom", NOM_TABLE_IMSG, Config.instance_id );
+                "SELECT id,name,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_bit_presence,imsg_available "
+                " FROM %s as user WHERE enable=1 AND imsg_enable=1 ORDER BY user.name",
+                NOM_TABLE_UTIL );
 
-    return ( Lancer_requete_SQL ( db, requete ) );             /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                         /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_imsgDB: Recupération de la liste des ids des imsgs                                    */
+/* Recuperer_liste_id_imsgDB: Recupération de la liste des ids des imsgs                                  */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- static struct IMSGDB *Recuperer_imsgDB_suite( struct DB *db )
+ struct IMSGDB *Recuperer_imsgDB_suite( struct DB *db )
   { struct IMSGDB *imsg;
 
-    Recuperer_ligne_SQL(db);                              /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( db );
        return(NULL);
@@ -139,167 +129,17 @@
     imsg = (struct IMSGDB *)g_try_malloc0( sizeof(struct IMSGDB) );
     if (!imsg) Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_ERR, "Recuperer_imsgDB_suite: Erreur allocation mémoire" );
     else
-     { g_snprintf( imsg->jabber_id, sizeof(imsg->jabber_id), "%s", db->row[4] );
-       g_snprintf( imsg->nom,       sizeof(imsg->nom),       "%s", db->row[5] );
-       imsg->id                = atoi(db->row[0]);
-       imsg->enable            = atoi(db->row[1]);
-       imsg->receive_imsg      = atoi(db->row[2]);
-       imsg->send_command      = atoi(db->row[3]);
-       imsg->bit_presence      = atoi(db->row[6]);
+     { g_snprintf( imsg->user_jabberid, sizeof(imsg->user_jabberid), "%s", db->row[5] );
+       g_snprintf( imsg->user_name,     sizeof(imsg->user_name),     "%s", db->row[1] );
+       g_snprintf( imsg->user_comment,  sizeof(imsg->user_comment),  "%s", db->row[3] );
+       imsg->user_id           = atoi(db->row[0]);
+       imsg->user_enable       = atoi(db->row[2]);
+       imsg->user_imsg_enable  = atoi(db->row[4]);
+       imsg->user_allow_cde    = atoi(db->row[6]);
+       imsg->user_bit_presence = atoi(db->row[7]);
+       imsg->user_available    = atoi(db->row[8]);
      }
     return(imsg);
-  }
-/**********************************************************************************************************/
-/* Modifier_imsgDB: Modification d'un imsg Watchdog                                                       */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
-/* Sortie: -1 si pb, id sinon                                                                             */
-/**********************************************************************************************************/
- static gint Ajouter_modifier_imsgDB( struct IMSGDB *imsg, gboolean ajout )
-  { gchar *jabber_id, *name;
-    gboolean retour_sql;
-    gchar requete[2048];
-    struct DB *db;
-    gint retour;
-
-    jabber_id = Normaliser_chaine ( imsg->jabber_id );                    /* Formatage correct des chaines */
-    if (!jabber_id)
-     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_imsgDB: Normalisation jabber_id impossible" );
-       return(-1);
-     }
-    name = Normaliser_chaine ( imsg->nom );                              /* Formatage correct des chaines */
-    if (!name)
-     { g_free(jabber_id);
-       Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
-                "Ajouter_modifier_imsgDB: Normalisation nom impossible" );
-       return(-1);
-     }
-
-    if (ajout == TRUE)
-     { g_snprintf( requete, sizeof(requete),
-                   "INSERT INTO %s"
-                   "(instance_id,enable,receive_imsg,send_command,jabber_id,nom,bit_presence) "
-                   "VALUES ('%s',%d,%d,%d,'%s','%s',%d)",
-                   NOM_TABLE_IMSG, Config.instance_id,
-                   imsg->enable, imsg->receive_imsg, imsg->send_command,
-                   jabber_id, name, imsg->bit_presence
-                 );
-     }
-    else
-     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
-                   "UPDATE %s SET "             
-                   "enable=%d, receive_imsg=%d, send_command=%d,"
-                   "jabber_id='%s', nom='%s', bit_presence=%d "
-                   "WHERE id=%d",
-                   NOM_TABLE_IMSG,
-                   imsg->enable, imsg->receive_imsg, imsg->send_command,
-                   jabber_id, name, imsg->bit_presence,
-                   imsg->id );
-     }
-    g_free(jabber_id);
-    g_free(name);
-
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
-                "Ajouter_modifier_imsgDB: Database Connection Failed" );
-       return(-1);
-     }
-
-    retour_sql = Lancer_requete_SQL ( db, requete );               /* Lancement de la requete */
-    if ( retour_sql == TRUE )                                                          /* Si pas d'erreur */
-     { if (ajout==TRUE) retour = Recuperer_last_ID_SQL ( db );    /* Retourne le nouvel ID imsg */
-       else retour = 0;
-     }
-    else retour = -1;
-    Libere_DB_SQL( &db );
-    Cfg_imsg.reload = TRUE;                         /* Rechargement des contacts RS en mémoire de travaille */
-    return ( retour );                                            /* Pas d'erreur lors de la modification */
-  }
-/**********************************************************************************************************/
-/* Modifier_imsgDB: Modification d'un imsg Watchdog                                                       */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
-/* Sortie: -1 si pb, id sinon                                                                             */
-/**********************************************************************************************************/
- gint Modifier_imsgDB( struct IMSGDB *imsg )
-  { return ( Ajouter_modifier_imsgDB( imsg, FALSE ) );
-  }
-/**********************************************************************************************************/
-/* Modifier_imsgDB: Modification d'un imsg Watchdog                                                       */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
-/* Sortie: -1 si pb, id sinon                                                                             */
-/**********************************************************************************************************/
- gint Ajouter_imsgDB( struct IMSGDB *imsg )
-  { return ( Ajouter_modifier_imsgDB( imsg, TRUE ) );
-  }
-/**********************************************************************************************************/
-/* Charger_tous_imsg: Requete la DB pour charger les contacts imsg                                         */
-/* Entrée: rien                                                                                           */
-/* Sortie: le nombre de contacts trouvé                                                                    */
-/**********************************************************************************************************/
- static gboolean Charger_tous_IMSG ( void  )
-  { struct DB *db;
-    gint cpt;
-
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING, "Charger_tous_imsg: Database Connection Failed" );
-       return(FALSE);
-     }
-
-/********************************************** Chargement des contacts ************************************/
-    if ( ! Recuperer_imsgDB( db ) )
-     { Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING, "Charger_tous_imsg: Recuperer_imsg Failed" );
-       return(FALSE);
-     }
-
-    Cfg_imsg.Contacts = NULL;
-    cpt = 0;
-    for ( ; ; )
-     { struct IMSG_CONTACT *contact;
-       struct IMSGDB *imsg;
-
-       imsg = Recuperer_imsgDB_suite( db );
-       if (!imsg) break;
-
-       contact = (struct IMSG_CONTACT *)g_try_malloc0( sizeof(struct IMSG_CONTACT) );
-       if (!contact)                                                   /* Si probleme d'allocation mémoire */
-        { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_ERR,
-                   "Charger_tous_imsg : Erreur allocation mémoire struct IMSG_CONTACT" );
-          g_free(imsg);
-          Libere_DB_SQL( &db );
-          return(FALSE);
-        }
-       memcpy( &contact->imsg, imsg, sizeof(struct IMSGDB) );
-       g_free(imsg);
-       cpt++;                                             /* Nous avons ajouté un contact dans la liste ! */
-                                                                        /* Ajout dans la liste de travail */
-       pthread_mutex_lock( &Cfg_imsg.lib->synchro );
-       Cfg_imsg.Contacts = g_slist_prepend ( Cfg_imsg.Contacts, contact );
-       pthread_mutex_unlock( &Cfg_imsg.lib->synchro );
-       Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO,
-                "Charger_tous_imsg: id = %03d, nom=%s, jabber_id=%s",
-                 contact->imsg.id, contact->imsg.nom, contact->imsg.jabber_id );
-     }
-    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_INFO, "Charger_tous_imsg: %03d IMSG found  !", cpt );
-
-    Libere_DB_SQL( &db );
-    return(TRUE);
-  }
-/**********************************************************************************************************/
-/* Decharger_tous_Decharge l'ensemble des contacts IMSG                                                   */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- static void Decharger_tous_IMSG ( void  )
-  { struct IMSG_CONTACT *contact;
-    pthread_mutex_lock( &Cfg_imsg.lib->synchro );
-    while ( Cfg_imsg.Contacts )
-     { contact = (struct IMSG_CONTACT *)Cfg_imsg.Contacts->data;
-       Cfg_imsg.Contacts = g_slist_remove ( Cfg_imsg.Contacts, contact );
-       g_free(contact);
-     }
-    pthread_mutex_unlock( &Cfg_imsg.lib->synchro );
   }
 /**********************************************************************************************************/
 /* Imsg_Gerer_message: Fonction d'abonné appellé lorsqu'un message est disponible.                        */
@@ -335,61 +175,38 @@
 /* Entrée: le contact et le statut                                                                        */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Imsg_Sauvegarder_statut_contact ( const gchar *jabber_id, gboolean available )
-  { struct IMSG_CONTACT *contact;
-    gboolean found;
-    GSList *liste;
+ static void Imsg_Sauvegarder_statut_contact ( gchar *jabber_id, gboolean available )
+  { gchar *jabberid, requete[80];
+    struct DB *db;
 
-    found = FALSE;
-    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
-              "Imsg_Sauvegarder_statut_contact : searching for user %s", jabber_id );
-    pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
-    liste = Cfg_imsg.Contacts;
-    while(liste)
-     { contact  = (struct IMSG_CONTACT *)liste->data;
-       if ( ! g_ascii_strncasecmp( contact->imsg.jabber_id, jabber_id, strlen(contact->imsg.jabber_id) ) )
-        { found = TRUE;
-          break;
-        }
-       liste = liste->next;
-     }
-    pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
-    if (found==TRUE)
-     { contact->available = available; 
-          Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
-                    "Imsg_Sauvegarder_statut_contact : user %s found in list. Availability updated to %d.",
-                    jabber_id, available );
-          if (contact->imsg.bit_presence) SB(contact->imsg.bit_presence, available);
+    jabberid = Normaliser_chaine ( jabber_id );
+    if (!jabberid)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "Imsg_Sauvegarder_statut_contact: Normalisation jabberid impossible" );
        return;
      }
 
-    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
-              "Imsg_Sauvegarder_statut_contact : user %s(availability=%d) not found in list. Dropping...",
-              jabber_id, available );
-  }
-/**********************************************************************************************************/
-/* Imsg_recipient_authorized : Renvoi TRUE si Watchdog peut envoyer au destinataire en parametre          */
-/* Entrée: le nom du destinataire                                                                         */
-/* Sortie : booléen, TRUE/FALSE                                                                           */
-/**********************************************************************************************************/
- static gboolean Imsg_recipient_send_command_authorized ( const gchar *jabber_id )
-  { struct IMSG_CONTACT *contact;
-    gboolean found;
-    GSList *liste;
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "UPDATE %s SET imsg_available=%d WHERE imsg_jabberid=%s",
+                NOM_TABLE_IMSG, available, jabberid );
+    g_free(jabberid);
 
-    found = FALSE;
-    pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
-    liste = Cfg_imsg.Contacts;
-    while (liste)
-     { contact  = (struct IMSG_CONTACT *)liste->data;
-       if ( contact->imsg.enable && contact->imsg.send_command &&
-            (! g_ascii_strncasecmp ( jabber_id, contact->imsg.jabber_id, strlen(contact->imsg.jabber_id) ) )
-          )
-        { found = TRUE; break; }
-       liste = liste->next;
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                "Imsg_Sauvegarder_statut_contact: Database Connection Failed" );
+       return;
      }
-    pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
-    return(found);
+
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE );                    /* Execution de la requete SQL */
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                "Imsg_Sauvegarder_statut_contact: Requete failed" );
+       Libere_DB_SQL( &db );
+       return;
+     }
+    Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
+             "Imsg_Sauvegarder_statut_contact : jabber_id %s -> Availability updated to %d.",
+             jabber_id, available );
   }
 /**********************************************************************************************************/
 /* Mode_presence : Change la presence du server watchdog aupres du serveur XMPP                           */
@@ -454,17 +271,28 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Imsg_Envoi_message_to_all_available ( gchar *message )
-  { GSList *liste;
-    pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
-    liste = Cfg_imsg.Contacts;
-    while(liste)
-     { struct IMSG_CONTACT *contact;
-       contact = (struct IMSG_CONTACT *)liste->data;
-       if ( contact->imsg.enable && contact->imsg.receive_imsg && contact->available == TRUE )
-        { Imsg_Envoi_message_to ( contact->imsg.jabber_id, message ); }
-       liste = liste->next;
+  { struct IMSGDB *imsg;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                "Imsg_Envoi_message_to_all_available: Database Connection Failed" );
+       return;
      }
-    pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
+
+/************************************* Chargement des informations en bases *******************************/
+    if ( ! Recuperer_all_available_imsgDB( db ) )
+     { Libere_DB_SQL( &db );
+       Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
+                "Imsg_Envoi_message_to_all_available: Recuperer_imsg Failed" );
+       return;
+     }
+
+    while ( (imsg = Recuperer_imsgDB_suite( db )) != NULL)
+     { Imsg_Envoi_message_to ( imsg->user_jabberid, message ); }
+
+    Libere_DB_SQL( &db );
   }
 /**********************************************************************************************************/
 /* Imsg_Reception_message : CB appellé lorsque l'on recoit un message xmpp                                */
@@ -498,7 +326,9 @@
     if ( (!from) || (!strncmp ( from, Cfg_imsg.username, strlen(Cfg_imsg.username) )) )
      { return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS); }
 
+#ifdef bouh
     if ( Imsg_recipient_send_command_authorized ( from ) == FALSE )
+#endif
      { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
                 "Imsg_Reception_message : unknown sender %s. Dropping message...", from );
        return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
@@ -611,7 +441,7 @@
         }
        lm_message_unref (m);
 
-       Imsg_Sauvegarder_statut_contact ( from, FALSE );         /* Par défaut, le contact est unavailable */
+       Imsg_Sauvegarder_statut_contact ( (const)from, FALSE );  /* Par défaut, le contact est unavailable */
        return(LM_HANDLER_RESULT_REMOVE_MESSAGE);
      }
     else if ( type && ( ! strcmp ( type, "unavailable" ) ) )    /* Gestion de la deconnexion des contacts */
@@ -813,7 +643,6 @@
     MainLoop = g_main_context_new();
 
     Abonner_distribution_histo ( Imsg_Gerer_histo );              /* Abonnement à la diffusion des histos */
-    Charger_tous_IMSG();
     while( Cfg_imsg.lib->Thread_run == TRUE )                            /* On tourne tant que necessaire */
      { usleep(10000);
        sched_yield();
@@ -832,8 +661,7 @@
 
        if (Cfg_imsg.reload == TRUE)
         { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE, "Run_thread: Reloading conf" );
-          Decharger_tous_IMSG();
-          Charger_tous_IMSG();
+          Imsg_Lire_config ();                          /* Lecture de la configuration logiciel du thread */
           Cfg_imsg.reload = FALSE;
         }
 
@@ -864,7 +692,6 @@
        g_main_context_iteration ( MainLoop, FALSE );
 
      }                                                                     /* Fin du while partage->arret */
-    Decharger_tous_IMSG();
     Desabonner_distribution_histo ( Imsg_Gerer_histo );       /* Desabonnement de la diffusion des histos */
     Imsg_Fermer_connexion ();                              /* Fermeture de la connexion au serveur Jabber */
     g_main_context_unref (MainLoop);

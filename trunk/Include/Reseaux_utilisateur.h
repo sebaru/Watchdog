@@ -56,6 +56,8 @@
     gboolean imsg_enable;
     gchar    imsg_jabberid[80];
     gboolean imsg_allow_cde;
+    guint    imsg_bit_presence;
+    gboolean imsg_available;
   };
 
  struct CMD_TYPE_GROUPE
