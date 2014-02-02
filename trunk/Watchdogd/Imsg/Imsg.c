@@ -187,7 +187,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET imsg_available=%d WHERE imsg_jabberid=%s",
+                "UPDATE %s SET imsg_available=%d WHERE imsg_jabberid='%s'",
                 NOM_TABLE_UTIL, available, jabberid );
     g_free(jabberid);
 
@@ -242,7 +242,7 @@
        return(NULL);
      }
 
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE );                    /* Execution de la requete SQL */
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )                     /* Execution de la requete SQL */
      { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_WARNING,
                 "Imsg_recipient_allow_command: Requete failed" );
        Libere_DB_SQL( &db );
