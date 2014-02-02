@@ -110,6 +110,7 @@
     Info_new( Config.log, Config.log_db, LOG_DEBUG,
               "Init_DB_SQL: Database Connection OK with %s@%s (id=%05d). Nbr_requete_en_cours=%d",
                Config.db_username, Config.db_database, db->id, taille );
+    SEA ( NUM_EA_SYS_DBREQUEST_SIMULT, taille );
     return(db);
   }
 /**********************************************************************************************************/

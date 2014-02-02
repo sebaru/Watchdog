@@ -53,6 +53,9 @@
     gboolean sms_enable;
     gchar    sms_phone[80];
     gboolean sms_allow_cde;
+    gboolean imsg_enable;
+    gchar    imsg_jabberid[80];
+    gboolean imsg_allow_cde;
   };
 
  struct CMD_TYPE_GROUPE

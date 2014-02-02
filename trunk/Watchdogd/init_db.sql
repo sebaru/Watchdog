@@ -635,6 +635,7 @@ INSERT INTO `mnemos` (`type`, `num`, `num_plugin`, `acronyme`, `libelle`, `comma
 (0, 6, 1, 'SYS_TICK_0.3S', 'Cligno toutes les 3 dixièmes de seconde', ''),
 (0, 7, 1, 'SYS_SHUTDOWN', 'System is halting', ''),
 (0, 8, 1, 'SYS_REBOOT', 'System is rebooting', ''),
+(5,127,1, 'SYS_DBREQUEST_SIMULT', 'Number of simultaneous SQL request', ''),
 (7, 1, 1, 'SYSTEME', 'Motif toujours en mode 1 couleur rouge', ''),
 (7, 4, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
 (7, 3, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
@@ -969,6 +970,9 @@ CREATE TABLE IF NOT EXISTS `users` (
   `sms_enable` tinyint(1) NOT NULL DEFAULT '0',
   `sms_phone` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `sms_allow_cde` tinyint(1) NOT NULL DEFAULT '0',
+  `imsg_enable` tinyint(1) NOT NULL DEFAULT '0',
+  `imsg_jabberid` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
+  `imsg_allow_cde` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=2 ;

@@ -50,12 +50,15 @@
  static GtkWidget *Entry_last;                                                   /* L'id de l'utilisateur */
  static GtkWidget *Entry_comment;                                  /* Commentaire associé à l'utilisateur */
  static GtkWidget *Entry_sms_phone;                                   /* n° de telephone de l'utilisateur */
+ static GtkWidget *Entry_imsg_jabberid;                 /* n° de messagerie instantannée de l'utilisateur */
  static GtkWidget *Check_enable;                                 /* Le compte utilisateur est-il enable ? */
- static GtkWidget *Check_cansetpwd;                      /* L'utilisateur peut-il changer son password ? */
+ static GtkWidget *Check_cansetpwd;                       /* L'utilisateur peut-il changer son password ? */
  static GtkWidget *Check_setpwdnow;                                       /* Pour changer le password now */
  static GtkWidget *Check_mustchangepwd;/* L'utilisateur doit-il changer son password au prochain login ?? */
  static GtkWidget *Check_sms_enable;                                           /* Lui envoit-on des SMS ? */
  static GtkWidget *Check_sms_allow_cde;              /* Peut-on recevoir des sms de commande de sa part ? */
+ static GtkWidget *Check_imsg_enable;                                         /* Lui envoit-on des IMSG ? */
+ static GtkWidget *Check_imsg_allow_cde;            /* Peut-on recevoir des imsg de commande de sa part ? */
  static GtkWidget *Entry_pass1, *Entry_pass2;                            /* Acquisition des passwords ... */
  static GtkWidget *F_ajout;                                /* Widget visuel de la fenetre d'ajout/edition */
  static struct CMD_TYPE_UTILISATEUR Edit_util;                          /* Utilisateur en cours d'edition */
@@ -207,6 +210,17 @@
     gtk_widget_set_sensitive( Check_sms_allow_cde, enable );
   }
 /**********************************************************************************************************/
+/* Changer_sms_enable: Appelé quand l'utilisateur clique sur le toggle sms_enable                         */
+/* Entrée: rien                                                                                           */
+/* sortie: kedal                                                                                          */
+/**********************************************************************************************************/
+ static void Changer_imsg_enable ( void )
+  { gboolean enable;
+    enable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_imsg_enable));
+    gtk_widget_set_sensitive( Entry_imsg_jabberid, enable );
+    gtk_widget_set_sensitive( Check_imsg_allow_cde, enable );
+  }
+/**********************************************************************************************************/
 /* Proto_afficher_un_groupe_existant: ajoute un groupe dans la liste des groupes existants                */
 /* Entrée: rien                                                                                           */
 /* sortie: kedal                                                                                          */
@@ -322,6 +336,8 @@
                 "%s", gtk_entry_get_text(GTK_ENTRY(Entry_comment) ) );
     g_snprintf( Edit_util.sms_phone, sizeof(Edit_util.sms_phone),
                 "%s", gtk_entry_get_text(GTK_ENTRY(Entry_sms_phone) ) );
+    g_snprintf( Edit_util.imsg_jabberid, sizeof(Edit_util.imsg_jabberid),
+                "%s", gtk_entry_get_text(GTK_ENTRY(Entry_imsg_jabberid) ) );
 
     Edit_util.date_expire   = gnome_date_edit_get_time( GNOME_DATE_EDIT(Calendar) );
     Edit_util.expire        = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_expire));
@@ -331,6 +347,8 @@
     Edit_util.setpwdnow     = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_setpwdnow));
     Edit_util.sms_enable    = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_sms_enable));
     Edit_util.sms_allow_cde = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_sms_allow_cde));
+    Edit_util.imsg_enable   = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_imsg_enable));
+    Edit_util.imsg_allow_cde= gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_imsg_allow_cde));
 
     gids = Recuperer_groupes_util();
     memcpy( Edit_util.gids, gids, sizeof(Edit_util.gids) );
@@ -400,7 +418,7 @@
     gtk_container_add( GTK_CONTAINER(frame), vboite );
 
 /******************************************** Paramètres de l'utilisateur *********************************/
-    table = gtk_table_new( 6, 4, FALSE );
+    table = gtk_table_new( 7, 4, FALSE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(vboite), table, FALSE, FALSE, 0 );
@@ -471,10 +489,22 @@
                       G_CALLBACK(Changer_sms_enable), NULL );
     Entry_sms_phone = gtk_entry_new();
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_sms_phone, 1, 3, i, i+1 );
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_nom), 80 );
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_sms_phone), 80 );
 
     Check_sms_allow_cde = gtk_check_button_new_with_label ( _("Allow CDE") );
     gtk_table_attach_defaults( GTK_TABLE(table), Check_sms_allow_cde, 3, 4, i, i+1 );
+
+    i++;
+    Check_imsg_enable = gtk_check_button_new_with_label ( _("Send IMSG to") );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_imsg_enable, 0, 1, i, i+1 );
+    g_signal_connect( G_OBJECT(Check_imsg_enable), "clicked",
+                      G_CALLBACK(Changer_imsg_enable), NULL );
+    Entry_imsg_jabberid = gtk_entry_new();
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_imsg_jabberid, 1, 3, i, i+1 );
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_imsg_jabberid), 80 );
+
+    Check_imsg_allow_cde = gtk_check_button_new_with_label ( _("Allow CDE") );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_imsg_allow_cde, 3, 4, i, i+1 );
 
 /***************************************** Gestion des groupes ********************************************/
     separateur = gtk_hseparator_new();
@@ -526,12 +556,15 @@
        gtk_entry_set_text( GTK_ENTRY(Entry_comment), edit_util->commentaire );
 
        gtk_entry_set_text( GTK_ENTRY(Entry_sms_phone), edit_util->sms_phone );
+       gtk_entry_set_text( GTK_ENTRY(Entry_imsg_jabberid), edit_util->imsg_jabberid );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_enable),        edit_util->enable );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_mustchangepwd), edit_util->mustchangepwd );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_cansetpwd),     edit_util->cansetpwd );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_expire),        edit_util->expire );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_sms_enable),    edit_util->sms_enable );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_sms_allow_cde), edit_util->sms_allow_cde );
+       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_imsg_enable),   edit_util->imsg_enable );
+       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_imsg_allow_cde),edit_util->imsg_allow_cde );
 
        temps = edit_util->date_modif;
        strftime( chaine, sizeof(chaine), "%c", localtime((time_t *)&temps) );
@@ -553,6 +586,7 @@
     Changer_setpwdnow();
     Changer_enabled();
     Changer_sms_enable ();
+    Changer_imsg_enable ();
     gtk_widget_show_all( F_ajout );
   }
 /*--------------------------------------------------------------------------------------------------------*/
