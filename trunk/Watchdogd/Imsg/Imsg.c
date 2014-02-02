@@ -214,7 +214,7 @@
 /* Sortie: struct IMSGDB *imsg                                                                            */
 /**********************************************************************************************************/
  static struct IMSGDB *Imsg_recipient_allow_command ( gchar *jabber_id )
-  { gchar *jabberid, requete[80];
+  { gchar *jabberid, requete[512];
     struct IMSGDB *imsg;
     struct DB *db;
 
