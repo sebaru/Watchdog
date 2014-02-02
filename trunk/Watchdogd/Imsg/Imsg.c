@@ -214,11 +214,15 @@
 /* Sortie: struct IMSGDB *imsg                                                                            */
 /**********************************************************************************************************/
  static struct IMSGDB *Imsg_recipient_allow_command ( gchar *jabber_id )
-  { gchar *jabberid, requete[512];
+  { gchar *jabberid, requete[512], hostonly[80], *ptr;
     struct IMSGDB *imsg;
     struct DB *db;
 
-    jabberid = Normaliser_chaine ( jabber_id );
+    g_snprintf( hostonly, sizeof(hostonly), "%s", jabber_id );
+    ptr = strstr( hostonly, "/" );
+    if (ptr) *ptr=0;
+
+    jabberid = Normaliser_chaine ( hostonly );
     if (!jabberid)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Imsg_recipient_allow_command: Normalisation jabberid impossible" );
