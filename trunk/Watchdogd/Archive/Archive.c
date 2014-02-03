@@ -85,12 +85,13 @@
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  static void Ajouter_archRRD ( struct ARCHDB *arch )
-  { gchar fichier[80], update[80];
+  { gchar fichier[80], update[80], png[80];
     gchar *params[11];
     gint result;
 
     params[0] = "rrdupdate";
     g_snprintf( fichier, sizeof(fichier), "RRA/%02d-%04d.rrd", arch->type, arch->num );
+    g_snprintf(     png, sizeof(png),     "WEB/%02d-%04d.png", arch->type, arch->num );
     params[1] = fichier;
     g_snprintf( update,  sizeof(update), "%d:%f", arch->date_sec, arch->valeur );
     params[2] = update;
@@ -119,6 +120,38 @@
                     "Ajouter_archRRD: Creation of RRD file %s OK", fichier );
         }
      }
+
+    if ( !(Partage->top % 600) )                                         /* Toutes les minutes */
+     { char **calcpr  = NULL;
+       int xsize, ysize;
+       double ymin, ymax;
+       gchar vval[80], vvalline[80], start[80], options[80];
+       Info_new( Config.log, Config.log_arch, LOG_DEBUG,
+                 "Ajouter_archRRD: Creation of du fichier PNG %s", png );
+       params[0] = "rrdgraph";
+       params[1] = png;
+       params[2] = "--slope-mode";
+       params[3] = "--start=-2days";
+       params[4] = "--vertical-label=label_vert";
+       params[5] = "--width=1500";
+       params[6] = "--height=500";
+       params[7] = "--right-axis-label=unite";
+       params[8] = "--right-axis:1:0";
+       g_snprintf( vval, sizeof(vval), "DEF:vval=%s:val:AVERAGE", fichier );
+       params[9] = vval;
+/*     $options[] = "DEF:mval=".$rrd_file[0].":val:MIN";
+     $options[] = "DEF:Mval=".$rrd_file[0].":val:MAX";
+     $options[] = "DEF:Lval=".$rrd_file[0].":val:LAST";*/
+    //"AREA:Mval#770000:Max",
+       g_snprintf( vvalline, sizeof(vvalline), "LINE1:vval#0000FF:liebbe en unite" );
+       params[10]=vvalline;
+/*     $options[] = "GPRINT:mval:MIN:Min Value \: %6.2lf";
+     $options[] = "GPRINT:Mval:MAX:Max Value \: %6.2lf";
+     $options[] = "GPRINT:Lval:LAST:Last Value \: %6.2lf";*/
+       rrd_clear_error();
+       result = rrd_graph(11, params, &calcpr, &xsize, &ysize, NULL, &ymin, &ymax);
+     }
+
   }
 /**********************************************************************************************************/
 /* Main: Fonction principale du thread                                                                    */
@@ -145,7 +178,7 @@
 
        if (Partage->com_arch.Thread_sigusr1)                                      /* On a recu sigusr1 ?? */
         { Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Run_arch: SIGUSR1" );
-          pthread_mutex_lock( &Partage->com_arch.synchro );                                 /* lockage futex */
+          pthread_mutex_lock( &Partage->com_arch.synchro );                              /* lockage futex */
           Info_new( Config.log, Config.log_arch, LOG_INFO,
                    "Run_arch: Reste %03d a traiter",
                     g_slist_length(Partage->com_arch.liste_arch) );
@@ -170,11 +203,10 @@
           pthread_mutex_lock( &Partage->com_arch.synchro );                              /* lockage futex */
           arch = Partage->com_arch.liste_arch->data;                              /* Recuperation du arch */
           Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
-          taille = g_slist_length(Partage->com_arch.liste_arch);
-          Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                   "Run_arch: Reste %03d a traiter", taille );
-          SEA ( NUM_EA_SYS_ARCHREQUEST, taille );                       /* Enregistrement pour historique */
           Partage->com_arch.taille_arch--;
+          Info_new( Config.log, Config.log_arch, LOG_DEBUG,
+                   "Run_arch: Reste %03d a traiter", Partage->com_arch.taille_arch );
+          SEA ( NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );/* Enregistrement pour historique */
           pthread_mutex_unlock( &Partage->com_arch.synchro );
           Ajouter_archRRD( arch );
           Ajouter_archDB ( db, arch );
