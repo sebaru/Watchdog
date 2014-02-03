@@ -42,10 +42,10 @@
     struct timeval tv;
     struct ARCHDB *arch;
 
-    if (Partage->com_arch.taille_arch > 150)
+    if (Partage->com_arch.taille_arch > 10000)
      { if ( last_log + 60 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                   "Ajouter_arch: DROP arch (taille>150) type=%d, num=%d", type, num );
+                   "Ajouter_arch: DROP arch (taille>10000) type=%d, num=%d", type, num );
           last_log = Partage->top;
         }
        return;
@@ -166,12 +166,14 @@
           continue;
         }
        while ( Partage->com_arch.liste_arch )
-        { pthread_mutex_lock( &Partage->com_arch.synchro );                                 /* lockage futex */
-          arch = Partage->com_arch.liste_arch->data;                                 /* Recuperation du arch */
+        { guint taille;
+          pthread_mutex_lock( &Partage->com_arch.synchro );                              /* lockage futex */
+          arch = Partage->com_arch.liste_arch->data;                              /* Recuperation du arch */
           Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
+          taille = g_slist_length(Partage->com_arch.liste_arch);
           Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                   "Run_arch: Reste %03d a traiter",
-                    g_slist_length(Partage->com_arch.liste_arch) );
+                   "Run_arch: Reste %03d a traiter", taille );
+          SEA ( NUM_EA_SYS_ARCHREQUEST, taille );                       /* Enregistrement pour historique */
           Partage->com_arch.taille_arch--;
           pthread_mutex_unlock( &Partage->com_arch.synchro );
           Ajouter_archRRD( arch );

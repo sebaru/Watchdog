@@ -110,7 +110,6 @@
     Info_new( Config.log, Config.log_db, LOG_DEBUG,
               "Init_DB_SQL: Database Connection OK with %s@%s (id=%05d). Nbr_requete_en_cours=%d",
                Config.db_username, Config.db_database, db->id, taille );
-    SEA ( NUM_EA_SYS_DBREQUEST_SIMULT, taille );
     return(db);
   }
 /**********************************************************************************************************/
@@ -156,6 +155,7 @@
              "Libere_DB_SQL: Deconnexion effective (id=%05d), Nbr_requete_en_cours=%d", db->id, taille );
     g_free( db );
     *adr_db = NULL;
+    SEA ( NUM_EA_SYS_DBREQUEST_SIMULT, taille );                        /* Enregistrement pour historique */
   }
 /**********************************************************************************************************/
 /* Lancer_requete_SQL : lance une requete en parametre, sur la structure de reférence                     */

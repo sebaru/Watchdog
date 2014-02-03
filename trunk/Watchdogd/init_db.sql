@@ -254,40 +254,6 @@ CREATE TABLE IF NOT EXISTS `histo_msgs` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `sms`
---
-
-CREATE TABLE IF NOT EXISTS `sms` (
-  `user_id` int(11) NOT NULL AUTO_INCREMENT REFERENCES `users`(`id`) ON DELETE CASCADE,
-  `instance_id` text COLLATE utf8_unicode_ci NOT NULL,
-  `enable` int(1) NOT NULL,
-  `phone` text COLLATE utf8_unicode_ci NOT NULL,
-  `send_command` int(1) NOT NULL,
-  `receive_sms` int(1) NOT NULL ,
-  PRIMARY KEY (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `imsg`
---
-
-CREATE TABLE IF NOT EXISTS `imsg` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `enable` int(1) NOT NULL,
-  `instance_id` text COLLATE utf8_unicode_ci NOT NULL,
-  `jabber_id` text COLLATE utf8_unicode_ci NOT NULL,
-  `nom` text COLLATE utf8_unicode_ci NOT NULL,
-  `send_command` int(1) NOT NULL,
-  `receive_imsg` int(1) NOT NULL,
-  `bit_presence` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `icons`
 --
 
@@ -635,6 +601,10 @@ INSERT INTO `mnemos` (`type`, `num`, `num_plugin`, `acronyme`, `libelle`, `comma
 (0, 6, 1, 'SYS_TICK_0.3S', 'Cligno toutes les 3 dixièmes de seconde', ''),
 (0, 7, 1, 'SYS_SHUTDOWN', 'System is halting', ''),
 (0, 8, 1, 'SYS_REBOOT', 'System is rebooting', ''),
+(5,123,1, 'DLS_WAIT', 'Number of milli-second to wait to get target turn/sec', ''),
+(5,124,1, 'TOUR_DLS_PER_SEC', 'Number of D.L.S turn in second', ''),
+(5,125,1, 'BITS_PER_SEC', 'Number of bits toggled in one second', ''),
+(5,126,1, 'SYS_ARCHREQUEST', 'Number of ArchiveRequest to proceed', ''),
 (5,127,1, 'SYS_DBREQUEST_SIMULT', 'Number of simultaneous SQL request', ''),
 (7, 1, 1, 'SYSTEME', 'Motif toujours en mode 1 couleur rouge', ''),
 (7, 4, 1, 'SYSTEME', 'rÃ©servÃ©', ''),

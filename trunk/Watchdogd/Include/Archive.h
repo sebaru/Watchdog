@@ -31,6 +31,8 @@
  #define ARCHIVE_EA_TEMPS_SI_CONSTANT  3000                /* Si constant, archivage toutes les 5 minutes */
  #define ARCHIVE_EA_TEMPS_SI_VARIABLE    50               /* Si variable, archivage toutes les 5 secondes */
 
+ #define NUM_EA_SYS_ARCHREQUEST         126  /* Numéro d'EA de reference pour le nbr de request archivage */
+
  #define NOM_TABLE_ARCH    "histo_bit"
 
  struct ARCHDB
