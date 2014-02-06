@@ -63,6 +63,10 @@
  #define FICHIER_FIFO_ADMIN_WRITE    "admin.fifo.write"
  #define FICHIER_EXPORT              "export.wdg"
 
+ #define NUM_EA_SYS_BITS_PER_SEC        125  /* Numéro d'EA de reference pour le nbr de request archivage */
+ #define NUM_EA_SYS_TOUR_DLS_PER_SEC    124  /* Numéro d'EA de reference pour le nbr de request archivage */
+ #define NUM_EA_SYS_DLS_WAIT            123  /* Numéro d'EA de reference pour le nbr de request archivage */
+
  struct LIBRAIRIE
   { pthread_t TID;                                                               /* Identifiant du thread */
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */

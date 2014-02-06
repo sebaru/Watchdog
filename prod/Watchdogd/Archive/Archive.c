@@ -42,10 +42,10 @@
     struct timeval tv;
     struct ARCHDB *arch;
 
-    if (Partage->com_arch.taille_arch > 150)
+    if (Partage->com_arch.taille_arch > 10000)
      { if ( last_log + 60 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                   "Ajouter_arch: DROP arch (taille>150) type=%d, num=%d", type, num );
+                   "Ajouter_arch: DROP arch (taille>10000) type=%d, num=%d", type, num );
           last_log = Partage->top;
         }
        return;
@@ -85,12 +85,13 @@
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  static void Ajouter_archRRD ( struct ARCHDB *arch )
-  { gchar fichier[80], update[80];
+  { gchar fichier[80], update[80], png[80];
     gchar *params[11];
-    gint result;
+    gint result, last_rrd;
 
     params[0] = "rrdupdate";
     g_snprintf( fichier, sizeof(fichier), "RRA/%02d-%04d.rrd", arch->type, arch->num );
+    g_snprintf(     png, sizeof(png),     "WEB/%02d-%04d.png", arch->type, arch->num );
     params[1] = fichier;
     g_snprintf( update,  sizeof(update), "%d:%f", arch->date_sec, arch->valeur );
     params[2] = update;
@@ -145,7 +146,7 @@
 
        if (Partage->com_arch.Thread_sigusr1)                                      /* On a recu sigusr1 ?? */
         { Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Run_arch: SIGUSR1" );
-          pthread_mutex_lock( &Partage->com_arch.synchro );                                 /* lockage futex */
+          pthread_mutex_lock( &Partage->com_arch.synchro );                              /* lockage futex */
           Info_new( Config.log, Config.log_arch, LOG_INFO,
                    "Run_arch: Reste %03d a traiter",
                     g_slist_length(Partage->com_arch.liste_arch) );
@@ -166,14 +167,14 @@
           continue;
         }
        while ( Partage->com_arch.liste_arch )
-        { pthread_mutex_lock( &Partage->com_arch.synchro );                                 /* lockage futex */
-          arch = Partage->com_arch.liste_arch->data;                                 /* Recuperation du arch */
+        { pthread_mutex_lock( &Partage->com_arch.synchro );                              /* lockage futex */
+          arch = Partage->com_arch.liste_arch->data;                              /* Recuperation du arch */
           Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
-          Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                   "Run_arch: Reste %03d a traiter",
-                    g_slist_length(Partage->com_arch.liste_arch) );
           Partage->com_arch.taille_arch--;
+          Info_new( Config.log, Config.log_arch, LOG_DEBUG,
+                   "Run_arch: Reste %03d a traiter", Partage->com_arch.taille_arch );
           pthread_mutex_unlock( &Partage->com_arch.synchro );
+          SEA ( NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );/* Enregistrement pour historique */
           Ajouter_archRRD( arch );
           Ajouter_archDB ( db, arch );
           g_free(arch);

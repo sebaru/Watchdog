@@ -46,6 +46,12 @@
     gboolean retour;
     struct DB *db;
 
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_mnemoDB: DB connexion failed" );
+       return(FALSE);
+     }
+
     mnemo_a_virer = Rechercher_mnemoDB ( mnemo->id );
     if (mnemo_a_virer)
      { switch (mnemo_a_virer->type)
@@ -73,12 +79,6 @@
                break;
         }
        g_free(mnemo_a_virer);
-     }
-
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_mnemoDB: DB connexion failed" );
-       return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
