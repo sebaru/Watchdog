@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS `class` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `libelle` varchar(241) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `class` (`id`, `libelle`) VALUES
 (1, 'Divers'),
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS `dls` (
   `name` text COLLATE utf8_unicode_ci NOT NULL,
   `actif` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 INSERT INTO `dls` (`id`, `type`, `num_syn`, `name`, `actif` ) VALUES
 (1, 0, 1, 'Systeme', FALSE);
 
@@ -177,6 +177,14 @@ CREATE TABLE IF NOT EXISTS `eana` (
   PRIMARY KEY (`id_mnemo`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+INSERT INTO `eana` (`id_mnemo`, `type`, `min`, `max`, `unite`) VALUES
+(10, 0, 0, 100, 'ms'),
+(11, 0, 0, 100, 't/s'),
+(12, 0, 0, 100, 'bit/s'),
+(13, 0, 0, 100, 'arch'),
+(14, 0, 0, 100, 'dbs');
+
+
 -- --------------------------------------------------------
 
 --
@@ -200,7 +208,7 @@ CREATE TABLE IF NOT EXISTS `groups` (
   `comment` varchar(241) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `groups` (`id`, `name`, `comment`) VALUES
 (0, 'Everybody', 'The default group'),
@@ -249,7 +257,7 @@ CREATE TABLE IF NOT EXISTS `histo_msgs` (
   PRIMARY KEY (`id`),
   KEY `date_create_sec` (`date_create_sec`),
   KEY `alive` (`alive`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -262,7 +270,7 @@ CREATE TABLE IF NOT EXISTS `icons` (
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `id_classe` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
 
 --
 -- Contenu de la table `icons`
@@ -589,31 +597,31 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
   `command_text` text COLLATE utf8_unicode_ci NOT NULL,
   `tableau` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`), FULLTEXT(`command_text`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
-INSERT INTO `mnemos` (`type`, `num`, `num_plugin`, `acronyme`, `libelle`, `command_text`) VALUES
-(0, 0, 1, 'SYS_TOGGLE_RUN', 'Change d''Ã©tat tous les tours programme', ''),
-(0, 1, 1, 'SYS_ALWAYS_0', 'Toujours Ã  0', ''),
-(0, 2, 1, 'SYS_ALWAYS_1', 'Toujours Ã  1', ''),
-(0, 3, 1, 'SYS_ONE_RUN', '0 le premier tour programme puis tout le temps 1', ''),
-(0, 4, 1, 'SYS_TICK_1S', 'Cligno toutes les secondes', ''),
-(0, 5, 1, 'SYS_TICK_0.5S', 'Cligno toutes les demi-secondes', ''),
-(0, 6, 1, 'SYS_TICK_0.3S', 'Cligno toutes les 3 dixièmes de seconde', ''),
-(0, 7, 1, 'SYS_SHUTDOWN', 'System is halting', ''),
-(0, 8, 1, 'SYS_REBOOT', 'System is rebooting', ''),
-(5,123,1, 'DLS_WAIT', 'Number of milli-second to wait to get target turn/sec', ''),
-(5,124,1, 'TOUR_DLS_PER_SEC', 'Number of D.L.S turn in second', ''),
-(5,125,1, 'BITS_PER_SEC', 'Number of bits toggled in one second', ''),
-(5,126,1, 'SYS_ARCHREQUEST', 'Number of ArchiveRequest to proceed', ''),
-(5,127,1, 'SYS_DBREQUEST_SIMULT', 'Number of simultaneous SQL request', ''),
-(7, 1, 1, 'SYSTEME', 'Motif toujours en mode 1 couleur rouge', ''),
-(7, 4, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
-(7, 3, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
-(7, 0, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
-(7, 2, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
-(1, 4, 1, 'AUDIO_START', 'Emission de message Audio.', ''),
-(1, 5, 1, 'AUDIO_END', 'Fin d''emission de message Audio.', ''),
-(1, 6, 1, 'AUDIO_INHIB', 'Inhibition des messages vocaux (hors alerte).', '');
+INSERT INTO `mnemos` (`id`, `type`, `num`, `num_plugin`, `acronyme`, `libelle`, `command_text`) VALUES
+(01, 0, 0, 1, 'SYS_TOGGLE_RUN', 'Change d''Ã©tat tous les tours programme', ''),
+(02, 0, 1, 1, 'SYS_ALWAYS_0', 'Toujours Ã  0', ''),
+(03, 0, 2, 1, 'SYS_ALWAYS_1', 'Toujours Ã  1', ''),
+(04, 0, 3, 1, 'SYS_ONE_RUN', '0 le premier tour programme puis tout le temps 1', ''),
+(05, 0, 4, 1, 'SYS_TICK_1S', 'Cligno toutes les secondes', ''),
+(06, 0, 5, 1, 'SYS_TICK_0.5S', 'Cligno toutes les demi-secondes', ''),
+(07, 0, 6, 1, 'SYS_TICK_0.3S', 'Cligno toutes les 3 dixièmes de seconde', ''),
+(08, 0, 7, 1, 'SYS_SHUTDOWN', 'System is halting', ''),
+(09, 0, 8, 1, 'SYS_REBOOT', 'System is rebooting', ''),
+(10, 5,123,1, 'SYS_DLS_WAIT', 'Number of milli-second to wait to get target turn/sec', ''),
+(11, 5,124,1, 'SYS_TOUR_DLS_PER_SEC', 'Number of D.L.S turn in second', ''),
+(12, 5,125,1, 'SYS_BITS_PER_SEC', 'Number of bits toggled in one second', ''),
+(13, 5,126,1, 'SYS_ARCHREQUEST', 'Number of ArchiveRequest to proceed', ''),
+(14, 5,127,1, 'SYS_DBREQUEST_SIMULT', 'Number of simultaneous SQL request', ''),
+(15, 7, 1, 1, 'SYSTEME', 'Motif toujours en mode 1 couleur rouge', ''),
+(16, 7, 4, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
+(17, 7, 3, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
+(18, 7, 0, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
+(19, 7, 2, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
+(20, 1, 4, 1, 'AUDIO_START', 'Emission de message Audio.', ''),
+(21, 1, 5, 1, 'AUDIO_END', 'Fin d''emission de message Audio.', ''),
+(22, 1, 6, 1, 'AUDIO_INHIB', 'Inhibition des messages vocaux (hors alerte).', '');
 -- --------------------------------------------------------
 
 --
@@ -670,7 +678,7 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `vitesse_voc` int(11) NOT NULL DEFAULT '150',
   `time_repeat` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `msgs` (`id`, `num`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `id_syn`, `bit_voc`, `enable`, `sms`, `type_voc`, `vitesse_voc`, `time_repeat`) VALUES
 (1, 0, 'Warning, system is halting', 'Warning, system is halting', 'Warning, system is halting', 0, 1, 1, TRUE, FALSE, 1, 150, 0),
@@ -698,29 +706,6 @@ CREATE TABLE `onduleurs` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
--- --------------------------------------------------------
-
---
--- Structure de la table `slaves`
---
-
-CREATE TABLE IF NOT EXISTS `slaves` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `enable` tinyint(1) NOT NULL DEFAULT '0',
-  `ea_min` int(11) NOT NULL DEFAULT '-1',
-  `ea_max` int(11) NOT NULL DEFAULT '-1',
-  `e_min` int(11) NOT NULL DEFAULT '-1',
-  `e_max` int(11) NOT NULL DEFAULT '-1',
-  `s_min` int(11) NOT NULL DEFAULT '-1',
-  `s_max` int(11) NOT NULL DEFAULT '-1',
-  `sa_min` int(11) NOT NULL DEFAULT '-1',
-  `sa_max` int(11) NOT NULL DEFAULT '-1',
-  `bit_comm` int(11) NOT NULL DEFAULT '0',
-  `libelle` text NOT NULL,
-  `ip` text NOT NULL,
-  `port` int(11) NOT NULL DEFAULT '5559',
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 --
@@ -798,7 +783,7 @@ CREATE TABLE IF NOT EXISTS `syns` (
   `page` text COLLATE utf8_unicode_ci NOT NULL,
   `access_groupe` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 
@@ -945,27 +930,10 @@ CREATE TABLE IF NOT EXISTS `users` (
   `imsg_allow_cde` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `users` (`id`, `name`, `mustchangepwd`, `cansetpwd`, `salt`, `hash`, `comment`, `login_failed`, `enable`, `date_create`, `enable_expire`, `date_expire`, `date_modif`) VALUES
 (0, 'root', 1, 1, 'DAABBD177CC38489DD70B61010C336439798F53F814920510C2A93A5BB4A64AA6A5E2F70CC85EBEF6E1D2E3F3E4592FAC0963068EF81E2B37549058A628DA943', 'C420585111C6F0E833D822E1FE562053E7722E1457186EE93C0F5590F4469CC089FFC6A1DC8878A9F54EDB5802F1D6B4111106D11ABFF1CFFB03714C7F52D393', 'Utilisateur Root', 0, 1, 0, 0, 0, 0),
 (1, 'guest', 0, 0, '0FE3B94BCC1E52AC4BEE0DE31D6306890854EAFC77F855FBD9D17BB0D7256A5E23ED8D58FA85E345FE71D046211745B6B50382CD939DC7FDAA2FBE6B7D586069', '6E14D7124DF5FC4C018D845F351553F751265C37834455B96EE3014BCA7CFE53B87CAD8FFA739B39C4A5BCD61E267560EAA7F2AEFFAB3C457B1E0F6BE5BCF8C4', 'Utilisateur Guest', 0, 1, 0, 0, 0, 0);
 
--- --------------------------------------------------------
 
---
--- Doublure de structure pour la vue `utilisation_histo_bit`
---
-CREATE TABLE IF NOT EXISTS `utilisation_histo_bit` (
-`cpt` bigint(21)
-,`type` int(11)
-,`num` int(11)
-);
--- --------------------------------------------------------
-
---
--- Structure de la vue `utilisation_histo_bit`
---
-DROP TABLE IF EXISTS `utilisation_histo_bit`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `utilisation_histo_bit` AS select count(0) AS `cpt`,`histo_bit`.`type` AS `type`,`histo_bit`.`num` AS `num` from `histo_bit` group by `histo_bit`.`type`,`histo_bit`.`num` order by count(0) desc;
