@@ -229,6 +229,7 @@
        Cfg_satellite.Liste_entreeANA = g_slist_remove( Cfg_satellite.Liste_entreeANA, GINT_TO_POINTER(num_ea) );
        pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
 
+       if ( 100<=num_ea && num_ea<128 ) continue;          /* No man's land des EA pour la partie SYSteme */
        xmlTextWriterStartElement(writer, (const unsigned char *)"EntreeANA");              /* Start EAxxx */
        xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"num",   "%d", num_ea );
        xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"in_range", "%d", Partage->ea[num_ea].inrange );

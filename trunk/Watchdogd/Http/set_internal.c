@@ -152,12 +152,16 @@
              in_range      = xmlTextReaderGetAttribute (reader, (xmlChar *)"in_range" );
              val_avant_ech = xmlTextReaderGetAttribute (reader, (xmlChar *)"val_avant_ech" );
              if (num && val_avant_ech && in_range)
-              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+              { guint num_ea;
+                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                          "Http_Traiter_XML_set_internal: setting EA%03d = %08.2f (without interpretation)",
                           atoi( (char *)num ), atof( (char *)val_avant_ech )
                         );
-                SEA(atoi( (char *)num ), atof( (char *)val_avant_ech ));
-                SEA_range( atoi( (char *)num ), atoi( (char *)in_range ) );
+                num_ea = atoi( (char *)num );
+                if ( num_ea < 100 && num_ea>=128 )              /* Les EA100 à 127 ne sont pas repliquées */
+                 { SEA( num_ea, atof( (char *)val_avant_ech ));
+                   SEA_range( num_ea, atoi( (char *)in_range ) );
+                 }
               }
              if(num)           free(num);
              if(in_range)      free(in_range);
