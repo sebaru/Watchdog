@@ -63,7 +63,7 @@
                "%s", SATELLITE_DEFAUT_FILE_KEY );
     g_snprintf( Cfg_satellite.https_file_ca,   sizeof(Cfg_satellite.https_file_ca),
                "%s", SATELLITE_DEFAUT_FILE_CA );
-    g_snprintf( Cfg_satellite.send_to_url,     sizeof(Cfg_satellite.send_to_url), "Unknown" );
+    g_snprintf( Cfg_satellite.send_to_url,     sizeof(Cfg_satellite.send_to_url), "http(s)://unknown:5560" );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                     /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,

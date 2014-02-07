@@ -217,7 +217,7 @@
           SEA ( NUM_EA_SYS_TOUR_DLS_PER_SEC, Partage->audit_tour_dls_per_sec_hold );        /* historique */
           if (Partage->audit_tour_dls_per_sec_hold > 100)                       /* Moyennage tour DLS/sec */
            { Partage->com_dls.temps_sched += 50; }
-          else if (Partage->audit_tour_dls_per_sec_hold < 50)
+          else if (Partage->audit_tour_dls_per_sec_hold < 80)
            { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
           SEA ( NUM_EA_SYS_DLS_WAIT, Partage->com_dls.temps_sched );                        /* historique */
         }
