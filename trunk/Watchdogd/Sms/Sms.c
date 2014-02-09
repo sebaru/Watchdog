@@ -155,7 +155,7 @@
     histo->alive      = TRUE;
     histo->msg.num    = 0;
     histo->msg.enable = TRUE;
-    histo->msg.sms    = MSG_SMS_SMSBOX;
+    histo->msg.sms    = MSG_SMS_SMSBOX_ONLY;
 
     pthread_mutex_lock( &Cfg_sms.lib->synchro );
     Cfg_sms.Liste_histos = g_slist_append ( Cfg_sms.Liste_histos, histo );
@@ -180,7 +180,7 @@
     histo->alive      = TRUE;
     histo->msg.num    = 0;
     histo->msg.enable = TRUE;
-    histo->msg.sms    = MSG_SMS_GSM;
+    histo->msg.sms    = MSG_SMS_GSM_ONLY;
 
     pthread_mutex_lock( &Cfg_sms.lib->synchro );
     Cfg_sms.Liste_histos = g_slist_append ( Cfg_sms.Liste_histos, histo );
@@ -551,8 +551,18 @@
      }
 
     while ( (sms = Sms_Recuperer_smsDB_suite( db )) != NULL)
-     { if ( Envoi_sms_gsm   ( msg, sms->user_sms_phone ) == FALSE )
-        { Envoi_sms_smsbox( msg, sms->user_sms_phone ); }
+     { switch (msg->sms)
+        { case MSG_SMS_YES:
+               if ( Envoi_sms_gsm   ( msg, sms->user_sms_phone ) == FALSE )
+                { Envoi_sms_smsbox( msg, sms->user_sms_phone ); }
+               break;
+          case MSG_SMS_GSM_ONLY:
+               Envoi_sms_gsm   ( msg, sms->user_sms_phone );
+               break;
+          case MSG_SMS_SMSBOX_ONLY:
+               Envoi_sms_smsbox( msg, sms->user_sms_phone );
+               break;
+        }
      }
 
     Libere_DB_SQL( &db );

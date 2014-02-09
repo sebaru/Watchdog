@@ -44,8 +44,9 @@
 
  enum
   { MSG_SMS_NONE,
-    MSG_SMS_GSM,
-    MSG_SMS_SMSBOX,
+    MSG_SMS_YES,
+    MSG_SMS_GSM_ONLY,
+    MSG_SMS_SMSBOX_ONLY,
     NBR_TYPE_MSG_SMS
   };
 
