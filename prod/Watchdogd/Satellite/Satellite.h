@@ -31,8 +31,8 @@
  #define NOM_THREAD                       "satellite"
 
  #define SATELLITE_DEFAUT_FILE_CA         "cacert.pem"
- #define SATELLITE_DEFAUT_FILE_SERVER     "serveursigne.pem"
- #define SATELLITE_DEFAUT_FILE_KEY        "serveurkey.pem"
+ #define SATELLITE_DEFAUT_FILE_SERVER     "satellite.pem"
+ #define SATELLITE_DEFAUT_FILE_KEY        "satellitekey.pem"
  #define SATELLITE_DEFAUT_MAX_CONNEXION   100
 
  struct SATELLITE_CONFIG

@@ -352,7 +352,7 @@
                                                  LmMessage *message, gpointer data )
   { LmMessageNode *node, *body;
     struct IMSGDB *imsg;
-    gchar *from;
+    gchar *from, *type;
     struct DB *db;
 
     node = lm_message_get_node ( message );
@@ -371,6 +371,9 @@
               "Imsg_Reception_message : recu un msg xmpp de %s : %s", 
               from, lm_message_node_get_value ( body )
             );
+    type = lm_message_node_get_attribute ( node, "type" );
+    if ( type && !strcmp ( type, "error" ) )
+     { return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS); }
 
                                  /* On drop les messages du serveur jabber et des interlocuteurs inconnus */
     if ( (!from) || (!strncmp ( from, Cfg_imsg.username, strlen(Cfg_imsg.username) )) )

@@ -155,7 +155,7 @@
     histo->alive      = TRUE;
     histo->msg.num    = 0;
     histo->msg.enable = TRUE;
-    histo->msg.sms    = MSG_SMS_SMSBOX;
+    histo->msg.sms    = MSG_SMS_SMSBOX_ONLY;
 
     pthread_mutex_lock( &Cfg_sms.lib->synchro );
     Cfg_sms.Liste_histos = g_slist_append ( Cfg_sms.Liste_histos, histo );
@@ -180,7 +180,7 @@
     histo->alive      = TRUE;
     histo->msg.num    = 0;
     histo->msg.enable = TRUE;
-    histo->msg.sms    = MSG_SMS_GSM;
+    histo->msg.sms    = MSG_SMS_GSM_ONLY;
 
     pthread_mutex_lock( &Cfg_sms.lib->synchro );
     Cfg_sms.Liste_histos = g_slist_append ( Cfg_sms.Liste_histos, histo );
@@ -384,7 +384,7 @@
 /* Entrée: le message à envoyer sateur                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- static void Envoi_sms_gsm ( struct CMD_TYPE_MESSAGE *msg, gchar *telephone )
+ static gboolean Envoi_sms_gsm ( struct CMD_TYPE_MESSAGE *msg, gchar *telephone )
   { struct gn_statemachine *state;
     gn_error error;
     gn_data data;
@@ -393,13 +393,13 @@
     if ((error=gn_lib_phoneprofile_load("", &state)) != GN_ERR_NONE)               /* Read config file */
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
                 "Envoi_sms_gsm: Read Phone profile NOK (%s)", gn_error_print(error) );
-       return;
+       return(FALSE);
      }
 
     if ((error=gn_lib_phone_open(state)) != GN_ERR_NONE)
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
                 "Envoi_sms_gsm: Open Phone NOK (%s)", gn_error_print(error) );
-       return;
+       return(FALSE);
      }
 
     gn_data_clear(&data);
@@ -450,6 +450,8 @@
     gn_lib_phoneprofile_free(&state);
     gn_lib_library_free();
     sleep(5);                                         /* Attente de 5 secondes pour ne pas saturer le GSM */
+    if (error == GN_ERR_NONE) return(TRUE);
+    else return(FALSE);
   }
 /**********************************************************************************************************/
 /* Envoi_sms_smsbox: Envoi un sms par SMSBOX                                                              */
@@ -549,8 +551,18 @@
      }
 
     while ( (sms = Sms_Recuperer_smsDB_suite( db )) != NULL)
-     { if (msg->sms == MSG_SMS_GSM)    Envoi_sms_gsm   ( msg, sms->user_sms_phone );
-       if (msg->sms == MSG_SMS_SMSBOX) Envoi_sms_smsbox( msg, sms->user_sms_phone );
+     { switch (msg->sms)
+        { case MSG_SMS_YES:
+               if ( Envoi_sms_gsm   ( msg, sms->user_sms_phone ) == FALSE )
+                { Envoi_sms_smsbox( msg, sms->user_sms_phone ); }
+               break;
+          case MSG_SMS_GSM_ONLY:
+               Envoi_sms_gsm   ( msg, sms->user_sms_phone );
+               break;
+          case MSG_SMS_SMSBOX_ONLY:
+               Envoi_sms_smsbox( msg, sms->user_sms_phone );
+               break;
+        }
      }
 
     Libere_DB_SQL( &db );

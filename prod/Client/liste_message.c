@@ -101,9 +101,10 @@
 /**********************************************************************************************************/
  gchar *Type_sms_vers_string ( guint32 type )
   { switch (type)
-     { case MSG_SMS_NONE  : return( _("-- Aucun SMS --") );
-       case MSG_SMS_GSM   : return( _("- SMS via GSM- ") );
-       case MSG_SMS_SMSBOX: return( _("SMS via SMSBOX ") );
+     { case MSG_SMS_NONE       : return( _("-- Aucun SMS --") );
+       case MSG_SMS_YES        : return( _("----- YES -----") );
+       case MSG_SMS_GSM_ONLY   : return( _("--- GSM ONLY --") );
+       case MSG_SMS_SMSBOX_ONLY: return( _("- SMSBOX ONLY -") );
      }
     return( _("Unknown") );
   }
