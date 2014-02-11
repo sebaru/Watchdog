@@ -107,7 +107,7 @@
   { gchar requete[512];
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,name,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_bit_presence,imsg_available "
-                " FROM %s as user WHERE enable=1 AND imsg_enable=1 ORDER BY user.name",
+                " FROM %s as user WHERE enable=1 AND imsg_enable=1 AND imsg_available=1 ORDER BY user.name",
                 NOM_TABLE_UTIL );
 
     return ( Lancer_requete_SQL ( db, requete ) );                         /* Execution de la requete SQL */

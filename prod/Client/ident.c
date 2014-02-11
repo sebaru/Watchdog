@@ -59,7 +59,7 @@
     Log ( _("Waiting for authorization") );
     Client_en_cours.mode = ATTENTE_AUTORISATION;
     Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
-              "Client en mode ATTENTE_AUTORISATION version %d", ident.version );
+              "Client en mode ATTENTE_AUTORISATION version %s", ident.version );
   }
 /**********************************************************************************************************/
 /* Envoyer_identification: envoi de l'identification cliente au serveur                                   */
