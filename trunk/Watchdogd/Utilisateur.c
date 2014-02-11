@@ -272,9 +272,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "salt='%s',hash='%s',date_modif='%d',mustchangepwd=0 WHERE id=%d"
-                " AND (mustchangepwd=1 OR id<%d OR (mustchangepwd=0 AND cansetpwd=1))",
-                NOM_TABLE_UTIL, salt, hash, (gint)time(NULL), util->id, NBR_UTILISATEUR_RESERVE );
+                "salt='%s',hash='%s',date_modif='%d',mustchangepwd=0 WHERE id=%d",
+                NOM_TABLE_UTIL, salt, hash, (gint)time(NULL), util->id );
     g_free(salt);
     g_free(hash);
 

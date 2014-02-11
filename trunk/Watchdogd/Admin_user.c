@@ -155,6 +155,7 @@
     if ( ! strcmp ( commande, "enable" ) )
      { struct CMD_TYPE_UTILISATEUR util;
        sscanf ( ligne, "%s %s", commande, util.nom );                /* Découpage de la ligne de commande */
+       util.id = -1;                                            /* suppression par nom plutot que par id */
        util.enable = TRUE;
        if (Set_enable_utilisateurDB ( &util ) == FALSE)
         { g_snprintf( chaine, sizeof(chaine), " User %s couldn't be enabled\n", util.nom );
@@ -168,6 +169,7 @@
     if ( ! strcmp ( commande, "disable" ) )
      { struct CMD_TYPE_UTILISATEUR util;
        sscanf ( ligne, "%s %s", commande, util.nom );                /* Découpage de la ligne de commande */
+       util.id = -1;                                            /* suppression par nom plutot que par id */
        util.enable = FALSE;
        if (Set_enable_utilisateurDB ( &util ) == FALSE)
         { g_snprintf( chaine, sizeof(chaine), " User %s couldn't be disabled\n", util.nom );
