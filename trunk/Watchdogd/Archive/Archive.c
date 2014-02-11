@@ -160,26 +160,26 @@
           continue;
         }
 
+       SEA ( NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );   /* Enregistrement pour historique */
+
        db = Init_DB_SQL();       
        if (!db)
         { Info_new( Config.log, Config.log_arch, LOG_ERR, 
                    "Run_arch: Unable to open database %s", Config.db_database );
           continue;
         }
-       while ( Partage->com_arch.liste_arch )
-        { pthread_mutex_lock( &Partage->com_arch.synchro );                              /* lockage futex */
-          arch = Partage->com_arch.liste_arch->data;                              /* Recuperation du arch */
-          Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
-          Partage->com_arch.taille_arch--;
-          Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                   "Run_arch: Reste %03d a traiter", Partage->com_arch.taille_arch );
-          pthread_mutex_unlock( &Partage->com_arch.synchro );
-          SEA ( NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );/* Enregistrement pour historique */
-          Ajouter_archRRD( arch );
-          Ajouter_archDB ( db, arch );
-          g_free(arch);
-          Info_new( Config.log, Config.log_arch, LOG_DEBUG, "Run_arch: archive saved" );
-        }
+
+       pthread_mutex_lock( &Partage->com_arch.synchro );                              /* lockage futex */
+       arch = Partage->com_arch.liste_arch->data;                              /* Recuperation du arch */
+       Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
+       Partage->com_arch.taille_arch--;
+       Info_new( Config.log, Config.log_arch, LOG_DEBUG,
+                "Run_arch: Reste %03d a traiter", Partage->com_arch.taille_arch );
+       pthread_mutex_unlock( &Partage->com_arch.synchro );
+       Ajouter_archRRD( arch );
+       Ajouter_archDB ( db, arch );
+       g_free(arch);
+       Info_new( Config.log, Config.log_arch, LOG_DEBUG, "Run_arch: archive saved" );
        Libere_DB_SQL( &db );
      }
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Run_arch: Down (%p)", pthread_self() );
