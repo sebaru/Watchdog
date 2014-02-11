@@ -33,7 +33,7 @@
  #define NOM_THREAD                "imsg"
 
  #define DEFAUT_USERNAME_IMSG      "defaultuser"
- #define DEFAUT_SERVER_IMSG        "defaultserver.org"
+ #define DEFAUT_SERVER_IMSG        "jabber.fr"
  #define DEFAUT_PASSWORD_IMSG      "defaultpassword"
  #define TIME_RECONNECT_IMSG       600                          /* 1 minute avant reconnexion si probleme */
 

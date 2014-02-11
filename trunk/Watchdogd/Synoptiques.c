@@ -48,7 +48,8 @@
 
     syn = Rechercher_synoptiqueDB ( syn_id );
     if (!syn) return(FALSE);
-    if (syn->groupe == GID_TOUTLEMONDE) return(TRUE);
+    if (syn->groupe == GID_TOUTLEMONDE)
+     { g_free(syn); return(TRUE); }
 
     cpt=0;
     while( util->gids[cpt] )

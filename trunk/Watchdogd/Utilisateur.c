@@ -116,7 +116,7 @@
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
  static gint Ajouter_Modifier_utilisateurDB( gboolean ajout, struct CMD_TYPE_UTILISATEUR *util )
-  { gchar requete[512], chaine[512];
+  { gchar requete[1024], chaine[512];
     gchar *nom, *comment, *phone, *salt, *hash, *jabberid;
     gboolean retour;
     struct DB *db;
