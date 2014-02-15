@@ -112,8 +112,10 @@
   { struct CMD_ENREG nbr;
     struct CMD_TYPE_CAPTEUR *capteur;
     struct DB *db;
+    gchar chaine[20];
 
-    prctl(PR_SET_NAME, "W-EnvoiCapteur", 0, 0, 0 );
+    g_snprintf( chaine, sizeof(chaine), "W-Capteur-%06d", client->ssrv_id );
+    prctl(PR_SET_NAME, chaine, 0, 0, 0 );
 
     if ( ! Recuperer_capteurDB( &db, client->syn.id ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */

@@ -120,6 +120,9 @@
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiCamSUP", 0, 0, 0 );
+    Unref_client( client );                                           /* Déréférence la structure cliente */
+    pthread_exit( NULL );
+
 #ifdef bouh
 
     db = Init_DB_SQL();       
