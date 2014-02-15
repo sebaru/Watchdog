@@ -156,7 +156,7 @@
     prctl(PR_SET_NAME, "W-EnvoiSYN", 0, 0, 0 );
 
     if ( ! Recuperer_synoptiqueDB( &db ) )
-     { return; }                                                                           /* Si pas de histos (??) */
+     { return; }                                                                 /* Si pas de histos (??) */
 
     nbr.num = db->nbr_result;
     if (nbr.num)

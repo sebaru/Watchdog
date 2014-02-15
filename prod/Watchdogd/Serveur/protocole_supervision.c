@@ -53,7 +53,7 @@
                syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;
                printf("Le client desire le synoptique de supervision\n" );
 
-               if ( ! Tester_groupe_synoptique( client->util, syn->id) )
+               if ( ! Tester_groupe_synoptique( client->util, syn->access_groupe ) )
                 { struct CMD_GTK_MESSAGE gtkmessage;
                   g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied..." );
                   Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,

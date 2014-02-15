@@ -75,7 +75,7 @@
     arch->date_usec = tv.tv_usec;
 
     pthread_mutex_lock( &Partage->com_arch.synchro );            /* Ajout dans la liste de arch a traiter */
-    Partage->com_arch.liste_arch = g_slist_prepend( Partage->com_arch.liste_arch, arch );
+    Partage->com_arch.liste_arch = g_slist_append( Partage->com_arch.liste_arch, arch );
     Partage->com_arch.taille_arch++;
     pthread_mutex_unlock( &Partage->com_arch.synchro );
   }
@@ -160,8 +160,6 @@
           continue;
         }
 
-       SEA ( NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );   /* Enregistrement pour historique */
-
        db = Init_DB_SQL();       
        if (!db)
         { Info_new( Config.log, Config.log_arch, LOG_ERR, 
@@ -181,7 +179,9 @@
        g_free(arch);
        Info_new( Config.log, Config.log_arch, LOG_DEBUG, "Run_arch: archive saved" );
        Libere_DB_SQL( &db );
+       SEA ( NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );   /* Enregistrement pour historique */
      }
+
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Run_arch: Down (%p)", pthread_self() );
     Partage->com_arch.Thread_run  = FALSE;                                          /* Le thread tourne ! */
     Partage->com_arch.TID = 0;                            /* On indique au master que le thread est mort. */
