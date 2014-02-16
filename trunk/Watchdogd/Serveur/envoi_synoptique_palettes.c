@@ -112,8 +112,9 @@
   { struct CMD_TYPE_PALETTE *palette;
     struct CMD_ENREG nbr;
     struct DB *db;
-
-    prctl(PR_SET_NAME, "W-EnvoiPalette", 0, 0, 0 );
+    gchar titre[20];
+    g_snprintf( titre, sizeof(titre), "W-PALE-%06d", client->ssrv_id );
+    prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
     if ( ! Recuperer_paletteDB( &db, client->syn.id ) )
      { return;
