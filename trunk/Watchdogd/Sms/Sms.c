@@ -223,7 +223,7 @@
 /**********************************************************************************************************/
  static struct SMSDB *Sms_is_recipient_authorized ( gchar *tel )
   { struct SMSDB *sms;
-    gchar *phone, requete[80];
+    gchar *phone, requete[512];
     struct DB *db;
 
     phone = Normaliser_chaine ( tel );
