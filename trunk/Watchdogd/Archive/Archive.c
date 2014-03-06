@@ -106,10 +106,10 @@
        params[4] = "--step";
        params[5] = "10";
        params[6] = "DS:val:GAUGE:1000:U:U";
-       params[7] = "RRA:MIN:0.5:3:1000";
-       params[8] = "RRA:MAX:0.5:3:1000";
-       params[9] = "RRA:AVERAGE:0.5:3:1000";
-       params[10] = "RRA:LAST:0.5:1:1000";
+       params[7] = "RRA:MIN:0.5:3:6307200"; /* 60*60*24*365 / 5 */
+       params[8] = "RRA:MAX:0.5:3:6307200";
+       params[9] = "RRA:AVERAGE:0.5:3:6307200";
+       params[10] = "RRA:LAST:0.5:1:6307200";
        rrd_clear_error();
        result = rrd_create( 11, params );
        if (result)       

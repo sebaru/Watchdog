@@ -211,7 +211,7 @@ printf("fin affichage groupe\n");
     if (liste)
      { gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_access_groupe), cpt );
        printf("Set history %d\n", cpt );
-     }
+     } else printf(" Groupe not %d found\n", Edit_syn.groupe );
     gtk_widget_show_all(F_ajout);                                    /* Affichage de l'interface complète */
   }
 /*--------------------------------------------------------------------------------------------------------*/
