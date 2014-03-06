@@ -102,7 +102,7 @@
                 "Ajouter_archRRD: RRD error %d (%s). Trying to create RRD", result, rrd_get_error() );
        params[0] = "create";
        params[2] = "--start";
-       params[3] = "-1year";
+       params[3] = "-1y";
        params[4] = "--step";
        params[5] = "10";
        params[6] = "DS:val:GAUGE:1000:U:U";
