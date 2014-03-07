@@ -152,7 +152,7 @@
         }
      }
     else if ( ! strcmp ( commande, "presence" ) )
-     { g_snprintf( Cfg_imsg.new_status, sizeof(Cfg_imsg.new_status), "%s", commande + 9 );
+     { g_snprintf( Cfg_imsg.new_status, sizeof(Cfg_imsg.new_status), "%s", ligne + 14 );
        Cfg_imsg.set_status = TRUE;
        g_snprintf( chaine, sizeof(chaine), " Presence Status changed to %s! \n", Cfg_imsg.new_status );
        Admin_write ( connexion, chaine );
@@ -170,7 +170,7 @@
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'IMSG'\n" );
        Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
        Admin_write ( connexion, "  send user@domain/resource message      - Send a message to user\n" );
-       Admin_write ( connexion, "  reload                                 - Reload contacts from Database\n" );
+       Admin_write ( connexion, "  reload                                 - Reload configuration from Database\n" );
        Admin_write ( connexion, "  list                                   - List contact and availability\n" );
        Admin_write ( connexion, "  presence new_status                    - Change Presence to 'new_status'\n" );
        Admin_write ( connexion, "  status                                 - See connexion status\n" );
