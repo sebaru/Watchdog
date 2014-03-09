@@ -534,11 +534,12 @@
      }
     else                                                           /* Fermeture de la Cfg_imsg.connection */
      { Imsg_Mode_presence( "unavailable", "xa", "Server is down" );
-       lm_connection_close (Cfg_imsg.connection, NULL);
      }
+    lm_connection_close (Cfg_imsg.connection, NULL);
     sleep(2);
                                                                   /* Destruction de la structure associée */
     lm_connection_unref (Cfg_imsg.connection);
+    Cfg_imsg.connection = NULL;
     Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_DEBUG,
               "Imsg_Fermer_connexion: Connexion is closed.");
   }
@@ -549,7 +550,7 @@
 /**********************************************************************************************************/
  static gboolean Imsg_Ouvrir_connexion ( void )
   { LmMessageHandler *lmMsgHandler;
-    GError       *error = NULL;
+    GError *error = NULL;
 
     Cfg_imsg.connection = lm_connection_new_with_context ( Cfg_imsg.server, MainLoop );
     if ( Cfg_imsg.connection == NULL )

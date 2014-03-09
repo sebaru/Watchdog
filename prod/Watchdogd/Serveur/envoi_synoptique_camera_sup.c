@@ -118,8 +118,9 @@
   { struct CMD_ENREG nbr;
     struct CMD_TYPE_CAMERA_SUP *camera_sup;
     struct DB *db;
-
-    prctl(PR_SET_NAME, "W-EnvoiCamSUP", 0, 0, 0 );
+    gchar titre[20];
+    g_snprintf( titre, sizeof(titre), "W-CAMS-%06d", client->ssrv_id );
+    prctl(PR_SET_NAME, titre, 0, 0, 0 );
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit( NULL );
 
@@ -169,7 +170,9 @@
     struct CMD_TYPE_CAMERA_SUP *camera_sup;
     struct DB *db;
 
-    prctl(PR_SET_NAME, "W-EnvoiCamSUP", 0, 0, 0 );
+    gchar titre[20];
+    g_snprintf( titre, sizeof(titre), "W-CAMS-%06d", client->ssrv_id );
+    prctl(PR_SET_NAME, titre, 0, 0, 0 );
     Client_mode( client, ENVOI_IXXX_SUPERVISION );
     Unref_client( client );                                     /* Déréférence la structure cliente */
     pthread_exit( NULL );

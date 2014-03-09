@@ -112,8 +112,9 @@
   { struct CMD_ENREG nbr;
     struct CMD_TYPE_COMMENT *comment;
     struct DB *db;
-
-    prctl(PR_SET_NAME, "W-EnvoiComment", 0, 0, 0 );
+    gchar titre[20];
+    g_snprintf( titre, sizeof(titre), "W-COMM-%06d", client->ssrv_id );
+    prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
     if ( ! Recuperer_commentDB( &db, client->syn.id ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */

@@ -117,8 +117,9 @@
     struct CMD_ENREG nbr;
     struct DB *db;
     gint max_enreg;                                /* Nombre maximum d'enregistrement dans un bloc reseau */
-
-    prctl(PR_SET_NAME, "W-EnvoiMotif", 0, 0, 0 );
+    gchar titre[20];
+    g_snprintf( titre, sizeof(titre), "W-MOTI-%06d", client->ssrv_id );
+    prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
     max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_MOTIFS)) / sizeof(struct CMD_TYPE_MOTIF);
     motifs = (struct CMD_TYPE_MOTIFS *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );    

@@ -152,8 +152,9 @@
   { struct CMD_ENREG nbr;
     struct CMD_TYPE_SYNOPTIQUE *syn;
     struct DB *db;
-
-    prctl(PR_SET_NAME, "W-EnvoiSYN", 0, 0, 0 );
+    gchar titre[20];
+    g_snprintf( titre, sizeof(titre), "W-SYNS-%06d", client->ssrv_id );
+    prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
     if ( ! Recuperer_synoptiqueDB( &db ) )
      { return; }                                                                 /* Si pas de histos (??) */
