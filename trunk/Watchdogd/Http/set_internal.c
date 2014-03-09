@@ -158,7 +158,7 @@
                           atoi( (char *)num ), atof( (char *)val_avant_ech )
                         );
                 num_ea = atoi( (char *)num );
-                if ( num_ea < 100 && num_ea>=128 )              /* Les EA100 à 127 ne sont pas repliquées */
+                if ( num_ea < 100 || num_ea>=128 )              /* Les EA100 à 127 ne sont pas repliquées */
                  { SEA( num_ea, atof( (char *)val_avant_ech ));
                    SEA_range( num_ea, atoi( (char *)in_range ) );
                  }
