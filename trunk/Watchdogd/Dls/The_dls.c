@@ -420,7 +420,7 @@
        return;
      }
 
-    if (Partage->i[num].etat   != etat || Partage->i[num].rouge != rouge || 
+        if (Partage->i[num].etat   != etat || Partage->i[num].rouge != rouge || 
         Partage->i[num].vert   != vert || Partage->i[num].bleu  != bleu  ||
         Partage->i[num].cligno != cligno
        )
@@ -432,24 +432,24 @@
           if ( Partage->i[num].changes == 5 )                   /* Est-ce le dernier change avant blocage */
            { Partage->i[num].etat   = 0;                     /* Si oui, on passe le visuel en kaki cligno */
              Partage->i[num].rouge  = 0;
-             Partage->i[num].vert   = 100;
+             Partage->i[num].vert   = 100;                                                   /* Mode Kaki */
              Partage->i[num].bleu   = 0;
-             Partage->i[num].cligno = 1;
+             Partage->i[num].cligno = 1;                                                    /* Clignotant */
            }
           else { Partage->i[num].etat   = etat;  /* Sinon on recopie ce qui est demandé par le plugin DLS */
                  Partage->i[num].rouge  = rouge;
                  Partage->i[num].vert   = vert;
                  Partage->i[num].bleu   = bleu;
                  Partage->i[num].cligno = cligno;
+                 Partage->i[num].last_change = Partage->top;                        /* Date de la photo ! */
                }
 
           pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de i a traiter */
           Partage->com_msrv.liste_i = g_slist_append( Partage->com_msrv.liste_i,
                                                       GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
-          Partage->i[num].changes++;                             /* Un change de plus ! */
+          Partage->i[num].changes++;                                               /* Un change de plus ! */
         }
-       Partage->i[num].last_change = Partage->top;                                  /* Date de la photo ! */
        Partage->audit_bit_interne_per_sec++;
      }
   }
