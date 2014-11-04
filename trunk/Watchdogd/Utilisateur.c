@@ -31,13 +31,71 @@
  #include <stdlib.h>
  #include <string.h>
  #include <time.h>
+ #include <openssl/rand.h>
 
 /************************************ Prototypes des fonctions ********************************************/
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
+/* Utilisateur_set_new_salt: Positionne un nouveau salt pour l'utilisateur en parametre                   */
+/* Entrées: une structure util                                                                            */
+/* Sortie: néant                                                                                          */
+/**********************************************************************************************************/
+ void Utilisateur_set_new_salt ( struct CMD_TYPE_UTILISATEUR *util )
+  { guchar salt[EVP_MAX_MD_SIZE];
+    guint cpt;
+
+    memset ( salt, 0, sizeof(salt) );                                                  /* RAZ des buffers */
+    memset ( util->salt, 0, sizeof(util->salt) );
+
+    RAND_pseudo_bytes( (guchar *)salt, sizeof(salt) );                  /* Récupération d'un nouveau SALT */
+    for (cpt=0; cpt<sizeof(salt); cpt++)                                   /* Mise en forme au format HEX */
+     { g_snprintf( &util->salt[2*cpt], 3, "%02X", (guchar)salt[cpt] ); }
+  }
+/**********************************************************************************************************/
+/* Utilisateur_has_password: Prepare un hashé du code confidentiel de l'utilisateur en parametre          */
+/* Entrées: une structure util, un code confidentiel                                                      */
+/* Sortie: un environnement de hashage EVP_MDCTX                                                          */
+/**********************************************************************************************************/
+ gchar *Utilisateur_hash_password ( struct CMD_TYPE_UTILISATEUR *util, gchar *pwd )
+  { guchar hash_memory[EVP_MAX_MD_SIZE];
+    gchar *result;
+    EVP_MD_CTX *mdctx;
+    guint md_len, cpt;
+
+    result = (gchar *)g_malloc0( 2*EVP_MAX_MD_SIZE + 1 );
+    if (!result) return(NULL);
+
+    mdctx = EVP_MD_CTX_create();                                        /* Creation du HASH correspondant */
+    EVP_DigestInit_ex (mdctx, EVP_sha512(), NULL);
+    EVP_DigestUpdate  (mdctx, util->nom, strlen(util->nom) );
+    EVP_DigestUpdate  (mdctx, util->salt, sizeof(util->salt)-1);
+    EVP_DigestUpdate  (mdctx, pwd,  strlen(pwd));
+    EVP_DigestFinal_ex(mdctx, (guchar *)&hash_memory, &md_len);
+    EVP_MD_CTX_destroy(mdctx);
+
+    for (cpt=0; cpt<md_len; cpt++)                                         /* Mise en forme au format HEX */
+     { g_snprintf( result + 2*cpt, 3, "%02X", (guchar)hash_memory[cpt] ); }
+    return(result);
+  }
+/**********************************************************************************************************/
+/* Check_utilisateur_password: Vérifie le mot de passe fourni                                             */
+/* Entrées: une structure util, un code confidentiel                                                      */
+/* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
+ gboolean Check_utilisateur_password( struct CMD_TYPE_UTILISATEUR *util, gchar *pwd )
+  { gint retour;
+    gchar *hash;
+    hash = Utilisateur_hash_password ( util, pwd );
+    if (!hash) return(FALSE);
+    retour = memcmp( hash, util->hash, sizeof( util->hash ) );
+    g_free(hash);    
+    if (retour==0) return (TRUE);
+    return(FALSE);
+  }
+/**********************************************************************************************************/
 /* Retirer_utilisateur: Elimine un utilisateur dans la base de données                                    */
-/* Entrées: un log, une db, un nom                                                                        */
+/* Entrées: une structure utilisateur contenant l'id à supprimer                                          */
 /* Sortie: true si pas de pb, false sinon                                                                 */
 /**********************************************************************************************************/
  gboolean Retirer_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util )
@@ -117,7 +175,7 @@
 /**********************************************************************************************************/
  static gint Ajouter_Modifier_utilisateurDB( gboolean ajout, struct CMD_TYPE_UTILISATEUR *util )
   { gchar requete[1024], chaine[512];
-    gchar *nom, *comment, *phone, *salt, *hash, *jabberid;
+    gchar *nom, *comment, *phone, *jabberid;
     gboolean retour;
     struct DB *db;
     gint id;
@@ -135,31 +193,13 @@
        g_free(nom);
        return(-1);
      }
-    salt = Normaliser_chaine ( util->salt );
-    if (!salt)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Ajouter_Modifier_utilisateurDB: Normalisation salt impossible" );
-       g_free(nom);
-       g_free(comment);
-       return(-1);
-     }
-    hash = Normaliser_chaine ( util->hash );
-    if (!hash)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Ajouter_Modifier_utilisateurDB: Normalisation hash impossible" );
-       g_free(nom);
-       g_free(comment);
-       g_free(salt);
-       return(-1);
-     }
+
     phone = Normaliser_chaine ( util->sms_phone );
     if (!phone)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Ajouter_Modifier_utilisateurDB: Normalisation phone impossible" );
        g_free(nom);
        g_free(comment);
-       g_free(salt);
-       g_free(hash);
        return(-1);
      }
     jabberid = Normaliser_chaine ( util->imsg_jabberid );
@@ -168,14 +208,12 @@
                 "Ajouter_Modifier_utilisateurDB: Normalisation jabberid impossible" );
        g_free(nom);
        g_free(comment);
-       g_free(salt);
-       g_free(hash);
        g_free(phone);
        return(-1);
      }
 
     if (ajout)
-     { g_snprintf( requete, sizeof(requete),                                              /* Requete SQL */
+     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
                    "INSERT INTO %s"             
                    "(name,mustchangepwd,cansetpwd,comment,login_failed,enable,"
                    "date_create,enable_expire,date_expire,date_modif,sms_enable,sms_phone,sms_allow_cde,"
@@ -188,7 +226,7 @@
                    util->imsg_enable, jabberid, util->imsg_allow_cde, util->imsg_bit_presence, util->imsg_available );
      }
     else
-     { g_snprintf( requete, sizeof(requete),                                              /* Requete SQL */
+     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
                    "UPDATE %s SET "             
                    "mustchangepwd=%d,comment='%s',enable=%d,enable_expire=%d,"
                    "cansetpwd=%d,date_expire='%d',date_modif='%d',"
@@ -199,17 +237,11 @@
                    util->cansetpwd, (gint)util->date_expire, (gint)time(NULL),
                    util->sms_enable, phone, util->sms_allow_cde,
                    util->imsg_enable, jabberid, util->imsg_allow_cde, util->imsg_bit_presence, util->imsg_available );
-       if (util->setpwdnow)
-        { g_snprintf( chaine, sizeof(chaine), ",salt='%s',hash='%s'", salt, hash );
-          g_strlcat ( requete, chaine, sizeof(requete) );
-        }
        g_snprintf( chaine, sizeof(chaine), " WHERE id='%d'", util->id ); 
        g_strlcat ( requete, chaine, sizeof(requete) );
      }
     g_free(nom);
     g_free(comment);
-    g_free(salt);
-    g_free(hash);
     g_free(phone);
     g_free(jabberid);
 
@@ -257,15 +289,17 @@
     gboolean retour;
     struct DB *db;
 
+    Utilisateur_set_new_salt ( util );                                  /* Récupération d'un nouveau SALT */
+
     salt = Normaliser_chaine ( (gchar *)util->salt );
     if (!salt)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_utilisateurDB: Normalisation salt impossible" );
        return(FALSE);
      }
 
-    hash = Normaliser_chaine ( (gchar *)util->hash );
+    hash = Utilisateur_hash_password ( util, util->hash );    /* Le nouveau mot de passe est dans le hash */
     if (!hash)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_utilisateurDB: Normalisation hash impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_utilisateurDB: Calcul du Hash impossible" );
        g_free(salt);
        return(FALSE);
      }
@@ -295,8 +329,8 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Set_password: Correspond au changement de password de l'utilisateur                                    */
-/* Entrées: un log, une db, un id utilisateur, une clef, un password                                      */
+/* Set_cansetpwd: Positionne le flag CanSetPassword                                                       */
+/* Entrées: un utilisateur                                                                                */
 /* Sortie: FALSE si probleme                                                                              */
 /**********************************************************************************************************/
  gboolean Modifier_utilisateurDB_set_cansetpwd( struct CMD_TYPE_UTILISATEUR *util )
@@ -323,6 +357,37 @@
      }
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
                 "Modifier_utilisateurDB_set_cansetpwd: update ok for id=%d (%s)", util->id, util->nom );
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Set_mustchangepwd: Positionne le flag MustChangePassword                                               */
+/* Entrées: un utilisateur                                                                                */
+/* Sortie: FALSE si probleme                                                                              */
+/**********************************************************************************************************/
+ gboolean Modifier_utilisateurDB_set_mustchangepwd( struct CMD_TYPE_UTILISATEUR *util )
+  { gchar requete[512];
+    gboolean retour;
+    struct DB *db;
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "UPDATE %s SET "             
+                "mustchangepwd=%d,date_modif='%d' WHERE id=%d",
+                NOM_TABLE_UTIL, util->mustchangepwd, (gint)time(NULL), util->id );
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_utilisateurDB_set_mustchangepwd: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    if ( ! retour )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "Modifier_utilisateurDB_set_mustchangepwd: update failed for id=%d (%s)", util->id, util->nom );
+       return(FALSE);
+     }
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                "Modifier_utilisateurDB_set_mustchangepwd: update ok for id=%d (%s)", util->id, util->nom );
     return(TRUE);
   }
 /**********************************************************************************************************/
@@ -464,8 +529,10 @@
      }
 
     util = Recuperer_utilisateurDB_suite( &db );
-    Libere_DB_SQL( &db );
-    if (util) Groupe_get_groupe_utilDB ( util->id, (guint *)&util->gids );
+    if (util)
+     { Libere_DB_SQL( &db );
+       Groupe_get_groupe_utilDB ( util->id, (guint *)&util->gids );
+     }
     return( util );
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -175,7 +175,7 @@
                 rs485->sa_min, rs485->sa_max, rs485->s_min, rs485->s_max,
                 rs485->id );
     g_free(libelle);
-    retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
     Cfg_rs485.reload = TRUE;                       /* Rechargement des modules RS en mémoire de travaille */
     return( retour );
@@ -193,7 +193,7 @@
                 "sa_min,sa_max,s_min,s_max"
                 " FROM %s WHERE instance_id='%s' ORDER BY num", NOM_TABLE_MODULE_RS485, Config.instance_id );
 
-    return ( Lancer_requete_SQL ( db, requete ) );             /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                         /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_liste_id_rs485DB: Recupération de la liste des ids des rs485s                                */
@@ -203,7 +203,7 @@
  static struct RS485DB *Recuperer_rs485DB_suite( struct DB *db )
   { struct RS485DB *rs485;
 
-    Recuperer_ligne_SQL(db);                              /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( db );
        return(NULL);

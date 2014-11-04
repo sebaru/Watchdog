@@ -129,7 +129,7 @@
 
        Config.log_msrv = g_key_file_get_boolean ( gkf, "LOG", "debug_msrv", NULL );
        Config.log_dls  = g_key_file_get_boolean ( gkf, "LOG", "debug_dls", NULL );
-       Config.log_arch = g_key_file_get_boolean ( gkf, "LOG", "debug_ach", NULL );
+       Config.log_arch = g_key_file_get_boolean ( gkf, "LOG", "debug_arch", NULL );
      } else 
         { printf("Unable to parse config file %s, error %s\n", fichier, error->message );
           g_error_free( error );

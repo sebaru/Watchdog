@@ -33,16 +33,14 @@
  #include "Config_cli.h"
  #include "trame.h"
 
- extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
+ extern struct CLIENT Client;                           /* Identifiant de l'utilisateur en cours */
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
 
- static void Envoyer_action_programme ( void );
-
  static GnomeUIInfo Menu_popup[]=
-  { GNOMEUIINFO_ITEM_STOCK ( N_("Program"), NULL, Envoyer_action_programme, GNOME_STOCK_PIXMAP_EXEC ),
+  { /*GNOMEUIINFO_ITEM_STOCK ( N_("Program"), NULL, Envoyer_action_programme, GNOME_STOCK_PIXMAP_EXEC ),*/
     GNOMEUIINFO_END
   };
  static struct TRAME_ITEM_MOTIF *appui = NULL;
@@ -68,20 +66,6 @@
     Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_ACTION_M,
                    (gchar *)&bit_clic, sizeof(struct CMD_ETAT_BIT_CLIC) );
     printf("Envoi M%d = 1 au serveur \n", bit_clic.num );
-  }
-/**********************************************************************************************************/
-/* Envoyer_action_programme: Lance la fenetre de liste des actions programmées pour le motif en question  */
-/* Entrée: une structure TRAME_ITEM_MOTIF                                                                 */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
- static void Envoyer_action_programme ( void )
-  { struct CMD_WANT_SCENARIO_MOTIF sce;
-    sce.bit_clic = appui->motif->bit_clic;
-    sce.bit_clic2 = appui->motif->bit_clic2;
-    Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SUP_WANT_SCENARIO,
-                   (gchar *)&sce, sizeof(struct CMD_WANT_SCENARIO_MOTIF) );
-    printf("Envoi demande de scenario motif %d %d au serveur \n", sce.bit_clic, sce.bit_clic2 );
-    Creer_fenetre_scenario( appui->motif );
   }
 /**********************************************************************************************************/
 /* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision   */
@@ -197,8 +181,8 @@ printf("release !\n");
           else if (!pid)                                             /* Lancement de la ligne de commande */
            { gchar chaine[256];
              g_snprintf( chaine, sizeof(chaine),
-                        "http://%s/watchdog/index.php?debug=1&type=%d&num=%d&period=hour",
-                         Client_en_cours.host, trame_capteur->capteur->type, trame_capteur->capteur->bit_controle );
+                        "http://%s:%d/getgraph?type=%d&num=%d&period=day",
+                         Client.host, Config_cli.port_http, trame_capteur->capteur->type, trame_capteur->capteur->bit_controle );
              execlp( "firefox", "firefox", chaine, NULL );
              printf("Lancement de firefox failed\n");
              _exit(0);

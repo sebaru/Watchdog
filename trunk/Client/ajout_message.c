@@ -37,11 +37,12 @@
  #include "Reseaux.h"
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
+ #include "client.h"
  #include "Config_cli.h"
 
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                                  /* Configuration generale watchdog */
- extern struct CONNEXION *Connexion;                                              /* connexion au serveur */
+ extern struct CLIENT Client;                                    /* Identifiant de l'utilisateur en cours */
 
  static GtkWidget *F_ajout;                                            /* Widget de l'interface graphique */
  static GtkWidget *Spin_num;                                /* Numéro du message en cours d'édition/ajout */
@@ -143,10 +144,10 @@
     id_source = open ( fichier, O_RDONLY, 0 );
     if (id_source<0) return;
 
-    msg_mp3 = (struct CMD_TYPE_MESSAGE_MP3 *)g_try_malloc0( Connexion->taille_bloc );
+    msg_mp3 = (struct CMD_TYPE_MESSAGE_MP3 *)g_try_malloc0( Client.connexion->taille_bloc );
     if (!msg_mp3) return;
     buffer_envoi     = (gchar *)msg_mp3 + sizeof(struct CMD_TYPE_MESSAGE_MP3);
-    taille_max       = Connexion->taille_bloc - sizeof(struct CMD_TYPE_MESSAGE_MP3);
+    taille_max       = Client.connexion->taille_bloc - sizeof(struct CMD_TYPE_MESSAGE_MP3);
     msg_mp3->num     = msg->num;
     msg_mp3->taille  = 0;
                                                           /* Demande de suppression du fichier source MP3 */

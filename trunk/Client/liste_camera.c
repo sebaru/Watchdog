@@ -282,7 +282,7 @@
     GtkTreeModel *store;
     gboolean valide;
     GError *error;
-
+#ifdef bouh
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_camera) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
     if (!valide) return;
@@ -295,6 +295,7 @@
 
     res = gtk_print_operation_run (print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
                                    GTK_WINDOW(F_client), &error);
+#endif
   }
 /**********************************************************************************************************/
 /* Gerer_popup_camera: Gestion du menu popup quand on clique droite sur la liste des cameras              */

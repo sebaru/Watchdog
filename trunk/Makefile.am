@@ -4,7 +4,7 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 
-SUBDIRS=Documentation Include Commun Watchdogd Client WatchdogdAdmin
+SUBDIRS=Include Commun Watchdogd Client WatchdogdAdmin
 ACLOCAL_AMFLAGS = -I m4
 #EXTRA_DIST = Watchdog.rpm.spec
 MAINTAINERCLEANFILES = Makefile.in

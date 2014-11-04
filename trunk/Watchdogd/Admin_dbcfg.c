@@ -53,10 +53,14 @@
         { g_snprintf(chaine, sizeof(chaine), "Database connexion failed\n" );
           Admin_write ( connexion, chaine );
         }
-       else while (Recuperer_configDB_suite( &db, &nom, &valeur ) )/* Récupération d'une config dans la DB */
-        { g_snprintf(chaine, sizeof(chaine), "  Instance_id '%s', Thread '%s' -> '%s' = '%s'\n",
-                     Config.instance_id, thread, nom, valeur );
+       else 
+        { g_snprintf(chaine, sizeof(chaine), " | Instance_id '%s', Thread '%s'\n", Config.instance_id, thread );
           Admin_write ( connexion, chaine );
+          while (Recuperer_configDB_suite( &db, &nom, &valeur ) )/* Récupération d'une config dans la DB */
+           { g_snprintf(chaine, sizeof(chaine), " | - '%20s' = '%s'\n", nom, valeur );
+             Admin_write ( connexion, chaine );
+           }
+          Admin_write( connexion, " |-\n" );
         }
      } else
     if ( ! strcmp ( commande, "add" ) )
@@ -97,7 +101,8 @@
                    Config.instance_id, thread );
        Admin_write ( connexion, chaine );
        return(TRUE);
-     } else
+     }
+    else
      { g_snprintf( chaine, sizeof(chaine), " Unknown DBCFG command : %s\n", ligne );
        Admin_write ( connexion, chaine );
      }

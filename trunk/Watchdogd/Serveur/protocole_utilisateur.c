@@ -118,6 +118,12 @@
                Proto_valider_editer_utilisateur( client, util );
              }
             break;
+       case SSTAG_CLIENT_CHANGE_PASSWORD:
+             { struct CMD_TYPE_UTILISATEUR *util;
+               util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
+               Proto_set_password( client, util );
+             }
+            break;
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

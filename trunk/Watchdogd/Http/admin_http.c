@@ -30,6 +30,48 @@
  #include "Http.h"
 
 /**********************************************************************************************************/
+/* Admin_http_status: Print le statut du thread HTTP                                                      */
+/* Entrée: la connexion pour sortiee client et la ligne de commande                                       */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Admin_http_status ( struct CONNEXION *connexion )
+  { gchar chaine[128];
+    g_snprintf( chaine, sizeof(chaine), " HTTP  Server : port %d %s\n",
+                Cfg_http.http_port, (Cfg_http.http_server ? "Running" : "Stopped" ) );
+    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " HTTPS Server : port %d %s\n",
+                Cfg_http.https_port, (Cfg_http.https_server ? "Running" : "Stopped" ) );
+    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " HTTPS Cipher : %s\n", Cfg_http.https_cipher );
+    Admin_write ( connexion, chaine );
+  }
+/**********************************************************************************************************/
+/* Admin_http_list: List les sessions actives du thread HTTP                                              */
+/* Entrée: la connexion pour sortiee client et la ligne de commande                                       */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Admin_http_list ( struct CONNEXION *connexion )
+  { struct HTTP_SESSION *session = NULL;
+    gchar chaine[128];
+    GSList *liste;
+    pthread_mutex_lock( &Cfg_http.lib->synchro );                        /* Ajout dans la liste a traiter */
+    liste = Cfg_http.Liste_sessions;
+    while ( liste )
+     { session = (struct HTTP_SESSION *)liste->data;
+       g_snprintf( chaine, sizeof(chaine), " | ----------- ID %s\n", session->sid );
+       Admin_write( connexion, chaine );
+       g_snprintf( chaine, sizeof(chaine), " | - type     = %03d\n", session->type );
+       Admin_write( connexion, chaine );
+       g_snprintf( chaine, sizeof(chaine), " | - username = %s\n", (session->util ? session->util->nom : "Unknown") );
+       Admin_write( connexion, chaine );
+       g_snprintf( chaine, sizeof(chaine), " | - last_top = %.1fs\n", (Partage->top - session->last_top)/10.0 );
+       Admin_write( connexion, chaine );
+       liste = liste->next;
+     }
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+    Admin_write( connexion, " -\n" );
+  }
+/**********************************************************************************************************/
 /* Admin_command: Gere une commande liée au thread HTTP depuis une connexion admin                        */
 /* Entrée: le client et la ligne de commande                                                              */
 /* Sortie: Néant                                                                                          */
@@ -39,9 +81,9 @@
 
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "list" ) )
-     {
-          Admin_write ( connexion, "ToBe implemented" );
-     }
+     { Admin_http_list ( connexion ); }
+    else if ( ! strcmp ( commande, "status" ) )
+     { Admin_http_status ( connexion ); }
     else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
      { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)   /* Si changement de parametre */
         { gboolean retour;
@@ -54,7 +96,8 @@
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'UPS'\n" );
        Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
-       Admin_write ( connexion, "  list satellite....\n");
+       Admin_write ( connexion, "  status                                 - Get Status of HTTP Thread\n");
+       Admin_write ( connexion, "  list                                   - Get Sessions list\n");
      }
     else
      { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );

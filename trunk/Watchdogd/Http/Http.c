@@ -33,12 +33,12 @@
  #include <string.h>
  #include <unistd.h>
  #include <microhttpd.h>
- #include <libxml/xmlwriter.h>
  #include <sys/socket.h>
  #include <netinet/in.h>
  #include <netdb.h>
  #include <gnutls/gnutls.h>
  #include <gnutls/x509.h>
+ #include <openssl/rand.h>
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
@@ -60,6 +60,7 @@
     Cfg_http.https_port        = HTTP_DEFAUT_PORT_HTTPS;
     Cfg_http.authenticate      = TRUE; 
     Cfg_http.nbr_max_connexion = HTTP_DEFAUT_MAX_CONNEXION;
+    g_snprintf( Cfg_http.https_cipher,    sizeof(Cfg_http.https_cipher),    "%s", HTTP_DEFAUT_HTTPS_CIPHER );
     g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", HTTP_DEFAUT_FILE_CERT );
     g_snprintf( Cfg_http.https_file_key,  sizeof(Cfg_http.https_file_key),  "%s", HTTP_DEFAUT_FILE_KEY );
     g_snprintf( Cfg_http.https_file_ca,   sizeof(Cfg_http.https_file_ca),   "%s", HTTP_DEFAUT_FILE_CA  );
@@ -79,6 +80,8 @@
         { g_snprintf( Cfg_http.https_file_ca, sizeof(Cfg_http.https_file_ca), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "https_file_key" ) )
         { g_snprintf( Cfg_http.https_file_key, sizeof(Cfg_http.https_file_key), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "https_cipher" ) )
+        { g_snprintf( Cfg_http.https_cipher, sizeof(Cfg_http.https_cipher), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "max_connexion" ) )
         { Cfg_http.nbr_max_connexion = atoi(valeur);  }
        else if ( ! g_ascii_strcasecmp ( nom, "http_enable" ) )
@@ -89,8 +92,6 @@
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.https_enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "https_port" ) )
         { Cfg_http.https_port = atoi(valeur);  }
-       else if ( ! g_ascii_strcasecmp ( nom, "satellite_enable" ) )
-        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.satellite_enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "authenticate" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "false" ) ) Cfg_http.authenticate = FALSE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
@@ -188,16 +189,13 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Http_Add_titanium_response_header : Ajoute les header HTTP de connexion pour titanium                  */
+/* Http_Add_response_header : Ajoute les header HTTP de connexion pour titanium                  */
 /* Entrée: la repsonse MHD                                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Http_Add_titanium_response_header ( struct MHD_Connection *connection, struct MHD_Response *response )
-  { const gchar *x_titanium;
-    x_titanium = MHD_lookup_connection_value (connection, MHD_HEADER_KIND, "X-Titanium-Id");
-    if (!x_titanium) x_titanium = "unknown";
-    MHD_add_response_header ( response, "Access-Control-Allow-Origin", "*" );
-    MHD_add_response_header ( response, "X-Titanium-Id", x_titanium);
+ void Http_Add_response_header ( struct MHD_Response *response )
+  { MHD_add_response_header ( response, "Access-Control-Allow-Origin", "*" );
+    MHD_add_response_header ( response, "Connection", "close" );
   }
 /**********************************************************************************************************/
 /* Liberer_certificat: Libere la mémoire allouée précédemment pour stocker les certificats                */
@@ -210,17 +208,194 @@
     if ( Cfg_http.ssl_ca )  g_free( Cfg_http.ssl_ca );
   }
 /**********************************************************************************************************/
+/* Satellite_update_infos : top les infos de la liste des connexions Satellite et maj les bits internes   */
+/* Entrées: les informations du satellite                                                                 */
+/* Sortie : néant                                                                                         */
+/**********************************************************************************************************/
+ static struct HTTP_SESSION *Http_get_session ( const gchar *sid )
+  { struct HTTP_SESSION *session = NULL;
+    GSList *liste;
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+             "Http_get_session : Searching for sid %s", sid );
+    pthread_mutex_lock( &Cfg_http.lib->synchro );                        /* Ajout dans la liste a traiter */
+    liste = Cfg_http.Liste_sessions;
+    while ( liste )
+     { session = (struct HTTP_SESSION *)liste->data;
+       if ( ! g_strcmp0 ( session->sid, sid ) ) break;
+       liste = liste->next;
+     }
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+    if (liste) return(session);
+          else return(NULL);
+  }
+/**********************************************************************************************************/
+/* Http Liberer_session : Libere la mémoire réservée par la structure session de reception de la requete  */
+/* Entrées : la session à libérer                                                                         */
+/* Sortie : néant                                                                                         */
+/**********************************************************************************************************/
+ static void Http_Liberer_session ( struct HTTP_SESSION *session )
+  { if (session->buffer) g_free(session->buffer);
+    if (session->util)   g_free(session->util);
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+             "Http_Liberer_session : session close for SID %s", session->sid );
+    g_free(session);                                                 /* Libération mémoire le cas échéant */
+  }
+/**********************************************************************************************************/
+/* Http_Check_sessions : Fait tomber les sessions sur timeout                                             */
+/* Entrées: néant                                                                                         */
+/* Sortie : néant                                                                                         */
+/**********************************************************************************************************/
+ static void Http_Check_sessions ( void )
+  { struct HTTP_SESSION *session = NULL;
+    GSList *liste;
+    pthread_mutex_lock( &Cfg_http.lib->synchro );                        /* Ajout dans la liste a traiter */
+    liste = Cfg_http.Liste_sessions;
+    while ( liste )
+     { session = (struct HTTP_SESSION *)liste->data;
+       if ( (session->last_top && Partage->top - session->last_top >= 6000) ||
+            session->type == SESSION_TO_BE_CLEANED )
+        { Cfg_http.Liste_sessions = g_slist_remove( Cfg_http.Liste_sessions, session );
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+                   "Http_Check_sessions : closing SID %s", session->sid );
+          Http_Liberer_session(session);
+          liste = Cfg_http.Liste_sessions;
+        }
+       else liste = liste->next;
+     }
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+  }
+/**********************************************************************************************************/
+/* Http_Send_file: Enoie un fichier au client                                                             */
+/* Entrées: La session, et le nom de fichier                                                              */
+/* Sortie : void                                                                                          */
+/**********************************************************************************************************/
+ static gint Http_Send_file ( struct HTTP_SESSION *session, struct MHD_Connection *connection,
+                              gchar *file, gchar *content_type )
+  { struct MHD_Response *response;
+    struct stat sbuf;
+    gint fd;
+    fd = open (file, O_RDONLY);
+    if ( fd == -1 || fstat (fd, &sbuf) == -1)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Http_Send_file : Error sending file %s to %s: %s",
+                file, (session ? session->sid : "Unathenticated"), strerror(errno) );
+       if (fd!=-1) close(fd);
+       response = MHD_create_response_from_buffer ( strlen (RESPONSE_INTERNAL_ERROR)+1,
+                                                    RESPONSE_INTERNAL_ERROR, MHD_RESPMEM_PERSISTENT );
+       if (response == NULL) return(MHD_NO);
+       Http_Add_response_header ( response );
+       MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response );
+       MHD_destroy_response (response);
+       return(MHD_YES);
+     }
+    response = MHD_create_response_from_fd_at_offset (sbuf.st_size, fd, 0);
+    MHD_add_response_header(response, "Content-Type", content_type);
+    Http_Add_response_header(response);
+    MHD_queue_response (connection, MHD_HTTP_OK, response);
+    MHD_destroy_response (response);
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+             "Http_Send_file : %s sent to session '%s'",
+              file, (session ? session->sid : "Unathenticated") );
+    return MHD_YES;
+  }
+/**********************************************************************************************************/
 /* Get_client_cert : Recupere le certificat client depuis la session TLS                                  */
 /* Entrées : la session TLS                                                                               */
 /* Sortie  : TRUE si OK, FALSE si erreur                                                                  */
 /**********************************************************************************************************/
- static gint Prepare_request( struct MHD_Connection *connection, const char *url, 
-                              const char *method, const char *version, size_t *upload_data_size,
-                              void **con_cls )
+ static struct HTTP_SESSION *Http_new_session( struct MHD_Connection *connection, const char *url, 
+                                               const char *method, const char *version, size_t *upload_data_size,
+                                               void **con_cls )
   { const union MHD_ConnectionInfo *info;
-    struct HTTP_CONNEXION_INFO *infos;
-    gnutls_x509_crt_t client_cert;
-    const gnutls_datum_t *pcert;
+    struct HTTP_SESSION *session;
+    struct sockaddr *client_addr;
+    gint retour, size, cpt;
+    void *tls_session;
+    gchar sid[32];
+
+    client_addr = MHD_get_connection_info (connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS)->client_addr;
+    if (client_addr->sa_family == AF_INET)  size = sizeof(struct sockaddr_in);
+    else
+    if (client_addr->sa_family == AF_INET6) size = sizeof(struct sockaddr_in6);
+    else
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "New_session :  MHD_CONNECTION_INFO_CLIENT_ADDRESS failed, wrong family" );
+       return(NULL);
+     }
+
+    session = (struct HTTP_SESSION *) g_try_malloc0 ( sizeof( struct HTTP_SESSION ) );
+    if (!session)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "New_session: Memory Alloc ERROR session" );
+       return(NULL);
+     }
+    session->type = SESSION_INIT;
+    session->last_top = Partage->top;
+
+    retour = getnameinfo( client_addr, size,
+                          session->client_host,    sizeof(session->client_host),
+                          session->client_service, sizeof(session->client_service),
+                          NI_NUMERICHOST | NI_NUMERICSERV );
+    if (retour) 
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "New_session : GetName failed : %s", gai_strerror(retour) );
+       g_free(session);
+       return(NULL);
+     }
+
+    info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_CIPHER_ALGO );
+    if ( info ) { session->ssl_algo = info->cipher_algorithm; }
+
+    info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_PROTOCOL );
+    if ( info ) { session->ssl_proto = info->protocol; }
+
+    info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_GNUTLS_SESSION );
+    if ( info ) { tls_session = info->tls_session; }
+           else { tls_session = NULL; }
+
+    g_snprintf( session->user_agent, sizeof(session->user_agent), "%s",
+                MHD_lookup_connection_value (connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT) );
+
+    g_snprintf( session->origine,    sizeof(session->origine),    "%s",
+                MHD_lookup_connection_value (connection, MHD_HEADER_KIND, "Origin") );
+
+    RAND_pseudo_bytes( (guchar *)sid, sizeof(sid) );                     /* Récupération d'un nouveau SID */
+    for (cpt=0; cpt<sizeof(sid); cpt++)                                    /* Mise en forme au format HEX */
+     { g_snprintf( &session->sid[2*cpt], 3, "%02X", (guchar)sid[cpt] ); }
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+             "New_session : Creation session '%s'", session->sid );
+
+    if (tls_session)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                 "New_session : New ANON HTTPS %s %s %s request (Payload size %d) from Host=%s/Service=%s"
+                 " (Cipher=%s/Proto=%s). User-Agent=%s. Origin=%s",
+                  method, url, version, (upload_data_size ? *upload_data_size : 0),
+                  session->client_host, session->client_service,
+                  gnutls_cipher_get_name (session->ssl_algo), gnutls_protocol_get_name (session->ssl_proto),
+                  session->user_agent, session->origine
+                );
+     }
+    else Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                  "New_session : New ANON HTTP  %s %s %s request (Payload size %d) from Host=%s/Service=%s. User-Agent=%s. Origin=%s",
+                   method, url, version, *upload_data_size,
+                   session->client_host, session->client_service, session->user_agent, session->origine
+                );
+    *con_cls = session;
+    pthread_mutex_lock( &Cfg_http.lib->synchro );                        /* Ajout dans la liste a traiter */
+    Cfg_http.Liste_sessions = g_slist_prepend( Cfg_http.Liste_sessions, session );
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+    return(session);
+  }
+/**********************************************************************************************************/
+/* Get_client_cert : Recupere le certificat client depuis la session TLS                                  */
+/* Entrées : la session TLS                                                                               */
+/* Sortie  : TRUE si OK, FALSE si erreur                                                                  */
+/**********************************************************************************************************/
+ static void Http_Log_request ( struct MHD_Connection *connection, const char *url, 
+                                const char *method, const char *version, size_t *upload_data_size,
+                                void **con_cls )
+  { const union MHD_ConnectionInfo *info;
+    struct HTTP_SESSION session;
     struct sockaddr *client_addr;
     void *tls_session;
     gint retour, size;
@@ -231,95 +406,51 @@
     if (client_addr->sa_family == AF_INET6) size = sizeof(struct sockaddr_in6);
     else
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Prepare_request :  MHD_CONNECTION_INFO_CLIENT_ADDRESS failed, wrong family" );
-       return(MHD_NO);
-     }
-
-    infos = (struct HTTP_CONNEXION_INFO *) g_try_malloc0 ( sizeof( struct HTTP_CONNEXION_INFO ) );
-    if (!infos)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Prepare_request: Memory Alloc ERROR infos" );
-       return(MHD_NO);
+                "Http_Log_request :  MHD_CONNECTION_INFO_CLIENT_ADDRESS failed, wrong family" );
+       return;
      }
 
     retour = getnameinfo( client_addr, size,
-                          infos->client_host,    sizeof(infos->client_host),
-                          infos->client_service, sizeof(infos->client_service),
+                          session.client_host,    sizeof(session.client_host),
+                          session.client_service, sizeof(session.client_service),
                           NI_NUMERICHOST | NI_NUMERICSERV );
     if (retour) 
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Prepare_request : GetName failed : %s", gai_strerror(retour) );
-       g_free(infos);
-       return(MHD_NO);
+                "Http_Log_request : GetName failed : %s", gai_strerror(retour) );
+       return;
      }
-
-    info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_CIPHER_ALGO );
-    if ( info ) { infos->ssl_algo = info->cipher_algorithm; }
-
-    info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_PROTOCOL );
-    if ( info ) { infos->ssl_proto = info->protocol; }
 
     info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_GNUTLS_SESSION );
     if ( info ) { tls_session = info->tls_session; }
            else { tls_session = NULL; }
 
-    g_snprintf( infos->user_agent, sizeof(infos->user_agent), "%s",
+    g_snprintf( session.user_agent, sizeof(session.user_agent), "%s",
                 MHD_lookup_connection_value (connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT) );
 
-    g_snprintf( infos->origine,    sizeof(infos->origine),    "%s",
+    g_snprintf( session.origine,    sizeof(session.origine),    "%s",
                 MHD_lookup_connection_value (connection, MHD_HEADER_KIND, "Origin") );
 
-
     if (tls_session)
-     { unsigned int listsize;
-       pcert = gnutls_certificate_get_peers(tls_session, &listsize);
-       if ( (pcert == NULL) || (listsize == 0))
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Prepare_request: Failed to get peers" );
-          g_free(infos);
-          return(MHD_NO);
-        }
+     { info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_CIPHER_ALGO );
+       if ( info ) { session.ssl_algo = info->cipher_algorithm; }
 
-       if ( (retour = gnutls_x509_crt_init(&client_cert)) < 0 )
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Prepare_request: Failed to init cert : %s", gnutls_strerror(retour) );
-          g_free(infos);
-          return(MHD_NO);
-        }
+       info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_PROTOCOL );
+       if ( info ) { session.ssl_proto = info->protocol; }
 
-       if ( (retour = gnutls_x509_crt_import(client_cert, &pcert[0], GNUTLS_X509_FMT_DER)) < 0 ) 
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Prepare_request: Failed import cert", gnutls_strerror(retour) );
-          gnutls_x509_crt_deinit(client_cert);
-          g_free(infos);
-          return(MHD_NO);
-        }  
-
-       size = sizeof(infos->client_dn);
-       gnutls_x509_crt_get_dn(client_cert, infos->client_dn, (size_t *)&size );
-       size = sizeof(infos->issuer_dn);
-       gnutls_x509_crt_get_issuer_dn(client_cert, infos->issuer_dn, (size_t *)&size );
-       size = sizeof(infos->username);
-       gnutls_x509_crt_get_dn_by_oid(client_cert, GNUTLS_OID_X520_COMMON_NAME, 0, 0,
-                                     infos->username, (size_t *)&size);
-       infos->util = Rechercher_utilisateurDB_by_name ( infos->username );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "Prepare_request : New HTTPS %s %s %s request (Payload size %d) from Host=%s(dn=%s cn=%s)/Service=%s"
-                " (Cipher=%s/Proto=%s/Issuer=%s). User-Agent=%s. Origin=%s",
-                 method, url, version, (upload_data_size ? *upload_data_size : 0),
-                 infos->client_host, infos->client_dn, infos->username, infos->client_service,
-                 gnutls_cipher_get_name (infos->ssl_algo), gnutls_protocol_get_name (infos->ssl_proto),
-                 infos->issuer_dn, infos->user_agent, infos->origine
-               );
-       gnutls_x509_crt_deinit(client_cert);
+                 "Http_Log_request : New HTTPS %s %s %s request (Payload size %d) from Host=%s/Service=%s"
+                 " (Cipher=%s/Proto=%s). User-Agent=%s. Origin=%s",
+                  method, url, version, (upload_data_size ? *upload_data_size : 0),
+                  session.client_host, session.client_service,
+                  gnutls_cipher_get_name (session.ssl_algo), gnutls_protocol_get_name (session.ssl_proto),
+                  session.user_agent, session.origine
+                );
      }
     else Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                  "Prepare_request : New HTTP  %s %s %s request (Payload size %d) from Host=%s/Service=%s. User-Agent=%s. Origin=%s",
+                  "Http_Log_request : New HTTP  %s %s %s request (Payload size %d) from Host=%s/Service=%s. User-Agent=%s. Origin=%s",
                    method, url, version, *upload_data_size,
-                   infos->client_host, infos->client_service, infos->user_agent, infos->origine
-                );
-    *con_cls = infos;
-    return(MHD_YES);
+                   session.client_host, session.client_service, session.user_agent, session.origine
+                 );
   }
 /**********************************************************************************************************/
 /* Http request_CB : Renvoi une reponse suite a une demande d'un client (appellée par libmicrohttpd)      */
@@ -332,112 +463,30 @@
                                const char *upload_data, 
                                size_t *upload_data_size, void **con_cls )
   { const char *Wrong_method     = "<html><body>Wrong method. Sorry... </body></html>";
-    const char *Not_found        = "<html><body>URI not found on this server. Sorry... </body></html>";
-    const char *Internal_error   = "<html><body>An internal server error has occured!..</body></html>";
     const char *Options_response = "<html><body>This is the response to HTTP OPTIONS Method!..</body></html>";
-    struct HTTP_CONNEXION_INFO *infos;
+    struct HTTP_SESSION *session = NULL;
     struct MHD_Response *response;
 
-    if (!*con_cls)
-     { if (Prepare_request(connection, url, method, version, upload_data_size, con_cls) == MHD_NO)
-        { return(MHD_NO); }
-     }
-    infos = *con_cls;                      /* infos est g_freé via CB a la fin de la requete issue de MHD */
-    
-    if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getsyn" ) )
-     { if ( Http_Traiter_request_getsyn ( connection ) == FALSE)              /* Traitement de la requete */
-        { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
-                                                      (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
-          if (response == NULL) return(MHD_NO);
-          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
-          MHD_destroy_response (response);
-        }
-       return MHD_YES;
-     }
-    else if ( Cfg_http.satellite_enable && ! strcasecmp( method, MHD_HTTP_METHOD_POST ) && ! strcasecmp ( url, "/set_internal" ) )
-     { return ( Http_Traiter_request_set_internal ( connection, upload_data, upload_data_size, infos ) ); }
-    else if ( Cfg_http.satellite_enable && ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/setm" ) )
-     { if ( Http_Traiter_request_setm ( connection ) == FALSE )              /* Traitement de la requete */
-        { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
-                                                      (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
-          if (response == NULL) return(MHD_NO);
-          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
-          MHD_destroy_response (response);
-        }
-       return MHD_YES;
-     }
-    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/status" ) )
-     { return( Http_Traiter_request_getstatus ( connection, infos ) ); }
-    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getgif" ) )
-     { if ( Http_Traiter_request_getgif ( connection ) == FALSE)              /* Traitement de la requete */
-        { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
-                                                      (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
-          if (response == NULL) return(MHD_NO);
-          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
-          MHD_destroy_response (response);
-        }
-       return MHD_YES;
-     }
-    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/gifile" ) )
-     { if ( Http_Traiter_request_gifile ( connection ) == FALSE)              /* Traitement de la requete */
-        { response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
-                                                      (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
-          if (response == NULL) return(MHD_NO);
-          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
-          MHD_destroy_response (response);
-        }
-       return MHD_YES;
-     }
+    Http_Log_request(connection, url, method, version, upload_data_size, con_cls);
+
+/************************************* Ici, pas de session en cours, reponse directe **********************/
+    if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/style.css" ) )
+     { return ( Http_Send_file (NULL, connection, "WEB/style.css", "text/css") ); }
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/prelogin.js" ) )
+     { return ( Http_Send_file (NULL, connection, "WEB/prelogin.js", "application/javascript") ); }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/favicon.ico" ) )
-     { struct stat sbuf;
-       gint fd;
-       fd = open ("favicon.gif", O_RDONLY);
-       if ( fd == -1 || fstat (fd, &sbuf) == -1)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                   "Http_request : Error /favicon.gif %s", strerror(errno) );
-          if (fd!=-1) close(fd);
-          response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
-                                                       (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
-          if (response == NULL) return(MHD_NO);
-          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
-          MHD_destroy_response (response);
-          return(MHD_YES);
-        }
-       response = MHD_create_response_from_fd_at_offset (sbuf.st_size, fd, 0);
-       MHD_add_response_header (response, "Content-Type", "image/gif");
-       MHD_queue_response (connection, MHD_HTTP_OK, response);
-       MHD_destroy_response (response);
-       return MHD_YES;
-     }
-    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/xml" ) )
-     { struct stat sbuf;
-       gint fd;
-       fd = open ("test.xml", O_RDONLY);
-       if ( fd == -1 || fstat (fd, &sbuf) == -1)
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                   "Http_request : Error /xml %s", strerror(errno) );
-          if (fd!=-1) close(fd);
-          response = MHD_create_response_from_buffer ( strlen (Internal_error)+1,
-                                                       (void*) Internal_error, MHD_RESPMEM_PERSISTENT);
-          if (response == NULL) return(MHD_NO);
-          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
-          MHD_destroy_response (response);
-          return(MHD_YES);
-        }
-       response = MHD_create_response_from_fd_at_offset (sbuf.st_size, fd, 0);
-       MHD_add_response_header (response, "Content-Type", "application/xml");
-       MHD_queue_response (connection, MHD_HTTP_OK, response);
-       MHD_destroy_response (response);
-       return MHD_YES;
-     }
+     { return ( Http_Send_file (NULL, connection, "WEB/favicon.gif", "image/gif") ); }
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getgif" ) )
+     { return ( Http_Traiter_request_getgif ( connection ) ); }               /* Traitement de la requete */
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/status" ) )
+     { return( Http_Traiter_request_getstatus ( connection ) ); }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_OPTIONS ) )
      { response = MHD_create_response_from_buffer ( strlen (Options_response)+1,
                                                    (void*) Options_response, MHD_RESPMEM_PERSISTENT);
        if (response == NULL) return(MHD_NO);
-
        MHD_add_response_header ( response, "Access-Control-Allow-Origin", "*" );
        MHD_add_response_header ( response, "Access-Control-Allow-Methods", "GET, POST" );
-       MHD_add_response_header ( response, "Access-Control-Allow-Headers", "X-Titanium-Id" );
+       Http_Add_response_header ( response );
        MHD_queue_response (connection, MHD_HTTP_OK, response);
        MHD_destroy_response (response);
        return MHD_YES;
@@ -446,29 +495,174 @@
      { response = MHD_create_response_from_buffer ( strlen (Wrong_method)+1,
                                                    (void*) Wrong_method, MHD_RESPMEM_PERSISTENT);
        if (response == NULL) return(MHD_NO);
+       Http_Add_response_header ( response );
        MHD_queue_response ( connection, MHD_HTTP_METHOD_NOT_ALLOWED, response);     /* Method not allowed */
        MHD_destroy_response (response);
        return MHD_YES;
      }
-    else /*if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) )*/
-     { response = MHD_create_response_from_buffer ( strlen (Not_found)+1,
-                                                   (void*) Not_found, MHD_RESPMEM_PERSISTENT);
+/*-------------------------------- Récupération des login / Mot de passe ---------------------------------*/
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_POST ) && ! strcasecmp ( url, "/postlogin.html" ) )
+     { gchar chaine[128], username[128], password[128], **splited, **couple;
+       struct HTTP_SESSION *session;
+       if ((*upload_data_size == 0) & (*con_cls == NULL))
+        { *con_cls = Http_new_session(connection, url, method, version, upload_data_size, con_cls);
+          if (!*con_cls)
+           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                      "Http_request_CB : Error in Prepare_session. Disconnect" );
+             return(MHD_NO);
+           }
+          return(MHD_YES);                                                    /* Attente du premier chunk */
+        }
+       session = *con_cls;
+       if (*upload_data_size != 0)                                                /* Transfert en cours ? */
+        { gchar *new_buffer;
+          new_buffer = g_try_realloc( session->buffer, session->buffer_size + *upload_data_size );
+          if (!new_buffer || session->buffer_size > 128)
+           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                      "Http_request_CB: Memory Alloc ERROR realloc buffer" );
+             g_free(session->buffer);
+             session->buffer = NULL;
+             session->type = SESSION_TO_BE_CLEANED;
+             return(MHD_NO);
+           } else session->buffer = new_buffer;
+          memcpy ( session->buffer + session->buffer_size, upload_data, *upload_data_size );   /* Recopie */
+          session->buffer_size += *upload_data_size;
+          *upload_data_size = 0;           /* Indique à MHD que l'on a traité l'ensemble des octets recus */
+          return(MHD_YES);                                        /* On demande de continuer le transfert */
+        }
+/*-------------------------------- Fin de transfert. On découpe le buffer d'entré ------------------------*/
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                "Http_request_CB: Buffer recu %s for session %s", session->buffer, session->sid );
+       memset( username, 0, sizeof(username) );
+       memset( password, 0, sizeof(password) );
+       splited = g_strsplit( session->buffer, "&", 2 );
+       g_free(session->buffer);                                         /* Libération du buffer d'origine */
+       session->buffer = NULL;
+       session->buffer_size = 0;
+       if (splited[0])
+        { gchar *new_string;
+          couple = g_strsplit( splited[0], "=", 2 );
+          if ( couple[0] && strcmp( couple[0], "remote_username" )==0 )
+           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                      "Http_request_CB: Login = %s for session %s", couple[1], session->sid );
+             new_string = g_uri_unescape_string ( couple[1], NULL );
+             g_snprintf( username , sizeof(username), "%s", new_string );
+             g_free(new_string);
+           }
+          g_strfreev( couple );
+          couple = g_strsplit( splited[1], "=", 2 );
+          if ( couple[0] && strcmp( couple[0], "remote_password" )==0 )
+           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                      "Http_request_CB: Password received for session %s", session->sid );
+             new_string = g_uri_unescape_string ( couple[1], NULL );
+             g_snprintf( password , sizeof(password), "%s", new_string );
+             g_free(new_string);
+           }
+          g_strfreev( couple );
+        }
+       g_strfreev( splited );
+/*------------------------------------- Checking credentials ---------------------------------------------*/
+       session->util = Rechercher_utilisateurDB_by_name( username );
+       if ( !session->util )
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+                   "Http_request_CB: User %s unknown for session %s", username, session->sid );
+          response = MHD_create_response_from_buffer ( strlen ("! Wrong Credentials !"),
+                                                       (void*) "! Wrong Credentials !", MHD_RESPMEM_PERSISTENT);
+          if (response == NULL) return(MHD_NO);
+          Http_Add_response_header ( response );
+          MHD_queue_response (connection, MHD_HTTP_OK, response);
+          MHD_destroy_response (response);
+          session->type = SESSION_TO_BE_CLEANED;                     /* On demande la purge de la session */
+          return(MHD_YES);
+        }
+
+       if ( Check_utilisateur_password( session->util, password ) == FALSE )
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+                   "Http_request_CB: Wrong password for user %s for session %s", username, session->sid );
+          response = MHD_create_response_from_buffer ( strlen ("! Wrong Credentials !"),
+                                                       (void*) "! Wrong Credentials !", MHD_RESPMEM_PERSISTENT);
+          if (response == NULL) return(MHD_NO);
+          Http_Add_response_header ( response );
+          MHD_queue_response (connection, MHD_HTTP_OK, response);
+          MHD_destroy_response (response);
+          session->type = SESSION_TO_BE_CLEANED;                     /* On demande la purge de la session */
+          return(MHD_YES);
+        }
+
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+                "Http_request_CB: User %s authenticated for session %s", session->util->nom, session->sid );
+          
+       session->type = SESSION_AUTH;
+       session->buffer = NULL;
+       session->buffer_size = 0;
+       response = MHD_create_response_from_buffer ( strlen ("OK"),
+                                                   (void*) "OK", MHD_RESPMEM_PERSISTENT);
        if (response == NULL) return(MHD_NO);
-       MHD_queue_response ( connection, MHD_HTTP_NOT_FOUND, response);
+       g_snprintf ( chaine, sizeof(chaine), "sid=%s; ", session->sid );
+       MHD_add_response_header (response, MHD_HTTP_HEADER_SET_COOKIE, chaine );
+       Http_Add_response_header ( response );
+       MHD_queue_response (connection, MHD_HTTP_OK, response);
        MHD_destroy_response (response);
+       return (MHD_YES);
+     }
+/************************************* A parti d'ici, la session est necessaire ***************************/
+    session = Http_get_session ( MHD_lookup_connection_value (connection, MHD_COOKIE_KIND, "sid") );
+    if (!session)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Http_request_CB : Get session failed for URL %s", url );
+       return ( Http_Send_file (session, connection, "WEB/prelogin.html", "text/html") );
+     }
+                                                           /* On a une session, mais est-on authentifié ? */
+    if (session->type != SESSION_AUTH)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Http_request_CB : Session_type != AUTH for %s", url );
+       return(MHD_NO);
+     }
+
+    if (session->util == NULL)                                                    /* Si pas authentifié ! */
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Http_request_CB : Non authenticated Request %s", url );
+       return(MHD_NO);
+     }
+
+    session->last_top = Partage->top;
+
+    if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/" ) )
+     { return ( Http_Send_file (*con_cls, connection, "WEB/ui.html", "text/html") ); }
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getsyn" ) )
+     { if ( Http_Traiter_request_getsyn ( session, connection ) == FALSE)     /* Traitement de la requete */
+        { response = MHD_create_response_from_buffer ( strlen (RESPONSE_INTERNAL_ERROR)+1,
+                                                       RESPONSE_INTERNAL_ERROR, MHD_RESPMEM_PERSISTENT);
+          if (response == NULL) return(MHD_NO);
+          Http_Add_response_header ( response );
+          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
+          MHD_destroy_response (response);
+        }
+       return MHD_YES;
+     }
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/setm" ) )
+     { if ( Http_Traiter_request_setm ( session, connection ) == FALSE )      /* Traitement de la requete */
+        { response = MHD_create_response_from_buffer ( strlen (RESPONSE_INTERNAL_ERROR)+1,
+                                                       RESPONSE_INTERNAL_ERROR, MHD_RESPMEM_PERSISTENT);
+          if (response == NULL) return(MHD_NO);
+          Http_Add_response_header ( response );
+          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
+          MHD_destroy_response (response);
+        }
+       return MHD_YES;
+     }
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getgraph" ) )
+     { if ( Http_Traiter_request_getgraph ( session, connection ) == FALSE)   /* Traitement de la requete */
+        { response = MHD_create_response_from_buffer ( strlen (RESPONSE_INTERNAL_ERROR)+1,
+                                                       RESPONSE_INTERNAL_ERROR, MHD_RESPMEM_PERSISTENT);
+          if (response == NULL) return(MHD_NO);
+          Http_Add_response_header ( response );
+          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
+          MHD_destroy_response (response);
+        }
        return MHD_YES;
      }
     return MHD_NO;
-  }
-/**********************************************************************************************************/
-/* Http Liberer_infos : Libere la mémoire réservée par la structure infos de reception de la requete      */
-/* Entrées : les infos à libérer                                                                          */
-/* Sortie : néant                                                                                         */
-/**********************************************************************************************************/
- void Http_Liberer_infos ( struct HTTP_CONNEXION_INFO *infos )
-  {  if (infos->buffer) g_free(infos->buffer);
-     if (infos->util)   g_free(infos->util);
-     g_free(infos);                                                  /* Libération mémoire le cas échéant */
   }
 /**********************************************************************************************************/
 /* Http cleanup : Termine une connexion cliente (appellée par libmicrohttpd)                              */
@@ -477,12 +671,13 @@
 /**********************************************************************************************************/
  static void Http_cleanup_CB ( void *cls, struct MHD_Connection *connection, void **con_cls,
                                enum MHD_RequestTerminationCode tcode )
-  { if (*con_cls)
-     { struct HTTP_CONNEXION_INFO *infos;
-       infos = *con_cls;
-       if (infos->dont_free == FALSE)                     /* Si erreur pendant la reception de la requete */
-        { Http_Liberer_infos ( infos ); }                                  /*  liberation mémoire par MHD */
-     }
+  { struct HTTP_SESSION *session;
+    session = *con_cls;
+    if (!session) return;
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+              "Http_cleanup_CB: fin de traitement de la requete session '%s'. Code retour %03d",
+               session->sid, tcode );
+
   }
 /**********************************************************************************************************/
 /* Http_MHD_debug : fonction appellé pour debugger le Daemon MHD                                          */
@@ -518,13 +713,13 @@
      }
 
     if (Cfg_http.http_enable)
-     { Cfg_http.http_server = MHD_start_daemon ( MHD_USE_SELECT_INTERNALLY | MHD_USE_DEBUG,
+     { Cfg_http.http_server = MHD_start_daemon ( MHD_USE_THREAD_PER_CONNECTION | MHD_USE_DEBUG,
                                                  Cfg_http.http_port, NULL, NULL, 
                                                 &Http_request_CB, NULL,
                                                  MHD_OPTION_NOTIFY_COMPLETED, Http_cleanup_CB, NULL,
                                                  MHD_OPTION_CONNECTION_LIMIT, Cfg_http.nbr_max_connexion,
-                                                 MHD_OPTION_PER_IP_CONNECTION_LIMIT, 2,
-                                                 MHD_OPTION_CONNECTION_TIMEOUT, 20,
+                                                /* MHD_OPTION_PER_IP_CONNECTION_LIMIT, 100, */
+                                                 MHD_OPTION_CONNECTION_TIMEOUT, 60,
                                                  MHD_OPTION_EXTERNAL_LOGGER, Http_MHD_debug, NULL,
                                                  MHD_OPTION_END);
        if (!Cfg_http.http_server)
@@ -539,16 +734,17 @@
      }
 
     if ( Cfg_http.https_enable && Charger_certificat() )
-     { Cfg_http.https_server = MHD_start_daemon ( MHD_USE_SELECT_INTERNALLY | MHD_USE_SSL | MHD_USE_DEBUG,
+     { Cfg_http.https_server = MHD_start_daemon ( MHD_USE_THREAD_PER_CONNECTION | MHD_USE_SSL | MHD_USE_DEBUG,
                                                   Cfg_http.https_port, NULL, NULL, 
                                                  &Http_request_CB, NULL,
                                                   MHD_OPTION_NOTIFY_COMPLETED, Http_cleanup_CB, NULL,
                                                   MHD_OPTION_CONNECTION_LIMIT, Cfg_http.nbr_max_connexion,
-                                                  MHD_OPTION_PER_IP_CONNECTION_LIMIT, 2,
-                                                  MHD_OPTION_CONNECTION_TIMEOUT, 20,
+                                                 /* MHD_OPTION_PER_IP_CONNECTION_LIMIT, 100, */
+                                                  MHD_OPTION_CONNECTION_TIMEOUT, 60,
                                                   MHD_OPTION_HTTPS_MEM_CERT, Cfg_http.ssl_cert,
                                                   MHD_OPTION_HTTPS_MEM_KEY,  Cfg_http.ssl_key,
-                                                  MHD_OPTION_HTTPS_MEM_TRUST, Cfg_http.ssl_ca,/* Require Client SSL */
+                                                 /* MHD_OPTION_HTTPS_MEM_TRUST, Cfg_http.ssl_ca,/* Require Client SSL */
+                                                  MHD_OPTION_HTTPS_PRIORITIES, Cfg_http.https_cipher,
                                                   MHD_OPTION_EXTERNAL_LOGGER, Http_MHD_debug, NULL,
                                                   MHD_OPTION_END);
        if (!Cfg_http.https_server)
@@ -563,10 +759,6 @@
      }
 
     if (!Cfg_http.http_server && !Cfg_http.https_server) goto end;             /* si erreur de chargement */
-    if (Cfg_http.satellite_enable)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                "Run_thread: MHDServer is handling SetInternal Request to SATELLITE" );
-     }
 #ifdef bouh
     Abonner_distribution_message ( Http_Gerer_message );   /* Abonnement à la diffusion des messages */
     Abonner_distribution_sortie  ( Http_Gerer_sortie );     /* Abonnement à la diffusion des sorties */
@@ -580,32 +772,16 @@
 
        if (Cfg_http.lib->Thread_sigusr1)                                  /* A-t'on recu un signal USR1 ? */
         { int nbr;
-
-          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "Run_thread: SIGUSR1" );
-          pthread_mutex_lock( &Cfg_http.lib->synchro );       /* On recupere le nombre de msgs en attente */
-          nbr = g_slist_length(Cfg_http.Liste_XML_docs);
+          pthread_mutex_lock( &Cfg_http.lib->synchro );                  /* Ajout dans la liste a traiter */
+          nbr = g_slist_length( Cfg_http.Liste_sessions );
           pthread_mutex_unlock( &Cfg_http.lib->synchro );
           Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                    "Run_thread: In Queue : %d XML Docs to process", nbr );
+                   "Run_thread: SIGUSR1. %03d sessions", nbr );
           Cfg_http.lib->Thread_sigusr1 = FALSE;
         }
 
-       if (Cfg_http.Liste_XML_docs)
-        { struct HTTP_CONNEXION_INFO *infos;
-          pthread_mutex_lock( &Cfg_http.lib->synchro );       /* On envoie au thread HTTP pour traitement */
-          infos = (struct HTTP_CONNEXION_INFO *)Cfg_http.Liste_XML_docs->data;
-          Cfg_http.Liste_XML_docs = g_slist_remove ( Cfg_http.Liste_XML_docs, infos );
-          pthread_mutex_unlock( &Cfg_http.lib->synchro );
-          switch (infos->type)
-           { case HTTP_CONNEXION_SET_INTERNAL : Http_Traiter_XML_set_internal ( infos );
-                                                break;
-             default : break;
-           }
-          Http_Liberer_infos ( infos );
-        }
-
        if ( last_top + 300 <= Partage->top )                                    /* Toutes les 30 secondes */
-        { Http_Check_satellites_states ();
+        { Http_Check_sessions ();
           last_top = Partage->top;
         }
      }
@@ -615,9 +791,18 @@
      { MHD_stop_daemon (Cfg_http.https_server);
        Liberer_certificat();
      }
-    Http_free_liste_satellites ();                                     /* Libération des infos satellites */
+
+    pthread_mutex_lock( &Cfg_http.lib->synchro );                        /* Ajout dans la liste a traiter */
+    while (Cfg_http.Liste_sessions)                                   /* Libération des infos de sessions */
+     { struct HTTP_SESSION *session;
+       session = (struct HTTP_SESSION *)Cfg_http.Liste_sessions->data;
+       Cfg_http.Liste_sessions = g_slist_remove( Cfg_http.Liste_sessions, session );
+       Http_Liberer_session ( session );
+     }
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
 end:
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+             "Run_thread: Down . . . TID = %p", pthread_self() );
     Cfg_http.lib->Thread_run = FALSE;                                       /* Le thread ne tourne plus ! */
     Cfg_http.lib->TID = 0;                                  /* On indique au http que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

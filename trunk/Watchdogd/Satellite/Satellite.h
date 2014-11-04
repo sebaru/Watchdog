@@ -28,12 +28,20 @@
 #ifndef _SATELLITE_H_
  #define _SATELLITE_H_
 
+ #include <gnutls/gnutls.h>
+ #include <gnutls/x509.h>
+ #include <openssl/ssl.h>
+ #include <openssl/err.h>
+ #include <openssl/rand.h>
+
  #define NOM_THREAD                       "satellite"
 
+ #define SATELLITE_DEFAUT_PORT            5558
+ #define SATELLITE_DEFAUT_HOST            "localhost"
  #define SATELLITE_DEFAUT_FILE_CA         "cacert.pem"
  #define SATELLITE_DEFAUT_FILE_SERVER     "satellite.pem"
  #define SATELLITE_DEFAUT_FILE_KEY        "satellitekey.pem"
- #define SATELLITE_DEFAUT_MAX_CONNEXION   100
+ #define SATELLITE_TIME_NEXT_RETRY        300                /* 30 secondes pour se reconnecter au master */
 
  struct SATELLITE_CONFIG
   { struct LIBRAIRIE *lib;
@@ -41,17 +49,35 @@
     gboolean enable;                              /* True si la config indique que le thread doit tourner */
     GSList *Liste_entreeTOR;                                       /* liste de struct MSGDB msg a envoyer */
     GSList *Liste_entreeANA;                                       /* liste de struct MSGDB msg a envoyer */
-    gchar send_to_url[128];                               /* URL du master a qui envoyer les informations */
-    guint bit_state;                                                            /* Bit B de communication */
-    gchar https_file_cert[80];
-    gchar https_file_key[80];
-    gchar https_file_ca[80];
-    gchar *received_buffer;                                /* Buffer de reception de la reponse du master */
-    gint received_size;                                                           /* Nombre d'octet recus */
-    guint last_sent;
- } Cfg_satellite;
+    gchar master_host[80];                                                /* Nom DNS du l'instance MASTER */
+    guint master_port;                                         /* Port TCP d'attaque de l'instance MASTER */
+    gchar ssl_file_cert[80];
+    gchar ssl_file_key[80];
+    gchar ssl_file_ca[80];
+    guchar Mode;
+    struct CONNEXION *Connexion;
+    X509 *master_certif;
+    SSL_CTX *Ssl_ctx;
+    guint date_next_retry;
+  } Cfg_satellite;
 
+ enum
+  { SAT_DISCONNECTED,
+    SAT_RETRY_CONNECT,
+    SAT_ATTENTE_INTERNAL,
+    SAT_ATTENTE_CONNEXION_SSL,
+    SAT_WAIT_FOR_CONNECTED,
+    SAT_CONNECTED,
+  };
 /*************************************** Définitions des prototypes ***************************************/
  extern gboolean Satellite_Lire_config ( void );
+ extern void Satellite_Deconnecter_sale ( void );
+ extern void Satellite_Deconnecter ( void );
+ extern void Satellite_Ecouter_maitre ( void );
+ extern void Satellite_Gerer_protocole_connexion ( struct CONNEXION *connexion );
+ extern gboolean Satellite_Connecter_ssl ( void );
+ extern gboolean Satellite_Connecter ( void );
+ extern void Satellite_Envoyer_maitre ( gint tag, gint ss_tag, gchar *buffer, gint taille );
+
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

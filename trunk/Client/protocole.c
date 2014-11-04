@@ -41,41 +41,39 @@
  #include "protocli.h"
 
  extern GtkWidget *Barre_status;                                         /* Barre d'etat de l'application */
- extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
+ extern struct CLIENT Client;                           /* Identifiant de l'utilisateur en cours */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
 
- extern struct CONNEXION *Connexion;                                              /* connexion au serveur */
 /**********************************************************************************************************/
 /* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
 /* Entrée: la connexion avec le serveur                                                                   */
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
  static void Gerer_protocole ( struct CONNEXION *connexion )
-  { static gboolean ssl_needed = FALSE;
-
+  { 
     switch ( Reseau_tag(connexion) )
      { case TAG_GTK_MESSAGE : Gerer_protocole_gtk_message ( connexion ); return;
        case TAG_INTERNAL    : if ( Reseau_ss_tag(connexion) == SSTAG_INTERNAL_SSLNEEDED ) 
-                               { ssl_needed = TRUE;
+                               { Client.ssl_needed = TRUE;
                                  Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
                                          _("Gerer_protocole: SSL Needed received") );
                                }
+                              else if ( Reseau_ss_tag(connexion) == SSTAG_INTERNAL_SSLNEEDED_WITH_CERT ) 
+                               { Client.ssl_needed_with_cert = TRUE;
+                                 Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
+                                         _("Gerer_protocole: SSL Needed_with_cert received") );
+                               }
                               else if (Reseau_ss_tag(connexion) == SSTAG_INTERNAL_END)/* Fin echange interne ? */
-                               { if (ssl_needed)
-                                  { Client_en_cours.mode = ATTENTE_CONNEXION_SSL;
-                                    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
-                                           _("Gerer_protocole: client en mode ATTENTE_CONNEXION_SSL") );
+                               { if (Client.ssl_needed)
+                                  { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
+                                           _("Gerer_protocole: Start SSL connexion") );
                                     if ( ! Connecter_ssl() )                   /* Gere les parametres SSL */
                                      { Deconnecter();
-                                       Log( "SSL connexion failed..." );
                                        return;
                                      }
                                   }
-                                 Client_en_cours.mode = ENVOI_IDENT;
-                                 Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
-                                        _("Gerer_protocole: client en mode ENVOI_IDENT") );
-                                 Envoyer_identification();           /* Envoi l'identification au serveur */
+                                 Envoyer_authentification();         /* Envoi l'identification au serveur */
                                }
                               return;
       case TAG_ICONE       : Gerer_protocole_icone        ( connexion ); break;
@@ -89,7 +87,6 @@
       case TAG_ATELIER     : Gerer_protocole_atelier      ( connexion ); break;
       case TAG_COURBE      : Gerer_protocole_courbe       ( connexion ); break;
       case TAG_HISTO_COURBE: Gerer_protocole_histo_courbe ( connexion ); break;
-      case TAG_SCENARIO    : Gerer_protocole_scenario     ( connexion ); break;
       case TAG_CAMERA      : Gerer_protocole_camera       ( connexion ); break;
       case TAG_ADMIN       : Gerer_protocole_admin        ( connexion ); break;
       case TAG_FICHIER     : Gerer_protocole_fichier_connecte ( connexion ); break;
@@ -106,9 +103,9 @@
   { gint recu;
 
     do
-     { recu = Recevoir_reseau( Connexion );
+     { recu = Recevoir_reseau( Client.connexion );
        if (recu==RECU_OK)
-        { Gerer_protocole( Connexion ); }
+        { Gerer_protocole( Client.connexion ); }
      } while ( recu == RECU_EN_COURS || recu == RECU_OK );
 
     if (recu>=RECU_ERREUR)                                             /* Erreur reseau->deconnexion */

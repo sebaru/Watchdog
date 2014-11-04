@@ -370,10 +370,10 @@
     GList *liste;
 
     prctl(PR_SET_NAME, "W-Trad.DLS", 0, 0, 0 );
-    g_snprintf( source,    sizeof(source),    "%d.dls.new", id );
-    g_snprintf( source_ok, sizeof(source_ok), "%d.dls", id );
-    g_snprintf( cible,     sizeof(cible),     "%d.c",   id );
-    g_snprintf( log,       sizeof(log),       "%d.log", id );
+    g_snprintf( source,    sizeof(source),    "Dls/%d.dls.new", id );
+    g_snprintf( source_ok, sizeof(source_ok), "Dls/%d.dls", id );
+    g_snprintf( cible,     sizeof(cible),     "Dls/%d.c",   id );
+    g_snprintf( log,       sizeof(log),       "Dls/%d.log", id );
     unlink ( cible );
     unlink ( log );
     Info_new( Config.log, Config.log_dls, LOG_INFO, "Traduire_DLS: source=%s", (new ? source : source_ok) );

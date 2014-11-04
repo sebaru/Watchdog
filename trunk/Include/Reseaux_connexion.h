@@ -32,6 +32,7 @@
 
  struct REZO_CLI_IDENT
   { gchar  nom [ NBR_CARAC_LOGIN_UTF8 + 1 ];
+    gchar  passwd  [24];
     gchar  version [32];
   };
 
@@ -41,8 +42,6 @@
 
  enum 
   { SSTAG_CLIENT_IDENT,                                               /* Le client s'identifie au serveur */
-    SSTAG_SERVEUR_WANT_HASH,                                 /* Le serveur donne un salt, et veut un hash */
-    SSTAG_CLIENT_SEND_HASH,
 
     SSTAG_SERVEUR_AUTORISE,                                       /* Le serveur autorise ou non le client */
     SSTAG_SERVEUR_REFUSE,                                         /* Le serveur autorise ou non le client */

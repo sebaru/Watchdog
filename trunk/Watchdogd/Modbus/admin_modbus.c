@@ -29,6 +29,39 @@
  #include "Modbus.h"
 
 /**********************************************************************************************************/
+/* Modbus_mode_to_string: Convertit le mode modbus (int) en sa version chaine de caractere                */
+/* Entrée : le module_modbus                                                                              */
+/* Sortie : char *mode_char                                                                               */
+/**********************************************************************************************************/
+ static gchar *Modbus_mode_to_string ( struct MODULE_MODBUS *module )
+  { static gchar chaine[32];
+    if (!module)                     return("Wrong Module   ");
+    if (module->date_retente > Partage->top)
+     { g_snprintf( chaine, sizeof(chaine),  "Next Try : %03ds", (module->date_retente - Partage->top)/10 );
+       return(chaine);
+     }
+    if (!module->started)            return("Disconnected   ");
+
+    switch ( module->mode )
+     {
+       case MODBUS_GET_DESCRIPTION : return("Get_Description");
+       case MODBUS_GET_FIRMWARE    : return("Get_firmware   ");
+       case MODBUS_INIT_WATCHDOG1  : return("Init_Watchdog_1");
+       case MODBUS_INIT_WATCHDOG2  : return("Init_Watchdog_2");
+       case MODBUS_INIT_WATCHDOG3  : return("Init_Watchdog_3");
+       case MODBUS_INIT_WATCHDOG4  : return("Init_Watchdog_4");
+       case MODBUS_GET_NBR_AI      : return("Init_Get_Nbr_AI");
+       case MODBUS_GET_NBR_AO      : return("Init_Get_Nbr_AO");
+       case MODBUS_GET_NBR_DI      : return("Init_Get_Nbr_DI");
+       case MODBUS_GET_NBR_DO      : return("Init_Get_Nbr_DO");
+       case MODBUS_GET_DI          : return("Get DI State   ");
+       case MODBUS_GET_AI          : return("Get AI State   ");
+       case MODBUS_SET_DO          : return("Set DO State   ");
+       case MODBUS_SET_AO          : return("Set AO State   ");
+       default :                     return("Unknown mode   ");
+     }
+  }
+/**********************************************************************************************************/
 /* Admin_modbus_reload: Demande le rechargement des conf MODBUS                                           */
 /* Entrée: le connexion                                                                                   */
 /* Sortie: rien                                                                                           */
@@ -45,9 +78,36 @@
     Admin_write ( connexion, " MODBUS Reloading done\n" );
   }
 /**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
+/* Admin_modbus_print: Affiche un modbus sur la connexion d'admin                                         */
+/* Entrée: la connexion, le module a afficher                                                             */
 /* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
+ static void Admin_modbus_print ( struct CONNEXION *connexion, struct MODULE_MODBUS *module )
+  { gchar chaine[512];
+    g_snprintf( chaine, sizeof(chaine),
+                " MODBUS[%02d] ------> %s - %s\n"
+                "  | - enable = %d, started = %d (bit B%04d=%d), watchdog = %03d, IP = %s\n"
+                "  | - %03d Digital Input,  First = E%03d, %03d Analog  Input,  First = EA%03d\n"
+                "  | - %03d Digital Output, First = A%03d, %03d Analog  Output, First = AA%03d\n"
+                "  | - transaction_id = %06d, nbr_deconnect = %02d, last_reponse=%03ds ago, date_next_eana=in %03ds\n"
+                "  -\n",
+                module->modbus.id, module->modbus.libelle,  Modbus_mode_to_string(module),
+                module->modbus.enable, module->started, module->modbus.bit, B(module->modbus.bit),
+                module->modbus.watchdog, module->modbus.ip,
+                module->nbr_entree_tor, module->modbus.min_e_tor, 
+                module->nbr_entree_ana, module->modbus.min_e_ana, 
+                module->nbr_sortie_tor, module->modbus.min_s_tor, 
+                module->nbr_sortie_ana, module->modbus.min_s_ana, 
+                module->transaction_id, module->nbr_deconnect,
+               (Partage->top - module->date_last_reponse)/10,                   
+               (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1)
+              );
+    Admin_write ( connexion, chaine );
+  }
+/**********************************************************************************************************/
+/* Admin_modbus_liste : Print l'ensemble des informations opérationnelles de tous les modules             */
+/* Entrée: La connexion                                                                                   */
+/* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Admin_modbus_list ( struct CONNEXION *connexion )
   { GSList *liste_modules;
@@ -61,31 +121,34 @@
     while ( liste_modules )
      { struct MODULE_MODBUS *module;
        module = (struct MODULE_MODBUS *)liste_modules->data;
-
-       g_snprintf( chaine, sizeof(chaine),
-                   " MODBUS[%02d] -> bit=%04d, enable=%d, started=%d, mode=%02d, watchdog=%03d, IP=%s, libelle=%s\n"
-                   "               min_e_tor=%03d (nbr %03d), min_e_ana=%03d (nbr %03d), min_s_tor=%03d (nbr %03d), min_s_ana=%03d (nbr %03d)\n"
-                   "               trans.=%06d, deco.=%02d, last_reponse=%03ds ago, retente=in %03ds, date_next_eana=in %03ds\n",
-                   module->modbus.id, module->modbus.bit, module->modbus.enable,
-                   module->started, module->mode, module->modbus.watchdog, module->modbus.ip, module->modbus.libelle,
-                   module->modbus.min_e_tor, module->nbr_entree_tor,
-                   module->modbus.min_e_ana, module->nbr_entree_ana,
-                   module->modbus.min_s_tor, module->nbr_sortie_tor,
-                   module->modbus.min_s_ana, module->nbr_sortie_ana,
-                   module->transaction_id, module->nbr_deconnect,
-                  (Partage->top - module->date_last_reponse)/10,                   
-                  (module->date_retente > Partage->top   ? (module->date_retente   - Partage->top)/10 : -1),
-                  (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1)
-                 );
-       Admin_write ( connexion, chaine );
+       Admin_modbus_print ( connexion, module );
        liste_modules = liste_modules->next;                                  /* Passage au module suivant */
      }
     pthread_mutex_unlock( &Cfg_modbus.lib->synchro );
   }
 /**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
+/* Admin_modbus_show : Print l'ensemble des informations opérationnelles liées au module en parametre     */
+/* Entrée: La connexion et le numéro de module                                                            */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Admin_modbus_show ( struct CONNEXION *connexion, gint num )
+  { GSList *liste_modules;
+    gchar chaine[512];
+
+    pthread_mutex_lock( &Cfg_modbus.lib->synchro );
+    liste_modules = Cfg_modbus.Modules_MODBUS;
+    while ( liste_modules )
+     { struct MODULE_MODBUS *module;
+       module = (struct MODULE_MODBUS *)liste_modules->data;
+       if (module->modbus.id == num) { Admin_modbus_print ( connexion, module ); break; }
+       liste_modules = liste_modules->next;                                  /* Passage au module suivant */
+     }
+    pthread_mutex_unlock( &Cfg_modbus.lib->synchro );
+  }
+/**********************************************************************************************************/
+/* Admin_modbus_start: Demande le demarrage d'un module en parametre                                      */
+/* Entrée: La connexion et le numéro de module                                                            */
+/* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Admin_modbus_start ( struct CONNEXION *connexion, gint id )
   { gchar chaine[128];
@@ -99,9 +162,9 @@
     Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
+/* Admin_modbus_stop: Demande l'arret d'un module en parametre                                            */
+/* Entrée: La connexion et le numéro de module                                                            */
+/* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Admin_modbus_stop ( struct CONNEXION *connexion, gint id )
   { gchar chaine[128];
@@ -115,9 +178,9 @@
     Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
+/* Admin_command : Fonction principale de traitement des commandes du thread                              */
+/* Entrée: La connexion et la ligne de commande a parser                                                  */
+/* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128], chaine[128];
@@ -136,6 +199,11 @@
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Admin_modbus_stop ( connexion, num );
+     }
+    else if ( ! strcmp ( commande, "show" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       Admin_modbus_show ( connexion, num );
      }
     else if ( ! strcmp ( commande, "reload" ) )
      { Admin_modbus_reload(connexion);
@@ -206,7 +274,8 @@
        Admin_write ( connexion, "                                         - Modifie le module id\n" );
        Admin_write ( connexion, "  del id                                 - Supprime le module id\n" );
        Admin_write ( connexion, "  start id                               - Demarre le module id\n" );
-       Admin_write ( connexion, "  stop id                                - Demarre le module id\n" );
+       Admin_write ( connexion, "  stop id                                - Arrete le module id\n" );
+       Admin_write ( connexion, "  show id                                - Affiche les infirmations du modbus ID\n" );
        Admin_write ( connexion, "  list                                   - Liste les modules MODBUS\n" );
        Admin_write ( connexion, "  reload                                 - Recharge la configuration\n" );
      }

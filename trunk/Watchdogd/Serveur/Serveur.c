@@ -54,61 +54,52 @@
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Ssrv_Lire_config ( void )
-  { GKeyFile *gkf;
+ gboolean Ssrv_Lire_config ( void )
+  { gchar *nom, *valeur;
+    struct DB *db;
 
-    gkf = g_key_file_new();
-    if ( ! g_key_file_load_from_file(gkf, Config.config_file, G_KEY_FILE_NONE, NULL) )
-     { Info_new( Config.log, TRUE, LOG_CRIT,
-                 "Ssrv_Lire_config : unable to load config file %s", Config.config_file );
-       return;
+    Cfg_ssrv.lib->Thread_debug = FALSE;                                    /* Settings default parameters */
+    /*Cfg_ssrv.enable            = FALSE; */
+
+    Cfg_ssrv.ssl_needed         = SSRV_DEFAUT_SSL_NEEDED;
+    Cfg_ssrv.ssl_peer_cert      = SSRV_DEFAUT_SSL_PEER_CERT;
+    Cfg_ssrv.port               = SSRV_DEFAUT_PORT;
+    Cfg_ssrv.taille_bloc_reseau = SSRV_DEFAUT_NETWORK_BUFFER;
+    g_snprintf( Cfg_ssrv.ssl_file_cert, sizeof(Cfg_ssrv.ssl_file_cert), "%s", SSRV_DEFAUT_FILE_CERT );
+    g_snprintf( Cfg_ssrv.ssl_file_key,  sizeof(Cfg_ssrv.ssl_file_key),  "%s", SSRV_DEFAUT_FILE_KEY );
+    g_snprintf( Cfg_ssrv.ssl_file_ca,   sizeof(Cfg_ssrv.ssl_file_ca),   "%s", SSRV_DEFAUT_FILE_CA  );
+
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                     /* Connexion a la base de données */
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
+                "Ssrv_Lire_config: Database connexion failed. Using Default Parameters" );
+       return(FALSE);
      }
-                                                                               /* Positionnement du debug */
-    Cfg_ssrv.lib->Thread_debug = g_key_file_get_boolean ( gkf, "SERVER", "debug", NULL ); 
-                                                                 /* Recherche des champs de configuration */
 
-/********************************************* Partie SERVER **********************************************/
-    Cfg_ssrv.ssl_crypt          = g_key_file_get_boolean ( gkf, "SERVER", "ssl_crypt", NULL );
-
-    Cfg_ssrv.port               = g_key_file_get_integer ( gkf, "SERVER", "port", NULL );
-    if (!Cfg_ssrv.port) Cfg_ssrv.port = DEFAUT_PORT;
-
-    Cfg_ssrv.max_client         = g_key_file_get_integer ( gkf, "SERVER", "max_client", NULL );
-    if (!Cfg_ssrv.max_client) Cfg_ssrv.max_client = DEFAUT_MAX_CLIENT;
-
-    Cfg_ssrv.min_serveur        = g_key_file_get_integer ( gkf, "SERVER", "min_serveur", NULL );
-    if (!Cfg_ssrv.min_serveur) Cfg_ssrv.min_serveur = DEFAUT_MIN_SERVEUR;
-
-    Cfg_ssrv.max_serveur        = g_key_file_get_integer ( gkf, "SERVER", "max_serveur", NULL );
-    if (!Cfg_ssrv.max_serveur) Cfg_ssrv.max_serveur = DEFAUT_MAX_SERVEUR;
-
-    Cfg_ssrv.max_inactivite     = g_key_file_get_integer ( gkf, "SERVER", "max_inactivite", NULL );
-    if (!Cfg_ssrv.max_inactivite) Cfg_ssrv.max_inactivite = DEFAUT_MAX_INACTIVITE;
-
-    Cfg_ssrv.max_login_failed   = g_key_file_get_integer ( gkf, "SERVER", "max_login_failed", NULL );
-    if (!Cfg_ssrv.max_login_failed) Cfg_ssrv.max_login_failed = DEFAUT_MAX_LOGIN_FAILED;
-
-    Cfg_ssrv.timeout_connexion  = g_key_file_get_integer ( gkf, "SERVER", "timeout_connexion", NULL );
-    if (!Cfg_ssrv.timeout_connexion) Cfg_ssrv.timeout_connexion = DEFAUT_TIMEOUT_CONNEXION;
-
-    Cfg_ssrv.taille_clef_dh     = g_key_file_get_integer ( gkf, "SERVER", "taille_clef_dh", NULL );
-    if (!Cfg_ssrv.taille_clef_dh) Cfg_ssrv.taille_clef_dh = DEFAUT_TAILLE_CLEF_DH;
-
-    Cfg_ssrv.taille_clef_rsa    = g_key_file_get_integer ( gkf, "SERVER", "taille_clef_rsa", NULL );
-    if (!Cfg_ssrv.taille_clef_rsa) Cfg_ssrv.taille_clef_rsa = DEFAUT_TAILLE_CLEF_RSA;
-
-    Cfg_ssrv.taille_bloc_reseau = g_key_file_get_integer ( gkf, "SERVER", "taille_bloc_reseau", NULL );
-    if (!Cfg_ssrv.taille_bloc_reseau) Cfg_ssrv.taille_bloc_reseau = DEFAUT_TAILLE_BLOC_RESEAU;
-
-    g_key_file_free(gkf);
-  }
-/**********************************************************************************************************/
-/* Ssrv_Liberer_config : Libere la mémoire allouer précédemment pour lire la config imsg                 */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Ssrv_Liberer_config ( void )
-  {
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,                        /* Print Config */
+                "Ssrv_Lire_config: '%s' = %s", nom, valeur );
+            if ( ! g_ascii_strcasecmp ( nom, "ssl_file_cert" ) )
+        { g_snprintf( Cfg_ssrv.ssl_file_cert, sizeof(Cfg_ssrv.ssl_file_cert), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "ssl_file_ca" ) )
+        { g_snprintf( Cfg_ssrv.ssl_file_ca, sizeof(Cfg_ssrv.ssl_file_ca), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "ssl_file_key" ) )
+        { g_snprintf( Cfg_ssrv.ssl_file_key, sizeof(Cfg_ssrv.ssl_file_key), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_ssrv.lib->Thread_debug = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "ssl_needed" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_ssrv.ssl_needed = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "ssl_peer_cert" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_ssrv.ssl_peer_cert = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "port" ) )
+        { Cfg_ssrv.port = atoi(valeur); }
+       else if ( ! g_ascii_strcasecmp ( nom, "network_buffer" ) )
+        { Cfg_ssrv.taille_bloc_reseau = atoi(valeur);  }
+       else
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
+                   "Ssrv_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
+        }
+     }
+    return(TRUE);
   }
 /**********************************************************************************************************/
 /* Ref_client et Unref_client servent a referencer ou non une structure CLIENT en mémoire                 */
@@ -176,7 +167,6 @@
      { case ATTENTE_CONNEXION_SSL       : return("ATTENTE_CONNEXION_SSL");
        case ENVOI_INTERNAL              : return("ENVOI_INTERNAL");
        case WAIT_FOR_IDENT              : return("WAIT_FOR_IDENT");
-       case WAIT_FOR_HASH               : return("WAIT_FOR_HASH");
        case WAIT_FOR_NEWPWD             : return("WAIT_FOR_NEWPWD");
        case ENVOI_HISTO                 : return("ENVOI_HISTO");
 
@@ -425,7 +415,7 @@
        client->pulse = Partage->top;
        client->courbe.num = -1;                           /* Init: pas de courbe a envoyer pour le moment */
        pthread_mutex_init( &client->mutex_struct_used, NULL );
-       client->struct_used = 1;/* Par défaut, personne la structure est utilisée par le thread de surveilance */
+       client->struct_used = 1;    /* Par défaut, la structure est utilisée par le thread de surveillance */
 
        pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
        Cfg_ssrv.Clients = g_slist_prepend( Cfg_ssrv.Clients, client );
@@ -463,15 +453,18 @@
     g_snprintf( Cfg_ssrv.lib->admin_prompt, sizeof(Cfg_ssrv.lib->admin_prompt), "ssrv" );
     g_snprintf( Cfg_ssrv.lib->admin_help,   sizeof(Cfg_ssrv.lib->admin_help),   "Manage SSRV Modules" );
 
-    Init_RSA();                                             /* Initialisation des clefs RSA et chargement */
-    if (Cfg_ssrv.ssl_crypt) { Cfg_ssrv.Ssl_ctx = Init_ssl();                        /* Initialisation SSL */
-                              if (!Cfg_ssrv.Ssl_ctx)
-                               { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                                           "Init ssl failed but needed. Stopping..." );
-                                 goto end;
-                               }
-                            }
-                       else { Cfg_ssrv.Ssl_ctx = NULL; }
+    if (Cfg_ssrv.ssl_needed)
+     { Cfg_ssrv.Ssl_ctx = Init_ssl();                                               /* Initialisation SSL */
+       if (!Cfg_ssrv.Ssl_ctx)
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
+                   "Run_thread: Init ssl failed but needed. Stopping..." );
+          goto end;
+        }
+     }
+    else { Cfg_ssrv.Ssl_ctx = NULL;
+           Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
+                    "Run_thread: ssl_needed = FALSE. Warning, Network is not ciphered !" );
+         }
 
     Cfg_ssrv.Socket_ecoute = Activer_ecoute();                    /* Initialisation de l'écoute via TCPIP */
     if ( Cfg_ssrv.Socket_ecoute<0 )            
@@ -511,10 +504,8 @@
      }
 end:
     Cfg_ssrv.lib->Thread_run = FALSE;                                       /* Le thread ne tourne plus ! */
-    Ssrv_Liberer_config ();                             /* Lecture de la configuration logiciel du thread */
     Liberer_SSL ();                                                                 /* Libération mémoire */
     if (Cfg_ssrv.Socket_ecoute>0) close(Cfg_ssrv.Socket_ecoute);
-    if (Cfg_ssrv.rsa) RSA_free( Cfg_ssrv.rsa );
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Down . . . TID = %p", pthread_self() );
     Cfg_ssrv.lib->TID = 0;                                /* On indique au master que le thread est mort. */

@@ -97,7 +97,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE:
              { struct CMD_TYPE_SYNOPTIQUE *syn;
-               Set_progress_plusun();
+               Set_progress_plus(1);
                syn = (struct CMD_TYPE_SYNOPTIQUE *)g_try_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
                if (!syn) return; 
 

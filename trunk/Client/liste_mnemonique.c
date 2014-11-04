@@ -80,7 +80,7 @@
  static gchar *TYPE_BIT_INTERNE[ NBR_TYPE_MNEMO ]=          /* Type des différents bits internes utilisés */
   { "Bistable      B",
     "Monostable    M",
-    "Temporisation TR",
+    "Temporisation T",
     "Entree TOR    E",
     "Sortie TOR    A",
     "Entree ANA    EA",
@@ -92,7 +92,7 @@
  static gchar *TYPE_BIT_INTERNE_COURT[ NBR_TYPE_MNEMO ]=    /* Type des différents bits internes utilisés */
   { "B",
     "M",
-    "TR",
+    "T",
     "E",
     "A",
     "EA",
@@ -312,106 +312,94 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
 /**********************************************************************************************************/
-/* draw_page: Dessine une page pour l'envoyer sur l'imprimante                                            */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void draw_page (GtkPrintOperation *operation,
-                        GtkPrintContext   *context,
-                        gint               page_nr,
-                        GtkTreeIter *iter)
-  { gchar *type_string, *groupe_page, *libelle, *acronyme, *date_create, titre[128], chaine[128];
-    GtkTreeModel *store;
-    struct tm *temps;
-    time_t timet;
-    GdkColor *color;
-    gboolean valide;
-    cairo_t *cr;
-    gdouble y;
-    
-    printf("Page_nr = %d, ter=%p\n", page_nr, iter );
-  
-    cr = gtk_print_context_get_cairo_context (context);
-    cairo_select_font_face (cr, "Courier", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (cr, 20.0 );
-
-    cairo_set_source_rgb (cr, 0.0, 0.0, 1.0);
-
-    timet = time(NULL);
-    temps = localtime( &timet );
-    if (temps) { strftime( chaine, sizeof(chaine), "%F %T", temps ); }
-    else       { g_snprintf( chaine, sizeof(chaine), _("Erreur") ); }
-
-    date_create = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
-    g_snprintf( titre, sizeof(titre), " Watchdog - Mnemonique - %s - Page %d", date_create, page_nr+1 );
-    g_free( date_create );
-
-    cairo_move_to( cr, 0.0, 0.0 );
-    cairo_show_text (cr, titre );
-
-    cairo_set_font_size (cr, PRINT_FONT_SIZE );
-    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_mnemonique) );
-    if ( gtk_list_store_iter_is_valid ( GTK_LIST_STORE(store), iter ) == FALSE )
-     { printf("Iter is not valid !! Return !!\n");
-       return;
-     }
-    valide = TRUE;
-    y = 2 * PRINT_FONT_SIZE;
-    while ( valide && y<gtk_print_context_get_height (context) )      /* Pour tous les groupe_pages du tableau */
-     { printf("Iter = %p\n", iter );
-       gtk_tree_model_get( store, iter, COLONNE_TYPE, &type_string, COLONNE_GROUPE_PAGE_DLS, &groupe_page,
-                           COLONNE_ACRONYME, &acronyme, COLONNE_LIBELLE, &libelle,
-                           COLONNE_COULEUR, &color, -1 );
-       cairo_move_to( cr, 0.0*PRINT_FONT_SIZE, y );
-       cairo_set_source_rgb (cr, color->red/65536.0, color->green/65536.0, color->blue/65536.0);
-       cairo_show_text (cr, type_string );
-
-       cairo_move_to( cr, 5.0*PRINT_FONT_SIZE, y );
-       cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-       cairo_show_text (cr, groupe_page );
-
-       cairo_move_to( cr, 23.0*PRINT_FONT_SIZE, y );
-       cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-       cairo_show_text (cr, acronyme );
-
-       cairo_move_to( cr, 35.0*PRINT_FONT_SIZE, y );
-       cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-       cairo_show_text (cr, libelle );
-
-       g_free(type_string);
-       g_free(groupe_page);
-       g_free(acronyme);
-       g_free(libelle);
-
-       valide = gtk_tree_model_iter_next( store, iter );
-       y += PRINT_FONT_SIZE;
-     }
-  }
-/**********************************************************************************************************/
 /* Menu_exporter_message: Exportation de la base dans un fichier texte                                    */
 /* Entrée: néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Menu_exporter_mnemonique( void )
-  { static GtkTreeIter iter;
+  { GtkSourcePrintCompositor *compositor;
     GtkPrintOperation *print;
-    GtkPrintOperationResult res;
+    GtkSourceBuffer *buffer;
     GtkTreeModel *store;
+    GtkTreeIter iter;
     gboolean valide;
     GError *error;
+    gint cpt;
 
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_mnemonique) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
     if (!valide) return;
 
+    buffer = gtk_source_buffer_new( NULL );                               /* Création d'un nouveau buffer */
+    for ( cpt=0; cpt < NBR_TYPE_MNEMO; cpt++ )
+     { gtk_text_buffer_create_tag ( GTK_TEXT_BUFFER(buffer), Type_bit_interne(cpt),
+                                   "background-gdk", Couleur_bit_interne(cpt),
+                                   "foreground-gdk", Couleur_texte_bit_interne(cpt)
+                                  );
+     }
+
+    while ( valide  )                                            /* Pour tous les groupe_pages du tableau */
+     { gchar pivot[80], *type_string, *groupe_page, *libelle, *acronyme, chaine[128];
+       GtkTextIter iter_end;
+       gint len, cpt, type_int;
+
+       gtk_tree_model_get( store, &iter, COLONNE_TYPE_INT, &type_int, COLONNE_TYPE, &type_string,
+                           COLONNE_GROUPE_PAGE_DLS, &groupe_page,
+                           COLONNE_ACRONYME, &acronyme, COLONNE_LIBELLE, &libelle, -1 );
+
+       g_snprintf( chaine, sizeof(chaine), "%-6s", type_string );
+       gtk_text_buffer_get_end_iter ( GTK_TEXT_BUFFER(buffer), &iter_end );
+       gtk_text_buffer_insert_with_tags_by_name ( GTK_TEXT_BUFFER(buffer), &iter_end, chaine, -1,
+                                                  Type_bit_interne(type_int), NULL );
+
+       g_snprintf( chaine, sizeof(chaine), "- " );
+       g_utf8_strncpy ( pivot, groupe_page, PRINT_NBR_CHAR_GROUPE_PAGE );
+       len = g_utf8_strlen( pivot, -1 );
+       g_strlcat ( chaine, pivot, sizeof(chaine) );
+       if ( len <= PRINT_NBR_CHAR_GROUPE_PAGE )
+        { for(cpt=len; cpt<=PRINT_NBR_CHAR_GROUPE_PAGE; cpt++) g_strlcat( chaine, " ", sizeof(chaine) ); }
+       g_strlcat( chaine, "- ", sizeof(chaine) );
+
+       g_utf8_strncpy ( pivot, acronyme, 20 );
+       len = g_utf8_strlen( pivot, -1 );
+       g_strlcat ( chaine, pivot, sizeof(chaine) );
+       if ( len <= 20 ) { for(cpt=len; cpt<=20; cpt++) g_strlcat( chaine, " ", sizeof(chaine) ); }
+       g_strlcat( chaine, "- ", sizeof(chaine) );
+
+       g_strlcat( chaine, libelle, sizeof(chaine)-1 );
+       g_strlcat( chaine, "\n", sizeof(chaine) );
+
+       gtk_text_buffer_insert_at_cursor ( GTK_TEXT_BUFFER(buffer), chaine, -1 );
+       g_free(type_string);
+       g_free(groupe_page);
+       g_free(acronyme);
+       g_free(libelle);
+       valide = gtk_tree_model_iter_next( store, &iter );
+     }
+
+    compositor = gtk_source_print_compositor_new ( buffer );
+    gtk_source_print_compositor_set_print_line_numbers ( compositor, 0 );
+    gtk_source_print_compositor_set_body_font_name ( compositor, PRINT_FONT_NAME );
+    gtk_source_print_compositor_set_print_header ( compositor, TRUE );
+    gtk_source_print_compositor_set_header_format ( compositor, TRUE,
+                                                    "Mnemoniques DLS",
+                                                    "%F",
+                                                    PRINT_HEADER_RIGHT);
+    gtk_source_print_compositor_set_print_footer ( compositor, TRUE );
+    gtk_source_print_compositor_set_footer_format ( compositor, TRUE,
+                                                    PRINT_FOOTER_LEFT,
+                                                    PRINT_FOOTER_CENTER,
+                                                    PRINT_FOOTER_RIGHT);
+    gtk_source_print_compositor_set_highlight_syntax ( compositor, TRUE );
+
     print = New_print_job ( "Print Mnemoniques" );
+    g_signal_connect (G_OBJECT(print), "draw-page", G_CALLBACK (Print_draw_page), compositor );
+    g_signal_connect (G_OBJECT(print), "paginate",  G_CALLBACK (Print_paginate),  compositor );
 
-    g_signal_connect (G_OBJECT(print), "draw-page", G_CALLBACK (draw_page), &iter );
-    g_signal_connect (G_OBJECT(print), "begin-print",
-                      G_CALLBACK (Begin_print), GTK_TREE_VIEW(Liste_mnemonique) );
-
-    res = gtk_print_operation_run (print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
-                                   GTK_WINDOW(F_client), &error);
+    gtk_print_operation_run (print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
+                             GTK_WINDOW(F_client), &error);
+    g_object_unref(compositor);
+    g_object_unref(buffer);
   }
 /**********************************************************************************************************/
 /* Gerer_popup_mnemonique: Gestion du menu popup quand on clique droite sur la liste des mnemoniques      */

@@ -30,14 +30,17 @@
  #include <gtksourceview/gtksourceprintcompositor.h>
 
  #include "Reseaux.h"
+
+/********************************* Définitions des prototypes programme ***********************************/
  #include "Config_cli.h"
+ #include "client.h"
+ #include "protocli.h"
+
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
- extern struct CONNEXION *Connexion;                                              /* connexion au serveur */
-/********************************* Définitions des prototypes programme ***********************************/
- #include "protocli.h"
+ extern struct CLIENT Client;                                                     /* Structure de travail */
 
 /**********************************************************************************************************/
 /* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
@@ -176,10 +179,10 @@
 
     Source = gtk_text_buffer_get_text( text_buffer, &start, &end, FALSE );
 
-    edit_dls = (struct CMD_TYPE_SOURCE_DLS *)g_try_malloc0( Connexion->taille_bloc );
+    edit_dls = (struct CMD_TYPE_SOURCE_DLS *)g_try_malloc0( Client.connexion->taille_bloc );
     if (!edit_dls) return;
     buffer_envoi     = (gchar *)edit_dls + sizeof(struct CMD_TYPE_SOURCE_DLS);
-    taille_max       = Connexion->taille_bloc - sizeof(struct CMD_TYPE_SOURCE_DLS);
+    taille_max       = Client.connexion->taille_bloc - sizeof(struct CMD_TYPE_SOURCE_DLS);
     edit_dls->id     = ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->id;
     edit_dls->taille = 0;
                                                           /* Demande de suppression du fichier source DLS */
@@ -192,7 +195,7 @@
     while( source != Source_fin )
      { gint taille;
        taille = Source_fin-source;                                                 /* Combien il reste ?? */
-       if (taille>Connexion->taille_bloc) taille = taille_max;
+       if (taille>Client.connexion->taille_bloc) taille = taille_max;
        memcpy( buffer_envoi, source, taille );                                         /* Recopie mémoire */  
        edit_dls->taille = taille;
        if (!Envoi_serveur( TAG_DLS, SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS,
@@ -207,76 +210,85 @@
     g_free(edit_dls);
   }
 /**********************************************************************************************************/
-/* draw_page: Dessine une page pour l'envoyer sur l'imprimante                                            */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void draw_page (GtkPrintOperation *operation,
-                        GtkPrintContext   *context,
-                        gint               page_nr,
-                        struct TYPE_INFO_SOURCE_DLS *infos)
-  { GtkSourcePrintCompositor *compositor;
-    compositor = GTK_SOURCE_PRINT_COMPOSITOR (infos->compositor);
-
-    gtk_source_print_compositor_draw_page (compositor, 
-                                           context,
-                                           page_nr);
-  }
-/**********************************************************************************************************/
-/* Menu_exporter_message: Exportation de la base dans un fichier texte                                    */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void begin_print (GtkPrintOperation *operation,
-                   GtkPrintContext   *context,
-                   struct TYPE_INFO_SOURCE_DLS *infos)
-  { GtkSourcePrintCompositor *compositor;
-    gint n_pages;
-
-    compositor = GTK_SOURCE_PRINT_COMPOSITOR (infos->compositor);
-
-    while (!gtk_source_print_compositor_paginate (compositor, context));
-
-    n_pages = gtk_source_print_compositor_get_n_pages (compositor);
-    gtk_print_operation_set_n_pages (operation, n_pages);
-  }
-/**********************************************************************************************************/
 /* Menu_exporter_message: Exportation de la base dans un fichier texte                                    */
 /* Entrée: néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Menu_exporter_source_dls( struct PAGE_NOTEBOOK *page )
-  { struct TYPE_INFO_SOURCE_DLS *infos;
+  { GtkSourcePrintCompositor *compositor;
+    struct TYPE_INFO_SOURCE_DLS *infos;
     GtkPrintOperation *print;
-    GtkPrintOperationResult res;
     GError *error;
 
     infos = (struct TYPE_INFO_SOURCE_DLS *)page->infos;
-    infos->print_ligne = 0;                                                   /* Init du compteur de lige */
+   /* infos->print_ligne = 0;                                                   /* Init du compteur de lige */
 
-    infos->compositor = gtk_source_print_compositor_new ( GTK_SOURCE_BUFFER(infos->text) );
-    gtk_source_print_compositor_set_print_line_numbers ( infos->compositor, 5 );
-    gtk_source_print_compositor_set_body_font_name ( infos->compositor, "Monospace 10");
-    gtk_source_print_compositor_set_print_header ( infos->compositor, TRUE );
-    gtk_source_print_compositor_set_header_format ( infos->compositor, TRUE,
+    compositor = gtk_source_print_compositor_new ( GTK_SOURCE_BUFFER(infos->text) );
+    gtk_source_print_compositor_set_print_line_numbers ( compositor, 5 );
+    gtk_source_print_compositor_set_body_font_name ( compositor, "Monospace 10");
+    gtk_source_print_compositor_set_print_header ( compositor, TRUE );
+    gtk_source_print_compositor_set_header_format ( compositor, TRUE,
                                                     "Module DLS",
                                                     "%F",
                                                     "page %N / %Q");
-    gtk_source_print_compositor_set_print_footer ( infos->compositor, TRUE );
-    gtk_source_print_compositor_set_footer_format ( infos->compositor, TRUE,
+    gtk_source_print_compositor_set_print_footer ( compositor, TRUE );
+    gtk_source_print_compositor_set_footer_format ( compositor, TRUE,
                                                     NULL,
                                                     NULL,
                                                     "Watchdog 2.0 ABLS");
-    gtk_source_print_compositor_set_highlight_syntax ( infos->compositor, TRUE );
+    gtk_source_print_compositor_set_highlight_syntax ( compositor, TRUE );
     print = New_print_job ( "Print Souce D.L.S" );
 
-    g_signal_connect (G_OBJECT(print), "draw-page", G_CALLBACK (draw_page), infos );
-    g_signal_connect (G_OBJECT(print), "begin-print",
-                      G_CALLBACK (begin_print), infos );
+    g_signal_connect (G_OBJECT(print), "draw-page", G_CALLBACK (Print_draw_page), compositor );
+    g_signal_connect (G_OBJECT(print), "paginate",  G_CALLBACK (Print_paginate),  compositor );
 
-    res = gtk_print_operation_run (print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
+    gtk_print_operation_run (print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
                                    GTK_WINDOW(F_client), &error);
+    g_object_unref(compositor);
   }
+/**********************************************************************************************************/
+/* Menu_source_dls_save_as: Exportation dans un fichier du plugin en cours d'edition                      */
+/* Entrée: néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Menu_source_dls_save_as( struct PAGE_NOTEBOOK *page )
+ { struct TYPE_INFO_SOURCE_DLS *infos;
+   gchar fichier[80];
+   GtkWidget *dialog;
+
+   infos = (struct TYPE_INFO_SOURCE_DLS *)page->infos;
+
+   dialog = gtk_file_chooser_dialog_new ( "Save File", GTK_WINDOW(F_client),
+                                          GTK_FILE_CHOOSER_ACTION_SAVE,
+                                          GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                          GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+                                          NULL);
+   gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER (dialog), TRUE);
+
+   g_snprintf( fichier, sizeof(fichier), "%04d-%s.dls", infos->id, infos->plugin_name );
+   gtk_file_chooser_set_current_folder ( GTK_FILE_CHOOSER (dialog), g_get_home_dir() );
+   gtk_file_chooser_set_current_name ( GTK_FILE_CHOOSER (dialog), fichier );
+
+   if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT)
+     { GtkTextBuffer *text_buffer;
+       GtkTextIter start, end;
+       gchar *filename, *Source;
+
+       gtk_widget_set_sensitive ( infos->text, FALSE);
+       text_buffer = GTK_TEXT_BUFFER( infos->text );
+       gtk_text_buffer_get_start_iter( text_buffer, &start );
+       gtk_text_buffer_get_end_iter( text_buffer, &end );
+
+       Source = gtk_text_buffer_get_text ( text_buffer, &start, &end, FALSE);       
+       gtk_text_buffer_set_modified ( text_buffer, FALSE);
+
+       filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
+       g_file_set_contents ( filename, Source, -1, NULL );
+       g_free (filename);
+       gtk_widget_set_sensitive (infos->text, TRUE);
+     }
+   gtk_widget_destroy (dialog);
+ }
 /**********************************************************************************************************/
 /* Creer_page_plugin_dls: Creation de la page du notebook consacrée aux plugins plugin_dlss watchdog      */
 /* Entrée: rien                                                                                           */
@@ -301,6 +313,7 @@
     
     page->type = TYPE_PAGE_SOURCE_DLS;
     infos->id = rezo_dls->id;
+    g_snprintf( infos->plugin_name, sizeof(infos->plugin_name), "%s", rezo_dls->nom );
     Liste_pages = g_list_append( Liste_pages, page );
 
     hboite = gtk_hbox_new( FALSE, 6 );                           /* Initialisation des parametres de page */
@@ -324,12 +337,6 @@
     gtk_widget_modify_font(text, font);
     pango_font_description_free(font);
 
-  /* Change default color throughout the widget */
-/*{ GdkColor color;
-  gdk_color_parse ("green", &color);
-  gtk_widget_modify_text (text, GTK_STATE_NORMAL, &color);
-}*/
-
 /************************************ Les boutons de controles ********************************************/
     boite = gtk_vbox_new( FALSE, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
@@ -351,6 +358,11 @@
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_exporter_source_dls), page );
+
+    bouton = gtk_button_new_from_stock( GTK_STOCK_SAVE_AS );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                              G_CALLBACK(Menu_source_dls_save_as), page );
 
     separateur = gtk_hseparator_new();
     gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );

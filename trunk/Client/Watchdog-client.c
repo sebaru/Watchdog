@@ -39,38 +39,19 @@
  #include "Config_cli.h"
  #include "client.h"
 
- #define TITRE_F_CONFIG     N_("Client Watchdog ver" VERSION)
+ #define TITRE_F_CONFIG     N_("Watchdog ver" VERSION)
 
  GtkWidget *F_client;                                                            /* Widget Fenetre Client */
 
- GtkWidget *Barre_status;                                                /* Barre d'etat de l'application */
-
- extern GtkWidget *Label_msg_total;           /* Nombre total de message dans l'historique RAM du serveur */
- extern GtkWidget *Label_msg_def;             /* Nombre total de message dans l'historique RAM du serveur */
- extern GtkWidget *Label_msg_alrm;            /* Nombre total de message dans l'historique RAM du serveur */
- extern GtkWidget *Label_msg_inhib;           /* Nombre total de message dans l'historique RAM du serveur */
- extern GtkWidget *Label_heure;                                       /* pour afficher l'heure du serveur */
-
  extern struct CMD_TYPE_UTILISATEUR *Edit_util;                       /* L'utilisateur en cours d'edition */
 
- extern gint Nbr_message;                                                /* Nombre de message de Watchdog */
-
- struct CLIENT Client_en_cours;                                  /* Identifiant de l'utilisateur en cours */
+ struct CLIENT Client;                                  /* Identifiant de l'utilisateur en cours */
  struct CONFIG_CLI Config_cli;                                 /* Configuration generale cliente watchdog */
- struct CONNEXION *Connexion = NULL;                                              /* Connexion au serveur */
 
  static void Fermer_client ( void );
  static void A_propos ( GtkWidget *widget, gpointer data );
-/****************************** Inclusion des images XPM pour les menus ***********************************/
- #include "boule_rouge.xpm"
- #include "boule_verte.xpm" 
- #include "boule_bleue.xpm" 
- #include "boule_orange.xpm" 
- #include "boule_jaune.xpm" 
- GdkBitmap *Rmask, *Bmask, *Vmask, *Omask, *Jmask;
- GdkPixmap *Rouge, *Bleue, *Verte, *Orange, *Jaune;
-
  static gboolean Arret = FALSE;
+
 /**************************************** Définition du menu **********************************************/
  GnomeUIInfo Menu_habilitation[]=                               /*!< Définition du menu des habilitations */
   { GNOMEUIINFO_ITEM_STOCK( N_("_Users"), N_("Edit users"),
@@ -101,8 +82,6 @@
                             Menu_want_mnemonique, GNOME_STOCK_PIXMAP_BOOK_GREEN ),
     GNOMEUIINFO_ITEM_STOCK( N_("_D.L.S"), N_("Edit DLS plugins"),
                             Menu_want_plugin_dls, GNOME_STOCK_PIXMAP_EXEC ),
-    GNOMEUIINFO_ITEM_STOCK( N_("Scenario"), N_("Edit Scenario"),
-                            Menu_want_scenario, GNOME_STOCK_PIXMAP_SCORES ),
     GNOMEUIINFO_SUBTREE(N_("_Synoptiques"), Menu_synoptique),
     GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_SUBTREE(N_("_Habilitations"), Menu_habilitation),
@@ -286,17 +265,10 @@
      { gnome_app_create_menus( GNOME_APP(F_client), Menu_principal );
        gnome_app_create_toolbar( GNOME_APP(F_client), Barre_outils );
      }
-    Barre_status = gnome_appbar_new( TRUE, TRUE, GNOME_PREFERENCES_USER );
-    gnome_app_set_statusbar( GNOME_APP( F_client ), Barre_status );
 
     gtk_widget_set_size_request (F_client, 800, 600);
     gtk_widget_realize( F_client );                                     /* Pour pouvoir creer les pixmaps */
     if (Config_cli.gui_fullscreen) gtk_window_maximize ( GTK_WINDOW(F_client) );
-    Rouge  = gdk_pixmap_create_from_xpm_d( F_client->window, &Rmask, NULL, boule_rouge_xpm );
-    Verte  = gdk_pixmap_create_from_xpm_d( F_client->window, &Vmask, NULL, boule_verte_xpm );
-    Bleue  = gdk_pixmap_create_from_xpm_d( F_client->window, &Bmask, NULL, boule_bleue_xpm );
-    Orange = gdk_pixmap_create_from_xpm_d( F_client->window, &Omask, NULL, boule_orange_xpm );
-    Jaune  = gdk_pixmap_create_from_xpm_d( F_client->window, &Jmask, NULL, boule_jaune_xpm );
     gnome_app_set_contents( GNOME_APP(F_client), Creer_boite_travail() );
 
     sig.sa_handler = Traitement_signaux;
@@ -306,25 +278,24 @@
     sigaction( SIGINT,  &sig, NULL );                                       /* Arret Prématuré (logiciel) */
     sigaction( SIGPIPE,  &sig, NULL );                                      /* Arret Prématuré (logiciel) */
 
-    Client_en_cours.gids = NULL;                     /* Initialisation de la structure de client en cours */
-    Client_en_cours.id   = 0;
-    Client_en_cours.mode = INERTE;
+    Client.gids = NULL;                     /* Initialisation de la structure de client en cours */
+    Client.mode = DISCONNECTED;
 
     gtk_widget_show_all( F_client );                               /* Affichage de le fenetre de controle */
     if (Config_cli.gui_tech == FALSE)
-     { memcpy( Client_en_cours.util.nom, Config_cli.user,    sizeof(Client_en_cours.util.nom) );
-       memcpy( Client_en_cours.host,     Config_cli.host,    sizeof(Client_en_cours.host) );
-       memcpy( Client_en_cours.password, Config_cli.passwd,  sizeof(Client_en_cours.password) );
+     { memcpy( Client.util.nom, Config_cli.user,    sizeof(Client.util.nom) );
+       memcpy( Client.host,     Config_cli.host,    sizeof(Client.host) );
+       memcpy( Client.password, Config_cli.passwd,  sizeof(Client.password) );
        Connecter_au_serveur();
      }
 
     while ( Arret != TRUE )
      { gtk_main_iteration_do ( FALSE );
-       if (Connexion) Ecouter_serveur();
+       if (Client.connexion) Ecouter_serveur();
        usleep(1000);
      }
 
-    if (Client_en_cours.gids) g_list_free(Client_en_cours.gids);
+    if (Client.gids) g_list_free(Client.gids);
     Info_new( Config_cli.log, Config_cli.log_override, LOG_NOTICE, _("Main : Stopped") );
     exit(0);
   }

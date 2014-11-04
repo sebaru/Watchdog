@@ -204,6 +204,10 @@ one_again:
         { Info_new( connexion->log, FALSE, LOG_DEBUG,
                    "Recevoir_reseau: recue TAG_INTERNAL_SSLNEEDED. Passing to application for setup" );
         }
+       else if (connexion->entete.ss_tag == SSTAG_INTERNAL_SSLNEEDED_WITH_CERT)
+        { Info_new( connexion->log, FALSE, LOG_DEBUG,
+                   "Recevoir_reseau: recue TAG_INTERNAL_SSLNEEDED_WITH_CERT. Passing to application for setup" );
+        }
        else if (connexion->entete.ss_tag == SSTAG_INTERNAL_END)
         { Info_new( connexion->log, FALSE, LOG_DEBUG,
                    "Recevoir_reseau: recue TAG_INTERNAL, end of internal transmissions" );

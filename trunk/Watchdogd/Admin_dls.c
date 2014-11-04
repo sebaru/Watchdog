@@ -174,7 +174,7 @@
   }
 /**********************************************************************************************************/
 /* Admin_dls: Appellée lorsque l'admin envoie une commande en mode dls dans la ligne de commande          */
-/* Entrée: La connexion connexione et la ligne de commande, et le buffer de sortie                           */
+/* Entrée: La connexion connexione et la ligne de commande, et le buffer de sortie                        */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_dls ( struct CONNEXION *connexion, gchar *ligne )

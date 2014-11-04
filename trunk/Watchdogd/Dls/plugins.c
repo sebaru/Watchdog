@@ -53,7 +53,7 @@
     void (*Go)(int);
     void *handle;
 
-    g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "%s/libdls%d.so", Config.home, dls->plugindb.id );
+    g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%d.so", dls->plugindb.id );
 
     handle = dlopen( nom_fichier_absolu, RTLD_GLOBAL | RTLD_NOW );
     if (!handle) { Info_new( Config.log, Config.log_dls, LOG_WARNING,
@@ -230,8 +230,8 @@
         { plugin->plugindb.on = actif;
           plugin->conso = 0.0;
           plugin->starting = 1;
-          Info_new( Config.log, Config.log_dls, LOG_INFO, "Activer_plugin_by_id: id %04d started (%s)",
-                    plugin->plugindb.id, plugin->plugindb.nom );
+          Info_new( Config.log, Config.log_dls, LOG_INFO, "Activer_plugin_by_id: id %04d %s (%s)",
+                    plugin->plugindb.id, (actif ? "started" : "stopped"), plugin->plugindb.nom );
           break;
         }
        plugins = plugins->next;
@@ -266,7 +266,7 @@
 
        Info_new( Config.log, Config.log_dls, LOG_DEBUG,
                 "THRCompil: Compiler_source_dls: Chargement du fichier de log D.L.S %d", id );
-       g_snprintf( log, sizeof(log), "%d.log", id );
+       g_snprintf( log, sizeof(log), "Dls/%d.log", id );
 
        id_fichier = open( log, O_RDONLY, 0 );
        if (id_fichier<0) { return(DLS_COMPIL_ERROR_LOAD_LOG); }
@@ -291,8 +291,8 @@
         }
        else if (!pidgcc)
         { gchar source[80], cible[80];
-          g_snprintf( source, sizeof(source), "%d.c", id );
-          g_snprintf( cible,  sizeof(cible),  "libdls%d.so", id );
+          g_snprintf( source, sizeof(source), "Dls/%d.c", id );
+          g_snprintf( cible,  sizeof(cible),  "Dls/libdls%d.so", id );
           Info_new( Config.log, Config.log_dls, LOG_DEBUG,
                    "THRCompilFils: Proto_compiler_source_dls: GCC start (pid %d) source %s cible %s!",
                     pidgcc, source, cible );

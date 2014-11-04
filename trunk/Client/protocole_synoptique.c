@@ -74,7 +74,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE:
              { struct CMD_TYPE_SYNOPTIQUE *syn;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                syn = (struct CMD_TYPE_SYNOPTIQUE *)g_try_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
                if (!syn) return; 
@@ -92,7 +92,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_SYNOPTIQUE:
              { struct CMD_TYPE_GROUPE *groupe;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
                if (!groupe) return; 

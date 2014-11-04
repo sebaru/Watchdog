@@ -66,7 +66,6 @@
     gboolean enable;                                               /* Le module doit-il tourner au boot ? */
     gchar host[NBR_CARAC_HOST_UPS_UTF8+1];                                   /* Adresses IP du module UPS */
     gchar ups[NBR_CARAC_UPS_UPS_UTF8+1];                                      /* Nom de l'UPS sur le HOST */
-    gchar libelle[NBR_CARAC_LIBELLE_UPS_UTF8+1];                                       /* Libelle associé */
     gchar username[NBR_CARAC_USERNAME_UPS_UTF8+1];                                    /* Username associé */
     gchar password[NBR_CARAC_PASSWORD_UPS_UTF8+1];                                    /* Password associé */
     guint bit_comm;                                  /* Bit interne B d'etat communication avec le module */
@@ -77,11 +76,11 @@
 
  struct MODULE_UPS
   { struct UPSDB ups;
+    gchar libelle[NBR_CARAC_LIBELLE_UPS_UTF8+1];                                       /* Libelle associé */
 
     UPSCONN_t upsconn;                                                           /* Connexion UPS à l'ups */
     gboolean started;                                                                  /* Est-il actif ?? */
-    guint nbr_deconnect;
-    time_t date_retente;
+    time_t date_next_connexion;
   };
 
 /*********************************************** Déclaration des prototypes *******************************/

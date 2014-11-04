@@ -39,8 +39,12 @@
 
  #define TEMPS_MAX_PULSE   10                        /* 10 secondes de battements maximum pour le serveur */
  #define NBR_BIT_DLS       10000
- #define SIGNATURE_PRINT   "Watchdog 2_1.ABLS 2008"
- #define PRINT_FONT_SIZE   10.0
+ #define PRINT_FOOTER_LEFT          "Sebastien & Bruno LEFEVRE"
+ #define PRINT_FOOTER_CENTER        "Watchdog ABLS"
+ #define PRINT_FOOTER_RIGHT         "1988-2014"
+ #define PRINT_HEADER_RIGHT         "page %N / %Q"
+ #define PRINT_FONT_NAME            "Monospace 10"
+ #define PRINT_NBR_CHAR_GROUPE_PAGE 30
 
  enum
   { TYPE_PAGE_PLUGIN_DLS,                                                     /* Listes des plugins D.L.S */
@@ -58,7 +62,6 @@
     TYPE_PAGE_SUPERVISION,                                            /* Supervision graphique synoptique */
     TYPE_PAGE_COURBE,                                              /* Affichage des courbes en temps reel */
     TYPE_PAGE_HISTO_COURBE,
-    TYPE_PAGE_SCENARIO,                                                           /* Gestion des scenario */
     TYPE_PAGE_CAMERA,                                                               /* Gestion des camera */
     TYPE_PAGE_ONDULEUR,                                        /* Page affichant la liste des onduleurs ! */
     TYPE_PAGE_RS485,                                                  /* Page affichant les modules RS485 */
@@ -131,9 +134,8 @@
 
  struct TYPE_INFO_SOURCE_DLS
   { GtkWidget *text;              /* Pour les plugins DLS, ici est placé le widget TextView correspondant */
-    guint print_ligne;                                                     /* ligne en cours d'impression */
-    GtkSourcePrintCompositor *compositor;
     guint id;                   /* Pour les plugins DLS, ici est stocké l'id du plugin en cours d'edition */
+    gchar plugin_name[80];
     GtkWidget *F_mnemo;
     GtkWidget *Option_type;
     GtkWidget *Spin_num;
@@ -192,11 +194,9 @@
  extern void Effacer_pages ( void );
  extern void Detruire_page ( struct PAGE_NOTEBOOK *page_a_virer );
  extern GtkWidget *Creer_boite_travail ( void );
- extern void Set_progress_plusun( void );
  extern void Set_progress_plus( gint plus );
  extern void Set_progress_text( gchar *capteur, gint max );
  extern void Set_progress_pulse( void );
- extern void Raz_progress( void );
  extern struct PAGE_NOTEBOOK *Chercher_page_notebook ( guint type, guint id, gboolean affiche );
  extern gboolean Tester_page_notebook ( guint type );
  extern GtkWidget *Bobouton ( GdkPixmap *pix, GdkBitmap *bitmap, gchar *capteur );
@@ -204,15 +204,13 @@
  extern struct PAGE_NOTEBOOK *Page_actuelle ( void );
  
  extern void Connecter ( void );                                                        /* Dans connect.c */
+ extern gboolean Connecter_ssl ( void );
  extern gboolean Connecter_au_serveur ( void );
+ extern void Envoyer_authentification ( void );
  extern void Deconnecter_sale ( void );
  extern void Deconnecter ( void );
  extern gboolean Envoi_serveur ( gint tag, gint ss_tag, gchar *buffer, gint taille );
  extern gboolean Changer_password ( void );
-
- extern void Envoyer_identification ( void );                                             /* Dans ident.c */
- extern void Envoyer_authentification ( struct CMD_TYPE_UTILISATEUR *util );
- extern void Calcul_password_hash ( gboolean new_salt, gchar *password );
 
  extern void Ecouter_serveur ( void );                                                /* Dans protocole.c */
  extern void Gerer_protocole_gtk_message ( struct CONNEXION *connexion );
@@ -230,13 +228,8 @@
  extern void Gerer_protocole_fichier_connecte ( struct CONNEXION *connexion );
  extern void Gerer_protocole_connexion ( struct CONNEXION *connexion );
  extern void Gerer_protocole_histo_courbe ( struct CONNEXION *connexion );
- extern void Gerer_protocole_scenario ( struct CONNEXION *connexion );
  extern void Gerer_protocole_camera ( struct CONNEXION *connexion );
  extern void Gerer_protocole_admin ( struct CONNEXION *connexion );
-
-
- extern gboolean Connecter_ssl ( void );                                                    /* Dans ssl.c */
- extern SSL_CTX *Init_ssl ( void );
 
  extern gboolean Timer ( gpointer data );                                                 /* Dans timer.c */
 
@@ -333,7 +326,6 @@
  extern void Menu_want_supervision( void );
  extern void Menu_want_courbe ( void );
  extern void Menu_want_histo_courbe ( void );
- extern void Menu_want_scenario ( void );
  extern void Menu_want_page_admin ( void );
 
 
@@ -473,9 +465,13 @@
  extern void Proto_editer_option_tempo ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_tempo );
 
  extern GtkPrintOperation *New_print_job ( gchar *nom );                                  /* Dans print.c */
- extern void Begin_print (GtkPrintOperation *operation,
-                          GtkPrintContext   *context,
-                          gpointer           user_data);
+ extern void Print_draw_page ( GtkPrintOperation *operation,
+                               GtkPrintContext   *context,
+                               gint               page_nr,
+                               gpointer           user_data );
+ extern gboolean Print_paginate ( GtkPrintOperation *operation,
+                                  GtkPrintContext   *context,
+                                  gpointer           user_data );
                                                                                          /* Dans courbe.c */
  extern void Proto_afficher_une_source_EA_for_courbe( struct CMD_TYPE_OPTION_ENTREEANA *entreeANA );
  extern void Proto_afficher_une_source_for_courbe( struct CMD_TYPE_MNEMONIQUE *mnemo );
@@ -496,23 +492,6 @@
  extern gboolean Append_courbe ( struct TYPE_INFO_COURBE *infos, struct COURBE *courbe,
                                  struct CMD_APPEND_COURBE *append_courbe );
  extern void Proto_ajouter_histo_courbe( struct CMD_TYPE_COURBE *courbe );
-
-
- extern void Proto_afficher_un_scenario( struct CMD_TYPE_SCENARIO *scenario );   /* Dans liste_scenario.c */
- extern void Proto_cacher_un_scenario( struct CMD_TYPE_SCENARIO *scenario );
- extern void Proto_rafraichir_un_scenario( struct CMD_TYPE_SCENARIO *scenario );
- extern void Creer_page_scenario( void );
-
-                                                                                 /* Dans ajout_scenario.c */
- extern void Menu_ajouter_editer_scenario ( struct CMD_TYPE_SCENARIO *edit_sce);
- extern void Proto_afficher_mnemo_scenario ( struct CMD_TYPE_MNEMONIQUE *mnemo );
-
-                                                                           /* Dans supervision_scenario.c */
- extern void Proto_supervision_afficher_un_scenario( struct CMD_TYPE_SCENARIO *scenario );
- extern void Proto_supervision_cacher_un_scenario( struct CMD_TYPE_SCENARIO *scenario );
- extern void Proto_supervision_rafraichir_un_scenario( struct CMD_TYPE_SCENARIO *scenario );
- extern void Menu_supervision_ajouter_editer_scenario ( struct CMD_TYPE_SCENARIO *edit_sce );
- extern void Creer_fenetre_scenario( struct CMD_TYPE_MOTIF *motif );
 
  extern void Proto_afficher_un_camera( struct CMD_TYPE_CAMERA *camera );           /* Dans liste_camera.c */
  extern void Proto_cacher_un_camera( struct CMD_TYPE_CAMERA *camera );

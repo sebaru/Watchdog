@@ -30,7 +30,7 @@
  #include "client.h"
 
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
- extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
+ extern struct CLIENT Client;                           /* Identifiant de l'utilisateur en cours */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
@@ -221,7 +221,7 @@
     static gint nbr_cligno = 0;
     GList *liste_motifs;
 
-    if (Client_en_cours.mode != VALIDE) return(TRUE);
+    if (Client.mode != VALIDE) return(TRUE);
 
     page = Page_actuelle();
     if (!page) return (TRUE);

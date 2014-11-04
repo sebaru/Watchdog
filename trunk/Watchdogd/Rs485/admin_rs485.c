@@ -46,41 +46,61 @@
     Admin_write ( connexion, " RS485 Reloading done\n" );
   }
 /**********************************************************************************************************/
-/* Admin_rs485_list: Envoi la liste des modules chargés au connexion d'admin                              */
-/* Entrée: Le connexion destinataire                                                                      */
-/* Sortie: néant                                                                                          */
+/* Admin_rs485_print : Affiche en details les infos d'un module RS495 en parametre                        */
+/* Entrée: La connexion connexion ADMIN et l'onduleur                                                     */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
+/**********************************************************************************************************/
+ static void Admin_rs485_print ( struct CONNEXION *connexion, struct MODULE_RS485 *module )
+  { gchar chaine[1024];
+    g_snprintf( chaine, sizeof(chaine),
+                " RS485[%02d] ------> num=%02d, requete = %03ds ago\n"
+                "  | - enable = %d, started = %d, bit_comm = B%04d(=%d)\n"
+                "  | - EA = %03d-%03d, E = %03d-%03d, S = %03d-%03d, SA = %03d-%03d\n"
+                "  | - next_get_ana=in %03ds, nbr_deconnect=%02d\n"
+                "  -\n",
+                module->rs485.id, module->rs485.num, (Partage->top - module->date_requete)/10,
+                module->rs485.enable, module->started, module->rs485.bit_comm, B(module->rs485.bit_comm),
+                module->rs485.ea_min, module->rs485.ea_max,
+                module->rs485.e_min, module->rs485.e_max,
+                module->rs485.s_min, module->rs485.s_max,
+                module->rs485.sa_min, module->rs485.sa_max,
+                (module->date_next_get_ana > Partage->top ? (module->date_next_get_ana - Partage->top)/10 : -1),
+                module->nbr_deconnect
+              );
+    Admin_write ( connexion, chaine );
+  }
+/**********************************************************************************************************/
+/* Admin_rs485_list: Affichage de toutes les infos opérationnelles de tous les modules rs485              */
+/* Entrée: La connexion connexion ADMIN                                                                   */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
 /**********************************************************************************************************/
  static void Admin_rs485_list ( struct CONNEXION *connexion )
   { GSList *liste_modules;
-    gchar chaine[256];
 
-    g_snprintf( chaine, sizeof(chaine), " -- Liste des modules RS485\n" );
-    Admin_write ( connexion, chaine );
-
-    g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
-    Admin_write ( connexion, chaine );
-       
     pthread_mutex_lock ( &Cfg_rs485.lib->synchro );
     liste_modules = Cfg_rs485.Modules_RS485;
     while ( liste_modules )
      { struct MODULE_RS485 *module;
        module = (struct MODULE_RS485 *)liste_modules->data;
+       Admin_rs485_print ( connexion, module );
+       liste_modules = liste_modules->next;
+     }
+    pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );
+  }
+/**********************************************************************************************************/
+/* Admin_rs485_show: Affichage des infos opérationnelles liées au module en parametre                     */
+/* Entrée: La connexion connexion ADMIN et le numero du module                                            */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
+/**********************************************************************************************************/
+ static void Admin_rs485_show ( struct CONNEXION *connexion, gint num )
+  { GSList *liste_modules;
 
-       g_snprintf( chaine, sizeof(chaine),
-                   " RS485[%02d] -> num=%02d, enable=%s, bit_comm=B%04d(=%d), ea=%03d-%03d, e=%03d-%03d, s=%03d-%03d, sa=%03d-%03d\n"
-                   "              started=%s, requete=%03ds ago, next_get_ana=in %03ds nbr_deconnect=%02d\n",
-                   module->rs485.id, module->rs485.num,
-                   (module->rs485.enable ? "TRUE " : "FALSE"),
-                   module->rs485.bit_comm, B(module->rs485.bit_comm),
-                   module->rs485.ea_min, module->rs485.ea_max,
-                   module->rs485.e_min, module->rs485.e_max,
-                   module->rs485.s_min, module->rs485.s_max, module->rs485.sa_min, module->rs485.sa_max,
-                   (module->started      ? "TRUE " : "FALSE"),
-                   (Partage->top - module->date_requete)/10,
-                   (module->date_next_get_ana > Partage->top ? (module->date_next_get_ana - Partage->top)/10 : -1),
-                   module->nbr_deconnect
-                 );
-       Admin_write ( connexion, chaine );
+    pthread_mutex_lock ( &Cfg_rs485.lib->synchro );
+    liste_modules = Cfg_rs485.Modules_RS485;
+    while ( liste_modules )
+     { struct MODULE_RS485 *module;
+       module = (struct MODULE_RS485 *)liste_modules->data;
+       if (module->rs485.id == num) { Admin_rs485_print ( connexion, module ); break; }
        liste_modules = liste_modules->next;
      }
     pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );
@@ -233,6 +253,11 @@
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Admin_rs485_stop ( connexion, num );
      }
+    else if ( ! strcmp ( commande, "show" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       Admin_rs485_show ( connexion, num );
+     }
     else if ( ! strcmp ( commande, "list" ) )
      { Admin_rs485_list ( connexion );
      }
@@ -257,7 +282,8 @@
        Admin_write ( connexion, "                                         - Modifie le module id\n" );
        Admin_write ( connexion, "  del id                                 - Retire le module id\n" );
        Admin_write ( connexion, "  start id                               - Demarre le module id\n" );
-       Admin_write ( connexion, "  stop id                                - Demarre le module id\n" );
+       Admin_write ( connexion, "  stop id                                - Arrete le module id\n" );
+       Admin_write ( connexion, "  show id                                - Affiche le module id\n" );
        Admin_write ( connexion, "  list                                   - Affiche les status des equipements RS485\n" );
        Admin_write ( connexion, "  reload                                 - Recharge les modules en memoire\n" );
      }

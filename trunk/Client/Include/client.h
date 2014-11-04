@@ -41,28 +41,33 @@
  #define REPERTOIR_CONF    ".watchdog"         /* Repertoire ou sont stocké les fichiers de configuration */
  
  enum
-  { INERTE,
+  { DISCONNECTED,
     ATTENTE_INTERNAL,
-    ATTENTE_CONNEXION_SSL,
-    ENVOI_IDENT,
     ATTENTE_AUTORISATION,
     CONNECTE,
     VALIDE,
-    ENVOI_GIF
+    /*ENVOI_GIF*/
   };
 
  struct CLIENT
   { guint32 mode;
-    guint32 id; /* necessaire ?? */
     GList *gids;
+    struct REZO_CLI_IDENT ident;
     struct CONNEXION *connexion;
+    SSL_CTX *ssl_ctx;
+    X509 *srv_certif;
+    X509 *cli_certif;
+    gboolean ssl_needed;
+    gboolean ssl_needed_with_cert;
     gchar host[TAILLE_NOM_SERVEUR+1];                           /* Nom du serveur sur lequel se connecter */
     struct CMD_TYPE_UTILISATEUR util;
     gchar password[NBR_CARAC_LOGIN_UTF8+1];               /* sauvegarde du mot de passe pour la connexion */
+#ifdef bouh
     struct
      { gint32 id_fichier_gif;                /* Identificateur de fichier gif en cours d'envoi au serveur */
        gchar *buffer;                                        /* Doit contenir aussi l'entete CMD_ID_ICONE */
      } transfert;
+#endif
   };
  #endif
 /*--------------------------------------------------------------------------------------------------------*/

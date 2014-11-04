@@ -69,7 +69,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_ENTREEANA_FOR_HISTO_COURBE:
              { struct CMD_TYPE_OPTION_ENTREEANA *eana;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                eana = (struct CMD_TYPE_OPTION_ENTREEANA *)g_try_malloc0( sizeof( struct CMD_TYPE_OPTION_ENTREEANA ) );
                if (!eana) return; 
@@ -83,7 +83,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_MNEMO_FOR_HISTO_COURBE:
              { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_try_malloc0( sizeof( struct CMD_TYPE_MNEMONIQUE ) );
                if (!mnemo) return; 

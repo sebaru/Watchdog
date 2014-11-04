@@ -45,7 +45,6 @@
     static GList *Arrivee_palette = NULL;
     static GList *Arrivee_capteur = NULL;
     static GList *Arrivee_pass = NULL;
-    static GList *Arrivee_scenario = NULL;
     static GList *Arrivee_camera_sup = NULL;
     static int save_id;                
 
@@ -94,7 +93,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT:
              { struct CMD_TYPE_COMMENT *comment;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                comment = (struct CMD_TYPE_COMMENT *)g_try_malloc0( sizeof( struct CMD_TYPE_COMMENT ) );
                if (!comment) return; 
@@ -113,7 +112,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS:
              { struct CMD_TYPE_PASSERELLE *pass;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                pass = (struct CMD_TYPE_PASSERELLE *)g_try_malloc0( sizeof( struct CMD_TYPE_PASSERELLE ) );
                if (!pass) return; 
@@ -132,7 +131,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE:
              { struct CMD_TYPE_PALETTE *palette;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                palette = (struct CMD_TYPE_PALETTE *)g_try_malloc0( sizeof( struct CMD_TYPE_PALETTE ) );
                if (!palette) return; 
@@ -151,7 +150,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR:
              { struct CMD_TYPE_CAPTEUR *capteur;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                capteur = (struct CMD_TYPE_CAPTEUR *)g_try_malloc0( sizeof( struct CMD_TYPE_CAPTEUR ) );
                if (!capteur) return; 
@@ -171,7 +170,7 @@
 /*********************************** Reception des cameras de supervision *********************************/
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP:
              { struct CMD_TYPE_CAMERA_SUP *camera_sup;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_try_malloc0( sizeof( struct CMD_TYPE_CAMERA_SUP ) );
                if (!camera_sup) return; 
@@ -184,49 +183,6 @@
                g_list_foreach( Arrivee_camera_sup, (GFunc)g_free, NULL );
                g_list_free( Arrivee_camera_sup );
                Arrivee_camera_sup = NULL;
-             }
-            break;
-/*********************************** Gestion des scenarios de supervision *********************************/
-       case SSTAG_SERVEUR_SUPERVISION_ADD_SCENARIO_OK:
-             { struct CMD_TYPE_SCENARIO *sce;
-               sce = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
-               Proto_supervision_afficher_un_scenario( sce );
-             }
-            break;
-       case SSTAG_SERVEUR_SUPERVISION_DEL_SCENARIO_OK:
-             { struct CMD_TYPE_SCENARIO *sce;
-               sce = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
-               Proto_supervision_cacher_un_scenario( sce );
-             }
-            break;
-       case SSTAG_SERVEUR_SUPERVISION_EDIT_SCENARIO_OK:
-             { struct CMD_TYPE_SCENARIO *sce;
-               sce = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
-               Menu_supervision_ajouter_editer_scenario( sce );
-             }
-            break;
-       case SSTAG_SERVEUR_SUPERVISION_VALIDE_EDIT_SCENARIO_OK:
-             { struct CMD_TYPE_SCENARIO *sce;
-               sce = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
-               Proto_supervision_rafraichir_un_scenario( sce );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO:
-             { struct CMD_TYPE_SCENARIO *sce;
-               Set_progress_plusun();
-printf("Addprogress scenario\n");
-               sce = (struct CMD_TYPE_SCENARIO *)g_try_malloc0( sizeof( struct CMD_TYPE_SCENARIO ) );
-               if (!sce) return; 
-               memcpy( sce, connexion->donnees, sizeof(struct CMD_TYPE_SCENARIO ) );
-               Arrivee_scenario = g_list_append( Arrivee_scenario, sce );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO_FIN:
-             { g_list_foreach( Arrivee_scenario, (GFunc)Proto_supervision_afficher_un_scenario, NULL );
-               g_list_foreach( Arrivee_scenario, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_scenario );
-               Arrivee_scenario = NULL;
-printf("Addprogress scenario fin\n");
              }
             break;
      }

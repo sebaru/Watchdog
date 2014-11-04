@@ -259,7 +259,8 @@
      }
 
     if ( (E(num) && !etat) || (!E(num) && etat) )
-     { Ajouter_arch( MNEMO_ENTREE, num, E(num) );                                            /* Archivage */
+     { Ajouter_arch( MNEMO_ENTREE, num, E(num) );/* Archivage de l'etat n-1 pour afficher des courbes correctes dans l'historique */
+       Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat );                        /* Archivage de l'etat courant */
        pthread_mutex_lock( &Partage->com_msrv.synchro );  /* Ajout dans la liste de E a envoyer au master */
        Partage->com_msrv.liste_e = g_slist_prepend( Partage->com_msrv.liste_e,
                                                     GINT_TO_POINTER(num) );
@@ -286,8 +287,8 @@
     Partage->ea[num].inrange = range;
   }
 /**********************************************************************************************************/
-/* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                     */
-/* Sortie : TRUE si les valeurs ont été archivées                                                         */
+/* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                        */
+/* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
  void SEA ( int num, float val_avant_ech )
   { static gint last_log = 0;
@@ -420,16 +421,16 @@
        return;
      }
 
-        if (Partage->i[num].etat   != etat || Partage->i[num].rouge != rouge || 
+    if (Partage->i[num].etat   != etat || Partage->i[num].rouge != rouge || 
         Partage->i[num].vert   != vert || Partage->i[num].bleu  != bleu  ||
         Partage->i[num].cligno != cligno
        )
-     { if ( Partage->i[num].last_change + 10 <= Partage->top )   /* Si pas de change depuis plus de 1 sec */
+     { if ( Partage->i[num].last_change + 50 <= Partage->top )   /* Si pas de change depuis plus de 5 sec */
         { Partage->i[num].changes = 0; }
 
-       if ( Partage->i[num].changes <= 5 )                           /* Si moins de 5 changes par seconde */
+       if ( Partage->i[num].changes <= 10 )                            /* Si moins de 10 changes en 5 sec */
         {
-          if ( Partage->i[num].changes == 5 )                   /* Est-ce le dernier change avant blocage */
+          if ( Partage->i[num].changes == 10 )                  /* Est-ce le dernier change avant blocage */
            { Partage->i[num].etat   = 0;                     /* Si oui, on passe le visuel en kaki cligno */
              Partage->i[num].rouge  = 0;
              Partage->i[num].vert   = 100;                                                   /* Mode Kaki */
@@ -441,9 +442,9 @@
                  Partage->i[num].vert   = vert;
                  Partage->i[num].bleu   = bleu;
                  Partage->i[num].cligno = cligno;
-                 Partage->i[num].last_change = Partage->top;                        /* Date de la photo ! */
                }
 
+          Partage->i[num].last_change = Partage->top;                               /* Date de la photo ! */
           pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de i a traiter */
           Partage->com_msrv.liste_i = g_slist_append( Partage->com_msrv.liste_i,
                                                       GINT_TO_POINTER(num) );
@@ -543,7 +544,8 @@
         { Partage->a[num].changes = 0; }
 
        if ( Partage->a[num].changes <= 5 )/* Arbitraire : si plus de 5 changes dans la seconde, on bloque */
-        { Ajouter_arch( MNEMO_SORTIE, num, 1.0*etat );
+        { Ajouter_arch( MNEMO_SORTIE, num, !etat );       /* Sauvegarde etat n-1 pour courbes historiques */
+          Ajouter_arch( MNEMO_SORTIE, num, 1.0*etat );                          /* Sauvegarde de l'etat n */
           pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de A a traiter */
           Partage->com_msrv.liste_a = g_slist_append( Partage->com_msrv.liste_a,
                                                       GINT_TO_POINTER(num) );
@@ -576,6 +578,7 @@
           if (delta > 600)                                           /* On compte +1 toutes les minutes ! */
            { Partage->ch[num].cpthdb.valeur ++;
              Partage->ch[num].old_top = new_top;
+             Ajouter_arch( MNEMO_CPTH, num, 1.0*Partage->ch[num].cpthdb.valeur );
            }
         }
      }
@@ -587,7 +590,8 @@
 /* Le compteur compte les impulsions !!                                                                   */
 /**********************************************************************************************************/
  void SCI( int num, int etat, int reset, int ratio )
-  { if (num<0 || num>=NBR_COMPTEUR_IMP)
+  { gboolean changed = FALSE;
+    if (num<0 || num>=NBR_COMPTEUR_IMP)
      { Info_new( Config.log, Config.log_dls, LOG_INFO, "CI : num %d out of range", num );
        return;
      }
@@ -595,6 +599,7 @@
      { if (reset)                                                   /* Le compteur doit-il etre resetté ? */
         { Partage->ci[num].val_en_cours1 = 0.0;                /* Valeur transitoire pour gérer les ratio */
           Partage->ci[num].val_en_cours2 = 0.0;                /* Valeur transitoire pour gérer les ratio */
+          changed = TRUE;
         }
 
        if ( ! Partage->ci[ num ].actif )                                              /* Passage en actif */
@@ -603,6 +608,7 @@
           if (Partage->ci[num].val_en_cours1>=ratio)
            { Partage->ci[num].val_en_cours2++;
              Partage->ci[num].val_en_cours1=0.0;                          /* RAZ de la valeur de calcul 1 */
+             changed = TRUE;
            }
         }
      }
@@ -610,26 +616,30 @@
      { if (!reset) Partage->ci[ num ].actif = FALSE; }
 
     switch (Partage->ci[ num ].cpt_impdb.type)                        /* Calcul de la valeur réelle du CI */
-     { case CI_TOTALISATEUR : if ( Partage->ci[num].last_update + 1 < Partage->top )
-                               { Partage->ci[num].cpt_impdb.valeur = Partage->ci[num].val_en_cours2;
-                                 Partage->ci[num].last_update = Partage->top;
-                               }
-                              break;
-       case CI_MOYENNEUR_SEC: if ( Partage->ci[num].last_update + 10 < Partage->top )
-                               { Partage->ci[num].cpt_impdb.valeur = (Partage->ci[num].cpt_impdb.valeur +
-                                                                      Partage->ci[num].val_en_cours2)/2.0;
-                                 Partage->ci[num].val_en_cours2 = 0.0;
-                                 Partage->ci[num].last_update = Partage->top;
-                               }
-                              break;
-       case CI_MOYENNEUR_MIN: if ( Partage->ci[num].last_update + 600 < Partage->top )
-                               { Partage->ci[num].cpt_impdb.valeur = (Partage->ci[num].cpt_impdb.valeur +
-                                                                      Partage->ci[num].val_en_cours2)/2.0;
-                                 Partage->ci[num].val_en_cours2 = 0.0;
-                                 Partage->ci[num].last_update = Partage->top;
-                               }
-                              break;
+     { case CI_TOTALISATEUR :
+            if ( Partage->ci[num].last_update + 1 < Partage->top )
+             { Partage->ci[num].cpt_impdb.valeur = Partage->ci[num].val_en_cours2;
+               Partage->ci[num].last_update = Partage->top;
+             }
+            break;
+       case CI_MOYENNEUR_SEC:
+            if ( Partage->ci[num].last_update + 10 < Partage->top )
+             { Partage->ci[num].cpt_impdb.valeur = (Partage->ci[num].cpt_impdb.valeur +
+                                                    Partage->ci[num].val_en_cours2)/2.0;
+               Partage->ci[num].val_en_cours2 = 0.0;
+               Partage->ci[num].last_update = Partage->top;
+             }
+            break;
+       case CI_MOYENNEUR_MIN:
+            if ( Partage->ci[num].last_update + 600 < Partage->top )
+             { Partage->ci[num].cpt_impdb.valeur = (Partage->ci[num].cpt_impdb.valeur +
+                                                    Partage->ci[num].val_en_cours2)/2.0;
+               Partage->ci[num].val_en_cours2 = 0.0;
+               Partage->ci[num].last_update = Partage->top;
+             }
+            break;
      }
+    if (changed == TRUE) Ajouter_arch( MNEMO_CPT_IMP, num, Partage->ci[num].cpt_impdb.valeur );
   }
 /**********************************************************************************************************/
 /* MSG: Positionnement des message DLS                                                                    */

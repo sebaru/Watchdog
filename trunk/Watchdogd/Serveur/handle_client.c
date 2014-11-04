@@ -1,3 +1,4 @@
+
 /**********************************************************************************************************/
 /* Watchdogd/Serveur/hangle_client.c                Comportement d'un sous-hangle_client Watchdog         */
 /* Projet WatchDog version 2.0       Gestion d'habitat                    dim. 31 mars 2013 20:07:37 CEST */
@@ -111,8 +112,10 @@
         { case ENVOI_INTERNAL:
                Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_PAQUETSIZE,
                              NULL, client->connexion->taille_bloc );
-               if (Cfg_ssrv.ssl_crypt)
+               if (Cfg_ssrv.ssl_needed)
                 { Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_SSLNEEDED, NULL, 0 ); 
+                  if (Cfg_ssrv.ssl_peer_cert)
+                   { Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_SSLNEEDED_WITH_CERT, NULL, 0 );  }
                   Client_mode ( client, ATTENTE_CONNEXION_SSL );
                 }
                else

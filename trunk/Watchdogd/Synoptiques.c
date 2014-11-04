@@ -44,6 +44,9 @@
   { struct CMD_TYPE_SYNOPTIQUE *syn;
     gint cpt;
 
+    if (!util) return(FALSE);
+    if (!util->enable) return(FALSE);
+
     if (util->id==UID_ROOT) return(TRUE);                            /* Le tech est dans tous les groupes */
 
     syn = Rechercher_synoptiqueDB ( syn_id );

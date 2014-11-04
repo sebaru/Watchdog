@@ -6,7 +6,8 @@
 SUBDIRS= 
 
 lib_LTLIBRARIES                      = libwatchdog-server-http.la
-libwatchdog_server_http_la_SOURCES    = Http.c Http.h admin_http.c getsyn.c set_internal.c getstatus.c getgif.c setm.c
+libwatchdog_server_http_la_SOURCES    = Http.c Http.h admin_http.c getsyn.c getstatus.c \
+                                        getgraph.c getgif.c getslash.c setm.c
 
 libwatchdog_server_http_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 libmicrohttpd libxml-2.0` \
                                        `mysql_config --libs` \

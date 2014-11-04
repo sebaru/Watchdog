@@ -222,7 +222,7 @@ INSERT INTO `groups` (`id`, `name`, `comment`) VALUES
 (8, 'Admin-scenarioDB', 'Members can add/remove Scenario'),
 (9, 'Admin-Lowlevel I/O', 'Configuration MODBUS/RS485/ONDULEUR/...'),
 (10, 'Admin-CommandLineInterface', 'Command Line Interface Access'),
-(11, 'Admin-HttpSetInternal', 'Add SetInternal Capabilities');
+(11, 'Satellite', 'Add Satellite Capabilities');
 
 -- --------------------------------------------------------
 
@@ -702,7 +702,7 @@ CREATE TABLE `onduleurs` (
   `ea_min` int(11) NOT NULL,
   `e_min` int(11) NOT NULL,
   `a_min` int(11) NOT NULL,
-  `libelle` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 

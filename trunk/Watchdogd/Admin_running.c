@@ -47,6 +47,7 @@
        Admin_write ( connexion, "  audit                 - Audit bit/s\n" );
        Admin_write ( connexion, "  dbcfg                 - Manage Threads Parameters in Database\n" );
        Admin_write ( connexion, "  clear_histo           - Clear Histo DB\n" );
+       Admin_write ( connexion, "  clear_arch            - Clear Archvie List\n" );
        Admin_write ( connexion, "  get                   - Sous-menu de lecture des bits internes\n" );
        Admin_write ( connexion, "  set                   - Sous-menu d'affectation des bits internes\n" );
        Admin_write ( connexion, "  modbus                - Sous-menu de gestion des equipements MODBUS\n" );
@@ -78,52 +79,61 @@
        Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "dbcfg" ) )
-     { Admin_dbcfg_thread( connexion, "global", ligne + 7 );
+     { Admin_dbcfg_thread( connexion, "global", ligne + 6 );
      } else
     if ( ! strcmp ( commande, "clear_histo" ) )
-     { Clear_histoDB ();                                            /* Clear de la table histo au boot */
+     { Clear_histoDB ();                                                      /* Clear de la table histo au boot */
        g_snprintf( chaine, sizeof(chaine), " HistoDB cleared\n" );
           Admin_write ( connexion, chaine );
+     } else
+    if ( ! strcmp ( commande, "clear_arch" ) )
+     { gint nbr;
+       nbr = Arch_Clear_list ();                            /* Clear de la list des archives à prendre en compte */
+       g_snprintf( chaine, sizeof(chaine), " ArchiveList cleared (%d components)\n", nbr );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "audit" ) )
      { gint num;
        g_snprintf( chaine, sizeof(chaine), " -- Audit de performance\n" );
        Admin_write ( connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Bit/s        : %d\n", Partage->audit_bit_interne_per_sec_hold );
+       g_snprintf( chaine, sizeof(chaine), " Bit/s                : %d\n", Partage->audit_bit_interne_per_sec_hold );
        Admin_write ( connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Tour/s       : %d\n", Partage->audit_tour_dls_per_sec_hold );
+       g_snprintf( chaine, sizeof(chaine), " Tour/s               : %d\n", Partage->audit_tour_dls_per_sec_hold );
+       Admin_write ( connexion, chaine );
+
+       g_snprintf( chaine, sizeof(chaine), " Archive to Proceed   : %d\n", Partage->com_arch.taille_arch );
        Admin_write ( connexion, chaine );
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
        num = g_slist_length( Partage->com_msrv.liste_i );                  /* Recuperation du numero de i */
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       g_snprintf( chaine, sizeof(chaine), " Distribution des I      : reste %d\n", num );
+       g_snprintf( chaine, sizeof(chaine), " Distribution des I   : reste %d\n", num );
        Admin_write ( connexion, chaine );
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
        num = g_slist_length( Partage->com_msrv.liste_msg );                /* Recuperation du numero de i */
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       g_snprintf( chaine, sizeof(chaine), " Distribution des Msg: reste %d\n", num );
+       g_snprintf( chaine, sizeof(chaine), " Distribution des Msg : reste %d\n", num );
        Admin_write ( connexion, chaine );
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );                /* Parcours de la liste a traiter */
        num = g_slist_length( Partage->com_msrv.liste_msg_repeat );                    /* liste des repeat */
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       g_snprintf( chaine, sizeof(chaine), "          MSgs en REPEAT : reste %d\n", num );
+       g_snprintf( chaine, sizeof(chaine), " MSgs en REPEAT       : reste %d\n", num );
        Admin_write ( connexion, chaine );
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );                /* Parcours de la liste a traiter */
        num = g_slist_length( Partage->com_msrv.liste_ea );                            /* liste des repeat */
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       g_snprintf( chaine, sizeof(chaine), " Distribution des EA     : reste %d\n", num );
+       g_snprintf( chaine, sizeof(chaine), " Distribution des EA  : reste %d\n", num );
        Admin_write ( connexion, chaine );
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );                /* Parcours de la liste a traiter */
        num = g_slist_length( Partage->com_msrv.liste_e );                            /* liste des repeat */
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       g_snprintf( chaine, sizeof(chaine), " Distribution des E      : reste %d\n", num );
+       g_snprintf( chaine, sizeof(chaine), " Distribution des E   : reste %d\n", num );
        Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "log_level" ) )

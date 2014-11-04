@@ -27,7 +27,6 @@
  
  #include <glib.h>
  #include <unistd.h>                                                                  /* Pour gethostname */
- #include <openssl/rand.h>
  #include <time.h>
 
  #include "watchdogd.h"
@@ -110,15 +109,16 @@
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'running'\n" );
-       Admin_write ( connexion, "  add $name $comment      - Add user $name with $commment\n" );
-       Admin_write ( connexion, "  del $name               - Erase user $name\n" );
-       Admin_write ( connexion, "  enable $name            - Allow user $name to connect\n" );
-       Admin_write ( connexion, "  disable $name           - Deny user $id to connect $name\n" );
-       Admin_write ( connexion, "  cansetpwd $name $bool   - Set CanSetPwd flag to true or false\n" );
-       Admin_write ( connexion, "  list                    - Liste les users Watchdog\n" );
-       Admin_write ( connexion, "  passwd $name $pwd       - Set password $pwd to user $name\n" );
-       Admin_write ( connexion, "  show $name              - Show user $name\n" );
-       Admin_write ( connexion, "  help                    - This help\n" );
+       Admin_write ( connexion, "  add $name $comment         - Add user $name with $commment\n" );
+       Admin_write ( connexion, "  del $name                  - Erase user $name\n" );
+       Admin_write ( connexion, "  enable $name               - Allow user $name to connect\n" );
+       Admin_write ( connexion, "  disable $name              - Deny user $id to connect $name\n" );
+       Admin_write ( connexion, "  cansetpwd $name $bool      - Set CanSetPwd flag to true or false\n" );
+       Admin_write ( connexion, "  musttchangepwd $name $bool - Set CanSetPwd flag to true or false\n" );
+       Admin_write ( connexion, "  list                       - Liste les users Watchdog\n" );
+       Admin_write ( connexion, "  passwd $name $pwd          - Set password $pwd to user $name\n" );
+       Admin_write ( connexion, "  show $name                 - Show user $name\n" );
+       Admin_write ( connexion, "  help                       - This help\n" );
      } else
     if ( ! strcmp ( commande, "list" ) )
      { Admin_user_list ( connexion );
@@ -140,16 +140,24 @@
         }
      } else
     if ( ! strcmp ( commande, "del" ) )
-     { struct CMD_TYPE_UTILISATEUR util;
-       sscanf ( ligne, "%s %s", commande, util.nom );                /* Découpage de la ligne de commande */
-       util.id = -1;                                            /* suppression par nom plutot que par id */
-       if (Retirer_utilisateurDB ( &util ) == FALSE)
-        { g_snprintf( chaine, sizeof(chaine), " User %s couldn't be removed\n", util.nom );
+     { struct CMD_TYPE_UTILISATEUR *util;
+       gchar name[80];
+       sscanf ( ligne, "%s %s", commande, name );                    /* Découpage de la ligne de commande */
+       util = Rechercher_utilisateurDB_by_name( name );          /* suppression par nom plutot que par id */
+       if (!util)
+        { g_snprintf( chaine, sizeof(chaine), " User %s not found in Database\n", name );
           Admin_write ( connexion, chaine );
         }
        else
-        { g_snprintf( chaine, sizeof(chaine), " User %s removed\n", util.nom );
-          Admin_write ( connexion, chaine );
+        { if (Retirer_utilisateurDB ( util ) == FALSE)
+           { g_snprintf( chaine, sizeof(chaine), " User %s couldn't be removed\n", name );
+             Admin_write ( connexion, chaine );
+           }
+          else
+           { g_snprintf( chaine, sizeof(chaine), " User %s (id=%d) removed\n", util->nom, util->id );
+             Admin_write ( connexion, chaine );
+           }
+          g_free(util);
         }
      } else
     if ( ! strcmp ( commande, "enable" ) )
@@ -182,8 +190,7 @@
      } else
     if ( ! strcmp ( commande, "add" ) )
      { struct CMD_TYPE_UTILISATEUR util;
-       util.expire = 0;
-       util.date_expire = 0;
+       memset ( &util, 0, sizeof( struct CMD_TYPE_UTILISATEUR ) );
        sscanf ( ligne, "%s %s %[^\n]", commande, util.nom, util.commentaire );/* Découpage de la ligne de commande */
        if (Ajouter_utilisateurDB ( &util ) == -1)
         { g_snprintf( chaine, sizeof(chaine), " User %s couldn't be added in Database\n", util.nom );
@@ -210,10 +217,33 @@
         { if (!strcmp( cansetpwd, "true" ) ) util->cansetpwd = 1;
                                         else util->cansetpwd = 0;
           if( Modifier_utilisateurDB_set_cansetpwd( util ) )
-           { g_snprintf( chaine, sizeof(chaine), " Flag CanSetPwd to %d set for user %s\n",
+           { g_snprintf( chaine, sizeof(chaine), " Flag CanSetPwd set to %d for user %s\n",
                          util->cansetpwd, util->nom ); }
           else
            { g_snprintf( chaine, sizeof(chaine), " Error while setting CanSetPwd\n" ); }
+          g_free(util);
+          Admin_write ( connexion, chaine );
+        }
+     } else
+    if ( ! strcmp ( commande, "mustchangepwd" ) )
+     { struct CMD_TYPE_UTILISATEUR *util;
+       gchar name[80], mustchangepwd[80];
+
+       sscanf ( ligne, "%s %s %s", commande, name, mustchangepwd );  /* Découpage de la ligne de commande */
+
+       util = Rechercher_utilisateurDB_by_name ( name );
+       if (!util)
+        { g_snprintf( chaine, sizeof(chaine), " User %s not found in Database\n", name );
+          Admin_write ( connexion, chaine );
+        }
+       else
+        { if (!strcmp( mustchangepwd, "true" ) ) util->mustchangepwd = 1;
+                                            else util->mustchangepwd = 0;
+          if( Modifier_utilisateurDB_set_mustchangepwd( util ) )
+           { g_snprintf( chaine, sizeof(chaine), " Flag MustChangePwd set to %d for user %s\n",
+                         util->mustchangepwd, util->nom ); }
+          else
+           { g_snprintf( chaine, sizeof(chaine), " Error while setting MustChangePwd\n" ); }
           g_free(util);
           Admin_write ( connexion, chaine );
         }
@@ -230,33 +260,7 @@
           Admin_write ( connexion, chaine );
         }
        else
-        { gchar salt[EVP_MAX_MD_SIZE], hash[EVP_MAX_MD_SIZE];
-          EVP_MD_CTX *mdctx;
-          guint md_len, cpt;
-          memset( salt, 0, sizeof(salt) );                                             /* RAZ des buffers */
-          memset( hash, 0, sizeof(hash) );                                             /* RAZ des buffers */
-          memset ( util->salt, 0, sizeof(util->salt) );
-          memset ( util->hash, 0, sizeof(util->hash) );
-
-          RAND_pseudo_bytes( (guchar *)salt, sizeof(salt) );            /* Récupération d'un nouveau SALT */
-          for (cpt=0; cpt<sizeof(salt); cpt++)                             /* Mise en forme au format HEX */
-           { g_snprintf( &util->salt[2*cpt], 3, "%02X", (guchar)salt[cpt] ); }
-          g_snprintf( chaine, sizeof(chaine), " SALT %s\n", util->salt );
-          Admin_write ( connexion, chaine );
-
-          mdctx = EVP_MD_CTX_create();                                  /* Creation du HASH correspondant */
-          EVP_DigestInit_ex (mdctx, EVP_sha512(), NULL);
-          EVP_DigestUpdate  (mdctx, util->nom, strlen(util->nom) );
-          EVP_DigestUpdate  (mdctx, util->salt, sizeof(util->salt)-1);
-          EVP_DigestUpdate  (mdctx, pwd,  strlen(pwd));
-          EVP_DigestFinal_ex(mdctx, (guchar *)&hash, &md_len);
-          EVP_MD_CTX_destroy(mdctx);
-
-          for (cpt=0; cpt<sizeof(hash); cpt++)                             /* Mise en forme au format HEX */
-           { g_snprintf( &util->hash[2*cpt], 3, "%02X", (guchar)hash[cpt] ); }
-          g_snprintf( chaine, sizeof(chaine), " HASH %s\n", util->hash );
-          Admin_write ( connexion, chaine );
-
+        { g_snprintf( util->hash, sizeof(util->hash), pwd );
           if( Modifier_utilisateurDB_set_password( util ) )
            { g_snprintf( chaine, sizeof(chaine), " Password set for user %s\n", util->nom ); }
           else

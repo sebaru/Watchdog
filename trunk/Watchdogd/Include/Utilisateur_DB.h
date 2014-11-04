@@ -54,7 +54,7 @@
     GID_SCENARIO,
     GID_LOWLEVEL_IO,
     GID_ADMIN_CLI,
-    GID_HTTP_SET_INTERNAL,
+    GID_SATELLITE,
     NBR_GROUPE_RESERVE
   };
 
@@ -81,6 +81,10 @@
  extern gchar *Nom_utilisateur_reserve( gint id );
  extern gboolean Modifier_utilisateurDB_set_password( struct CMD_TYPE_UTILISATEUR *util );
  extern gboolean Modifier_utilisateurDB_set_cansetpwd( struct CMD_TYPE_UTILISATEUR *util );
+ extern gboolean Modifier_utilisateurDB_set_mustchangepwd( struct CMD_TYPE_UTILISATEUR *util );
+ extern void Utilisateur_set_new_salt ( struct CMD_TYPE_UTILISATEUR *util );
+ extern gchar *Utilisateur_hash_password ( struct CMD_TYPE_UTILISATEUR *util, gchar *pwd );
+ extern gboolean Check_utilisateur_password( struct CMD_TYPE_UTILISATEUR *util, gchar *pwd );
 
  extern gboolean Raz_login_failed( guint id );                                     /* Dans login_failed.c */
  extern gboolean Ajouter_one_login_failed( guint id, gint max_login_failed );

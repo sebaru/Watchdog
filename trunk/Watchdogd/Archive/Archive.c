@@ -28,11 +28,31 @@
  #include <glib.h>
  #include <sys/time.h>
  #include <sys/prctl.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
  #include <unistd.h>
  #include <rrd.h>
 
  #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
 
+/**********************************************************************************************************/
+/* Arch_clear_list: efface la liste des archives a prendre en compte                                      */
+/* Entrées: le type de bit, le numéro du bit, et sa valeur                                                */
+/**********************************************************************************************************/
+ gint Arch_Clear_list ( void )
+  { struct ARCHDB *arch;
+    gint save_nbr;
+    pthread_mutex_lock( &Partage->com_arch.synchro );                                    /* lockage futex */
+    save_nbr = Partage->com_arch.taille_arch;
+    while ( Partage->com_arch.liste_arch )
+     { arch = Partage->com_arch.liste_arch->data;                                 /* Recuperation du arch */
+       g_free(arch);                                                                /* Libération mémoire */
+       Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
+       Partage->com_arch.taille_arch--;
+     }
+    pthread_mutex_unlock( &Partage->com_arch.synchro );
+    return(save_nbr);
+ }
 /**********************************************************************************************************/
 /* Ajouter_arch: Ajoute une archive dans la base de données                                               */
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                */
@@ -85,40 +105,47 @@
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  static void Ajouter_archRRD ( struct ARCHDB *arch )
-  { gchar fichier[80], update[80], png[80];
+  { gchar fichier[80], update[80];
     gchar *params[11];
+    struct stat sbuf;
     gint result;
 
-    params[0] = "rrdupdate";
     g_snprintf( fichier, sizeof(fichier), "RRA/%02d-%04d.rrd", arch->type, arch->num );
-    g_snprintf(     png, sizeof(png),     "WEB/%02d-%04d.png", arch->type, arch->num );
     params[1] = fichier;
-    g_snprintf( update,  sizeof(update), "%d:%f", arch->date_sec, arch->valeur );
-    params[2] = update;
-    rrd_clear_error();
-    result = rrd_update( 3, params );
-    if (result)
-     { Info_new( Config.log, Config.log_arch, LOG_ERR,
-                "Ajouter_archRRD: RRD error %d (%s). Trying to create RRD", result, rrd_get_error() );
+
+    if ( stat ( fichier, &sbuf ) == -1)                                       /* Test présence du fichier */
+     { Info_new( Config.log, Config.log_arch, LOG_WARNING,
+                "Ajouter_archRRD: Unable to Stat file %s (%s). Trying to create RRD file", fichier, strerror(errno) );
        params[0] = "create";
        params[2] = "--start";
        params[3] = "-1y";
        params[4] = "--step";
        params[5] = "10";
        params[6] = "DS:val:GAUGE:1000:U:U";
-       params[7] = "RRA:MIN:0.5:3:6307200"; /* 60*60*24*365 / 5 */
-       params[8] = "RRA:MAX:0.5:3:6307200";
-       params[9] = "RRA:AVERAGE:0.5:3:6307200";
-       params[10] = "RRA:LAST:0.5:1:6307200";
+       params[7] = "RRA:MIN:0.5:3:630720"; /* 6*60*24*365 / 5 */
+       params[8] = "RRA:MAX:0.5:3:630720";
+       params[9] = "RRA:AVERAGE:0.5:3:630720";
+       params[10] = "RRA:LAST:0.5:1:630720";
        rrd_clear_error();
        result = rrd_create( 11, params );
        if (result)       
         { Info_new( Config.log, Config.log_arch, LOG_ERR,
-                    "Ajouter_archRRD: Error %d creating RRD (%s).", result, rrd_get_error() );
-        } else 
+                    "Ajouter_archRRD: Error %d creating RRD (%s). Dropping ARCH", result, rrd_get_error() );
+        }
+       else 
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
                     "Ajouter_archRRD: Creation of RRD file %s OK", fichier );
         }
+       return;
+     }
+    params[0] = "rrdupdate";
+    g_snprintf( update,  sizeof(update), "%d:%f", arch->date_sec, arch->valeur );
+    params[2] = update;
+    rrd_clear_error();
+    result = rrd_update( 3, params );
+    if (result)
+     { Info_new( Config.log, Config.log_arch, LOG_WARNING,
+                "Ajouter_archRRD: RRD error %d (%s)", result, rrd_get_error() );
      }
   }
 /**********************************************************************************************************/
@@ -167,17 +194,19 @@
           continue;
         }
 
-       pthread_mutex_lock( &Partage->com_arch.synchro );                              /* lockage futex */
-       arch = Partage->com_arch.liste_arch->data;                              /* Recuperation du arch */
-       Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
-       Partage->com_arch.taille_arch--;
-       Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                "Run_arch: Reste %03d a traiter", Partage->com_arch.taille_arch );
-       pthread_mutex_unlock( &Partage->com_arch.synchro );
-       Ajouter_archRRD( arch );
-       Ajouter_archDB ( db, arch );
-       g_free(arch);
-       Info_new( Config.log, Config.log_arch, LOG_DEBUG, "Run_arch: archive saved" );
+       while (Partage->com_arch.liste_arch)
+        { pthread_mutex_lock( &Partage->com_arch.synchro );                                 /* lockage futex */
+          arch = Partage->com_arch.liste_arch->data;                                 /* Recuperation du arch */
+          Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
+          Partage->com_arch.taille_arch--;
+          Info_new( Config.log, Config.log_arch, LOG_DEBUG,
+                   "Run_arch: Reste %03d a traiter", Partage->com_arch.taille_arch );
+          pthread_mutex_unlock( &Partage->com_arch.synchro );
+          Ajouter_archRRD( arch );
+          Ajouter_archDB ( db, arch );
+          g_free(arch);
+          Info_new( Config.log, Config.log_arch, LOG_DEBUG, "Run_arch: archive saved" );
+        }
        Libere_DB_SQL( &db );
        SEA ( NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );   /* Enregistrement pour historique */
      }

@@ -201,7 +201,6 @@
                                               G_TYPE_STRING,                 /* Num (id en string "EAxxx" */
                                               G_TYPE_FLOAT,                                       /* min */
                                               G_TYPE_FLOAT,                                       /* max */
-                                              G_TYPE_UINT,                                       /* Unite */
                                               G_TYPE_STRING,                              /* Unite_string */
                                               G_TYPE_STRING                                    /* libelle */
                                );
@@ -321,6 +320,7 @@ printf("Envoie want page source for histo courbe\n");
 
     histo_courbe.date_first = gnome_date_edit_get_time( GNOME_DATE_EDIT(infos->Date_debut) );
     histo_courbe.date_last = gnome_date_edit_get_time( GNOME_DATE_EDIT(infos->Date_fin) );
+printf(" Date first/last = %d / %d\n", histo_courbe.date_first, histo_courbe.date_last );
 
     Envoi_serveur( TAG_HISTO_COURBE, SSTAG_CLIENT_SET_DATE,
                    (gchar *)&histo_courbe, sizeof( struct CMD_HISTO_COURBE ) );

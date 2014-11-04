@@ -44,46 +44,67 @@
     Admin_write ( connexion, " ONDULEUR Reloading done\n" );
   }
 /**********************************************************************************************************/
-/* Admin_ups_list : L'utilisateur admin lance la commande "list" en mode ups                              */
+/* Admin_ups_print : Affiche en details les infos d'un onduleur en parametre                              */
+/* Entrée: La connexion connexion ADMIN et l'onduleur                                                     */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
+/**********************************************************************************************************/
+ static void Admin_ups_print ( struct CONNEXION *connexion, struct MODULE_UPS *module )
+  { gchar chaine[1024];
+    g_snprintf( chaine, sizeof(chaine),
+                " UPS[%02d] ------> %s@%s %s\n"
+                "  | - enable = %d, started = %d (bit B%04d=%d)\n"
+                "  | - ea_min = EA%03d, e_min = E%03d, a_min = A%03d\n"
+                "  | - username = %s, password = %s,\n"
+                "  | - date_next_connexion = in %03ds\n"
+                "  -\n",
+                module->ups.id, module->ups.ups, module->ups.host, module->libelle,
+                module->ups.enable, module->started, module->ups.bit_comm, B(module->ups.bit_comm),
+                module->ups.ea_min, module->ups.e_min, module->ups.a_min,
+                module->ups.username, module->ups.password,
+          (int)(module->date_next_connexion > Partage->top ? (module->date_next_connexion - Partage->top)/10 : -1)
+              );
+    Admin_write ( connexion, chaine );
+  }
+/**********************************************************************************************************/
+/* Admin_ups_list : Affichage de toutes les infos opérationnelles de tous les onduleurs                   */
 /* Entrée: La connexion connexion ADMIN                                                                   */
 /* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
 /**********************************************************************************************************/
  static void Admin_ups_list ( struct CONNEXION *connexion )
   { GSList *liste_modules;
-    gchar chaine[256];
-
-    g_snprintf( chaine, sizeof(chaine), " -- Liste des UPS\n" );
-    Admin_write ( connexion, chaine );
-
-    g_snprintf( chaine, sizeof(chaine), "Partage->top = %d\n", Partage->top );
-    Admin_write ( connexion, chaine );
        
     pthread_mutex_lock ( &Cfg_ups.lib->synchro );
     liste_modules = Cfg_ups.Modules_UPS;
     while ( liste_modules )
      { struct MODULE_UPS *module;
        module = (struct MODULE_UPS *)liste_modules->data;
-
-       g_snprintf( chaine, sizeof(chaine),
-                   " UPS[%03d] -> Host=%s, UPS=%s, enable=%d, started=%d, nbr_deconnect=%d date_retente=%d\n"
-                   "             username=%s, password=%s\n"
-                   "             bit_comm=B%04d, ea_min=EA%03d, e_min=E%03d, a_min=A%03d\n\n",
-                   module->ups.id, module->ups.host, module->ups.ups,
-                   module->ups.enable, module->started,
-                   module->nbr_deconnect, (int)module->date_retente,
-                   module->ups.username, module->ups.password,
-                   module->ups.bit_comm,
-                   module->ups.ea_min, module->ups.e_min, module->ups.a_min
-                 );
-       Admin_write ( connexion, chaine );
+       Admin_ups_print ( connexion, module );
        liste_modules = liste_modules->next;
      }
     pthread_mutex_unlock ( &Cfg_ups.lib->synchro );
   }
 /**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
+/* Admin_ups_show : Affichage des infos opérationnelles liées à l'onduleur en parametre                   */
+/* Entrée: La connexion connexion ADMIN et le numero de l'onduleur                                        */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
+/**********************************************************************************************************/
+ static void Admin_ups_show ( struct CONNEXION *connexion, gint num )
+  { GSList *liste_modules;
+       
+    pthread_mutex_lock ( &Cfg_ups.lib->synchro );
+    liste_modules = Cfg_ups.Modules_UPS;
+    while ( liste_modules )
+     { struct MODULE_UPS *module;
+       module = (struct MODULE_UPS *)liste_modules->data;
+       if (module->ups.id == num) { Admin_ups_print ( connexion, module ); break; }
+       liste_modules = liste_modules->next;
+     }
+    pthread_mutex_unlock ( &Cfg_ups.lib->synchro );
+  }
+/**********************************************************************************************************/
+/* Admin_ups_start: Demande le demarrage d'un onduleur en parametre                                       */
+/* Entrée: La connexion et le numéro d'onduleur                                                           */
+/* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Admin_ups_start ( struct CONNEXION *connexion, gint id )
   { gchar chaine[128];
@@ -97,9 +118,9 @@
     Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
+/* Admin_ups_stop: Demande l'arret d'un onduleur en parametre                                             */
+/* Entrée: La connexion et le numéro d'onduleur                                                           */
+/* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Admin_ups_stop ( struct CONNEXION *connexion, gint id )
   { gchar chaine[128];
@@ -113,9 +134,9 @@
     Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
+/* Admin_command : Fonction principale de traitement des commandes du thread                              */
+/* Entrée: La connexion et la ligne de commande a parser                                                  */
+/* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128], chaine[128];
@@ -132,6 +153,11 @@
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Admin_ups_stop ( connexion, num );
      }
+    else if ( ! strcmp ( commande, "show" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       Admin_ups_show ( connexion, num );
+     }
     else if ( ! strcmp ( commande, "list" ) )
      { Admin_ups_list ( connexion );
      }
@@ -141,9 +167,9 @@
     else if ( ! strcmp ( commande, "add" ) )
      { struct UPSDB ups;
        gint retour;
-       sscanf ( ligne, "%s %[^,],%[^,],%[^,],%[^,],%d,%d,%d,%d,%[^\n]", commande,    /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %[^,],%[^,],%[^,],%[^,],%d,%d,%d,%d", commande,    /* Découpage de la ligne de commande */
                 ups.ups, ups.host, ups.username, ups.password,
-                &ups.bit_comm, &ups.ea_min, &ups.e_min, &ups.a_min, ups.libelle
+                &ups.bit_comm, &ups.ea_min, &ups.e_min, &ups.a_min
               );
        ups.enable = TRUE;
        retour = Ajouter_upsDB ( &ups );
@@ -153,14 +179,15 @@
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), " UPS %s added. New ID=%d\n", ups.ups, retour );
           Admin_write ( connexion, chaine );
+          Cfg_ups.reload = TRUE;                     /* Rechargement des modules RS en mémoire de travail */
         }
      }
     else if ( ! strcmp ( commande, "set" ) )
      { struct UPSDB ups;
        gint retour;
-       sscanf ( ligne, "%s %d,%s,%s,%s,%s,%d,%d,%d,%d,%s", commande, /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d,%[^,],%[^,],%[^,],%[^,],%d,%d,%d,%d", commande, /* Découpage de la ligne de commande */
                 &ups.id, ups.ups, ups.host, ups.username, ups.password,
-                &ups.bit_comm, &ups.ea_min, &ups.e_min, &ups.a_min, ups.libelle
+                &ups.bit_comm, &ups.ea_min, &ups.e_min, &ups.a_min
               );
        retour = Modifier_upsDB ( &ups );
        if (retour == FALSE)
@@ -169,6 +196,7 @@
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), " UPS %s changed\n", ups.ups );
           Admin_write ( connexion, chaine );
+          Cfg_ups.reload = TRUE;                     /* Rechargement des modules RS en mémoire de travail */
         }
      }
     else if ( ! strcmp ( commande, "del" ) )
@@ -182,6 +210,7 @@
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), " UPS %d erased\n", ups.id );
           Admin_write ( connexion, chaine );
+          Cfg_ups.reload = TRUE;                     /* Rechargement des modules RS en mémoire de travail */
         }
      }
     else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
@@ -196,13 +225,14 @@
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'UPS'\n" );
        Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
-       Admin_write ( connexion, "  add name,host,username,password,bit_comm,ea_min,e_min,a_min,libelle\n");
+       Admin_write ( connexion, "  add name,host,username,password,bit_comm,ea_min,e_min,a_min\n");
        Admin_write ( connexion, "                                         - Ajoute un UPS\n" );
-       Admin_write ( connexion, "  set id,name,host,username,password,bit_comm,ea_min,e_min,a_min,libelle\n");
+       Admin_write ( connexion, "  set id,name,host,username,password,bit_comm,ea_min,e_min,a_min\n");
        Admin_write ( connexion, "                                         - Change UPS id\n" );
        Admin_write ( connexion, "  del id                                 - Delete UPS id\n" );
        Admin_write ( connexion, "  start id                               - Start UPS id\n" );
        Admin_write ( connexion, "  stop id                                - Stop UPS id\n" );
+       Admin_write ( connexion, "  show id                                - Show UPS id\n" );
        Admin_write ( connexion, "  list                                   - Liste les modules ONDULEUR\n" );
        Admin_write ( connexion, "  reload                                 - Recharge la configuration\n" );
      }
