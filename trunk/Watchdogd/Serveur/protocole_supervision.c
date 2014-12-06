@@ -36,7 +36,6 @@
 /**********************************************************************************************************/
  void Gerer_protocole_supervision( struct CLIENT *client )
   { struct CONNEXION *connexion;
-    pthread_t tid;
     connexion = client->connexion;
 
     if ( ! Tester_groupe_util( client->util, GID_TOUTLEMONDE) )
@@ -53,28 +52,29 @@
                syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;
                printf("Le client desire le synoptique de supervision\n" );
 
-               if ( ! Tester_groupe_synoptique( client->util, syn->id ) )
+               struct CMD_TYPE_SYNOPTIQUE *syndb;
+               syndb = Rechercher_synoptiqueDB ( syn->id );
+               if ( ! syndb )
                 { struct CMD_GTK_MESSAGE gtkmessage;
-                  g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied..." );
+                  g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Synoptique inconnu..." );
                   Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                 (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
                 }
-               else { struct CMD_TYPE_SYNOPTIQUE *syndb;
-                      syndb = Rechercher_synoptiqueDB ( syn->id );
-                      if ( ! syndb )
-                       { struct CMD_GTK_MESSAGE gtkmessage;
-                         g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Synoptique inconnu..." );
-                         Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                                       (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
-                       }
-                      else
-                       { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_AFFICHE_PAGE_SUP,
-                                           (gchar *)syndb, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
-                         g_free(syndb);
-                         memcpy( &client->syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
-                         Client_mode( client, ENVOI_MOTIF_SUPERVISION );
-                       }
-                    }
+               else
+                { if ( ! Tester_groupe_util( client->util, syn->access_groupe ) )
+                   { struct CMD_GTK_MESSAGE gtkmessage;
+                     g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied for this syn..." );
+                     Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                                   (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
+                   }
+                  else
+                   { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_AFFICHE_PAGE_SUP,
+                                   (gchar *)syndb, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
+                     memcpy( &client->syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
+                     Client_mode( client, ENVOI_MOTIF_SUPERVISION );
+                   }
+                  g_free(syndb);
+                }
              }
             break;
        case SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN:

@@ -561,9 +561,7 @@
           else if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
            { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb ARCH" ); }
 
-          if (!Config.instance_is_master)
-           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "D.L.S Thread is administratively DOWN (instance is not Master)" ); }
-          else if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
+          if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
            { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb DLS" ); }
 
           Charger_librairies();                           /* Chargement de toutes les librairies Watchdog */

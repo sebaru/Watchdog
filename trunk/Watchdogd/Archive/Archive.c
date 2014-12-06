@@ -62,7 +62,8 @@
     struct timeval tv;
     struct ARCHDB *arch;
 
-    if (Partage->com_arch.taille_arch > 10000)
+    if (Config.instance_is_master == FALSE) return;              /* Les instances Slave n'archivent pas ! */
+    else if (Partage->com_arch.taille_arch > 10000)
      { if ( last_log + 60 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
                    "Ajouter_arch: DROP arch (taille>10000) type=%d, num=%d", type, num );

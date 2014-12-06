@@ -470,15 +470,11 @@
     Http_Log_request(connection, url, method, version, upload_data_size, con_cls);
 
 /************************************* Ici, pas de session en cours, reponse directe **********************/
-    if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/style.css" ) )
-     { return ( Http_Send_file (NULL, connection, "WEB/style.css", "text/css") ); }
-    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/prelogin.js" ) )
-     { return ( Http_Send_file (NULL, connection, "WEB/prelogin.js", "application/javascript") ); }
-    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/favicon.ico" ) )
+    if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/favicon.ico" ) )
      { return ( Http_Send_file (NULL, connection, "WEB/favicon.gif", "image/gif") ); }
-    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getgif" ) )
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getgif.ws" ) )
      { return ( Http_Traiter_request_getgif ( connection ) ); }               /* Traitement de la requete */
-    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/status" ) )
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/status.ws" ) )
      { return( Http_Traiter_request_getstatus ( connection ) ); }
     else if ( ! strcasecmp( method, MHD_HTTP_METHOD_OPTIONS ) )
      { response = MHD_create_response_from_buffer ( strlen (Options_response)+1,
@@ -501,7 +497,7 @@
        return MHD_YES;
      }
 /*-------------------------------- Récupération des login / Mot de passe ---------------------------------*/
-    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_POST ) && ! strcasecmp ( url, "/postlogin.html" ) )
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_POST ) && ! strcasecmp ( url, "/postlogin.ws" ) )
      { gchar chaine[128], username[128], password[128], **splited, **couple;
        struct HTTP_SESSION *session;
        if ((*upload_data_size == 0) & (*con_cls == NULL))
@@ -516,7 +512,7 @@
        session = *con_cls;
        if (*upload_data_size != 0)                                                /* Transfert en cours ? */
         { gchar *new_buffer;
-          new_buffer = g_try_realloc( session->buffer, session->buffer_size + *upload_data_size );
+          new_buffer = g_try_realloc( session->buffer, 1 + session->buffer_size + *upload_data_size );
           if (!new_buffer || session->buffer_size > 128)
            { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                       "Http_request_CB: Memory Alloc ERROR realloc buffer" );
@@ -531,6 +527,7 @@
           return(MHD_YES);                                        /* On demande de continuer le transfert */
         }
 /*-------------------------------- Fin de transfert. On découpe le buffer d'entré ------------------------*/
+       session->buffer[session->buffer_size] = 0;                                /* Caractère nul d'arret */
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                 "Http_request_CB: Buffer recu %s for session %s", session->buffer, session->sid );
        memset( username, 0, sizeof(username) );
@@ -570,7 +567,7 @@
                                                        (void*) "! Wrong Credentials !", MHD_RESPMEM_PERSISTENT);
           if (response == NULL) return(MHD_NO);
           Http_Add_response_header ( response );
-          MHD_queue_response (connection, MHD_HTTP_OK, response);
+          MHD_queue_response (connection, MHD_HTTP_FORBIDDEN, response);
           MHD_destroy_response (response);
           session->type = SESSION_TO_BE_CLEANED;                     /* On demande la purge de la session */
           return(MHD_YES);
@@ -583,7 +580,7 @@
                                                        (void*) "! Wrong Credentials !", MHD_RESPMEM_PERSISTENT);
           if (response == NULL) return(MHD_NO);
           Http_Add_response_header ( response );
-          MHD_queue_response (connection, MHD_HTTP_OK, response);
+          MHD_queue_response (connection, MHD_HTTP_FORBIDDEN, response);
           MHD_destroy_response (response);
           session->type = SESSION_TO_BE_CLEANED;                     /* On demande la purge de la session */
           return(MHD_YES);
@@ -595,8 +592,8 @@
        session->type = SESSION_AUTH;
        session->buffer = NULL;
        session->buffer_size = 0;
-       response = MHD_create_response_from_buffer ( strlen ("OK"),
-                                                   (void*) "OK", MHD_RESPMEM_PERSISTENT);
+       response = MHD_create_response_from_buffer ( strlen (session->sid),
+                                                   (void*) session->sid, MHD_RESPMEM_PERSISTENT);
        if (response == NULL) return(MHD_NO);
        g_snprintf ( chaine, sizeof(chaine), "sid=%s; ", session->sid );
        MHD_add_response_header (response, MHD_HTTP_HEADER_SET_COOKIE, chaine );
@@ -629,7 +626,7 @@
 
     if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/" ) )
      { return ( Http_Send_file (*con_cls, connection, "WEB/ui.html", "text/html") ); }
-    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getsyn" ) )
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getsyn.ws" ) )
      { if ( Http_Traiter_request_getsyn ( session, connection ) == FALSE)     /* Traitement de la requete */
         { response = MHD_create_response_from_buffer ( strlen (RESPONSE_INTERNAL_ERROR)+1,
                                                        RESPONSE_INTERNAL_ERROR, MHD_RESPMEM_PERSISTENT);
@@ -640,19 +637,8 @@
         }
        return MHD_YES;
      }
-    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/setm" ) )
+    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/setm.ws" ) )
      { if ( Http_Traiter_request_setm ( session, connection ) == FALSE )      /* Traitement de la requete */
-        { response = MHD_create_response_from_buffer ( strlen (RESPONSE_INTERNAL_ERROR)+1,
-                                                       RESPONSE_INTERNAL_ERROR, MHD_RESPMEM_PERSISTENT);
-          if (response == NULL) return(MHD_NO);
-          Http_Add_response_header ( response );
-          MHD_queue_response ( connection, MHD_HTTP_INTERNAL_SERVER_ERROR, response);
-          MHD_destroy_response (response);
-        }
-       return MHD_YES;
-     }
-    else if ( ! strcasecmp( method, MHD_HTTP_METHOD_GET ) && ! strcasecmp ( url, "/getgraph" ) )
-     { if ( Http_Traiter_request_getgraph ( session, connection ) == FALSE)   /* Traitement de la requete */
         { response = MHD_create_response_from_buffer ( strlen (RESPONSE_INTERNAL_ERROR)+1,
                                                        RESPONSE_INTERNAL_ERROR, MHD_RESPMEM_PERSISTENT);
           if (response == NULL) return(MHD_NO);

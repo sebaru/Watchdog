@@ -57,7 +57,7 @@
                 Admin_Satellite_Mode_vers_string( Cfg_satellite.Mode ),
                 Cfg_satellite.Mode );
     Admin_write( connexion, chaine );
-    if (next >= 0.0)
+    if (Cfg_satellite.Mode == SAT_RETRY_CONNECT)
      { g_snprintf( chaine, sizeof(chaine), " | - Retry in %02.1fs\n", next );
        Admin_write( connexion, chaine );
      }
@@ -93,6 +93,7 @@
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'Satellite'\n" );
        Admin_write ( connexion, "  dbcfg ...          - Get/Set Database Parameters\n" );
+       Admin_write ( connexion, "  status             - Show connection status\n" );
        Admin_write ( connexion, "  reload             - Reload config from Database\n" );
        Admin_write ( connexion, "  help               - This help\n" );
      } else

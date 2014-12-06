@@ -270,9 +270,13 @@
    Desabonner_distribution_entreeANA ( Satellite_Gerer_entreeANA );/* Abonnement à la diffusion des entrees */
    Desabonner_distribution_entree    ( Satellite_Gerer_entree    );/* Abonnement à la diffusion des entrees */
 
+   if (Cfg_satellite.Liste_entreeANA)                                    /* Si la liste est encore pleine */
+    { g_slist_free ( Cfg_satellite.Liste_entreeANA ); }
+
 end:
-    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
-    Cfg_satellite.lib->TID = 0;                              /* On indique au satellite que le thread est mort. */
+    Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_NOTICE,
+             "Run_thread: Down . . . TID = %p", pthread_self() );
+    Cfg_satellite.lib->TID = 0;                        /* On indique au satellite que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
 /*--------------------------------------------------------------------------------------------------------*/

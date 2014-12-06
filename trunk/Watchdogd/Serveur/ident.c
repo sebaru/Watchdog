@@ -147,6 +147,8 @@
     Autoriser_client ( client );
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
              "Tester_autorisation: Autorisation sent for %s(id=%d)", client->util->nom, client->util->id );
+                                                           /* Le client est connecté, on en informe D.L.S */
+    if (client->util->ssrv_bit_presence) SB(client->util->ssrv_bit_presence, 1);
     Client_mode (client, ENVOI_HISTO);
   }
 /*--------------------------------------------------------------------------------------------------------*/

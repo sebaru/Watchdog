@@ -217,13 +217,14 @@
                    "INSERT INTO %s"             
                    "(name,mustchangepwd,cansetpwd,comment,login_failed,enable,"
                    "date_create,enable_expire,date_expire,date_modif,sms_enable,sms_phone,sms_allow_cde,"
-                   "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_bit_presence,imsg_available)"
+                   "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence)"
                    "VALUES ('%s', 1, 1, '%s', 0, 1, %d, %d, '%d', '%d','%d','%s','%d','%d','%s','%d','%d','%d' );",
                    NOM_TABLE_UTIL, nom,
                    comment, (gint)time(NULL),
                    util->expire, (gint)util->date_expire, (gint)time(NULL),
                    util->sms_enable, phone, util->sms_allow_cde,
-                   util->imsg_enable, jabberid, util->imsg_allow_cde, util->imsg_bit_presence, util->imsg_available );
+                   util->imsg_enable, jabberid, util->imsg_allow_cde, util->imsg_available,
+                   util->ssrv_bit_presence );
      }
     else
      { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
@@ -231,12 +232,14 @@
                    "mustchangepwd=%d,comment='%s',enable=%d,enable_expire=%d,"
                    "cansetpwd=%d,date_expire='%d',date_modif='%d',"
                    "sms_enable='%d',sms_phone='%s',sms_allow_cde='%d',"
-                   "imsg_enable='%d',imsg_jabberid='%s',imsg_allow_cde='%d',imsg_bit_presence='%d',imsg_available='%d'",
+                   "imsg_enable='%d',imsg_jabberid='%s',imsg_allow_cde='%d',imsg_available='%d',"
+                   "ssrv_bit_presence='%d'",
                    NOM_TABLE_UTIL, util->mustchangepwd, comment,
                    util->enable, util->expire,
                    util->cansetpwd, (gint)util->date_expire, (gint)time(NULL),
                    util->sms_enable, phone, util->sms_allow_cde,
-                   util->imsg_enable, jabberid, util->imsg_allow_cde, util->imsg_bit_presence, util->imsg_available );
+                   util->imsg_enable, jabberid, util->imsg_allow_cde, util->imsg_available,
+                   util->ssrv_bit_presence );
        g_snprintf( chaine, sizeof(chaine), " WHERE id='%d'", util->id ); 
        g_strlcat ( requete, chaine, sizeof(requete) );
      }
@@ -403,7 +406,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT name,id,mustchangepwd,comment,enable,date_create,"
                 "enable_expire,date_expire,cansetpwd,date_modif,salt,hash,sms_enable,sms_phone,sms_allow_cde,"
-                "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_bit_presence,imsg_available "
+                "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence "
                 "FROM %s", NOM_TABLE_UTIL );
 
     db = Init_DB_SQL();       
@@ -456,8 +459,8 @@
        util->sms_allow_cde     = atoi(db->row[14]);
        util->imsg_enable       = atoi(db->row[15]);
        util->imsg_allow_cde    = atoi(db->row[17]);
-       util->imsg_bit_presence = atoi(db->row[18]);
-       util->imsg_available    = atoi(db->row[19]);
+       util->imsg_available    = atoi(db->row[18]);
+       util->ssrv_bit_presence = atoi(db->row[19]);
      }
     return( util );
   }
@@ -474,7 +477,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT name,id,mustchangepwd,comment,enable,date_create,"
                 "enable_expire,date_expire,cansetpwd,date_modif,salt,hash,sms_enable,sms_phone,sms_allow_cde,"
-                "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_bit_presence,imsg_available "
+                "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence "
                 "FROM %s WHERE id=%d LIMIT 1", NOM_TABLE_UTIL, id );
 
     db = Init_DB_SQL();       
@@ -513,7 +516,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT name,id,mustchangepwd,comment,enable,date_create,"
                 "enable_expire,date_expire,cansetpwd,date_modif,salt,hash,sms_enable,sms_phone,sms_allow_cde,"
-                "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_bit_presence,imsg_available "
+                "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence "
                 "FROM %s WHERE name='%s' LIMIT 1", NOM_TABLE_UTIL, nom );
     g_free(name);
 

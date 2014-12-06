@@ -41,7 +41,6 @@
  #define NOM_TABLE_CAMERASUP      "syns_camerasup"
 
 /*************************************** Définitions des prototypes ***************************************/
- extern gboolean Tester_groupe_synoptique( struct CMD_TYPE_UTILISATEUR *util, guint syn_id );
  extern struct CMD_TYPE_SYNOPTIQUE *Rechercher_synoptiqueDB ( guint id );
  extern gboolean Recuperer_synoptiqueDB ( struct DB **db );
  extern struct CMD_TYPE_SYNOPTIQUE *Recuperer_synoptiqueDB_suite( struct DB **db );

@@ -230,6 +230,8 @@
               "Deconnecter: deconnexion client %s", client->machine );
     Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );
     client->mode = DECONNECTE;
+                                                    /* Le client n'est plus connecté, on en informe D.L.S */
+    if (client->util && client->util->ssrv_bit_presence) SB(client->util->ssrv_bit_presence, 0);
     Unref_client( client ); 
   }
 /**********************************************************************************************************/
@@ -503,6 +505,16 @@
        g_slist_free ( Cfg_ssrv.Liste_histo );
      }
 end:
+    while (Cfg_ssrv.Clients)                                  /* Tant que des clients sont encore managés */
+     { gint nbr;
+       sleep(1);
+       pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
+       nbr = g_slist_length( Cfg_ssrv.Clients );
+       pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
+                "Run_thread: Wating for %03d clients to shutdown", nbr );
+       sched_yield();
+     }
     Cfg_ssrv.lib->Thread_run = FALSE;                                       /* Le thread ne tourne plus ! */
     Liberer_SSL ();                                                                 /* Libération mémoire */
     if (Cfg_ssrv.Socket_ecoute>0) close(Cfg_ssrv.Socket_ecoute);

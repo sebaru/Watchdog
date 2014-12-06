@@ -44,6 +44,7 @@
     GNOMEUIINFO_END
   };
  static struct TRAME_ITEM_MOTIF *appui = NULL;
+ static struct TRAME_ITEM_CAPTEUR *appui_capteur = NULL;
  static struct TRAME_ITEM_CAMERA_SUP *appui_camera_sup = NULL;
 
 /********************************* Définitions des prototypes programme ***********************************/
@@ -162,31 +163,67 @@ printf("release !\n");
      }
   }
 /**********************************************************************************************************/
-/* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision   */
+/* Clic_sur_capteur_supervision_action: Appelé pour lancer un firefox sur la periode en parametre         */
+/* Entrée: période d'affichage                                                                            */
+/* Sortie :rien                                                                                           */
+/**********************************************************************************************************/
+ static void Clic_capteur_supervision_action ( gchar *period )
+  { gint pid;
+    printf( "Clic_sur_capteur_supervision : Lancement d'un firefox type=%d, num=%d\n",
+             appui_capteur->capteur->type, appui_capteur->capteur->bit_controle );
+    pid = fork();
+    if (pid<0) return;
+    else if (!pid)                                             /* Lancement de la ligne de commande */
+     { gchar chaine[256];
+       g_snprintf( chaine, sizeof(chaine),
+                  "http://%s/watchdog/graph.php?type=%d&num=%d&period=%s",
+                   Client.host, appui_capteur->capteur->type, appui_capteur->capteur->bit_controle, period );
+       execlp( "firefox", "firefox", chaine, NULL );
+       printf("Lancement de firefox failed\n");
+       _exit(0);
+     }
+  }
+/**********************************************************************************************************/
+/* Clic_sur_capteur_supervision_xxx: Appelé quand le menu last xxx est cliqué                             */
+/* Entrée: rien                                                                                           */
+/* Sortie :rien                                                                                           */
+/**********************************************************************************************************/
+ static void Clic_capteur_supervision_hour ( void )
+  { Clic_capteur_supervision_action ( "hour" ); }
+ static void Clic_capteur_supervision_day ( void )
+  { Clic_capteur_supervision_action ( "day" ); }
+ static void Clic_capteur_supervision_week ( void )
+  { Clic_capteur_supervision_action ( "week" ); }
+ static void Clic_capteur_supervision_month ( void )
+  { Clic_capteur_supervision_action ( "month" ); }
+ static void Clic_capteur_supervision_year ( void )
+  { Clic_capteur_supervision_action ( "year" ); }
+/**********************************************************************************************************/
+/* Clic_sur_capteur_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision   */
 /* Entrée: une structure Event                                                                            */
 /* Sortie :rien                                                                                           */
 /**********************************************************************************************************/
  void Clic_sur_capteur_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                      GdkEvent *event, struct TRAME_ITEM_CAPTEUR *trame_capteur )
-  { if (!(trame_capteur && event)) return;
+  { static GtkWidget *Popup = NULL;
+    static GnomeUIInfo Popup_comment[]=
+     { GNOMEUIINFO_ITEM_STOCK( N_("Last Hour"),  NULL, Clic_capteur_supervision_hour, GNOME_STOCK_PIXMAP_BOOK_OPEN ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Last Day"),   NULL, Clic_capteur_supervision_day, GNOME_STOCK_PIXMAP_BOOK_RED ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Last Week"),  NULL, Clic_capteur_supervision_week, GNOME_STOCK_PIXMAP_BOOK_GREEN ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Last Month"), NULL, Clic_capteur_supervision_month, GNOME_STOCK_PIXMAP_BOOK_BLUE ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Last Year"),  NULL, Clic_capteur_supervision_year, GNOME_STOCK_PIXMAP_BOOK_YELLOW ),
+       GNOMEUIINFO_END
+     };
+
+    if (!(trame_capteur && event)) return;
+    appui_capteur = trame_capteur;
 
     if (event->type == GDK_BUTTON_PRESS)
      { if ( ((GdkEventButton *)event)->button == 1)           /* Release sur le motif qui a été appuyé ?? */
-        { gint pid;
-
-          printf( "Clic_sur_capteur_supervision : Lancement d'un firefox type=%d, num=%d\n",
-                  trame_capteur->capteur->type, trame_capteur->capteur->bit_controle );
-          pid = fork();
-          if (pid<0) return;
-          else if (!pid)                                             /* Lancement de la ligne de commande */
-           { gchar chaine[256];
-             g_snprintf( chaine, sizeof(chaine),
-                        "http://%s:%d/getgraph?type=%d&num=%d&period=day",
-                         Client.host, Config_cli.port_http, trame_capteur->capteur->type, trame_capteur->capteur->bit_controle );
-             execlp( "firefox", "firefox", chaine, NULL );
-             printf("Lancement de firefox failed\n");
-             _exit(0);
-           }
+        { Clic_capteur_supervision_hour ();		 }
+       else if (event->button.button == 3)
+        { if (!Popup) Popup = gnome_popup_menu_new( Popup_comment );                     /* Creation menu */
+          gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
         }
      }
   }

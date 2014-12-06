@@ -75,7 +75,7 @@
     gchar    user_agent[120], origine[80];
     gint     ssl_algo, ssl_proto;
     gchar    *buffer;                                  /* Le buffer recu dans le corps de la requete HTTP */
-    gchar    buffer_size;                                                    /* La taille utile du buffer */
+    guchar   buffer_size;                                                    /* La taille utile du buffer */
     struct   CMD_TYPE_UTILISATEUR *util;                           /* Utilisateur authentifié (via HTTPS) */
     gint     last_top;                                                     /* Date de la derniere requete */
   };
@@ -86,7 +86,6 @@
  extern gint Http_Traiter_request_getstatus ( struct MHD_Connection *connection );
  extern gint Http_Traiter_request_getslash ( struct HTTP_SESSION *session, struct MHD_Connection *connection );
  extern gint Http_Traiter_request_getgif ( struct MHD_Connection *connection );
- extern gboolean Http_Traiter_request_getgraph ( struct HTTP_SESSION *session, struct MHD_Connection *connection );
  extern gboolean Http_Traiter_request_setm ( struct HTTP_SESSION *session, struct MHD_Connection *connection );
  extern void Http_Add_response_header ( struct MHD_Response *response );
  extern void Http_free_liste_satellites ( void );

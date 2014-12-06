@@ -101,10 +101,11 @@
        liste = Cfg_ssrv.Clients;
        while ( liste )                              /* Parcours de la liste des ssrv (et donc de clients) */
         { client = (struct CLIENT *)liste->data;
-          g_snprintf( chaine, sizeof(chaine), " | - SSRV%06d - v%s %s@%s - mode %d defaut %d date %s\n",
+          g_snprintf( chaine, sizeof(chaine), " | SSRV%06d - v%s - mode %d defaut %d date %s - %s@%s\n",
                           client->ssrv_id, client->ident.version,
-                         (client->util ? client->util->nom : "unknown"), client->machine,
-                          client->mode, client->defaut, ctime(&client->date_connexion) );
+                          client->mode, client->defaut, ctime(&client->date_connexion),
+                         (client->util ? client->util->nom : "unknown"), client->machine
+                    );
           Admin_write ( connexion, chaine );
           liste = g_slist_next(liste);
         }

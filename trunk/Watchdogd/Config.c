@@ -108,12 +108,6 @@
        else
         { g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", DEFAUT_DB_USERNAME  ); }
 
-       chaine                    = g_key_file_get_string ( gkf, "DATABASE", "crypto_key", NULL );
-       if (chaine)
-        { g_snprintf( (gchar *)Config.crypto_key, sizeof(Config.crypto_key), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( (gchar *)Config.crypto_key, sizeof(Config.crypto_key), "%s", DEFAUT_CRYPTO_KEY  ); }
-
 /********************************************* Partie LOG *************************************************/
        Config.log_level = LOG_NOTICE;
        chaine = g_key_file_get_string ( gkf, "LOG", "log_level", NULL );
@@ -155,7 +149,6 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db username          %s", Config.db_username );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db password          %s", Config.db_password );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db port              %d", Config.db_port );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config crypto key           %s", Config.crypto_key );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config compil               %d", Config.compil );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
   }
@@ -188,7 +181,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
 /* Sortie: false si probleme                                                                              */
 /**********************************************************************************************************/
- static gboolean Ajouter_modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur, gboolean ajout )
+ gboolean Modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur )
   { gchar requete[2048];
     gboolean retour;
     struct DB *db;
@@ -199,37 +192,17 @@
        return(FALSE);
      }
 
-    if (ajout == FALSE)
-     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
-                  "UPDATE %s SET valeur='%s' WHERE instance_id='%s' AND nom_thread='%s' AND nom='%s'",
-                   NOM_TABLE_CONFIG, valeur, Config.instance_id, nom_thread, nom
-                 );
-     }
-    else
-     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
-                  "INSERT INTO %s(instance_id,nom_thread,nom,valeur) VALUES "
-                  "('%s','%s','%s','%s')", NOM_TABLE_CONFIG, Config.instance_id,
-                  nom_thread,nom,valeur
-                 );
-     }
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+               "INSERT INTO %s(instance_id,nom_thread,nom,valeur) VALUES "
+               "('%s','%s','%s','%s') ON DUPLICATE KEY UPDATE valeur='%s';",
+               NOM_TABLE_CONFIG, Config.instance_id,
+               nom_thread, nom, valeur, valeur
+              );
+
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return(retour);
   }
-/**********************************************************************************************************/
-/* Modifier_configDB: Modifie un parametre de configuration en base de donnée                             */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gboolean Ajouter_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur )
-  { return ( Ajouter_modifier_configDB( nom_thread, nom, valeur, TRUE ) ); }
-/**********************************************************************************************************/
-/* Modifier_configDB: Modifie un parametre de configuration en base de donnée                             */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gboolean Modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur )
-  { return ( Ajouter_modifier_configDB( nom_thread, nom, valeur, FALSE ) ); }
 /**********************************************************************************************************/
 /* Recuperer_configDB : Récupration de la configuration en base pour une instance_id donnée               */
 /* Entrée: une database de retour et le nom de l'instance_id                                              */

@@ -57,19 +57,21 @@
     else       { g_snprintf( date_creation, sizeof(date_creation), "Erreur" );    }
 
     g_snprintf( chaine, sizeof(chaine),
-              " [%03d]%12s -> enable=%d, expire=%d, date_expire=%s, mustchangepwd=%d, cansetpwd=%d\n"
-              "   |               -> date_creation=%s, date_modif=%s\n"
-              "   |               -> sms_enable =%d, sms_phone     =%30s, sms_allow_cde =%d\n"
-              "   |               -> imsg_enable=%d, imsg_jabber_id=%30s, imsg_allow_cde=%d\n"
-              "   |               -> imsg_bit_presence=B%04d, imsg_available=%d\n"
+              " [%03d]%12s -> enable=%d, expire=%d, date_expire = %s, mustchangepwd = %d, cansetpwd = %d\n"
+              "   |               -> date_creation = %s, date_modif = %s\n"
+              "   |               -> sms_enable  = %d, sms_allow_cde  = %d, sms_phone = %s\n"
+              "   |               -> imsg_enable = %d, imsg_allow_cde = %d, imsg_jabber_id = %s\n"
+              "   |               -> imsg_available = %d\n"
+              "   |               -> ssrv_bit_presence = B%04d (=%d)\n"
               "   |               -> salt=%s\n"
               "   |               -> hash=%s\n"
               "   |----------------> %s\n",
                 util->id, util->nom, util->enable, util->expire, date_expire, util->mustchangepwd,
                 util->cansetpwd, date_creation, date_modif,
-                util->sms_enable, util->sms_phone, util->sms_allow_cde,
-                util->imsg_enable, util->imsg_jabberid, util->imsg_allow_cde,
-                util->imsg_bit_presence, util->imsg_available,
+                util->sms_enable, util->sms_allow_cde, util->sms_phone,
+                util->imsg_enable, util->imsg_allow_cde, util->imsg_jabberid,
+                util->imsg_available,
+                util->ssrv_bit_presence, B(util->ssrv_bit_presence),
                 util->salt, util->hash, util->commentaire
               );
     Admin_write ( connexion, chaine );
@@ -87,6 +89,7 @@
     if ( ! Recuperer_utilisateurDB( &db ) )                           /* Chargement de la base de données */
      { g_snprintf( chaine, sizeof(chaine), " Error : DB Connexion failed\n" );
        Admin_write ( connexion, chaine );
+       return;
      }                                                                           /* Si pas de histos (??) */
 
     g_snprintf( chaine, sizeof(chaine), " -------- Users List ------------\n" );
