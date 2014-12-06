@@ -13,5 +13,4 @@ AM_CPPFLAGS= `pkg-config --cflags glib-2.0` \
           -I$(top_srcdir)/Include \
           -I../Include
 
-libwatchdog_server_rfxcom_la_LDFLAGS = -rdynamic -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION) \
-                                      `pkg-config --libs glib-2.0`
+libwatchdog_server_rfxcom_la_LDFLAGS = -rdynamic `pkg-config --libs glib-2.0`
