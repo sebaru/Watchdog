@@ -218,90 +218,16 @@
     g_list_free (lignes);
   }
 /**********************************************************************************************************/
-/* draw_page: Dessine une page pour l'envoyer sur l'imprimante                                            */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void draw_page (GtkPrintOperation *operation,
-                        GtkPrintContext   *context,
-                        gint               page_nr,
-                        GtkTreeIter *iter)
-  { gchar *nom, chaine[20], *groupe_page, *date_create, titre[128];
-    GtkTreeModel *store;
-    struct tm *temps;
-    gboolean valide;
-    guint active, id;
-    time_t timet;
-    cairo_t *cr;
-    gdouble y;
-    
-    cr = gtk_print_context_get_cairo_context (context);
-  
-    cairo_select_font_face (cr, "Courier", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (cr, 20.0 );
-
-    cairo_set_source_rgb (cr, 0.0, 0.0, 1.0);
-
-    timet = time(NULL);
-    temps = localtime( &timet );
-    if (temps) { strftime( chaine, sizeof(chaine), "%F %T", temps ); }
-    else       { g_snprintf( chaine, sizeof(chaine), _("Erreur") ); }
-
-    date_create = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
-    g_snprintf( titre, sizeof(titre), " Watchdog - Modules D.L.S - %s - Page %d", date_create, page_nr+1 );
-    g_free( date_create );
-
-    cairo_move_to( cr, 0.0, 0.0 );
-    cairo_show_text (cr, titre );
-
-
-    cairo_set_font_size (cr, PRINT_FONT_SIZE );
-    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_plugin_dls) );
-    valide = TRUE;
-    y = 2 * PRINT_FONT_SIZE;
-    while ( valide && y<gtk_print_context_get_height (context) )      /* Pour tous les objets du tableau */
-     { gtk_tree_model_get( store, iter, COLONNE_ID, &id, COLONNE_ACTIVE, &active,
-                                         COLONNE_NOM, &nom,
-                                         COLONNE_GROUPE_PAGE, &groupe_page,
-                           -1 );
-       cairo_move_to( cr, 0.0*PRINT_FONT_SIZE, y );
-       if (active) { cairo_set_source_rgb (cr, 0.0, 1.0, 0.0);
-                     cairo_show_text (cr, _("-ACTIVE- ") );
-                   }
-       else        { cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
-                     cairo_show_text (cr, _("-STANDBY-") );
-                   }
-
-       cairo_move_to( cr, 6.0*PRINT_FONT_SIZE, y );
-       cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-       g_snprintf( chaine, sizeof(chaine), "%d", id );
-       cairo_show_text (cr, chaine );
-
-       cairo_move_to( cr, 9.0*PRINT_FONT_SIZE, y );
-       cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-       cairo_show_text (cr, groupe_page );
-
-       cairo_move_to( cr, 30.0*PRINT_FONT_SIZE, y );
-       cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-       cairo_show_text (cr, nom );
-
-       g_free(nom);
-       g_free(groupe_page);
-
-       valide = gtk_tree_model_iter_next( store, iter );
-       y += PRINT_FONT_SIZE;
-     }
-  }
-/**********************************************************************************************************/
 /* Menu_exporter_message: Exportation de la base dans un fichier texte                                    */
 /* Entrée: néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Menu_exporter_plugin_dls( void )
-  { static GtkTreeIter iter;
+  { GtkSourcePrintCompositor *compositor;
     GtkPrintOperation *print;
-    GtkPrintOperationResult res;
+    GtkSourceBuffer *buffer;
     GtkTreeModel *store;
+    GtkTreeIter iter;
     gboolean valide;
     GError *error;
 
@@ -309,14 +235,75 @@
     valide = gtk_tree_model_get_iter_first( store, &iter );
     if (!valide) return;
 
+    buffer = gtk_source_buffer_new( NULL );                               /* Création d'un nouveau buffer */
+    gtk_text_buffer_create_tag ( GTK_TEXT_BUFFER(buffer), "active",
+                                "background", "green", "foreground", "white"
+                               );
+    gtk_text_buffer_create_tag ( GTK_TEXT_BUFFER(buffer), "down",
+                                "background", "red",   "foreground", "white"
+                               );
+
+    while ( valide  )                                            /* Pour tous les groupe_pages du tableau */
+     { gchar pivot[80], *nom, chaine[128], *groupe_page;
+       GtkTextIter iter_end;
+       gint len, cpt, id;
+       gboolean active;
+
+       gtk_tree_model_get( store, &iter, COLONNE_ID, &id, COLONNE_ACTIVE, &active,
+                                         COLONNE_NOM, &nom,
+                                         COLONNE_GROUPE_PAGE, &groupe_page,
+                           -1 );
+
+       gtk_text_buffer_get_end_iter ( GTK_TEXT_BUFFER(buffer), &iter_end );
+       if (active)
+        { gtk_text_buffer_insert_with_tags_by_name ( GTK_TEXT_BUFFER(buffer), &iter_end, "--UP--", -1,
+                                                     "active", NULL );
+        }
+       else
+        { gtk_text_buffer_insert_with_tags_by_name ( GTK_TEXT_BUFFER(buffer), &iter_end, "-DOWN-", -1,
+                                                     "down", NULL );
+        }
+
+       g_snprintf( chaine, sizeof(chaine), "- %04d - ", id );
+       g_utf8_strncpy ( pivot, groupe_page, 30 );
+       len = g_utf8_strlen( pivot, -1 );
+       g_strlcat ( chaine, pivot, sizeof(chaine) );
+       if ( len <= PRINT_NBR_CHAR_GROUPE_PAGE )
+        { for(cpt=len; cpt<=PRINT_NBR_CHAR_GROUPE_PAGE; cpt++) g_strlcat( chaine, " ", sizeof(chaine) ); }
+       g_strlcat( chaine, "- ", sizeof(chaine) );
+
+       g_strlcat( chaine, nom, sizeof(chaine)-1 );
+       g_strlcat( chaine, "\n", sizeof(chaine) );
+
+       gtk_text_buffer_insert_at_cursor ( GTK_TEXT_BUFFER(buffer), chaine, -1 );
+       g_free(nom);
+       g_free(groupe_page);
+       valide = gtk_tree_model_iter_next( store, &iter );
+     }
+
+    compositor = gtk_source_print_compositor_new ( GTK_SOURCE_BUFFER(buffer) );
+    gtk_source_print_compositor_set_print_line_numbers ( compositor, 5 );
+    gtk_source_print_compositor_set_body_font_name ( compositor, PRINT_FONT_NAME );
+    gtk_source_print_compositor_set_print_header ( compositor, TRUE );
+    gtk_source_print_compositor_set_header_format ( compositor, TRUE,
+                                                    "Plugin D.L.S",
+                                                    "%F",
+                                                    PRINT_HEADER_RIGHT);
+    gtk_source_print_compositor_set_print_footer ( compositor, TRUE );
+    gtk_source_print_compositor_set_footer_format ( compositor, TRUE,
+                                                    PRINT_FOOTER_LEFT,
+                                                    PRINT_FOOTER_CENTER,
+                                                    PRINT_FOOTER_RIGHT);
+    gtk_source_print_compositor_set_highlight_syntax ( compositor, TRUE );
+
     print = New_print_job ( "Print Plugin D.L.S" );
+    g_signal_connect (G_OBJECT(print), "draw-page", G_CALLBACK (Print_draw_page), compositor );
+    g_signal_connect (G_OBJECT(print), "paginate",  G_CALLBACK (Print_paginate),  compositor );
 
-    g_signal_connect (G_OBJECT(print), "draw-page", G_CALLBACK (draw_page), &iter );
-    g_signal_connect (G_OBJECT(print), "begin-print",
-                      G_CALLBACK (Begin_print), GTK_TREE_VIEW(Liste_plugin_dls) );
-
-    res = gtk_print_operation_run (print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
-                                   GTK_WINDOW(F_client), &error);
+    gtk_print_operation_run (print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
+                             GTK_WINDOW(F_client), &error);
+    g_object_unref( compositor);
+    g_object_unref(buffer);
   }
 /**********************************************************************************************************/
 /* Gerer_popup_plugin_dls: Gestion du menu popup quand on clique droite sur la liste des plugin_dls       */

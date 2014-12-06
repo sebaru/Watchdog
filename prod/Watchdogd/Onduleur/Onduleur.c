@@ -104,7 +104,7 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,host,ups,bit_comm,enable,ea_min,libelle,e_min,a_min,username,password "
+                "SELECT id,host,ups,bit_comm,enable,ea_min,e_min,a_min,username,password "
                 " FROM %s WHERE instance_id='%s' ORDER BY host,ups", NOM_TABLE_UPS, Config.instance_id );
 
     return ( Lancer_requete_SQL ( db, requete ) );             /* Execution de la requete SQL */
@@ -128,15 +128,14 @@
     else
      { memcpy( &ups->host,     db->row[1],  sizeof(ups->host   ) );
        memcpy( &ups->ups,      db->row[2],  sizeof(ups->ups    ) );
-       memcpy( &ups->libelle,  db->row[6],  sizeof(ups->libelle) );
-       memcpy( &ups->username, db->row[9],  sizeof(ups->username) );
-       memcpy( &ups->password, db->row[10], sizeof(ups->password) );
+       memcpy( &ups->username, db->row[8],  sizeof(ups->username) );
+       memcpy( &ups->password, db->row[9], sizeof(ups->password) );
        ups->id                = atoi(db->row[0]);
        ups->bit_comm          = atoi(db->row[3]);
        ups->enable            = atoi(db->row[4]);
        ups->ea_min            = atoi(db->row[5]);
-       ups->e_min             = atoi(db->row[7]);
-       ups->a_min             = atoi(db->row[8]);
+       ups->e_min             = atoi(db->row[6]);
+       ups->a_min             = atoi(db->row[7]);
      }
     return(ups);
   }
@@ -146,7 +145,7 @@
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
  static gint Ajouter_modifier_upsDB( struct UPSDB *ups, gboolean ajout )
-  { gchar *host, *name, *libelle,*username,*password;
+  { gchar *host, *name, *username, *password;
     gboolean retour_sql;
     gchar requete[2048];
     struct DB *db;
@@ -163,18 +162,10 @@
        Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation name impossible" );
        return(-1);
      }
-    libelle = Normaliser_chaine ( ups->libelle );            /* Formatage correct des chaines */
-    if (!libelle)
-     { g_free(host);
-       g_free(name);
-       Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation libelle impossible" );
-       return(-1);
-     }
     username = Normaliser_chaine ( ups->username );          /* Formatage correct des chaines */
     if (!username)
      { g_free(host);
        g_free(name);
-       g_free(libelle);
        Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation username impossible" );
        return(-1);
      }
@@ -182,7 +173,6 @@
     if (!password)
      { g_free(host);
        g_free(name);
-       g_free(libelle);
        g_free(username);
        Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "Ajouter_modifier_upsDB: Normalisation password impossible" );
        return(-1);
@@ -191,9 +181,9 @@
     if (ajout == TRUE)
      { g_snprintf( requete, sizeof(requete),
                    "INSERT INTO %s"
-                   "(instance_id,host,ups,libelle,bit_comm,enable,ea_min,e_min,a_min,username,password) "
-                   "VALUES ('%s','%s','%s','%s',%d,%d,%d,%d,%d,'%s','%s')",
-                   NOM_TABLE_UPS, Config.instance_id, host, name, libelle, ups->bit_comm, ups->enable,
+                   "(instance_id,host,ups,bit_comm,enable,ea_min,e_min,a_min,username,password) "
+                   "VALUES ('%s','%s','%s',%d,%d,%d,%d,%d,'%s','%s')",
+                   NOM_TABLE_UPS, Config.instance_id, host, name, ups->bit_comm, ups->enable,
                    ups->ea_min, ups->e_min, ups->a_min, username, password
                  );
      }
@@ -202,16 +192,15 @@
                    "UPDATE %s SET "             
                    "host='%s',ups='%s',bit_comm=%d,enable=%d,"
                    "ea_min=%d,e_min=%d,a_min=%d,"
-                   "libelle='%s',username='%s',password='%s' "
+                   "username='%s',password='%s' "
                    "WHERE id=%d",
                    NOM_TABLE_UPS, host, name, ups->bit_comm, ups->enable,
                    ups->ea_min, ups->e_min, ups->a_min,
-                   libelle, username, password,
+                   username, password,
                    ups->id );
      }
     g_free(host);
     g_free(name);
-    g_free(libelle);
     g_free(username);
     g_free(password);
 
@@ -221,14 +210,13 @@
        return(-1);
      }
 
-    retour_sql = Lancer_requete_SQL ( db, requete );               /* Lancement de la requete */
+    retour_sql = Lancer_requete_SQL ( db, requete );                           /* Lancement de la requete */
     if ( retour_sql == TRUE )                                                          /* Si pas d'erreur */
-     { if (ajout==TRUE) retour = Recuperer_last_ID_SQL ( db );    /* Retourne le nouvel ID ups */
+     { if (ajout==TRUE) retour = Recuperer_last_ID_SQL ( db );               /* Retourne le nouvel ID ups */
        else retour = 0;
      }
     else retour = -1;
     Libere_DB_SQL( &db );
-    Cfg_ups.reload = TRUE;                         /* Rechargement des modules RS en mémoire de travaille */
     return ( retour );                                            /* Pas d'erreur lors de la modification */
   }
 /**********************************************************************************************************/
@@ -236,8 +224,8 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gint Modifier_upsDB( struct UPSDB *ups )
-  { return ( Ajouter_modifier_upsDB( ups, FALSE ) );
+ gboolean Modifier_upsDB( struct UPSDB *ups )
+  { return ( (Ajouter_modifier_upsDB( ups, FALSE ) > 0 ? TRUE : FALSE) );
   }
 /**********************************************************************************************************/
 /* Modifier_upsDB: Modification d'un ups Watchdog                                                         */
@@ -359,7 +347,6 @@
     if (module->started == TRUE)
      { upscli_disconnect( &module->upsconn );
        module->started = FALSE;
-       module->nbr_deconnect++;
      }
 
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "Deconnecter_module %d", module->ups.id );
@@ -411,12 +398,12 @@
                    (char *)upscli_strerror(&module->upsconn) );
         }
        else
-        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, 
+        { g_snprintf( module->libelle, sizeof(module->libelle), "%s", buffer + strlen(module->ups.ups) + 9 );
+          Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, 
                    "Connecter_ups: Reading GET UPSDESC %s",
-                   buffer + strlen(module->ups.ups) + 9 );
+                   module->libelle );
         }
      }
-
 /********************************************* USERNAME ***************************************************/
     g_snprintf( buffer, sizeof(buffer), "USERNAME %s\n", module->ups.username );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
@@ -457,7 +444,7 @@
         }
      }
 
-    module->date_retente = 0;
+    module->date_next_connexion = 0;
     module->started = TRUE;
     if (module->ups.bit_comm) SB( module->ups.bit_comm, 1 );    /* Mise a un du bit interne lié au module */
     num_ea = module->ups.ea_min;
@@ -510,6 +497,7 @@
 /**********************************************************************************************************/
  gboolean Onduleur_get_var ( struct MODULE_UPS *module, gchar *nom_var, gfloat *retour )
   { gchar buffer[80];
+    gint retour_read;
 
     g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->ups.ups, nom_var );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
@@ -519,14 +507,15 @@
        return(FALSE);
      }
 
-    if ( upscli_readline( &module->upsconn, buffer, sizeof(buffer) ) == -1 )
+    retour_read = upscli_readline( &module->upsconn, buffer, sizeof(buffer) );
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
+             "Onduleur_get_var: Reading GET VAR %s ReadLine result = %d, upscli_upserror = %d, buffer = %s",
+              nom_var, retour_read, upscli_upserror(&module->upsconn), buffer );
+    if ( retour_read == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "Onduleur_get_var: Reading GET VAR result failed (%s) error=%s",
                  nom_var, (char *)upscli_strerror(&module->upsconn) );
-       if (upscli_upserror(&module->upsconn) != UPSCLI_ERR_VARNOTSUPP)        /* Variable non supportée ? */
-        { return(FALSE); }
-       *retour = 0.0;
-       return(TRUE);                                     /* Variable not supported... is not an error ... */
+       return(FALSE);
      }
 
     if ( ! strncmp ( buffer, "VAR", 3 ) )
@@ -536,8 +525,14 @@
        return(TRUE);
      }
 
+    if ( ! strcmp ( buffer, "ERR VAR-NOT-SUPPORTED" ) )
+     { *retour = 0.0;
+       return(TRUE);                                     /* Variable not supported... is not an error ... */
+     }
+
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-             "Onduleur_get_var: Reading GET VAR %s NOK error %s", nom_var, buffer );
+             "Onduleur_get_var: Reading GET VAR %s Failed : error %s (buffer %s)",
+              nom_var, (char *)upscli_strerror(&module->upsconn), buffer );
     return(FALSE);
   }
 /**********************************************************************************************************/
@@ -581,42 +576,52 @@
 
     if ( Onduleur_get_var ( module, "ups.load", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
+    else return(FALSE);                                                               /* Retour si erreur */
     
     num_ea++;
     if ( Onduleur_get_var ( module, "ups.realpower", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
+    else return(FALSE);                                                               /* Retour si erreur */
 
     num_ea++;
     if ( Onduleur_get_var ( module, "battery.charge", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
+    else return(FALSE);                                                               /* Retour si erreur */
 
     num_ea++;
     if ( Onduleur_get_var ( module, "input.voltage", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
+    else return(FALSE);                                                               /* Retour si erreur */
 
     num_ea++;
     if ( Onduleur_get_var ( module, "battery.runtime", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
+    else return(FALSE);                                                               /* Retour si erreur */
 
     num_ea++;
     if ( Onduleur_get_var ( module, "battery.voltage", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
+    else return(FALSE);                                                               /* Retour si erreur */
 
     num_ea++;
     if ( Onduleur_get_var ( module, "input.frequency", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
+    else return(FALSE);                                                               /* Retour si erreur */
 
     num_ea++;
     if ( Onduleur_get_var ( module, "output.current", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
+    else return(FALSE);                                                               /* Retour si erreur */
 
     num_ea++;
     if ( Onduleur_get_var ( module, "output.frequency", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
+    else return(FALSE);                                                               /* Retour si erreur */
 
     num_ea++;
     if ( Onduleur_get_var ( module, "output.voltage", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */
+    else return(FALSE);                                                               /* Retour si erreur */
 
     return(TRUE);
   }
@@ -673,15 +678,19 @@
 
        if (Cfg_ups.admin_start)
         { module = Chercher_module_ups_by_id ( Cfg_ups.admin_start );
-          if (module) module->started = TRUE;
+          if (module) { module->ups.enable = TRUE;
+                        module->date_next_connexion = 0;
+                        Modifier_upsDB( &module->ups );
+                      }
           Cfg_ups.admin_start = 0;
         }
 
        if (Cfg_ups.admin_stop)
         { module = Chercher_module_ups_by_id ( Cfg_ups.admin_stop );
-          if (module) { module->started = FALSE;
+          if (module) { module->ups.enable = FALSE;
                         Deconnecter_module  ( module );
-                        module->date_retente = 0;                            /* RAZ de la date de retente */
+                        module->date_next_connexion = 0;                            /* RAZ de la date de retente */
+                        Modifier_upsDB( &module->ups );
                       }
           Cfg_ups.admin_stop = 0;
         }
@@ -694,7 +703,7 @@
        while (liste && (lib->Thread_run == TRUE))
         { module = (struct MODULE_UPS *)liste->data;
           if ( module->ups.enable != TRUE ||        /* si le module n'est pas enable, on ne le traite pas */
-               Partage->top < module->date_retente )           /* Si attente retente, on change de module */
+               Partage->top < module->date_next_connexion )    /* Si attente retente, on change de module */
            { liste = liste->next;                      /* On prépare le prochain accès au prochain module */
              continue;
            }
@@ -704,7 +713,7 @@
               { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                          "Run_thread: Module %03d DOWN", module->ups.id );
                 Deconnecter_module ( module );                     /* Sur erreur, on deconnecte le module */
-                module->date_retente = Partage->top + UPS_RETRY;
+                module->date_next_connexion = Partage->top + UPS_RETRY;
               }
            }
           else
@@ -712,16 +721,16 @@
                       "Run_thread: Envoi des sorties ups ID%03d", module->ups.id );
              if ( Envoyer_sortie_ups ( module ) == FALSE )
               { Deconnecter_module ( module );                     /* Sur erreur, on deconnecte le module */
-                module->date_retente = Partage->top + UPS_RETRY;             /* On retente dans longtemps */
+                module->date_next_connexion = Partage->top + UPS_RETRY;             /* On retente dans longtemps */
               }
              else
               { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
                          "Run_thread: Interrogation ups ID%03d", module->ups.id );
                 if ( Interroger_ups ( module ) == FALSE )
                  { Deconnecter_module ( module );
-                   module->date_retente = Partage->top + UPS_RETRY;          /* On retente dans longtemps */
+                   module->date_next_connexion = Partage->top + UPS_RETRY;          /* On retente dans longtemps */
                  }
-                else module->date_retente = Partage->top + UPS_POLLING;  /* Update toutes les xx secondes */
+                else module->date_next_connexion = Partage->top + UPS_POLLING;  /* Update toutes les xx secondes */
               }
            }
           liste = liste->next;                         /* On prépare le prochain accès au prochain module */

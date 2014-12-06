@@ -65,7 +65,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_HISTO:
              { struct CMD_TYPE_HISTO *histo;
-               Set_progress_plusun();
+               Set_progress_plus(1);
                histo = (struct CMD_TYPE_HISTO *)g_try_malloc0( sizeof( struct CMD_TYPE_HISTO ) );
                if (!histo) return; 
                memcpy( histo, connexion->donnees, sizeof(struct CMD_TYPE_HISTO ) );
@@ -76,14 +76,13 @@
              { g_list_foreach( Arrivee_histo, (GFunc)Proto_afficher_un_histo, NULL );
                g_list_foreach( Arrivee_histo, (GFunc)g_free, NULL );
                g_list_free( Arrivee_histo );
-     printf("Reception histo: affichage\n");
                Arrivee_histo = NULL;
                Chercher_page_notebook( TYPE_PAGE_HISTO, 0, TRUE );
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS:
              { struct CMD_RESPONSE_HISTO_MSGS *response;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                response = (struct CMD_RESPONSE_HISTO_MSGS *)g_try_malloc0( sizeof( struct CMD_RESPONSE_HISTO_MSGS ) );
                if (!response) return; 
@@ -93,15 +92,10 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS_FIN:
-             { printf("histo_msgs 1\n");
-               Proto_effacer_liste_histo_msgs(page_id);
-               printf("histo_msgs 2\n");
+             { Proto_effacer_liste_histo_msgs(page_id);
                g_list_foreach( Arrivee_histo_msgs, (GFunc)Proto_afficher_un_histo_msgs, NULL );
-               printf("histo_msgs 3\n");
                g_list_foreach( Arrivee_histo_msgs, (GFunc)g_free, NULL );
-               printf("histo_msgs 4\n");
                g_list_free( Arrivee_histo_msgs );
-               printf("histo_msgs 5\n");
                Arrivee_histo_msgs = NULL;
              }
             break;

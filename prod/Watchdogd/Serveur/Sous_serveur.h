@@ -33,39 +33,28 @@
 
  #include "Client.h"
 
- #define DEFAUT_PORT                    5558
- #define DEFAUT_MAX_CLIENT              100
- #define DEFAUT_MIN_SERVEUR             1
- #define DEFAUT_MAX_SERVEUR             3
- #define DEFAUT_MAX_INACTIVITE          600
- #define DEFAUT_TAILLE_CLEF_DH          512
- #define DEFAUT_TAILLE_CLEF_RSA         2048
- #define DEFAUT_SSL_CRYPT               0
- #define DEFAUT_TIMEOUT_CONNEXION       30               /* 30 secondes max pour se loguer sur le serveur */
- #define DEFAUT_TAILLE_BLOC_RESEAU      8192
- #define DEFAUT_MAX_LOGIN_FAILED        3
- #define FICHIER_CERTIF_CA             "cacert.pem"
- #define FICHIER_CERTIF_SERVEUR        "serveursigne.pem"
- #define FICHIER_CERTIF_CLEF_SERVEUR   "serveurkey.pem"
- #define FICHIER_CLEF_PUB_RSA          "watchdogd.pub.rsa" 
- #define FICHIER_CLEF_SEC_RSA          "watchdogd.sec.rsa" 
+ #define NOM_THREAD                    "SSRV"
+ #define SSRV_DEFAUT_PORT              5558
+ #define SSRV_DEFAUT_SSL_NEEDED        FALSE
+ #define SSRV_DEFAUT_SSL_PEER_CERT     FALSE
+ #define SSRV_DEFAUT_NETWORK_BUFFER    16384
+ #define SSRV_DEFAUT_FILE_CA           "cacert.pem"
+ #define SSRV_DEFAUT_FILE_CERT         "server.crt"
+ #define SSRV_DEFAUT_FILE_KEY          "serverkey.pem"
 
  struct SSRV_CONFIG
   { struct LIBRAIRIE *lib;
     gint Socket_ecoute;                                      /* Socket de connexion (d'écoute) du serveur */
     SSL_CTX *Ssl_ctx;                                              /* Contexte de cryptage des connexions */
+    X509 *ssrv_certif;
     gint  port;                                                    /* Port d'ecoute des requetes clientes */
-    gint  max_client;                  /* Nombre maximum de client qui peuvent se connecter en meme temps */
-    gint  min_serveur;                                     /* Nombre de server min à lancer en même temps */
-    gint  max_serveur;                                     /* Nombre de server max à lancer en même temps */
-    gint  max_inactivite;                                            /* temps max d'inactivite du serveur */
-    gint  max_login_failed;                      /* Nombre de tentative de connexion failed avant blocage */
-    gint  taille_clef_dh;                                       /* Taille en bits de la clef DH de codage */
-    gint  taille_clef_rsa;                                     /* Taille en bits de la clef RSA de codage */
     gint  taille_bloc_reseau;
-    gboolean ssl_crypt;                                                  /* Cryptage des transmissions ?? */
+    gboolean ssl_needed;                                                 /* Cryptage des transmissions ?? */
+    gboolean ssl_peer_cert;                                 /* Devons-nous valider le certificat client ? */
+    gchar ssl_file_cert[80];
+    gchar ssl_file_key[80];
+    gchar ssl_file_ca[80];
     gint  timeout_connexion;                       /* Temps max d'attente de reponse de la part du client */
-    RSA *rsa;                                                      /* Clefs publique et privée du serveur */
     GSList *Clients;                                             /* Liste des clients en cours de gestion */
     GSList *Liste_histo;                                                  /* Envoi d'un histo aux clients */
     GSList *Liste_motif;                                                 /* Destruction d'un histo client */
@@ -80,6 +69,7 @@
 /*---------------------------- Déclarations des prototypes de fonctions ----------------------------------*/
 
                                                                                         /* Dans serveur.c */
+ extern gboolean Ssrv_Lire_config ( void );
  extern void Unref_client ( struct CLIENT *client );
  extern void Ref_client ( struct CLIENT *client );
  extern void Deconnecter ( struct CLIENT *client );
@@ -88,11 +78,9 @@
  extern void Ecouter_client ( struct CLIENT *client );                                /* Dans protocole.c */
 
  extern void Liberer_SSL ( void );                                                          /* Dans ssl.c */ 
- extern void Init_RSA ( void );
 
                                                                                   /* Dans protocole_***.c */
  extern void Gerer_protocole_atelier( struct CLIENT *client );
- extern void Gerer_protocole_scenario( struct CLIENT *client );
  extern void Gerer_protocole_icone( struct CLIENT *client );
  extern void Gerer_protocole_dls( struct CLIENT *client );
  extern void Gerer_protocole_utilisateur( struct CLIENT *client );
@@ -105,6 +93,7 @@
  extern void Gerer_protocole_synoptique( struct CLIENT *client );
  extern void Gerer_protocole_camera( struct CLIENT *client );
  extern void Gerer_protocole_admin( struct CLIENT *client );
+ extern void Gerer_protocole_satellite( struct CLIENT *client );
 
                                                                                           /* Dans envoi.c */
  extern gint Envoi_client( struct CLIENT *client, gint tag, gint sstag, gchar *buffer, gint taille );
@@ -119,7 +108,8 @@
  extern gboolean Tester_update_capteur( struct CAPTEUR *capteur );                      /* Dans capteur.c */
  extern struct CMD_ETAT_BIT_CAPTEUR *Formater_capteur( struct CAPTEUR *capteur );
 
- extern void Tester_autorisation ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *util );/* Dans ident.c */
+                                                                                          /* Dans ident.c */
+ extern void Tester_autorisation ( struct CLIENT *client, struct REZO_CLI_IDENT *ident );
  extern void Proto_set_password ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *util );
 
  extern void Client_mode ( struct CLIENT *client, gint mode );                          /* Dans Serveur.c */
@@ -276,22 +266,6 @@
 
                                                                                /* Dans envoi_histo_courbe */
  extern void Proto_ajouter_histo_courbe_thread ( struct CLIENT *client );
-
-                                                                                 /* Dans envoi_scenario.h */
- extern void Proto_editer_scenario ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc );
- extern void Proto_valider_editer_scenario ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc );
- extern void Proto_effacer_scenario ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc );
- extern void Proto_effacer_scenario_tag ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc,
-                                          gint tag, gint sstag );
- extern void Proto_ajouter_scenario ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc );
- extern void *Envoyer_scenario_thread ( struct CLIENT *client );
-
-                                                                      /* Dans envoi_synoptique_scenario.h */
- extern void Proto_editer_scenario_sup ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc );
- extern void Proto_valider_editer_scenario_sup ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc );
- extern void Proto_effacer_scenario_sup ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc );
- extern void Proto_ajouter_scenario_sup ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_sc );
- extern void *Envoyer_scenario_sup_thread ( struct CLIENT *client );
 
                                                                                    /* Dans envoi_camera.c */
  extern void Proto_ajouter_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera );

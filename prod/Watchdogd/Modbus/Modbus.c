@@ -368,8 +368,9 @@
     fcntl( connexion, F_SETFL, SO_KEEPALIVE | SO_REUSEADDR );
     module->connexion = connexion;                                                    /* Sauvegarde du fd */
     module->date_last_reponse = Partage->top;
-    module->date_retente = 0;
-    module->transaction_id=1;
+    module->date_retente   = 0;
+    module->nbr_deconnect  = 0;
+    module->transaction_id = 1;
     module->started = TRUE;
     module->mode = MODBUS_GET_DESCRIPTION;
 
@@ -1010,7 +1011,6 @@
                 (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1)
                );
        Deconnecter_module( module );
-       module->modbus.enable = FALSE;          /* Arrete la communication (ie pas de reprise automatique) */
        return;
      }
 

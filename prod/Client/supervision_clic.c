@@ -33,19 +33,18 @@
  #include "Config_cli.h"
  #include "trame.h"
 
- extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
+ extern struct CLIENT Client;                           /* Identifiant de l'utilisateur en cours */
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
 
- static void Envoyer_action_programme ( void );
-
  static GnomeUIInfo Menu_popup[]=
-  { GNOMEUIINFO_ITEM_STOCK ( N_("Program"), NULL, Envoyer_action_programme, GNOME_STOCK_PIXMAP_EXEC ),
+  { /*GNOMEUIINFO_ITEM_STOCK ( N_("Program"), NULL, Envoyer_action_programme, GNOME_STOCK_PIXMAP_EXEC ),*/
     GNOMEUIINFO_END
   };
  static struct TRAME_ITEM_MOTIF *appui = NULL;
+ static struct TRAME_ITEM_CAPTEUR *appui_capteur = NULL;
  static struct TRAME_ITEM_CAMERA_SUP *appui_camera_sup = NULL;
 
 /********************************* Définitions des prototypes programme ***********************************/
@@ -68,20 +67,6 @@
     Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_ACTION_M,
                    (gchar *)&bit_clic, sizeof(struct CMD_ETAT_BIT_CLIC) );
     printf("Envoi M%d = 1 au serveur \n", bit_clic.num );
-  }
-/**********************************************************************************************************/
-/* Envoyer_action_programme: Lance la fenetre de liste des actions programmées pour le motif en question  */
-/* Entrée: une structure TRAME_ITEM_MOTIF                                                                 */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
- static void Envoyer_action_programme ( void )
-  { struct CMD_WANT_SCENARIO_MOTIF sce;
-    sce.bit_clic = appui->motif->bit_clic;
-    sce.bit_clic2 = appui->motif->bit_clic2;
-    Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SUP_WANT_SCENARIO,
-                   (gchar *)&sce, sizeof(struct CMD_WANT_SCENARIO_MOTIF) );
-    printf("Envoi demande de scenario motif %d %d au serveur \n", sce.bit_clic, sce.bit_clic2 );
-    Creer_fenetre_scenario( appui->motif );
   }
 /**********************************************************************************************************/
 /* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision   */
@@ -178,31 +163,67 @@ printf("release !\n");
      }
   }
 /**********************************************************************************************************/
-/* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision   */
+/* Clic_sur_capteur_supervision_action: Appelé pour lancer un firefox sur la periode en parametre         */
+/* Entrée: période d'affichage                                                                            */
+/* Sortie :rien                                                                                           */
+/**********************************************************************************************************/
+ static void Clic_capteur_supervision_action ( gchar *period )
+  { gint pid;
+    printf( "Clic_sur_capteur_supervision : Lancement d'un firefox type=%d, num=%d\n",
+             appui_capteur->capteur->type, appui_capteur->capteur->bit_controle );
+    pid = fork();
+    if (pid<0) return;
+    else if (!pid)                                             /* Lancement de la ligne de commande */
+     { gchar chaine[256];
+       g_snprintf( chaine, sizeof(chaine),
+                  "http://%s/watchdog/graph.php?type=%d&num=%d&period=%s",
+                   Client.host, appui_capteur->capteur->type, appui_capteur->capteur->bit_controle, period );
+       execlp( "firefox", "firefox", chaine, NULL );
+       printf("Lancement de firefox failed\n");
+       _exit(0);
+     }
+  }
+/**********************************************************************************************************/
+/* Clic_sur_capteur_supervision_xxx: Appelé quand le menu last xxx est cliqué                             */
+/* Entrée: rien                                                                                           */
+/* Sortie :rien                                                                                           */
+/**********************************************************************************************************/
+ static void Clic_capteur_supervision_hour ( void )
+  { Clic_capteur_supervision_action ( "hour" ); }
+ static void Clic_capteur_supervision_day ( void )
+  { Clic_capteur_supervision_action ( "day" ); }
+ static void Clic_capteur_supervision_week ( void )
+  { Clic_capteur_supervision_action ( "week" ); }
+ static void Clic_capteur_supervision_month ( void )
+  { Clic_capteur_supervision_action ( "month" ); }
+ static void Clic_capteur_supervision_year ( void )
+  { Clic_capteur_supervision_action ( "year" ); }
+/**********************************************************************************************************/
+/* Clic_sur_capteur_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision   */
 /* Entrée: une structure Event                                                                            */
 /* Sortie :rien                                                                                           */
 /**********************************************************************************************************/
  void Clic_sur_capteur_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                      GdkEvent *event, struct TRAME_ITEM_CAPTEUR *trame_capteur )
-  { if (!(trame_capteur && event)) return;
+  { static GtkWidget *Popup = NULL;
+    static GnomeUIInfo Popup_comment[]=
+     { GNOMEUIINFO_ITEM_STOCK( N_("Last Hour"),  NULL, Clic_capteur_supervision_hour, GNOME_STOCK_PIXMAP_BOOK_OPEN ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Last Day"),   NULL, Clic_capteur_supervision_day, GNOME_STOCK_PIXMAP_BOOK_RED ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Last Week"),  NULL, Clic_capteur_supervision_week, GNOME_STOCK_PIXMAP_BOOK_GREEN ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Last Month"), NULL, Clic_capteur_supervision_month, GNOME_STOCK_PIXMAP_BOOK_BLUE ),
+       GNOMEUIINFO_ITEM_STOCK( N_("Last Year"),  NULL, Clic_capteur_supervision_year, GNOME_STOCK_PIXMAP_BOOK_YELLOW ),
+       GNOMEUIINFO_END
+     };
+
+    if (!(trame_capteur && event)) return;
+    appui_capteur = trame_capteur;
 
     if (event->type == GDK_BUTTON_PRESS)
      { if ( ((GdkEventButton *)event)->button == 1)           /* Release sur le motif qui a été appuyé ?? */
-        { gint pid;
-
-          printf( "Clic_sur_capteur_supervision : Lancement d'un firefox type=%d, num=%d\n",
-                  trame_capteur->capteur->type, trame_capteur->capteur->bit_controle );
-          pid = fork();
-          if (pid<0) return;
-          else if (!pid)                                             /* Lancement de la ligne de commande */
-           { gchar chaine[256];
-             g_snprintf( chaine, sizeof(chaine),
-                        "http://%s/watchdog/index.php?debug=1&type=%d&num=%d&period=hour",
-                         Client_en_cours.host, trame_capteur->capteur->type, trame_capteur->capteur->bit_controle );
-             execlp( "firefox", "firefox", chaine, NULL );
-             printf("Lancement de firefox failed\n");
-             _exit(0);
-           }
+        { Clic_capteur_supervision_hour ();		 }
+       else if (event->button.button == 3)
+        { if (!Popup) Popup = gnome_popup_menu_new( Popup_comment );                     /* Creation menu */
+          gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
         }
      }
   }

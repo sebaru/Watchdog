@@ -12,5 +12,4 @@ AM_CPPFLAGS= -I$(top_srcdir)/Include -I../Include \
 	  `pkg-config --cflags glib-2.0` \
 	  `mysql_config --cflags`
 
-libwatchdog_server_lirc_la_LDFLAGS = -llirc_client -rdynamic `pkg-config --libs glib-2.0` `mysql_config --libs` \
-				     -version-info $(LIBW_MAJOR_VERSION):$(LIBW_MINOR_VERSION):$(LIBW_MICRO_VERSION)
+libwatchdog_server_lirc_la_LDFLAGS = -llirc_client -rdynamic `pkg-config --libs glib-2.0` `mysql_config --libs`

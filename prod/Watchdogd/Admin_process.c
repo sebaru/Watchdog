@@ -29,8 +29,98 @@
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
+/* Admin_start: Demarre un thread en parametre                                                            */
+/* Entrée: La connexion d'admin et le nom du thread a demarrer                                            */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Admin_start ( struct CONNEXION *connexion, gchar *thread )
+  { gchar chaine[128];
+
+    g_snprintf( chaine, sizeof(chaine), " Trying to start %s\n", thread );
+    Admin_write ( connexion, chaine );
+
+    if ( ! strcmp ( thread, "arch" ) )
+     { if (!Demarrer_arch())                                               /* Demarrage gestion Archivage */
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Admin: Pb ARCH -> Arret" ); }
+       else { g_snprintf( chaine, sizeof(chaine), " ARCH started\n" );
+              Admin_write ( connexion, chaine );
+            }
+     } else
+    if ( ! strcmp ( thread, "dls" ) )
+     { if (!Demarrer_dls())                                                           /* Démarrage D.L.S. */
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Admin: Pb DLS -> Arret" ); }
+       else { g_snprintf( chaine, sizeof(chaine), " D.L.S started\n" );
+              Admin_write ( connexion, chaine );
+            }
+     }
+    else
+     { GSList *liste;
+       gint found;
+       liste = Partage->com_msrv.Librairies;                         /* Parcours de toutes les librairies */
+       found = 0;
+       while(liste)
+        { struct LIBRAIRIE *lib;
+          lib = (struct LIBRAIRIE *)liste->data;
+          if ( ! strcmp( lib->admin_prompt, thread ) )
+           { if (Start_librairie(lib))
+              { g_snprintf( chaine, sizeof(chaine), " Library %s started\n", lib->admin_prompt );
+                found++;
+              }
+             else
+              { g_snprintf( chaine, sizeof(chaine), " Error while starting library %s\n", lib->admin_prompt ); }
+             Admin_write ( connexion, chaine );
+           }
+          liste = liste->next;
+        }
+       g_snprintf( chaine, sizeof(chaine), " Number of librairie(s) started : %d\n", found );
+       Admin_write ( connexion, chaine );
+     }
+  }
+/**********************************************************************************************************/
+/* Admin_start: Arrete un thread en parametre                                                             */
+/* Entrée: La connexion d'admin et le nom du thread                                                       */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Admin_stop ( struct CONNEXION *connexion, gchar *thread )
+  { gchar chaine[128];
+
+    g_snprintf( chaine, sizeof(chaine), " Trying to stop %s\n", thread );
+    Admin_write ( connexion, chaine );
+
+    if ( ! strcmp ( thread, "all" ) )
+     { Stopper_fils(FALSE);                              /* Termine tous les process sauf le thread ADMIN */
+     } else
+    if ( ! strcmp ( thread, "arch"      ) ) { Partage->com_arch.Thread_run      = FALSE; } else
+    if ( ! strcmp ( thread, "dls"       ) ) { Partage->com_dls.Thread_run       = FALSE; }
+    else
+     { GSList *liste;
+       gint found;
+       liste = Partage->com_msrv.Librairies;                         /* Parcours de toutes les librairies */
+       found = 0;
+       while(liste)
+        { struct LIBRAIRIE *lib;
+          lib = (struct LIBRAIRIE *)liste->data;
+          if ( ! strcmp( lib->admin_prompt, thread ) )
+           { if (Stop_librairie(lib))
+              { g_snprintf( chaine, sizeof(chaine), " Library %s (%s) stopped\n",
+                            lib->admin_prompt, lib->nom_fichier );
+                found++;
+              }
+             else
+              { g_snprintf( chaine, sizeof(chaine), " Error while stopping library %s (%s) \n",
+                            lib->admin_prompt, lib->nom_fichier );
+              }
+             Admin_write ( connexion, chaine );
+           }
+          liste = liste->next;
+        }
+       g_snprintf( chaine, sizeof(chaine), " Number of librairie(s) stopped : %d\n", found );
+       Admin_write ( connexion, chaine );
+     }
+  }
+/**********************************************************************************************************/
 /* Admin_process: Appellée lorsque l'admin envoie une commande 'process' dans la ligne de commande        */
-/* Entrée: La connexion connexione et la ligne de commande, et le buffer de sortie                           */
+/* Entrée: La connexion connexione et la ligne de commande, et le buffer de sortie                        */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Admin_process ( struct CONNEXION *connexion, gchar *ligne )
@@ -41,49 +131,23 @@
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
     if ( ! strcmp ( commande, "start" ) )
-     { gchar thread[128], chaine[128];
+     { gchar thread[128];
        guint num;
        sscanf ( ligne, "%s %s %d", commande, thread, &num );
-
-       g_snprintf( chaine, sizeof(chaine), " Trying to start %s\n", thread );
-       Admin_write ( connexion, chaine );
-
-       if ( ! strcmp ( thread, "arch" ) )
-        { if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
-           { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Admin: Pb ARCH -> Arret" ); }
-          else { g_snprintf( chaine, sizeof(chaine), " ARCH started\n" );
-                 Admin_write ( connexion, chaine );
-               }
-        } else
-       if ( ! strcmp ( thread, "dls" ) )
-        { if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
-           { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Admin: Pb DLS -> Arret" ); }
-          else { g_snprintf( chaine, sizeof(chaine), " D.L.S started\n" );
-                 Admin_write ( connexion, chaine );
-               }
-        }
-       else
-        { GSList *liste;
-          gint found;
-          liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
-          found = 0;
-          while(liste)
-           { struct LIBRAIRIE *lib;
-             lib = (struct LIBRAIRIE *)liste->data;
-             if ( ! strcmp( lib->admin_prompt, thread ) )
-              { if (Start_librairie(lib))
-                 { g_snprintf( chaine, sizeof(chaine), " Library %s started\n", lib->admin_prompt );
-                   found++;
-                 }
-                else
-                 { g_snprintf( chaine, sizeof(chaine), " Error while starting library %s\n", lib->admin_prompt ); }
-                   Admin_write ( connexion, chaine );
-              }
-             liste = liste->next;
-           }
-          g_snprintf( chaine, sizeof(chaine), " Number of librairie(s) started : %d\n", found );
-          Admin_write ( connexion, chaine );
-        }
+       Admin_start ( connexion, thread );
+     } else
+    if ( ! strcmp ( commande, "stop" ) )
+     { gchar thread[128];
+       sscanf ( ligne, "%s %s", commande, thread );
+       Admin_stop ( connexion, thread );
+     } else
+    if ( ! strcmp ( commande, "restart" ) )
+     { gchar thread[128];
+       sscanf ( ligne, "%s %s", commande, thread );
+       Admin_stop ( connexion, thread );
+       Admin_write ( connexion, "Waiting 5 seconds ... \n" );
+       sleep(5);
+       Admin_start ( connexion, thread );
      } else
     if ( ! strcmp ( commande, "load" ) )
      { gchar thread[128], chaine[128];
@@ -109,45 +173,6 @@
        else
         { g_snprintf( chaine, sizeof(chaine), " Error while unloading library %s\n", thread ); }
        Admin_write ( connexion, chaine );
-     } else
-    if ( ! strcmp ( commande, "stop" ) )
-     { gchar thread[128], chaine[128];
-       sscanf ( ligne, "%s %s", commande, thread );
-
-       g_snprintf( chaine, sizeof(chaine), " Trying to stop %s\n", thread );
-       Admin_write ( connexion, chaine );
-
-       if ( ! strcmp ( thread, "all" ) )
-        { Stopper_fils(FALSE);                           /* Termine tous les process sauf le thread ADMIN */
-        } else
-       if ( ! strcmp ( thread, "arch"      ) ) { Partage->com_arch.Thread_run      = FALSE; } else
-       if ( ! strcmp ( thread, "dls"       ) ) { Partage->com_dls.Thread_run       = FALSE; }
-       else
-        { GSList *liste;
-          gint found;
-          liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
-          found = 0;
-          while(liste)
-           { struct LIBRAIRIE *lib;
-             lib = (struct LIBRAIRIE *)liste->data;
-             if ( ! strcmp( lib->admin_prompt, thread ) )
-              { if (Stop_librairie(lib))
-                 { g_snprintf( chaine, sizeof(chaine), " Library %s (%s) stopped\n",
-                               lib->admin_prompt, lib->nom_fichier );
-                   found++;
-                 }
-                else
-                 { g_snprintf( chaine, sizeof(chaine), " Error while stopping library %s (%s) \n",
-                               lib->admin_prompt, lib->nom_fichier );
-                 }
-                Admin_write ( connexion, chaine );
-              }
-             liste = liste->next;
-           }
-          g_snprintf( chaine, sizeof(chaine), " Number of librairie(s) stopped : %d\n", found );
-          Admin_write ( connexion, chaine );
-        }
-
      } else
     if ( ! strcmp ( commande, "list" ) )
      { gchar chaine[128];
@@ -217,10 +242,11 @@
      } else
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'PROCESS'\n" );
-       Admin_write ( connexion, "  load thread          - Load a library (but not start it !)\n" );
-       Admin_write ( connexion, "  unload thread        - Unload a library\n" );
-       Admin_write ( connexion, "  start thread         - Start a thread (arch,modbus,dls, or library name)\n" );
-       Admin_write ( connexion, "  stop                 - Stop thread (all,arch,modbus,dls, or library name)\n" );
+       Admin_write ( connexion, "  load $thread         - Load a library (but not start it !)\n" );
+       Admin_write ( connexion, "  unload $thread       - Unload a library\n" );
+       Admin_write ( connexion, "  start $thread        - Start a thread (arch,modbus,dls, or library name)\n" );
+       Admin_write ( connexion, "  stop $thread         - Stop thread (all,arch,modbus,dls, or library name)\n" );
+       Admin_write ( connexion, "  restart $thread      - Stop & Start thread (arch,modbus,dls, or library name)\n" );
        Admin_write ( connexion, "  list                 - Liste les statut des threads\n" );
        Admin_write ( connexion, "  RELOAD               - Reload configuration\n" );
        Admin_write ( connexion, "  REBOOT               - Restart all processes\n" );

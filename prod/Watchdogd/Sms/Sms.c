@@ -192,8 +192,10 @@
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
  static void Sms_Gerer_histo ( struct CMD_TYPE_HISTO *histo )
-  { gint taille;
-
+  { gsize bytes_written;
+    gchar *new_libelle;
+    gint taille;
+    
     if ( ! histo->msg.sms ) { g_free(histo); return; }                   /* Si flag = 0; on return direct */
 
     pthread_mutex_lock( &Cfg_sms.lib->synchro );                         /* Ajout dans la liste a traiter */
@@ -202,7 +204,7 @@
 
     if (taille > 150)
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "Sms_Gerer_histo: DROP message %D (length = %d > 150)", histo->msg.num, taille);
+                "Sms_Gerer_histo: DROP message %d (length = %d > 150)", histo->msg.num, taille);
        g_free(histo);
        return;
      }
@@ -212,6 +214,10 @@
        g_free(histo);
        return;
      }
+/* conversion en Latin 1 ISO8859-1 20140626 */
+    new_libelle = g_convert ( histo->msg.libelle, -1, "ISO-8859-1", "UTF8", NULL, &bytes_written, NULL);
+    g_snprintf( histo->msg.libelle, sizeof(histo->msg.libelle), "%s", new_libelle );
+    g_free(new_libelle);
     pthread_mutex_lock ( &Cfg_sms.lib->synchro );
     Cfg_sms.Liste_histos = g_slist_append ( Cfg_sms.Liste_histos, histo );                  /* Ajout a la liste */
     pthread_mutex_unlock ( &Cfg_sms.lib->synchro );
@@ -247,7 +253,7 @@
        return(NULL);
      }
 
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE );                    /* Execution de la requete SQL */
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )                     /* Execution de la requete SQL */
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
                 "Sms_is_recipient_authorized: Requete failed" );
        Libere_DB_SQL( &db );
@@ -279,7 +285,7 @@
     g_free(sms);
 
     if ( ! strcasecmp( texte, "ping" ) )                                           /* Interfacage de test */
-     { Envoyer_sms_smsbox_text ( "Pong !" );
+     { Envoyer_sms_gsm_text ( "Pong !" );
        return;
      }
 

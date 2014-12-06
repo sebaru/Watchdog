@@ -75,7 +75,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_UTIL:
              { struct CMD_TYPE_UTILISATEUR *util;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                util = (struct CMD_TYPE_UTILISATEUR *)g_try_malloc0( sizeof(struct CMD_TYPE_UTILISATEUR) );
                if (!util) return; 
@@ -93,7 +93,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_UTIL:
              { struct CMD_TYPE_GROUPE *groupe;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof(struct CMD_TYPE_GROUPE) );
                if (!groupe) return; 
@@ -136,7 +136,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_GROUPE:
              { struct CMD_TYPE_GROUPE *groupe;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
                if (!groupe) return; 

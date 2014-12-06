@@ -45,7 +45,6 @@
     gboolean expire;
     gboolean cansetpwd;
     gboolean mustchangepwd;                                /* L'utilisateut doit changer son mot de passe */
-    gboolean setpwdnow;                       /* True sile user souhaite modifier son mot de passe actuel */
     guint    date_creation;
     guint    date_modif;
     guint    date_expire;
@@ -56,8 +55,8 @@
     gboolean imsg_enable;
     gchar    imsg_jabberid[80];
     gboolean imsg_allow_cde;
-    guint    imsg_bit_presence;
     gboolean imsg_available;
+    guint    ssrv_bit_presence;
   };
 
  struct CMD_TYPE_GROUPE
@@ -83,6 +82,7 @@
     SSTAG_CLIENT_EDIT_UTIL,                               /* Le client demande l'edition d'un utilisateur */
     SSTAG_SERVEUR_EDIT_UTIL_OK,                /* Le serveur accepte et envoi les données correspondantes */
     SSTAG_CLIENT_VALIDE_EDIT_UTIL,                               /* Le client renvoie les données editées */
+    SSTAG_CLIENT_CHANGE_PASSWORD,                  /* Le client demande a modifier le mot de passe actuel */
     SSTAG_SERVEUR_VALIDE_EDIT_UTIL_OK,                         /* Le serveur valide les nouvelles données */
 
     SSTAG_SERVEUR_ADDPROGRESS_GROUPE,                          /* Ajout d'un groupe dans la liste cliente */

@@ -39,9 +39,7 @@
     gchar passwd[TAILLE_NOM_SERVEUR+1];                                       /* Serveur Watchdog distant */
     guint port_ihm;                                          /* Port TCP du service IHM (5558 par défaut) */
     guint port_http;                                        /* Port TCP du service HTTP (5560 par défaut) */
-    gchar ssl_ca[80];                                                                   /* Paramètres SSL */
-    gchar ssl_cert[80]; 
-    gchar ssl_key[80]; 
+    gchar ssl_file_ca[80];                                                              /* Paramètres SSL */
     guint log_override;                                     /* Pour afficher tous les informations de log */
     guint log_level;                                                      /* Niveau de debug du programme */
     gboolean gui_tech;                               /* True si la GUI doit présenter l'aspect Technicien */
@@ -57,9 +55,7 @@
  #define DEFAUT_PORT_HTTP               5560
  #define DEFAUT_LOG_LEVEL               LOG_INFO
  #define DEFAUT_TAILLE_BLOC_RESEAU      8192
- #define DEFAUT_SSL_CA                  "cacert.pem"         /* Certificat de l'autorite de certification */
- #define DEFAUT_SSL_CERT                "clientsigne.pem"
- #define DEFAUT_SSL_KEY                 "clientkey.pem"
+ #define DEFAUT_SSL_FILE_CA            "cacert.pem"         /* Certificat de l'autorite de certification */
 
 /******************************************* Prototypes de fonctions **************************************/
  extern void Lire_config_cli ( struct CONFIG_CLI *config, char *fichier_config );

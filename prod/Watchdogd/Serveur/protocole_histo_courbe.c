@@ -67,6 +67,11 @@
                courbe = (struct CMD_HISTO_COURBE *)connexion->donnees;
                client->histo_courbe.date_first = courbe->date_first;
                client->histo_courbe.date_last = courbe->date_last;
+               Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                        "Gerer_protocole_histo_courbe: Set Date to %d/%d",
+                        client->histo_courbe.date_first, client->histo_courbe.date_last
+                       );
+    
              }
             break;
      }

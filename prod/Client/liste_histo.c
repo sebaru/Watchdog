@@ -75,9 +75,6 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
  
- extern GdkBitmap *Rmask, *Bmask, *Vmask, *Omask, *Jmask;
- extern GdkPixmap *Rouge, *Bleue, *Verte, *Orange, *Jaune;
-
  static void Menu_acquitter_histo ( void );
  static void Menu_go_to_syn ( void );
 
@@ -316,7 +313,7 @@
 /* Sortie: un widget boite                                                                                */
 /**********************************************************************************************************/
  void Creer_page_histo( void )
-  { GtkWidget *boite, *scroll, *hboite, *bouton;
+  { GtkWidget *boite, *scroll, *hboite;
     GtkTreeSelection *selection;
     GtkTreeViewColumn *colonne;
     GtkCellRenderer *renderer;
@@ -362,7 +359,6 @@
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_NUM);                    /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
 
-printf("5\n");
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe/Page"), renderer,
                                                          "text", COLONNE_GROUPE_PAGE,
@@ -370,7 +366,6 @@ printf("5\n");
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_GROUPE_PAGE);
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
 
-printf("6\n");
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
     colonne = gtk_tree_view_column_new_with_attributes ( _("Type"), renderer,
@@ -381,30 +376,27 @@ printf("6\n");
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_TYPE);
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
 
-printf("7\n");
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Beginning"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Timestamp"), renderer,
                                                          "text", COLONNE_DATE_CREATE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_DATE_CREATE);
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
 
-printf("8\n");
-    renderer = gtk_cell_renderer_text_new();                                        /* Colonne du libelle */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Message"), renderer,
-                                                         "text", COLONNE_LIBELLE,
-                                                         NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
-
-printf("9\n");
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
     colonne = gtk_tree_view_column_new_with_attributes ( _("Acknowledge"), renderer,
                                                          "text", COLONNE_ACK,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_ACK);
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                                        /* Colonne du libelle */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Message"), renderer,
+                                                         "text", COLONNE_LIBELLE,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
 
     g_signal_connect( G_OBJECT(Liste_histo), "button_press_event",               /* Gestion du menu popup */
@@ -415,15 +407,12 @@ printf("9\n");
     boite = gtk_vbox_new( FALSE, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
 
-printf("10\n");
-    bouton = Bobouton( Verte, Vmask, _("Acknowledge") );
+/*    bouton = Bobouton( Verte, Vmask, _("Acknowledge") );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect( G_OBJECT(bouton), "clicked",
                       G_CALLBACK(Menu_acquitter_histo), NULL );
-printf("11\n");
+*/
     gtk_widget_show_all( hboite );
-printf("12\n");
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( _("Messages") ) );
-printf("13\n");
   }
 /*--------------------------------------------------------------------------------------------------------*/

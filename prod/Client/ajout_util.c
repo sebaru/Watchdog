@@ -28,7 +28,6 @@
  #include <gnome.h>
  
  #include "Reseaux.h"
- #include "client.h"
 
  enum
   {  COLONNE_ID,
@@ -38,10 +37,11 @@
   };
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
+ #include "client.h"
 
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG Config;                                          /* Configuration generale watchdog */
- extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
+ extern struct CLIENT Client;                                    /* Identifiant de l'utilisateur en cours */
 
  static GtkWidget *Liste_grps, *Liste_grp_util;                            /* Liste des groupes existants */
  static GtkWidget *Check_expire;                                         /* Le bouton d'expiration ou non */
@@ -60,6 +60,8 @@
  static GtkWidget *Check_imsg_enable;                                         /* Lui envoit-on des IMSG ? */
  static GtkWidget *Check_imsg_allow_cde;            /* Peut-on recevoir des imsg de commande de sa part ? */
  static GtkWidget *Entry_pass1, *Entry_pass2;                            /* Acquisition des passwords ... */
+ static GtkWidget *Spin_ssrv_bit_presence;                                       /* Bxxx de presence SSRV */
+ static GtkWidget *Check_imsg_enable;                                         /* Lui envoit-on des IMSG ? */
  static GtkWidget *F_ajout;                                /* Widget visuel de la fenetre d'ajout/edition */
  static struct CMD_TYPE_UTILISATEUR Edit_util;                          /* Utilisateur en cours d'edition */
 /**********************************************************************************************************/
@@ -339,16 +341,16 @@
     g_snprintf( Edit_util.imsg_jabberid, sizeof(Edit_util.imsg_jabberid),
                 "%s", gtk_entry_get_text(GTK_ENTRY(Entry_imsg_jabberid) ) );
 
-    Edit_util.date_expire   = gnome_date_edit_get_time( GNOME_DATE_EDIT(Calendar) );
-    Edit_util.expire        = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_expire));
-    Edit_util.mustchangepwd = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_mustchangepwd));
-    Edit_util.enable        = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_enable));
-    Edit_util.cansetpwd     = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_cansetpwd));
-    Edit_util.setpwdnow     = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_setpwdnow));
-    Edit_util.sms_enable    = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_sms_enable));
-    Edit_util.sms_allow_cde = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_sms_allow_cde));
-    Edit_util.imsg_enable   = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_imsg_enable));
-    Edit_util.imsg_allow_cde= gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_imsg_allow_cde));
+    Edit_util.date_expire       = gnome_date_edit_get_time( GNOME_DATE_EDIT(Calendar) );
+    Edit_util.expire            = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_expire));
+    Edit_util.mustchangepwd     = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_mustchangepwd));
+    Edit_util.enable            = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_enable));
+    Edit_util.cansetpwd         = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_cansetpwd));
+    Edit_util.sms_enable        = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_sms_enable));
+    Edit_util.sms_allow_cde     = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_sms_allow_cde));
+    Edit_util.imsg_enable       = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_imsg_enable));
+    Edit_util.imsg_allow_cde    = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_imsg_allow_cde));
+    Edit_util.ssrv_bit_presence = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_ssrv_bit_presence) );
 
     gids = Recuperer_groupes_util();
     memcpy( Edit_util.gids, gids, sizeof(Edit_util.gids) );
@@ -369,9 +371,10 @@
                                             G_CALLBACK(gtk_widget_destroy), dialog );
                   return(TRUE);
                 }
-               Calcul_password_hash( TRUE, (gchar *)gtk_entry_get_text(GTK_ENTRY(Entry_pass1)));
-               memcpy (&Edit_util.salt, Client_en_cours.util.salt, sizeof(Edit_util.salt));
-               memcpy (&Edit_util.hash, Client_en_cours.util.hash, sizeof(Edit_util.hash));
+               g_snprintf ( Edit_util.hash, sizeof(Edit_util.hash), "%s", /* le champ Hash contient le code en clair ! */
+                            gtk_entry_get_text(GTK_ENTRY(Entry_pass1) ) );
+               Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_CHANGE_PASSWORD,
+                              (gchar *)&Client.util, sizeof(struct CMD_TYPE_UTILISATEUR) );
              }
            Envoi_serveur( TAG_UTILISATEUR, (edition ? SSTAG_CLIENT_VALIDE_EDIT_UTIL
                                                     : SSTAG_CLIENT_ADD_UTIL),
@@ -418,7 +421,7 @@
     gtk_container_add( GTK_CONTAINER(frame), vboite );
 
 /******************************************** Paramètres de l'utilisateur *********************************/
-    table = gtk_table_new( 7, 4, FALSE );
+    table = gtk_table_new( 8, 4, FALSE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(vboite), table, FALSE, FALSE, 0 );
@@ -505,6 +508,12 @@
 
     Check_imsg_allow_cde = gtk_check_button_new_with_label ( _("Allow CDE") );
     gtk_table_attach_defaults( GTK_TABLE(table), Check_imsg_allow_cde, 3, 4, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("SSRV_bit_presence") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Spin_ssrv_bit_presence = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_ssrv_bit_presence, 1, 4, i, i+1 );;
 
 /***************************************** Gestion des groupes ********************************************/
     separateur = gtk_hseparator_new();

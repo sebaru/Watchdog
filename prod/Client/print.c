@@ -1,6 +1,6 @@
 /**********************************************************************************************************/
 /* Client/print.c        Configuration des impressions de Watchdog v2.0                                   */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       sam 23 fév 2008 11:39:41 CET */
+/* Projet WatchDog version 2.0       Gestion d'habitat                    jeu. 28 août 2014 09:04:16 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
@@ -33,29 +33,36 @@
  #include "protocli.h"
 
 /**********************************************************************************************************/
-/* begin_print: Prepare la pagination                                                                     */
-/* Entrée: néant                                                                                          */
+/* draw_page: CB de dessin de la page nbr_page                                                            */
+/* Entrée: le composeur                                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Begin_print (GtkPrintOperation *operation,
-                   GtkPrintContext   *context,
-                   gpointer           user_data)    
-  {
-    guint nbr_msg, nbr_page;
-    GtkTreeModel *store;
-    GtkTreeIter iter;
-    gboolean valide;
-
-    store  = gtk_tree_view_get_model ( user_data );
-    valide = gtk_tree_model_get_iter_first( store, &iter );
-
-    nbr_msg = 0;
-    while ( valide )                                                   /* Pour tous les objets du tableau */
-     { valide = gtk_tree_model_iter_next( store, &iter );
-       nbr_msg++;
+ void Print_draw_page ( GtkPrintOperation *operation,
+                  GtkPrintContext   *context,
+                  gint               page_nr,
+                  gpointer           user_data )
+  { GtkSourcePrintCompositor *compositor;
+    compositor = GTK_SOURCE_PRINT_COMPOSITOR (user_data);
+    gtk_source_print_compositor_draw_page ( compositor, context, page_nr );
+  }
+/**********************************************************************************************************/
+/* begin_print: Prepare la pagination                                                                     */
+/* Entrée: Prepare la pagination avec le composeur                                                        */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ gboolean Print_paginate ( GtkPrintOperation *operation,
+                              GtkPrintContext   *context,
+                              gpointer           user_data ) 
+  { GtkSourcePrintCompositor *compositor;
+    compositor = GTK_SOURCE_PRINT_COMPOSITOR (user_data);
+    if (gtk_source_print_compositor_paginate (compositor, context))
+     { gint n_pages;
+       n_pages = gtk_source_print_compositor_get_n_pages (compositor);
+printf("Print_paginate -> number page = %d\n", n_pages);
+       gtk_print_operation_set_n_pages (operation, n_pages);
+       return TRUE;
      }
-    nbr_page = 1 + nbr_msg / ((gtk_print_context_get_height(context)-2*PRINT_FONT_SIZE) / PRINT_FONT_SIZE);
-    gtk_print_operation_set_n_pages ( operation, nbr_page );
+    return FALSE;
   }
 /**********************************************************************************************************/
 /* New_print_job: Creer un job pour imprimer                                                              */

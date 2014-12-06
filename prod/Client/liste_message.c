@@ -36,12 +36,13 @@
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
 
  enum
-  {  COLONNE_NOTINHIB,
+  {  COLONNE_ACTIVE,
      COLONNE_SMS,
+     COLONNE_SMS_STRING,
      COLONNE_ID,
      COLONNE_AUDIO,
      COLONNE_REPEAT,
-     COLONNE_NUM,
+     COLONNE_NUM_STRING,
      COLONNE_TYPE_INT,
      COLONNE_TYPE_STRING,
      COLONNE_GROUPE_PAGE,
@@ -84,13 +85,13 @@
 /**********************************************************************************************************/
  gchar *Type_vers_string ( guint32 type )
   { switch (type)
-     { case MSG_ETAT     : return( _("Info    (I)") );
+     { case MSG_ETAT     : return( _("Info    (I) ") );
        case MSG_ALERTE   : return( _("Alerte  (AK)") );
        case MSG_ALARME   : return( _("Alarme  (AL)") );
-       case MSG_DEFAUT   : return( _("Trouble (T)") );
-       case MSG_VEILLE   : return( _("Veille  (V)") );
-       case MSG_ATTENTE  : return( _("Attente (A)") );
-       case MSG_DANGER   : return( _("Danger  (D)") );
+       case MSG_DEFAUT   : return( _("Trouble (T) ") );
+       case MSG_VEILLE   : return( _("Veille  (V) ") );
+       case MSG_ATTENTE  : return( _("Attente (A) ") );
+       case MSG_DANGER   : return( _("Danger  (D) ") );
      }
     return( _("Unknown") );
   }
@@ -211,129 +212,113 @@
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
 /**********************************************************************************************************/
-/* draw_page: Dessine une page pour l'envoyer sur l'imprimante                                            */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void draw_page (GtkPrintOperation *operation,
-                        GtkPrintContext   *context,
-                        gint               page_nr,
-                        GtkTreeIter *iter)
-  { gchar *num, *type_string, *groupe_page, *libelle, *date_create, titre[128], chaine[128];
-    guint enable, type_int, sms;
-    GtkTreeModel *store;
-    gboolean valide;
-    struct tm *temps;
-    time_t timet;
-    cairo_t *cr;
-    gdouble y;
-    
-    printf("Page_nr = %d\n", page_nr );
-  
-    cr = gtk_print_context_get_cairo_context (context);
-  
-    cairo_select_font_face (cr, "Courier", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (cr, 20.0 );
-
-    cairo_set_source_rgb (cr, 0.0, 0.0, 1.0);
-
-    timet = time(NULL);
-    temps = localtime( &timet );
-    if (temps) { strftime( chaine, sizeof(chaine), "%F %T", temps ); }
-    else       { g_snprintf( chaine, sizeof(chaine), _("Erreur") ); }
-
-    date_create = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
-    g_snprintf( titre, sizeof(titre), " Watchdog - Messages - %s - Page %d", date_create, page_nr+1 );
-    g_free( date_create );
-
-    cairo_move_to( cr, 0.0, 0.0 );
-    cairo_show_text (cr, titre );
-
-    cairo_set_font_size (cr, PRINT_FONT_SIZE );
-    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_message) );
-    if ( gtk_list_store_iter_is_valid ( GTK_LIST_STORE(store), iter ) == FALSE )
-     { printf("Iter is not valid !! Return !!\n");
-       return;
-     }
-    valide = TRUE;
-    y = 2 * PRINT_FONT_SIZE;
-    while ( valide && y<gtk_print_context_get_height (context) )      /* Pour tous les groupe_pages du tableau */
-     { gtk_tree_model_get( store, iter, COLONNE_NOTINHIB, &enable, COLONNE_NUM, &num,
-                           COLONNE_SMS, &sms,
-                           COLONNE_TYPE_INT, &type_int, COLONNE_TYPE_STRING, &type_string,
-                           COLONNE_GROUPE_PAGE, &groupe_page, COLONNE_LIBELLE, &libelle, -1 );
-
-       cairo_move_to( cr, 0.0*PRINT_FONT_SIZE, y );
-       if (enable) { cairo_set_source_rgb (cr, 0.0, 1.0, 0.0);
-                     cairo_show_text (cr, _("ON") );
-                   }
-       else        { cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
-                     cairo_show_text (cr, _("OFF") );
-                   }
-
-       if (sms)    { cairo_move_to( cr, 3.0*PRINT_FONT_SIZE, y );
-                     cairo_set_source_rgb (cr, 1.0, 0.0, 0.0);
-                     cairo_show_text (cr, _("SMS") );
-                   }
-
-       cairo_move_to( cr, 6.0*PRINT_FONT_SIZE, y );
-       cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-       cairo_show_text (cr, num );
-
-       cairo_set_source_rgb (cr, (gdouble)COULEUR_FOND[type_int].red / 0xFFFF,
-                                 (gdouble)COULEUR_FOND[type_int].green / 0xFFFF,
-                                 (gdouble)COULEUR_FOND[type_int].blue / 0xFFFF );
-       cairo_rectangle (cr, 11.0*PRINT_FONT_SIZE, y+1-PRINT_FONT_SIZE, 5.0*PRINT_FONT_SIZE, PRINT_FONT_SIZE);
-       cairo_fill (cr);
-  
-       cairo_move_to( cr, 11.0*PRINT_FONT_SIZE, y );
-       cairo_set_source_rgb (cr, (gdouble)COULEUR_TEXTE[type_int].red / 0xFFFF,
-                                 (gdouble)COULEUR_TEXTE[type_int].green / 0xFFFF,
-                                 (gdouble)COULEUR_TEXTE[type_int].blue / 0xFFFF );
-       cairo_show_text (cr, type_string );
-
-       cairo_move_to( cr, 17.0*PRINT_FONT_SIZE, y );   /* Objet */
-       cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-       cairo_show_text (cr, groupe_page );
-
-       cairo_move_to( cr, 38.0*PRINT_FONT_SIZE, y );  /* Libelle */
-       cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
-       cairo_show_text (cr, libelle );
-
-       g_free(num);
-       g_free(type_string);
-       g_free(groupe_page);
-       g_free(libelle);
-
-       valide = gtk_tree_model_iter_next( store, iter );
-       y += PRINT_FONT_SIZE;
-     }
-  }
-/**********************************************************************************************************/
 /* Menu_exporter_message: Exportation de la base dans un fichier texte                                    */
 /* Entrée: néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Menu_exporter_message( void )
-  { static GtkTreeIter iter;
+  { GtkSourcePrintCompositor *compositor;
+    GtkSourceBuffer *buffer;
+    static GtkTreeIter iter;
     GtkPrintOperation *print;
-    GtkPrintOperationResult res;
     GtkTreeModel *store;
     gboolean valide;
     GError *error;
+    gint cpt;
 
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_message) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
     if (!valide) return;
 
+    buffer = gtk_source_buffer_new( NULL );                               /* Création d'un nouveau buffer */
+    for ( cpt=0; cpt < NBR_TYPE_MSG; cpt++ )
+     { gtk_text_buffer_create_tag ( GTK_TEXT_BUFFER(buffer), Type_vers_string(cpt),
+                                   "background-gdk", &COULEUR_FOND[cpt],
+                                   "foreground-gdk", &COULEUR_TEXTE[cpt]
+                                  );
+     }
+    gtk_text_buffer_create_tag ( GTK_TEXT_BUFFER(buffer), "active",
+                                "background", "green", "foreground", "white"
+                               );
+    gtk_text_buffer_create_tag ( GTK_TEXT_BUFFER(buffer), "down",
+                                "background", "red",   "foreground", "white"
+                               );
+
+    while ( valide  )                                            /* Pour tous les groupe_pages du tableau */
+     { gchar chaine[128], pivot[80], *num, *type_string, *groupe_page, *libelle;
+       GtkTextIter iter_end;
+       gboolean enable;
+       gint len, sms;
+
+       gtk_tree_model_get( store, &iter, COLONNE_ACTIVE, &enable, COLONNE_NUM_STRING, &num,
+                           COLONNE_SMS, &sms,
+                           COLONNE_TYPE_STRING, &type_string,
+                           COLONNE_GROUPE_PAGE, &groupe_page, COLONNE_LIBELLE, &libelle, -1 );
+
+       gtk_text_buffer_get_end_iter ( GTK_TEXT_BUFFER(buffer), &iter_end );
+       if (enable)
+        { gtk_text_buffer_insert_with_tags_by_name ( GTK_TEXT_BUFFER(buffer), &iter_end, "--UP--", -1,
+                                                     "active", NULL );
+        }
+       else
+        { gtk_text_buffer_insert_with_tags_by_name ( GTK_TEXT_BUFFER(buffer), &iter_end, "-DOWN-", -1,
+                                                     "down", NULL );
+        }
+
+       if (sms)
+        { gtk_text_buffer_insert_at_cursor ( GTK_TEXT_BUFFER(buffer), " NOSMS - ", -1 ); }
+       else
+        { gtk_text_buffer_insert_at_cursor ( GTK_TEXT_BUFFER(buffer), "  SMS  - ", -1 ); }
+
+       g_snprintf( chaine, sizeof(chaine), "%s - ", num );
+       gtk_text_buffer_insert_at_cursor ( GTK_TEXT_BUFFER(buffer), chaine, -1 );
+
+       gtk_text_buffer_get_end_iter ( GTK_TEXT_BUFFER(buffer), &iter_end );
+       gtk_text_buffer_insert_with_tags_by_name ( GTK_TEXT_BUFFER(buffer), &iter_end, type_string, -1,
+                                                  type_string, NULL );
+
+       g_snprintf( chaine, sizeof(chaine), " - " );
+       g_utf8_strncpy ( pivot, groupe_page, PRINT_NBR_CHAR_GROUPE_PAGE );
+       len = g_utf8_strlen( pivot, -1 );
+       g_strlcat ( chaine, pivot, sizeof(chaine) );
+       if ( len <= PRINT_NBR_CHAR_GROUPE_PAGE )
+        { for(cpt=len; cpt<=PRINT_NBR_CHAR_GROUPE_PAGE; cpt++) g_strlcat( chaine, " ", sizeof(chaine) ); }
+       g_strlcat( chaine, "- ", sizeof(chaine) );
+
+       g_strlcat( chaine, libelle, sizeof(chaine)-1 );
+       g_strlcat( chaine, "\n", sizeof(chaine) );
+       gtk_text_buffer_insert_at_cursor ( GTK_TEXT_BUFFER(buffer), chaine, -1 );
+
+       g_free(num);
+       g_free(type_string);
+       g_free(groupe_page);
+       g_free(libelle);
+       valide = gtk_tree_model_iter_next( store, &iter );
+     }
+
+    compositor = gtk_source_print_compositor_new ( buffer );
+    gtk_source_print_compositor_set_print_line_numbers ( compositor, 0 );
+    gtk_source_print_compositor_set_body_font_name ( compositor, PRINT_FONT_NAME );
+    gtk_source_print_compositor_set_print_header ( compositor, TRUE );
+    gtk_source_print_compositor_set_header_format ( compositor, TRUE,
+                                                    "Messages D.L.S",
+                                                    "%F",
+                                                    PRINT_HEADER_RIGHT);
+    gtk_source_print_compositor_set_print_footer ( compositor, TRUE );
+    gtk_source_print_compositor_set_footer_format ( compositor, TRUE,
+                                                    PRINT_FOOTER_LEFT,
+                                                    PRINT_FOOTER_CENTER,
+                                                    PRINT_FOOTER_RIGHT);
+    gtk_source_print_compositor_set_highlight_syntax ( compositor, TRUE );
+
     print = New_print_job ( "Print Messages" );
+    g_signal_connect (G_OBJECT(print), "draw-page", G_CALLBACK (Print_draw_page), compositor );
+    g_signal_connect (G_OBJECT(print), "paginate",  G_CALLBACK (Print_paginate),  compositor );
 
-    g_signal_connect (G_OBJECT(print), "draw-page", G_CALLBACK (draw_page), &iter );
-    g_signal_connect (G_OBJECT(print), "begin-print",
-                      G_CALLBACK (Begin_print), GTK_TREE_VIEW(Liste_message) );
-
-    res = gtk_print_operation_run (print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
-                                   GTK_WINDOW(F_client), &error);
+    gtk_print_operation_run (print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
+                             GTK_WINDOW(F_client), &error);
+    g_object_unref(compositor);
+    g_object_unref(buffer);
   }
 /**********************************************************************************************************/
 /* Gerer_popup_message: Gestion du menu popup quand on clique droite sur la liste des messages            */
@@ -401,8 +386,9 @@
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
-    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_BOOLEAN,                               /* Not_inhibe */
-                                              G_TYPE_STRING,                                       /* SMS */
+    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_BOOLEAN,                                   /* Active */
+                                              G_TYPE_UINT,                                         /* SMS */
+                                              G_TYPE_STRING,                                /* SMS STRING */
                                               G_TYPE_UINT,                                          /* Id */
                                               G_TYPE_STRING,                                     /* Audio */
                                               G_TYPE_UINT,                                      /* Repeat */
@@ -424,23 +410,23 @@
 
     renderer = gtk_cell_renderer_toggle_new();                              /* Colonne de l'id du message */
     colonne = gtk_tree_view_column_new_with_attributes ( _("ON"), renderer,
-                                                         "active", COLONNE_NOTINHIB,
+                                                         "active", COLONNE_ACTIVE,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_NOTINHIB);               /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_ACTIVE);               /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_message), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                /* Colonne de l'id du message */
     colonne = gtk_tree_view_column_new_with_attributes ( _("SMS"), renderer,
-                                                         "text", COLONNE_SMS,
+                                                         "text", COLONNE_SMS_STRING,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_SMS);                    /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_SMS_STRING);                    /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_message), colonne );
 
     renderer = gtk_cell_renderer_text_new();                             /* Colonne du libelle de message */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Msg"), renderer,
-                                                         "text", COLONNE_NUM,
+                                                         "text", COLONNE_NUM_STRING,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_NUM);                    /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_NUM_STRING);                    /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_message), colonne );
 
     renderer = gtk_cell_renderer_text_new();                             /* Colonne du libelle de message */
@@ -562,10 +548,10 @@
     g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", message->groupe, message->page );
 
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
-                         COLONNE_NOTINHIB, message->enable,
-                         COLONNE_SMS, Type_sms_vers_string(message->sms),
+                         COLONNE_ACTIVE, message->enable,
+                         COLONNE_SMS_STRING, Type_sms_vers_string(message->sms),
                          COLONNE_ID, message->id,
-                         COLONNE_NUM, chaine,
+                         COLONNE_NUM_STRING, chaine,
                          COLONNE_REPEAT, message->time_repeat,
                          COLONNE_AUDIO, audio,
                          COLONNE_TYPE_INT, message->type,

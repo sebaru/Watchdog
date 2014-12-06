@@ -47,7 +47,7 @@
  void Proto_effacer_fichier_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls )
   { gchar chaine[80];
     gint id_fichier;
-    g_snprintf( chaine, sizeof(chaine), "%d.dls.new", edit_dls->id );
+    g_snprintf( chaine, sizeof(chaine), "Dls/%d.dls.new", edit_dls->id );
     unlink ( chaine );
     id_fichier = open( chaine, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     close(id_fichier);
@@ -170,7 +170,7 @@
     buffer_data = buffer_all + sizeof(struct CMD_TYPE_SOURCE_DLS);       /* Index data dans le buffer_all */
     taille_max_data = Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_SOURCE_DLS);
 
-    g_snprintf( chaine, sizeof(chaine), "%d.dls", rezo_dls->id );
+    g_snprintf( chaine, sizeof(chaine), "Dls/%d.dls", rezo_dls->id );
     fd = open( chaine, O_RDONLY );
     if (fd < 0)
      { struct CMD_GTK_MESSAGE erreur;
@@ -207,7 +207,7 @@
   { gchar chaine[80];
     if (!client->id_creation_plugin_dls)
      { gint id_fichier;
-       g_snprintf( chaine, sizeof(chaine), "%d.dls.new", edit_dls->id );
+       g_snprintf( chaine, sizeof(chaine), "Dls/%d.dls.new", edit_dls->id );
        id_fichier = open( chaine, O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR );
        if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
@@ -240,7 +240,7 @@
             break;
        case DLS_COMPIL_ERROR_LOAD_LOG:
             g_snprintf( erreur.message, sizeof(erreur.message),
-                       "Unable to open og file for DLS %d", client->dls.id );
+                       "Unable to open log file for DLS %d", client->dls.id );
             Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                            (gchar *)&erreur, sizeof(erreur) );
             break;
@@ -295,7 +295,7 @@
             { gchar chaine[80];
               gint id_fichier;
 
-              g_snprintf(chaine, sizeof(chaine), "%d.dls", result->id );
+              g_snprintf(chaine, sizeof(chaine), "Dls/%d.dls", result->id );
               id_fichier = open( chaine, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
               if (id_fichier == -1)
                { struct CMD_GTK_MESSAGE erreur;
@@ -304,7 +304,7 @@
                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
-              else { g_snprintf(chaine, sizeof(chaine), "/* %d.dls: %s */\n", result->id, result->nom );
+              else { g_snprintf(chaine, sizeof(chaine), "/* %06d.dls: %s */\n", result->id, result->nom );
                      write(id_fichier, chaine, strlen(chaine) );
                      close(id_fichier); 
 

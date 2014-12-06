@@ -93,7 +93,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS:
              { struct CMD_TYPE_PLUGIN_DLS *dls;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                dls = (struct CMD_TYPE_PLUGIN_DLS *)g_try_malloc0( sizeof( struct CMD_TYPE_PLUGIN_DLS ) );
                if (!dls) return; 
@@ -112,7 +112,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_PLUGIN_DLS:
              { struct CMD_TYPE_SYNOPTIQUE *syn;
-               Set_progress_plusun();
+               Set_progress_plus(1);
                syn = (struct CMD_TYPE_SYNOPTIQUE *)g_try_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
                if (!syn) return; 
 printf("recu un syn\n");

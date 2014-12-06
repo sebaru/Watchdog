@@ -47,9 +47,8 @@
  #include "Reseaux_courbe.h"
  #include "Reseaux_histo_courbe.h"
  #include "Reseaux_fichier.h"
- #include "Reseaux_scenario.h"
  #include "Reseaux_admin.h"
- #include "Reseaux_master_slave.h"
+ #include "Reseaux_satellite.h"
 
  #define TIMEOUT_BUFFER_PLEIN    4          /* 1 seconde max d'attente de disponibilite du tampon d'envoi */
 
@@ -99,15 +98,15 @@
     TAG_ATELIER,                                                                 /* Gestions de l'atelier */
     TAG_COURBE,                                                                   /* Gestions des courbes */
     TAG_HISTO_COURBE,                                                 /* Gestions des historiques courbes */
-    TAG_SCENARIO,                                                                 /* Gestion des scenario */
     TAG_CAMERA,                                                                     /* Gestion des camera */
     TAG_ADMIN,                                /* Utilisation des commandes d'admin depuis le client lourd */
-    TAG_MASTER_SLAVE,                                   /* Echange des informations entre Slave et Master */
+    TAG_SATELLITE,                                                         /* Echange vers les satellites */
   };
 
  enum
   { SSTAG_INTERNAL_PAQUETSIZE,                                       /* Taille d'un bloc d'échange reseau */
     SSTAG_INTERNAL_SSLNEEDED,                                      /* La communication doit passer en ssl */
+    SSTAG_INTERNAL_SSLNEEDED_WITH_CERT,                   /* SSL + authentification reseau via certificat */
     SSTAG_INTERNAL_END                                                       /* Fin des echanges internes */
   };
 

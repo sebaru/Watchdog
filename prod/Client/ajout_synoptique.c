@@ -204,14 +204,14 @@ printf(" Flag afficher groupe pour syn \n" );
 printf("fin affichage groupe\n");
     liste = Liste_index_groupe; 
     while (liste)
-     { if ( liste->data == GINT_TO_POINTER(Edit_syn.groupe) ) break;
+     { if ( liste->data == GINT_TO_POINTER(Edit_syn.access_groupe) ) break;
        cpt++;
        liste = liste->next;
      }
     if (liste)
      { gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_access_groupe), cpt );
        printf("Set history %d\n", cpt );
-     } else printf(" Groupe not %d found\n", Edit_syn.groupe );
+     } else printf(" Groupe not %d found\n", Edit_syn.access_groupe );
     gtk_widget_show_all(F_ajout);                                    /* Affichage de l'interface complète */
   }
 /*--------------------------------------------------------------------------------------------------------*/

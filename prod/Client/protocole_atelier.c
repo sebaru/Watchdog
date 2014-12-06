@@ -58,7 +58,7 @@
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE:
              { struct CMD_TYPE_GROUPE *groupe;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
                if (!groupe) return; 
@@ -156,7 +156,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER:
              { struct CMD_TYPE_SYNOPTIQUE *syn;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                syn = (struct CMD_TYPE_SYNOPTIQUE *)g_try_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
                if (!syn) return; 
@@ -175,7 +175,7 @@
 /******************************************** Reception des cameras ***************************************/
        case SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FOR_ATELIER:
              { struct CMD_TYPE_CAMERA *cam;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                cam = (struct CMD_TYPE_CAMERA *)g_try_malloc0( sizeof( struct CMD_TYPE_CAMERA ) );
                if (!cam) return; 
@@ -194,7 +194,7 @@
 /*********************************** Reception des cameras de supervision *********************************/
        case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP:
              { struct CMD_TYPE_CAMERA_SUP *camera_sup;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_try_malloc0( sizeof( struct CMD_TYPE_CAMERA_SUP ) );
                if (!camera_sup) return; 
@@ -224,7 +224,7 @@
 /******************************************** Reception des palettes **************************************/
        case SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_PALETTE:
              { struct CMD_TYPE_SYNOPTIQUE *syn;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                syn = (struct CMD_TYPE_SYNOPTIQUE *)g_try_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
                if (!syn) return; 
@@ -267,7 +267,7 @@
 
        case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT:
              { struct CMD_TYPE_COMMENT *comment;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                comment = (struct CMD_TYPE_COMMENT *)g_try_malloc0( sizeof( struct CMD_TYPE_COMMENT ) );
                if (!comment) return; 
@@ -287,7 +287,7 @@
 
        case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS:
              { struct CMD_TYPE_PASSERELLE *pass;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                pass = (struct CMD_TYPE_PASSERELLE *)g_try_malloc0( sizeof( struct CMD_TYPE_PASSERELLE ) );
                if (!pass) { printf("Pas assez de mémoire\n"); return;  }
@@ -307,7 +307,7 @@
 
        case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR:
              { struct CMD_TYPE_CAPTEUR *capteur;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                capteur = (struct CMD_TYPE_CAPTEUR *)g_try_malloc0( sizeof( struct CMD_TYPE_CAPTEUR ) );
                if (!capteur) { printf("Pas assez de mémoire\n"); return;  }
@@ -327,7 +327,7 @@
 
        case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE:
              { struct CMD_TYPE_PALETTE *palette;
-               Set_progress_plusun();
+               Set_progress_plus(1);
                palette = (struct CMD_TYPE_PALETTE *)g_try_malloc0( sizeof( struct CMD_TYPE_PALETTE ) );
                if (!palette) return; 
                memcpy( palette, connexion->donnees, sizeof(struct CMD_TYPE_PALETTE ) );
@@ -344,7 +344,7 @@
 
        case SSTAG_SERVEUR_ADDPROGRESS_CLASSE_FOR_ATELIER:
              { struct CMD_TYPE_CLASSE *classe;
-               Set_progress_plusun();
+               Set_progress_plus(1);
                classe = (struct CMD_TYPE_CLASSE *)g_try_malloc0( sizeof( struct CMD_TYPE_CLASSE ) );
                if (!classe) return; 
                memcpy( classe, connexion->donnees, sizeof(struct CMD_TYPE_CLASSE ) );

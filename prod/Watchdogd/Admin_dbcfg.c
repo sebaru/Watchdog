@@ -40,7 +40,6 @@
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'DBCFG'\n" );
        Admin_write ( connexion, "  list               - List all parameters\n" );
        Admin_write ( connexion, "  reload             - Reload all Parameters from DB\n" );
-       Admin_write ( connexion, "  add name value     - Add parameter name and set it to value\n" );
        Admin_write ( connexion, "  set name value     - Set parameter name to value\n" );
        Admin_write ( connexion, "  del name           - Erase parameter name\n" );
        Admin_write ( connexion, "  help               - This help\n" );
@@ -53,22 +52,15 @@
         { g_snprintf(chaine, sizeof(chaine), "Database connexion failed\n" );
           Admin_write ( connexion, chaine );
         }
-       else while (Recuperer_configDB_suite( &db, &nom, &valeur ) )/* Récupération d'une config dans la DB */
-        { g_snprintf(chaine, sizeof(chaine), "  Instance_id '%s', Thread '%s' -> '%s' = '%s'\n",
-                     Config.instance_id, thread, nom, valeur );
+       else 
+        { g_snprintf(chaine, sizeof(chaine), " | Instance_id '%s', Thread '%s'\n", Config.instance_id, thread );
           Admin_write ( connexion, chaine );
+          while (Recuperer_configDB_suite( &db, &nom, &valeur ) )/* Récupération d'une config dans la DB */
+           { g_snprintf(chaine, sizeof(chaine), " | - '%20s' = '%s'\n", nom, valeur );
+             Admin_write ( connexion, chaine );
+           }
+          Admin_write( connexion, " |-\n" );
         }
-     } else
-    if ( ! strcmp ( commande, "add" ) )
-     { gchar param[80],valeur[80];
-       gboolean retour;
-       sscanf ( ligne, "%s %s %s", commande, param, valeur );/* Découpage de la ligne de commande */
-       retour = Ajouter_configDB( thread, param, valeur );
-       g_snprintf( chaine, sizeof(chaine), " Instance_id '%s', Thread '%s' -> Adding %s = %s -> %s\n",
-                   Config.instance_id, thread, param, valeur,
-                  (retour ? "Success" : "Failed") );
-       Admin_write ( connexion, chaine );
-       return(retour);
      } else
     if ( ! strcmp ( commande, "set" ) )
      { gchar param[80],valeur[80];
@@ -97,7 +89,8 @@
                    Config.instance_id, thread );
        Admin_write ( connexion, chaine );
        return(TRUE);
-     } else
+     }
+    else
      { g_snprintf( chaine, sizeof(chaine), " Unknown DBCFG command : %s\n", ligne );
        Admin_write ( connexion, chaine );
      }

@@ -34,7 +34,7 @@
  #define MBUS_WRITE_REGISTER           0x06
  #define MBUS_WRITE_MULTIPLE_REGISTER  0x10
 
- #define MBUS_TEMPS_UPDATE_IO_ANA  2               /* Rafraichssiement des I/Os ANA toutes les 2 dixièmes */
+ #define MBUS_TEMPS_UPDATE_IO_ANA  5               /* Rafraichssiement des I/Os ANA toutes les 5 dixièmes */
 
  enum
   { MODBUS_GET_DESCRIPTION,

@@ -39,23 +39,23 @@
 /* Sortie: un contexte SSL                                                                                */
 /**********************************************************************************************************/
  SSL_CTX *Init_ssl ( void )
-  { SSL_CTX *ssl_ctx;
-    X509 *certif;
+  { STACK_OF(X509_NAME) *stack;
+    SSL_CTX *ssl_ctx;
     gint retour;
     FILE *fd;
-    STACK_OF(X509_NAME) *stack;
-    DH *dh;
-
+    
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "Init_ssl SSL init" );
     SSL_load_error_strings();                                                    /* Initialisation de SSL */
     SSL_library_init();                                             /* Init SSL et PRNG: number générator */
+
+
     while(!RAND_status())
      { RAND_load_file( "/dev/urandom", 256 );
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "Init_ssl: Ajout RandADD" );
      }
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Init_ssl: SSL random ok" );
 
-    ssl_ctx = SSL_CTX_new ( SSLv23_server_method() );                       /* Création d'un contexte SSL */
+    ssl_ctx = SSL_CTX_new ( TLSv1_server_method() );                        /* Création d'un contexte SSL */
     if (!ssl_ctx)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
                  "Init_ssl : set server method failed (%s)", ERR_error_string( ERR_get_error(), NULL ) );
@@ -64,46 +64,54 @@
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Init_ssl: SSL server method ok" );
 
     SSL_CTX_set_mode( ssl_ctx, SSL_MODE_AUTO_RETRY );                                /* Mode non bloquant */
-    retour = SSL_CTX_load_verify_locations( ssl_ctx, FICHIER_CERTIF_CA, NULL );
+    SSL_CTX_set_options( ssl_ctx, SSL_OP_SINGLE_DH_USE );                    /* Options externe à OpenSSL */
+
+
+    retour = SSL_CTX_load_verify_locations( ssl_ctx, Cfg_ssrv.ssl_file_ca, NULL );
     if (retour != 1)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
                  "load verify locations failed (%s), CA file %s",
-                 ERR_error_string( ERR_get_error(), NULL ), FICHIER_CERTIF_CA );
+                 ERR_error_string( ERR_get_error(), NULL ), Cfg_ssrv.ssl_file_ca );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Init_ssl: SSL location ok" );
 
                                                                   /* Type de verification des certificats */
-    SSL_CTX_set_verify( ssl_ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL );
+    if (Cfg_ssrv.ssl_peer_cert == FALSE)
+     { SSL_CTX_set_verify( ssl_ctx, SSL_VERIFY_PEER, NULL ); }
+    else
+     { SSL_CTX_set_verify( ssl_ctx, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, NULL ); }
 
-    fd = fopen( FICHIER_CERTIF_SERVEUR, "r" );
+    fd = fopen( Cfg_ssrv.ssl_file_cert, "r" );
     if (!fd)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                "Init_ssl: failed open file %s certif serveur failed (%s)", FICHIER_CERTIF_SERVEUR, strerror(errno) );
+                "Init_ssl: failed open file %s certif serveur failed (%s)", Cfg_ssrv.ssl_file_cert, strerror(errno) );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Init_ssl: open certif server OK (%s)", FICHIER_CERTIF_SERVEUR );
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Init_ssl: open certif server OK (%s)", Cfg_ssrv.ssl_file_cert );
        
-    certif = PEM_read_X509( fd, NULL, NULL, NULL );                              /* Lecture du certificat */
+    Cfg_ssrv.ssrv_certif = PEM_read_X509( fd, NULL, NULL, NULL );                /* Lecture du certificat */
     fclose(fd);
-    if (!certif)
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Init_ssl: certif loading failed (%s)", FICHIER_CERTIF_SERVEUR );
+    if (!Cfg_ssrv.ssrv_certif)
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
+                "Init_ssl: certif loading failed (%s)", Cfg_ssrv.ssl_file_cert );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
 
-    retour = SSL_CTX_use_certificate( ssl_ctx, certif );
+    retour = SSL_CTX_use_certificate( ssl_ctx, Cfg_ssrv.ssrv_certif );
     if (retour != 1)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
                 "Init_ssl: use certificate file failed (%s)", ERR_error_string( ERR_get_error(), NULL ) );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Init_ssl: use certificate %s", Nom_certif(certif) );
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
+             "Init_ssl: use certificate %s", Nom_certif(Cfg_ssrv.ssrv_certif) );
 
-    retour = SSL_CTX_use_RSAPrivateKey_file( ssl_ctx, FICHIER_CERTIF_CLEF_SERVEUR, SSL_FILETYPE_PEM );
+    retour = SSL_CTX_use_RSAPrivateKey_file( ssl_ctx, Cfg_ssrv.ssl_file_key, SSL_FILETYPE_PEM );
     if (retour != 1)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
                 "Init_ssl: use RSAPrivate key server failed (%s)",
@@ -112,7 +120,7 @@
        return(NULL);
      }
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-             "Init_ssl: use RSAPrivate key server file %s", FICHIER_CERTIF_CLEF_SERVEUR );
+             "Init_ssl: use RSAPrivate key server file %s", Cfg_ssrv.ssl_file_key );
 
     retour = SSL_CTX_check_private_key( ssl_ctx );                         /* Verification du certif/clef */
     if (retour != 1)
@@ -122,44 +130,18 @@
        return(NULL);
      }
 
-    stack = SSL_load_client_CA_file( FICHIER_CERTIF_CA );
+    stack = SSL_load_client_CA_file( Cfg_ssrv.ssl_file_ca );
     if (!stack)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
                 "Init_ssl: load client CA failed (%s)", ERR_error_string( ERR_get_error(), NULL ) );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
      }
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Init_ssl: use master ca certificate %s", FICHIER_CERTIF_CA );
-       
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, 
+             "Init_ssl: use master ca certificate %s", Cfg_ssrv.ssl_file_ca );
     SSL_CTX_set_client_CA_list( ssl_ctx, stack );
-
-    dh = DH_generate_parameters( Cfg_ssrv.taille_clef_dh, 5, NULL, NULL );     /* Generation Diffie hellman */
-    if (!dh)
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                "Init_ssl: Dh parameters failed (%s)", ERR_error_string( ERR_get_error(), NULL ) );
-       SSL_CTX_free(ssl_ctx);
-       return(NULL);
-     }
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Init_ssl: creation clef DH ok" );
-
-    retour = SSL_CTX_set_tmp_dh( ssl_ctx, dh );
-    if (retour != 1)
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                "Init_ssl: Set DH failed (%s)", ERR_error_string( ERR_get_error(), NULL ) );
-       SSL_CTX_free(ssl_ctx);
-       return(NULL);
-     }
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Init_ssl: activation clef DH ok" );
-       
-    retour = SSL_CTX_set_tmp_rsa( ssl_ctx, Cfg_ssrv.rsa );                 /* Clefs publique et privée RSA */
-    if (retour != 1)
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                "Init_ssl: Set RSA failed (%s)", ERR_error_string( ERR_get_error(), NULL ) );
-       SSL_CTX_free(ssl_ctx);
-       return(NULL);
-     }
-
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "Init_ssl: SSL initialisation ok" );
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
+             "Init_ssl: SSL initialisation ok" );
     return( ssl_ctx );
   }
 /**********************************************************************************************************/
@@ -170,76 +152,4 @@
  void Liberer_SSL ( void )
   { if (Cfg_ssrv.Ssl_ctx) SSL_CTX_free( Cfg_ssrv.Ssl_ctx );                         /* Libération mémoire */
   } 
-/**********************************************************************************************************/
-/* Init_RSA: Initialisation de l'environnement RSA                                                        */
-/* Entrée: rien                                                                                           */
-/* Sortie: un contexte SSL                                                                                */
-/**********************************************************************************************************/
- static gboolean Generer_clef_RSA ( void )
-  { FILE *fd;
-    RSA *rsa;
-
-    rsa = RSA_generate_key( Cfg_ssrv.taille_clef_rsa, 65537, NULL, NULL );
-    if (!rsa)
-     { printf( " Could not generate RSA keys: %s\n", ERR_error_string( ERR_get_error(), NULL ) );
-       return(FALSE);
-     }
-    else 
-     { printf( " RSA keys generation OK\n" );
-       fd = fopen( FICHIER_CLEF_SEC_RSA, "w+" );
-       if (!fd)
-        { printf( "Could not open file %s\n", FICHIER_CLEF_SEC_RSA );
-          return(FALSE);
-        }
-       else
-        { gint ok;
-          ok = PEM_write_RSAPrivateKey( fd, rsa, NULL, NULL, 0, NULL, NULL );
-          if (!ok) printf( "Could not write into %s\n", FICHIER_CLEF_SEC_RSA );
-          fclose(fd);
-        }
-
-       fd = fopen( FICHIER_CLEF_PUB_RSA, "w+" );
-       if (!fd)
-        { printf( "Could not open file %s\n", FICHIER_CLEF_PUB_RSA );
-          return(FALSE);
-        }
-       else
-        { gint ok;
-          ok = PEM_write_RSAPublicKey( fd, rsa );
-          if (!ok) printf( "Could not write into %s\n", FICHIER_CLEF_PUB_RSA );
-          fclose(fd);
-        }
-      }
-    return(TRUE);
-  }
-/**********************************************************************************************************/
-/* Init_RSA: Initialisation de l'environnement RSA                                                        */
-/* Entrée: rien                                                                                           */
-/* Sortie: un contexte SSL                                                                                */
-/**********************************************************************************************************/
- void Init_RSA ( void )
-  { FILE *fd;
-
-    Cfg_ssrv.rsa = NULL;
-encore:
-    fd = fopen( FICHIER_CLEF_PUB_RSA, "r" );
-    if (!fd)
-     { printf( "Could not open file %s. Generating keys.\n", FICHIER_CLEF_PUB_RSA );
-       if (Generer_clef_RSA()) goto encore;
-       else { printf( "Error generating RSA keys (%s).\n", FICHIER_CLEF_PUB_RSA );
-              return;
-            }
-     }
-
-    Cfg_ssrv.rsa = PEM_read_RSAPublicKey( fd, NULL, NULL, NULL );
-    if (!Cfg_ssrv.rsa) printf("Unable to load %s\n", FICHIER_CLEF_PUB_RSA );
-    fclose(fd); 
-
-    fd = fopen( FICHIER_CLEF_SEC_RSA, "r" );
-    if (!fd)
-     { printf( "Could not open file %s\n", FICHIER_CLEF_SEC_RSA ); exit(EXIT_OK); }
-    Cfg_ssrv.rsa = PEM_read_RSAPrivateKey( fd, &Cfg_ssrv.rsa, NULL, NULL );
-    if (!Cfg_ssrv.rsa) printf("Unable to load %s\n", FICHIER_CLEF_SEC_RSA );
-    fclose(fd); 
-  }
 /*--------------------------------------------------------------------------------------------------------*/

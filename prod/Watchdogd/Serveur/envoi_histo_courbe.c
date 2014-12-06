@@ -82,7 +82,7 @@
        client->histo_courbe.date_first = client->histo_courbe.date_last - 3600;
      }
 
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Proto_ajouter_histo_courbe_thread: début d'envoi" );
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "Proto_ajouter_histo_courbe_thread: début d'envoi" );
     max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_START_COURBE)) / sizeof(struct CMD_START_COURBE_VALEUR);
 
     Recuperer_archDB ( Config.log, db, rezo_courbe.type, rezo_courbe.num,                  /* Requete SQL */

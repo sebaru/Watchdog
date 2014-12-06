@@ -174,10 +174,6 @@
     Charger_eana();
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des EANA fait" );
 
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des SCENARIO" );
-    Charger_scenario();
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des SCENARIO fait" );
-
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des compteurs horaires" );
     Charger_cpth();
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des compteurs horaires fait" );
@@ -296,7 +292,6 @@
 /**********************************************************************************************************/
  static void *Boucle_pere ( void )
   { gint cpt_5_minutes, cpt_1_minute;
-    gint cpt;
 
     prctl(PR_SET_NAME, "W-MSRV", 0, 0, 0 );
 
@@ -353,10 +348,8 @@
         }
 
        if (cpt_1_minute < Partage->top)                                   /* Update DB toutes les minutes */
-        { for( cpt=0; cpt<NBR_SCENARIO; cpt++)
-           { Checker_scenario( cpt ); }
-          Gerer_histo_repeat();
-          Print_SQL_status(); /* Print SQL status ! */
+        { Gerer_histo_repeat();
+          Print_SQL_status();                                         /* Print SQL status for debugging ! */
           cpt_1_minute = Partage->top + 600;                             /* Sauvegarde toutes les minutes */
         }
 
@@ -375,7 +368,7 @@
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  static gboolean Lire_ligne_commande( int argc, char *argv[] )
-  { gint help, log_level, max_client, fg, initrsa, single, compil;
+  { gint help, log_level, fg, initrsa, single, compil;
     gchar *home, *file, *run_as;
     struct passwd *pwd, *old;
     struct poptOption Options[]= 
@@ -385,8 +378,6 @@
          &initrsa,          0, "RSA initialisation", NULL },
        { "debug",      'd', POPT_ARG_INT,
          &log_level,      0, "Debug level", "LEVEL" },
-       { "max_client", 'm', POPT_ARG_INT,
-         &max_client,       0, "Maximum of connexions allowed", "MAX" },
        { "home",       'H', POPT_ARG_STRING,
          &home,             0, "Home directory", "HOME" },
        { "run_as",     'u', POPT_ARG_STRING,
@@ -407,7 +398,6 @@
     home   = NULL;
     file   = NULL;
     run_as = NULL;
-    max_client     = -1;
     log_level      = -1;
     initrsa        = 0;
     fg             = 0;
@@ -571,9 +561,7 @@
           else if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
            { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb ARCH" ); }
 
-          if (!Config.instance_is_master)
-           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "D.L.S Thread is administratively DOWN (instance is not Master)" ); }
-          else if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
+          if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
            { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb DLS" ); }
 
           Charger_librairies();                           /* Chargement de toutes les librairies Watchdog */

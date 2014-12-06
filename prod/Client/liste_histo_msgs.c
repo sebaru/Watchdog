@@ -506,7 +506,7 @@ printf("Proto_afficher_histo_msgs 1\n");
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Detruire_page), page );
 
-    bouton = Bobouton( Verte, Vmask, _("Find") );
+    bouton = gtk_button_new_from_stock( GTK_STOCK_FIND );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Preparer_requete_histo_msgs), page );

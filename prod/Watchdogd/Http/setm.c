@@ -36,7 +36,7 @@
 /* Entrées: la connexion MHD                                                                              */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
- gboolean Http_Traiter_request_setm ( struct MHD_Connection *connection )
+ gboolean Http_Traiter_request_setm ( struct HTTP_SESSION *session, struct MHD_Connection *connection )
   { const char *Setm_response = "<html><body>OK</body></html>";
     struct MHD_Response *response;
     const gchar *m_num_char;
@@ -46,11 +46,15 @@
     if (!m_num_char) { return(FALSE); }
                 else { m_num = atoi(m_num_char); }
 
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+             "Http_Traiter_request_setm: Setting M%04d = 1 for User %s, SID %s",
+              m_num, session->util->nom, session->sid );
     Envoyer_commande_dls ( m_num );
 
     response = MHD_create_response_from_buffer ( strlen (Setm_response)+1,
                                                 (void*) Setm_response, MHD_RESPMEM_PERSISTENT);
     if (response == NULL) return(FALSE);
+    Http_Add_response_header ( response );
     MHD_queue_response (connection, MHD_HTTP_OK, response);
     MHD_destroy_response (response);
 

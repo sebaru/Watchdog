@@ -68,9 +68,9 @@
                case TAG_ATELIER     : Gerer_protocole_atelier      ( client ); break;
                case TAG_COURBE      : Gerer_protocole_courbe       ( client ); break;
                case TAG_HISTO_COURBE: Gerer_protocole_histo_courbe ( client ); break;
-               case TAG_SCENARIO    : Gerer_protocole_scenario     ( client ); break;
                case TAG_CAMERA      : Gerer_protocole_camera       ( client ); break;
                case TAG_ADMIN       : Gerer_protocole_admin        ( client ); break;
+               case TAG_SATELLITE   : Gerer_protocole_satellite    ( client ); break;
                case TAG_CONNEXION   : if (Reseau_ss_tag(connexion) == SSTAG_CLIENT_SETPASSWORD )
                                        { struct CMD_TYPE_UTILISATEUR *util;
                                          util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
@@ -81,54 +81,10 @@
 /************************************** Client en attente identification **********************************/
     else if ( client->mode == WAIT_FOR_IDENT && Reseau_tag(connexion)    == TAG_CONNEXION
                                              && Reseau_ss_tag(connexion) == SSTAG_CLIENT_IDENT )
-          { int client_major, client_minor, client_micro;
-            int server_major, server_minor, server_micro;
-            struct REZO_CLI_IDENT *ident;
+          { struct REZO_CLI_IDENT *ident;
 
             ident = (struct REZO_CLI_IDENT *)connexion->donnees;
-            Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-                     "Gerer_protocol: Identification du client (%d), nom=%s, version=%s",
-                      connexion->socket, ident->nom, ident->version );
-            memcpy( &client->ident, ident, sizeof( struct REZO_CLI_IDENT ) );  /* Recopie pour sauvegarde */
-            
-                                                                        /* Vérification du MAJOR et MINOR */
-            sscanf ( ident->version, "%d.%d.%d", &client_major, &client_minor, &client_micro );
-            sscanf ( VERSION,        "%d.%d.%d", &server_major, &server_minor, &server_micro );
-
-            if ( client_major == server_major && client_minor == server_minor )
-             { client->util = Rechercher_utilisateurDB_by_name ( ident->nom );
-               if (!client->util)
-                { struct CMD_GTK_MESSAGE gtkmessage;
-                  g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Wrong User" );
-                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                                (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
-                  Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, "Wrong User" );
-                  Client_mode ( client, DECONNECTE );
-                }
-               else
-                { struct CMD_TYPE_UTILISATEUR new_util;
-                  memcpy ( &new_util, client->util, sizeof(struct CMD_TYPE_UTILISATEUR) );
-                  memset ( &new_util.hash, 0, sizeof(new_util.hash) );
-                  Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_WANT_HASH,
-                                (gchar *)&new_util, sizeof(struct CMD_TYPE_UTILISATEUR) );
-                  Client_mode ( client, WAIT_FOR_HASH );
-                }
-             }
-            else 
-             { struct CMD_GTK_MESSAGE gtkmessage;
-               g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Wrong version number" );
-               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                             (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
-               Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, "Wrong version number" );
-               Client_mode ( client, DECONNECTE );
-             }
-          }
-/************************************** Récupération du HASH du client ************************************/
-    else if ( client->mode == WAIT_FOR_HASH && Reseau_tag(connexion)    == TAG_CONNEXION
-                                            && Reseau_ss_tag(connexion) == SSTAG_CLIENT_SEND_HASH )
-          { struct CMD_TYPE_UTILISATEUR *util;
-            util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
-            Tester_autorisation ( client, util );
+            Tester_autorisation ( client, ident );       /* Test l'authent cliente (login/code ou certif) */
           }
 /************************************** Client en attente nouveau password ********************************/
     else if ( client->mode == WAIT_FOR_NEWPWD && Reseau_tag(connexion)    == TAG_CONNEXION

@@ -13,7 +13,7 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
                           protocole_supervision.c protocole_histo.c \
                           protocole_atelier.c protocole_courbe.c protocole_fichier.c \
 			  protocole_synoptique.c protocole_admin.c \
-                          ssl.c menu.c ident.c timer.c admin.c \
+                          menu.c timer.c admin.c \
 			  liste_groupe.c ajout_groupe.c \
 			  liste_util.c ajout_util.c \
 			  liste_plugin_dls.c ajout_plugin_dls.c edit_source_dls.c \
@@ -24,7 +24,6 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 			  liste_icone.c ajout_icone.c liste_icone.h \
 			  option_entreeana.c option_cpt_imp.c option_tempo.c \
                           liste_camera.c ajout_camera.c protocole_camera.c \
-			  liste_scenario.c ajout_scenario.c protocole_scenario.c \
 			  atelier.c atelier_clic_trame.c atelier_selection.c \
 			  atelier_agrandir.c atelier_propriete_motif.c atelier_ajout_motif.c \
 			  atelier_ajout_comment.c \
@@ -33,7 +32,7 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 			  atelier_ajout_capteur.c atelier_ajout_camera_sup.c \
 			  supervision.c supervision_clic.c supervision_comment.c \
                           supervision_passerelle.c supervision_palette.c \
-                          supervision_capteur.c supervision_scenario.c \
+                          supervision_capteur.c \
 			  supervision_camera.c \
 			  trame.c \
 			  print.c \

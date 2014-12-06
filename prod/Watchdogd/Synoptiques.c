@@ -36,33 +36,6 @@
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
-/* Tester_groupe_synoptique: renvoie true si l'utilisateur fait partie du groupe en parametre             */
-/* Entrées: un id utilisateur, une liste de groupe, un id de groupe                                       */
-/* Sortie: false si pb                                                                                    */
-/**********************************************************************************************************/
- gboolean Tester_groupe_synoptique( struct CMD_TYPE_UTILISATEUR *util, guint syn_id )
-  { struct CMD_TYPE_SYNOPTIQUE *syn;
-    gint cpt;
-
-    if (util->id==UID_ROOT) return(TRUE);                            /* Le tech est dans tous les groupes */
-
-    syn = Rechercher_synoptiqueDB ( syn_id );
-    if (!syn) return(FALSE);
-    if (syn->groupe == GID_TOUTLEMONDE)
-     { g_free(syn); return(TRUE); }
-
-    cpt=0;
-    while( util->gids[cpt] )
-     { if( util->gids[cpt] == syn->access_groupe )
-        { g_free(syn);
-          return(TRUE);
-        }
-       cpt++;
-     }
-    g_free(syn);
-    return(FALSE);
-  }
-/**********************************************************************************************************/
 /* Retirer_msgDB: Elimination d'un synoptique                                                             */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: false si probleme                                                                              */

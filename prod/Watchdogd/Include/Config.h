@@ -43,7 +43,6 @@
     gchar db_username[ TAILLE_DB_USERNAME+1 ];            /* Nom de l'administrateur de la base de données*/
     gchar db_database[ TAILLE_DB_DATABASE+1 ];                          /* Chemin d'acces aux DB watchdog */
     gchar db_password[ TAILLE_DB_PASSWORD+1 ];                          /* Mot de passe de connexion ODBC */
-    guchar crypto_key[TAILLE_CRYPTO_KEY+1];           /* Clef de cryptage des mots de passes utilisateurs */
     gchar home [ TAILLE_HOME+1 ];                                          /* Repertoire maison du daemon */
     gchar librairie_dir [ TAILLE_HOME+1 ];               /* Repertoire de stockage des libraires watchdog */
     gchar instance_id [ TAILLE_HOME+1 ];                     /* Global ID, unique, de l'instance Watchdog */
@@ -69,7 +68,6 @@
  #define DEFAUT_HOME                    g_get_home_dir()        /* Ne pas depasser TAILLE_HOME caracteres */
  #define DEFAUT_GLOBAL_ID               "MASTER"                /* Ne pas depasser TAILLE_HOME caracteres */
  #define DEFAUT_LIBRAIRIE_DIR           "/usr/local/lib"        /* Ne pas depasser TAILLE_HOME caracteres */
- #define DEFAUT_CRYPTO_KEY              "My/Name/Is/Bond/"
  #define DEFAUT_TELLSTICK_A_MIN         -1
  #define DEFAUT_TELLSTICK_A_MAX         -1
  #define DEFAUT_ASTERISK_M_MIN          -1
@@ -78,7 +76,6 @@
  extern void Lire_config ( char *fichier_config );
  extern void Print_config ( void );
  extern gboolean Retirer_configDB ( gchar *nom_thread, gchar *nom );
- extern gboolean Ajouter_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur );
  extern gboolean Modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur );
  extern gboolean Recuperer_configDB ( struct DB **db_retour, gchar *nom_thread );
  extern gboolean Recuperer_configDB_suite( struct DB **db_orig, gchar **nom, gchar **valeur );

@@ -38,12 +38,11 @@
  #define TAILLE_MACHINE            30                                /* Taille max pour un nom d'hote DNS */
  #define TEMPS_UPDATE_CAPTEUR      20              /* Rafraichissement des capteurs toutes les 2 secondes */
  #define TEMPS_PULSE               20                                       /* Envoi d'un pulse au client */
+
  enum
   { ENVOI_INTERNAL,                              /* Envoi des informations internes à la librairie Reseau */
     ATTENTE_CONNEXION_SSL,                                           /* Veut-il crypter les connexions ?? */
     WAIT_FOR_IDENT,                                /* Permet de demander l'identification du client lourd */
-    SEND_SALT,                                    /* Permet de demander l'identification de l'utilisateur */
-    WAIT_FOR_HASH,                              /* Permet de demander l'authentification de l'utilisateur */
     WAIT_FOR_NEWPWD,                                    /* Si l'utilisateur doit changer son mot de passe */
 
     ENVOI_HISTO,
@@ -81,6 +80,7 @@
  struct CLIENT                /* Définition de la structure de travail et de gestion des clients distants */
   { gchar machine[TAILLE_MACHINE+1];                          /* Le nom (ou adrIP) de sa machine distante */
     gint  ssrv_id;                                                   /* Numero de sous serveur de gestion */
+    X509 *certif;                                                                       /* Certificat ssl */
     struct REZO_CLI_IDENT ident;                                 /* Nom complet de l'utilisateur en cours */
     struct CMD_TYPE_UTILISATEUR *util;
     guchar mode;                        /* Ce client est-il valide ou est-ce un gogol qui veut rentrer ?? */

@@ -38,10 +38,10 @@
 /* Entrées: la connexion MHD                                                                              */
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
- gboolean Http_Traiter_request_getsyn ( struct MHD_Connection *connection )
+ gboolean Http_Traiter_request_getsyn ( struct HTTP_SESSION *session, struct MHD_Connection *connection )
   { struct CMD_TYPE_SYNOPTIQUE *syndb;
     struct MHD_Response *response;
-    const gchar *syn_id_char, *x_titanium_id;
+    const gchar *syn_id_char;
     xmlTextWriterPtr writer;
     xmlBufferPtr buf;
     gint retour, syn_id;
@@ -145,6 +145,31 @@
      }
     xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping capteurs !!");
 
+/*------------------------------------------- Dumping motif ----------------------------------------------*/
+    xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping motifs !!");
+    if ( Recuperer_motifDB( &db, syn_id ) )
+     { for ( ; ; )
+        { struct CMD_TYPE_MOTIF *motif;
+          motif = Recuperer_motifDB_suite( &db );
+          if (!motif) break;                                                                /* Terminé ?? */
+
+          xmlTextWriterStartElement(writer, (const unsigned char *)"motif");               /* Start Motif */
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"id",     "%d", motif->id );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"icone_id","%d", motif->icone_id );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"libelle","%s", motif->libelle );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"type_gestion","%d", motif->type_gestion );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"bit_clic","%d", motif->bit_clic );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"etat",   "%d", Partage->i[motif->bit_controle].etat );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"rouge",  "%d", Partage->i[motif->bit_controle].rouge );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"vert",   "%d", Partage->i[motif->bit_controle].vert );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"bleu",   "%d", Partage->i[motif->bit_controle].bleu );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"cligno", "%d", Partage->i[motif->bit_controle].cligno );
+          xmlTextWriterEndElement(writer);                                              /* End passerelle */
+          g_free(motif);
+        }
+     }
+    xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping motifs !!");
+
     retour = xmlTextWriterEndElement(writer);                                           /* End synoptique */
     if (retour < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
@@ -166,12 +191,7 @@
     xmlBufferFree(buf);                           /* Libération du buffer dont nous n'avons plus besoin ! */
     if (response == NULL) return(FALSE);       /* Si erreur de creation de la reponse, on sort une erreur */
     MHD_add_response_header (response, "Content-Type", "application/xml");
-
-    x_titanium_id = MHD_lookup_connection_value (connection, MHD_HEADER_KIND, "X-Titanium-Id");
-    if (!x_titanium_id) x_titanium_id = "unknown";
-    MHD_add_response_header ( response, "Access-Control-Allow-Origin", "*" );
-    MHD_add_response_header ( response, "X-Titanium-Id", x_titanium_id);
-
+    Http_Add_response_header ( response );
     MHD_queue_response (connection, MHD_HTTP_OK, response);
     MHD_destroy_response (response);
     return(TRUE);

@@ -27,65 +27,16 @@
 
  #include <gnome.h>
 
- GtkWidget *Label_msg_total;                  /* Nombre total de message dans l'historique RAM du serveur */
- GtkWidget *Label_msg_def;                    /* Nombre total de message dans l'historique RAM du serveur */
- GtkWidget *Label_msg_alrm;                   /* Nombre total de message dans l'historique RAM du serveur */
- GtkWidget *Label_msg_inhib;                  /* Nombre total de message dans l'historique RAM du serveur */
- GtkWidget *Label_heure;                                              /* pour afficher l'heure du serveur */
  GtkWidget *Notebook;                                                /* Le Notebook de controle du client */
  GtkWidget *Entry_status;                                                 /* Status de la machine cliente */
  GList *Liste_pages = NULL;                                   /* Liste des pages ouvertes sur le notebook */  
 
- gint Nbr_message=0;                                            /* Nombre_total de messages dans la liste */
- gint Nbr_message_etat=0;                                       /* Nombre_total de messages dans la liste */
- gint Nbr_message_def=0;                                        /* Nombre_total de messages dans la liste */
- gint Nbr_message_alrm=0;                                       /* Nombre_total de messages dans la liste */
- gint Nbr_message_inhib=0;                                      /* Nombre_total de messages dans la liste */
-
  static gint nbr_enreg = 0, nbr_enreg_max = 0;
- extern GtkWidget *Barre_status;                                         /* Barre d'etat de l'application */
+ static GtkWidget *Barre_pulse;                                                        /* Barre de pulse  */
+ static GtkWidget *Barre_progress;                                                 /* Barre de chargement */
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
-/****************************** Inclusion des images XPM pour les menus ***********************************/
- extern GdkBitmap *Rmask, *Bmask, *Vmask, *Omask, *Jmask;
- extern GdkPixmap *Rouge, *Bleue, *Verte, *Orange, *Jaune;
-
-/**********************************************************************************************************/
-/* Bobouton: Renvoi un beau bouton avec une boule de couleur !!                                           */
-/* Entrée: Un pixmap et un bitmap et le texte à afficher                                                  */
-/* Sortie: un widget                                                                                      */
-/**********************************************************************************************************/
- GtkWidget *Bobouton ( GdkPixmap *pix, GdkBitmap *bitmap, gchar *texte )
-  { GtkWidget *vboite, *bouton;
-
-    bouton = gtk_button_new();
-    vboite = gtk_hbox_new( FALSE, 6 );
-    gtk_container_set_border_width( GTK_CONTAINER(vboite), 5 );
-    gtk_container_add( GTK_CONTAINER(bouton), vboite );
-    gtk_box_pack_start( GTK_BOX(vboite), gtk_pixmap_new( pix, bitmap ), FALSE, FALSE, 0 );
-    gtk_box_pack_start( GTK_BOX(vboite), gtk_label_new (    texte    ), TRUE, TRUE, 0 );
-    return(bouton);
-  }
-/**********************************************************************************************************/
-/* Maj_compteurs: Affichage du nombre de message de la liste msg                                          */
-/* Entrée: niet                                                                                           */
-/* Sortie: void                                                                                           */
-/**********************************************************************************************************/
- void Maj_compteurs ( void )
-  { gchar chaine[50];
-    snprintf( chaine, sizeof(chaine), "%d message%c", Nbr_message_etat, (Nbr_message>1 ? 's' : ' ') );
-    gtk_label_set_text( GTK_LABEL(Label_msg_total), chaine );                      /* Affichage à l'ecran */
-
-    snprintf( chaine, sizeof(chaine), "%d défaut%c", Nbr_message_def, (Nbr_message_def>1 ? 's' : ' ') );
-    gtk_label_set_text( GTK_LABEL(Label_msg_def), chaine );                        /* Affichage à l'ecran */
-
-    snprintf( chaine, sizeof(chaine), "%d Alarme%c", Nbr_message_alrm, (Nbr_message_alrm>1 ? 's' : ' ') );
-    gtk_label_set_text( GTK_LABEL(Label_msg_alrm), chaine );                       /* Affichage à l'ecran */
-
-    snprintf( chaine, sizeof(chaine), "%d inhibé%c", Nbr_message_inhib, (Nbr_message_inhib>1 ? 's' : ' ') );
-    gtk_label_set_text( GTK_LABEL(Label_msg_inhib), chaine );                      /* Affichage à l'ecran */
-  }
 /**********************************************************************************************************/
 /* Detruire_page_plugin_dls: Detruit la page du notebook consacrée aux plugin_dlss watchdog               */
 /* Entrée: rien                                                                                           */
@@ -174,22 +125,8 @@
 /* Entrées: val, max                                                                                      */
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
- void Set_progress_plusun( void )
-  { GtkProgressBar *progress;
-    if (nbr_enreg != nbr_enreg_max) nbr_enreg++;
-    progress = gnome_appbar_get_progress( GNOME_APPBAR(Barre_status) );
-    gtk_progress_bar_set_fraction( progress, (gdouble)nbr_enreg/nbr_enreg_max );
-    if (nbr_enreg == nbr_enreg_max) Set_progress_text( _("done"), nbr_enreg_max );
-  }
-/**********************************************************************************************************/
-/* Set_progress: Positionne la barre de progression de la fenetre                                         */
-/* Entrées: val, max                                                                                      */
-/* Sortie: Kedal                                                                                          */
-/**********************************************************************************************************/
  void Set_progress_pulse( void )
-  { GtkProgressBar *progress;
-    progress = gnome_appbar_get_progress( GNOME_APPBAR(Barre_status) );
-    gtk_progress_bar_pulse ( progress );
+  { gtk_progress_bar_pulse ( GTK_PROGRESS_BAR(Barre_pulse) );
   }
 /**********************************************************************************************************/
 /* Set_progress: Positionne la barre de progression de la fenetre                                         */
@@ -198,12 +135,21 @@
 /**********************************************************************************************************/
  void Set_progress_plus( gint plus )
   { GtkProgressBar *progress;
+    gdouble fraction;
+    gchar chaine[20];
+
     nbr_enreg += plus;
-    if (!nbr_enreg_max) nbr_enreg_max=1;
-    if (nbr_enreg > nbr_enreg_max) nbr_enreg = nbr_enreg_max;
-    progress = gnome_appbar_get_progress( GNOME_APPBAR(Barre_status) );
-    gtk_progress_bar_set_fraction( progress, (gdouble)nbr_enreg/nbr_enreg_max );
-    if (nbr_enreg == nbr_enreg_max) Set_progress_text( _("done"), nbr_enreg_max );
+    if (nbr_enreg >= nbr_enreg_max)
+     { nbr_enreg=0; nbr_enreg_max=0;
+       gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (Barre_progress), 1.0 );
+       gtk_progress_bar_set_text( GTK_PROGRESS_BAR (Barre_progress), "100%" );
+     }
+    else
+     { fraction = 1.0*nbr_enreg/nbr_enreg_max;
+       gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (Barre_progress), fraction );
+       g_snprintf( chaine, sizeof(chaine), "%3.1f%%", 100.0*fraction );
+       gtk_progress_bar_set_text( GTK_PROGRESS_BAR (Barre_progress), chaine );
+     }
   }
 /**********************************************************************************************************/
 /* Set_progress_text: Positionne le texte de la barre de progression de la fenetre                        */
@@ -211,25 +157,7 @@
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
  void Set_progress_text( gchar *texte, gint max )
-  { GtkProgressBar *progress;
-    gchar chaine[50];
-
-    nbr_enreg_max = max;
-    nbr_enreg     = 0;
-    progress = gnome_appbar_get_progress( GNOME_APPBAR(Barre_status) );
-    g_snprintf( chaine, sizeof(chaine), "%s", texte );
-    gtk_progress_bar_set_text( progress, chaine );
-  }
-/**********************************************************************************************************/
-/* Raz_progress: Remise à zero de la barre de progression                                                 */
-/* Entrées: rien                                                                                          */
-/* Sortie: Kedal                                                                                          */
-/**********************************************************************************************************/
- void Raz_progress( void )
-  { GtkProgressBar *progress;
-    progress = gnome_appbar_get_progress( GNOME_APPBAR(Barre_status) );
-    g_object_set( progress, "bar-style", GTK_PROGRESS_CONTINUOUS, NULL );
-    gtk_progress_bar_set_text( progress, NULL );
+  { nbr_enreg_max += max;
   }
 /**********************************************************************************************************/
 /* Log: Afficher un texte dans l'entry status                                                             */
@@ -308,7 +236,7 @@
 /* Sortie: Widget *boite, référençant la boite                                                            */
 /**********************************************************************************************************/
  GtkWidget *Creer_boite_travail ( void )
-  { GtkWidget *vboite, *hboite, *texte, *bouton;
+  { GtkWidget *vboite, *hboite, *texte;
 
     vboite = gtk_vbox_new( FALSE, 6 );
     
@@ -318,7 +246,9 @@
     gtk_notebook_set_scrollable (GTK_NOTEBOOK(Notebook), TRUE );
 
     hboite = gtk_hbox_new( FALSE, 6 );
+    gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_box_pack_start( GTK_BOX(vboite), hboite, FALSE, FALSE, 0 );
+
 /********************* Status de la machine cliente:connectée/erreur/loguée... ****************************/
     texte = gtk_label_new( "Status" );
     gtk_box_pack_start( GTK_BOX(hboite), texte, FALSE, FALSE, 0 );
@@ -326,33 +256,14 @@
     gtk_entry_set_editable( GTK_ENTRY(Entry_status), FALSE );
     gtk_box_pack_start( GTK_BOX(hboite), Entry_status, TRUE, TRUE, 0 );
 
-/******************* Nombre de messages d'etat dans l'historique RAM serveur ******************************/
-    bouton = Bobouton( Verte, Vmask, "0 message" );
-    gtk_box_pack_start( GTK_BOX(hboite), bouton, FALSE, FALSE, 0 );
-  /*  g_signal_connect_swapped( bouton, "clicked",
-                              G_CALLBACK(Changer_page_notebook), GINT_TO_POINTER( TYPE_PAGE_HISTO ) );*/
-    Label_msg_total = ((GtkBoxChild *)(GTK_BOX(GTK_BIN(bouton)->child)->children->next->data))->widget;
-                      
-    bouton = Bobouton( Orange, Omask, "0 message" );
-    gtk_box_pack_start( GTK_BOX(hboite), bouton, FALSE, FALSE, 0 );
-    /*gtk_signal_connect( GTK_OBJECT(bouton), "clicked",
-                        GTK_SIGNAL_FUNC(Changer_page_Notebook), GINT_TO_POINTER(Num_page_defaut) );*/
-    Label_msg_def = ((GtkBoxChild *)(GTK_BOX(GTK_BIN(bouton)->child)->children->next->data))->widget;
+    Barre_progress = gtk_progress_bar_new ();
+    gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (Barre_progress), 1.0 );
+    gtk_progress_bar_set_text( GTK_PROGRESS_BAR (Barre_progress), "100%" );
+    gtk_box_pack_start( GTK_BOX(hboite), Barre_progress, FALSE, FALSE, 0 );
 
-    bouton = Bobouton( Rouge, Rmask, "0 message" );
-    gtk_box_pack_start( GTK_BOX(hboite), bouton, FALSE, FALSE, 0 );
-    /*gtk_signal_connect( GTK_OBJECT(bouton), "clicked",
-                        GTK_SIGNAL_FUNC(Changer_page_Notebook), GINT_TO_POINTER(Num_page_alarme) );*/
-    Label_msg_alrm = ((GtkBoxChild *)(GTK_BOX(GTK_BIN(bouton)->child)->children->next->data))->widget;
+    Barre_pulse = gtk_progress_bar_new ();
+    gtk_box_pack_start( GTK_BOX(hboite), Barre_pulse, FALSE, FALSE, 0 );
 
-    bouton = Bobouton( Jaune, Jmask, "0 message" );
-    gtk_box_pack_start( GTK_BOX(hboite), bouton, FALSE, FALSE, 0 );
-    /*g_signal_connect( GTK_OBJECT(bouton), "clicked",
-                        GTK_SIGNAL_FUNC(Changer_page_Notebook), GINT_TO_POINTER(Num_page_inhib) );*/
-    Label_msg_inhib = ((GtkBoxChild *)(GTK_BOX(GTK_BIN(bouton)->child)->children->next->data))->widget;
-
-    Label_heure = gtk_label_new("");
-    gtk_box_pack_start( GTK_BOX(hboite), Label_heure, FALSE, FALSE, 0 );
     return(vboite);
  }
 /*--------------------------------------------------------------------------------------------------------*/

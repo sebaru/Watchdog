@@ -35,8 +35,7 @@
  #include "protocli.h"
 
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
- extern GtkWidget *Barre_status;                                         /* Barre d'etat de l'application */
+ extern struct CLIENT Client;                           /* Identifiant de l'utilisateur en cours */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
 /**********************************************************************************************************/
 /* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
@@ -52,7 +51,7 @@
        case SSTAG_SERVEUR_CLI_VALIDE:
              { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
                          "Gerer_protocole_connexion : Client en mode VALIDE" );
-               Client_en_cours.mode = VALIDE;
+               Client.mode = VALIDE;
                if (Config_cli.gui_tech==FALSE)                                    /* Affichage GUI Client */
                 { Menu_want_supervision(); }                               
                break;
@@ -116,24 +115,23 @@
              { if (!Changer_password()) Deconnecter();
              }
             break;
-       case SSTAG_SERVEUR_WANT_HASH:
-             { struct CMD_TYPE_UTILISATEUR *util;
-               util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;               
-               printf("Proto_connexion : Want HASH\n");
-               Envoyer_authentification(util);
-             }
-            break;
-
        case SSTAG_SERVEUR_AUTORISE:
              { struct REZO_SRV_IDENT *ident;
-               gchar chaine[80];
+               gchar chaine[256];
 
                ident = (struct REZO_SRV_IDENT *)connexion->donnees;
-               g_snprintf( chaine, sizeof(chaine), _("Connected to %s@%s:%d  %s"),
-                           Client_en_cours.util.nom, Client_en_cours.host, Config_cli.port_ihm, ident->comment );
-               gnome_appbar_push( GNOME_APPBAR(Barre_status), chaine );
-               Log( _("Connected") );
-               Client_en_cours.mode = CONNECTE;
+               if (Client.srv_certif)
+                { g_snprintf( chaine, sizeof(chaine), _("SSL Connected to %s@%s:%d %s - on %s"),
+                              Client.ident.nom, Client.host, Config_cli.port_ihm,
+                              ident->comment, Nom_certif(Client.srv_certif) );
+                }
+               else
+                { g_snprintf( chaine, sizeof(chaine), _("Connected to %s@%s:%d (%s)"),
+                              Client.ident.nom, Client.host, Config_cli.port_ihm,
+                              ident->comment );
+                }
+               Log( chaine );
+               Client.mode = CONNECTE;
                Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
                          "Gerer_protocole_connexion : Client en mode CONNECTE" );
              }

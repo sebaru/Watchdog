@@ -133,14 +133,6 @@
     Chercher_page_notebook( TYPE_PAGE_HISTO_COURBE, 0, TRUE );                    /* Affichage de la page */
   }
 /**********************************************************************************************************/
-/* Menu_want_histo_hard: l'utilisateur desire voir l'historique                                           */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
- void Menu_want_scenario ( void )
-  { if (Chercher_page_notebook( TYPE_PAGE_SCENARIO, 0, TRUE )) return;
-    Envoi_serveur( TAG_SCENARIO, SSTAG_CLIENT_WANT_PAGE_SCENARIO, NULL, 0 );
-  }
-/**********************************************************************************************************/
 /* Menu_want_supervision: l'utilisateur desire voir le synoptique supervision                             */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/

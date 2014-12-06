@@ -73,7 +73,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_CAMERA:
              { struct CMD_TYPE_CAMERA *camera;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                camera = (struct CMD_TYPE_CAMERA *)g_try_malloc0( sizeof( struct CMD_TYPE_CAMERA ) );
                if (!camera) return; 

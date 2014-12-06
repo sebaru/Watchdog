@@ -2,8 +2,9 @@ dnl Process this file with autoconf to produce a configure script.
 
 
 
-define([svnversion], esyscmd([sh -c "svnversion -n"]))
-AC_INIT([Watchdog], [2.8.svnversion], [project.watchdog@gmail.com], [Watchdog], [http://seblef.hd.free.fr] )
+dnl define([gittag], esyscmd([sh -c "git describe --always  | tr -d '\n'"]))
+
+AC_INIT([Watchdog], [2.8.`svnversion -n`], [project.watchdog@gmail.com], [Watchdog], [http://seblef.hd.free.fr/wiki] )
 AC_CANONICAL_TARGET
 AC_CONFIG_SRCDIR([Watchdogd/Watchdogd.c])
 AM_INIT_AUTOMAKE
@@ -84,7 +85,6 @@ ALL_LINGUAS=""
 
 AC_OUTPUT( \
 Makefile \
-Documentation/Makefile \
 Include/Makefile \
 Commun/Makefile \
 Client/Include/Makefile \

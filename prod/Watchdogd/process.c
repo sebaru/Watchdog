@@ -69,7 +69,7 @@
        return(FALSE);
      }
 
-    if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) )           /* On le détache au boot */
+    if ( pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) )   /* On le laisse joinable au boot */
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "Start_librairie: pthread_setdetachstate failed (%s)",
                 lib->nom_fichier );
@@ -98,8 +98,8 @@
      { Info_new( Config.log, Config.log_msrv, LOG_INFO,
                 "Stop_librairie: thread %s, stopping in progress", lib->nom_fichier );
 
-       lib->Thread_run = FALSE;                                         /* On demande au thread de s'arreter */
-       while( lib->TID != 0 ) sched_yield();                                             /* Attente fin thread */
+       lib->Thread_run = FALSE;                                      /* On demande au thread de s'arreter */
+       while( lib->TID != 0 ) sched_yield();                                        /* Attente fin thread */
      }
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
              "Stop_librairie: thread %s stopped", lib->nom_fichier );
@@ -333,13 +333,13 @@
 
     Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: Waiting for ARCH (%p) to finish", Partage->com_arch.TID );
     Partage->com_arch.Thread_run = FALSE;
-    while ( Partage->com_arch.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
+    while ( Partage->com_arch.TID != 0 ) sched_yield();                            /* Attente fin Archive */
     Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: ok, ARCH is down" );
 
     if (flag)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: Waiting for ADMIN (%p) to finish", Partage->com_admin.TID );
        Partage->com_admin.Thread_run = FALSE;
-       while ( Partage->com_admin.TID != 0 ) sched_yield();                       /* Attente fin ONDULEUR */
+       while ( Partage->com_admin.TID != 0 ) sched_yield();                          /* Attente fin ADMIN */
        Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Stopper_fils: ok, ADMIN is down" );
      }
 

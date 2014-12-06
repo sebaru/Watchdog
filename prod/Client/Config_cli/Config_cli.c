@@ -73,23 +73,11 @@
        else
         { g_snprintf( config_cli->passwd, sizeof(config_cli->passwd), "%s", DEFAUT_PASSWD  ); }
 
-       chaine = g_key_file_get_string ( gkf, "SERVER", "ssl_ca", NULL );
+       chaine = g_key_file_get_string ( gkf, "SERVER", "ssl_file_ca", NULL );
        if (chaine)
-        { g_snprintf( config_cli->ssl_ca, sizeof(config_cli->ssl_ca), "%s", chaine ); g_free(chaine); }
+        { g_snprintf( config_cli->ssl_file_ca, sizeof(config_cli->ssl_file_ca), "%s", chaine ); g_free(chaine); }
        else
-        { g_snprintf( config_cli->ssl_ca, sizeof(config_cli->ssl_ca), "%s", DEFAUT_SSL_CA  ); }
-
-       chaine = g_key_file_get_string ( gkf, "SERVER", "ssl_cert", NULL );
-       if (chaine)
-        { g_snprintf( config_cli->ssl_cert, sizeof(config_cli->ssl_cert), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( config_cli->ssl_cert, sizeof(config_cli->ssl_cert), "%s", DEFAUT_SSL_CERT ); }
-
-       chaine = g_key_file_get_string ( gkf, "SERVER", "ssl_key", NULL );
-       if (chaine)
-        { g_snprintf( config_cli->ssl_key, sizeof(config_cli->ssl_key), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( config_cli->ssl_key, sizeof(config_cli->ssl_key), "%s", DEFAUT_SSL_KEY  ); }
+        { g_snprintf( config_cli->ssl_file_ca, sizeof(config_cli->ssl_file_ca), "%s", DEFAUT_SSL_FILE_CA ); }
 
        config_cli->port_ihm = g_key_file_get_integer ( gkf, "SERVER", "port_ihm", NULL );
        if (!config_cli->port_ihm) config_cli->port_ihm = DEFAUT_PORT_IHM;
@@ -138,11 +126,7 @@
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
               "Config passwd ----------- %s", config_cli->passwd );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
-              "Config ssl_ca ----------- %s", config_cli->ssl_ca );
-    Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
-              "Config ssl_cert --------- %s", config_cli->ssl_cert );
-    Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
-              "Config ssl_key ---------- %s", config_cli->ssl_key );
+              "Config ssl_file_ca ----------- %s", config_cli->ssl_file_ca );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
               "Config log_level -------- %d", config_cli->log_level );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,

@@ -104,7 +104,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_CLASSE:
              { struct CMD_TYPE_CLASSE *classe;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                classe = (struct CMD_TYPE_CLASSE *)g_try_malloc0( sizeof( struct CMD_TYPE_CLASSE ) );
                if (!classe) return; 
@@ -122,7 +122,7 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_ICONE:
              { struct CMD_TYPE_ICONE *ico;
-               Set_progress_plusun();
+               Set_progress_plus(1);
 
                ico = (struct CMD_TYPE_ICONE *)g_try_malloc0( sizeof( struct CMD_TYPE_ICONE ) );
                if (!ico) return; 

@@ -39,7 +39,7 @@
  GtkWidget *Liste_classe;                             /* GtkTreeView pour la gestion des classes Watchdog */
  static GtkWidget *Liste_icone;                        /* GtkTreeView pour la gestion des icones Watchdog */
                                  /* non static car reutilisable par l'utilitaire d'ajout d'un utilisateur */
- extern struct CLIENT Client_en_cours;                           /* Identifiant de l'utilisateur en cours */
+ extern struct CLIENT Client;                           /* Identifiant de l'utilisateur en cours */
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
@@ -148,7 +148,7 @@
     nbr = gtk_tree_selection_count_selected_rows( selection );
     printf("Menu_effacer_icone: nbr=%d\n", nbr );
     if (!nbr) return;                                                        /* Si rien n'est selectionné */
-printf("hello !\n");
+
     dialog = gtk_message_dialog_new ( GTK_WINDOW(F_client),
                                       GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
                                       GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO,
@@ -792,7 +792,7 @@ printf("bouh\n");
        close(source);
        Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_ADD_ICONE_FIN_FILE,
                       (gchar *)&buffer, sizeof(struct CMD_TYPE_ICONE) );
-       Client_en_cours.mode = VALIDE;
+       Client.mode = VALIDE;
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

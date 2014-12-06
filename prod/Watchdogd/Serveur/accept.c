@@ -39,7 +39,6 @@
 /**********************************************************************************************************/
  void Connecter_ssl( struct CLIENT *client )
   { struct CONNEXION *connexion;
-    X509 *certif;
     gint retour;
 
     connexion = client->connexion;
@@ -47,26 +46,32 @@
     if (!connexion->ssl)                                                  /* Premier appel de la fonction */
      { connexion->ssl = SSL_new( Cfg_ssrv.Ssl_ctx );                           /* Creation d'une instance */
        if (!connexion->ssl)                                                   /* Si réussite d'allocation */
-        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  "Connecter_ssl: unable to create a ssl object" );
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
+                   "Connecter_ssl: unable to create a ssl object" );
           client->mode = DECONNECTE;  
           return;         
         }
 
        SSL_set_fd( connexion->ssl, connexion->socket );
        SSL_set_accept_state( connexion->ssl );
-       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  "Connecter_ssl: set_accept_state %d", client->connexion->socket );
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
+                "Connecter_ssl: set_accept_state %d", client->connexion->socket );
      }
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "Connecter_ssl: accept en cours 1 = %d", client->connexion->socket );
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+             "Connecter_ssl: accept en cours 1 = %d", client->connexion->socket );
     retour = SSL_accept( connexion->ssl );
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "Connecter_ssl: accept en cours 2 = %d", retour );
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+             "Connecter_ssl: accept en cours 2 = %d", retour );
     if (retour<=0)
      { retour = SSL_get_error( connexion->ssl, retour );
        if (retour == SSL_ERROR_WANT_READ || retour == SSL_ERROR_WANT_WRITE)
-        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,  "Connecter_ssl: need more data", client->connexion->socket );
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                   "Connecter_ssl: need more data", client->connexion->socket );
           return;
         }
        
-       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  "Connecter_ssl: SSL_accept get error %d (%s)",
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
+                "Connecter_ssl: SSL_accept get error %d (%s)",
                  retour, ERR_error_string( retour, NULL ) );
        while ( (retour=ERR_get_error()) )
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
@@ -76,27 +81,39 @@
        client->mode = DECONNECTE;
        return;
      }
-                          /* Ici, la connexion a été effectuée, il faut maintenant tester les certificats */ 
-    certif = SSL_get_peer_certificate( connexion->ssl );             /* On prend le certificat du serveur */
-    if (!certif)
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  "Connecter_ssl: no certificate received" );
-       client->mode = DECONNECTE;
-       return;
-     }
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,  "Connecter_ssl: certificate received" );
-
-    retour = SSL_get_verify_result( connexion->ssl );                       /* Verification du certificat */
-    if ( retour != X509_V_OK )                                      /* Si erreur, on se deconnecte presto */
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  "Connecter_ssl: unauthorized certificate" );
-       client->mode = DECONNECTE;
-       return;
-     }
-
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-             "Connecter_ssl: algo crypto %s, (%d bits), for %s, signed by %s",
-             (gchar *)SSL_get_cipher_name( connexion->ssl ), SSL_get_cipher_bits( connexion->ssl, NULL ),
-              Nom_certif ( certif ), Nom_certif_signataire ( certif ) );
-    
+             "Connecter_ssl: Secured Connexion with %s, (%d bits)",
+             (gchar *)SSL_get_cipher_name( connexion->ssl ), SSL_get_cipher_bits( connexion->ssl, NULL ) );
+
+          /* Ici, la connexion a été effectuée, il faut maintenant tester les certificats si necessaire ! */ 
+    client->certif = SSL_get_peer_certificate( connexion->ssl );      /* On prend le certificat du client */
+    if (!client->certif && Cfg_ssrv.ssl_peer_cert)
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
+                "Connecter_ssl: no certificate received and ssl_peer_cert = TRUE in config." );
+       client->mode = DECONNECTE;
+       return;
+     }
+
+    if (client->certif)                                 /* Si nous avons un certificat, nous le verifions */
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,  "Connecter_ssl: certificate received" );
+
+       retour = SSL_get_verify_result( connexion->ssl );                    /* Verification du certificat */
+       if ( retour != X509_V_OK )                                   /* Si erreur, on se deconnecte presto */
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
+                   "Connecter_ssl: unauthorized certificate for %s: error %d (%s)",
+                    Nom_certif(client->certif), retour, ERR_error_string( retour, NULL ) );
+          client->mode = DECONNECTE;
+          return;
+        }
+
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
+                "Connecter_ssl: Peer = %s, issuer = %s",
+                 Nom_certif ( client->certif ), Nom_certif_signataire ( client->certif ) );
+     }
+    else
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
+                "Connecter_ssl: No certificate received" );
+     }
     Client_mode ( client, WAIT_FOR_IDENT );
   }
 /*--------------------------------------------------------------------------------------------------------*/

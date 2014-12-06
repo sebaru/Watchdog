@@ -73,8 +73,8 @@
        lockf( id_fichier, F_LOCK, 0 );
        client->id_creation_message_mp3 = id_fichier;
      }
-    
     nbr = write( client->id_creation_message_mp3, buffer, msg_mp3->taille );
+    if (nbr<0) Client_mode ( client, DECONNECTE );
   }
 /**********************************************************************************************************/
 /* Proto_editer_msg: Le client desire editer un msg                                                       */

@@ -204,6 +204,10 @@ one_again:
         { Info_new( connexion->log, FALSE, LOG_DEBUG,
                    "Recevoir_reseau: recue TAG_INTERNAL_SSLNEEDED. Passing to application for setup" );
         }
+       else if (connexion->entete.ss_tag == SSTAG_INTERNAL_SSLNEEDED_WITH_CERT)
+        { Info_new( connexion->log, FALSE, LOG_DEBUG,
+                   "Recevoir_reseau: recue TAG_INTERNAL_SSLNEEDED_WITH_CERT. Passing to application for setup" );
+        }
        else if (connexion->entete.ss_tag == SSTAG_INTERNAL_END)
         { Info_new( connexion->log, FALSE, LOG_DEBUG,
                    "Recevoir_reseau: recue TAG_INTERNAL, end of internal transmissions" );
@@ -265,7 +269,7 @@ one_again:
  gint Envoyer_reseau( struct CONNEXION *connexion, gint tag, gint ss_tag,
                       gchar *buffer, gint taille_buffer )
   { struct ENTETE_CONNEXION Entete;
-    gint err, retour, cpt;
+    gint err = 0, retour, cpt;
 
     if (!connexion) return(-1);
 
@@ -301,23 +305,25 @@ encore_entete:
         { retour = SSL_write( connexion->ssl, &Entete, cpt ); }                      /* Envoi de l'entete */
        else retour = write( connexion->socket, &Entete, cpt );                       /* Envoi de l'entete */
 
-       if (retour<=0)
+       if (retour < 0)
         { err = errno;
           Info_new( connexion->log, FALSE, LOG_ERR,
-                   "Envoyer_reseau: error %s", strerror(err) );
+                   "Envoyer_reseau: error %d (%s)", err, strerror(err) );
           if (connexion->ssl)
-           { Info_new( connexion->log, FALSE, LOG_ERR,
+           { gint ssl_err;
+             ssl_err = SSL_get_error( connexion->ssl, retour );
+             Info_new( connexion->log, FALSE, LOG_ERR,
                       "Envoyer_reseau: retour SSL %s",
-                       ERR_error_string( SSL_get_error( connexion->ssl, retour ), NULL ) );
+                       ERR_error_string( ssl_err, NULL ) );
            }
-          if (err == EAGAIN) goto encore_entete;
+          /* Disabled le 12/11/14 if (err == EAGAIN) goto encore_entete; */
           break;                                                                    /* Si erreur, on sort */
         }          
        cpt -= retour;
      }
 
     if (retour && buffer && (tag != TAG_INTERNAL))                    /* Preparation de l'envoi du buffer */
-     {  cpt = 0;
+     { cpt = 0;
        while(cpt < Entete.taille_donnees)
         {
 encore_buffer:
@@ -349,8 +355,8 @@ encore_buffer:
      }
     pthread_mutex_unlock( &connexion->mutex_write );
 
-    if (retour<=0) return(err);
-    else           return(0);
+    if (retour<0) return(err);
+    else          return(0);
   }
 /**********************************************************************************************************/
 /* Reseau_tag: Renvoi le numero de tag correspondant au paquet recu                                       */
