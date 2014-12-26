@@ -7,14 +7,10 @@
 noinst_LTLIBRARIES   = libconfig_cli.la
 libconfig_cli_la_SOURCES = Config_cli.c
 
-#Pour LEX et YACC
-#libconfig_cli_la_LIBADD  = @LEXLIB@
-
-
 AM_CPPFLAGS= -I$(top_srcdir) -I$(includedir) \
           -I$(top_srcdir)/Include \
           -I$(top_srcdir)/intl \
-          -I../Include \
+          -I$(top_srcdir)/Client/Include \
           $(GLIB_CFLAGS)
 
 CLEANFILES = 
