@@ -17,4 +17,4 @@ libwatchdog_server_modbus_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0`
                                       `mysql_config --cflags`
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
-         -I../Include
+            -I$(top_srcdir)/Watchdogd/Include

@@ -8,11 +8,8 @@ SUBDIRS=
 lib_LTLIBRARIES     = libwatchdog-server-tellstick.la
 libwatchdog_server_tellstick_la_SOURCES    = Tellstick.c Tellstick.h admin_tellstick.c
 
-AM_CPPFLAGS= `pkg-config --cflags glib-2.0` \
-          -I$(top_srcdir) -I$(includedir) \
-          -I$(top_srcdir)/Include \
-          $(MYSQL_CFLAGS) \
-          -I../Include
+AM_CPPFLAGS=-I$(top_srcdir)/Include \
+            -I$(top_srcdir)/Watchdogd/Include
 
 libwatchdog_server_tellstick_la_LDFLAGS = -ltelldus-core -rdynamic \
                                           `pkg-config --libs glib-2.0`
