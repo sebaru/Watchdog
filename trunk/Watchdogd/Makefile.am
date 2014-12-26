@@ -34,10 +34,10 @@ Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libcurl librrd open
                    `mysql_config --cflags`
 
 sysconf_DATA = watchdogd.conf
-pkgdata_DATA = init_db.sql migrate_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc motion.conf cam0001.conf
+pkgdata_DATA = init_db.sql migrate_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
 	 -IInclude
 
-EXTRA_DIST = watchdogd.conf init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc motion.conf cam0001.conf
+EXTRA_DIST = watchdogd.conf init_db.sql migrate_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
 MAINTAINERCLEANFILES = Makefile.in
