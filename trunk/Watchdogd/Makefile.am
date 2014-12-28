@@ -3,7 +3,7 @@
 #* Projet WatchDog version 2.0       Gestion d'habitat                      lun 02 jun 2003 14:24:24 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-SUBDIRS = Include Serveur Dls TraductionDLS Archive \
+SUBDIRS = Include Serveur Dls TraductionDLS Archive Enocean \
 	  Rs485 Sms Modbus Audio Onduleur Lirc Rfxcom Imsg Satellite TeleinfoEDF Http
 
 bin_PROGRAMS = Watchdogd
