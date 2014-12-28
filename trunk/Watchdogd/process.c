@@ -110,7 +110,7 @@
 /* Entrée: Le nom de fichier correspondant                                                                */
 /* Sortie: Rien                                                                                           */
 /**********************************************************************************************************/
- struct LIBRAIRIE *Charger_librairie_par_fichier ( gchar *path, gchar *nom_fichier )
+ struct LIBRAIRIE *Charger_librairie_par_fichier ( gboolean fullname, gchar *nom_fichier )
   { pthread_mutexattr_t attr;                                      /* Initialisation des mutex de synchro */
     struct LIBRAIRIE *lib;
     gchar nom_absolu[128];
@@ -134,10 +134,16 @@
                 return(NULL);
               }
 
-    if (path) { g_snprintf( nom_absolu, sizeof(nom_absolu), "%s/%s", path, nom_fichier );
-                lib->dl_handle = dlopen( nom_absolu, RTLD_GLOBAL | RTLD_NOW );
-              }
-         else { lib->dl_handle = dlopen( nom_fichier, RTLD_GLOBAL | RTLD_NOW ); }
+    if (fullname)
+     { g_snprintf( nom_absolu, sizeof(nom_absolu), "%s/%s",
+                   Config.librairie_dir, nom_fichier );
+     }
+    else
+     { g_snprintf( nom_absolu, sizeof(nom_absolu), "%s/libwatchdog-server-%s.so",
+                   Config.librairie_dir, nom_fichier );
+     }
+
+    lib->dl_handle = dlopen( nom_absolu, RTLD_GLOBAL | RTLD_NOW );
     if (!lib->dl_handle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                  "Charger_librairie_par_fichier Candidat: %s failed (%s)", nom_fichier, dlerror() );
@@ -148,7 +154,7 @@
     lib->Run_thread = dlsym( lib->dl_handle, "Run_thread" );                  /* Recherche de la fonction */
     if (!lib->Run_thread)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Charger_librairie_par_fichier: Candidat %s rejeté sur absence Run_thread", nom_fichier ); 
+                "Charger_librairie_par_fichier: %s rejected (Run_thread not found)", nom_fichier ); 
        dlclose( lib->dl_handle );
        g_free(lib);
        return(NULL);
@@ -157,7 +163,7 @@
     lib->Admin_command = dlsym( lib->dl_handle, "Admin_command" );            /* Recherche de la fonction */
     if (!lib->Admin_command)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Charger_librairie_par_fichier: Candidat %s rejeté sur absence Admin_command", nom_fichier ); 
+                "Charger_librairie_par_fichier: %s rejected (Admin_command not found)", nom_fichier ); 
        dlclose( lib->dl_handle );
        g_free(lib);
        return(NULL);
@@ -244,7 +250,7 @@
      { if (!strncmp( fichier->d_name, "libwatchdog-server-", 19 )) /* Chargement unitaire d'une librairie */
         { if ( ! strncmp( fichier->d_name + strlen(fichier->d_name) - 3, ".so", 4 ) )
            { struct LIBRAIRIE *lib;
-             lib = Charger_librairie_par_fichier( Config.librairie_dir, fichier->d_name );
+             lib = Charger_librairie_par_fichier( TRUE, fichier->d_name );
              Start_librairie( lib );
            }
         }

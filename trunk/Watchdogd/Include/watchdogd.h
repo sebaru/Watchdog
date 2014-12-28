@@ -58,8 +58,6 @@
  #define EXIT_INACTIF      1                                             /* Un fils est mort d'inactivité */
 
  #define VERROU_SERVEUR              "watchdogd.lock"
- #define FICHIER_FIFO_ADMIN_READ     "admin.fifo.read"
- #define FICHIER_FIFO_ADMIN_WRITE    "admin.fifo.write"
  #define FICHIER_EXPORT              "export.wdg"
 
  #define NUM_EA_SYS_BITS_PER_SEC        125  /* Numéro d'EA de reference pour le nbr de request archivage */
@@ -181,7 +179,7 @@
  extern void Decharger_librairies ( void );
  extern gboolean Start_librairie ( struct LIBRAIRIE *lib );
  extern gboolean Stop_librairie ( struct LIBRAIRIE *lib );
- extern struct LIBRAIRIE *Charger_librairie_par_fichier ( gchar *path, gchar *nom_fichier );
+ extern struct LIBRAIRIE *Charger_librairie_par_fichier ( gboolean fullname, gchar *nom_fichier );
  extern gboolean Decharger_librairie_par_prompt ( gchar *nom_fichier );
 
  extern void Gerer_arrive_MSGxxx_dls ( void );                                   /* Dans distrib_MSGxxx.c */
