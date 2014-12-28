@@ -1,5 +1,4 @@
 #!/bin/sh
-svn update
-svnversion -n | sed -e "s/M//g" > RevisionNumber.txt
+./update.sh
 ./autogen.sh
 make -j 2 distcheck
