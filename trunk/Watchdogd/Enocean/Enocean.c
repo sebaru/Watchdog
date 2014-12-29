@@ -479,7 +479,7 @@
   { unsigned char resultCRC = 0;
     unsigned char *ptr;
     gint i;
-    ptr = &trame->sync;
+    ptr = (unsigned char *)&trame;
     for (i = 0; i<TAILLE_ENTETE_ENOCEAN - 1; i++)
      { resultCRC = ENOCEAN_CRC8TABLE[ resultCRC ^ ptr[i] ]; }
     return( resultCRC );
@@ -727,11 +727,17 @@
           if (nbr_oct_lu<TAILLE_ENTETE_ENOCEAN)
            { bute = TAILLE_ENTETE_ENOCEAN; } else { bute = sizeof(Trame); }
 
+          if (nbr_oct_lu == bute)                                                 /* Anti buffer-overflow */
+           { nbr_oct_lu = 0;
+             Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
+                      "Run_thread: Buffer overflow, dropping.", Trame.sync );
+           }
+
           cpt = read( Cfg_enocean.fd, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
           if (cpt>0)
            { nbr_oct_lu = nbr_oct_lu + cpt;
 
-             if ( Trame.sync != 0x55 )                                   /* Bit de synchronisation EnOCEAN */
+             if ( Trame.sync != 0x55 )                                  /* Bit de synchronisation EnOCEAN */
               { nbr_oct_lu = 0;
                 Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
                          "Run_thread: Wrong SYNC Byte (%02X). Dropping Frame", Trame.sync );
@@ -746,8 +752,16 @@
              if (nbr_oct_lu >= TAILLE_ENTETE_ENOCEAN + Trame.data_length + Trame.optional_length + 1)
               { nbr_oct_lu = 0;                              /* traitement trame (taille +1 car CRC DATA) */
                 /*if (Trame.taille > 0) Processer_trame( &Trame );*/
+                Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+                         "Run_thread: Right trame received !" );
                 memset (&Trame, 0, sizeof(struct TRAME_ENOCEAN) );
               }
+           }
+          else if (cpt<0)
+           { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
+                      "Run_thread: Error in Read Enocean: error %d (%s). stopping thread",
+                       cpt, strerror(errno) );
+             lib->Thread_run = FALSE;
            }
         }
 /********************************************** Transmission des trames aux sorties ***********************/

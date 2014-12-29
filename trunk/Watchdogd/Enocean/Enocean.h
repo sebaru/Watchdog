@@ -36,12 +36,12 @@
  #define TAILLE_ENTETE_ENOCEAN      6
 
  struct TRAME_ENOCEAN                                                   /* Definition d'une trame ENOCEAN */
-  { unsigned char sync;
-    unsigned short data_length;
-    unsigned char optional_length;
-    unsigned char packet_type;
-    unsigned char crc_header;
-    unsigned char data[80];
+  { guchar  sync;
+    guint16 data_length;
+    guchar  optional_length;
+    guchar  packet_type;
+    guchar  crc_header;
+    guchar  data[80];
   };
 
  struct ENOCEANDB

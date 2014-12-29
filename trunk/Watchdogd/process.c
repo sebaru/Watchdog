@@ -146,7 +146,7 @@
     lib->dl_handle = dlopen( nom_absolu, RTLD_GLOBAL | RTLD_NOW );
     if (!lib->dl_handle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                 "Charger_librairie_par_fichier Candidat: %s failed (%s)", nom_fichier, dlerror() );
+                 "Charger_librairie_par_fichier Candidat: %s failed (%s)", nom_absolu, dlerror() );
        g_free(lib);
        return(NULL);
      }
@@ -154,7 +154,7 @@
     lib->Run_thread = dlsym( lib->dl_handle, "Run_thread" );                  /* Recherche de la fonction */
     if (!lib->Run_thread)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Charger_librairie_par_fichier: %s rejected (Run_thread not found)", nom_fichier ); 
+                "Charger_librairie_par_fichier: %s rejected (Run_thread not found)", nom_absolu ); 
        dlclose( lib->dl_handle );
        g_free(lib);
        return(NULL);
@@ -163,7 +163,7 @@
     lib->Admin_command = dlsym( lib->dl_handle, "Admin_command" );            /* Recherche de la fonction */
     if (!lib->Admin_command)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Charger_librairie_par_fichier: %s rejected (Admin_command not found)", nom_fichier ); 
+                "Charger_librairie_par_fichier: %s rejected (Admin_command not found)", nom_absolu ); 
        dlclose( lib->dl_handle );
        g_free(lib);
        return(NULL);
@@ -171,7 +171,7 @@
 
     g_snprintf( lib->nom_fichier, sizeof(lib->nom_fichier), "%s", nom_fichier );
 
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Charger_librairie_par_fichier: %s loaded", nom_fichier );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Charger_librairie_par_fichier: %s loaded", nom_absolu );
 
     pthread_mutexattr_init( &attr );                                      /* Creation du mutex de synchro */
     pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
