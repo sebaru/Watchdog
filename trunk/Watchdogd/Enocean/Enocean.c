@@ -479,7 +479,7 @@
   { unsigned char resultCRC = 0;
     unsigned char *ptr;
     gint i;
-    ptr = (unsigned char *)&trame;
+    ptr = (unsigned char *)trame;
     for (i = 0; i<TAILLE_ENTETE_ENOCEAN - 1; i++)
      { resultCRC = ENOCEAN_CRC8TABLE[ resultCRC ^ ptr[i] ]; }
     return( resultCRC );
@@ -725,13 +725,9 @@
         { int bute, cpt;
 
           if (nbr_oct_lu<TAILLE_ENTETE_ENOCEAN)
-           { bute = TAILLE_ENTETE_ENOCEAN; } else { bute = sizeof(Trame); }
-
-          if (nbr_oct_lu == bute)                                                 /* Anti buffer-overflow */
-           { nbr_oct_lu = 0;
-             Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
-                      "Run_thread: Buffer overflow, dropping.", Trame.sync );
-           }
+           { bute = TAILLE_ENTETE_ENOCEAN; }
+          else { bute = TAILLE_ENTETE_ENOCEAN + (Trame.data_length_msb << 8) + Trame.data_length_lsb + 1; }
+          if (bute > sizeof(Trame)) bute = sizeof(Trame);
 
           cpt = read( Cfg_enocean.fd, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
           if (cpt>0)
@@ -746,10 +742,10 @@
              if (nbr_oct_lu == TAILLE_ENTETE_ENOCEAN && Trame.crc_header != Enocean_crc_header( &Trame ))
               { nbr_oct_lu = 0;                                             /* Vérification du CRC Header */
                 Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-                         "Run_thread: CRC HEADER. Dropping Frame" );
+                         "Run_thread: Wrong CRC HEADER. Dropping Frame" );
               }
           
-             if (nbr_oct_lu >= TAILLE_ENTETE_ENOCEAN + Trame.data_length + Trame.optional_length + 1)
+             if (nbr_oct_lu >= TAILLE_ENTETE_ENOCEAN + (Trame.data_length_msb << 8) + Trame.data_length_lsb + Trame.optional_length + 1)
               { nbr_oct_lu = 0;                              /* traitement trame (taille +1 car CRC DATA) */
                 /*if (Trame.taille > 0) Processer_trame( &Trame );*/
                 Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
