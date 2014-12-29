@@ -480,7 +480,7 @@
     unsigned char *ptr;
     gint i;
     ptr = (unsigned char *)trame;
-    for (i = 0; i<TAILLE_ENTETE_ENOCEAN - 1; i++)
+    for (i = 1; i<TAILLE_ENTETE_ENOCEAN - 1; i++)
      { resultCRC = ENOCEAN_CRC8TABLE[ resultCRC ^ ptr[i] ]; }
     return( resultCRC );
   }
@@ -752,6 +752,11 @@
                          "Run_thread: Right trame received !" );
                 memset (&Trame, 0, sizeof(struct TRAME_ENOCEAN) );
               }
+           }
+          else if (cpt==0)                   /* Si problème de buffer overflow, et re-initialise la trame */
+           { nbr_oct_lu = 0;
+             Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
+                      "Run_thread: Buffer overflow. Erasing Trame !" );
            }
           else if (cpt<0)
            { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
