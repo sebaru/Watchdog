@@ -481,13 +481,31 @@
 /* Entrée: la trame a recue                                                                               */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static int Processer_trame( struct TRAME_ENOCEAN *trame )
-  { 
+ static void Processer_trame( struct TRAME_ENOCEAN *trame )
+  { switch (trame->packet_type)
+     { case 1:                                                                              /* RADIO_ERP1 */
+        { if (trame->data[0] == 0xD2)
+           { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+                      "Processer_trame Received RADIO_ERP1-VLD" );
+           }
+          else if (trame->data[0] == 0xA6)
+           { gchar chaine[32];
+             gint cpt;
+             memset( chaine, 0, sizeof(chaine) );
+             for (cpt=0; cpt<trame->data_length_lsb; cpt++)                /* Mise en forme au format HEX */
+              { g_snprintf( &chaine[2*cpt], 3, "%02X", trame->data[cpt] ); }
+             Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+                      "Processer_trame Received RADIO_ERP1-ADT-%s", chaine );
+           }
+          else if (trame->data[0] == 0xA5)
+           { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+                      "Processer_trame Received RADIO_ERP1-4BS" );
+           }
+          break;
+        }
+     }
 #ifdef bouh
 
-    Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-              "Processer_trame taille=%d, type=%02d(0x%02x), sous_type=%02d(0x%02X), seqno=%03d",
-               trame->taille, trame->type, trame->type, trame->sous_type, trame->sous_type, trame->seqno );
 
     if (trame->type == 0x01 && trame->sous_type == 0x00)
      { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
@@ -746,6 +764,12 @@
            }
           case ENOCEAN_WAIT_FOR_HEADER:
            { gint cpt;
+             if (Cfg_enocean.date_last_view + ENOCEAN_TRAME_TIMEOUT <= Partage->top)
+              { Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
+                Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
+                         "Run_thread: Timeout wating for HEADER. Dropping Frame" );
+                break;
+              }
              if (Enocean_select()<=0) break;
              cpt = read( Cfg_enocean.fd, (unsigned char *)&Trame + Cfg_enocean.nbr_oct_lu,
                          ENOCEAN_HEADER_LENGTH - Cfg_enocean.nbr_oct_lu );
@@ -777,6 +801,12 @@
            }
           case ENOCEAN_WAIT_FOR_DATA:
            { gint cpt;
+             if (Cfg_enocean.date_last_view + ENOCEAN_TRAME_TIMEOUT <= Partage->top)
+              { Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
+                Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
+                         "Run_thread: Timeout wating for DATA. Dropping Frame" );
+                break;
+              }
              if (Enocean_select()<=0) break;
              cpt = read( Cfg_enocean.fd, (unsigned char *)&Trame + Cfg_enocean.nbr_oct_lu,
                          Cfg_enocean.index_bute - Cfg_enocean.nbr_oct_lu );
@@ -790,8 +820,8 @@
                       Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
                     }
                    else
-                    { /* Processer Trame */
-                      Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
+                    { Processer_trame ( &Trame );                            /* Precessing received trame */
+                      Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;            /* and wait for another */
                     }
                  }
               }

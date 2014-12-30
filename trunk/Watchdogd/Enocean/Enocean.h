@@ -35,6 +35,7 @@
  #define NBR_CARAC_LIBELLE_ENOCEAN  128
  #define ENOCEAN_HEADER_LENGTH      5
  #define ENOCEAN_RECONNECT_DELAY    300                     /* 30 secondes avant tentative de reconnexion */
+ #define ENOCEAN_TRAME_TIMEOUT      2    /* 200ms avant de dropper la trame si pas de nouveau bytes recus */
 
  struct TRAME_ENOCEAN                                                   /* Definition d'une trame ENOCEAN */
   { guchar data_length_msb;
