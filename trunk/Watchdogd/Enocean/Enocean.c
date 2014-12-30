@@ -505,8 +505,8 @@
            { gchar chaine[32];
              gint cpt;
              memset( chaine, 0, sizeof(chaine) );
-             for (cpt=0; cpt<trame->data_length_lsb; cpt++)                /* Mise en forme au format HEX */
-              { g_snprintf( &chaine[2*cpt], 3, "%02X", trame->data[cpt] ); }
+             for (cpt=0; cpt<trame->data_length_lsb+trame->optional_data_length; cpt++)
+              { g_snprintf( &chaine[2*cpt], 3, "%02X", trame->data[cpt] ); }/* Mise en forme au format HEX */
              Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
                       "Processer_trame Received RADIO_ERP1-RPS-%s", chaine );
            }
