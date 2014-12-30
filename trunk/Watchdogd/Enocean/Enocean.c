@@ -458,7 +458,7 @@
     unsigned char *ptr;
     gint i;
     ptr = (unsigned char *)trame;
-    for (i = 1; i < ENOCEAN_HEADER_LENGTH - 1; i++)
+    for (i = 1; i < ENOCEAN_HEADER_LENGTH - 1; i++)                                    /* Last Byte = CRC */
      { resultCRC = ENOCEAN_CRC8TABLE[ resultCRC ^ ptr[i] ]; }
     return( resultCRC );
   }
@@ -472,7 +472,7 @@
     unsigned char *ptr;
     gint i;
     ptr = (unsigned char *)trame;
-    for (i = ENOCEAN_HEADER_LENGTH + 1; i < Cfg_enocean.index_bute; i++)
+    for (i = ENOCEAN_HEADER_LENGTH; i < Cfg_enocean.index_bute - 1; i++)               /* Last byte = CRC */
      { resultCRC = ENOCEAN_CRC8TABLE[ resultCRC ^ ptr[i] ]; }
     return( resultCRC );
   }
@@ -781,7 +781,7 @@
               { Cfg_enocean.nbr_oct_lu = Cfg_enocean.nbr_oct_lu + cpt;
 
                 if (Cfg_enocean.nbr_oct_lu == Cfg_enocean.index_bute)         /* Vérification du CRC Data */
-                 { if ( ((unsigned char *)&Trame)[Cfg_enocean.index_bute] != Enocean_crc_data( &Trame ))
+                 { if ( ((unsigned char *)&Trame)[Cfg_enocean.index_bute-1] != Enocean_crc_data( &Trame ))
                     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
                                "Run_thread: Wrong CRC DATA. Dropping Frame" );
                       Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
