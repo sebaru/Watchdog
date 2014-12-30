@@ -501,9 +501,21 @@
            { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
                       "Processer_trame Received RADIO_ERP1-4BS" );
            }
-          break;
+          else if (trame->data[0] == 0xF6)                                                /* RPS Telegram */
+           { gchar chaine[32];
+             gint cpt;
+             memset( chaine, 0, sizeof(chaine) );
+             for (cpt=0; cpt<trame->data_length_lsb; cpt++)                /* Mise en forme au format HEX */
+              { g_snprintf( &chaine[2*cpt], 3, "%02X", trame->data[cpt] ); }
+             Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+                      "Processer_trame Received RADIO_ERP1-RPS-%s", chaine );
+           }
+          return;
         }
      }
+    Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+             "Processer_trame: Unmanaged packet type %0X %0X-%0X-%0X",
+              trame->packet_type, trame->data[0], trame->data[1], trame->data[2] );
 #ifdef bouh
 
 
@@ -721,7 +733,7 @@
 /*  Charger_tous_enocean();                          /* Chargement de tous les capteurs/actionneurs ENOCEAN */
     Cfg_enocean.nbr_oct_lu = 0;
     Cfg_enocean.comm_status = ENOCEAN_CONNECT;
-    while( lib->Thread_run == TRUE)                                      /* On tourne tant que necessaire */
+    while( lib->Thread_run == TRUE )                                     /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
 
@@ -814,7 +826,7 @@
               { Cfg_enocean.nbr_oct_lu = Cfg_enocean.nbr_oct_lu + cpt;
 
                 if (Cfg_enocean.nbr_oct_lu == Cfg_enocean.index_bute)         /* Vérification du CRC Data */
-                 { if ( ((unsigned char *)&Trame)[Cfg_enocean.index_bute-1] != Enocean_crc_data( &Trame ))
+                 { if ( ((unsigned char *)&Trame)[Cfg_enocean.index_bute-1] != Enocean_crc_data( &Trame ) )
                     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
                                "Run_thread: Wrong CRC DATA. Dropping Frame" );
                       Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
