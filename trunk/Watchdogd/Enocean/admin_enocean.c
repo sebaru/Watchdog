@@ -30,8 +30,38 @@
  #include "watchdogd.h"
  #include "Enocean.h"
 
+ static gchar *ENOCEAN_COMM_STATUS[]=
+  { "CONNECT",
+    "WAIT_FOR_SYNC",
+    "WAIT_FOR_HEADER",
+    "WAIT_FOR_DATA",
+    "DISCONNECT",
+    "WAIT_BEFORE_RECONNECT",
+  };
+
 /**********************************************************************************************************/
-/* Admin_enocean_print : Affiche en details les infos d'un onduleur en parametre                           */
+/* Admin_enocean_print : Affiche en details les infos d'un onduleur en parametre                          */
+/* Entrée: La connexion connexion ADMIN et l'onduleur                                                     */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
+/**********************************************************************************************************/
+ static void Admin_enocean_status ( struct CONNEXION *connexion )
+  { gchar chaine[1024];
+    g_snprintf( chaine, sizeof(chaine),
+                " ENOCEAN status ------> %s (%02d) - %s\n"
+                "  | - retry_connect  = in %03.1f s\n"
+                "  | - date_last_view = %03.1f s ago\n"
+                "  | - nbr_oct_lu     = %03d bytes\n"
+                "  | - filedescriptor = %03d\n"
+                "  -\n",
+                ENOCEAN_COMM_STATUS[Cfg_enocean.comm_status], Cfg_enocean.comm_status, Cfg_enocean.port,
+                (Cfg_enocean.date_retry_connect ? (Partage->top - Cfg_enocean.date_retry_connect)/10.0 : 0.0),
+                (Cfg_enocean.date_last_view ? (Partage->top - Cfg_enocean.date_last_view)/10.0 : 0.0),
+                Cfg_enocean.nbr_oct_lu, Cfg_enocean.fd
+              );
+    Admin_write ( connexion, chaine );
+  }
+/**********************************************************************************************************/
+/* Admin_enocean_print : Affiche en details les infos d'un onduleur en parametre                          */
 /* Entrée: La connexion connexion ADMIN et l'onduleur                                                     */
 /* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
 /**********************************************************************************************************/
@@ -153,6 +183,9 @@
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
+    if ( ! strcmp ( commande, "status" ) )
+     { Admin_enocean_status ( connexion ); }
+#ifdef bouh
     if ( ! strcmp ( commande, "add" ) )
      { struct ENOCEANDB enocean;
        memset( &enocean, 0, sizeof(struct ENOCEANDB) );                /* Découpage de la ligne de commande */
@@ -246,6 +279,7 @@
     else if ( ! strcmp ( commande, "list" ) )
      { Admin_enocean_list ( connexion );
      }
+#endif
     else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
      { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)   /* Si changement de parametre */
         { gboolean retour;
@@ -257,18 +291,8 @@
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'ENOCEAN'\n" );
-       Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
-       Admin_write ( connexion, "  add type,sstype,(id1,id2,id3,id4),housecode,unitcode,e_min,ea_min,a_min,libelle\n"
-                     "                                         - Ajoute un module\n" );
-       Admin_write ( connexion, "  set ID,type,sstype,(id1,id2,id3,id4),housecode,unitcode,e_min,ea_min,a_min,libelle\n"
-                     "                                         - Edite le module ID\n" );
-       Admin_write ( connexion, "  del ID                                 - Retire le module ID\n" );
-       Admin_write ( connexion, "  light proto,housecode,unitcode,cmdnumber\n" );
-       Admin_write ( connexion, "                                         - Envoie une commande ENOCEAN proto = x10 or arc\n" );
-       Admin_write ( connexion, "  light_ac (id1,id2,id3,id4),unitcode,cmdnumber,level\n" );
-       Admin_write ( connexion, "                                         - Envoie une commande ENOCEAN Protocol AC, HomeEasy EU, ANSLUT\n" );
-       Admin_write ( connexion, "  list                                   - Affiche les status des equipements ENOCEAN\n" );
-       Admin_write ( connexion, "  show $id                               - Affiche les status de l'equipements ENOCEAN $id\n" );
+       Admin_write ( connexion, "  dbcfg ...      - Get/Set Database Parameters\n" );
+       Admin_write ( connexion, "  status         - Affiche les status de l'equipements ENOCEAN $id\n" );
      }
     else
      { gchar chaine[128];

@@ -72,8 +72,8 @@
     gboolean reload;
     GSList *Modules_ENOCEAN;                                                /* Listes des modules ENOCEAN */
     GSList *Liste_sortie;                                              /* Liste des sorties a positionner */
-    gchar comm_status;
-    gint  date_esp_last_view;
+    gint  comm_status;
+    gint  date_last_view;
     gint  date_retry_connect;
     gint  nbr_oct_lu;
     gint  index_bute;

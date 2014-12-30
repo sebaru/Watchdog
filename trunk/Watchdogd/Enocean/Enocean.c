@@ -664,7 +664,10 @@
     FD_SET(Cfg_enocean.fd, &fdselect );
     retval = select(Cfg_enocean.fd+1, &fdselect, NULL, NULL, &tv );    /* Attente d'un caractere */
     if (retval==0) return(0);
-    if (retval==1 && FD_ISSET(Cfg_enocean.fd, &fdselect) ) return(1);
+    if (retval==1 && FD_ISSET(Cfg_enocean.fd, &fdselect) )
+     { Cfg_enocean.date_last_view = Partage->top;
+       return(1);
+     }
     Cfg_enocean.comm_status = ENOCEAN_DISCONNECT;                                /* Disconnect sur erreur */
     Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
              "Enocean_select: Error %d (%s)", errno, strerror(errno) );
@@ -809,7 +812,9 @@
            }
           case ENOCEAN_WAIT_BEFORE_RECONNECT:
            { if (Cfg_enocean.date_retry_connect >= Partage->top)
-              { Cfg_enocean.comm_status = ENOCEAN_CONNECT; }
+              { Cfg_enocean.comm_status = ENOCEAN_CONNECT;
+                Cfg_enocean.date_retry_connect = 0;
+              }
              break;
            }
           default: Cfg_enocean.comm_status = ENOCEAN_CONNECT;
