@@ -338,23 +338,14 @@
 /* Sortie: l'identifiant de la connexion                                                                  */
 /**********************************************************************************************************/
  static int Init_enocean ( void )
-  { gchar trame_reset[] = { 0x0D, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
-    gchar trame_get_status[] = { 0x0D, 00, 00, 01, 02, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
-    gchar trame_set_proto[] = { 0x0D, 00, 00, 02, 03, 0x53, 00, 0x80, 0x00, 0x26, 00, 00, 00, 00 };
-                                                                         /* 0x20 Oregon */
-                                                                         /* 0x08 HomEasy */
-                                                                         /* 0x04 AC */
-                                                                         /* 0x02 ARC */
-                                                                         /* 0x01 X10 */
-                                                                   /* 0x08 Lacrosse Frame */
-                                                             /* 0x80 Undecoded Frame */
-    struct termios oldtio;
+  { struct termios oldtio;
     int fd;
 
     fd = open( Cfg_enocean.port, O_RDWR | O_NOCTTY | O_NONBLOCK );
     if (fd<0)
      { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
-               "Init_enocean: Impossible d'ouvrir le port enocean %s, erreur %d", Cfg_enocean.port, fd );
+               "Init_enocean: Impossible d'ouvrir le port enocean %s, erreur %d (%s)",
+                Cfg_enocean.port, fd, strerror(errno) );
        return(-1);
      }
     else
@@ -370,19 +361,6 @@
        Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
                  "Init_enocean: Ouverture port enocean okay %s", Cfg_enocean.port );
      }
-#ifdef bouh
-    Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG, "Init_enocean: Sending INIT" );
-    if (write (fd, &trame_reset, sizeof(trame_reset) ) == -1)
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING, "Init_enocean: Sending INIT failed " ); }
-    sleep(2);
-    Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG, "Init_enocean: Sending SET PROTO" );
-    if (write (fd, &trame_set_proto, sizeof(trame_set_proto) ) == -1)
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING, "Init_enocean: Sending SET PROTO failed " ); }
-    sleep(2);
-    Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG, "Init_enocean: Sending GET STATUS" );
-    if (write (fd, &trame_get_status, sizeof(trame_get_status) ) == -1)
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING, "Init_enocean: Sending GET STATUS failed " ); }
-#endif
     return(fd);
   }
 /**********************************************************************************************************/
@@ -480,7 +458,21 @@
     unsigned char *ptr;
     gint i;
     ptr = (unsigned char *)trame;
-    for (i = 1; i<TAILLE_ENTETE_ENOCEAN - 1; i++)
+    for (i = 1; i < ENOCEAN_HEADER_LENGTH - 1; i++)
+     { resultCRC = ENOCEAN_CRC8TABLE[ resultCRC ^ ptr[i] ]; }
+    return( resultCRC );
+  }
+/**********************************************************************************************************/
+/* Enocean_crc_data: Calcul le Data CRC de la trame en parametre                                          */
+/* Entrée: la trame recue                                                                                 */
+/* Sortie: le CRC sur 8 bits !                                                                            */
+/**********************************************************************************************************/
+ static unsigned char Enocean_crc_data( struct TRAME_ENOCEAN *trame )
+  { unsigned char resultCRC = 0;
+    unsigned char *ptr;
+    gint i;
+    ptr = (unsigned char *)trame;
+    for (i = ENOCEAN_HEADER_LENGTH + 1; i < Cfg_enocean.index_bute; i++)
      { resultCRC = ENOCEAN_CRC8TABLE[ resultCRC ^ ptr[i] ]; }
     return( resultCRC );
   }
@@ -658,13 +650,31 @@
     pthread_mutex_unlock( &Cfg_enocean.lib->synchro );
   }
 /**********************************************************************************************************/
-/* Main: Fonction principale du thread Enocean                                                             */
+/* Enocean_select: Permet d'estimer la disponibilité d'une information reçue à traiter                    */
+/* Entrée : Néant                                                                                         */
+/* Sortie : 0 - pas d'info, 1 presence d'info, -1, erreur                                                 */
+/**********************************************************************************************************/
+ static gint Enocean_select ( void )
+  { struct timeval tv;
+    fd_set fdselect;
+    gint retval;
+    tv.tv_sec = 0;
+    tv.tv_usec= 100000;
+    FD_ZERO(&fdselect);                                  /* Reception sur la ligne serie ENOCEAN */
+    FD_SET(Cfg_enocean.fd, &fdselect );
+    retval = select(Cfg_enocean.fd+1, &fdselect, NULL, NULL, &tv );    /* Attente d'un caractere */
+    if (retval==0) return(0);
+    if (retval==1 && FD_ISSET(Cfg_enocean.fd, &fdselect) ) return(1);
+    Cfg_enocean.comm_status = ENOCEAN_DISCONNECT;                                /* Disconnect sur erreur */
+    Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
+             "Enocean_select: Error %d (%s)", errno, strerror(errno) );
+    return(-1);
+  }
+/**********************************************************************************************************/
+/* Main: Fonction principale du thread Enocean                                                            */
 /**********************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct TRAME_ENOCEAN Trame;
-    gint retval, nbr_oct_lu;
-    struct timeval tv;
-    fd_set fdselect;
 
     prctl(PR_SET_NAME, "W-ENOCEAN", 0, 0, 0 );
     memset( &Cfg_enocean, 0, sizeof(Cfg_enocean) );               /* Mise a zero de la structure de travail */
@@ -686,19 +696,10 @@
        goto end;
      }
 
-    Cfg_enocean.fd = Init_enocean();
-    if (Cfg_enocean.fd<0)                                                  /* On valide l'acces aux ports */
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_CRIT,
-                 "Run_thread: Init ENOCEAN failed. exiting..." );
-       goto end;
-     }
-    else { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                    "Acces ENOCEAN FD=%d", Cfg_enocean.fd );
-         }
-
 /*  Abonner_distribution_sortie ( Enocean_Gerer_sortie );     /* Desabonnement de la diffusion des sorties */
 /*  Charger_tous_enocean();                          /* Chargement de tous les capteurs/actionneurs ENOCEAN */
-    nbr_oct_lu = 0;
+    Cfg_enocean.nbr_oct_lu = 0;
+    Cfg_enocean.comm_status = ENOCEAN_CONNECT;
     while( lib->Thread_run == TRUE)                                      /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
@@ -715,55 +716,103 @@
           Cfg_enocean.reload = FALSE;
         }
 
-/******************************************* Reception trame ENOCEAN **************************************/
-       FD_ZERO(&fdselect);                                        /* Reception sur la ligne serie ENOCEAN */
-       FD_SET(Cfg_enocean.fd, &fdselect );
-       tv.tv_sec = 0;
-       tv.tv_usec= 100000;
-       retval = select(Cfg_enocean.fd+1, &fdselect, NULL, NULL, &tv );          /* Attente d'un caractere */
-       if (retval>=0 && FD_ISSET(Cfg_enocean.fd, &fdselect) )
-        { int bute, cpt;
-
-          if (nbr_oct_lu<TAILLE_ENTETE_ENOCEAN)
-           { bute = TAILLE_ENTETE_ENOCEAN; }
-          else { bute = TAILLE_ENTETE_ENOCEAN + (Trame.data_length_msb << 8) + Trame.data_length_lsb + 1; }
-          if (bute > sizeof(Trame)) bute = sizeof(Trame);
-
-          cpt = read( Cfg_enocean.fd, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
-          if (cpt>0)
-           { nbr_oct_lu = nbr_oct_lu + cpt;
-
-             if ( Trame.sync != 0x55 )                                  /* Bit de synchronisation EnOCEAN */
-              { nbr_oct_lu = 0;
-                Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-                         "Run_thread: Wrong SYNC Byte (%02X). Dropping Frame", Trame.sync );
-              }          
-
-             if (nbr_oct_lu == TAILLE_ENTETE_ENOCEAN && Trame.crc_header != Enocean_crc_header( &Trame ))
-              { nbr_oct_lu = 0;                                             /* Vérification du CRC Header */
-                Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-                         "Run_thread: Wrong CRC HEADER. Dropping Frame" );
+       switch (Cfg_enocean.comm_status)
+        { case ENOCEAN_CONNECT:
+           { Cfg_enocean.fd = Init_enocean();
+             if (Cfg_enocean.fd<0)                                         /* On valide l'acces aux ports */
+              { Cfg_enocean.comm_status = ENOCEAN_DISCONNECT; }
+             else { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
+                             "Run_thread: ENOCEAN FileDescriptor = %d opened", Cfg_enocean.fd );
+                    Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
+                  }
+             break;
+           }
+          case ENOCEAN_WAIT_FOR_SYNC:
+           { guchar sync;
+             gint cpt;
+             if (Enocean_select()<=0) break;
+             cpt = read( Cfg_enocean.fd, &sync, 1 );
+             if (cpt>0)
+              { if (sync==0x55) Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_HEADER;
+                else Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+                              "Run_thread: Wrong SYNC Byte (%02X). Dropping Frame", sync );
+                Cfg_enocean.nbr_oct_lu = 0;
               }
-          
-             if (nbr_oct_lu >= TAILLE_ENTETE_ENOCEAN + (Trame.data_length_msb << 8) + Trame.data_length_lsb + Trame.optional_length + 1)
-              { nbr_oct_lu = 0;                              /* traitement trame (taille +1 car CRC DATA) */
-                /*if (Trame.taille > 0) Processer_trame( &Trame );*/
-                Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-                         "Run_thread: Right trame received !" );
-                memset (&Trame, 0, sizeof(struct TRAME_ENOCEAN) );
+             else Cfg_enocean.comm_status = ENOCEAN_DISCONNECT;                              /* Si erreur */
+             break;
+           }
+          case ENOCEAN_WAIT_FOR_HEADER:
+           { gint cpt;
+             if (Enocean_select()<=0) break;
+             cpt = read( Cfg_enocean.fd, (unsigned char *)&Trame + Cfg_enocean.nbr_oct_lu,
+                         ENOCEAN_HEADER_LENGTH - Cfg_enocean.nbr_oct_lu );
+             if (cpt>0)
+              { Cfg_enocean.nbr_oct_lu = Cfg_enocean.nbr_oct_lu + cpt;
+
+                if (Cfg_enocean.nbr_oct_lu == ENOCEAN_HEADER_LENGTH)
+                 { if (Trame.crc_header != Enocean_crc_header( &Trame ))    /* Vérification du CRC Header */
+                    { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
+                               "Run_thread: Wrong CRC HEADER. Dropping Frame" );
+                      Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
+                    }
+                   else
+                    { Cfg_enocean.index_bute = ENOCEAN_HEADER_LENGTH + (Trame.data_length_msb << 8)
+                                             + Trame.data_length_lsb
+                                             + Trame.optional_data_length+1; /* On compte le CRC de fin ! */
+                      if (Cfg_enocean.index_bute > sizeof(Trame))
+                       { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
+                                  "Run_thread: Trame too long (%d / %d max), can't handle, dropping",
+                                   Cfg_enocean.index_bute, sizeof(Trame) );
+                         Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
+                       }
+                      else Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_DATA;
+                    }
+                 }
               }
+             else Cfg_enocean.comm_status = ENOCEAN_DISCONNECT;                              /* Si erreur */
+             break;
            }
-          else if (cpt==0)                   /* Si problème de buffer overflow, et re-initialise la trame */
-           { nbr_oct_lu = 0;
-             Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
-                      "Run_thread: Buffer overflow. Erasing Trame !" );
+          case ENOCEAN_WAIT_FOR_DATA:
+           { gint cpt;
+             if (Enocean_select()<=0) break;
+             cpt = read( Cfg_enocean.fd, (unsigned char *)&Trame + Cfg_enocean.nbr_oct_lu,
+                         Cfg_enocean.index_bute - Cfg_enocean.nbr_oct_lu );
+             if (cpt>0)
+              { Cfg_enocean.nbr_oct_lu = Cfg_enocean.nbr_oct_lu + cpt;
+
+                if (Cfg_enocean.nbr_oct_lu == Cfg_enocean.index_bute)         /* Vérification du CRC Data */
+                 { if ( ((unsigned char *)&Trame)[Cfg_enocean.index_bute] != Enocean_crc_data( &Trame ))
+                    { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
+                               "Run_thread: Wrong CRC DATA. Dropping Frame" );
+                      Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
+                    }
+                   else
+                    { /* Processer Trame */
+                      Cfg_enocean.comm_status = ENOCEAN_WAIT_FOR_SYNC;
+                    }
+                 }
+              }
+             else Cfg_enocean.comm_status = ENOCEAN_DISCONNECT;                              /* Si erreur */
+             break;
            }
-          else if (cpt<0)
-           { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
-                      "Run_thread: Error in Read Enocean: error %d (%s). stopping thread",
-                       cpt, strerror(errno) );
-             lib->Thread_run = FALSE;
+          case ENOCEAN_DISCONNECT:
+           { if (Cfg_enocean.fd)
+              { close(Cfg_enocean.fd);
+                Cfg_enocean.fd = 0;
+              }
+             Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
+                      "Run_thread: ENOCEAN Disconnected. Re-Trying in %s sec...",
+                       ENOCEAN_RECONNECT_DELAY );
+             Cfg_enocean.date_retry_connect = Partage->top + ENOCEAN_RECONNECT_DELAY;
+             Cfg_enocean.comm_status = ENOCEAN_WAIT_BEFORE_RECONNECT;
+             break;
            }
+          case ENOCEAN_WAIT_BEFORE_RECONNECT:
+           { if (Cfg_enocean.date_retry_connect >= Partage->top)
+              { Cfg_enocean.comm_status = ENOCEAN_CONNECT; }
+             break;
+           }
+          default: Cfg_enocean.comm_status = ENOCEAN_CONNECT;
         }
 /********************************************** Transmission des trames aux sorties ***********************/
 #ifdef bouh

@@ -33,13 +33,13 @@
  #define NOM_THREAD                 "enocean"
  #define NOM_TABLE_MODULE_ENOCEAN   "enocean"
  #define NBR_CARAC_LIBELLE_ENOCEAN  128
- #define TAILLE_ENTETE_ENOCEAN      6
+ #define ENOCEAN_HEADER_LENGTH      5
+ #define ENOCEAN_RECONNECT_DELAY    300                     /* 30 secondes avant tentative de reconnexion */
 
  struct TRAME_ENOCEAN                                                   /* Definition d'une trame ENOCEAN */
-  { guchar sync;
-    guchar data_length_msb;
+  { guchar data_length_msb;
     guchar data_length_lsb;
-    guchar optional_length;
+    guchar optional_data_length;
     guchar packet_type;
     guchar crc_header;
     guchar data[80];
@@ -72,8 +72,21 @@
     gboolean reload;
     GSList *Modules_ENOCEAN;                                                /* Listes des modules ENOCEAN */
     GSList *Liste_sortie;                                              /* Liste des sorties a positionner */
- } Cfg_enocean;
+    gchar comm_status;
+    gint  date_esp_last_view;
+    gint  date_retry_connect;
+    gint  nbr_oct_lu;
+    gint  index_bute;
+  } Cfg_enocean;
 
+ enum
+  { ENOCEAN_CONNECT,
+    ENOCEAN_WAIT_FOR_SYNC,
+    ENOCEAN_WAIT_FOR_HEADER,
+    ENOCEAN_WAIT_FOR_DATA,
+    ENOCEAN_DISCONNECT,
+    ENOCEAN_WAIT_BEFORE_RECONNECT,
+  };
 /*************************************** Définitions des prototypes ***************************************/
  extern gboolean Enocean_Lire_config ( void );
  extern gboolean Retirer_enoceanDB ( gint id );
