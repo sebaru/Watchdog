@@ -100,34 +100,17 @@
     gboolean retour;
     struct DB *db;
 
-    libelle = Normaliser_chaine ( mnemo->libelle );                      /* Formatage correct des chaines */
-    if (!libelle)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Ajouter_Modifier_mnemoDB: Normalisation impossible libelle" );
-       return(-1);
-     }
-    acro = Normaliser_chaine ( mnemo->acronyme );                        /* Formatage correct des chaines */
-    if (!acro)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Ajouter_Modifier_mnemoDB: Normalisation impossible acronyme" );
-       g_free(libelle);
-       return(-1);
-     }
+    libelle      = Normaliser_chaine ( mnemo->libelle );                 /* Formatage correct des chaines */
+    acro         = Normaliser_chaine ( mnemo->acronyme );                /* Formatage correct des chaines */
     command_text = Normaliser_chaine ( mnemo->command_text );            /* Formatage correct des chaines */
-    if (!command_text)
+    tableau      = Normaliser_chaine ( mnemo->tableau );                 /* Formatage correct des chaines */
+    if ( !(libelle && acro && command_text && tableau) )
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Ajouter_Modifier_mnemoDB: Normalisation impossible command_text" );
-       g_free(acro);
-       g_free(libelle);
-       return(-1);
-     }
-    tableau = Normaliser_chaine ( mnemo->tableau );                      /* Formatage correct des chaines */
-    if (!tableau)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Ajouter_Modifier_mnemoDB: Normalisation impossible tableau" );
-       g_free(acro);
-       g_free(libelle);
-       g_free(command_text);
+                "Ajouter_Modifier_mnemoDB: Normalisation impossible. Mnemo NOT added nor modified." );
+       if (libelle)      g_free(libelle);
+       if (acro)         g_free(acro);
+       if (command_text) g_free(command_text);
+       if (tableau)      g_free(tableau);
        return(-1);
      }
 
@@ -139,7 +122,8 @@
      } else
      { g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                    "UPDATE %s SET "             
-                   "libelle='%s',acronyme='%s',command_text='%s',num_plugin=%d,num=%d,tableau='%s' WHERE id=%d",
+                   "libelle='%s',acronyme='%s',command_text='%s',num_plugin=%d,num=%d,tableau='%s' "
+                   "WHERE id=%d",
                    NOM_TABLE_MNEMO, libelle, acro, command_text, 
                    mnemo->num_plugin, mnemo->num, tableau, mnemo->id );
      }
@@ -311,15 +295,16 @@
      }
 
     mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
-    if (!mnemo) Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_mnemoDB_suite: Erreur allocation mémoire" );
-    else
-     { memcpy( &mnemo->acronyme,     db->row[4], sizeof(mnemo->acronyme  ) );/* Recopie dans la structure */
-       memcpy( &mnemo->libelle,      db->row[5], sizeof(mnemo->libelle   ) );/* Recopie dans la structure */
-       memcpy( &mnemo->command_text, db->row[6], sizeof(mnemo->command_text ) );
-       memcpy( &mnemo->groupe,       db->row[7], sizeof(mnemo->groupe    ) );/* Recopie dans la structure */
-       memcpy( &mnemo->page,         db->row[8], sizeof(mnemo->page      ) );/* Recopie dans la structure */
-       memcpy( &mnemo->plugin_dls,   db->row[9], sizeof(mnemo->plugin_dls) );/* Recopie dans la structure */
-       memcpy( &mnemo->tableau,      db->row[10], sizeof(mnemo->tableau  ) );/* Recopie dans la structure */
+    if (!mnemo) Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                         "Recuperer_mnemoDB_suite: Erreur allocation mémoire" );
+    else                                                            /* Recopie dans la nouvelle structure */
+     { g_snprintf( mnemo->acronyme,     sizeof(mnemo->acronyme),     "%s", db->row[4] );
+       g_snprintf( mnemo->libelle,      sizeof(mnemo->libelle),      "%s", db->row[5] );
+       g_snprintf( mnemo->command_text, sizeof(mnemo->command_text), "%s", db->row[6] );
+       g_snprintf( mnemo->groupe,       sizeof(mnemo->groupe),       "%s", db->row[7] );
+       g_snprintf( mnemo->page,         sizeof(mnemo->page),         "%s", db->row[8] );
+       g_snprintf( mnemo->plugin_dls,   sizeof(mnemo->plugin_dls),   "%s", db->row[9] );
+       g_snprintf( mnemo->tableau,      sizeof(mnemo->tableau),      "%s", db->row[10] );
        mnemo->id          = atoi(db->row[0]);
        mnemo->type        = atoi(db->row[1]);
        mnemo->num         = atoi(db->row[2]);

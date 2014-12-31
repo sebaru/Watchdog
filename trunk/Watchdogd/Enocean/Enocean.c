@@ -354,7 +354,6 @@
      }
 
 /*  Abonner_distribution_sortie ( Enocean_Gerer_sortie );     /* Desabonnement de la diffusion des sorties */
-/*  Charger_tous_enocean();                          /* Chargement de tous les capteurs/actionneurs ENOCEAN */
     Cfg_enocean.nbr_oct_lu = 0;
     Cfg_enocean.comm_status = ENOCEAN_CONNECT;
     while( lib->Thread_run == TRUE )                                     /* On tourne tant que necessaire */
@@ -368,8 +367,6 @@
 
        if (Cfg_enocean.reload == TRUE)
         { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE, "Run_thread: Reloading in progress" );
-          Decharger_tous_enocean();
-          Charger_tous_enocean();
           Cfg_enocean.reload = FALSE;
         }
 
