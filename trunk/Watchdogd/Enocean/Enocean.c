@@ -254,7 +254,19 @@
      }
 
     if (nbr_result == 0)                             /* Si pas trouvé, création d'un mnemo 'discovered' ? */
-     {
+     { struct CMD_TYPE_MNEMONIQUE mnemo;
+       memset( &mnemo, 0, sizeof(mnemo) );
+       mnemo.type       = MNEMO_MONOSTABLE;
+       mnemo.num        = 0;
+       mnemo.num_plugin = 1;
+       g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "EnOcean EVENT" );
+       g_snprintf( mnemo.libelle,  sizeof(mnemo.libelle),  "Event %s discovered by %s", event, NOM_THREAD );
+       g_snprintf( mnemo.command_text, sizeof(mnemo.command_text), "%s", event );
+
+       if ( Ajouter_mnemoDB ( &mnemo ) < 0 )                     /* Ajout auto dans la base de mnemonique */
+        { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
+                   "Map_event_to_mnemo: Error adding new mnemo in DB for event %s", event );
+        }
      }
 
     return (result_mnemo);                       /* A-t'on le seul et unique Mnemo associé à cet event ?? */
@@ -334,12 +346,12 @@
     for (cpt=0; cpt<trame->data_length_lsb+trame->optional_data_length; cpt++)
      { g_snprintf( &chaine[2*cpt], 3, "%02X", trame->data[cpt] ); }/* Mise en forme au format HEX */
     Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-             "Processer_trame Received RADIO_ERP1-%s", chaine );
+             "Processer_trame: Received RADIO_ERP1-%s", chaine );
 
     if (trame->packet_type == 1 && Processer_trame_ERP1 ( trame )) return;                  /* RADIO_ERP1 */ 
 
     Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-             "Processer_trame: Unmanaged telegram: packet type %0X - %0X-%0X-%0X",
+             "Processer_trame: Unmanaged telegram: packet type %0X - %02X-%02X-%02X",
               trame->packet_type, trame->data[0], trame->data[1], trame->data[2] );
   }
 /**********************************************************************************************************/

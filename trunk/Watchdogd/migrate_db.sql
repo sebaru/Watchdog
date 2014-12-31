@@ -23,7 +23,13 @@ CREATE PROCEDURE MigrateDB ()
      ALTER TABLE users DROP `imsg_bit_presence`;
      ALTER TABLE users ADD `ssrv_bit_presence` INT NOT NULL DEFAULT '0';
   END IF;
-  UPDATE config SET valeur = 1 where nom_thread="GLOBAL" AND nom="database_version";
+
+  IF @db_ver = 1 THEN 
+     INSERT INTO `mnemos` (`id`, `type`, `num`, `num_plugin`, `acronyme`, `libelle`, `command_text`) VALUES
+           (23, 1, 0, 1, 'EVENT_NONE', 'Used for detected Event with no mapping yet.', '');
+  END IF;
+
+  UPDATE config SET valeur = 2 where nom_thread="GLOBAL" AND nom="database_version";
 END //
 DELIMITER ;
 CALL MigrateDB();

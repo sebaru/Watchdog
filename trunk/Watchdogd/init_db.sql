@@ -621,7 +621,9 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `num_plugin`, `acronyme`, `libelle`, 
 (19, 7, 2, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
 (20, 1, 4, 1, 'AUDIO_START', 'Emission de message Audio.', ''),
 (21, 1, 5, 1, 'AUDIO_END', 'Fin d''emission de message Audio.', ''),
-(22, 1, 6, 1, 'AUDIO_INHIB', 'Inhibition des messages vocaux (hors alerte).', '');
+(22, 1, 6, 1, 'AUDIO_INHIB', 'Inhibition des messages vocaux (hors alerte).', ''),
+(23, 1, 0, 1, 'EVENT_NONE', 'Used for detected Event with no mapping yet.', '');
+
 -- --------------------------------------------------------
 
 --
@@ -690,7 +692,7 @@ INSERT INTO `msgs` (`id`, `num`, `libelle`, `libelle_audio`, `libelle_sms`, `typ
 -- Structure de la table `onduleurs`
 --
 
-CREATE TABLE `onduleurs` (
+CREATE TABLE IF NOT EXISTS `onduleurs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `instance_id` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `enable` tinyint(1) NOT NULL,
