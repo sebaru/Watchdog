@@ -290,16 +290,16 @@
                                else action = "Released";
        if ( (trame->data[6] & 0x30) == 0x30 )                                     /* Status : T21 et NU ? */
         { switch( (trame->data[1] & 0xE0)>>5 )
-           { case 0: button = "Button AI"; break;
-             case 1: button = "Button AO"; break;
-             case 2: button = "Button BI"; break;
-             case 3: button = "Button BO"; break;
+           { case 0: button = "Button-AI"; break;
+             case 1: button = "Button-AO"; break;
+             case 2: button = "Button-BI"; break;
+             case 3: button = "Button-BO"; break;
            }
         }
        else if ( (trame->data[6] & 0x30) == 0x20 )                                /* Status : Juste T21 ? */
         { switch( (trame->data[1] & 0xE0)>>5 )
-           { case 0: button = "No button"; break;
-             case 1: button = "3/4 buttons"; break;
+           { case 0: button = "No-Button"; break;
+             case 1: button = "3/4-Buttons"; break;
            }
         }
        g_snprintf( event, sizeof(event), "%s:%02X%02X%02X%02X:%s:%s",
