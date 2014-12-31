@@ -506,7 +506,7 @@
              status = trame->data[6];
              if ( DB0 & 0x10 ) action = "Pressed";
                           else action = "Released";
-             if (status & 0x30) /* T21 et NU ? */
+             if ( (status & 0x30) == 0x30 ) /* T21 et NU ? */
               { switch( (DB0 & 0xE0)>>5 )
                  { case 0: button = "Button AI"; break;
                    case 1: button = "Button AO"; break;
@@ -514,7 +514,7 @@
                    case 3: button = "Button BO"; break;
                  }
               }
-             else if (status & 0x20) /* Juste T21 ? */
+             else if ( (status & 0x30) == 0x20 ) /* Juste T21 ? */
               { switch( (DB0 & 0xE0)>>5 )
                  { case 0: button = "No button"; break;
                    case 1: button = "3/4 buttons"; break;
