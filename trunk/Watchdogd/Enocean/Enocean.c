@@ -482,22 +482,26 @@
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  static void Processer_trame( struct TRAME_ENOCEAN *trame )
-  { switch (trame->packet_type)
+  { gchar chaine[32];
+    gint cpt;
+    switch (trame->packet_type)
      { case 1:                                                                              /* RADIO_ERP1 */
-        { if (trame->data[0] == 0xD2)
+        { memset( chaine, 0, sizeof(chaine) );
+          for (cpt=0; cpt<trame->data_length_lsb+trame->optional_data_length; cpt++)
+           { g_snprintf( &chaine[2*cpt], 3, "%02X", trame->data[cpt] ); }/* Mise en forme au format HEX */
+          Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+                   "Processer_trame Received RADIO_ERP1-RPS-%s", chaine );
+
+          if (trame->data[0] == 0xD2)
            { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-                      "Processer_trame Received RADIO_ERP1-VLD" );
+                      "Processer_trame: Received RADIO_ERP1-VLD" );
+             return;
            }
-          else if (trame->data[0] == 0xA6)
+          else if (trame->data[0] == 0xF6)                                                /* RPS Telegram */
            { gchar chaine[32], event[32];
              gchar *action, *button = "unknown";
              guchar DB0, status;
              gint cpt;
-             memset( chaine, 0, sizeof(chaine) );
-             for (cpt=0; cpt<trame->data_length_lsb; cpt++)                /* Mise en forme au format HEX */
-              { g_snprintf( &chaine[2*cpt], 3, "%02X", trame->data[cpt] ); }
-             Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-                      "Processer_trame: Received RADIO_ERP1-ADT-%s", chaine );
              DB0 = trame->data[1];
              status = trame->data[6];
              if ( DB0 & 0x10 ) action = "Pressed";
@@ -521,35 +525,27 @@
                          button, action );
              Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
                       "Processer_trame: New_Event : %s", event );
+             return;
            }
           else if (trame->data[0] == 0xA5)
            { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
                       "Processer_trame Received RADIO_ERP1-4BS" );
+             return;
            }
-          else if (trame->data[0] == 0xF6)                                                /* RPS Telegram */
-           { gchar chaine[32];
-             gint cpt;
-             memset( chaine, 0, sizeof(chaine) );
-             for (cpt=0; cpt<trame->data_length_lsb+trame->optional_data_length; cpt++)
-              { g_snprintf( &chaine[2*cpt], 3, "%02X", trame->data[cpt] ); }/* Mise en forme au format HEX */
-             Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-                      "Processer_trame Received RADIO_ERP1-RPS-%s", chaine );
-           }
-          return;
         }
      }
     Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-             "Processer_trame: Unmanaged packet type %0X %0X-%0X-%0X",
+             "Processer_trame: Unmanaged telegram: packet type %0X - %0X-%0X-%0X",
               trame->packet_type, trame->data[0], trame->data[1], trame->data[2] );
   }
 /**********************************************************************************************************/
-/* Enocean_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois ENOCEAN                     */
+/* Enocean_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois ENOCEAN                   */
 /* Entrées: le numéro de la sortie                                                                        */
 /**********************************************************************************************************/
- void Enocean_Gerer_sortie( gint num_a )                                    /* Num_a est l'id de la sortie */
+ void Enocean_Gerer_sortie( gint num_a )                                   /* Num_a est l'id de la sortie */
   { gint taille;
 
-    pthread_mutex_lock( &Cfg_enocean.lib->synchro );              /* Ajout dans la liste de tell a traiter */
+    pthread_mutex_lock( &Cfg_enocean.lib->synchro );             /* Ajout dans la liste de tell a traiter */
     taille = g_slist_length( Cfg_enocean.Liste_sortie );
     pthread_mutex_unlock( &Cfg_enocean.lib->synchro );
 
