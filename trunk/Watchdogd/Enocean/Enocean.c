@@ -228,7 +228,7 @@
     gint nbr_result;
     struct DB *db;
 
-    if ( ! Recuperer_mnemoDB_by_command_text ( &db, event ) )
+    if ( ! Recuperer_mnemoDB_by_command_text ( &db, event, TRUE ) )
      { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
                  "Map_event_to_mnemo: Error searching Database" );
        return(FALSE);
@@ -239,17 +239,13 @@
      { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
                 "Map_event_to_mnemo: No match found for %s", event );
      }
-    if ( nbr_result > 1 )                                                     /* Si trop d'enregistrement */
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
-                "Map_event_to_mnemo: Too many matchs found (%d) for %s", db->nbr_result, event );
-     }
 
     while ( (mnemo = Recuperer_mnemoDB_suite( &db )) != NULL)
      { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
                 "Map_event_to_mnemo: Match found for %s: Type %d Num %d - %s",
                  event, mnemo->type, mnemo->num, mnemo->libelle );
 
-       if (db->nbr_result==1) result_mnemo = mnemo;            /* Si un seul enregistrement, c'est le bon */
+       if (nbr_result==1) result_mnemo = mnemo;                /* Si un seul enregistrement, c'est le bon */
        else g_free(mnemo);      /* Si trop, on les libere tous dans la mesure ou l'on ne sait que choisir */
      }
 

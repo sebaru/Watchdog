@@ -290,7 +290,7 @@
        return;
      }
 
-    if ( ! Recuperer_mnemoDB_by_command_text ( &db, (gchar *)texte ) )
+    if ( ! Recuperer_mnemoDB_by_command_text ( &db, (gchar *)texte, FALSE ) )
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_ERR,
                  "Traiter_commande_sms : Error searching Database" );
        return;

@@ -39,7 +39,7 @@
  extern gboolean Recuperer_mnemoDB ( struct DB **db );
  extern gboolean Recuperer_mnemoDB_for_courbe ( struct DB **db );
  extern gboolean Recuperer_mnemoDB_by_command_text ( struct DB **db,
-                                                     gchar *commande_pure );
+                                                     gchar *commande_pure, gboolean exact );
  extern struct CMD_TYPE_MNEMONIQUE *Recuperer_mnemoDB_suite( struct DB **db );
  extern gint Ajouter_mnemoDB ( struct CMD_TYPE_MNEMONIQUE *mnemo );
  extern gboolean Retirer_mnemoDB ( struct CMD_TYPE_MNEMONIQUE *mnemo );

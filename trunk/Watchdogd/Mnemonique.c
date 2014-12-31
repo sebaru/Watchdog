@@ -191,8 +191,8 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- gboolean Recuperer_mnemoDB_by_command_text ( struct DB **db_retour, gchar *commande_pure )
-  { gchar requete[1024], commande_finale[1024];
+ gboolean Recuperer_mnemoDB_by_command_text ( struct DB **db_retour, gchar *commande_pure, gboolean exact )
+  { gchar requete[1024], critere[256], commande_finale[1024];
     gchar *commande;
     gboolean space;
     gint i, j;
@@ -206,30 +206,41 @@
        return(FALSE);
      }
 
-    i = 0; j = 0; space = TRUE;
-    while ( commande[i] )
-     { if ( commande[i] == ' ') { commande_finale[j++] = ' '; space = TRUE; }
-       else if (space == TRUE) { commande_finale[j++] = '+'; commande_finale[j++] = commande[i]; space = FALSE; }
-                          else { commande_finale[j++] = commande[i]; space = FALSE; }
-       if(i<strlen(commande_pure) && j<sizeof(commande_finale)) 
-        { i++; } else break;
-     }
-    commande_finale[j] = '\0';
-    g_free(commande);
-
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,"
                 "%s.name, %s.tableau"
                 " FROM %s,%s,%s"
-                " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id AND"
-                " MATCH (%s.command_text) AGAINST ('%s' IN BOOLEAN MODE) LIMIT 10",
+                " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
                 NOM_TABLE_DLS, NOM_TABLE_MNEMO,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
-                NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_MNEMO, commande_finale
-              );                                                                /* order by test 25/01/06 */
+                NOM_TABLE_MNEMO, NOM_TABLE_DLS
+              );
+
+    if (exact == FALSE)
+     { i = 0; j = 0; space = TRUE;
+       while ( commande[i] )
+        { if ( commande[i] == ' ') { commande_finale[j++] = ' '; space = TRUE; }
+          else if (space == TRUE) { commande_finale[j++] = '+'; commande_finale[j++] = commande[i]; space = FALSE; }
+                             else { commande_finale[j++] = commande[i]; space = FALSE; }
+          if(i<strlen(commande_pure) && j<sizeof(commande_finale)) 
+           { i++; } else break;
+        }
+       commande_finale[j] = '\0';
+       g_free(commande);
+
+       g_snprintf( critere, sizeof(critere),
+                  " AND MATCH (%s.command_text) AGAINST ('%s' IN BOOLEAN MODE) LIMIT 10",
+                   NOM_TABLE_MNEMO, commande_finale );
+       g_strlcat( requete, critere, sizeof(requete) );
+     }
+    else
+     { g_snprintf( critere, sizeof(critere), " AND %s.command_text = '%s'",
+                   NOM_TABLE_MNEMO, commande_pure );
+       g_strlcat( requete, critere, sizeof(requete) );
+     }
 
     db = Init_DB_SQL();       
     if (!db)
