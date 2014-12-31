@@ -39,5 +39,5 @@ pkgdata_DATA = init_db.sql migrate_db.sql openssl.cnf Programmateur_mysql.sql De
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/Watchdogd/Include
 
-EXTRA_DIST = watchdogd.conf init_db.sql migrate_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
+EXTRA_DIST = watchdogd.conf init_db.sql Migrate_db.sh migrate_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
 MAINTAINERCLEANFILES = Makefile.in
