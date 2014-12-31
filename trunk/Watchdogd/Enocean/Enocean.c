@@ -219,13 +219,55 @@
     return( resultCRC );
   }
 /**********************************************************************************************************/
-/* Processer_trame_RPS: traitement de la trame ERP1 recue par le controleur EnOcean                       */
+/* Map_event_to_mnemo: Associe l'event en parametre aux mnemoniques D.L.S                                 */
+/* Entrée: l'evenement à traiter                                                                          */
+/* Sortie: le mnemo en question, ou NULL si non-trouvé (ou multi trouvailles)                             */
+/**********************************************************************************************************/
+ static struct CMD_TYPE_MNEMONIQUE *Map_event_to_mnemo( gchar *event )
+  { struct CMD_TYPE_MNEMONIQUE *mnemo, *result_mnemo = NULL;
+    gint nbr_result;
+    struct DB *db;
+
+    if ( ! Recuperer_mnemoDB_by_command_text ( &db, event ) )
+     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
+                 "Map_event_to_mnemo: Error searching Database" );
+       return(FALSE);
+     }
+    nbr_result = db->nbr_result;
+          
+    if ( nbr_result == 0 )                                              /* Si pas d'enregistrement trouvé */
+     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
+                "Map_event_to_mnemo: No match found for %s", event );
+     }
+    if ( nbr_result > 1 )                                                     /* Si trop d'enregistrement */
+     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
+                "Map_event_to_mnemo: Too many matchs found (%d) for %s", db->nbr_result, event );
+     }
+
+    while ( (mnemo = Recuperer_mnemoDB_suite( &db )) != NULL)
+     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+                "Map_event_to_mnemo: Match found for %s: Type %d Num %d - %s",
+                 event, mnemo->type, mnemo->num, mnemo->libelle );
+
+       if (db->nbr_result==1) result_mnemo = mnemo;            /* Si un seul enregistrement, c'est le bon */
+       else g_free(mnemo);      /* Si trop, on les libere tous dans la mesure ou l'on ne sait que choisir */
+     }
+
+    if (nbr_result == 0)                             /* Si pas trouvé, création d'un mnemo 'discovered' ? */
+     {
+     }
+
+    return (result_mnemo);                       /* A-t'on le seul et unique Mnemo associé à cet event ?? */
+  }
+/**********************************************************************************************************/
+/* Processer_trame_ERP1: traitement de la trame ERP1 recue par le controleur EnOcean                      */
 /* Entrée: la trame a recue                                                                               */
 /* Sortie: TRUE si processed                                                                              */
 /**********************************************************************************************************/
  static gboolean Processer_trame_ERP1( struct TRAME_ENOCEAN *trame )
-  { gchar event[64];
+  { struct CMD_TYPE_MNEMONIQUE *mnemo;
     gchar *action, *button = "unknown";
+    gchar event[64];
        
     if (trame->data[0] == 0xD2)
      { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
@@ -253,6 +295,25 @@
                    button, action );
        Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
                  "Processer_trame_ERP1: New_Event : %s", event );
+
+       mnemo = Map_event_to_mnemo ( event );
+       if (!mnemo) return(FALSE);
+       switch ( mnemo->type )
+        { case MNEMO_MONOSTABLE:                                      /* Positionnement du bit interne */
+               Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
+                        "Processer_trame_ERP1: Mise a un du bit M%03d", mnemo->num );
+               Envoyer_commande_dls(mnemo->num); 
+               break;
+          case MNEMO_ENTREE:
+               break;
+          case MNEMO_ENTREE_ANA:
+               break;
+          default: Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
+                            "Processer_trame_ERP1: Cannot handle commande type %d (num=%03d) for event %s",
+                             mnemo->type, mnemo->num, event );
+                   break;
+        }
+       g_free(mnemo);                                                  /* Libération du mnémonique traité */
        return(TRUE);
      }
     else if (trame->data[0] == 0xA5)
