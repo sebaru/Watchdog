@@ -109,232 +109,7 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Retirer_enoceanDB: Elimination d'un module enocean                                                     */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gboolean Retirer_enoceanDB ( gint id )
-  { gchar requete[200];
-    gboolean retour;
-    struct DB *db;
-
-    db = Init_DB_SQL();       
-    if (!db) return(FALSE);
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "DELETE FROM %s WHERE id=%d", NOM_TABLE_MODULE_ENOCEAN, id );
-
-    retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
-    Libere_DB_SQL( &db );
-    Cfg_enocean.reload = TRUE;
-    return(retour);
-  }
-/**********************************************************************************************************/
-/* Ajouter_enoceanDB: Ajout ou edition d'un enocean                                                       */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure enocean                       */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gint Ajouter_enoceanDB ( struct ENOCEANDB *enocean )
-  { gchar requete[2048];
-    gboolean retour;
-    gchar *libelle;
-    struct DB *db;
-    gint last_id;
-
-
-    libelle = Normaliser_chaine ( enocean->libelle );         /* Formatage correct des chaines */
-    if (!libelle)
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
-                 "Ajouter_enoceanDB: Normalisation libelle impossible" );
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(instance_id,type,sstype,id1,id2,id3,id4,housecode,unitcode,libelle,e_min,ea_min,a_min) "
-                " VALUES ('%s','%d','%d','%d','%d','%d','%d','%d','%d','%s','%d','%d','%d')",
-                NOM_TABLE_MODULE_ENOCEAN, Config.instance_id, enocean->type, enocean->sous_type,
-                enocean->id1, enocean->id2, enocean->id3, enocean->id4, enocean->housecode, enocean->unitcode, 
-                libelle, enocean->e_min, enocean->ea_min, enocean->a_min
-              );
-    g_free(libelle);
-
-    db = Init_DB_SQL();       
-    if (!db) { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_CRIT,
-                         "Ajouter_enoceanDB: Erreur connexion Database" );
-               return(FALSE);
-             }
-
-    retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
-    if (retour == FALSE)  { Libere_DB_SQL( &db );
-                            return(-1);
-                          }
-    last_id = Recuperer_last_ID_SQL ( db );
-    Libere_DB_SQL( &db );
-    Cfg_enocean.reload = TRUE;
-    return( last_id );
-  }
-/**********************************************************************************************************/
-/* Recuperer_liste_id_enoceanDB: Recupération de la liste des ids des enoceans                              */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- static gboolean Recuperer_enoceanDB ( struct LOG *log, struct DB *db )
-  { gchar requete[256];
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,type,sstype,id1,id2,id3,id4,housecode,unitcode,libelle,e_min,ea_min,a_min"
-                " FROM %s WHERE instance_id = '%s' ORDER BY type,sstype",
-                NOM_TABLE_MODULE_ENOCEAN, Config.instance_id );/* Ne selectionne que le instance_id spécifique */
-
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
-  }
-/**********************************************************************************************************/
-/* Recuperer_liste_id_enoceanDB: Recupération de la liste des ids des enoceans                              */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- static struct ENOCEANDB *Recuperer_enoceanDB_suite( struct LOG *log, struct DB *db )
-  { struct ENOCEANDB *enocean;
-
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       return(NULL);
-     }
-
-    enocean = (struct ENOCEANDB *)g_try_malloc0( sizeof(struct ENOCEANDB) );
-    if (!enocean) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
-                           "Recuperer_enoceanDB_suite: Erreur allocation mémoire" );
-    else
-     { g_snprintf( enocean->libelle, sizeof(enocean->libelle), "%s", db->row[9] );
-       enocean->id                = atoi(db->row[0]);
-       enocean->type              = atoi(db->row[1]);
-       enocean->sous_type         = atoi(db->row[2]);
-       enocean->id1               = atoi(db->row[3]);
-       enocean->id2               = atoi(db->row[4]);
-       enocean->id3               = atoi(db->row[5]);
-       enocean->id4               = atoi(db->row[6]);
-       enocean->housecode         = atoi(db->row[7]);
-       enocean->unitcode          = atoi(db->row[8]);
-       enocean->e_min             = atoi(db->row[10]);
-       enocean->ea_min            = atoi(db->row[11]);
-       enocean->a_min             = atoi(db->row[12]);
-     }
-    return(enocean);
-  }
-/**********************************************************************************************************/
-/* Modifier_enoceanDB: Modification d'un enocean Watchdog                                                   */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
-/* Sortie: FALSE si probleme                                                                              */
-/**********************************************************************************************************/
- gboolean Modifier_enoceanDB( struct ENOCEANDB *enocean )
-  { gchar requete[2048];
-    gboolean retour;
-    gchar *libelle;
-    struct DB *db;
-
-    db = Init_DB_SQL();       
-    if (!db) { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_CRIT,
-                         "Modifier_enoceanDB: Erreur connexion Database" );
-               return(FALSE);
-             }
-
-    libelle = Normaliser_chaine ( enocean->libelle );         /* Formatage correct des chaines */
-    if (!libelle)
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
-                 "Modifier_enoceanDB: Normalisation libelle impossible" );
-       Libere_DB_SQL( &db );
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET "             
-                "type='%d',sstype='%d',id1='%d',id2='%d',id3='%d',id4='%d',housecode='%d',unitcode='%d',"
-                "libelle='%s',e_min='%d',ea_min='%d',a_min='%d' "
-                " WHERE id=%d",
-                NOM_TABLE_MODULE_ENOCEAN,
-                enocean->type, enocean->sous_type,
-                enocean->id1, enocean->id2, enocean->id3, enocean->id4, enocean->housecode, enocean->unitcode, 
-                libelle, enocean->e_min, enocean->ea_min, enocean->a_min,
-                enocean->id );
-    g_free(libelle);
-
-    retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
-    Libere_DB_SQL( &db );
-    Cfg_enocean.reload = TRUE;
-    return( retour );
-  }
-/**********************************************************************************************************/
-/* Charger_tous_enocean: Requete la DB pour charger les modules et les bornes enocean                       */
-/* Entrée: rien                                                                                           */
-/* Sortie: FALSE si erreur                                                                                */
-/**********************************************************************************************************/
- static gboolean Charger_tous_enocean ( void  )
-  { struct DB *db;
-
-    db = Init_DB_SQL();       
-    if (!db) { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_CRIT,
-               "Charger_tous_enocean: Erreur connexion Database" );
-               return(FALSE);
-             }
-/********************************************** Chargement des modules ************************************/
-    if ( ! Recuperer_enoceanDB( Config.log, db ) )
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_CRIT,
-                "Charger_tous_enocean: Erreur de requete SQL" );
-       Libere_DB_SQL( &db );
-       return(FALSE);
-     }
-
-    Cfg_enocean.Modules_ENOCEAN = NULL;
-    for ( ; ; )
-     { struct MODULE_ENOCEAN *module;
-       struct ENOCEANDB *enocean;
-
-       enocean = Recuperer_enoceanDB_suite( Config.log, db );
-       if (!enocean) break;
-
-       module = (struct MODULE_ENOCEAN *)g_try_malloc0( sizeof(struct MODULE_ENOCEAN) );
-       if (!module)                                                   /* Si probleme d'allocation mémoire */
-        { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
-                    "Charger_tous_Erreur allocation mémoire struct MODULE_ENOCEAN" );
-          g_free(enocean);
-          Libere_DB_SQL( &db );
-          return(FALSE);
-        }
-       memcpy( &module->enocean, enocean, sizeof(struct ENOCEANDB) );
-       g_free(enocean);
-                                                                        /* Ajout dans la liste de travail */
-       pthread_mutex_lock ( &Cfg_enocean.lib->synchro );
-       Cfg_enocean.Modules_ENOCEAN = g_slist_prepend ( Cfg_enocean.Modules_ENOCEAN, module );
-       pthread_mutex_unlock ( &Cfg_enocean.lib->synchro );
-       Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-                 "Charger_tous_enocean. Module loaded id = %02d", module->enocean.id    );
-     }
-    pthread_mutex_lock ( &Cfg_enocean.lib->synchro );
-    Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-              "Charger_tous_module : %d ENOCEAN Modules found !", g_slist_length( Cfg_enocean.Modules_ENOCEAN ) );
-    pthread_mutex_unlock ( &Cfg_enocean.lib->synchro );
-
-    Libere_DB_SQL( &db );
-    return(TRUE);
-  }
-/**********************************************************************************************************/
-/* Decharger_tous_enocean : Dechargement de tous les capteurs/senseurs/actionneurs ENOCEAN                  */
-/* Entrée: néant                                                                                          */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
- static void Decharger_tous_enocean ( void  )
-  { struct MODULE_ENOCEAN *module;
-    pthread_mutex_lock ( &Cfg_enocean.lib->synchro );
-    while ( Cfg_enocean.Modules_ENOCEAN )
-     { module = (struct MODULE_ENOCEAN *)Cfg_enocean.Modules_ENOCEAN->data;
-       Cfg_enocean.Modules_ENOCEAN = g_slist_remove ( Cfg_enocean.Modules_ENOCEAN, module );
-       g_free(module);
-     }
-    pthread_mutex_unlock ( &Cfg_enocean.lib->synchro );
-  }
-/**********************************************************************************************************/
-/* Init_enocean: Initialisation de la ligne ENOCEAN                                                         */
+/* Init_enocean: Initialisation de la ligne TTY ENOCEAN                                                   */
 /* Sortie: l'identifiant de la connexion                                                                  */
 /**********************************************************************************************************/
  static int Init_enocean ( void )
@@ -368,44 +143,10 @@
 /* Entrée: les paramètres de critères de recherche                                                        */
 /* Sortie: le module, ou NULL si erreur                                                                   */
 /**********************************************************************************************************/
- static struct MODULE_ENOCEAN *Chercher_enocean ( gint type, gint sous_type,
-                                                gboolean check_id1, guchar id1,
-                                                gboolean check_id2, guchar id2,
-                                                gboolean check_id3, guchar id3,
-                                                gboolean check_id4, guchar id4,
-                                                gboolean check_housecode, guchar housecode,
-                                                gboolean check_unitcode, guchar unitcode
-                                              )
-  { struct MODULE_ENOCEAN *module;
-    GSList *liste_modules;
-
-    module = NULL;
-    pthread_mutex_lock ( &Cfg_enocean.lib->synchro );
-    liste_modules = Cfg_enocean.Modules_ENOCEAN;
-    while ( liste_modules )
-     { module = (struct MODULE_ENOCEAN *)liste_modules->data;
-
-       if (module->enocean.type == type && module->enocean.sous_type == sous_type && 
-           (check_id1       == FALSE || module->enocean.id1 == id1) &&
-           (check_id2       == FALSE || module->enocean.id2 == id2) &&
-           (check_id3       == FALSE || module->enocean.id3 == id3) &&
-           (check_id4       == FALSE || module->enocean.id4 == id4) &&
-           (check_housecode == FALSE || module->enocean.housecode == housecode) &&
-           (check_unitcode  == FALSE || module->enocean.unitcode  == unitcode)
-          ) break;
-       liste_modules = liste_modules->next;
-     }
-    pthread_mutex_unlock ( &Cfg_enocean.lib->synchro );
-    if (liste_modules) return(module);
-    return(NULL);
-  }
-/**********************************************************************************************************/
-/* Chercher_enocean: Retrouve un module/capteur dans la liste gérée en fonction des paramètres             */
-/* Entrée: les paramètres de critères de recherche                                                        */
-/* Sortie: le module, ou NULL si erreur                                                                   */
-/**********************************************************************************************************/
  static void Enocean_Envoyer_sortie ( gint num_a )
-  { gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
+  {
+#ifdef bouh
+ gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
     struct MODULE_ENOCEAN *module;
     GSList *liste_modules;
 
@@ -447,6 +188,7 @@
        liste_modules = liste_modules->next;
      }
     pthread_mutex_unlock ( &Cfg_enocean.lib->synchro );
+#endif
   }
 /**********************************************************************************************************/
 /* Enocean_crc_header: Calcul le Header CRC de la trame en parametre                                      */
@@ -477,6 +219,49 @@
     return( resultCRC );
   }
 /**********************************************************************************************************/
+/* Processer_trame_RPS: traitement de la trame ERP1 recue par le controleur EnOcean                       */
+/* Entrée: la trame a recue                                                                               */
+/* Sortie: TRUE si processed                                                                              */
+/**********************************************************************************************************/
+ static gboolean Processer_trame_ERP1( struct TRAME_ENOCEAN *trame )
+  { gchar event[64];
+    gchar *action, *button = "unknown";
+       
+    if (trame->data[0] == 0xD2)
+     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+                "Processer_trame_ERP1: Received VLD" );
+     }
+    else if (trame->data[0] == 0xF6)                                                      /* RPS Telegram */
+     { if ( trame->data[1] & 0x10 ) action = "Pressed";
+                               else action = "Released";
+       if ( (trame->data[6] & 0x30) == 0x30 )                                     /* Status : T21 et NU ? */
+        { switch( (trame->data[1] & 0xE0)>>5 )
+           { case 0: button = "Button AI"; break;
+             case 1: button = "Button AO"; break;
+             case 2: button = "Button BI"; break;
+             case 3: button = "Button BO"; break;
+           }
+        }
+       else if ( (trame->data[6] & 0x30) == 0x20 )                                /* Status : Juste T21 ? */
+        { switch( (trame->data[1] & 0xE0)>>5 )
+           { case 0: button = "No button"; break;
+             case 1: button = "3/4 buttons"; break;
+           }
+        }
+       g_snprintf( event, sizeof(event), "%s:%02X%02X%02X%02X:%s:%s",
+                   NOM_THREAD, trame->data[2], trame->data[3], trame->data[4], trame->data[5],
+                   button, action );
+       Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
+                 "Processer_trame_ERP1: New_Event : %s", event );
+       return(TRUE);
+     }
+    else if (trame->data[0] == 0xA5)
+     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+                "Processer_trame_ERP1: Received RADIO_ERP1-4BS" );
+     }
+    return(FALSE);
+  }
+/**********************************************************************************************************/
 /* Processer_trame: traitement de la trame recue par un microcontroleur                                   */
 /* Entrée: la trame a recue                                                                               */
 /* Sortie: néant                                                                                          */
@@ -484,56 +269,14 @@
  static void Processer_trame( struct TRAME_ENOCEAN *trame )
   { gchar chaine[32];
     gint cpt;
-    switch (trame->packet_type)
-     { case 1:                                                                              /* RADIO_ERP1 */
-        { memset( chaine, 0, sizeof(chaine) );
-          for (cpt=0; cpt<trame->data_length_lsb+trame->optional_data_length; cpt++)
-           { g_snprintf( &chaine[2*cpt], 3, "%02X", trame->data[cpt] ); }/* Mise en forme au format HEX */
-          Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-                   "Processer_trame Received RADIO_ERP1-RPS-%s", chaine );
+    memset( chaine, 0, sizeof(chaine) );
+    for (cpt=0; cpt<trame->data_length_lsb+trame->optional_data_length; cpt++)
+     { g_snprintf( &chaine[2*cpt], 3, "%02X", trame->data[cpt] ); }/* Mise en forme au format HEX */
+    Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+             "Processer_trame Received RADIO_ERP1-%s", chaine );
 
-          if (trame->data[0] == 0xD2)
-           { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-                      "Processer_trame: Received RADIO_ERP1-VLD" );
-             return;
-           }
-          else if (trame->data[0] == 0xF6)                                                /* RPS Telegram */
-           { gchar chaine[32], event[32];
-             gchar *action, *button = "unknown";
-             guchar DB0, status;
-             gint cpt;
-             DB0 = trame->data[1];
-             status = trame->data[6];
-             if ( DB0 & 0x10 ) action = "Pressed";
-                          else action = "Released";
-             if ( (status & 0x30) == 0x30 ) /* T21 et NU ? */
-              { switch( (DB0 & 0xE0)>>5 )
-                 { case 0: button = "Button AI"; break;
-                   case 1: button = "Button AO"; break;
-                   case 2: button = "Button BI"; break;
-                   case 3: button = "Button BO"; break;
-                 }
-              }
-             else if ( (status & 0x30) == 0x20 ) /* Juste T21 ? */
-              { switch( (DB0 & 0xE0)>>5 )
-                 { case 0: button = "No button"; break;
-                   case 1: button = "3/4 buttons"; break;
-                 }
-              }
-             g_snprintf( event, sizeof(event), "%s:%02X%02X%02X%02X:%s:%s",
-                         NOM_THREAD, trame->data[2], trame->data[3], trame->data[4], trame->data[5],
-                         button, action );
-             Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                      "Processer_trame: New_Event : %s", event );
-             return;
-           }
-          else if (trame->data[0] == 0xA5)
-           { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-                      "Processer_trame Received RADIO_ERP1-4BS" );
-             return;
-           }
-        }
-     }
+    if (trame->packet_type == 1 && Processer_trame_ERP1 ( trame )) return;                  /* RADIO_ERP1 */ 
+
     Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
              "Processer_trame: Unmanaged telegram: packet type %0X - %0X-%0X-%0X",
               trame->packet_type, trame->data[0], trame->data[1], trame->data[2] );
@@ -544,7 +287,7 @@
 /**********************************************************************************************************/
  void Enocean_Gerer_sortie( gint num_a )                                   /* Num_a est l'id de la sortie */
   { gint taille;
-
+#ifdef bouh
     pthread_mutex_lock( &Cfg_enocean.lib->synchro );             /* Ajout dans la liste de tell a traiter */
     taille = g_slist_length( Cfg_enocean.Liste_sortie );
     pthread_mutex_unlock( &Cfg_enocean.lib->synchro );
@@ -558,6 +301,7 @@
     pthread_mutex_lock( &Cfg_enocean.lib->synchro );       /* Ajout dans la liste de tell a traiter */
     Cfg_enocean.Liste_sortie = g_slist_prepend( Cfg_enocean.Liste_sortie, GINT_TO_POINTER(num_a) );
     pthread_mutex_unlock( &Cfg_enocean.lib->synchro );
+#endif
   }
 /**********************************************************************************************************/
 /* Enocean_select: Permet d'estimer la disponibilité d'une information reçue à traiter                    */

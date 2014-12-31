@@ -60,6 +60,7 @@
               );
     Admin_write ( connexion, chaine );
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Admin_enocean_print : Affiche en details les infos d'un onduleur en parametre                          */
 /* Entrée: La connexion connexion ADMIN et l'onduleur                                                     */
@@ -121,7 +122,7 @@
     pthread_mutex_unlock ( &Cfg_enocean.lib->synchro );
   }
 /**********************************************************************************************************/
-/* Admin_enocean_del: Retire le capteur/module enocean dont l'id est en parametre                           */
+/* Admin_enocean_del: Retire le capteur/module enocean dont l'id est en parametre                         */
 /* Entrée: le connexion et l'id                                                                           */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
@@ -138,8 +139,8 @@
     Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
-/* Admin_enocean_add: Ajoute un capteur/module ENOCEAN                                                      */
-/* Entrée: le connexion et la structure de reference du capteur                                              */
+/* Admin_enocean_add: Ajoute un capteur/module ENOCEAN                                                    */
+/* Entrée: le connexion et la structure de reference du capteur                                           */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  static void Admin_enocean_add ( struct CONNEXION *connexion, struct ENOCEANDB *enocean )
@@ -157,7 +158,7 @@
     Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
-/* Admin_enocean_change: Modifie la configuration d'un capteur ENOCEAN                                      */
+/* Admin_enocean_change: Modifie la configuration d'un capteur ENOCEAN                                    */
 /* Entrée: le connexion et la structure de reference du capteur                                           */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
@@ -173,8 +174,9 @@
      { g_snprintf( chaine, sizeof(chaine), " Error. Module %03d NOT changed.\n", enocean->id ); }
     Admin_write ( connexion, chaine );
   }
+#endif
 /**********************************************************************************************************/
-/* Admin_enocean: Fonction gerant les différentes commandes possible pour l'administration enocean          */
+/* Admin_enocean: Fonction gerant les différentes commandes possible pour l'administration enocean        */
 /* Entrée: le connexion d'admin et la ligne de commande                                                   */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/

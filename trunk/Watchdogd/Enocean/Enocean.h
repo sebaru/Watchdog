@@ -31,8 +31,6 @@
  #define DEFAUT_PORT_ENOCEAN             "/dev/watchdog_ENOCEAN"
 
  #define NOM_THREAD                 "enocean"
- #define NOM_TABLE_MODULE_ENOCEAN   "enocean"
- #define NBR_CARAC_LIBELLE_ENOCEAN  128
  #define ENOCEAN_HEADER_LENGTH      5
  #define ENOCEAN_RECONNECT_DELAY    300                     /* 30 secondes avant tentative de reconnexion */
  #define ENOCEAN_TRAME_TIMEOUT      2    /* 200ms avant de dropper la trame si pas de nouveau bytes recus */
@@ -44,25 +42,6 @@
     guchar packet_type;
     guchar crc_header;
     guchar data[80];
-  };
-
- struct ENOCEANDB
-  { guint id;                                                                   /* ID unique de la enocean */
-    guchar type;                                                                   /* Numéro de la enocean */
-    guchar sous_type;                                                              /* Numéro de la enocean */
-    guchar id1;                                                                    /* Numéro de la enocean */
-    guchar id2;                                                                    /* Numéro de la enocean */
-    guchar id3;                                                                    /* Numéro de la enocean */
-    guchar id4;                                                                    /* Numéro de la enocean */
-    guchar housecode;                                                              /* Numéro de la enocean */
-    guchar unitcode;                                                               /* Numéro de la enocean */
-    gint e_min, ea_min, a_min;
-    gchar libelle[NBR_CARAC_LIBELLE_ENOCEAN];                                      /* Libelle de la enocean */
-  };
-
- struct MODULE_ENOCEAN
-  { struct ENOCEANDB enocean;
-    guint date_last_view;
   };
 
  struct ENOCEAN_CONFIG
@@ -90,9 +69,5 @@
   };
 /*************************************** Définitions des prototypes ***************************************/
  extern gboolean Enocean_Lire_config ( void );
- extern gboolean Retirer_enoceanDB ( gint id );
- extern gint Ajouter_enoceanDB ( struct ENOCEANDB *enocean );
- extern gboolean Modifier_enoceanDB( struct ENOCEANDB *enocean );
-
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
