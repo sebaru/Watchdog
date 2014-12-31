@@ -489,13 +489,38 @@
                       "Processer_trame Received RADIO_ERP1-VLD" );
            }
           else if (trame->data[0] == 0xA6)
-           { gchar chaine[32];
+           { gchar chaine[32], event[32];
+             gchar *action, *button = "unknown";
+             guchar DB0, status;
              gint cpt;
              memset( chaine, 0, sizeof(chaine) );
              for (cpt=0; cpt<trame->data_length_lsb; cpt++)                /* Mise en forme au format HEX */
               { g_snprintf( &chaine[2*cpt], 3, "%02X", trame->data[cpt] ); }
              Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-                      "Processer_trame Received RADIO_ERP1-ADT-%s", chaine );
+                      "Processer_trame: Received RADIO_ERP1-ADT-%s", chaine );
+             DB0 = trame->data[1];
+             status = trame->data[6];
+             if ( DB0 & 0x10 ) action = "Pressed";
+                          else action = "Released";
+             if (status & 0x30) /* T21 et NU ? */
+              { switch( (DB0 & 0xE0)>>5 )
+                 { case 0: button = "Button AI"; break;
+                   case 1: button = "Button AO"; break;
+                   case 2: button = "Button BI"; break;
+                   case 3: button = "Button BO"; break;
+                 }
+              }
+             else if (status & 0x20) /* Juste T21 ? */
+              { switch( (DB0 & 0xE0)>>5 )
+                 { case 0: button = "No button"; break;
+                   case 1: button = "3/4 buttons"; break;
+                 }
+              }
+             g_snprintf( event, sizeof(event), "%s:%02X%02X%02X%02X:%s:%s",
+                         NOM_THREAD, trame->data[2], trame->data[3], trame->data[4], trame->data[5],
+                         button, action );
+             Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
+                      "Processer_trame: New_Event : %s", event );
            }
           else if (trame->data[0] == 0xA5)
            { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
@@ -516,147 +541,6 @@
     Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
              "Processer_trame: Unmanaged packet type %0X %0X-%0X-%0X",
               trame->packet_type, trame->data[0], trame->data[1], trame->data[2] );
-#ifdef bouh
-
-
-    if (trame->type == 0x01 && trame->sous_type == 0x00)
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                 "Processer_trame get_status Cmd= %d (0x%2X)", trame->data[0], trame->data[0] );
-       if (trame->data[1] == 0x52) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                             "Processer_trame get_status 433MHz receiver only" );   
-       if (trame->data[1] == 0x53) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                             "Processer_trame get_status 433MHz transceiver" );   
-       Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                 "Processer_trame get_status firmware %d (0x%2X)", trame->data[2], trame->data[2] );
-       if (trame->data[3] & 0x80) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Unencoded Frame" );   
-       if (trame->data[3] & 0x40) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto RFU6" );   
-       if (trame->data[3] & 0x20) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto RFU5" );   
-       if (trame->data[3] & 0x10) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto RFU4" );   
-       if (trame->data[3] & 0x08) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto RFU3" );   
-       if (trame->data[3] & 0x04) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto FineOffset/Viking" );   
-       if (trame->data[3] & 0x02) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Rubicson" );   
-       if (trame->data[3] & 0x01) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto AE" );   
-       if (trame->data[4] & 0x80) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto BlindsT1" );   
-       if (trame->data[4] & 0x40) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto BlindsT0" );   
-       if (trame->data[4] & 0x20) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto ProGuard" );   
-       if (trame->data[4] & 0x10) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto FS20" );   
-       if (trame->data[4] & 0x08) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto LaCrosse" );   
-       if (trame->data[4] & 0x04) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Hideki" );   
-       if (trame->data[4] & 0x02) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto LightwaveRF" );   
-       if (trame->data[4] & 0x01) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Mertik" );   
-       if (trame->data[5] & 0x80) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto Visonic" );   
-       if (trame->data[5] & 0x40) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto ATI" );   
-       if (trame->data[5] & 0x20) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto OregonScientific" );   
-       if (trame->data[5] & 0x10) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto MeianTech" );   
-       if (trame->data[5] & 0x08) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto HomeEasy/EU" );   
-       if (trame->data[5] & 0x04) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto AC" );   
-       if (trame->data[5] & 0x02) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto ARC" );   
-       if (trame->data[5] & 0x01) Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame get_status proto X10" );   
-     }
-    else if (trame->type == 0x02)
-     { switch (trame->sous_type)
-        { case 0x00: Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                              "Processer_trame : Transceiver message : Error, receiver did not lock" );
-                     break;
-          case 0x01: switch (trame->data[0])
-                      { case 0x00: Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame : Transceiver message : ACK, transmit OK" );
-                                   break;
-                        case 0x01: Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame : Transceiver message : ACK, "
-                                            "but transmit started after 3 seconds delay anyway with RF receive data" );
-                                   break;
-                        case 0x02: Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame : Transceiver message : NAK, transmitter "
-                                            "did not lock on the requested transmit frequency" );
-                                   break;
-                        case 0x03: Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame : Transceiver message : NAK, "
-                                            "AC address zero in id1-id4 not allowed" );
-                                   break;
-                        default  : Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                                            "Processer_trame : Transceiver message : Unknown message..." );
-                                   break;
-                      }
-                     break;
-          default :  Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                              "Processer_trame : Transceiver message : unknown packet ssous_type %d", trame->sous_type);
-        }
-     } 
-    else if (trame->type == 0x52 && trame->sous_type == 0x01)                                   /* Oregon */
-     { struct MODULE_ENOCEAN *module;
-       Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                 "Processer_trame : get status type=%03d(0x%02X), sous_type=%03d(0x%02X), id1=%03d, id2=%03d, high=%03d, "
-                 "signe=%02d, low=%03d, hum=%02d, humstatus=%02d, battery=%02d, rssi=%02d",
-                 trame->type, trame->type, trame->sous_type, trame->sous_type, trame->data[0], trame->data[1],
-                 trame->data[2] & 0x7F, trame->data[2] & 0x80, trame->data[3], trame->data[4], trame->data[5],
-                 trame->data[6] >> 4, trame->data[6] & 0x0F
-               );   
-       module = Chercher_enocean( trame->type, trame->sous_type, TRUE, trame->data[0], TRUE, trame->data[1],
-                                 FALSE, 0, FALSE, 0, FALSE, 0, FALSE, 0 );
-       if (module)
-        { SEA( module->enocean.ea_min,     (trame->data[2] & 0x80 ? -1.0 : 1.0)* ( ((trame->data[2] & 0x7F)<<8) + trame->data[3])
-                                           / 10.0 );                                              /* Temp */
-          SEA( module->enocean.ea_min + 1,  trame->data[4] );                                  /* Humidity */
-          SEA( module->enocean.ea_min + 2,  trame->data[6] >> 4);                               /* Battery */
-          SEA( module->enocean.ea_min + 3,  trame->data[6] & 0x0F );                               /* RSSI */
-
-          module->date_last_view = Partage->top;
-        }
-       else Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                      "Processer_trame: No module found for packet received type=%02d(0x%02X), sous_type=%02d(0x%02X)",
-                      trame->type, trame->type, trame->sous_type, trame->sous_type );
-     }
-    else if (trame->type == 0x11 && trame->sous_type == 0x00)                            /* Lighting 2 AC */
-     { struct MODULE_ENOCEAN *module;
-       Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                 "Processer_trame : get lighting ! type=%03d(0x%02X), sous_type=%03d(0x%02X), id1=%03d, id2=%03d, "
-                 "id3=%03d, id4=%03d, unitcode=%03d, cmnd=%03d, level=%03d rssi=%02d",
-                 trame->type, trame->type, trame->sous_type, trame->sous_type, trame->data[0] & 0x03, trame->data[1],
-                 trame->data[2], trame->data[3], trame->data[4], trame->data[5],
-                 trame->data[6], trame->data[7] & 0x0F
-               );   
-       module = Chercher_enocean( trame->type, trame->sous_type, TRUE, trame->data[0] & 0x03, TRUE, trame->data[1],
-                                 TRUE, trame->data[2], TRUE, trame->data[3], FALSE, 0, TRUE, trame->data[4] );
-       if (module)
-        { SE( module->enocean.e_min, trame->data[5] );
-          Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-                    "Processer_trame : Module found (%s), Setting E%03d=%d", module->enocean.libelle, module->enocean.e_min, trame->data[5] );
-          module->date_last_view = Partage->top;
-        }
-       else Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                      "Processer_trame: No module found for packet received type=%02d(0x%02X), sous_type=%02d(0x%02X)",
-                      trame->type, trame->type, trame->sous_type, trame->sous_type );
-     }
-    else Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                   "Processer_trame unknown packet type %02d(0x%02X), sous_type=%02d(0x%02X)",
-                   trame->type, trame->type, trame->sous_type, trame->sous_type );
-    return(TRUE);
-#endif
   }
 /**********************************************************************************************************/
 /* Enocean_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois ENOCEAN                     */
