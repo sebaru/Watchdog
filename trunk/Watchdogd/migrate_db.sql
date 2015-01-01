@@ -26,7 +26,8 @@ CREATE PROCEDURE MigrateDB ()
 
   IF @db_ver = 1 THEN 
      INSERT INTO `mnemos` (`id`, `type`, `num`, `num_plugin`, `acronyme`, `libelle`, `command_text`) VALUES
-           (23, 1, 0, 1, 'EVENT_NONE', 'Used for detected Event with no mapping yet.', '');
+        (23, 3,9999, 1, 'EVENT_NONE_TOR', 'Used for detected Event with no mapping yet.', ''),
+        (24, 5,9999, 1, 'EVENT_NONE_ANA', 'Used for detected Event with no mapping yet.', '');
   END IF;
 
   UPDATE config SET valeur = 2 where nom_thread="GLOBAL" AND nom="database_version";

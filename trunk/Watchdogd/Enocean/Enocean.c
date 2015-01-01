@@ -249,22 +249,6 @@
        else g_free(mnemo);      /* Si trop, on les libere tous dans la mesure ou l'on ne sait que choisir */
      }
 
-    if (nbr_result == 0)                             /* Si pas trouvé, création d'un mnemo 'discovered' ? */
-     { struct CMD_TYPE_MNEMONIQUE mnemo;
-       memset( &mnemo, 0, sizeof(mnemo) );
-       mnemo.type       = MNEMO_MONOSTABLE;
-       mnemo.num        = 0;
-       mnemo.num_plugin = 1;
-       g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "EnOcean EVENT" );
-       g_snprintf( mnemo.libelle,  sizeof(mnemo.libelle),  "Event %s discovered by %s", event, NOM_THREAD );
-       g_snprintf( mnemo.command_text, sizeof(mnemo.command_text), "%s", event );
-
-       if ( Ajouter_mnemoDB ( &mnemo ) < 0 )                     /* Ajout auto dans la base de mnemonique */
-        { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
-                   "Map_event_to_mnemo: Error adding new mnemo in DB for event %s", event );
-        }
-     }
-
     return (result_mnemo);                       /* A-t'on le seul et unique Mnemo associé à cet event ?? */
   }
 /**********************************************************************************************************/
@@ -305,14 +289,30 @@
                  "Processer_trame_ERP1: New_Event : %s", event );
 
        mnemo = Map_event_to_mnemo ( event );
-       if (!mnemo) return(FALSE);
+       if (!mnemo)                                   /* Si pas trouvé, création d'un mnemo 'discovered' ? */
+        { struct CMD_TYPE_MNEMONIQUE mnemo;
+          memset( &mnemo, 0, sizeof(mnemo) );
+          mnemo.type       = MNEMO_ENTREE;
+          mnemo.num        = 9999;
+          mnemo.num_plugin = 1;
+          g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "EnOcean EVENT" );
+          g_snprintf( mnemo.libelle,  sizeof(mnemo.libelle),  "Event %s discovered by %s", event, NOM_THREAD );
+          g_snprintf( mnemo.command_text, sizeof(mnemo.command_text), "%s", event );
+
+          if ( Ajouter_mnemoDB ( &mnemo ) < 0 )                     /* Ajout auto dans la base de mnemonique */
+           { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
+                      "Map_event_to_mnemo: Error adding new mnemo in DB for event %s", event );
+           }
+          return(FALSE);
+        }
+
        switch ( mnemo->type )
         { case MNEMO_MONOSTABLE:                                      /* Positionnement du bit interne */
-               Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
-                        "Processer_trame_ERP1: Mise a un du bit M%03d", mnemo->num );
-               Envoyer_commande_dls(mnemo->num); 
                break;
           case MNEMO_ENTREE:
+               Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
+                        "Processer_trame_ERP1: Mise a un du bit E%03d", mnemo->num );
+               Envoyer_entree_dls(mnemo->num, 1, TRUE); 
                break;
           case MNEMO_ENTREE_ANA:
                break;
