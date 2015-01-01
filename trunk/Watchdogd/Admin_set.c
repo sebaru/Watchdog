@@ -103,7 +103,7 @@
      { int num, val;
        sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
        if (num<NBR_ENTRE_TOR)
-        { SE(num, val );
+        { Envoyer_entree_dls( num, val, FALSE );                                                      /* Pas de furtivité */
           g_snprintf( chaine, sizeof(chaine), " E%03d = %d\n", num, val );
         } else
         { g_snprintf( chaine, sizeof(chaine), " E -> num '%d' out of range\n", num ); }
