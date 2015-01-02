@@ -28,10 +28,9 @@
 #ifndef _RESEAUX_OPTION_ENTREETOR_H_
  #define _RESEAUX_OPTION_ENTREETOR_H_
 
- struct CMD_TYPE_OPTION_DIGITALINPUT
-  { guint  id_mnemo;                                                        /* Id unique du mnemo associé */
+ struct CMD_TYPE_MNEMO_DI
+  { gint num; 
     gboolean furtif;
-                                                                                        /* Vient du mnemo */
   };
 
 #endif

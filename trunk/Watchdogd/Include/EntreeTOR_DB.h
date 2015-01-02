@@ -34,15 +34,13 @@
  #define NOM_TABLE_DIGITAL_INPUT   "mnemos_DigitalInput"
 
  struct DIGITAL_INPUT                          /* Traitement des entrées analogiques par le process rs485 */
-  { struct CMD_TYPE_OPTION_DIGITALINPUT confDB;
+  { struct CMD_TYPE_MNEMO_DI confDB;
     gboolean etat;
   };
 
 /*************************************** Définitions des prototypes ***************************************/
  extern void Charger_digitalInput ( void );
- extern struct CMD_TYPE_OPTION_DIGITALINPUT *Rechercher_digitalInputDB ( guint id );
- extern gboolean Recuperer_digitalInputDB ( struct DB **db );
- extern struct CMD_TYPE_OPTION_DIGITALINPUT *Recuperer_digitalInputDB_suite( struct DB **db_orig );
- extern gboolean Modifier_digitalInputDB( struct CMD_TYPE_OPTION_DIGITALINPUT *digitalInput );
+ extern struct CMD_TYPE_OPTION_MNEMO *Rechercher_digitalInputDB ( guint id );
+ extern gboolean Modifier_digitalInputDB( struct CMD_TYPE_OPTION_MNEMO *option_mnemo );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

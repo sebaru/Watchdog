@@ -80,10 +80,20 @@
     guint num;
   };
 
+ struct CMD_TYPE_OPTION_MNEMO
+  { struct CMD_TYPE_MNEMONIQUE mnemo;
+    union { struct CMD_TYPE_MNEMO_DI mnemo_di;
+            /*struct CMD_TYPE_OPTION_ENTREEANA eana;
+            struct CMD_TYPE_OPTION_COMPTEUR_IMP cpt_imp;
+            struct CMD_TYPE_OPTION_TEMPO tempo;*/
+          };
+
+  };
+
+#warning A supprimer
  struct CMD_TYPE_OPTION_BIT_INTERNE
   { guint type;
-    union { struct CMD_TYPE_OPTION_DIGITALINPUT etor;
-            struct CMD_TYPE_OPTION_ENTREEANA eana;
+    union { struct CMD_TYPE_OPTION_ENTREEANA eana;
             struct CMD_TYPE_OPTION_COMPTEUR_IMP cpt_imp;
             struct CMD_TYPE_OPTION_TEMPO tempo;
           };
