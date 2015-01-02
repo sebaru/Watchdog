@@ -37,6 +37,7 @@
  #define NBR_CARAC_UNITE_MNEMONIQUE          8
  #define NBR_CARAC_UNITE_MNEMONIQUE_UTF8     (2*NBR_CARAC_UNITE_MNEMONIQUE)
 
+ #include "Reseaux_option_entreetor.h"
  #include "Reseaux_option_entreeana.h"
  #include "Reseaux_option_compteur_imp.h"
  #include "Reseaux_option_tempo.h"
@@ -81,7 +82,8 @@
 
  struct CMD_TYPE_OPTION_BIT_INTERNE
   { guint type;
-    union { struct CMD_TYPE_OPTION_ENTREEANA eana;
+    union { struct CMD_TYPE_OPTION_DIGITALINPUT etor;
+            struct CMD_TYPE_OPTION_ENTREEANA eana;
             struct CMD_TYPE_OPTION_COMPTEUR_IMP cpt_imp;
             struct CMD_TYPE_OPTION_TEMPO tempo;
           };

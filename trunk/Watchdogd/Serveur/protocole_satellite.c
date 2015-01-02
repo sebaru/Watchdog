@@ -59,7 +59,7 @@
                                         "Gerer_protocole_satellite: Setting type SEA(%03d)=%8.2f from satellite %s",
                                          sat->num, sat->val_float, client->util->nom );
                                          break;
-                  case MNEMO_ENTREE    : Envoyer_entree_dls ( sat->num, sat->val_int, FALSE );
+                  case MNEMO_ENTREE    : Envoyer_entree_dls ( sat->num, sat->val_int );
                                          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                                         "Gerer_protocole_satellite: Setting type SE(%03d)=%03d from satellite %s",
                                          sat->num, sat->val_int, client->util->nom );

@@ -170,21 +170,25 @@
 /* Entrée: néant                                                                                          */
 /**********************************************************************************************************/
  static void Charger_config_bit_interne( void )
-  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des EANA" );
+  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading EntreeTOR" );
+    Charger_digitalInput();
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading EntreeTOR done" );
+
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading EANA" );
     Charger_eana();
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des EANA fait" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading EANA done" );
 
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des compteurs horaires" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading compteurs horaires" );
     Charger_cpth();
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des compteurs horaires fait" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading compteurs horaires done" );
 
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des compteurs impulsion" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading compteurs impulsion" );
     Charger_cpt_imp();
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des compteurs impulsion fait" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading compteurs impulsion done" );
 
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des temporisations" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading temporisations" );
     Charger_tempo();
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des temporisations fait" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading temporisations done" );
   }
 /**********************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                         */
@@ -545,7 +549,7 @@
        if (!import)
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Clear Histo" );
           Clear_histoDB ();                                            /* Clear de la table histo au boot */
-          Info_new( Config.log, Config.log_msrv, LOG_INFO, "Clear Histo fait" );
+          Info_new( Config.log, Config.log_msrv, LOG_INFO, "Clear Histo done" );
         } else Info_new( Config.log, Config.log_msrv, LOG_INFO, "Import => pas de clear histo" );
 
        Charger_config_bit_interne ();     /* Chargement des configurations des bits internes depuis la DB */

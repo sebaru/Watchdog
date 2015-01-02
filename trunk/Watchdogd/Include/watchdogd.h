@@ -49,6 +49,7 @@
  #include "Mnemonique_DB.h"
  #include "Icones_DB.h"
  #include "EntreeANA_DB.h"
+ #include "EntreeTOR_DB.h"
  #include "Proto_traductionDLS.h"
 
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
@@ -152,7 +153,7 @@
     struct CPT_IMP ci [ NBR_COMPTEUR_IMP ];
     struct ENTREE_ANA ea [ NBR_ENTRE_ANA ];
     guchar m [ (NBR_BIT_MONOSTABLE>>3) + 1 ];                  /* Monostables du DLS (DLS=rw, Sserveur=r) */
-    guchar e [ NBR_ENTRE_TOR>>3 ];
+    struct DIGITAL_INPUT e [ NBR_ENTRE_TOR ];
     struct SORTIE_TOR a [ NBR_SORTIE_TOR ];
     guchar b [ (NBR_BIT_BISTABLE>>3) + 1 ];                                                  /* Bistables */
     struct MESSAGES g [ NBR_MESSAGE_ECRITS ];                               /* Message vers veille et syn */

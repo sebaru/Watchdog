@@ -1,10 +1,10 @@
 /**********************************************************************************************************/
-/* Watchdogd/Include/EntreeANA.h        Déclaration structure internes des entree analogiques             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      ven 25 jun 2004 11:17:05 CEST */
+/* Watchdogd/Include/EntreeTOR.h        Déclaration structure internes des entree analogiques             */
+/* Projet WatchDog version 2.0       Gestion d'habitat                    ven. 02 janv. 2015 18:54:48 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
- * EntreeANA.h
+ * EntreeTOR.h
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -25,27 +25,24 @@
  * Boston, MA  02110-1301  USA
  */
  
-#ifndef _ENTREEANA_H_
- #define _ENTREEANA_H_
+#ifndef _ENTREETOR_H_
+ #define _ENTREETOR_H_
 
  #include "Reseaux.h"
  #include "Db.h"
 
- #define NOM_TABLE_ENTREEANA    "mnemos_AnalogInput"
+ #define NOM_TABLE_DIGITAL_INPUT   "mnemos_DigitalInput"
 
- struct ENTREE_ANA                             /* Traitement des entrées analogiques par le process rs485 */
-  { struct CMD_TYPE_OPTION_ENTREEANA cmd_type_eana;
-    gfloat  val_ech;
-    gfloat  val_avant_ech;
-    guint   last_arch;                                                     /* Date de la derniere archive */
-    guint   inrange;
+ struct DIGITAL_INPUT                          /* Traitement des entrées analogiques par le process rs485 */
+  { struct CMD_TYPE_OPTION_DIGITALINPUT confDB;
+    gboolean etat;
   };
 
 /*************************************** Définitions des prototypes ***************************************/
- extern void Charger_eana ( void );
- extern struct CMD_TYPE_OPTION_ENTREEANA *Rechercher_entreeANADB ( guint id );
- extern gboolean Recuperer_entreeANADB ( struct DB **db );
- extern struct CMD_TYPE_OPTION_ENTREEANA *Recuperer_entreeANADB_suite( struct DB **db );
- extern gboolean Modifier_entreeANADB( struct CMD_TYPE_OPTION_ENTREEANA *entreeana );
+ extern void Charger_digitalInput ( void );
+ extern struct CMD_TYPE_OPTION_DIGITALINPUT *Rechercher_digitalInputDB ( guint id );
+ extern gboolean Recuperer_digitalInputDB ( struct DB **db );
+ extern struct CMD_TYPE_OPTION_DIGITALINPUT *Recuperer_digitalInputDB_suite( struct DB **db_orig );
+ extern gboolean Modifier_digitalInputDB( struct CMD_TYPE_OPTION_DIGITALINPUT *digitalInput );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

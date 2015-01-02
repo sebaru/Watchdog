@@ -857,7 +857,7 @@
         { case MODBUS_GET_DI:
                cpt_e = module->modbus.min_e_tor;
                for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<module->nbr_entree_tor; cpt++)
-                { Envoyer_entree_dls( cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ), FALSE );
+                { Envoyer_entree_dls( cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) );
                   cpt_e++;
                   cpt_poid = cpt_poid << 1;
                   if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }

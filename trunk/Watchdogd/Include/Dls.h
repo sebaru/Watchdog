@@ -110,7 +110,7 @@
  extern void SEA( int num, float val_avant_ech );
  extern void SEA_range( int num, int range );
  extern void SEA_ech( int num, float val_ech );
- extern void Envoyer_entree_dls( int num, int etat, gboolean furtif );
+ extern void Envoyer_entree_dls( int num, int etat );
  extern void Envoyer_commande_dls ( int num );
 
  extern void Prendre_heure ( void );                                                      /* Dans heure.c */ 

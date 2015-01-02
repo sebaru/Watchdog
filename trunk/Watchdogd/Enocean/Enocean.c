@@ -312,7 +312,7 @@
           case MNEMO_ENTREE:
                Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
                         "Processer_trame_ERP1: Mise a un du bit E%03d", mnemo->num );
-               Envoyer_entree_dls(mnemo->num, 1, TRUE); 
+               Envoyer_entree_dls(mnemo->num, 1);
                break;
           case MNEMO_ENTREE_ANA:
                break;

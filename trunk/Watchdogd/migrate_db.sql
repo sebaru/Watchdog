@@ -30,7 +30,15 @@ CREATE PROCEDURE MigrateDB ()
         (24, 5,9999, 1, 'EVENT_NONE_ANA', 'Used for detected Event with no mapping yet.', '');
   END IF;
 
-  UPDATE config SET valeur = 2 where nom_thread="GLOBAL" AND nom="database_version";
+  IF @db_ver = 2 THEN 
+     RENAME TABLE eana TO mnemos_AnalogInput;
+     CREATE TABLE `mnemos_DigitalInput`
+        (`id_mnemo` int(11) NOT NULL, `furtif` int(1) NOT NULL, PRIMARY KEY (`id_mnemo`)
+        ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  END IF;
+
+  UPDATE config SET valeur = 3 where nom_thread="GLOBAL" AND nom="database_version";
+
 END //
 DELIMITER ;
 CALL MigrateDB();
