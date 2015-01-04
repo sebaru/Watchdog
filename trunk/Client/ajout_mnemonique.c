@@ -43,9 +43,11 @@
  static GtkWidget *Entry_command;                                          /* Commande_text du mnemonique */
  static GtkWidget *Entry_tableau;                                 /* Tableau d'affichage pour les courbes */
  static GtkWidget *Combo_dls;                                                       /* Synoptique associé */
- static struct CMD_TYPE_MNEMO_FULL Option_mnemo;                       /* Mnemonique en cours d'édition */
+ static struct CMD_TYPE_MNEMO_FULL Option_mnemo;                         /* Mnemonique en cours d'édition */
  static GList *Liste_index_dls;
-
+ static GtkWidget *Table_options_DI;                     /* Table des options associées aux Digital Input */
+ static GtkWidget *Check_DI_furtif;                                              /* Option DI - furtivité */
+ static GtkWidget *Table_options_AI;                      /* Table des options associées aux Analog Input */
 /**********************************************************************************************************/
 /* CB_ajouter_editer_mnemonique: Fonction appelée qd on appuie sur un des boutons de l'interface          */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
@@ -65,6 +67,13 @@
     Option_mnemo.mnemo_base.num_plugin = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, index ) );
     Option_mnemo.mnemo_base.type       = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
     Option_mnemo.mnemo_base.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
+
+    switch ( Option_mnemo.mnemo_base.type )
+     { case MNEMO_ENTREE:
+        { Option_mnemo.mnemo_di.furtif = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_DI_furtif));
+          break;
+        }
+     }
 
     switch(reponse)
      { case GTK_RESPONSE_OK:
@@ -108,11 +117,26 @@
  static void CB_valider ( void )
   { gtk_dialog_response( GTK_DIALOG(F_ajout), GTK_RESPONSE_OK ); } 
 /**********************************************************************************************************/
-/* Set_max_bit: Met a jour la range Spinbutton selon le type de mnemonique                                */
+/* Rafraichir_sensibilite_options: Cache ou montre la bonne table d'options en fonction du type           */
 /* Entrée : Rien                                                                                          */
 /* Sortie : Rien                                                                                          */
 /**********************************************************************************************************/
- static void Set_max_bit ( void )
+ static void Rafraichir_sensibilite_options ( void )
+  { gint type;
+    type = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
+    gtk_widget_hide ( Table_options_DI );
+    gtk_widget_hide ( Table_options_AI );
+    switch(type)
+     { case MNEMO_ENTREE_ANA: gtk_widget_show ( Table_options_AI ); break;
+       case MNEMO_ENTREE:     gtk_widget_show ( Table_options_DI ); break;
+     }
+  }
+/**********************************************************************************************************/
+/* Type_changed: Met a jour la range Spinbutton selon le type de mnemonique                               */
+/* Entrée : Rien                                                                                          */
+/* Sortie : Rien                                                                                          */
+/**********************************************************************************************************/
+ static void Type_changed ( void )
   { switch ( gtk_combo_box_get_active ( GTK_COMBO_BOX(Option_type) ) )
      { case MNEMO_BISTABLE:
             gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_BIT_BISTABLE );
@@ -133,7 +157,7 @@
             gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_ENTRE_ANA );
             break;
        case MNEMO_SORTIE_ANA:
-            gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_ENTRE_ANA );
+            gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_SORTIE_ANA );
             break;
        case MNEMO_MOTIF:
             gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_BIT_CONTROLE );
@@ -148,6 +172,7 @@
             gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, 1.0 );
             break;
      }
+    Rafraichir_sensibilite_options();
   }
 /**********************************************************************************************************/
 /* Ajouter_mnemonique: Ajoute un mnemonique au systeme                                                    */
@@ -190,7 +215,7 @@
 
     hboite = gtk_hbox_new( FALSE, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
-    gtk_notebook_append_page( GTK_NOTEBOOK(notebook), hboite, gtk_label_new ( _("Settings") ) );
+    gtk_notebook_append_page( GTK_NOTEBOOK(notebook), hboite, gtk_label_new ( _("Common Settings") ) );
 
     table = gtk_table_new( 5, 4, FALSE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
@@ -204,7 +229,7 @@
     for ( cpt=0; cpt<NBR_TYPE_MNEMO; cpt++ )
      { gtk_combo_box_append_text( GTK_COMBO_BOX(Option_type),Type_bit_interne(cpt) ); }
     gtk_table_attach_defaults( GTK_TABLE(table), Option_type, 1, 2, i, i+1 );
-    g_signal_connect_swapped( G_OBJECT(Option_type), "changed", G_CALLBACK(Set_max_bit), NULL );
+    g_signal_connect_swapped( G_OBJECT(Option_type), "changed", G_CALLBACK(Type_changed), NULL );
 
     texte = gtk_label_new( _("Num") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
@@ -247,13 +272,30 @@
     gtk_entry_set_max_length( GTK_ENTRY(Entry_tableau), NBR_CARAC_LIBELLE_MNEMONIQUE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_tableau, 1, 4, i, i+1 );
 
-    Set_max_bit();
+    Type_changed();
     g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(CB_valider), NULL );
 
 /************************************** Seconde page : les options ****************************************/
     hboite = gtk_hbox_new( FALSE, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
-    gtk_notebook_append_page( GTK_NOTEBOOK(notebook), hboite, gtk_label_new ( _("Options") ) );
+    gtk_notebook_append_page( GTK_NOTEBOOK(notebook), hboite, gtk_label_new ( _("Specific Options") ) );
+
+    Table_options_AI = gtk_table_new( 5, 4, FALSE );
+    gtk_table_set_row_spacings( GTK_TABLE(Table_options_AI), 5 );
+    gtk_table_set_col_spacings( GTK_TABLE(Table_options_AI), 5 );
+    gtk_box_pack_start( GTK_BOX(hboite), Table_options_AI, TRUE, TRUE, 0 );
+    texte = gtk_label_new( _("AI") );
+    gtk_table_attach_defaults( GTK_TABLE(Table_options_AI), texte, 0, 1, 0, 1 );
+
+    Table_options_DI = gtk_table_new( 5, 2, FALSE );
+    gtk_table_set_row_spacings( GTK_TABLE(Table_options_DI), 5 );
+    gtk_table_set_col_spacings( GTK_TABLE(Table_options_DI), 5 );
+    gtk_box_pack_start( GTK_BOX(hboite), Table_options_DI, TRUE, TRUE, 0 );
+
+    texte = gtk_label_new( _("Furtif") );
+    gtk_table_attach_defaults( GTK_TABLE(Table_options_DI), texte, 0, 1, 0, 1 );
+    Check_DI_furtif = gtk_check_button_new_with_label( _("Furtif") );
+    gtk_table_attach_defaults( GTK_TABLE(Table_options_DI), Check_DI_furtif, 0, 1, 1, 2 );
 
 /**************************************** Positionnement des infos d'edition ******************************/
     if (mnemo_full)                                                         /* Si edition d'un mnemonique */
@@ -263,9 +305,13 @@
        gtk_entry_set_text( GTK_ENTRY(Entry_tableau), mnemo_full->mnemo_base.tableau );
        gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type), mnemo_full->mnemo_base.type );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), (double)mnemo_full->mnemo_base.num );
+
+/****************************************** Spécifique DI *************************************************/
+       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_DI_furtif), mnemo_full->mnemo_di.furtif );
      }
 
     gtk_widget_grab_focus( Entry_lib );
     gtk_widget_show_all( F_ajout );
+    Rafraichir_sensibilite_options();
   }
 /*--------------------------------------------------------------------------------------------------------*/
