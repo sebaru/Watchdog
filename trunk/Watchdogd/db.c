@@ -254,4 +254,100 @@
      }
     pthread_mutex_unlock ( &Partage->com_db.synchro );
   }
+/**********************************************************************************************************/
+/* Update_database_schema: Vérifie la connexion et le schéma de la base de données                        */
+/* Entrée: néant                                                                                          */
+/* Sortie: néant                                                                                          */
+/**********************************************************************************************************/
+ void Update_database_schema ( void )
+  { gint database_version;
+    gchar *nom, *valeur;
+    gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
+
+    database_version = 0;                                                            /* valeur par défaut */
+    if ( ! Recuperer_configDB( &db, "GLOBAL" ) )                        /* Connexion a la base de données */
+     { Info_new( Config.log, Config.log_db, LOG_WARNING,
+                "Update_database_schema: Database connexion failed" );
+       return;
+     }
+
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Config.log_db, LOG_INFO,                         /* Print Config */
+                "Update_database_schema: '%s' = %s", nom, valeur );
+            if ( ! g_ascii_strcasecmp ( nom, "database_version" ) )
+        { database_version = atoi( valeur ); }
+     }
+
+    Info_new( Config.log, Config.log_db, LOG_NOTICE,
+             "Update_database_schema: Actual Databse_version detected = %05d", database_version );
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "Update_database_schema: DB connexion failed" );
+       return;
+     }
+
+    if (database_version < 2500)
+     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
+                  "ALTER TABLE users DROP `imsg_bit_presence`;"
+                  "ALTER TABLE users ADD `ssrv_bit_presence` INT NOT NULL DEFAULT '0';"
+                 );
+       retour = Lancer_requete_SQL ( db, requete );                        /* Execution de la requete SQL */
+       if (retour)
+        { Info_new( Config.log, Config.log_db, LOG_NOTICE,
+                   "Update_database_schema: updating to v2500 OK" );
+        }
+       else
+        { Info_new( Config.log, Config.log_db, LOG_NOTICE,
+                   "Update_database_schema: updating to v2500 FAILED" );
+        }
+     }
+
+    if (database_version < 2510)
+     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
+                  "INSERT INTO `mnemos` (`id`, `type`, `num`, `num_plugin`, `acronyme`, `libelle`, `command_text`) VALUES"
+                  "(23, 3,9999, 1, 'EVENT_NONE_TOR', 'Used for detected Event with no mapping yet.', ''),"
+                  "(24, 5,9999, 1, 'EVENT_NONE_ANA', 'Used for detected Event with no mapping yet.', '');"
+                 );
+       retour = Lancer_requete_SQL ( db, requete );                        /* Execution de la requete SQL */
+       if (retour)
+        { Info_new( Config.log, Config.log_db, LOG_NOTICE,
+                   "Update_database_schema: updating to v2510 OK" );
+        }
+       else
+        { Info_new( Config.log, Config.log_db, LOG_NOTICE,
+                   "Update_database_schema: updating to v2510 FAILED" );
+        }
+     }
+
+    if (database_version < 2532)
+     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
+                  "RENAME TABLE eana TO mnemos_AnalogInput;"
+                  "CREATE TABLE `mnemos_DigitalInput`"
+                  "(`id_mnemo` int(11) NOT NULL, `furtif` int(1) NOT NULL, PRIMARY KEY (`id_mnemo`)"
+                  ") ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
+                 );
+       retour = Lancer_requete_SQL ( db, requete );                        /* Execution de la requete SQL */
+       if (retour)
+        { Info_new( Config.log, Config.log_db, LOG_NOTICE,
+                   "Update_database_schema: updating to v2532 OK" );
+        }
+       else
+        { Info_new( Config.log, Config.log_db, LOG_NOTICE,
+                   "Update_database_schema: updating to v2532 FAILED" );
+        }
+     }
+    Libere_DB_SQL(&db);
+
+    if (Modifier_configDB ( "GLOBAL", "database_version", "2532" ))
+     { Info_new( Config.log, Config.log_db, LOG_NOTICE,
+                "Update_database_schema: updating Database_version OK" );
+     }
+    else
+     { Info_new( Config.log, Config.log_db, LOG_NOTICE,
+                "Update_database_schema: updating Database_version FAILED" );
+     }
+  }
 /*--------------------------------------------------------------------------------------------------------*/

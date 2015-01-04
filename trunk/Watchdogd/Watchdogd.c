@@ -525,6 +525,7 @@
     setlocale( LC_ALL, "C" );                        /* Pour le formattage correct des , . dans les float */
     gcry_check_version(NULL);                                    /* Initialisation de la librairie GCRYPT */
     curl_global_init (CURL_GLOBAL_ALL);                             /* Initialisation de la libraire CURL */
+    Update_database_schema();                                   /* Update du schéma de Database si besoin */
     Partage = NULL;                                                                     /* Initialisation */
     Partage = Shm_init();                                        /* Initialisation de la mémoire partagée */
     if (!Partage)

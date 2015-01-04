@@ -188,7 +188,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_configDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_configDB: DB connexion failed" );
        return(FALSE);
      }
 

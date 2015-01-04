@@ -57,5 +57,6 @@
  extern void Liberer_resultat_SQL ( struct DB *db );
  extern guint Recuperer_last_ID_SQL ( struct DB *db );
  extern void Print_SQL_status ( void );
+ extern void Update_database_schema ( void );
  #endif
 /*--------------------------------------------------------------------------------------------------------*/

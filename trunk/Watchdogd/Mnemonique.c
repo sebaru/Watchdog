@@ -189,7 +189,7 @@
 /* Entrée: une structure representant le mnemonique                                                       */
 /* Sortie: l'id du nouveau mnemonique, ou -1 si erreur                                                    */
 /**********************************************************************************************************/
- gint Ajouter_mnemoDB ( struct CMD_TYPE_MNEMO_BASE *mnemo )
+ gint Ajouter_mnemo_baseDB ( struct CMD_TYPE_MNEMO_BASE *mnemo )
   { return(Ajouter_Modifier_mnemo_baseDB( mnemo, TRUE )); }
 /**********************************************************************************************************/
 /* Modifier_mnemo_baseDB: Modification d'un mnemo Watchdog                                                */
@@ -308,7 +308,7 @@
 /* Entrée: un pointeur sur la connexion de baase de données                                               */
 /* Sortie: une structure nouvellement allouée                                                             */
 /**********************************************************************************************************/
- struct CMD_TYPE_MNEMO_BASE *Recuperer_mnemoDB_suite( struct DB **db_orig )
+ struct CMD_TYPE_MNEMO_BASE *Recuperer_mnemo_baseDB_suite( struct DB **db_orig )
   { struct CMD_TYPE_MNEMO_BASE *mnemo;
     struct DB *db;
 
@@ -374,7 +374,7 @@
        return(NULL);
      }
 
-    mnemo = Recuperer_mnemoDB_suite( &db );
+    mnemo = Recuperer_mnemo_baseDB_suite( &db );
     if (mnemo) Libere_DB_SQL ( &db );
     return(mnemo);
   }
@@ -414,7 +414,7 @@
        return(NULL);
      }
 
-    mnemo = Recuperer_mnemoDB_suite ( &db );
+    mnemo = Recuperer_mnemo_baseDB_suite ( &db );
     if (mnemo) Libere_DB_SQL( &db );
     return( mnemo );
   }
@@ -423,7 +423,7 @@
 /* Entrée: un pointeur sur la nouvelle connexion base de données                                          */
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- gboolean Recuperer_mnemoDB_for_courbe ( struct DB **db_retour )
+ gboolean Recuperer_mnemo_baseDB_for_courbe ( struct DB **db_retour )
   { gchar requete[512];
     gboolean retour;
     struct DB *db;
