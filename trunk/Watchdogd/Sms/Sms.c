@@ -270,7 +270,7 @@
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
  static void Traiter_commande_sms ( gchar *from, gchar *texte )
-  { struct CMD_TYPE_MNEMONIQUE *mnemo, *result_mnemo = NULL;
+  { struct CMD_TYPE_MNEMO_BASE *mnemo, *result_mnemo = NULL;
     struct SMSDB *sms;
     struct DB *db;
 
@@ -290,13 +290,13 @@
        return;
      }
 
-    if ( ! Recuperer_mnemoDB_by_command_text ( &db, (gchar *)texte, FALSE ) )
+    if ( ! Recuperer_mnemo_baseDB_by_command_text ( &db, (gchar *)texte, FALSE ) )
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_ERR,
                  "Traiter_commande_sms : Error searching Database" );
        return;
      }
           
-    while ( (mnemo = Recuperer_mnemoDB_suite( &db )) != NULL )
+    while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL )
      {  if (db->nbr_result==1) result_mnemo = mnemo;                         /* Save for re-use si unique */
                           else g_free(mnemo);                                 /* we don't need it anymore */
      }

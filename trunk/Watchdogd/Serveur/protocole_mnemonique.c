@@ -56,26 +56,26 @@
              }
             break;
        case SSTAG_CLIENT_EDIT_MNEMONIQUE:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_BASE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
                Proto_editer_mnemonique( client, mnemo );
              }
             break;
        case SSTAG_CLIENT_ADD_MNEMONIQUE:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_BASE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
                Proto_ajouter_mnemonique( client, mnemo );
              }
             break;
        case SSTAG_CLIENT_DEL_MNEMONIQUE:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_BASE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
                Proto_effacer_mnemonique( client, mnemo );
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_MNEMONIQUE:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_BASE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
                Proto_valider_editer_mnemonique( client, mnemo );
              }
             break;
@@ -85,9 +85,10 @@
                pthread_detach( tid );
              }
             break;
+#ifdef bouh
        case SSTAG_CLIENT_EDIT_OPTION_BIT_INTERNE:
-             { struct CMD_TYPE_MNEMONIQUE *rezo_mnemo;
-               rezo_mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_BASE *rezo_mnemo;
+               rezo_mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
                switch ( rezo_mnemo->type )
                 { case MNEMO_ENTREE_ANA  : Proto_editer_option_entreeANA( client, rezo_mnemo );
                                            break;
@@ -117,6 +118,7 @@
                 }
              }
             break;
+#endif
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -77,20 +77,20 @@
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC:
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC2:
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CTRL:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_BASE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
                Proto_afficher_mnemo_atelier( Reseau_ss_tag ( connexion ), mnemo );
              }
             break;
        case SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE_EA:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_BASE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
                Proto_afficher_mnemo_capteur_atelier( mnemo );
              }
             break;
        case SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE_PASS:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_BASE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
                Proto_afficher_mnemo_atelier_pass( mnemo );
              }
             break;

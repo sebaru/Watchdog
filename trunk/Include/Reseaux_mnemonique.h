@@ -56,7 +56,7 @@
     NBR_TYPE_MNEMO
   };
 
- struct CMD_TYPE_MNEMONIQUE
+ struct CMD_TYPE_MNEMO_BASE                                 /* Informations partagées par tous les mnémos */
   { guint id;                                                /* ID unique du mnemonique dans la structure */
     guint type;                                                                /* Type du bit interne lié */
     guint num;                                                         /* Numéro du bit lié au mnemonique */
@@ -72,7 +72,7 @@
 
  struct CMD_TYPE_MNEMONIQUES
   { guint nbr_mnemos;                                /* Nombre de structure CMD_TYPE_MNEMONIQUE suivantes */
-    struct CMD_TYPE_MNEMONIQUE mnemo[];
+    struct CMD_TYPE_MNEMO_BASE mnemo[];
   };
 
  struct CMD_TYPE_NUM_MNEMONIQUE
@@ -80,8 +80,8 @@
     guint num;
   };
 
- struct CMD_TYPE_OPTION_MNEMO
-  { struct CMD_TYPE_MNEMONIQUE mnemo;
+ struct CMD_TYPE_MNEMO_FULL
+  { struct CMD_TYPE_MNEMO_BASE mnemo_base;
     union { struct CMD_TYPE_MNEMO_DI mnemo_di;
             /*struct CMD_TYPE_OPTION_ENTREEANA eana;
             struct CMD_TYPE_OPTION_COMPTEUR_IMP cpt_imp;
@@ -90,14 +90,6 @@
 
   };
 
-#warning A supprimer
- struct CMD_TYPE_OPTION_BIT_INTERNE
-  { guint type;
-    union { struct CMD_TYPE_OPTION_ENTREEANA eana;
-            struct CMD_TYPE_OPTION_COMPTEUR_IMP cpt_imp;
-            struct CMD_TYPE_OPTION_TEMPO tempo;
-          };
-  };
  enum 
   { SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE,                      /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE_FIN,                  /* Ajout d'un groupe dans la liste cliente */

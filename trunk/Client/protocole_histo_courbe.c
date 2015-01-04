@@ -82,12 +82,12 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_MNEMO_FOR_HISTO_COURBE:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
+             { struct CMD_TYPE_MNEMO_BASE *mnemo;
                Set_progress_plus(1);
 
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_try_malloc0( sizeof( struct CMD_TYPE_MNEMONIQUE ) );
+               mnemo = (struct CMD_TYPE_MNEMO_BASE *)g_try_malloc0( sizeof( struct CMD_TYPE_MNEMO_BASE ) );
                if (!mnemo) return; 
-               memcpy( mnemo, connexion->donnees, sizeof(struct CMD_TYPE_MNEMONIQUE ) );
+               memcpy( mnemo, connexion->donnees, sizeof(struct CMD_TYPE_MNEMO_BASE ) );
                Arrivee_mnemo = g_list_append( Arrivee_mnemo, mnemo );
              }
             break;

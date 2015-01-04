@@ -36,12 +36,12 @@
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
-/* Retirer_mnemoDB: Elimination d'un mnemo                                                                */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: false si probleme                                                                              */
+/* Retirer_mnemo_baseDB: Elimination d'un mnemo                                                           */
+/* Entrée: une structure representant le mnemo à supprimer                                                */
+/* Sortie: FALSE si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Retirer_mnemoDB ( struct CMD_TYPE_MNEMONIQUE *mnemo )
-  { struct CMD_TYPE_MNEMONIQUE *mnemo_a_virer;
+ gboolean Retirer_mnemo_baseDB ( struct CMD_TYPE_MNEMO_BASE *mnemo )
+  { struct CMD_TYPE_MNEMO_BASE *mnemo_a_virer;
     gchar requete[200];
     gboolean retour;
     struct DB *db;
@@ -52,10 +52,15 @@
        return(FALSE);
      }
 
-    mnemo_a_virer = Rechercher_mnemoDB ( mnemo->id );
+    mnemo_a_virer = Rechercher_mnemo_baseDB ( mnemo->id );
     if (mnemo_a_virer)
      { switch (mnemo_a_virer->type)
-        { case MNEMO_ENTREE_ANA:
+        { case MNEMO_ENTREE:
+               g_snprintf( requete, sizeof(requete),                                       /* Requete SQL */
+               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_MNEMO_DI, mnemo_a_virer->id );
+               Lancer_requete_SQL ( db, requete );
+               break;
+          case MNEMO_ENTREE_ANA:
                g_snprintf( requete, sizeof(requete),                                       /* Requete SQL */
                "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_ENTREEANA, mnemo_a_virer->id );
                Lancer_requete_SQL ( db, requete );
@@ -89,11 +94,11 @@
     return(retour);
   }
 /**********************************************************************************************************/
-/* Ajouter_mnemoDB: Ajout ou edition d'un mnemo                                                           */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure mnemo                         */
-/* Sortie: false si probleme                                                                              */
+/* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                  */
+/* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                      */
+/* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                */
 /**********************************************************************************************************/
- static gint Ajouter_Modifier_mnemoDB ( struct CMD_TYPE_MNEMONIQUE *mnemo, gboolean ajout )
+ static gint Ajouter_Modifier_mnemo_baseDB ( struct CMD_TYPE_MNEMO_BASE *mnemo, gboolean ajout )
   { gchar *libelle, *acro, *command_text, *tableau;
     gchar requete[1024];
     gint last_id;
@@ -106,7 +111,7 @@
     tableau      = Normaliser_chaine ( mnemo->tableau );                 /* Formatage correct des chaines */
     if ( !(libelle && acro && command_text && tableau) )
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Ajouter_Modifier_mnemoDB: Normalisation impossible. Mnemo NOT added nor modified." );
+                "Ajouter_Modifier_mnemo_baseDB: Normalisation impossible. Mnemo NOT added nor modified." );
        if (libelle)      g_free(libelle);
        if (acro)         g_free(acro);
        if (command_text) g_free(command_text);
@@ -120,7 +125,7 @@
                    "(%d,%d,%d,'%s','%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
                    mnemo->num, mnemo->num_plugin, acro, libelle, command_text, tableau );
      } else
-     { g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
                    "UPDATE %s SET "             
                    "libelle='%s',acronyme='%s',command_text='%s',num_plugin=%d,num=%d,tableau='%s' "
                    "WHERE id=%d",
@@ -134,7 +139,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_Modifier_mnemoDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_Modifier_mnemo_baseDB: DB connexion failed" );
        return(-1);
      }
 
@@ -165,7 +170,7 @@
                Lancer_requete_SQL ( db, requete );
                break;
           case MNEMO_TEMPO:
-               g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
+               g_snprintf( requete, sizeof(requete),                                       /* Requete SQL */
                            "INSERT INTO %s(id_mnemo,delai_on,min_on,max_on,delai_off) VALUES "
                            "('%d','%d','%d','%d','%d')", NOM_TABLE_TEMPO, last_id, 10, 0, 0, 0 );
                Lancer_requete_SQL ( db, requete );
@@ -180,18 +185,28 @@
     else return(0);
   }
 /**********************************************************************************************************/
-/* Ajouter_mnemoDB: Ajout ou edition d'un mnemo                                                           */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure mnemo                         */
-/* Sortie: false si probleme                                                                              */
+/* Ajouter_mnemo_baseDB: Ajout d'un nouvel mnemonique de base                                             */
+/* Entrée: une structure representant le mnemonique                                                       */
+/* Sortie: l'id du nouveau mnemonique, ou -1 si erreur                                                    */
 /**********************************************************************************************************/
- gint Ajouter_mnemoDB ( struct CMD_TYPE_MNEMONIQUE *mnemo )
-  { return(Ajouter_Modifier_mnemoDB( mnemo, TRUE )); }
+ gint Ajouter_mnemoDB ( struct CMD_TYPE_MNEMO_BASE *mnemo )
+  { return(Ajouter_Modifier_mnemo_baseDB( mnemo, TRUE )); }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_mnemoDB: Recupération de la liste des ids des mnemos                                */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
+/* Modifier_mnemo_baseDB: Modification d'un mnemo Watchdog                                                */
+/* Entrée: un mnemonique de base                                                                          */
+/* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- gboolean Recuperer_mnemoDB_by_command_text ( struct DB **db_retour, gchar *commande_pure, gboolean exact )
+ static gboolean Modifier_mnemo_baseDB( struct CMD_TYPE_MNEMO_BASE *mnemo )
+  { if (Ajouter_Modifier_mnemo_baseDB( mnemo, FALSE ) == -1) return(FALSE);
+    return(TRUE);
+  }
+/**********************************************************************************************************/
+/* Recuperer_mnemo_baseDB_by_command_text: Recupération de la liste des mnemo par command_text            */
+/* Entrée: un pointeur vers une nouvelle connexion de base de données, le critere de recherche et un flag */
+/*         permettant de dire si la recherche est exacte ou 'fuzzy'                                       */
+/* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
+ gboolean Recuperer_mnemo_baseDB_by_command_text ( struct DB **db_retour, gchar *commande_pure, gboolean exact )
   { gchar requete[1024], critere[256], commande_finale[1024];
     gchar *commande;
     gboolean space;
@@ -254,11 +269,11 @@
     return ( retour );
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_mnemo    if (ajout == TRUE)DB: Recupération de la liste des ids des mnemos          */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
+/* Recuperer_mnemo_base_db: Récupération de la liste des mnemos de base                                   */
+/* Entrée: un pointeur vers la nouvelle connexion base de données                                         */
+/* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
- gboolean Recuperer_mnemoDB ( struct DB **db_retour )
+ gboolean Recuperer_mnemo_baseDB ( struct DB **db_retour )
   { gchar requete[512];
     gboolean retour;
     struct DB *db;
@@ -289,12 +304,12 @@
     return ( retour );
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_mnemoDB: Recupération de la liste des ids des mnemos                                */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
+/* Recuperer_mnemo_base_DB_suite: Fonction itérative de récupération des mnémoniques de base              */
+/* Entrée: un pointeur sur la connexion de baase de données                                               */
+/* Sortie: une structure nouvellement allouée                                                             */
 /**********************************************************************************************************/
- struct CMD_TYPE_MNEMONIQUE *Recuperer_mnemoDB_suite( struct DB **db_orig )
-  { struct CMD_TYPE_MNEMONIQUE *mnemo;
+ struct CMD_TYPE_MNEMO_BASE *Recuperer_mnemoDB_suite( struct DB **db_orig )
+  { struct CMD_TYPE_MNEMO_BASE *mnemo;
     struct DB *db;
 
     db = *db_orig;                      /* Récupération du pointeur initialisé par la fonction précédente */
@@ -305,7 +320,7 @@
        return(NULL);
      }
 
-    mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMONIQUE) );
+    mnemo = (struct CMD_TYPE_MNEMO_BASE *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_BASE) );
     if (!mnemo) Info_new( Config.log, Config.log_msrv, LOG_ERR,
                          "Recuperer_mnemoDB_suite: Erreur allocation mémoire" );
     else                                                            /* Recopie dans la nouvelle structure */
@@ -324,12 +339,12 @@
     return(mnemo);
   }
 /**********************************************************************************************************/
-/* Rechercher_mnemoDB: Recupération du mnemo dont l'id est en parametre                                   */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
+/* Rechercher_mnemo_baseDB: Recupération du mnemo dont l'id est en parametre                              */
+/* Entrée: l'id du mnemonique a récupérer                                                                 */
+/* Sortie: la structure representant le mnemonique de base                                                */
 /**********************************************************************************************************/
- struct CMD_TYPE_MNEMONIQUE *Rechercher_mnemoDB ( guint id )
-  { struct CMD_TYPE_MNEMONIQUE *mnemo;
+ struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB ( guint id )
+  { struct CMD_TYPE_MNEMO_BASE *mnemo;
     gchar requete[512];
     struct DB *db;
 
@@ -350,7 +365,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_mnemoDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_mnemo_baseDB: DB connexion failed" );
        return(NULL);
      }
 
@@ -364,12 +379,12 @@
     return(mnemo);
   }
 /**********************************************************************************************************/
-/* Rechercher_mnemoDB: Recupération du mnemo dont l'id est en parametre                                   */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
+/* Rechercher_mnemo_baseDB_type_num: Recupération du mnemo par critere type/numéro                        */
+/* Entrée: une structure de critere                                                                       */
+/* Sortie: le mnemonique de base                                                                          */
 /**********************************************************************************************************/
- struct CMD_TYPE_MNEMONIQUE *Rechercher_mnemoDB_type_num ( struct CMD_TYPE_NUM_MNEMONIQUE *critere )
-  { struct CMD_TYPE_MNEMONIQUE *mnemo;
+ struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB_type_num ( struct CMD_TYPE_NUM_MNEMONIQUE *critere )
+  { struct CMD_TYPE_MNEMO_BASE *mnemo;
     gchar requete[512];
     struct DB *db;
 
@@ -390,7 +405,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_mnemoDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_mnemo_baseDB: DB connexion failed" );
        return(NULL);
      }
 
@@ -404,18 +419,9 @@
     return( mnemo );
   }
 /**********************************************************************************************************/
-/* Modifier_mnemoDB: Modification d'un mnemo Watchdog                                                     */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
-/* Sortie: -1 si pb, id sinon                                                                             */
-/**********************************************************************************************************/
- gboolean Modifier_mnemoDB( struct CMD_TYPE_MNEMONIQUE *mnemo )
-  { if (Ajouter_Modifier_mnemoDB( mnemo, FALSE ) == -1) return(FALSE);
-    return(TRUE);
-  }
-/**********************************************************************************************************/
 /* Recuperer_mnemoDB_for_courbe: Recupération de la liste des ids des mnemos pour les courbes             */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
+/* Entrée: un pointeur sur la nouvelle connexion base de données                                          */
+/* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
  gboolean Recuperer_mnemoDB_for_courbe ( struct DB **db_retour )
   { gchar requete[512];
@@ -447,5 +453,58 @@
     if (retour == FALSE) Libere_DB_SQL (&db);
     *db_retour = db;
     return ( retour );
+  }
+/**********************************************************************************************************/
+/* Rechercher_mnemo_fullDB: Recupération de l'ensemble du mnemo et de sa conf spécifique                  */
+/* Entrée: l'id du mnemonique a récupérer                                                                 */
+/* Sortie: la structure representant le mnemonique de base                                                */
+/**********************************************************************************************************/
+ struct CMD_TYPE_MNEMO_FULL *Rechercher_mnemo_fullDB ( guint id )
+  { struct CMD_TYPE_MNEMO_BASE *mnemo_base;
+    struct CMD_TYPE_MNEMO_FULL *mnemo_full;
+
+    mnemo_base = Rechercher_mnemo_baseDB ( id );
+    if (!mnemo_base)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                              "Recuperer_mnemo_fullDB: Mnemo %d not found", id );
+       return(NULL);
+     }
+
+    mnemo_full = (struct CMD_TYPE_MNEMO_FULL *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_FULL) );
+    if (!mnemo_full)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                              "Recuperer_mnemo_fullDB: Erreur allocation mémoire" );
+       g_free(mnemo_base);
+       return(NULL);
+     }
+
+    memcpy ( &mnemo_full->mnemo_base, mnemo_base, sizeof( struct CMD_TYPE_MNEMO_BASE ) );
+    g_free(mnemo_base);
+
+    switch( mnemo_full->mnemo_base.type )
+     { case MNEMO_ENTREE:
+        { struct CMD_TYPE_MNEMO_DI *mnemo_di;
+          mnemo_di = Rechercher_mnemo_diDB ( id );
+          if (mnemo_di) memcpy ( &mnemo_full->mnemo_di, mnemo_di, sizeof(struct CMD_TYPE_MNEMO_DI) );
+          break;
+        }
+     }
+    return(mnemo_full);
+  }
+/**********************************************************************************************************/
+/* Modifier_mnemo_fullDB: Modifie la configuration du mnemo paramètre                                     */
+/* Entrée: une structure de mnemo FULL                                                                    */
+/* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
+ gboolean Modifier_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
+  { if (Modifier_mnemo_baseDB ( &mnemo_full->mnemo_base ) == FALSE )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_mnemo_fullDB: Modifier_mnemo_baseDB failed" );
+       return(FALSE);
+     }
+
+    switch (mnemo_full->mnemo_base.type)
+     { case MNEMO_ENTREE: return( Modifier_mnemo_diDB ( mnemo_full ) );
+       default :          return ( Modifier_mnemo_baseDB ( &mnemo_full->mnemo_base ) );
+     }
   }
 /*--------------------------------------------------------------------------------------------------------*/

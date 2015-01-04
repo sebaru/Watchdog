@@ -1,10 +1,10 @@
 /**********************************************************************************************************/
-/* Watchdogd/EntreeTOR/EntreeTOR.c        Déclaration des fonctions pour la gestion des digitalInput.c       */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 18 avr 2009 13:30:10 CEST */
+/* Watchdogd/Mnemo_DI.c        Déclaration des fonctions pour la gestion des digitalInput.c               */
+/* Projet WatchDog version 2.0       Gestion d'habitat                    dim. 04 janv. 2015 00:01:55 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
- * EntreeTOR.c
+ * Mnemo_DI.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -60,11 +60,11 @@
                 " LEFT JOIN %s ON %s.id_mnemo   = %s.id"
                 " WHERE %s.type=%d ORDER BY %s.num",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,
-                NOM_TABLE_DIGITAL_INPUT,
+                NOM_TABLE_MNEMO_DI,
                 NOM_TABLE_MNEMO,                                                                  /* FROM */
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MNEMO, NOM_TABLE_DLS,                    /* 1er LEFT JOIN */
                 NOM_TABLE_DLS, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,                      /* 2nd LEFT JOIN */
-                NOM_TABLE_DIGITAL_INPUT, NOM_TABLE_DIGITAL_INPUT, NOM_TABLE_MNEMO,     /* 3ieme LEFT JOIN */
+                NOM_TABLE_MNEMO_DI, NOM_TABLE_MNEMO_DI, NOM_TABLE_MNEMO,     /* 3ieme LEFT JOIN */
                 NOM_TABLE_MNEMO, MNEMO_ENTREE_TOR,                                               /* WHERE */
                 NOM_TABLE_MNEMO                                                               /* Order by */
 #endif
@@ -74,9 +74,9 @@
                 " FROM %s"
                 " INNER JOIN %s ON %s.id_mnemo = %s.id"
                 " WHERE %s.type=%d ORDER BY %s.num",
-                NOM_TABLE_MNEMO, NOM_TABLE_DIGITAL_INPUT,
+                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO_DI,
                 NOM_TABLE_MNEMO,                                                                  /* FROM */
-                NOM_TABLE_DIGITAL_INPUT, NOM_TABLE_DIGITAL_INPUT, NOM_TABLE_MNEMO,           /* LEFT JOIN */
+                NOM_TABLE_MNEMO_DI, NOM_TABLE_MNEMO_DI, NOM_TABLE_MNEMO,           /* LEFT JOIN */
                 NOM_TABLE_MNEMO, MNEMO_ENTREE,                                                   /* WHERE */
                 NOM_TABLE_MNEMO                                                               /* Order by */
               );
@@ -87,12 +87,12 @@
     return ( retour );
   }
 /**********************************************************************************************************/
-/* Recuperer_liste_id_entreetorDB: Recupération de la liste des ids des digitalInputs                     */
+/* Recuperer_liste_id_mnemo_diDB: Recupération de la liste des ids des digitalInputs                     */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
  static struct CMD_TYPE_MNEMO_DI *Recuperer_digitalInputDB_suite( struct DB **db_orig )
-  { struct CMD_TYPE_MNEMO_DI *entreetor;
+  { struct CMD_TYPE_MNEMO_DI *mnemo_di;
     struct DB *db;
 
     db = *db_orig;                      /* Récupération du pointeur initialisé par la fonction précédente */
@@ -103,49 +103,29 @@
        return(NULL);
      }
 
-    entreetor = (struct CMD_TYPE_MNEMO_DI *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_DI) );
-    if (!entreetor) Info_new( Config.log, Config.log_msrv, LOG_ERR,
+    mnemo_di = (struct CMD_TYPE_MNEMO_DI *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_DI) );
+    if (!mnemo_di) Info_new( Config.log, Config.log_msrv, LOG_ERR,
                              "Recuperer_digitalInputDB_suite: Erreur allocation mémoire" );
     else
-     { entreetor->num    = atoi(db->row[0]);
-       entreetor->furtif = atoi(db->row[1]);
+     { mnemo_di->num    = atoi(db->row[0]);
+       mnemo_di->furtif = atoi(db->row[1]);
      }
-    return(entreetor);
+    return(mnemo_di);
   }
 /**********************************************************************************************************/
-/* Rechercher_entreetorDB: Recupération du digitalInput dont l'id est en parametre                        */
+/* Rechercher_mnemo_diDB: Recupération du digitalInput dont l'id est en parametre                         */
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_OPTION_MNEMO *Rechercher_digitalInputDB ( guint id )
-  { struct CMD_TYPE_OPTION_MNEMO *result;
-    struct CMD_TYPE_MNEMO_DI *entreetor;
-    struct CMD_TYPE_MNEMONIQUE *mnemo;
+ struct CMD_TYPE_MNEMO_DI *Rechercher_mnemo_diDB ( guint id )
+  { struct CMD_TYPE_MNEMO_DI *mnemo_di;
     gchar requete[512];
     gboolean retour;
     struct DB *db;
 
-    result = (struct CMD_TYPE_OPTION_MNEMO *)g_try_malloc0( sizeof(struct CMD_TYPE_OPTION_MNEMO) );
-    if (!result)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "Recuperer_digitalInputDB: Erreur allocation mémoire" );
-       return(NULL);
-     }
-
-    mnemo = Rechercher_mnemoDB ( id );
-    if (!mnemo)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "Recuperer_digitalInputDB: Mnemo not found" );
-       g_free(result);
-       return(NULL);
-     }
-    memcpy ( &result->mnemo, mnemo, sizeof(struct CMD_TYPE_MNEMONIQUE) );
-    g_free(mnemo);
- 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_digitalInputDB: DB connexion failed" );
-       g_free(result);
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_mnemo_diDB: DB connexion failed" );
        return(NULL);
      }
  
@@ -154,43 +134,37 @@
                 " FROM %s"
                 " INNER JOIN %s ON %s.id_mnemo = %s.id"
                 " WHERE %s.id_mnemo=%d",
-                NOM_TABLE_MNEMO, NOM_TABLE_DIGITAL_INPUT,
+                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO_DI,
                 NOM_TABLE_MNEMO,                                                                  /* FROM */
-                NOM_TABLE_DIGITAL_INPUT, NOM_TABLE_DIGITAL_INPUT, NOM_TABLE_MNEMO,           /* LEFT JOIN */
-                NOM_TABLE_DIGITAL_INPUT, id                                                      /* WHERE */
+                NOM_TABLE_MNEMO_DI, NOM_TABLE_MNEMO_DI, NOM_TABLE_MNEMO,           /* LEFT JOIN */
+                NOM_TABLE_MNEMO_DI, id                                                      /* WHERE */
               );
 
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
     if (retour == FALSE)
-     { g_free(result);
-       Libere_DB_SQL (&db);
+     { Libere_DB_SQL (&db);
        return(NULL);
      }
 
-    entreetor = Recuperer_digitalInputDB_suite( &db );
+    mnemo_di = Recuperer_digitalInputDB_suite( &db );
     Liberer_resultat_SQL (db);
     Libere_DB_SQL( &db );
 
-    if (entreetor)
-     { memcpy ( &result->mnemo_di, entreetor, sizeof(struct CMD_TYPE_MNEMO_DI) );
-       g_free(entreetor);
-     }
-
-    return(result);
+    return(mnemo_di);
   }
 /**********************************************************************************************************/
 /* Modifier_digitalInputDB: Modification d'un digitalInput Watchdog                                       */
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_digitalInputDB( struct CMD_TYPE_OPTION_MNEMO *option_mnemo )
+ gboolean Modifier_mnemo_diDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { gchar requete[1024];
     gboolean retour;
     struct DB *db;
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_digitalInputDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_mnemo_diDB: DB connexion failed" );
        return(FALSE);
      }
 
@@ -198,9 +172,9 @@
                 "UPDATE %s SET "             
                 "furtif='%d' "
                 "WHERE id_mnemo=%d",
-                NOM_TABLE_DIGITAL_INPUT,
-                option_mnemo->mnemo_di.furtif,
-                option_mnemo->mnemo.id );
+                NOM_TABLE_MNEMO_DI,
+                mnemo_full->mnemo_di.furtif,
+                mnemo_full->mnemo_base.id );
 
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
     Libere_DB_SQL(&db);

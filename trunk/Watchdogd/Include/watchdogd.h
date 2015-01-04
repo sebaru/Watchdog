@@ -49,7 +49,6 @@
  #include "Mnemonique_DB.h"
  #include "Icones_DB.h"
  #include "EntreeANA_DB.h"
- #include "EntreeTOR_DB.h"
  #include "Proto_traductionDLS.h"
 
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
@@ -107,6 +106,11 @@
     GSList *Liste_abonne_msg;                                      /* liste de struct MSGDB msg a envoyer */
 
     GSList *Librairies;                                    /* Liste des librairies chargées pour Watchdog */
+  };
+
+ struct DIGITAL_INPUT                          /* Traitement des entrées analogiques par le process rs485 */
+  { struct CMD_TYPE_MNEMO_DI confDB;
+    gboolean etat;
   };
 
  struct SORTIE_TOR                                                         /* Définition d'une sortie TOR */

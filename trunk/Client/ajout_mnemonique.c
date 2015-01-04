@@ -43,7 +43,7 @@
  static GtkWidget *Entry_command;                                          /* Commande_text du mnemonique */
  static GtkWidget *Entry_tableau;                                 /* Tableau d'affichage pour les courbes */
  static GtkWidget *Combo_dls;                                                       /* Synoptique associé */
- static struct CMD_TYPE_MNEMONIQUE Edit_mnemo;                              /* Message en cours d'édition */
+ static struct CMD_TYPE_MNEMO_FULL Option_mnemo;                       /* Mnemonique en cours d'édition */
  static GList *Liste_index_dls;
 
 /**********************************************************************************************************/
@@ -53,28 +53,28 @@
 /**********************************************************************************************************/
  static gboolean CB_ajouter_editer_mnemonique ( GtkDialog *dialog, gint reponse, gboolean edition )
   { gint index;
-    g_snprintf( Edit_mnemo.libelle, sizeof(Edit_mnemo.libelle),
+    g_snprintf( Option_mnemo.mnemo_base.libelle, sizeof(Option_mnemo.mnemo_base.libelle),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
-    g_snprintf( Edit_mnemo.acronyme, sizeof(Edit_mnemo.acronyme),
+    g_snprintf( Option_mnemo.mnemo_base.acronyme, sizeof(Option_mnemo.mnemo_base.acronyme),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acro) ) );
-    g_snprintf( Edit_mnemo.command_text, sizeof(Edit_mnemo.command_text),
+    g_snprintf( Option_mnemo.mnemo_base.command_text, sizeof(Option_mnemo.mnemo_base.command_text),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_command) ) );
-    g_snprintf( Edit_mnemo.tableau, sizeof(Edit_mnemo.tableau),
+    g_snprintf( Option_mnemo.mnemo_base.tableau, sizeof(Option_mnemo.mnemo_base.tableau),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_tableau) ) );
-    index                 = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls) );
-    Edit_mnemo.num_plugin = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, index ) );
-    Edit_mnemo.type       = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
-    Edit_mnemo.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
+    index                              = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls) );
+    Option_mnemo.mnemo_base.num_plugin = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, index ) );
+    Option_mnemo.mnemo_base.type       = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
+    Option_mnemo.mnemo_base.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
 
     switch(reponse)
      { case GTK_RESPONSE_OK:
              { Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_ADD_MNEMONIQUE,
-                              (gchar *)&Edit_mnemo, sizeof( struct CMD_TYPE_MNEMONIQUE ) );
+                              (gchar *)&Option_mnemo.mnemo_base, sizeof( struct CMD_TYPE_MNEMO_BASE ) );
                break;
              }
        case GTK_RESPONSE_APPLY:
              { Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_VALIDE_EDIT_MNEMONIQUE,
-                              (gchar *)&Edit_mnemo, sizeof( struct CMD_TYPE_MNEMONIQUE ) );
+                              (gchar *)&Option_mnemo.mnemo_base, sizeof( struct CMD_TYPE_MNEMO_BASE ) );
                break;
              }
        case GTK_RESPONSE_CANCEL:
@@ -94,7 +94,7 @@
     g_snprintf( chaine, sizeof(chaine), "%s/%s/%s", dls->groupe, dls->page, dls->nom );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_dls), chaine );
     Liste_index_dls = g_list_append( Liste_index_dls, GINT_TO_POINTER(dls->id) );
-    if (Edit_mnemo.num_plugin == dls->id)
+    if (Option_mnemo.mnemo_base.num_plugin == dls->id)
      { gtk_combo_box_set_active ( GTK_COMBO_BOX (Combo_dls),
                                   g_list_index(Liste_index_dls, GINT_TO_POINTER(dls->id))
                                 );
@@ -154,16 +154,16 @@
 /* Entrée: rien                                                                                           */
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
- void Menu_ajouter_editer_mnemonique ( struct CMD_TYPE_MNEMONIQUE *edit_mnemo )
+ void Menu_ajouter_editer_mnemonique ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { GtkWidget *frame, *table, *texte, *hboite;
     int cpt, i;
 
-    if (edit_mnemo)                                                       /* Save pour utilisation future */
-     { memcpy( &Edit_mnemo, edit_mnemo, sizeof(struct CMD_TYPE_MNEMONIQUE) );
+    if (mnemo_full)                                                     /* Save pour utilisation future */
+     { memcpy( &Option_mnemo, mnemo_full, sizeof(struct CMD_TYPE_MNEMO_FULL) );
      }
-    else memset (&Edit_mnemo, 0, sizeof(struct CMD_TYPE_MNEMONIQUE) );             /* Sinon RAZ structure */
+    else memset (&Option_mnemo, 0, sizeof(struct CMD_TYPE_MNEMO_FULL) );         /* Sinon RAZ structure */
 
-    if (edit_mnemo)
+    if (mnemo_full)
      { F_ajout = gtk_dialog_new_with_buttons( _("Edit a mnemonic"),
                                               GTK_WINDOW(F_client),
                                               GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -182,7 +182,7 @@
      }
     g_signal_connect( F_ajout, "response",
                       G_CALLBACK(CB_ajouter_editer_mnemonique),
-                      GINT_TO_POINTER( (edit_mnemo ? TRUE : FALSE) ) );
+                      GINT_TO_POINTER( (mnemo_full ? TRUE : FALSE) ) );
 
     frame = gtk_frame_new("Settings");                               /* Création de l'interface graphique */
     gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
@@ -199,7 +199,7 @@
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
 
     i=0;
-    texte = gtk_label_new( _("Type") );    /* Création de l'option menu pour le choix du type de mnemonique */
+    texte = gtk_label_new( _("Type") );  /* Création de l'option menu pour le choix du type de mnemonique */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Option_type = gtk_combo_box_new_text();
     for ( cpt=0; cpt<NBR_TYPE_MNEMO; cpt++ )
@@ -250,13 +250,13 @@
 
     Set_max_bit();
     g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(CB_valider), NULL );
-    if (edit_mnemo)                                                          /* Si edition d'un mnemonique */
-     { gtk_entry_set_text( GTK_ENTRY(Entry_lib),     edit_mnemo->libelle );
-       gtk_entry_set_text( GTK_ENTRY(Entry_acro),    edit_mnemo->acronyme );
-       gtk_entry_set_text( GTK_ENTRY(Entry_command), edit_mnemo->command_text );
-       gtk_entry_set_text( GTK_ENTRY(Entry_tableau), edit_mnemo->tableau );
-       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type), edit_mnemo->type );
-       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), (double)edit_mnemo->num );
+    if (mnemo_full)                                                          /* Si edition d'un mnemonique */
+     { gtk_entry_set_text( GTK_ENTRY(Entry_lib),     mnemo_full->mnemo_base.libelle );
+       gtk_entry_set_text( GTK_ENTRY(Entry_acro),    mnemo_full->mnemo_base.acronyme );
+       gtk_entry_set_text( GTK_ENTRY(Entry_command), mnemo_full->mnemo_base.command_text );
+       gtk_entry_set_text( GTK_ENTRY(Entry_tableau), mnemo_full->mnemo_base.tableau );
+       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type), mnemo_full->mnemo_base.type );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), (double)mnemo_full->mnemo_base.num );
      }
     gtk_widget_grab_focus( Entry_lib );
     gtk_widget_show_all( F_ajout );

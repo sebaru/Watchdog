@@ -128,8 +128,8 @@ printf("recu un syn\n");
              }
             break;
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_BASE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
                Proto_afficher_mnemo_dls( mnemo );
              }
             break;

@@ -5,7 +5,7 @@
 #**********************************************************************************************************/
 noinst_HEADERS    = Db.h Message_DB.h Histo_DB.h \
                     Utilisateur_DB.h Config.h \
-                    Icones_DB.h EntreeANA_DB.h EntreeTOR_DB.h \
+                    Icones_DB.h EntreeANA_DB.h \
                     Synoptiques_DB.h Camera_DB.h \
                     Mnemonique_DB.h \
                     Proto_traductionDLS.h \

@@ -223,12 +223,12 @@
 /* Entrée: l'evenement à traiter                                                                          */
 /* Sortie: le mnemo en question, ou NULL si non-trouvé (ou multi trouvailles)                             */
 /**********************************************************************************************************/
- static struct CMD_TYPE_MNEMONIQUE *Map_event_to_mnemo( gchar *event )
-  { struct CMD_TYPE_MNEMONIQUE *mnemo, *result_mnemo = NULL;
+ static struct CMD_TYPE_MNEMO_BASE *Map_event_to_mnemo( gchar *event )
+  { struct CMD_TYPE_MNEMO_BASE *mnemo, *result_mnemo = NULL;
     gint nbr_result;
     struct DB *db;
 
-    if ( ! Recuperer_mnemoDB_by_command_text ( &db, event, TRUE ) )
+    if ( ! Recuperer_mnemo_baseDB_by_command_text ( &db, event, TRUE ) )
      { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
                  "Map_event_to_mnemo: Error searching Database" );
        return(FALSE);
@@ -240,7 +240,7 @@
                 "Map_event_to_mnemo: No match found for %s", event );
      }
 
-    while ( (mnemo = Recuperer_mnemoDB_suite( &db )) != NULL)
+    while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
      { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
                 "Map_event_to_mnemo: Match found for %s: Type %d Num %d - %s",
                  event, mnemo->type, mnemo->num, mnemo->libelle );
@@ -257,7 +257,7 @@
 /* Sortie: TRUE si processed                                                                              */
 /**********************************************************************************************************/
  static gboolean Processer_trame_ERP1( struct TRAME_ENOCEAN *trame )
-  { struct CMD_TYPE_MNEMONIQUE *mnemo;
+  { struct CMD_TYPE_MNEMO_BASE *mnemo;
     gchar *action, *button = "unknown";
     gchar event[64];
        
@@ -290,7 +290,7 @@
 
        mnemo = Map_event_to_mnemo ( event );
        if (!mnemo)                                   /* Si pas trouvé, création d'un mnemo 'discovered' ? */
-        { struct CMD_TYPE_MNEMONIQUE mnemo;
+        { struct CMD_TYPE_MNEMO_BASE mnemo;
           memset( &mnemo, 0, sizeof(mnemo) );
           mnemo.type       = MNEMO_ENTREE;
           mnemo.num        = 9999;
@@ -299,7 +299,7 @@
           g_snprintf( mnemo.libelle,  sizeof(mnemo.libelle),  "Event %s discovered by %s", event, NOM_THREAD );
           g_snprintf( mnemo.command_text, sizeof(mnemo.command_text), "%s", event );
 
-          if ( Ajouter_mnemoDB ( &mnemo ) < 0 )                     /* Ajout auto dans la base de mnemonique */
+          if ( Ajouter_mnemo_baseDB ( &mnemo ) < 0 )             /* Ajout auto dans la base de mnemonique */
            { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
                       "Map_event_to_mnemo: Error adding new mnemo in DB for event %s", event );
            }

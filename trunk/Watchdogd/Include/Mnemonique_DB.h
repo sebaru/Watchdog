@@ -32,19 +32,25 @@
  #include "Reseaux.h"
  #include "Db.h"
 
- #define NOM_TABLE_MNEMO    "mnemos"
+ #define NOM_TABLE_MNEMO      "mnemos"
+ #define NOM_TABLE_MNEMO_DI   "mnemos_DigitalInput"
 
 /*************************************** Définitions des prototypes ***************************************/
- extern struct CMD_TYPE_MNEMONIQUE *Rechercher_mnemoDB ( guint id );
- extern gboolean Recuperer_mnemoDB ( struct DB **db );
- extern gboolean Recuperer_mnemoDB_for_courbe ( struct DB **db );
- extern gboolean Recuperer_mnemoDB_by_command_text ( struct DB **db,
+ extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB ( guint id );
+ extern gboolean Recuperer_mnemo_baseDB ( struct DB **db );
+ extern gboolean Recuperer_mnemo_baseDB_for_courbe ( struct DB **db );
+ extern gboolean Recuperer_mnemo_baseDB_by_command_text ( struct DB **db,
                                                      gchar *commande_pure, gboolean exact );
- extern struct CMD_TYPE_MNEMONIQUE *Recuperer_mnemoDB_suite( struct DB **db );
- extern gint Ajouter_mnemoDB ( struct CMD_TYPE_MNEMONIQUE *mnemo );
- extern gboolean Retirer_mnemoDB ( struct CMD_TYPE_MNEMONIQUE *mnemo );
- extern gboolean Modifier_mnemoDB( struct CMD_TYPE_MNEMONIQUE *mnemo );
- extern struct CMD_TYPE_MNEMONIQUE *Rechercher_mnemoDB_type_num ( struct CMD_TYPE_NUM_MNEMONIQUE *critere );
+ extern struct CMD_TYPE_MNEMO_BASE *Recuperer_mnemo_baseDB_suite( struct DB **db );
+ extern gint Ajouter_mnemo_baseDB ( struct CMD_TYPE_MNEMO_BASE *mnemo );
+ extern gboolean Retirer_mnemo_baseDB ( struct CMD_TYPE_MNEMO_BASE *mnemo );
+ extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB_type_num ( struct CMD_TYPE_NUM_MNEMONIQUE *critere );
+ extern struct CMD_TYPE_MNEMO_FULL *Rechercher_mnemo_fullDB ( guint id );
+ extern gboolean Modifier_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
+
+ extern void Charger_digitalInput ( void );                                            /* Dans Mnemo_DI.c */
+ extern struct CMD_TYPE_MNEMO_DI *Rechercher_mnemo_diDB ( guint id );
+ extern gboolean Modifier_mnemo_diDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
