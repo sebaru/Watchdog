@@ -34,6 +34,7 @@
 
  #define NOM_TABLE_MNEMO      "mnemos"
  #define NOM_TABLE_MNEMO_DI   "mnemos_DigitalInput"
+ #define NOM_TABLE_MNEMO_AI   "mnemos_AnalogInput"
 
 /*************************************** Définitions des prototypes ***************************************/
  extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB ( guint id );
@@ -51,6 +52,10 @@
  extern void Charger_digitalInput ( void );                                            /* Dans Mnemo_DI.c */
  extern struct CMD_TYPE_MNEMO_DI *Rechercher_mnemo_diDB ( guint id );
  extern gboolean Modifier_mnemo_diDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
+
+ extern void Charger_analogInput ( void );                                            /* Dans Mnemo_AI.c */
+ extern struct CMD_TYPE_MNEMO_AI *Rechercher_mnemo_aiDB ( guint id );
+ extern gboolean Modifier_mnemo_aiDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

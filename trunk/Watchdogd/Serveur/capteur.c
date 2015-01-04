@@ -87,13 +87,13 @@
              { if(-1000000.0<capteur->val_ech && capteur->val_ech<1000000.0)
                 { g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
                              "%6.2f %s", capteur->val_ech,
-                              Partage->ea[capteur->bit_controle].cmd_type_eana.unite
+                              Partage->ea[capteur->bit_controle].confDB.unite
                             );
                 }
                else
                 { g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
                              "%8.0f %s", capteur->val_ech,
-                              Partage->ea[capteur->bit_controle].cmd_type_eana.unite
+                              Partage->ea[capteur->bit_controle].confDB.unite
                             );
                 }
              }

@@ -263,7 +263,6 @@
   { gint database_version;
     gchar *nom, *valeur;
     gchar requete[1024];
-    gboolean retour;
     struct DB *db;
 
     database_version = 0;                                                            /* valeur par défaut */

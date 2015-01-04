@@ -62,8 +62,8 @@
   { gboolean retour;
 
     pthread_mutex_lock( &Partage->com_dls.synchro );
-    Partage->com_dls.liste_plugin_reset = g_list_append ( Partage->com_dls.liste_plugin_reset,
-                                                          GINT_TO_POINTER(rezo_dls->id) );
+    Partage->com_dls.liste_plugin_reset = g_slist_append ( Partage->com_dls.liste_plugin_reset,
+                                                           GINT_TO_POINTER(rezo_dls->id) );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
 
     retour = Retirer_plugin_dlsDB( rezo_dls );
@@ -123,8 +123,8 @@
            if (result) 
             { pthread_mutex_lock( &Partage->com_dls.synchro );
               Partage->com_dls.liste_plugin_reset =
-                              g_list_append ( Partage->com_dls.liste_plugin_reset,
-                                              GINT_TO_POINTER(result->id) );
+                              g_slist_append ( Partage->com_dls.liste_plugin_reset,
+                                               GINT_TO_POINTER(result->id) );
               pthread_mutex_unlock( &Partage->com_dls.synchro );
                       
               Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_VALIDE_EDIT_PLUGIN_DLS_OK,
@@ -218,7 +218,11 @@
        client->id_creation_plugin_dls = id_fichier;
      }
     
-    write( client->id_creation_plugin_dls, buffer, edit_dls->taille );
+    if (write( client->id_creation_plugin_dls, buffer, edit_dls->taille )<0)
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
+                "Proto_valider_source_dls: write failed %d (%s)", edit_dls->id, strerror(errno) );
+       close (client->id_creation_plugin_dls);
+     }
   }
 /**********************************************************************************************************/
 /* Proto_compiler_source_dls: Compilation de la source DLS                                                */
@@ -305,7 +309,10 @@
                                (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
                }
               else { g_snprintf(chaine, sizeof(chaine), "/* %06d.dls: %s */\n", result->id, result->nom );
-                     write(id_fichier, chaine, strlen(chaine) );
+                     if (write(id_fichier, chaine, strlen(chaine) )<0)
+                      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
+                                 "Proto_ajouter_plugin_dls: Init .dls failed %d (%s)", result->id, strerror(errno) );
+                      }
                      close(id_fichier); 
 
                      Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_ADD_PLUGIN_DLS_OK,      /* Tout va bien */

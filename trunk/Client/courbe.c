@@ -88,7 +88,7 @@
              case MNEMO_ENTREE_ANA:
                   valeur = courbe->Y[index_posx];
                   g_snprintf( description, sizeof(description),
-                              "EA%d=%8.2f %s", courbe->eana.num, valeur, courbe->eana.unite );
+                              "EA%d=%8.2f %s", courbe->eana.mnemo_base.num, valeur, courbe->eana.mnemo_ai.unite );
                   break;
              default: g_snprintf( description, sizeof(description), "type unknown" );
            }
@@ -209,14 +209,14 @@
        new_courbe->type  = rezo_courbe.type;    /* Récupération des données EANA dans la structure COURBE */
        switch( new_courbe->type )
         { case MNEMO_ENTREE_ANA:
-               new_courbe->eana.num = rezo_courbe.num;
-               gtk_tree_model_get( store, &iter, COLONNE_TYPE_EA, &new_courbe->eana.type, -1 );
-               gtk_tree_model_get( store, &iter, COLONNE_MIN, &new_courbe->eana.min, -1 );
-               gtk_tree_model_get( store, &iter, COLONNE_MAX, &new_courbe->eana.max, -1 );
+               new_courbe->eana.mnemo_base.num = rezo_courbe.num;
+               gtk_tree_model_get( store, &iter, COLONNE_TYPE_EA, &new_courbe->eana.mnemo_ai.type, -1 );
+               gtk_tree_model_get( store, &iter, COLONNE_MIN, &new_courbe->eana.mnemo_ai.min, -1 );
+               gtk_tree_model_get( store, &iter, COLONNE_MAX, &new_courbe->eana.mnemo_ai.max, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_UNITE_STRING, &unite, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
-               g_snprintf( new_courbe->eana.libelle, sizeof(new_courbe->eana.libelle), "%s", libelle );
-               g_snprintf( new_courbe->eana.unite,   sizeof(new_courbe->eana.unite),   "%s", unite );
+               g_snprintf( new_courbe->eana.mnemo_base.libelle, sizeof(new_courbe->eana.mnemo_base.libelle), "%s", libelle );
+               g_snprintf( new_courbe->eana.mnemo_ai.unite,   sizeof(new_courbe->eana.mnemo_ai.unite),   "%s", unite );
                g_free(libelle);
                g_free(unite);
                break;
@@ -525,30 +525,28 @@
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_source_EA( GtkTreeIter *iter, struct CMD_TYPE_OPTION_ENTREEANA *source )
-  { struct TYPE_INFO_COURBE *infos;
-    struct PAGE_NOTEBOOK *page;
+ static void Rafraichir_visu_source_EA( GtkTreeIter *iter, struct CMD_TYPE_MNEMO_FULL *source )
+  { struct PAGE_NOTEBOOK *page;
     GtkTreeModel *store;
     gchar chaine[20], groupe[128];
 
     page = Page_actuelle();
     if (page->type != TYPE_PAGE_COURBE) return;                                            /* Bon type ?? */
-    infos = (struct TYPE_INFO_COURBE *)page->infos;
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_source) );              /* Acquisition du modele */
 
-    g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), source->num );
-    g_snprintf( groupe, sizeof(groupe), "%s/%s/%s", source->groupe, source->page, source->plugin_dls );
+    g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), source->mnemo_base.num );
+    g_snprintf( groupe, sizeof(groupe), "%s/%s/%s", source->mnemo_base.groupe, source->mnemo_base.page, source->mnemo_base.plugin_dls );
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
-                         COLONNE_ID, source->num,
+                         COLONNE_ID, source->mnemo_base.num,
                          COLONNE_TYPE, MNEMO_ENTREE_ANA,
-                         COLONNE_TYPE_EA, source->type,
+                         COLONNE_TYPE_EA, source->mnemo_ai.type,
                          COLONNE_OBJET, groupe,
                          COLONNE_NUM, chaine,
-                         COLONNE_MIN, source->min,
-                         COLONNE_MAX, source->max,
-                         COLONNE_UNITE_STRING, source->unite,
-                         COLONNE_LIBELLE, source->libelle,
+                         COLONNE_MIN, source->mnemo_ai.min,
+                         COLONNE_MAX, source->mnemo_ai.max,
+                         COLONNE_UNITE_STRING, source->mnemo_ai.unite,
+                         COLONNE_LIBELLE, source->mnemo_base.libelle,
                          -1
                        );
   }
@@ -558,14 +556,12 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Rafraichir_visu_source( GtkTreeIter *iter, struct CMD_TYPE_MNEMO_BASE *source )
-  { struct TYPE_INFO_COURBE *infos;
-    struct PAGE_NOTEBOOK *page;
+  { struct PAGE_NOTEBOOK *page;
     GtkTreeModel *store;
     gchar chaine[20], groupe_page[512];
 
     page = Page_actuelle();
     if (page->type != TYPE_PAGE_COURBE) return;                                            /* Bon type ?? */
-    infos = (struct TYPE_INFO_COURBE *)page->infos;
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_source) );              /* Acquisition du modele */
 
@@ -591,7 +587,7 @@
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_une_source_EA_for_courbe( struct CMD_TYPE_OPTION_ENTREEANA *source )
+ void Proto_afficher_une_source_EA_for_courbe( struct CMD_TYPE_MNEMO_FULL *source )
   { GtkListStore *store;
     GtkTreeIter iter;
 
@@ -637,9 +633,6 @@
 
        new_X = g_try_realloc ( courbe->X, courbe->taille_donnees * sizeof(gfloat) );
        new_Y = g_try_realloc ( courbe->Y, courbe->taille_donnees * sizeof(gfloat) );
-
-       printf(" index = %d : New taille = %d(gfloat), %d(gdouble)\n", 
-               -1, courbe->taille_donnees * sizeof(gfloat), courbe->taille_donnees * sizeof(gdouble) );
 
        if (new_X && new_Y)
         { courbe->X = new_X;
@@ -761,9 +754,9 @@
             break;
        case MNEMO_ENTREE_ANA:
             g_snprintf( description, sizeof(description), "EA%d - %s (%8.2f/%8.2f)",
-                        new_courbe->eana.num,
-                        new_courbe->eana.libelle,
-                        new_courbe->eana.min, new_courbe->eana.max );
+                        new_courbe->eana.mnemo_ai.num,
+                        new_courbe->eana.mnemo_base.libelle,
+                        new_courbe->eana.mnemo_ai.min, new_courbe->eana.mnemo_ai.max );
             break;
        default: g_snprintf( description, sizeof(description), " -- type unknown -- " );
      }
@@ -813,8 +806,6 @@
 
     new_X = g_try_realloc ( courbe->X, courbe->taille_donnees * sizeof(gfloat) );
     new_Y = g_try_realloc ( courbe->Y, courbe->taille_donnees * sizeof(gfloat) );
-
-    printf(" New taille = %d\n", courbe->taille_donnees * sizeof(gfloat) );
 
     if (new_X && new_Y)
      { courbe->X = new_X;

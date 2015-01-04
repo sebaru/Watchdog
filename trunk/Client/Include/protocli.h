@@ -110,7 +110,7 @@
     gfloat *Y;                                                              /* Coordonnées Y de la courbe */
     guint type;
     union                                                                      /* Option liée à la courbe */
-     { struct CMD_TYPE_OPTION_ENTREEANA eana;
+     { struct CMD_TYPE_MNEMO_FULL eana;
        struct CMD_TYPE_MNEMO_BASE mnemo;
      };
   };
@@ -475,7 +475,7 @@
                                   GtkPrintContext   *context,
                                   gpointer           user_data );
                                                                                          /* Dans courbe.c */
- extern void Proto_afficher_une_source_EA_for_courbe( struct CMD_TYPE_OPTION_ENTREEANA *entreeANA );
+ extern void Proto_afficher_une_source_EA_for_courbe( struct CMD_TYPE_MNEMO_FULL *entreeANA );
  extern void Proto_afficher_une_source_for_courbe( struct CMD_TYPE_MNEMO_BASE *mnemo );
  extern void Creer_page_courbe ( gchar *libelle );
  extern void Detruire_page_courbe( struct PAGE_NOTEBOOK *page );
@@ -487,7 +487,7 @@
  extern void Afficher_courbe( struct CMD_START_COURBE *courbe, struct TYPE_INFO_COURBE *infos );
  extern void Proto_start_courbe( struct CMD_START_COURBE *courbe );
                                                                                    /* Dans histo_courbe.c */
- extern void Proto_afficher_une_source_EA_for_histo_courbe( struct CMD_TYPE_OPTION_ENTREEANA *entreeANA );
+ extern void Proto_afficher_une_source_EA_for_histo_courbe( struct CMD_TYPE_MNEMO_FULL *entreeANA );
  extern void Proto_afficher_une_source_for_histo_courbe( struct CMD_TYPE_MNEMO_BASE *mnemo );
  extern void Creer_page_histo_courbe ( gchar *libelle );
  extern void Detruire_page_histo_courbe( struct PAGE_NOTEBOOK *page );

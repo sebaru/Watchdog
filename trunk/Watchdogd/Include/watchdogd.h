@@ -108,9 +108,17 @@
     GSList *Librairies;                                    /* Liste des librairies chargées pour Watchdog */
   };
 
- struct DIGITAL_INPUT                          /* Traitement des entrées analogiques par le process rs485 */
+ struct DIGITAL_INPUT
   { struct CMD_TYPE_MNEMO_DI confDB;
     gboolean etat;
+  };
+
+ struct ANALOG_INPUT
+  { struct CMD_TYPE_MNEMO_AI confDB;
+    gfloat  val_ech;
+    gfloat  val_avant_ech;
+    guint   last_arch;                                                     /* Date de la derniere archive */
+    guint   inrange;
   };
 
  struct SORTIE_TOR                                                         /* Définition d'une sortie TOR */
@@ -155,7 +163,7 @@
 
     struct CPT_HORAIRE ch [ NBR_COMPTEUR_H ];
     struct CPT_IMP ci [ NBR_COMPTEUR_IMP ];
-    struct ENTREE_ANA ea [ NBR_ENTRE_ANA ];
+    struct ANALOG_INPUT ea [ NBR_ENTRE_ANA ];
     guchar m [ (NBR_BIT_MONOSTABLE>>3) + 1 ];                  /* Monostables du DLS (DLS=rw, Sserveur=r) */
     struct DIGITAL_INPUT e [ NBR_ENTRE_TOR ];
     struct SORTIE_TOR a [ NBR_SORTIE_TOR ];

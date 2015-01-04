@@ -249,7 +249,7 @@
        if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top )
         { need_arch = TRUE; }
 
-       switch ( Partage->ea[num].cmd_type_eana.type )
+       switch ( Partage->ea[num].confDB.type )
         { case ENTREEANA_NON_INTERP:
                Partage->ea[ num ].val_ech = val_avant_ech;                     /* Pas d'interprétation !! */
                Partage->ea[ num ].inrange = 1;
@@ -262,8 +262,8 @@
                else
                 { if (val_avant_ech < 204) val_avant_ech = 204;
                   Partage->ea[ num ].val_ech = (gfloat)
-                  ((val_avant_ech-204)*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/820.0
-                  + Partage->ea[num].cmd_type_eana.min;                             /* Valeur à l'echelle */ 
+                  ((val_avant_ech-204)*(Partage->ea[num].confDB.max - Partage->ea[num].confDB.min))/820.0
+                  + Partage->ea[num].confDB.min;                             /* Valeur à l'echelle */ 
 
                   Partage->ea[ num ].inrange = 1;
                 }
@@ -276,15 +276,15 @@
                else
                 { if (val_avant_ech < 816) val_avant_ech = 816;
                   Partage->ea[ num ].val_ech = (gfloat)
-                  ((val_avant_ech-816)*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/3280.0
-                     + Partage->ea[num].cmd_type_eana.min;                          /* Valeur à l'echelle */ 
+                  ((val_avant_ech-816)*(Partage->ea[num].confDB.max - Partage->ea[num].confDB.min))/3280.0
+                     + Partage->ea[num].confDB.min;                          /* Valeur à l'echelle */ 
                   Partage->ea[ num ].inrange = 1;
                 }
                break;
           case ENTREEANA_WAGO_750455:
                Partage->ea[ num ].val_ech = (gfloat)
-                  (val_avant_ech*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/4095.0
-                     + Partage->ea[num].cmd_type_eana.min;                          /* Valeur à l'echelle */ 
+                  (val_avant_ech*(Partage->ea[num].confDB.max - Partage->ea[num].confDB.min))/4095.0
+                     + Partage->ea[num].confDB.min;                          /* Valeur à l'echelle */ 
                Partage->ea[ num ].inrange = 1;
                break;
           case ENTREEANA_WAGO_750461:

@@ -170,25 +170,11 @@
 /* Entrée: néant                                                                                          */
 /**********************************************************************************************************/
  static void Charger_config_bit_interne( void )
-  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading EntreeTOR" );
-    Charger_digitalInput();
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading EntreeTOR done" );
-
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading EANA" );
-    Charger_eana();
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading EANA done" );
-
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading compteurs horaires" );
+  { Charger_digitalInput();
+    Charger_analogInput();
     Charger_cpth();
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading compteurs horaires done" );
-
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading compteurs impulsion" );
     Charger_cpt_imp();
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading compteurs impulsion done" );
-
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading temporisations" );
     Charger_tempo();
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Loading temporisations done" );
   }
 /**********************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                         */

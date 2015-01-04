@@ -106,10 +106,10 @@
        if (num<NBR_ENTRE_ANA)
         { g_snprintf( chaine, sizeof(chaine),
                       " EA%03d = %8.2f %s, val_avant_ech=%8.2f, inrange=%d, type=%d, last_arch=%d (%ds ago), min=%8.2f, max=%8.2f\n",
-                      num, EA_ech(num), Partage->ea[num].cmd_type_eana.unite, Partage->ea[num].val_avant_ech, EA_inrange(num),
-                      Partage->ea[num].cmd_type_eana.type, Partage->ea[num].last_arch, 
+                      num, EA_ech(num), Partage->ea[num].confDB.unite, Partage->ea[num].val_avant_ech, EA_inrange(num),
+                      Partage->ea[num].confDB.type, Partage->ea[num].last_arch, 
                       (Partage->top - Partage->ea[num].last_arch)/10,
-                      Partage->ea[num].cmd_type_eana.min, Partage->ea[num].cmd_type_eana.max 
+                      Partage->ea[num].confDB.min, Partage->ea[num].confDB.max 
                     );
         } else
         { g_snprintf( chaine, sizeof(chaine), " EA -> num '%d' out of range (max=%d)\n", num,NBR_ENTRE_ANA ); }

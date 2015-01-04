@@ -37,8 +37,6 @@
  #define NBR_CARAC_UNITE_MNEMONIQUE          8
  #define NBR_CARAC_UNITE_MNEMONIQUE_UTF8     (2*NBR_CARAC_UNITE_MNEMONIQUE)
 
- #include "Reseaux_option_entreetor.h"
- #include "Reseaux_option_entreeana.h"
  #include "Reseaux_option_compteur_imp.h"
  #include "Reseaux_option_tempo.h"
 
@@ -56,6 +54,7 @@
     NBR_TYPE_MNEMO
   };
 
+/********************************************** Base de tous les mnemos ***********************************/
  struct CMD_TYPE_MNEMO_BASE                                 /* Informations partagées par tous les mnémos */
   { guint id;                                                /* ID unique du mnemonique dans la structure */
     guint type;                                                                /* Type du bit interne lié */
@@ -70,6 +69,31 @@
     gchar  tableau[ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
   };
 
+/******************************************* AddOns pour les Digital Input ********************************/
+ struct CMD_TYPE_MNEMO_DI
+  { gint num; 
+    gboolean furtif;
+  };
+
+/******************************************* AddOns pour les Analog Input *********************************/
+ #define COURBE_TEMPS_TOP             5                     /* 1 point = 5 secondes sur la grille courbes */
+ enum
+  { ENTREEANA_NON_INTERP,
+    ENTREEANA_4_20_MA_12BITS,
+    ENTREEANA_4_20_MA_10BITS,
+    ENTREEANA_WAGO_750455,
+    ENTREEANA_WAGO_750461,
+    NBR_TYPE_ENTREEANA
+  };
+
+ struct CMD_TYPE_MNEMO_AI
+  { guint  num;                                                                         /* Numero de l'EA */
+    gfloat min;
+    gfloat max;
+    guint  type;                                                               /* Type de gestion de l'EA */
+    gchar  unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                      /* Km, h, ° ... */
+  };
+/*********************************************** Suite des structures *************************************/
  struct CMD_TYPE_MNEMONIQUES
   { guint nbr_mnemos;                                /* Nombre de structure CMD_TYPE_MNEMONIQUE suivantes */
     struct CMD_TYPE_MNEMO_BASE mnemo[];
@@ -83,8 +107,8 @@
  struct CMD_TYPE_MNEMO_FULL
   { struct CMD_TYPE_MNEMO_BASE mnemo_base;
     union { struct CMD_TYPE_MNEMO_DI mnemo_di;
-            /*struct CMD_TYPE_OPTION_ENTREEANA eana;
-            struct CMD_TYPE_OPTION_COMPTEUR_IMP cpt_imp;
+            struct CMD_TYPE_MNEMO_AI mnemo_ai;
+            /*struct CMD_TYPE_OPTION_COMPTEUR_IMP cpt_imp;
             struct CMD_TYPE_OPTION_TEMPO tempo;*/
           };
 
@@ -109,10 +133,6 @@
     SSTAG_CLIENT_WANT_DLS_FOR_MNEMO,                             /* Envoi des synoptiques pour les mnemos */
     SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO,
     SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO_FIN,
-
-    SSTAG_CLIENT_EDIT_OPTION_BIT_INTERNE,             /* Le client demande l'edition des options d'un bit */
-    SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK,  /* Le serveur accepte et envoi les données correspondantes */
-    SSTAG_CLIENT_VALIDE_EDIT_OPTION_BIT_INTERNE,                /* Valide la modification de l'entree ANA */
   };
 
 #endif

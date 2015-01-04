@@ -41,7 +41,7 @@
 /**********************************************************************************************************/
  static void Envoyer_entreeANA_tag ( struct CLIENT *client, guint tag, gint sstag, gint sstag_fin )
   { struct CMD_ENREG nbr;
-    struct CMD_TYPE_OPTION_ENTREEANA *entree;
+    struct CMD_TYPE_MNEMO_AI *entree;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-EnvoiANA", 0, 0, 0 );
@@ -66,7 +66,7 @@
           return;
         }
 
-       Envoi_client ( client, tag, sstag, (gchar *)entree, sizeof(struct CMD_TYPE_OPTION_ENTREEANA) );
+       Envoi_client ( client, tag, sstag, (gchar *)entree, sizeof(struct CMD_TYPE_MNEMO_AI) );
        g_free(entree);
      }
   }

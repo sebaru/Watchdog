@@ -867,7 +867,7 @@
           case MODBUS_GET_AI:
                cpt_e = module->modbus.min_e_ana;
                for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
-                { switch(Partage->ea[cpt_e].cmd_type_eana.type)
+                { switch(Partage->ea[cpt_e].confDB.type)
                    { case ENTREEANA_WAGO_750455:
                           if ( ! (module->response.data[ 2*cpt + 2 ] & 0x03) )
                            { int reponse;

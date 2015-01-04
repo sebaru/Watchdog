@@ -62,7 +62,7 @@
                break;
           case MNEMO_ENTREE_ANA:
                g_snprintf( requete, sizeof(requete),                                       /* Requete SQL */
-               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_ENTREEANA, mnemo_a_virer->id );
+               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_MNEMO_AI, mnemo_a_virer->id );
                Lancer_requete_SQL ( db, requete );
                break;
           case MNEMO_CPT_IMP:
@@ -101,7 +101,6 @@
  static gint Ajouter_Modifier_mnemo_baseDB ( struct CMD_TYPE_MNEMO_BASE *mnemo, gboolean ajout )
   { gchar *libelle, *acro, *command_text, *tableau;
     gchar requete[1024];
-    gint last_id;
     gboolean retour;
     struct DB *db;
 
@@ -148,6 +147,7 @@
      { Libere_DB_SQL(&db); 
        return(-1);
      }
+#ifdef bouh
     if (ajout == TRUE)
      { last_id = Recuperer_last_ID_SQL ( db );
        switch (mnemo->type)
@@ -179,9 +179,9 @@
                break;
         }
      }
-
+#endif
     Libere_DB_SQL(&db);
-    if (ajout==TRUE) return( last_id );
+    if (ajout==TRUE) return( Recuperer_last_ID_SQL ( db ) );
     else return(0);
   }
 /**********************************************************************************************************/
