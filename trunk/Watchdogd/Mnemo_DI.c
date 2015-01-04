@@ -147,9 +147,7 @@
      }
 
     mnemo_di = Recuperer_digitalInputDB_suite( &db );
-    Liberer_resultat_SQL (db);
-    Libere_DB_SQL( &db );
-
+    if (mnemo_di) Libere_DB_SQL( &db );
     return(mnemo_di);
   }
 /**********************************************************************************************************/
@@ -169,12 +167,12 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET "             
-                "furtif='%d' "
-                "WHERE id_mnemo=%d",
-                NOM_TABLE_MNEMO_DI,
-                mnemo_full->mnemo_di.furtif,
-                mnemo_full->mnemo_base.id );
+                "INSERT INTO %s (id_mnemo,furtif) VALUES "
+                "('%d','%d') "
+                "ON DUPLICATE KEY UPDATE "
+                "furtif='%d' ",
+                NOM_TABLE_MNEMO_DI, mnemo_full->mnemo_base.id, mnemo_full->mnemo_di.furtif,
+                mnemo_full->mnemo_di.furtif );
 
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
@@ -200,14 +198,13 @@
        if (!entree) return;
 
        if (entree->num < NBR_ENTRE_TOR)
-        { memcpy( &Partage->e[entree->num].confDB, entree,
-                  sizeof(struct CMD_TYPE_MNEMO_DI) );
-        }
+        { memcpy( &Partage->e[entree->num].confDB, entree, sizeof(struct CMD_TYPE_MNEMO_DI) ); }
        else
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                    "Charger_digitalInput: entree->num (%d) out of range (max=%d)", entree->num, NBR_ENTRE_TOR );
         }
        g_free(entree);
      }
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Charger_digitalInput: DB reloaded" );
   }
 /*--------------------------------------------------------------------------------------------------------*/

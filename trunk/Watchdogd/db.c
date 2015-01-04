@@ -267,7 +267,7 @@
     struct DB *db;
 
     database_version = 0;                                                            /* valeur par défaut */
-    if ( ! Recuperer_configDB( &db, "GLOBAL" ) )                        /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, "global" ) )                        /* Connexion a la base de données */
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
                 "Update_database_schema: Database connexion failed" );
        return;
@@ -319,7 +319,7 @@
      }
     Libere_DB_SQL(&db);
 
-    if (Modifier_configDB ( "GLOBAL", "database_version", "2532" ))
+    if (Modifier_configDB ( "global", "database_version", "2532" ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
                 "Update_database_schema: updating Database_version OK" );
      }

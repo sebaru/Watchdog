@@ -96,7 +96,8 @@
     if ( ! strcmp ( commande, "e" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       g_snprintf( chaine, sizeof(chaine), " E%03d = %d\n", num, E(num) );
+       g_snprintf( chaine, sizeof(chaine), " E%03d = %d (furtif=%02d)\n",
+                   num, E(num), Partage->e[num].confDB.furtif );
        Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "ea" ) )

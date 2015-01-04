@@ -78,12 +78,12 @@
     switch(reponse)
      { case GTK_RESPONSE_OK:
              { Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_ADD_MNEMONIQUE,
-                              (gchar *)&Option_mnemo.mnemo_base, sizeof( struct CMD_TYPE_MNEMO_BASE ) );
+                              (gchar *)&Option_mnemo, sizeof( struct CMD_TYPE_MNEMO_FULL ) );
                break;
              }
        case GTK_RESPONSE_APPLY:
              { Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_VALIDE_EDIT_MNEMONIQUE,
-                              (gchar *)&Option_mnemo.mnemo_base, sizeof( struct CMD_TYPE_MNEMO_BASE ) );
+                              (gchar *)&Option_mnemo, sizeof( struct CMD_TYPE_MNEMO_FULL ) );
                break;
              }
        case GTK_RESPONSE_CANCEL:
@@ -213,11 +213,12 @@
     gtk_container_set_border_width( GTK_CONTAINER(notebook), 6 );
     gtk_notebook_set_scrollable (GTK_NOTEBOOK(notebook), TRUE );
 
+/************************************** Premiere page : les paramtres communs *****************************/
     hboite = gtk_hbox_new( FALSE, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_notebook_append_page( GTK_NOTEBOOK(notebook), hboite, gtk_label_new ( _("Common Settings") ) );
 
-    table = gtk_table_new( 5, 4, FALSE );
+    table = gtk_table_new( 4, 4, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
@@ -231,32 +232,31 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Option_type, 1, 2, i, i+1 );
     g_signal_connect_swapped( G_OBJECT(Option_type), "changed", G_CALLBACK(Type_changed), NULL );
 
-    texte = gtk_label_new( _("Num") );
+    texte = gtk_label_new( _("Number") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
     Spin_num = gtk_spin_button_new_with_range( 0.0, NBR_BIT_DLS, 1.0 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_num, 3, 4, i, i+1 );
-
-    i++;
-    texte = gtk_label_new( _("Groupe/Page/Module DLS") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Combo_dls = gtk_combo_box_new_text();
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_dls, 1, 4, i, i+1 );
-    Liste_index_dls = NULL;
-    Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_WANT_DLS_FOR_MNEMO, NULL, 0 );
 
     i++;
     texte = gtk_label_new( _("Acronyme") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_acro = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_acro), NBR_CARAC_ACRONYME_MNEMONIQUE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_acro, 1, 4, i, i+1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_acro, 1, 2, i, i+1 );
 
-    i++;
-    texte = gtk_label_new( _("Command text") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    texte = gtk_label_new( _("Event") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
     Entry_command = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_command), NBR_CARAC_LIBELLE_MNEMONIQUE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_command, 1, 4, i, i+1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_command, 3, 4, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("Module D.L.S") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Combo_dls = gtk_combo_box_new_text();
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_dls, 1, 4, i, i+1 );
+    Liste_index_dls = NULL;
+    Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_WANT_DLS_FOR_MNEMO, NULL, 0 );
 
     i++;
     texte = gtk_label_new( _("Description") );
@@ -287,15 +287,19 @@
     texte = gtk_label_new( _("AI") );
     gtk_table_attach_defaults( GTK_TABLE(Table_options_AI), texte, 0, 1, 0, 1 );
 
-    Table_options_DI = gtk_table_new( 5, 2, FALSE );
+/************************************** Seconde page : spéciale Digital Input *****************************/
+    Table_options_DI = gtk_table_new( 5, 2, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(Table_options_DI), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(Table_options_DI), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), Table_options_DI, TRUE, TRUE, 0 );
 
-    texte = gtk_label_new( _("Furtif") );
-    gtk_table_attach_defaults( GTK_TABLE(Table_options_DI), texte, 0, 1, 0, 1 );
+    i = 0;
+    texte = gtk_label_new( _("Options for Digital Inputs") );
+    gtk_table_attach_defaults( GTK_TABLE(Table_options_DI), texte, 0, 2, i, i+1 );
+
+    i++;
     Check_DI_furtif = gtk_check_button_new_with_label( _("Furtif") );
-    gtk_table_attach_defaults( GTK_TABLE(Table_options_DI), Check_DI_furtif, 0, 1, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(Table_options_DI), Check_DI_furtif, 0, 1, i, i+1 );
 
 /**************************************** Positionnement des infos d'edition ******************************/
     if (mnemo_full)                                                         /* Si edition d'un mnemonique */

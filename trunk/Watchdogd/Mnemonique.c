@@ -466,14 +466,14 @@
     mnemo_base = Rechercher_mnemo_baseDB ( id );
     if (!mnemo_base)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                              "Recuperer_mnemo_fullDB: Mnemo %d not found", id );
+                "Recuperer_mnemo_fullDB: Mnemo %d not found", id );
        return(NULL);
      }
 
     mnemo_full = (struct CMD_TYPE_MNEMO_FULL *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_FULL) );
     if (!mnemo_full)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                              "Recuperer_mnemo_fullDB: Erreur allocation mémoire" );
+                "Recuperer_mnemo_fullDB: Erreur allocation mémoire" );
        g_free(mnemo_base);
        return(NULL);
      }
@@ -485,7 +485,10 @@
      { case MNEMO_ENTREE:
         { struct CMD_TYPE_MNEMO_DI *mnemo_di;
           mnemo_di = Rechercher_mnemo_diDB ( id );
-          if (mnemo_di) memcpy ( &mnemo_full->mnemo_di, mnemo_di, sizeof(struct CMD_TYPE_MNEMO_DI) );
+          if (mnemo_di) 
+           { memcpy ( &mnemo_full->mnemo_di, mnemo_di, sizeof(struct CMD_TYPE_MNEMO_DI) );
+             g_free(mnemo_di);
+           }
           break;
         }
      }

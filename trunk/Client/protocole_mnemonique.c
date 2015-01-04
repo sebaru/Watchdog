@@ -61,8 +61,8 @@
              }
             break;
        case SSTAG_SERVEUR_EDIT_MNEMONIQUE_OK:
-             { struct CMD_TYPE_MNEMO_BASE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
                Menu_ajouter_editer_mnemonique( mnemo );
              }
             break;
@@ -72,21 +72,6 @@
                Proto_rafraichir_un_mnemonique( mnemo );
              }
             break;
-#ifdef bouh
-       case SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK:
-             { struct CMD_TYPE_OPTION_BIT_INTERNE *option;
-               option = (struct CMD_TYPE_OPTION_BIT_INTERNE *)connexion->donnees;
-               switch( option->type )
-                { case MNEMO_ENTREE_ANA : Proto_editer_option_entreeANA( option );
-                                          break;
-                  case MNEMO_CPT_IMP    : Proto_editer_option_cpt_imp( option );
-                                          break;
-                  case MNEMO_TEMPO      : Proto_editer_option_tempo( option );
-                                          break;
-                }
-             }
-            break;
-#endif
        case SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE:
              { struct CMD_TYPE_MNEMONIQUES *mnemos;
                gint i;
