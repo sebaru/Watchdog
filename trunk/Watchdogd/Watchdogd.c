@@ -525,7 +525,6 @@
     setlocale( LC_ALL, "C" );                        /* Pour le formattage correct des , . dans les float */
     gcry_check_version(NULL);                                    /* Initialisation de la librairie GCRYPT */
     curl_global_init (CURL_GLOBAL_ALL);                             /* Initialisation de la libraire CURL */
-    Update_database_schema();                                   /* Update du schéma de Database si besoin */
     Partage = NULL;                                                                     /* Initialisation */
     Partage = Shm_init();                                        /* Initialisation de la mémoire partagée */
     if (!Partage)
@@ -553,6 +552,7 @@
           Info_new( Config.log, Config.log_msrv, LOG_INFO, "Clear Histo done" );
         } else Info_new( Config.log, Config.log_msrv, LOG_INFO, "Import => pas de clear histo" );
 
+       Update_database_schema();                                /* Update du schéma de Database si besoin */
        Charger_config_bit_interne ();     /* Chargement des configurations des bits internes depuis la DB */
 
        if (Config.single == FALSE)                                             /* Si demarrage des thread */

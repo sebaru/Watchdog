@@ -155,13 +155,12 @@
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Menu_ajouter_editer_mnemonique ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
-  { GtkWidget *frame, *table, *texte, *hboite;
+  { GtkWidget *table, *texte, *hboite, *notebook;
     int cpt, i;
 
-    if (mnemo_full)                                                     /* Save pour utilisation future */
-     { memcpy( &Option_mnemo, mnemo_full, sizeof(struct CMD_TYPE_MNEMO_FULL) );
-     }
-    else memset (&Option_mnemo, 0, sizeof(struct CMD_TYPE_MNEMO_FULL) );         /* Sinon RAZ structure */
+    if (mnemo_full)                                                       /* Save pour utilisation future */
+       { memcpy( &Option_mnemo, mnemo_full, sizeof(struct CMD_TYPE_MNEMO_FULL) ); }
+    else memset (&Option_mnemo, 0, sizeof(struct CMD_TYPE_MNEMO_FULL) );           /* Sinon RAZ structure */
 
     if (mnemo_full)
      { F_ajout = gtk_dialog_new_with_buttons( _("Edit a mnemonic"),
@@ -184,14 +183,14 @@
                       G_CALLBACK(CB_ajouter_editer_mnemonique),
                       GINT_TO_POINTER( (mnemo_full ? TRUE : FALSE) ) );
 
-    frame = gtk_frame_new("Settings");                               /* Création de l'interface graphique */
-    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
-    gtk_container_set_border_width( GTK_CONTAINER(frame), 6 );
-    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(F_ajout)->vbox ), frame, TRUE, TRUE, 0 );
+    notebook = gtk_notebook_new();
+    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(F_ajout)->vbox ), notebook, TRUE, TRUE, 0 );
+    gtk_container_set_border_width( GTK_CONTAINER(notebook), 6 );
+    gtk_notebook_set_scrollable (GTK_NOTEBOOK(notebook), TRUE );
 
     hboite = gtk_hbox_new( FALSE, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
-    gtk_container_add( GTK_CONTAINER(frame), hboite );
+    gtk_notebook_append_page( GTK_NOTEBOOK(notebook), hboite, gtk_label_new ( _("Settings") ) );
 
     table = gtk_table_new( 5, 4, FALSE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
@@ -250,7 +249,14 @@
 
     Set_max_bit();
     g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(CB_valider), NULL );
-    if (mnemo_full)                                                          /* Si edition d'un mnemonique */
+
+/************************************** Seconde page : les options ****************************************/
+    hboite = gtk_hbox_new( FALSE, 6 );
+    gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
+    gtk_notebook_append_page( GTK_NOTEBOOK(notebook), hboite, gtk_label_new ( _("Options") ) );
+
+/**************************************** Positionnement des infos d'edition ******************************/
+    if (mnemo_full)                                                         /* Si edition d'un mnemonique */
      { gtk_entry_set_text( GTK_ENTRY(Entry_lib),     mnemo_full->mnemo_base.libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_acro),    mnemo_full->mnemo_base.acronyme );
        gtk_entry_set_text( GTK_ENTRY(Entry_command), mnemo_full->mnemo_base.command_text );
@@ -258,6 +264,7 @@
        gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type), mnemo_full->mnemo_base.type );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), (double)mnemo_full->mnemo_base.num );
      }
+
     gtk_widget_grab_focus( Entry_lib );
     gtk_widget_show_all( F_ajout );
   }
