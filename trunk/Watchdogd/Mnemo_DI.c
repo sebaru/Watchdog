@@ -175,7 +175,7 @@
     for( ; ; )
      { struct CMD_TYPE_MNEMO_DI *entree;
        entree = Recuperer_digitalInputDB_suite( &db );
-       if (!entree) return;
+       if (!entree) break;
 
        if (entree->num < NBR_ENTRE_TOR)
         { memcpy( &Partage->e[entree->num].confDB, entree, sizeof(struct CMD_TYPE_MNEMO_DI) ); }

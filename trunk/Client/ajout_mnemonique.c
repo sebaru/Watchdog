@@ -73,6 +73,11 @@
         { Option_mnemo.mnemo_di.furtif = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_DI_furtif));
           break;
         }
+       case MNEMO_ENTREE_ANA:
+        { Get_options_AI ( &Option_mnemo );
+          break;
+        }
+
      }
 
     switch(reponse)
@@ -213,7 +218,7 @@
     gtk_container_set_border_width( GTK_CONTAINER(notebook), 6 );
     gtk_notebook_set_scrollable (GTK_NOTEBOOK(notebook), TRUE );
 
-/************************************** Premiere page : les paramtres communs *****************************/
+/************************************* Premiere page : les paramètres communs *****************************/
     hboite = gtk_hbox_new( FALSE, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_notebook_append_page( GTK_NOTEBOOK(notebook), hboite, gtk_label_new ( _("Common Settings") ) );
@@ -280,13 +285,6 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_notebook_append_page( GTK_NOTEBOOK(notebook), hboite, gtk_label_new ( _("Specific Options") ) );
 
-    Table_options_AI = gtk_table_new( 5, 4, FALSE );
-    gtk_table_set_row_spacings( GTK_TABLE(Table_options_AI), 5 );
-    gtk_table_set_col_spacings( GTK_TABLE(Table_options_AI), 5 );
-    gtk_box_pack_start( GTK_BOX(hboite), Table_options_AI, TRUE, TRUE, 0 );
-    texte = gtk_label_new( _("AI") );
-    gtk_table_attach_defaults( GTK_TABLE(Table_options_AI), texte, 0, 1, 0, 1 );
-
 /************************************** Seconde page : spéciale Digital Input *****************************/
     Table_options_DI = gtk_table_new( 5, 2, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(Table_options_DI), 5 );
@@ -301,6 +299,12 @@
     Check_DI_furtif = gtk_check_button_new_with_label( _("Furtif") );
     gtk_table_attach_defaults( GTK_TABLE(Table_options_DI), Check_DI_furtif, 0, 1, i, i+1 );
 
+/************************************** Seconde page : spéciale analog Input ******************************/
+    Table_options_AI = Get_options_AI_gtktable();
+    gtk_table_set_row_spacings( GTK_TABLE(Table_options_AI), 5 );
+    gtk_table_set_col_spacings( GTK_TABLE(Table_options_AI), 5 );
+    gtk_box_pack_start( GTK_BOX(hboite), Table_options_AI, TRUE, TRUE, 0 );
+
 /**************************************** Positionnement des infos d'edition ******************************/
     if (mnemo_full)                                                         /* Si edition d'un mnemonique */
      { gtk_entry_set_text( GTK_ENTRY(Entry_lib),     mnemo_full->mnemo_base.libelle );
@@ -312,6 +316,7 @@
 
 /****************************************** Spécifique DI *************************************************/
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_DI_furtif), mnemo_full->mnemo_di.furtif );
+       Set_options_AI ( mnemo_full );
      }
 
     gtk_widget_grab_focus( Entry_lib );

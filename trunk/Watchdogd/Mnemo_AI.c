@@ -138,7 +138,7 @@
 /* Entrées: une structure hébergeant l'entrée analogique a modifier                                       */
 /* Sortie: -1 si pb, id sinon                                                                             */
 /**********************************************************************************************************/
- gboolean Modifier_analogInputDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
+ gboolean Modifier_mnemo_aiDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { gchar requete[1024];
     gboolean retour;
     struct DB *db;
@@ -188,7 +188,7 @@
     for( ; ; )
      { struct CMD_TYPE_MNEMO_AI *entree;
        entree = Recuperer_analogInputDB_suite( &db );
-       if (!entree) return;
+       if (!entree) break;
 
        if (entree->num < NBR_ENTRE_ANA)
         { memcpy( &Partage->ea[entree->num].confDB, entree, sizeof(struct CMD_TYPE_MNEMO_AI) );

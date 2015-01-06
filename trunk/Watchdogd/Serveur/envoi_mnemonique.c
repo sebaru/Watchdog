@@ -81,7 +81,7 @@
                             (gchar *)result, sizeof(struct CMD_TYPE_MNEMO_BASE) );
               switch( result->type )
                { case MNEMO_ENTREE     :  Charger_digitalInput(); break;   /* Update de la running config */
-                 case MNEMO_ENTREE_ANA :  Charger_eana ();        break;   /* Update de la running config */
+                 case MNEMO_ENTREE_ANA :  Charger_analogInput (); break;   /* Update de la running config */
                  case MNEMO_CPT_IMP    :  Charger_cpt_imp ();     break;   /* Update de la running config */
                  case MNEMO_CPTH       :  Charger_cpth ();        break;   /* Update de la running config */
                  case MNEMO_TEMPO      :  Charger_tempo ();       break;   /* Update de la running config */

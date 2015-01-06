@@ -491,6 +491,15 @@
            }
           break;
         }
+       case MNEMO_ENTREE_ANA:
+        { struct CMD_TYPE_MNEMO_AI *mnemo_ai;
+          mnemo_ai = Rechercher_mnemo_aiDB ( id );
+          if (mnemo_ai) 
+           { memcpy ( &mnemo_full->mnemo_ai, mnemo_ai, sizeof(struct CMD_TYPE_MNEMO_AI) );
+             g_free(mnemo_ai);
+           }
+          break;
+        }
      }
     return(mnemo_full);
   }
@@ -506,8 +515,9 @@
      }
 
     switch (mnemo_full->mnemo_base.type)
-     { case MNEMO_ENTREE: return( Modifier_mnemo_diDB ( mnemo_full ) );
-       default :          return ( Modifier_mnemo_baseDB ( &mnemo_full->mnemo_base ) );
+     { case MNEMO_ENTREE:     return( Modifier_mnemo_diDB ( mnemo_full ) );
+       case MNEMO_ENTREE_ANA: return( Modifier_mnemo_aiDB ( mnemo_full ) );
+       default : return(TRUE);
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

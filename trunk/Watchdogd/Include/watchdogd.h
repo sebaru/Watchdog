@@ -48,7 +48,6 @@
  #include "Synoptiques_DB.h"
  #include "Mnemonique_DB.h"
  #include "Icones_DB.h"
- #include "EntreeANA_DB.h"
  #include "Proto_traductionDLS.h"
 
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
