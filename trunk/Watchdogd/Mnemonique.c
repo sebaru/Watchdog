@@ -67,7 +67,7 @@
                break;
           case MNEMO_CPT_IMP:
                g_snprintf( requete, sizeof(requete),                                       /* Requete SQL */
-               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_CPT_IMP, mnemo_a_virer->id );
+               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_MNEMO_CPTIMP, mnemo_a_virer->id );
                Lancer_requete_SQL ( db, requete );
                break;
           case MNEMO_CPTH:

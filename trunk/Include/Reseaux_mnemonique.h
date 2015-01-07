@@ -37,7 +37,6 @@
  #define NBR_CARAC_UNITE_MNEMONIQUE          8
  #define NBR_CARAC_UNITE_MNEMONIQUE_UTF8     (2*NBR_CARAC_UNITE_MNEMONIQUE)
 
- #include "Reseaux_option_compteur_imp.h"
  #include "Reseaux_option_tempo.h"
 
  enum
@@ -93,6 +92,23 @@
     guint  type;                                                               /* Type de gestion de l'EA */
     gchar  unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                      /* Km, h, ° ... */
   };
+
+/******************************************* Pour les compteurs d'impulsions ******************************/
+ enum
+  { CI_TOTALISATEUR,
+    CI_MOYENNEUR_SEC,
+    CI_MOYENNEUR_MIN,
+    NBR_TYPE_CI
+  };
+
+ struct CMD_TYPE_MNEMO_CPT_IMP
+  { guint  num;                                                                     /* Numero du compteur */
+    gfloat valeur;                                                                  /* Valeur du compteur */
+    guint  type;                                                                /* Totalisateur/Moyenneur */
+    gfloat multi;                                                                       /* Multiplicateur */
+    gchar  unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                      /* Km, h, ° ... */
+  };
+
 /*********************************************** Suite des structures *************************************/
  struct CMD_TYPE_MNEMONIQUES
   { guint nbr_mnemos;                                /* Nombre de structure CMD_TYPE_MNEMONIQUE suivantes */
@@ -108,8 +124,8 @@
   { struct CMD_TYPE_MNEMO_BASE mnemo_base;
     union { struct CMD_TYPE_MNEMO_DI mnemo_di;
             struct CMD_TYPE_MNEMO_AI mnemo_ai;
-            /*struct CMD_TYPE_OPTION_COMPTEUR_IMP cpt_imp;
-            struct CMD_TYPE_OPTION_TEMPO tempo;*/
+            struct CMD_TYPE_MNEMO_CPT_IMP mnemo_cptimp;
+            /*struct CMD_TYPE_OPTION_TEMPO tempo;*/
           };
 
   };

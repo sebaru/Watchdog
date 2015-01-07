@@ -224,10 +224,6 @@
  extern void *Envoyer_mnemoniques_for_histo_courbe_thread ( struct CLIENT *client );
  extern void Proto_envoyer_type_num_mnemo_tag( int tag, int ss_tag, struct CLIENT *client,
                                                struct CMD_TYPE_NUM_MNEMONIQUE *critere );
- extern void Proto_editer_option_compteur_imp ( struct CLIENT *client,
-                                                struct CMD_TYPE_MNEMO_BASE *rezo_mnemo );
- extern void Proto_valider_editer_option_compteur_imp ( struct CLIENT *client,
-                                                        struct CMD_TYPE_OPTION_COMPTEUR_IMP *rezo_cpt );
  extern void Proto_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_BASE *rezo_mnemo );
  extern void Proto_valider_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_FULL *rezo_mnemo );
  extern void Proto_effacer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_BASE *rezo_mnemo );

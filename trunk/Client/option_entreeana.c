@@ -53,7 +53,7 @@
 /* Entrée: numéro du type d'entree ANA                                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- gchar *Type_ea_vers_string ( guint type )
+ static gchar *Type_ea_vers_string ( guint type )
   { if (type<NBR_TYPE_ENTREEANA) return( TYPE_EA[type] );
                             else return ( "Unknown" );
   }

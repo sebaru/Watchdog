@@ -48,7 +48,7 @@
        case MNEMO_CPTH:
             return( capteur->val_ech != Partage->ch[capteur->bit_controle].cpthdb.valeur );
        case MNEMO_CPT_IMP:
-            return( capteur->val_ech != Partage->ci[capteur->bit_controle].cpt_impdb.valeur );
+            return( capteur->val_ech != Partage->ci[capteur->bit_controle].confDB.valeur );
        default: return(FALSE);
      }
   }
@@ -115,17 +115,17 @@
        case MNEMO_CPT_IMP:
              { gfloat valeur;
                gchar *format;
-               valeur = Partage->ci[capteur->bit_controle].cpt_impdb.valeur;
-               valeur = valeur * (gfloat)Partage->ci[capteur->bit_controle].cpt_impdb.multi;      /* Multiplication ! */
-               switch (Partage->ci[capteur->bit_controle].cpt_impdb.type)
+               valeur = Partage->ci[capteur->bit_controle].confDB.valeur;
+               valeur = valeur * (gfloat)Partage->ci[capteur->bit_controle].confDB.multi;      /* Multiplication ! */
+               switch (Partage->ci[capteur->bit_controle].confDB.type)
                 { case CI_TOTALISATEUR: format = "%8.0f %s"; break;
                   default:              format = "%8.2f %s"; break;
                 }
                g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
                            format, valeur,
-                           Partage->ci[capteur->bit_controle].cpt_impdb.unite
+                           Partage->ci[capteur->bit_controle].confDB.unite
                          );
-               capteur->val_ech = Partage->ci[capteur->bit_controle].cpt_impdb.valeur;
+               capteur->val_ech = Partage->ci[capteur->bit_controle].confDB.valeur;
              }
             break;
        default:

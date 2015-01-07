@@ -48,6 +48,7 @@
  static GtkWidget *Table_options_DI;                     /* Table des options associées aux Digital Input */
  static GtkWidget *Check_DI_furtif;                                              /* Option DI - furtivité */
  static GtkWidget *Table_options_AI;                      /* Table des options associées aux Analog Input */
+ static GtkWidget *Table_options_CPTIMP;        /* Table des options associées aux compteurs d'impulsions */
 /**********************************************************************************************************/
 /* CB_ajouter_editer_mnemonique: Fonction appelée qd on appuie sur un des boutons de l'interface          */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
@@ -73,10 +74,8 @@
         { Option_mnemo.mnemo_di.furtif = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_DI_furtif));
           break;
         }
-       case MNEMO_ENTREE_ANA:
-        { Get_options_AI ( &Option_mnemo );
-          break;
-        }
+       case MNEMO_ENTREE_ANA: Get_options_AI     ( &Option_mnemo ); break;
+       case MNEMO_CPT_IMP   : Get_options_CPTIMP ( &Option_mnemo ); break;
 
      }
 
@@ -131,9 +130,11 @@
     type = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
     gtk_widget_hide ( Table_options_DI );
     gtk_widget_hide ( Table_options_AI );
+    gtk_widget_hide ( Table_options_CPTIMP );
     switch(type)
-     { case MNEMO_ENTREE_ANA: gtk_widget_show ( Table_options_AI ); break;
-       case MNEMO_ENTREE:     gtk_widget_show ( Table_options_DI ); break;
+     { case MNEMO_ENTREE_ANA: gtk_widget_show_all ( Table_options_AI ); break;
+       case MNEMO_ENTREE:     gtk_widget_show_all ( Table_options_DI ); break;
+       case MNEMO_CPT_IMP:    gtk_widget_show_all ( Table_options_CPTIMP ); break;
      }
   }
 /**********************************************************************************************************/
@@ -226,7 +227,7 @@
     table = gtk_table_new( 4, 4, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
-    gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX(hboite), table, FALSE, FALSE, 0 );
 
     i=0;
     texte = gtk_label_new( _("Type") );  /* Création de l'option menu pour le choix du type de mnemonique */
@@ -299,11 +300,18 @@
     Check_DI_furtif = gtk_check_button_new_with_label( _("Furtif") );
     gtk_table_attach_defaults( GTK_TABLE(Table_options_DI), Check_DI_furtif, 0, 1, i, i+1 );
 
+    gtk_widget_show_all( F_ajout );
 /************************************** Seconde page : spéciale analog Input ******************************/
     Table_options_AI = Get_options_AI_gtktable();
     gtk_table_set_row_spacings( GTK_TABLE(Table_options_AI), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(Table_options_AI), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), Table_options_AI, TRUE, TRUE, 0 );
+
+/************************************** Seconde page : spéciale compteur impulsion ************************/
+    Table_options_CPTIMP = Get_options_CPTIMP_gtktable();
+    gtk_table_set_row_spacings( GTK_TABLE(Table_options_CPTIMP), 5 );
+    gtk_table_set_col_spacings( GTK_TABLE(Table_options_CPTIMP), 5 );
+    gtk_box_pack_start( GTK_BOX(hboite), Table_options_CPTIMP, TRUE, TRUE, 0 );
 
 /**************************************** Positionnement des infos d'edition ******************************/
     if (mnemo_full)                                                         /* Si edition d'un mnemonique */
@@ -320,7 +328,6 @@
      }
 
     gtk_widget_grab_focus( Entry_lib );
-    gtk_widget_show_all( F_ajout );
     Rafraichir_sensibilite_options();
   }
 /*--------------------------------------------------------------------------------------------------------*/

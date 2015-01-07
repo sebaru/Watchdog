@@ -148,7 +148,7 @@
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  float CI( int num )
-  { if (num<NBR_COMPTEUR_IMP) return (Partage->ci[ num ].cpt_impdb.valeur);
+  { if (num<NBR_COMPTEUR_IMP) return (Partage->ci[ num ].confDB.valeur);
     else
      { if (!(Partage->top % 600))
         { Info_new( Config.log, Config.log_dls, LOG_INFO, "CI : num %d out of range", num ); }
@@ -561,16 +561,16 @@
     else
      { if (!reset) Partage->ci[ num ].actif = FALSE; }
 
-    switch (Partage->ci[ num ].cpt_impdb.type)                        /* Calcul de la valeur réelle du CI */
+    switch (Partage->ci[ num ].confDB.type)                        /* Calcul de la valeur réelle du CI */
      { case CI_TOTALISATEUR :
             if ( Partage->ci[num].last_update + 1 < Partage->top )
-             { Partage->ci[num].cpt_impdb.valeur = Partage->ci[num].val_en_cours2;
+             { Partage->ci[num].confDB.valeur = Partage->ci[num].val_en_cours2;
                Partage->ci[num].last_update = Partage->top;
              }
             break;
        case CI_MOYENNEUR_SEC:
             if ( Partage->ci[num].last_update + 10 < Partage->top )
-             { Partage->ci[num].cpt_impdb.valeur = (Partage->ci[num].cpt_impdb.valeur +
+             { Partage->ci[num].confDB.valeur = (Partage->ci[num].confDB.valeur +
                                                     Partage->ci[num].val_en_cours2)/2.0;
                Partage->ci[num].val_en_cours2 = 0.0;
                Partage->ci[num].last_update = Partage->top;
@@ -578,14 +578,14 @@
             break;
        case CI_MOYENNEUR_MIN:
             if ( Partage->ci[num].last_update + 600 < Partage->top )
-             { Partage->ci[num].cpt_impdb.valeur = (Partage->ci[num].cpt_impdb.valeur +
+             { Partage->ci[num].confDB.valeur = (Partage->ci[num].confDB.valeur +
                                                     Partage->ci[num].val_en_cours2)/2.0;
                Partage->ci[num].val_en_cours2 = 0.0;
                Partage->ci[num].last_update = Partage->top;
              }
             break;
      }
-    if (changed == TRUE) Ajouter_arch( MNEMO_CPT_IMP, num, Partage->ci[num].cpt_impdb.valeur );
+    if (changed == TRUE) Ajouter_arch( MNEMO_CPT_IMP, num, Partage->ci[num].confDB.valeur );
   }
 /**********************************************************************************************************/
 /* MSG: Positionnement des message DLS                                                                    */

@@ -132,8 +132,8 @@
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        if (num<NBR_COMPTEUR_IMP)
         { g_snprintf( chaine, sizeof(chaine), " CI%03d = %8.2f, type=%d, actif=%d, unite=%s, multi=%8.2f, val1=%8.2f, val2=%8.2f\n",
-                      num, Partage->ci[num].cpt_impdb.valeur, Partage->ci[num].cpt_impdb.type, Partage->ci[num].actif,
-                      Partage->ci[num].cpt_impdb.unite, Partage->ci[num].cpt_impdb.multi,
+                      num, Partage->ci[num].confDB.valeur, Partage->ci[num].confDB.type, Partage->ci[num].actif,
+                      Partage->ci[num].confDB.unite, Partage->ci[num].confDB.multi,
                       Partage->ci[num].val_en_cours1, Partage->ci[num].val_en_cours2
                     );
         } else

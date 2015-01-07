@@ -455,15 +455,16 @@
  extern void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup );
 
                                                                                /* Dans option_entreeana.c */
- extern gchar *Type_ea_vers_string ( guint type );
  extern void Get_options_AI ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
  extern GtkWidget *Get_options_AI_gtktable ( void );
  extern void Set_options_AI ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
 
-#ifdef bouh
                                                                                  /* Dans option_cpt_imp.c */
- extern void Proto_editer_option_cpt_imp ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_cpt_imp );
+ extern void Get_options_CPTIMP ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
+ extern GtkWidget *Get_options_CPTIMP_gtktable ( void );
+ extern void Set_options_CPTIMP ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
 
+#ifdef bouh
                                                                                    /* Dans option_tempo.c */
  extern void Proto_editer_option_tempo ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_tempo );
 #endif

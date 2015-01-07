@@ -39,7 +39,6 @@
  #include "Archive.h"
  #include "Admin.h"
  #include "Cpth_DB.h"
- #include "Cpt_imp_DB.h"
  #include "Tempo_DB.h"
  #include "Message_DB.h"
  #include "Camera_DB.h"
@@ -105,19 +104,6 @@
     GSList *Liste_abonne_msg;                                      /* liste de struct MSGDB msg a envoyer */
 
     GSList *Librairies;                                    /* Liste des librairies chargées pour Watchdog */
-  };
-
- struct DIGITAL_INPUT
-  { struct CMD_TYPE_MNEMO_DI confDB;
-    gboolean etat;
-  };
-
- struct ANALOG_INPUT
-  { struct CMD_TYPE_MNEMO_AI confDB;
-    gfloat  val_ech;
-    gfloat  val_avant_ech;
-    guint   last_arch;                                                     /* Date de la derniere archive */
-    guint   inrange;
   };
 
  struct SORTIE_TOR                                                         /* Définition d'une sortie TOR */

@@ -316,9 +316,13 @@
                  );
        Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
      }
-    Libere_DB_SQL(&db);
 
-    if (Modifier_configDB ( "global", "database_version", "2532" ))
+    if (database_version < 2541)
+     { g_snprintf( requete, sizeof(requete), "RENAME TABLE dls_cpt_imp TO mnemos_CptImp" );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+     }
+
+    if (Modifier_configDB ( "global", "database_version", "2541" ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
                 "Update_database_schema: updating Database_version OK" );
      }
@@ -326,5 +330,7 @@
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
                 "Update_database_schema: updating Database_version FAILED" );
      }
+
+    Libere_DB_SQL(&db);
   }
 /*--------------------------------------------------------------------------------------------------------*/

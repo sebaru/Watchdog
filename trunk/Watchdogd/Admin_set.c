@@ -65,7 +65,7 @@
      { int num, val;
        sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
        if (num<NBR_COMPTEUR_IMP)
-        { Partage->ci[num].cpt_impdb.valeur = (gfloat)val;
+        { Partage->ci[num].confDB.valeur = (gfloat)val;
           Partage->ci[num].val_en_cours1 = 0.0;
           Partage->ci[num].val_en_cours2 = (gfloat)val;
           g_snprintf( chaine, sizeof(chaine), " CI%03d = %d\n", num, val );
