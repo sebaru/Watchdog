@@ -124,15 +124,15 @@
 /* Entrée: le mnemo à créer                                                                               */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_ajouter_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_BASE *rezo_mnemonique )
+ void Proto_ajouter_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_FULL *rezo_mnemonique )
   { struct CMD_TYPE_MNEMO_BASE *result;
     gint id;
 
-    id = Ajouter_mnemo_baseDB ( rezo_mnemonique );
+    id = Ajouter_mnemo_fullDB ( rezo_mnemonique );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to add mnemo %s", rezo_mnemonique->libelle);
+                   "Unable to add mnemo %s", rezo_mnemonique->mnemo_base.libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -140,7 +140,7 @@
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate mnemo %s", rezo_mnemonique->libelle);
+                          "Unable to locate mnemo %s", rezo_mnemonique->mnemo_base.libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }

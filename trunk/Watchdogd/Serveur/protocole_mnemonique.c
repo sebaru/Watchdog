@@ -62,8 +62,8 @@
              }
             break;
        case SSTAG_CLIENT_ADD_MNEMONIQUE:
-             { struct CMD_TYPE_MNEMO_BASE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
                Proto_ajouter_mnemonique( client, mnemo );
              }
             break;

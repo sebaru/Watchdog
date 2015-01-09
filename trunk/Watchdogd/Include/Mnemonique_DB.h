@@ -66,7 +66,7 @@
  extern gboolean Recuperer_mnemo_baseDB_by_command_text ( struct DB **db,
                                                      gchar *commande_pure, gboolean exact );
  extern struct CMD_TYPE_MNEMO_BASE *Recuperer_mnemo_baseDB_suite( struct DB **db );
- extern gint Ajouter_mnemo_baseDB ( struct CMD_TYPE_MNEMO_BASE *mnemo );
+ extern gint Ajouter_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo );
  extern gboolean Retirer_mnemo_baseDB ( struct CMD_TYPE_MNEMO_BASE *mnemo );
  extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB_type_num ( struct CMD_TYPE_NUM_MNEMONIQUE *critere );
  extern struct CMD_TYPE_MNEMO_FULL *Rechercher_mnemo_fullDB ( guint id );

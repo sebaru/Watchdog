@@ -103,6 +103,7 @@
     gchar requete[1024];
     gboolean retour;
     struct DB *db;
+    gint last_id;
 
     libelle      = Normaliser_chaine ( mnemo->libelle );                 /* Formatage correct des chaines */
     acro         = Normaliser_chaine ( mnemo->acronyme );                /* Formatage correct des chaines */
@@ -147,50 +148,36 @@
      { Libere_DB_SQL(&db); 
        return(-1);
      }
-#ifdef bouh
-    if (ajout == TRUE)
-     { last_id = Recuperer_last_ID_SQL ( db );
-       switch (mnemo->type)
-        { case MNEMO_ENTREE_ANA:
-               g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
-                           "INSERT INTO %s(min,max,unite,id_mnemo) VALUES "
-                           "('%f','%f','%d','%d')", NOM_TABLE_ENTREEANA, 0.0, 100.0, 0, last_id );
-               Lancer_requete_SQL ( db, requete );
-               break;
-          case MNEMO_CPT_IMP:
-               g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
-                           "INSERT INTO %s(val,id_mnemo,type_ci,multi,unite) VALUES "
-                           "('%d','%d','%d','%f','%s')", NOM_TABLE_CPT_IMP, 0, last_id, 0, 1.0, "n/a" );
-               Lancer_requete_SQL ( db, requete );
-               break;
-          case MNEMO_CPTH:
-               g_snprintf( requete, sizeof(requete),                                          /* Requete SQL */
-                           "INSERT INTO %s(val,id_mnemo) VALUES "
-                           "('%d','%d')", NOM_TABLE_CPTH, 0, last_id );
-               Lancer_requete_SQL ( db, requete );
-               break;
-          case MNEMO_TEMPO:
-               g_snprintf( requete, sizeof(requete),                                       /* Requete SQL */
-                           "INSERT INTO %s(id_mnemo,delai_on,min_on,max_on,delai_off) VALUES "
-                           "('%d','%d','%d','%d','%d')", NOM_TABLE_TEMPO, last_id, 10, 0, 0, 0 );
-               Lancer_requete_SQL ( db, requete );
-               break;
-          default:
-               break;
-        }
-     }
-#endif
+
+    if (ajout==TRUE) last_id = Recuperer_last_ID_SQL ( db );
     Libere_DB_SQL(&db);
-    if (ajout==TRUE) return( Recuperer_last_ID_SQL ( db ) );
+
+    if (ajout==TRUE) return(last_id);
     else return(0);
+  }
+/**********************************************************************************************************/
+/* Modifier_mnemo_fullDB: Modifie la configuration du mnemo paramètre                                     */
+/* Entrée: une structure de mnemo FULL                                                                    */
+/* Sortie: FALSE si erreur                                                                                */
+/**********************************************************************************************************/
+ static gboolean Modifier_mnemo_optionsDB ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
+  { switch (mnemo_full->mnemo_base.type)
+     { case MNEMO_ENTREE    : return( Modifier_mnemo_diDB     ( mnemo_full ) );
+       case MNEMO_ENTREE_ANA: return( Modifier_mnemo_aiDB     ( mnemo_full ) );
+       case MNEMO_CPT_IMP   : return( Modifier_mnemo_cptimpDB ( mnemo_full ) );
+       default : return(TRUE);
+     }
   }
 /**********************************************************************************************************/
 /* Ajouter_mnemo_baseDB: Ajout d'un nouvel mnemonique de base                                             */
 /* Entrée: une structure representant le mnemonique                                                       */
 /* Sortie: l'id du nouveau mnemonique, ou -1 si erreur                                                    */
 /**********************************************************************************************************/
- gint Ajouter_mnemo_baseDB ( struct CMD_TYPE_MNEMO_BASE *mnemo )
-  { return(Ajouter_Modifier_mnemo_baseDB( mnemo, TRUE )); }
+ gint Ajouter_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo )
+  { mnemo->mnemo_base.id = Ajouter_Modifier_mnemo_baseDB( &mnemo->mnemo_base, TRUE );
+    Modifier_mnemo_optionsDB ( mnemo );
+    return(mnemo->mnemo_base.id);
+  }
 /**********************************************************************************************************/
 /* Modifier_mnemo_baseDB: Modification d'un mnemo Watchdog                                                */
 /* Entrée: un mnemonique de base                                                                          */
@@ -500,6 +487,15 @@
            }
           break;
         }
+       case MNEMO_CPT_IMP:
+        { struct CMD_TYPE_MNEMO_CPT_IMP *mnemo_cpt;
+          mnemo_cpt = Rechercher_mnemo_cptimpDB ( id );
+          if (mnemo_cpt) 
+           { memcpy ( &mnemo_full->mnemo_cptimp, mnemo_cpt, sizeof(struct CMD_TYPE_MNEMO_CPT_IMP) );
+             g_free(mnemo_cpt);
+           }
+          break;
+        }
      }
     return(mnemo_full);
   }
@@ -513,11 +509,10 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_mnemo_fullDB: Modifier_mnemo_baseDB failed" );
        return(FALSE);
      }
-
-    switch (mnemo_full->mnemo_base.type)
-     { case MNEMO_ENTREE:     return( Modifier_mnemo_diDB ( mnemo_full ) );
-       case MNEMO_ENTREE_ANA: return( Modifier_mnemo_aiDB ( mnemo_full ) );
-       default : return(TRUE);
+    if (Modifier_mnemo_optionsDB ( mnemo_full ) == FALSE)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_mnemo_fullDB: Modifier_mnemo_optionsDB failed" );
+       return(FALSE);
      }
+    return(TRUE);
   }
 /*--------------------------------------------------------------------------------------------------------*/

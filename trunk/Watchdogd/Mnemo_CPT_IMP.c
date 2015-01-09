@@ -78,7 +78,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT num,val,type_ci,multi,unite"
+                "SELECT num,val,type_ci,multi,unite_string"
                 " FROM %s"
                 " INNER JOIN %s ON %s.id_mnemo = %s.id"
                 " WHERE %s.type=%d ORDER BY %s.num",
@@ -139,10 +139,10 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT num,val,type_ci,multi,unite"
+                "SELECT num,val,type_ci,multi,unite_string"
                 " FROM %s"
                 " INNER JOIN %s ON %s.id_mnemo = %s.id"
-                " WHERE %s.id_mnemo=%d",
+                " WHERE %s.id=%d",
                 NOM_TABLE_MNEMO,                                                                  /* From */
                 NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO,            /* INNER JOIN */
                 NOM_TABLE_MNEMO, id
@@ -174,12 +174,13 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s (id_mnemo,type_ci,multi,unite) VALUES "
+                "INSERT INTO %s (id_mnemo,type_ci,multi,unite_string) VALUES "
                 "('%d','%d','%f','%s') "
                 "ON DUPLICATE KEY UPDATE "
-                "type_ci=VALUES(type_ci), multi=VALUES(multi), unite=VALUES(unite) ",
-                NOM_TABLE_MNEMO_CPTIMP, mnemo_full->mnemo_base.id,
-                mnemo_full->mnemo_cptimp.multi, mnemo_full->mnemo_cptimp.type, unite );
+                "type_ci=VALUES(type_ci), multi=VALUES(multi), unite_string=VALUES(unite_string) ",
+                NOM_TABLE_MNEMO_CPTIMP,
+                mnemo_full->mnemo_base.id, mnemo_full->mnemo_cptimp.type,
+                mnemo_full->mnemo_cptimp.multi, unite );
     g_free(unite);
 
     db = Init_DB_SQL();       

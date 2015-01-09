@@ -322,9 +322,10 @@
        gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type), mnemo_full->mnemo_base.type );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), (double)mnemo_full->mnemo_base.num );
 
-/****************************************** Spécifique DI *************************************************/
+/****************************************** Spécifique Options ********************************************/
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_DI_furtif), mnemo_full->mnemo_di.furtif );
        Set_options_AI ( mnemo_full );
+       Set_options_CPTIMP ( mnemo_full );
      }
 
     gtk_widget_grab_focus( Entry_lib );
