@@ -61,12 +61,34 @@
   };
 
  struct TEMPO                                                           /* Définition d'une temporisation */
-  { struct CMD_TYPE_OPTION_TEMPO option_tempo;
+  { struct CMD_TYPE_MNEMO_TEMPO confDB;
                                                                             /* Variables de travail (run) */
     guint status;                                                           /* Statut de la temporisation */
     guint date_on;                                          /* date a partir de laquelle la tempo sera ON */
     guint date_off;                                        /* date a partir de laquelle la tempo sera OFF */
     gboolean state;
+  };
+
+ struct DIGITAL_INPUT
+  { struct CMD_TYPE_MNEMO_DI confDB;
+    gboolean etat;
+  };
+
+ struct ANALOG_INPUT
+  { struct CMD_TYPE_MNEMO_AI confDB;
+    gfloat  val_ech;
+    gfloat  val_avant_ech;
+    guint   last_arch;                                                     /* Date de la derniere archive */
+    guint   inrange;
+  };
+
+ struct CPT_IMP
+  { struct CMD_TYPE_MNEMO_CPT_IMP confDB;
+    gboolean actif;                                                       /* Mémorisation de l'etat du CI */
+    gfloat val_en_cours1;                                 /* valeur en cours pour le calcul via les ratio */
+    gfloat val_en_cours2;                     /* valeur en cours avant interprétation selon le type de CI */
+    time_t last_update;                               /* date de derniere update de la valeur du compteur */
+    guint last_arch;                                 /* Date de dernier enregistrement en base de données */
   };
 
  struct COM_DLS                                             /* Communication entre le serveur et DLS */

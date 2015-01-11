@@ -37,8 +37,6 @@
  #define NBR_CARAC_UNITE_MNEMONIQUE          8
  #define NBR_CARAC_UNITE_MNEMONIQUE_UTF8     (2*NBR_CARAC_UNITE_MNEMONIQUE)
 
- #include "Reseaux_option_tempo.h"
-
  enum
   { MNEMO_BISTABLE,                                               /* Definitions des types de mnemoniques */
     MNEMO_MONOSTABLE,
@@ -109,6 +107,15 @@
     gchar  unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                      /* Km, h, ° ... */
   };
 
+/******************************************* Pour les temporisations **************************************/
+ struct CMD_TYPE_MNEMO_TEMPO
+  { guint  num;                                                                     /* Numero de la tempo */
+    guint delai_on;                                 /* delai avant mise à un (fixé par option mnémonique) */
+    guint delai_off;                              /* delai avant mise à zero (fixé par option mnémonique) */
+    guint min_on;        /* Durée minimale pendant laquelle la tempo sera ON (fixé par option mnémonique) */
+    guint max_on;        /* Durée maximale pendant laquelle la tempo sera ON (fixé par option mnémonique) */
+  };
+
 /*********************************************** Suite des structures *************************************/
  struct CMD_TYPE_MNEMONIQUES
   { guint nbr_mnemos;                                /* Nombre de structure CMD_TYPE_MNEMONIQUE suivantes */
@@ -125,7 +132,7 @@
     union { struct CMD_TYPE_MNEMO_DI mnemo_di;
             struct CMD_TYPE_MNEMO_AI mnemo_ai;
             struct CMD_TYPE_MNEMO_CPT_IMP mnemo_cptimp;
-            /*struct CMD_TYPE_OPTION_TEMPO tempo;*/
+            struct CMD_TYPE_MNEMO_TEMPO mnemo_tempo;
           };
 
   };
@@ -153,4 +160,3 @@
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
-

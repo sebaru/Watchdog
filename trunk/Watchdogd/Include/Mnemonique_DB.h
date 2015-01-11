@@ -36,28 +36,7 @@
  #define NOM_TABLE_MNEMO_DI     "mnemos_DigitalInput"
  #define NOM_TABLE_MNEMO_AI     "mnemos_AnalogInput"
  #define NOM_TABLE_MNEMO_CPTIMP "mnemos_CptImp"
-
- struct DIGITAL_INPUT
-  { struct CMD_TYPE_MNEMO_DI confDB;
-    gboolean etat;
-  };
-
- struct ANALOG_INPUT
-  { struct CMD_TYPE_MNEMO_AI confDB;
-    gfloat  val_ech;
-    gfloat  val_avant_ech;
-    guint   last_arch;                                                     /* Date de la derniere archive */
-    guint   inrange;
-  };
-
- struct CPT_IMP
-  { struct CMD_TYPE_MNEMO_CPT_IMP confDB;
-    gboolean actif;                                                       /* Mémorisation de l'etat du CI */
-    gfloat val_en_cours1;                                 /* valeur en cours pour le calcul via les ratio */
-    gfloat val_en_cours2;                     /* valeur en cours avant interprétation selon le type de CI */
-    time_t last_update;                               /* date de derniere update de la valeur du compteur */
-    guint last_arch;                                 /* Date de dernier enregistrement en base de données */
-  };
+ #define NOM_TABLE_MNEMO_TEMPO  "mnemos_Tempo"
 
 /*************************************** Définitions des prototypes ***************************************/
  extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB ( guint id );
@@ -85,6 +64,10 @@
  extern struct CMD_TYPE_MNEMO_CPT_IMP *Rechercher_mnemo_cptimpDB ( guint id );
  extern gboolean Modifier_mnemo_cptimpDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
  extern void Charger_cpt_imp ( void );
+
+ extern void Charger_tempo ( void );                                                   /* Dans Mnemo_AI.c */
+ extern struct CMD_TYPE_MNEMO_AI *Rechercher_mnemo_tempoDB ( guint id );
+ extern gboolean Modifier_mnemo_tempoDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

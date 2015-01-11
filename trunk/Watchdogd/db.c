@@ -322,6 +322,11 @@
        Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
      }
 
+    if (database_version < 2543)
+     { g_snprintf( requete, sizeof(requete), "RENAME TABLE tempo TO mnemos_Tempo" );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+     }
+
     if (Modifier_configDB ( "global", "database_version", "2541" ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
                 "Update_database_schema: updating Database_version OK" );

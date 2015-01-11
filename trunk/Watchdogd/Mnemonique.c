@@ -77,7 +77,7 @@
                break;
           case MNEMO_TEMPO:
                g_snprintf( requete, sizeof(requete),                                       /* Requete SQL */
-               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_TEMPO, mnemo_a_virer->id );
+               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_MNEMO_TEMPO, mnemo_a_virer->id );
                Lancer_requete_SQL ( db, requete );
                break;
           default:

@@ -10,7 +10,7 @@ noinst_HEADERS    = Db.h Message_DB.h Histo_DB.h \
                     Mnemonique_DB.h \
                     Proto_traductionDLS.h \
                     watchdogd.h Dls.h Admin.h \
-                    Cpth_DB.h Tempo_DB.h \
+                    Cpth_DB.h \
                     Archive.h Scenario_DB.h Asterisk_DB.h
 
 include_HEADERS   = Module_dls.h 
