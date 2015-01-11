@@ -454,6 +454,11 @@
                                                                              /* Dans supervision_camera.c */
  extern void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup );
 
+                                                                               /* Dans option_entreetor.c */
+ extern void Get_options_DI ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
+ extern GtkWidget *Get_options_DI_gtktable ( void );
+ extern void Set_options_DI ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
+
                                                                                /* Dans option_entreeana.c */
  extern void Get_options_AI ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
  extern GtkWidget *Get_options_AI_gtktable ( void );

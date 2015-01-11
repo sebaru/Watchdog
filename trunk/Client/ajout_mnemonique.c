@@ -46,7 +46,6 @@
  static struct CMD_TYPE_MNEMO_FULL Option_mnemo;                         /* Mnemonique en cours d'édition */
  static GList *Liste_index_dls;
  static GtkWidget *Table_options_DI;                     /* Table des options associées aux Digital Input */
- static GtkWidget *Check_DI_furtif;                                              /* Option DI - furtivité */
  static GtkWidget *Table_options_AI;                      /* Table des options associées aux Analog Input */
  static GtkWidget *Table_options_CPTIMP;        /* Table des options associées aux compteurs d'impulsions */
 /**********************************************************************************************************/
@@ -70,13 +69,9 @@
     Option_mnemo.mnemo_base.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
 
     switch ( Option_mnemo.mnemo_base.type )
-     { case MNEMO_ENTREE:
-        { Option_mnemo.mnemo_di.furtif = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_DI_furtif));
-          break;
-        }
+     { case MNEMO_ENTREE    : Get_options_DI     ( &Option_mnemo ); break;
        case MNEMO_ENTREE_ANA: Get_options_AI     ( &Option_mnemo ); break;
        case MNEMO_CPT_IMP   : Get_options_CPTIMP ( &Option_mnemo ); break;
-
      }
 
     switch(reponse)
@@ -286,21 +281,13 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_notebook_append_page( GTK_NOTEBOOK(notebook), hboite, gtk_label_new ( _("Specific Options") ) );
 
+    gtk_widget_show_all( F_ajout );
 /************************************** Seconde page : spéciale Digital Input *****************************/
-    Table_options_DI = gtk_table_new( 5, 2, TRUE );
+    Table_options_DI = Get_options_DI_gtktable();
     gtk_table_set_row_spacings( GTK_TABLE(Table_options_DI), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(Table_options_DI), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), Table_options_DI, TRUE, TRUE, 0 );
 
-    i = 0;
-    texte = gtk_label_new( _("Options for Digital Inputs") );
-    gtk_table_attach_defaults( GTK_TABLE(Table_options_DI), texte, 0, 2, i, i+1 );
-
-    i++;
-    Check_DI_furtif = gtk_check_button_new_with_label( _("Furtif") );
-    gtk_table_attach_defaults( GTK_TABLE(Table_options_DI), Check_DI_furtif, 0, 1, i, i+1 );
-
-    gtk_widget_show_all( F_ajout );
 /************************************** Seconde page : spéciale analog Input ******************************/
     Table_options_AI = Get_options_AI_gtktable();
     gtk_table_set_row_spacings( GTK_TABLE(Table_options_AI), 5 );
@@ -323,7 +310,7 @@
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), (double)mnemo_full->mnemo_base.num );
 
 /****************************************** Spécifique Options ********************************************/
-       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_DI_furtif), mnemo_full->mnemo_di.furtif );
+       Set_options_DI ( mnemo_full );
        Set_options_AI ( mnemo_full );
        Set_options_CPTIMP ( mnemo_full );
      }
