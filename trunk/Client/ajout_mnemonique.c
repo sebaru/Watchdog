@@ -48,6 +48,7 @@
  static GtkWidget *Table_options_DI;                     /* Table des options associées aux Digital Input */
  static GtkWidget *Table_options_AI;                      /* Table des options associées aux Analog Input */
  static GtkWidget *Table_options_CPTIMP;        /* Table des options associées aux compteurs d'impulsions */
+ static GtkWidget *Table_options_Tempo;                  /* Table des options associées aux temporisation */
 /**********************************************************************************************************/
 /* CB_ajouter_editer_mnemonique: Fonction appelée qd on appuie sur un des boutons de l'interface          */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
@@ -72,6 +73,7 @@
      { case MNEMO_ENTREE    : Get_options_DI     ( &Option_mnemo ); break;
        case MNEMO_ENTREE_ANA: Get_options_AI     ( &Option_mnemo ); break;
        case MNEMO_CPT_IMP   : Get_options_CPTIMP ( &Option_mnemo ); break;
+       case MNEMO_TEMPO     : Get_options_Tempo  ( &Option_mnemo ); break;
      }
 
     switch(reponse)
@@ -126,10 +128,12 @@
     gtk_widget_hide ( Table_options_DI );
     gtk_widget_hide ( Table_options_AI );
     gtk_widget_hide ( Table_options_CPTIMP );
+    gtk_widget_hide ( Table_options_Tempo );
     switch(type)
      { case MNEMO_ENTREE_ANA: gtk_widget_show_all ( Table_options_AI ); break;
-       case MNEMO_ENTREE:     gtk_widget_show_all ( Table_options_DI ); break;
-       case MNEMO_CPT_IMP:    gtk_widget_show_all ( Table_options_CPTIMP ); break;
+       case MNEMO_ENTREE    : gtk_widget_show_all ( Table_options_DI ); break;
+       case MNEMO_CPT_IMP   : gtk_widget_show_all ( Table_options_CPTIMP ); break;
+       case MNEMO_TEMPO     : gtk_widget_show_all ( Table_options_Tempo ); break;
      }
   }
 /**********************************************************************************************************/
@@ -313,6 +317,7 @@
        Set_options_DI ( mnemo_full );
        Set_options_AI ( mnemo_full );
        Set_options_CPTIMP ( mnemo_full );
+       Set_options_Tempo ( mnemo_full );
      }
 
     gtk_widget_grab_focus( Entry_lib );

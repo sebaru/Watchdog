@@ -464,15 +464,15 @@
  extern GtkWidget *Get_options_AI_gtktable ( void );
  extern void Set_options_AI ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
 
+                                                                                   /* Dans option_tempo.c */
+ extern void Get_options_Tempo ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
+ extern GtkWidget *Get_options_Tempo_gtktable ( void );
+ extern void Set_options_Tempo ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
+
                                                                                  /* Dans option_cpt_imp.c */
  extern void Get_options_CPTIMP ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
  extern GtkWidget *Get_options_CPTIMP_gtktable ( void );
  extern void Set_options_CPTIMP ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
-
-#ifdef bouh
-                                                                                   /* Dans option_tempo.c */
- extern void Proto_editer_option_tempo ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_tempo );
-#endif
 
  extern GtkPrintOperation *New_print_job ( gchar *nom );                                  /* Dans print.c */
  extern void Print_draw_page ( GtkPrintOperation *operation,

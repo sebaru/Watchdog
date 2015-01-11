@@ -38,8 +38,8 @@
  static GtkWidget *Check_DI_furtif;                                              /* Option DI - furtivité */
 
 /**********************************************************************************************************/
-/* Get_options_AI: Rempli une structure mnemo depuis les informations de l'ihm                            */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
+/* Get_options_DI: Rempli une structure mnemo depuis les informations de l'ihm                            */
+/* Entrée: le mnemonique a remplir                                                                        */
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  void Get_options_DI ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
@@ -48,15 +48,15 @@
     mnemo->furtif = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_DI_furtif));
   }
 /**********************************************************************************************************/
-/* Ajouter_entreetor: Ajoute un entreetor au systeme                                                      */
+/* Get_options_DI_gtktable: Renvoie le widget lié à l'édition du mnemonique DI                            */
 /* Entrée: rien                                                                                           */
-/* sortie: rien                                                                                           */
+/* sortie: le widget table                                                                                */
 /**********************************************************************************************************/
  GtkWidget *Get_options_DI_gtktable ( void )
   { GtkWidget *table, *texte;
     gint i;
 
-    table = gtk_table_new( 5, 4, TRUE );
+    table = gtk_table_new( 5, 2, TRUE );
     i = 0;
     texte = gtk_label_new( _("Options for Digital Inputs") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 2, i, i+1 );
