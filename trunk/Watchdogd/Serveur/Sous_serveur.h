@@ -228,8 +228,6 @@
  extern void Proto_valider_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_FULL *rezo_mnemo );
  extern void Proto_effacer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_BASE *rezo_mnemo );
  extern void Proto_ajouter_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_FULL *rezo_mnemo );
- extern void Proto_editer_option_tempo ( struct CLIENT *client, struct CMD_TYPE_MNEMO_BASE *rezo_mnemo );
- extern void Proto_valider_editer_option_tempo ( struct CLIENT *client, struct CMD_TYPE_OPTION_TEMPO *rezo_tempo );
 
  
  extern void *Envoyer_histo_thread ( struct CLIENT *client );                       /* Dans envoi_histo.c */
