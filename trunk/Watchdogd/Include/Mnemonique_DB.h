@@ -65,8 +65,8 @@
  extern gboolean Modifier_mnemo_cptimpDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
  extern void Charger_cpt_imp ( void );
 
- extern void Charger_tempo ( void );                                                   /* Dans Mnemo_AI.c */
- extern struct CMD_TYPE_MNEMO_AI *Rechercher_mnemo_tempoDB ( guint id );
+ extern void Charger_tempo ( void );                                                /* Dans Mnemo_tempo.c */
+ extern struct CMD_TYPE_MNEMO_TEMPO *Rechercher_mnemo_tempoDB ( guint id );
  extern gboolean Modifier_mnemo_tempoDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
 
 #endif

@@ -165,6 +165,7 @@
      { case MNEMO_ENTREE    : return( Modifier_mnemo_diDB     ( mnemo_full ) );
        case MNEMO_ENTREE_ANA: return( Modifier_mnemo_aiDB     ( mnemo_full ) );
        case MNEMO_CPT_IMP   : return( Modifier_mnemo_cptimpDB ( mnemo_full ) );
+       case MNEMO_TEMPO     : return( Modifier_mnemo_tempoDB  ( mnemo_full ) );
        default : return(TRUE);
      }
   }
@@ -493,6 +494,15 @@
           if (mnemo_cpt) 
            { memcpy ( &mnemo_full->mnemo_cptimp, mnemo_cpt, sizeof(struct CMD_TYPE_MNEMO_CPT_IMP) );
              g_free(mnemo_cpt);
+           }
+          break;
+        }
+       case MNEMO_TEMPO:
+        { struct CMD_TYPE_MNEMO_TEMPO *mnemo_tempo;
+          mnemo_tempo = Rechercher_mnemo_tempoDB ( id );
+          if (mnemo_tempo) 
+           { memcpy ( &mnemo_full->mnemo_tempo, mnemo_tempo, sizeof(struct CMD_TYPE_MNEMO_TEMPO) );
+             g_free(mnemo_tempo);
            }
           break;
         }

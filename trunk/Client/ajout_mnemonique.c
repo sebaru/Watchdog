@@ -304,6 +304,12 @@
     gtk_table_set_col_spacings( GTK_TABLE(Table_options_CPTIMP), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), Table_options_CPTIMP, TRUE, TRUE, 0 );
 
+/************************************** Seconde page : spéciale temporisations ****************************/
+    Table_options_Tempo = Get_options_Tempo_gtktable();
+    gtk_table_set_row_spacings( GTK_TABLE(Table_options_Tempo), 5 );
+    gtk_table_set_col_spacings( GTK_TABLE(Table_options_Tempo), 5 );
+    gtk_box_pack_start( GTK_BOX(hboite), Table_options_Tempo, TRUE, TRUE, 0 );
+
 /**************************************** Positionnement des infos d'edition ******************************/
     if (mnemo_full)                                                         /* Si edition d'un mnemonique */
      { gtk_entry_set_text( GTK_ENTRY(Entry_lib),     mnemo_full->mnemo_base.libelle );

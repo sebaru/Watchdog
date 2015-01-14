@@ -109,7 +109,7 @@
 /* Entrée: un log et une database                                                                         */
 /* Sortie: une GList                                                                                      */
 /**********************************************************************************************************/
- struct CMD_TYPE_MNEMO_TEMPO *Rechercher_tempoDB ( guint id )
+ struct CMD_TYPE_MNEMO_TEMPO *Rechercher_mnemo_tempoDB ( guint id )
   { struct CMD_TYPE_MNEMO_TEMPO *tempo;
     gchar requete[512];
     struct DB *db;
@@ -146,7 +146,7 @@
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
 /* Sortie: FALSE si probleme                                                                              */
 /**********************************************************************************************************/
- gboolean Modifier_tempoDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
+ gboolean Modifier_mnemo_tempoDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { gchar requete[1024];
     gboolean retour;
     struct DB *db;
