@@ -67,7 +67,7 @@
                return(FALSE);
              }
 
-    Info_new( Config.log, Config.log_dls, LOG_INFO, "Charger_un_plugin: plugin id = %04d (%s) loaded",
+    Info_new( Config.log, Config.log_dls, LOG_INFO, "Charger_un_plugin: plugin %04d loaded (%s)",
               dls->plugindb.id, dls->plugindb.nom );
     strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );
     dls->handle   = handle;
@@ -170,7 +170,8 @@
        dlclose( plugin->handle );
        Partage->com_dls.Plugins = g_slist_remove( Partage->com_dls.Plugins, plugin );
                                                          /* Destruction de l'entete associé dans la GList */
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "Decharger_plugins: plugin %04d unloaded", plugin->plugindb.id );
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "Decharger_plugins: plugin %04d unloaded (%s)",
+                 plugin->plugindb.id, plugin->plugindb.nom );
        g_free( plugin );
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
@@ -202,9 +203,7 @@
                  g_free(plugin);
                                                                       /* Si option "compil" au demarrage" */
                  if (Config.compil == 1) Compiler_source_dls( FALSE, FALSE, dls->plugindb.id, NULL, 0 );
-                 if (Charger_un_plugin( dls )==TRUE)
-                  { Info_new( Config.log, Config.log_dls, LOG_INFO, "Plugin DLS %s loaded", dls->plugindb.nom ); }
-                 else g_free(dls);                                                  /* Libération mémoire */
+                 if (Charger_un_plugin( dls )==FALSE) g_free(dls);                                                  /* Libération mémoire */
                }
         } while ( TRUE );
      }

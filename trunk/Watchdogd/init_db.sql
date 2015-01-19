@@ -106,19 +106,19 @@ CREATE TABLE IF NOT EXISTS `dls_cpth` (
 -- Structure de la table `dls_cpt_imp`
 --
 
-CREATE TABLE IF NOT EXISTS `dls_cpt_imp` (
+CREATE TABLE IF NOT EXISTS `mnemos_CptImp` (
   `id_mnemo` int(11) NOT NULL,
   `val` float NOT NULL,
   `type_ci` int(11) NOT NULL,
   `multi` float NOT NULL DEFAULT '1',
-  `unite` text COLLATE utf8_unicode_ci NOT NULL,
+  `unite_string` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id_mnemo`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `eana`
+-- Structure de la table `mnemos_AnalogInput`
 --
 
 CREATE TABLE IF NOT EXISTS `mnemos_AnalogInput` (
@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AnalogInput` (
   PRIMARY KEY (`id_mnemo`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-INSERT INTO `eana` (`id_mnemo`, `type`, `min`, `max`, `unite`) VALUES
+INSERT INTO `mnemos_AnalogInput` (`id_mnemo`, `type`, `min`, `max`, `unite`) VALUES
 (10, 0, 0, 100, 'ms'),
 (11, 0, 0, 100, 't/s'),
 (12, 0, 0, 100, 'bit/s'),
@@ -703,7 +703,7 @@ CREATE TABLE IF NOT EXISTS `rs485` (
 -- Structure de la table `tempo`
 --
 
-CREATE TABLE IF NOT EXISTS `tempo` (
+CREATE TABLE IF NOT EXISTS `mnemos_Tempo` (
   `id_mnemo` int(11) NOT NULL,
   `delai_on` int(11) NOT NULL DEFAULT '0',
   `delai_off` tinyint(1) NOT NULL DEFAULT '0',

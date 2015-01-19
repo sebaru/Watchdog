@@ -42,7 +42,6 @@
     gchar    user_jabberid[80];
     gchar    user_name[80];
     gchar    user_comment[80];
-    guint    user_bit_presence;
     gboolean user_enable;
     gboolean user_imsg_enable;
     gboolean user_allow_cde;

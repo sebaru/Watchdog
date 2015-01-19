@@ -92,7 +92,7 @@
  gboolean Recuperer_imsgDB ( struct DB *db )
   { gchar requete[512];
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,name,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_bit_presence,imsg_available "
+                "SELECT id,name,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available "
                 " FROM %s as user ORDER BY user.name",
                 NOM_TABLE_UTIL );
 
@@ -106,7 +106,7 @@
  static gboolean Recuperer_all_available_imsgDB ( struct DB *db )
   { gchar requete[512];
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,name,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_bit_presence,imsg_available "
+                "SELECT id,name,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available "
                 " FROM %s as user WHERE enable=1 AND imsg_enable=1 AND imsg_available=1 ORDER BY user.name",
                 NOM_TABLE_UTIL );
 
@@ -136,8 +136,7 @@
        imsg->user_enable       = atoi(db->row[2]);
        imsg->user_imsg_enable  = atoi(db->row[4]);
        imsg->user_allow_cde    = atoi(db->row[6]);
-       imsg->user_bit_presence = atoi(db->row[7]);
-       imsg->user_available    = atoi(db->row[8]);
+       imsg->user_available    = atoi(db->row[7]);
      }
     return(imsg);
   }
@@ -234,7 +233,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,name,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_bit_presence,imsg_available "
+                "SELECT id,name,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available "
                 " FROM %s as user WHERE enable=1 AND imsg_allow_cde=1 AND imsg_jabberid LIKE '%s' LIMIT 1",
                 NOM_TABLE_UTIL, jabberid );
     g_free(jabberid);
