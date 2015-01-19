@@ -606,10 +606,19 @@
         { Partage->g[num].changes = 0; }
 
        if ( Partage->g[num].changes <= 5 ) 
-        { pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
-          Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg,
-                                                         GINT_TO_POINTER(num) );
-          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+        { struct MESSAGES_EVENT *event;
+          event = (struct MESSAGES_EVENT *)g_malloc0( sizeof ( struct MESSAGES_EVENT ) );
+          if (!event)
+           { Info_new( Config.log, Config.log_dls, LOG_ERR,
+                      "MSG: malloc Event failed. Memory error for MSG%d", num );
+           }
+          else
+           { event->num  = num;
+             event->etat = etat;
+             pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
+             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
+             pthread_mutex_unlock( &Partage->com_msrv.synchro );
+           }
           Partage->g[num].changes++;
         } else if ( ! (Partage->top % 50 ))                /* Si persistence on prévient toutes les 5 sec */
         { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "MSG: last_change trop tot for MSG%03d!", num ); }

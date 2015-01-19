@@ -117,7 +117,7 @@
     memcpy( &histo.msg, msg, sizeof(struct CMD_TYPE_MESSAGE) );                       /* Ajout dans la DB */
     g_free( msg );                                                 /* On a plus besoin de cette reference */
 
-    if (!histo.msg.enable)                             /* Distribution du message aux sous serveurs */
+    if (!histo.msg.enable)                                   /* Distribution du message aux sous serveurs */
      { Info_new( Config.log, Config.log_msrv, LOG_INFO, 
                 "Gerer_arrive_message_dls_on: Message %03d not enabled !", num );
        return;
@@ -182,21 +182,20 @@
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Gerer_arrive_MSGxxx_dls ( void )
-  { gint num, val;
+  { struct MESSAGES_EVENT *event;
 
-    if (Partage->com_msrv.liste_msg)
+    while (Partage->com_msrv.liste_msg)
      { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
-       num = GPOINTER_TO_INT(Partage->com_msrv.liste_msg->data);         /* Recuperation du numero de msg */
-       val = Partage->g[num].etat;
-       Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg,
-                                                      GINT_TO_POINTER(num) );
+       event = Partage->com_msrv.liste_msg->data;                        /* Recuperation du numero de msg */
+       Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg, event );
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                 "Gerer_arrive_message_dls: Handle MSG%03d=%d, Reste a %d a traiter",
-                 num, val, g_slist_length(Partage->com_msrv.liste_msg) );
+                 event->num, event->etat, g_slist_length(Partage->com_msrv.liste_msg) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-            if (val == 0) Gerer_arrive_MSGxxx_dls_off( num );
-       else if (val == 1) Gerer_arrive_MSGxxx_dls_on( num );
+            if (event->etat == 0) Gerer_arrive_MSGxxx_dls_off( event->num );
+       else if (event->etat == 1) Gerer_arrive_MSGxxx_dls_on ( event->num );
+       g_free(event);
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/
