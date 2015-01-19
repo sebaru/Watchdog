@@ -37,10 +37,6 @@
  #define NBR_CARAC_UNITE_MNEMONIQUE          8
  #define NBR_CARAC_UNITE_MNEMONIQUE_UTF8     (2*NBR_CARAC_UNITE_MNEMONIQUE)
 
- #include "Reseaux_option_entreeana.h"
- #include "Reseaux_option_compteur_imp.h"
- #include "Reseaux_option_tempo.h"
-
  enum
   { MNEMO_BISTABLE,                                               /* Definitions des types de mnemoniques */
     MNEMO_MONOSTABLE,
@@ -55,7 +51,8 @@
     NBR_TYPE_MNEMO
   };
 
- struct CMD_TYPE_MNEMONIQUE
+/********************************************** Base de tous les mnemos ***********************************/
+ struct CMD_TYPE_MNEMO_BASE                                 /* Informations partagées par tous les mnémos */
   { guint id;                                                /* ID unique du mnemonique dans la structure */
     guint type;                                                                /* Type du bit interne lié */
     guint num;                                                         /* Numéro du bit lié au mnemonique */
@@ -69,9 +66,60 @@
     gchar  tableau[ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
   };
 
+/******************************************* AddOns pour les Digital Input ********************************/
+ struct CMD_TYPE_MNEMO_DI
+  { gint num; 
+    gboolean furtif;
+  };
+
+/******************************************* AddOns pour les Analog Input *********************************/
+ #define COURBE_TEMPS_TOP             5                     /* 1 point = 5 secondes sur la grille courbes */
+ enum
+  { ENTREEANA_NON_INTERP,
+    ENTREEANA_4_20_MA_12BITS,
+    ENTREEANA_4_20_MA_10BITS,
+    ENTREEANA_WAGO_750455,
+    ENTREEANA_WAGO_750461,
+    NBR_TYPE_ENTREEANA
+  };
+
+ struct CMD_TYPE_MNEMO_AI
+  { guint  num;                                                                         /* Numero de l'EA */
+    gfloat min;
+    gfloat max;
+    guint  type;                                                               /* Type de gestion de l'EA */
+    gchar  unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                      /* Km, h, ° ... */
+  };
+
+/******************************************* Pour les compteurs d'impulsions ******************************/
+ enum
+  { CI_TOTALISATEUR,
+    CI_MOYENNEUR_SEC,
+    CI_MOYENNEUR_MIN,
+    NBR_TYPE_CI
+  };
+
+ struct CMD_TYPE_MNEMO_CPT_IMP
+  { guint  num;                                                                     /* Numero du compteur */
+    gfloat valeur;                                                                  /* Valeur du compteur */
+    guint  type;                                                                /* Totalisateur/Moyenneur */
+    gfloat multi;                                                                       /* Multiplicateur */
+    gchar  unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                      /* Km, h, ° ... */
+  };
+
+/******************************************* Pour les temporisations **************************************/
+ struct CMD_TYPE_MNEMO_TEMPO
+  { guint  num;                                                                     /* Numero de la tempo */
+    guint delai_on;                                 /* delai avant mise à un (fixé par option mnémonique) */
+    guint delai_off;                              /* delai avant mise à zero (fixé par option mnémonique) */
+    guint min_on;        /* Durée minimale pendant laquelle la tempo sera ON (fixé par option mnémonique) */
+    guint max_on;        /* Durée maximale pendant laquelle la tempo sera ON (fixé par option mnémonique) */
+  };
+
+/*********************************************** Suite des structures *************************************/
  struct CMD_TYPE_MNEMONIQUES
   { guint nbr_mnemos;                                /* Nombre de structure CMD_TYPE_MNEMONIQUE suivantes */
-    struct CMD_TYPE_MNEMONIQUE mnemo[];
+    struct CMD_TYPE_MNEMO_BASE mnemo[];
   };
 
  struct CMD_TYPE_NUM_MNEMONIQUE
@@ -79,13 +127,16 @@
     guint num;
   };
 
- struct CMD_TYPE_OPTION_BIT_INTERNE
-  { guint type;
-    union { struct CMD_TYPE_OPTION_ENTREEANA eana;
-            struct CMD_TYPE_OPTION_COMPTEUR_IMP cpt_imp;
-            struct CMD_TYPE_OPTION_TEMPO tempo;
+ struct CMD_TYPE_MNEMO_FULL
+  { struct CMD_TYPE_MNEMO_BASE mnemo_base;
+    union { struct CMD_TYPE_MNEMO_DI mnemo_di;
+            struct CMD_TYPE_MNEMO_AI mnemo_ai;
+            struct CMD_TYPE_MNEMO_CPT_IMP mnemo_cptimp;
+            struct CMD_TYPE_MNEMO_TEMPO mnemo_tempo;
           };
+
   };
+
  enum 
   { SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE,                      /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE_FIN,                  /* Ajout d'un groupe dans la liste cliente */
@@ -105,12 +156,7 @@
     SSTAG_CLIENT_WANT_DLS_FOR_MNEMO,                             /* Envoi des synoptiques pour les mnemos */
     SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO,
     SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO_FIN,
-
-    SSTAG_CLIENT_EDIT_OPTION_BIT_INTERNE,             /* Le client demande l'edition des options d'un bit */
-    SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK,  /* Le serveur accepte et envoi les données correspondantes */
-    SSTAG_CLIENT_VALIDE_EDIT_OPTION_BIT_INTERNE,                /* Valide la modification de l'entree ANA */
   };
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
-

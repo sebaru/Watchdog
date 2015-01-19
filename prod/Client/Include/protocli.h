@@ -110,8 +110,8 @@
     gfloat *Y;                                                              /* Coordonnées Y de la courbe */
     guint type;
     union                                                                      /* Option liée à la courbe */
-     { struct CMD_TYPE_OPTION_ENTREEANA eana;
-       struct CMD_TYPE_MNEMONIQUE mnemo;
+     { struct CMD_TYPE_MNEMO_FULL eana;
+       struct CMD_TYPE_MNEMO_BASE mnemo;
      };
   };
 
@@ -262,7 +262,7 @@
 
  extern void Creer_page_source_dls( struct CMD_TYPE_PLUGIN_DLS *rezo_dls );       /* Dans edit_source_dls.c */
  extern void Proto_append_source_dls( struct CMD_TYPE_SOURCE_DLS *dls, gchar *buffer );
- extern void Proto_afficher_mnemo_dls ( struct CMD_TYPE_MNEMONIQUE *mnemo );
+ extern void Proto_afficher_mnemo_dls ( struct CMD_TYPE_MNEMO_BASE *mnemo );
 
  extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo );               /* Dans liste_histo.c */
  extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );
@@ -277,7 +277,7 @@
  extern gchar *Type_sms_vers_string ( guint type );
 
  extern void Menu_ajouter_editer_message ( struct CMD_TYPE_MESSAGE *edit_msg );   /* Dans ajout_message.c */
- extern void Proto_afficher_mnemo_voc_message ( struct CMD_TYPE_MNEMONIQUE *mnemo );
+ extern void Proto_afficher_mnemo_voc_message ( struct CMD_TYPE_MNEMO_BASE *mnemo );
  extern void Proto_afficher_un_syn_for_message ( struct CMD_TYPE_SYNOPTIQUE *syn );
 
  extern void Proto_cacher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );/* Dans liste_synoptique.c*/
@@ -291,15 +291,15 @@
  extern void Proto_afficher_les_groupes_pour_synoptique ( GList *liste );
  extern void Proto_afficher_un_dls_for_mnemonique ( struct CMD_TYPE_PLUGIN_DLS *dls );
 
- extern void Proto_cacher_un_mnemonique( struct CMD_TYPE_MNEMONIQUE *mnemonique );/* Dans liste_mnemonique.c*/
- extern void Proto_afficher_un_mnemonique( struct CMD_TYPE_MNEMONIQUE *mnemonique );
- extern void Proto_rafraichir_un_mnemonique( struct CMD_TYPE_MNEMONIQUE *smnemonique );
+ extern void Proto_cacher_un_mnemonique( struct CMD_TYPE_MNEMO_BASE *mnemonique );/* Dans liste_mnemonique.c*/
+ extern void Proto_afficher_un_mnemonique( struct CMD_TYPE_MNEMO_BASE *mnemonique );
+ extern void Proto_rafraichir_un_mnemonique( struct CMD_TYPE_MNEMO_BASE *smnemonique );
  extern gchar *Type_bit_interne ( gint num );
  extern gchar *Type_bit_interne_court ( gint num );
  extern gint Type_bit_interne_int ( gchar *type );
  extern void Creer_page_mnemonique( void );
 
- extern void Menu_ajouter_editer_mnemonique ( struct CMD_TYPE_MNEMONIQUE *edit_mnemo );/* ajout_mnemonique.c*/
+ extern void Menu_ajouter_editer_mnemonique ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );/* ajout_mnemonique.c*/
  extern void Proto_afficher_un_syn_for_mnemonique ( struct CMD_TYPE_SYNOPTIQUE *syn );
 
  extern void Proto_cacher_un_icone( struct CMD_TYPE_ICONE *icone );                   /* Dans liste_icone.c */
@@ -378,11 +378,11 @@
  extern void Detruire_fenetre_propriete_TOR ();
  extern void Editer_propriete_TOR ( struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Changer_couleur_motif_directe( struct TRAME_ITEM_MOTIF *trame_motif );
- extern void Proto_afficher_mnemo_atelier ( int tag, struct CMD_TYPE_MNEMONIQUE *mnemo );
+ extern void Proto_afficher_mnemo_atelier ( int tag, struct CMD_TYPE_MNEMO_BASE *mnemo );
 
                                                                    /* Dans atelier_propriete_passerelle.c */
  extern void Editer_propriete_pass ( struct TRAME_ITEM_PASS *trame_pass );
- extern void Proto_afficher_mnemo_atelier_pass ( struct CMD_TYPE_MNEMONIQUE *mnemo );
+ extern void Proto_afficher_mnemo_atelier_pass ( struct CMD_TYPE_MNEMO_BASE *mnemo );
 
  extern void Creer_fenetre_ajout_motif ( void );                            /* Dans atelier_ajout_motif.c */
  extern void Detruire_fenetre_ajout_motif ( void );
@@ -403,7 +403,7 @@
  extern void Menu_ajouter_editer_capteur ( struct TRAME_ITEM_CAPTEUR *trame_capteur );
  extern void Proto_afficher_un_capteur_atelier( struct CMD_TYPE_CAPTEUR *rezo_capteur );
  extern void Proto_cacher_un_capteur_atelier( struct CMD_TYPE_CAPTEUR *capteur );
- extern void Proto_afficher_mnemo_capteur_atelier ( struct CMD_TYPE_MNEMONIQUE *mnemo );
+ extern void Proto_afficher_mnemo_capteur_atelier ( struct CMD_TYPE_MNEMO_BASE *mnemo );
 
                                                                           /* Dans atelier_ajout_palette.c */
  extern void Creer_fenetre_ajout_palette ( struct TYPE_INFO_ATELIER *infos );
@@ -454,15 +454,25 @@
                                                                              /* Dans supervision_camera.c */
  extern void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup );
 
-                                                                               /* Dans option_entreeana.c */
- extern void Proto_editer_option_entreeANA ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_entree );
- extern gchar *Type_ea_vers_string ( guint type );
+                                                                               /* Dans option_entreetor.c */
+ extern void Get_options_DI ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
+ extern GtkWidget *Get_options_DI_gtktable ( void );
+ extern void Set_options_DI ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
 
-                                                                                 /* Dans option_cpt_imp.c */
- extern void Proto_editer_option_cpt_imp ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_cpt_imp );
+                                                                               /* Dans option_entreeana.c */
+ extern void Get_options_AI ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
+ extern GtkWidget *Get_options_AI_gtktable ( void );
+ extern void Set_options_AI ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
 
                                                                                    /* Dans option_tempo.c */
- extern void Proto_editer_option_tempo ( struct CMD_TYPE_OPTION_BIT_INTERNE *edit_tempo );
+ extern void Get_options_Tempo ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
+ extern GtkWidget *Get_options_Tempo_gtktable ( void );
+ extern void Set_options_Tempo ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
+
+                                                                                 /* Dans option_cpt_imp.c */
+ extern void Get_options_CPTIMP ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
+ extern GtkWidget *Get_options_CPTIMP_gtktable ( void );
+ extern void Set_options_CPTIMP ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
 
  extern GtkPrintOperation *New_print_job ( gchar *nom );                                  /* Dans print.c */
  extern void Print_draw_page ( GtkPrintOperation *operation,
@@ -473,8 +483,8 @@
                                   GtkPrintContext   *context,
                                   gpointer           user_data );
                                                                                          /* Dans courbe.c */
- extern void Proto_afficher_une_source_EA_for_courbe( struct CMD_TYPE_OPTION_ENTREEANA *entreeANA );
- extern void Proto_afficher_une_source_for_courbe( struct CMD_TYPE_MNEMONIQUE *mnemo );
+ extern void Proto_afficher_une_source_EA_for_courbe( struct CMD_TYPE_MNEMO_FULL *entreeANA );
+ extern void Proto_afficher_une_source_for_courbe( struct CMD_TYPE_MNEMO_BASE *mnemo );
  extern void Creer_page_courbe ( gchar *libelle );
  extern void Detruire_page_courbe( struct PAGE_NOTEBOOK *page );
  extern gboolean CB_deplacement_databox ( struct TYPE_INFO_COURBE *infos, GdkEvent *event, gpointer data );
@@ -485,8 +495,8 @@
  extern void Afficher_courbe( struct CMD_START_COURBE *courbe, struct TYPE_INFO_COURBE *infos );
  extern void Proto_start_courbe( struct CMD_START_COURBE *courbe );
                                                                                    /* Dans histo_courbe.c */
- extern void Proto_afficher_une_source_EA_for_histo_courbe( struct CMD_TYPE_OPTION_ENTREEANA *entreeANA );
- extern void Proto_afficher_une_source_for_histo_courbe( struct CMD_TYPE_MNEMONIQUE *mnemo );
+ extern void Proto_afficher_une_source_EA_for_histo_courbe( struct CMD_TYPE_MNEMO_FULL *entreeANA );
+ extern void Proto_afficher_une_source_for_histo_courbe( struct CMD_TYPE_MNEMO_BASE *mnemo );
  extern void Creer_page_histo_courbe ( gchar *libelle );
  extern void Detruire_page_histo_courbe( struct PAGE_NOTEBOOK *page );
  extern gboolean Append_courbe ( struct TYPE_INFO_COURBE *infos, struct COURBE *courbe,
@@ -503,7 +513,7 @@
 
                                                                                    /* Dans ajout_camera.c */
  extern void Menu_ajouter_editer_camera ( struct CMD_TYPE_CAMERA *edit_camera );
- extern void Proto_afficher_mnemo_camera ( int tag, struct CMD_TYPE_MNEMONIQUE *mnemo );
+ extern void Proto_afficher_mnemo_camera ( int tag, struct CMD_TYPE_MNEMO_BASE *mnemo );
 
  #endif
 /*--------------------------------------------------------------------------------------------------------*/

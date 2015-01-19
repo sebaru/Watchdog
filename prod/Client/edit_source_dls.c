@@ -47,7 +47,7 @@
 /* Entre: widget, data.                                                                                   */
 /* Sortie: void                                                                                           */
 /**********************************************************************************************************/
- void Proto_afficher_mnemo_dls ( struct CMD_TYPE_MNEMONIQUE *mnemo )
+ void Proto_afficher_mnemo_dls ( struct CMD_TYPE_MNEMO_BASE *mnemo )
   { struct PAGE_NOTEBOOK *page;
     struct TYPE_INFO_SOURCE_DLS *infos;
     GtkTextBuffer *text_buffer;

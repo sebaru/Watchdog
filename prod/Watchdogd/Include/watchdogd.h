@@ -39,8 +39,6 @@
  #include "Archive.h"
  #include "Admin.h"
  #include "Cpth_DB.h"
- #include "Cpt_imp_DB.h"
- #include "Tempo_DB.h"
  #include "Message_DB.h"
  #include "Camera_DB.h"
  #include "Dls.h"
@@ -48,7 +46,6 @@
  #include "Synoptiques_DB.h"
  #include "Mnemonique_DB.h"
  #include "Icones_DB.h"
- #include "EntreeANA_DB.h"
  #include "Proto_traductionDLS.h"
 
  extern struct PARTAGE *Partage;                             /* Accès aux données partagées des processes */
@@ -58,8 +55,6 @@
  #define EXIT_INACTIF      1                                             /* Un fils est mort d'inactivité */
 
  #define VERROU_SERVEUR              "watchdogd.lock"
- #define FICHIER_FIFO_ADMIN_READ     "admin.fifo.read"
- #define FICHIER_FIFO_ADMIN_WRITE    "admin.fifo.write"
  #define FICHIER_EXPORT              "export.wdg"
 
  #define NUM_EA_SYS_BITS_PER_SEC        125  /* Numéro d'EA de reference pour le nbr de request archivage */
@@ -152,9 +147,9 @@
 
     struct CPT_HORAIRE ch [ NBR_COMPTEUR_H ];
     struct CPT_IMP ci [ NBR_COMPTEUR_IMP ];
-    struct ENTREE_ANA ea [ NBR_ENTRE_ANA ];
+    struct ANALOG_INPUT ea [ NBR_ENTRE_ANA ];
     guchar m [ (NBR_BIT_MONOSTABLE>>3) + 1 ];                  /* Monostables du DLS (DLS=rw, Sserveur=r) */
-    guchar e [ NBR_ENTRE_TOR>>3 ];
+    struct DIGITAL_INPUT e [ NBR_ENTRE_TOR ];
     struct SORTIE_TOR a [ NBR_SORTIE_TOR ];
     guchar b [ (NBR_BIT_BISTABLE>>3) + 1 ];                                                  /* Bistables */
     struct MESSAGES g [ NBR_MESSAGE_ECRITS ];                               /* Message vers veille et syn */
@@ -181,7 +176,7 @@
  extern void Decharger_librairies ( void );
  extern gboolean Start_librairie ( struct LIBRAIRIE *lib );
  extern gboolean Stop_librairie ( struct LIBRAIRIE *lib );
- extern struct LIBRAIRIE *Charger_librairie_par_fichier ( gchar *path, gchar *nom_fichier );
+ extern struct LIBRAIRIE *Charger_librairie_par_fichier ( gboolean fullname, gchar *nom_fichier );
  extern gboolean Decharger_librairie_par_prompt ( gchar *nom_fichier );
 
  extern void Gerer_arrive_MSGxxx_dls ( void );                                   /* Dans distrib_MSGxxx.c */

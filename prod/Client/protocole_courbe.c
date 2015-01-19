@@ -64,12 +64,12 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_ENTREEANA_FOR_COURBE:
-             { struct CMD_TYPE_OPTION_ENTREEANA *eana;
+             { struct CMD_TYPE_MNEMO_FULL *eana;
                Set_progress_plus(1);
 
-               eana = (struct CMD_TYPE_OPTION_ENTREEANA *)g_try_malloc0( sizeof( struct CMD_TYPE_OPTION_ENTREEANA ) );
+               eana = (struct CMD_TYPE_MNEMO_FULL *)g_try_malloc0( sizeof( struct CMD_TYPE_MNEMO_FULL ) );
                if (!eana) return; 
-               memcpy( eana, connexion->donnees, sizeof(struct CMD_TYPE_OPTION_ENTREEANA ) );
+               memcpy( eana, connexion->donnees, sizeof(struct CMD_TYPE_MNEMO_FULL ) );
                Arrivee_eana = g_list_append( Arrivee_eana, eana );
              }
             break;
@@ -78,12 +78,12 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_MNEMO_FOR_COURBE:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
                Set_progress_plus(1);
 
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_try_malloc0( sizeof( struct CMD_TYPE_MNEMONIQUE ) );
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)g_try_malloc0( sizeof( struct CMD_TYPE_MNEMO_FULL ) );
                if (!mnemo) return; 
-               memcpy( mnemo, connexion->donnees, sizeof(struct CMD_TYPE_MNEMONIQUE ) );
+               memcpy( mnemo, connexion->donnees, sizeof(struct CMD_TYPE_MNEMO_FULL ) );
                Arrivee_mnemo = g_list_append( Arrivee_mnemo, mnemo );
              }
             break;

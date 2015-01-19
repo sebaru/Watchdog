@@ -29,6 +29,8 @@
  #include <stdio.h>
  #include <openssl/ssl.h>
 
+ #define NOT_FOUND "Unknown"
+
 /**********************************************************************************************************/
 /* Nom_certif_signataire: renvoie le common name du signataire du certificat en parametre                 */
 /* Entrée: un certificat x509                                                                             */
@@ -39,9 +41,12 @@
     X509_NAME *name;
     gint pos;
 
+    if (!certif) return(NOT_FOUND);
     name = X509_get_issuer_name ( certif );
+    if (!name) return(NOT_FOUND);
     pos = X509_NAME_get_index_by_NID( name, NID_commonName, -1 );
     entry = X509_NAME_get_entry( name, pos );
+    if (!entry) return(NOT_FOUND);
     return ( ASN1_STRING_data( X509_NAME_ENTRY_get_data( entry ) ) );
   }
 /**********************************************************************************************************/
@@ -54,9 +59,12 @@
     X509_NAME *name;
     gint pos;
 
+    if (!certif) return(NOT_FOUND);
     name = X509_get_subject_name ( certif );
+    if (!name) return(NOT_FOUND);
     pos = X509_NAME_get_index_by_NID( name, NID_commonName, -1 );
     entry = X509_NAME_get_entry( name, pos );
+    if (!entry) return(NOT_FOUND);
     return ( ASN1_STRING_data( X509_NAME_ENTRY_get_data( entry ) ) );
   }
 

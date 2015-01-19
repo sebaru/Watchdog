@@ -3,8 +3,8 @@ dnl Process this file with autoconf to produce a configure script.
 
 
 dnl define([gittag], esyscmd([sh -c "git describe --always  | tr -d '\n'"]))
-
-AC_INIT([Watchdog], [2.8.`svnversion -n`], [project.watchdog@gmail.com], [Watchdog], [http://seblef.hd.free.fr/wiki] )
+define([SVNVERSION], esyscmd([sh -c "cat RevisionNumber.txt"]))
+AC_INIT([Watchdog], [2.10.SVNVERSION], [project.watchdog@gmail.com], [Watchdog], [https://www.connect4all.fr] )
 AC_CANONICAL_TARGET
 AC_CONFIG_SRCDIR([Watchdogd/Watchdogd.c])
 AM_INIT_AUTOMAKE
@@ -100,6 +100,7 @@ Watchdogd/Rs485/Makefile \
 Watchdogd/Modbus/Makefile \
 Watchdogd/Archive/Makefile \
 Watchdogd/Rfxcom/Makefile \
+Watchdogd/Enocean/Makefile \
 Watchdogd/Imsg/Makefile \
 Watchdogd/Satellite/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \

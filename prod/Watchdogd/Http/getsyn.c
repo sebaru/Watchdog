@@ -133,7 +133,7 @@
           switch(capteur->type)
            { case MNEMO_ENTREE_ANA:
                   valeur = Partage->ea[capteur->bit_controle].val_ech;
-                  unite =  Partage->ea[capteur->bit_controle].cmd_type_eana.unite;
+                  unite =  Partage->ea[capteur->bit_controle].confDB.unite;
                   break;
              default: valeur = 0.0; unite = "?";
            }

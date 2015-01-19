@@ -49,40 +49,27 @@
              }
             break;
        case SSTAG_SERVEUR_ADD_MNEMONIQUE_OK:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_BASE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
                Proto_afficher_un_mnemonique( mnemo );
              }
             break;
        case SSTAG_SERVEUR_DEL_MNEMONIQUE_OK:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_BASE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
                Proto_cacher_un_mnemonique( mnemo );
              }
             break;
        case SSTAG_SERVEUR_EDIT_MNEMONIQUE_OK:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
                Menu_ajouter_editer_mnemonique( mnemo );
              }
             break;
        case SSTAG_SERVEUR_VALIDE_EDIT_MNEMONIQUE_OK:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_BASE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
                Proto_rafraichir_un_mnemonique( mnemo );
-             }
-            break;
-       case SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK:
-             { struct CMD_TYPE_OPTION_BIT_INTERNE *option;
-               option = (struct CMD_TYPE_OPTION_BIT_INTERNE *)connexion->donnees;
-               switch( option->type )
-                { case MNEMO_ENTREE_ANA : Proto_editer_option_entreeANA( option );
-                                          break;
-                  case MNEMO_CPT_IMP    : Proto_editer_option_cpt_imp( option );
-                                          break;
-                  case MNEMO_TEMPO      : Proto_editer_option_tempo( option );
-                                          break;
-                }
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE:
@@ -91,10 +78,10 @@
                mnemos = (struct CMD_TYPE_MNEMONIQUES *)connexion->donnees;
                Set_progress_plus( mnemos->nbr_mnemos );
                for (i=0; i<mnemos->nbr_mnemos; i++)
-                { struct CMD_TYPE_MNEMONIQUE *mnemo;
-                  mnemo = (struct CMD_TYPE_MNEMONIQUE *)g_try_malloc0( sizeof( struct CMD_TYPE_MNEMONIQUE ) );
+                { struct CMD_TYPE_MNEMO_BASE *mnemo;
+                  mnemo = (struct CMD_TYPE_MNEMO_BASE *)g_try_malloc0( sizeof( struct CMD_TYPE_MNEMO_BASE ) );
                   if (!mnemo) break;
-                  memcpy( mnemo, &mnemos->mnemo[i], sizeof(struct CMD_TYPE_MNEMONIQUE ) );
+                  memcpy( mnemo, &mnemos->mnemo[i], sizeof(struct CMD_TYPE_MNEMO_BASE ) );
                   Arrivee_mnemonique = g_list_append( Arrivee_mnemonique, mnemo );
                 }
              }

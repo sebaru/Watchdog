@@ -857,7 +857,7 @@
         { case MODBUS_GET_DI:
                cpt_e = module->modbus.min_e_tor;
                for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<module->nbr_entree_tor; cpt++)
-                { SE( cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) );
+                { Envoyer_entree_dls( cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) );
                   cpt_e++;
                   cpt_poid = cpt_poid << 1;
                   if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
@@ -867,7 +867,7 @@
           case MODBUS_GET_AI:
                cpt_e = module->modbus.min_e_ana;
                for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
-                { switch(Partage->ea[cpt_e].cmd_type_eana.type)
+                { switch(Partage->ea[cpt_e].confDB.type)
                    { case ENTREEANA_WAGO_750455:
                           if ( ! (module->response.data[ 2*cpt + 2 ] & 0x03) )
                            { int reponse;

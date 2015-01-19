@@ -53,6 +53,7 @@
        Admin_write ( connexion, "  modbus                - Sous-menu de gestion des equipements MODBUS\n" );
        Admin_write ( connexion, "  dls                   - D.L.S. Status\n" );
        Admin_write ( connexion, "  user                  - Manage Watchdog Users\n" );
+       Admin_write ( connexion, "  update_schemaDB       - Update Database Schema\n" );
        Admin_write ( connexion, "  log_level loglevel    - Set Log Level (debug, info, notice, warning, error)\n" );
        Admin_write ( connexion, "  debug switch          - Toggle debug Switch (list, all, none, dls, arch, db, msrv or library name)\n" );
 
@@ -85,6 +86,11 @@
      { Clear_histoDB ();                                                      /* Clear de la table histo au boot */
        g_snprintf( chaine, sizeof(chaine), " HistoDB cleared\n" );
           Admin_write ( connexion, chaine );
+     } else
+    if ( ! strcmp ( commande, "update_schemaDB" ) )
+     { Update_database_schema ();
+       g_snprintf( chaine, sizeof(chaine), " Update Schema done\n" );
+       Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "clear_arch" ) )
      { gint nbr;

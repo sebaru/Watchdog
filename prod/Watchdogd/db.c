@@ -108,8 +108,8 @@
     taille = g_slist_length ( Partage->com_db.Liste );
     pthread_mutex_unlock ( &Partage->com_db.synchro );
     Info_new( Config.log, Config.log_db, LOG_DEBUG,
-              "Init_DB_SQL: Database Connection OK with %s@%s (id=%05d). Nbr_requete_en_cours=%d",
-               Config.db_username, Config.db_database, db->id, taille );
+              "Init_DB_SQL: Database Connection OK with %s@%s:%d on %s (id=%05d). Nbr_requete_en_cours=%d",
+               Config.db_username, Config.db_host, Config.db_port, Config.db_database, db->id, taille );
     return(db);
   }
 /**********************************************************************************************************/
@@ -253,5 +253,89 @@
        liste = g_slist_next( liste );
      }
     pthread_mutex_unlock ( &Partage->com_db.synchro );
+  }
+/**********************************************************************************************************/
+/* Update_database_schema: Vérifie la connexion et le schéma de la base de données                        */
+/* Entrée: néant                                                                                          */
+/* Sortie: néant                                                                                          */
+/**********************************************************************************************************/
+ void Update_database_schema ( void )
+  { gint database_version;
+    gchar *nom, *valeur;
+    gchar requete[1024];
+    struct DB *db;
+
+    database_version = 0;                                                            /* valeur par défaut */
+    if ( ! Recuperer_configDB( &db, "global" ) )                        /* Connexion a la base de données */
+     { Info_new( Config.log, Config.log_db, LOG_WARNING,
+                "Update_database_schema: Database connexion failed" );
+       return;
+     }
+
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Config.log_db, LOG_INFO,                                     /* Print Config */
+                "Update_database_schema: '%s' = %s", nom, valeur );
+       if ( ! g_ascii_strcasecmp ( nom, "database_version" ) )
+        { database_version = atoi( valeur ); }
+     }
+
+    Info_new( Config.log, Config.log_db, LOG_NOTICE,
+             "Update_database_schema: Actual Database_Version detected = %05d", database_version );
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "Update_database_schema: DB connexion failed" );
+       return;
+     }
+
+    if (database_version < 2500)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE users DROP `imsg_bit_presence`" );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete),
+                  "ALTER TABLE users ADD `ssrv_bit_presence` INT NOT NULL DEFAULT '0'"
+                 );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+     }
+
+    if (database_version < 2510)
+     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
+                  "INSERT INTO `mnemos` (`id`, `type`, `num`, `num_plugin`, `acronyme`, `libelle`, `command_text`) VALUES"
+                  "(23, 3,9999, 1, 'EVENT_NONE_TOR', 'Used for detected Event with no mapping yet.', ''),"
+                  "(24, 5,9999, 1, 'EVENT_NONE_ANA', 'Used for detected Event with no mapping yet.', '')"
+                 );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+     }
+
+    if (database_version < 2532)
+     { g_snprintf( requete, sizeof(requete), "RENAME TABLE eana TO mnemos_AnalogInput" );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), 
+                  "CREATE TABLE `mnemos_DigitalInput`"
+                  "(`id_mnemo` int(11) NOT NULL, `furtif` int(1) NOT NULL, PRIMARY KEY (`id_mnemo`)"
+                  ") ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
+                 );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+     }
+
+    if (database_version < 2541)
+     { g_snprintf( requete, sizeof(requete), "RENAME TABLE dls_cpt_imp TO mnemos_CptImp" );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+     }
+
+    if (database_version < 2543)
+     { g_snprintf( requete, sizeof(requete), "RENAME TABLE tempo TO mnemos_Tempo" );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+     }
+
+    if (Modifier_configDB ( "global", "database_version", "2541" ))
+     { Info_new( Config.log, Config.log_db, LOG_NOTICE,
+                "Update_database_schema: updating Database_version OK" );
+     }
+    else
+     { Info_new( Config.log, Config.log_db, LOG_NOTICE,
+                "Update_database_schema: updating Database_version FAILED" );
+     }
+
+    Libere_DB_SQL(&db);
   }
 /*--------------------------------------------------------------------------------------------------------*/

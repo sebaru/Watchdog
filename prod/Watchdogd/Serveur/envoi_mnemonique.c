@@ -34,191 +34,20 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
-/**********************************************************************************************************/
-/* Proto_editer_option_tempo: Le client desire editer les options d'une tempo                             */
-/* Entrée: le client demandeur et le entree en question                                                   */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- void Proto_editer_option_tempo ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemo )
-  { struct CMD_TYPE_OPTION_BIT_INTERNE option;
-    struct CMD_TYPE_OPTION_TEMPO *tempo;
 
-    tempo = Rechercher_tempoDB( rezo_mnemo->id );
-
-    if (tempo)
-     { option.type = MNEMO_TEMPO;
-       memcpy( &option.tempo, tempo, sizeof( struct CMD_TYPE_OPTION_TEMPO ) );
-       Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK,
-                     (gchar *)&option, sizeof(struct CMD_TYPE_OPTION_BIT_INTERNE) );
-       g_free(tempo);                                                               /* liberation mémoire */
-     }
-    else
-     { struct CMD_GTK_MESSAGE erreur;
-       g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to locate tempo %s", rezo_mnemo->libelle);
-       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-     }
-  }
-/**********************************************************************************************************/
-/* Proto_valider_editer_option_tempo: Le client valide l'edition des options tempo                        */
-/* Entrée: le client demandeur et le entree en question                                                   */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- void Proto_valider_editer_option_tempo ( struct CLIENT *client, struct CMD_TYPE_OPTION_TEMPO *rezo_tempo )
-  { struct CMD_TYPE_OPTION_TEMPO *result;
-    gboolean retour;
-
-    retour = Modifier_tempoDB ( rezo_tempo );
-    if (retour==FALSE)
-     { struct CMD_GTK_MESSAGE erreur;
-       g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to edit tempo %s", rezo_tempo->libelle);
-       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-     }
-    else { result = Rechercher_tempoDB( rezo_tempo->id_mnemo );
-           if (result)
-            { g_free(result);
-              Charger_tempo ();                                            /* Update de la running config */
-            }
-           else
-            { struct CMD_GTK_MESSAGE erreur;
-              g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate entree %s", rezo_tempo->libelle);
-              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-            }
-         }
-  }
-/**********************************************************************************************************/
-/* Proto_editer_entree: Le client desire editer un entree                                                 */
-/* Entrée: le client demandeur et le entree en question                                                   */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- void Proto_editer_option_entreeANA ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemo )
-  { struct CMD_TYPE_OPTION_BIT_INTERNE option;
-    struct CMD_TYPE_OPTION_ENTREEANA *entree;
-
-    entree = Rechercher_entreeANADB( rezo_mnemo->id );
-
-    if (entree)
-     { option.type = MNEMO_ENTREE_ANA;
-       memcpy( &option.eana, entree, sizeof( struct CMD_TYPE_OPTION_ENTREEANA ) );
-       Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK,
-                     (gchar *)&option, sizeof(struct CMD_TYPE_OPTION_BIT_INTERNE) );
-       g_free(entree);                                                              /* liberation mémoire */
-     }
-    else
-     { struct CMD_GTK_MESSAGE erreur;
-       g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to locate entree %s", rezo_mnemo->libelle);
-       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-     }
-  }
-/**********************************************************************************************************/
-/* Proto_valider_editer_entree: Le client valide l'edition d'un entree                                    */
-/* Entr�e: le client demandeur et le entree en question                                                   */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- void Proto_valider_editer_option_entreeANA ( struct CLIENT *client, struct CMD_TYPE_OPTION_ENTREEANA *rezo_entree )
-  { struct CMD_TYPE_OPTION_ENTREEANA *result;
-    gboolean retour;
-
-    retour = Modifier_entreeANADB ( rezo_entree );
-    if (retour==FALSE)
-     { struct CMD_GTK_MESSAGE erreur;
-       g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to edit entree %s", rezo_entree->libelle);
-       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-     }
-    else { result = Rechercher_entreeANADB( rezo_entree->id_mnemo );
-           if (result)
-            { g_free(result);
-              Charger_eana ();                                             /* Update de la running config */
-            }
-           else
-            { struct CMD_GTK_MESSAGE erreur;
-              g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate entree %s", rezo_entree->libelle);
-              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-            }
-         }
-  }
-/**********************************************************************************************************/
-/* Proto_editer_option_compteur_imp: Le client desire editer une option de compteur d'impulsion           */
-/* Entrée: le client demandeur et le mnemonique du CI                                                     */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- void Proto_editer_option_compteur_imp ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemo )
-  { struct CMD_TYPE_OPTION_BIT_INTERNE option;
-    struct CMD_TYPE_OPTION_COMPTEUR_IMP *cpt;
-
-    cpt = Rechercher_cpt_impDB( rezo_mnemo->id );
-
-    if (cpt)
-     { option.type = MNEMO_CPT_IMP;
-       memcpy( &option.cpt_imp, cpt, sizeof( struct CMD_TYPE_OPTION_COMPTEUR_IMP ) );
-       Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_EDIT_OPTION_BIT_INTERNE_OK,
-                     (gchar *)&option, sizeof(struct CMD_TYPE_OPTION_BIT_INTERNE) );
-       g_free(cpt);                                                                 /* liberation mémoire */
-     }
-    else
-     { struct CMD_GTK_MESSAGE erreur;
-       g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to locate cpt_imp %s", rezo_mnemo->libelle);
-       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-     }
-  }
-/**********************************************************************************************************/
-/* Proto_valider_editer_option_cpt_imp: Le client valide l'edition d'un compteur d'impulsion              */
-/* Entr�e: le client demandeur et le entree en question                                                   */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- void Proto_valider_editer_option_compteur_imp ( struct CLIENT *client,
-                                                 struct CMD_TYPE_OPTION_COMPTEUR_IMP *rezo_cpt )
-  { struct CMD_TYPE_OPTION_COMPTEUR_IMP *result;
-    gboolean retour;
-
-    retour = Modifier_cpt_impDB ( rezo_cpt );
-    if (retour==FALSE)
-     { struct CMD_GTK_MESSAGE erreur;
-       g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to edit cpt_imp CI%03d", rezo_cpt->num);
-       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-     }
-    else { result = Rechercher_cpt_impDB( rezo_cpt->id_mnemo );
-           if (result)
-            { g_free(result);
-              Charger_cpt_imp ();                                          /* Update de la running config */
-            }
-           else
-            { struct CMD_GTK_MESSAGE erreur;
-              g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate cpt_imp CI%03d", rezo_cpt->num);
-              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-            }
-         }
-  }
 /**********************************************************************************************************/
 /* Proto_editer_mnemonique: Le client desire editer un mnemo                                              */
 /* Entrée: le client demandeur et le mnemo en question                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemonique )
-  { struct CMD_TYPE_MNEMONIQUE *mnemo;
+ void Proto_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_BASE *rezo_mnemonique )
+  { struct CMD_TYPE_MNEMO_FULL *result = NULL;
 
-    mnemo = Rechercher_mnemoDB( rezo_mnemonique->id );
-    if (mnemo)
+    result = Rechercher_mnemo_fullDB ( rezo_mnemonique->id );
+    if (result)
      { Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_EDIT_MNEMONIQUE_OK,
-                  (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMONIQUE) );
-       g_free(mnemo);                                                               /* liberation mémoire */
+                    (gchar *)result, sizeof(struct CMD_TYPE_MNEMO_FULL) );
+       g_free(result);                                                              /* liberation mémoire */
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -233,34 +62,36 @@
 /* Entrée: le client demandeur et le mnemo en question                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_valider_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemonique )
-  { struct CMD_TYPE_MNEMONIQUE *result;
-    gboolean retour;
+ void Proto_valider_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_FULL *rezo_mnemonique )
+  { struct CMD_TYPE_MNEMO_BASE *result;
+    gboolean retour = FALSE;
 
-    retour = Modifier_mnemoDB ( rezo_mnemonique );
+    retour = Modifier_mnemo_fullDB ( rezo_mnemonique );
+
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to edit mnemo %s", rezo_mnemonique->libelle);
+                   "Unable to edit mnemo %s", rezo_mnemonique->mnemo_base.libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_mnemoDB( rezo_mnemonique->id );
+    else { result = Rechercher_mnemo_baseDB( rezo_mnemonique->mnemo_base.id );
            if (result) 
             { Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_VALIDE_EDIT_MNEMONIQUE_OK,
-                            (gchar *)result, sizeof(struct CMD_TYPE_MNEMONIQUE) );
+                            (gchar *)result, sizeof(struct CMD_TYPE_MNEMO_BASE) );
               switch( result->type )
-               { case MNEMO_ENTREE_ANA :  Charger_eana ();    break;       /* Update de la running config */
-                 case MNEMO_CPT_IMP    :  Charger_cpt_imp (); break;       /* Update de la running config */
-                 case MNEMO_CPTH       :  Charger_cpth ();    break;       /* Update de la running config */
-                 case MNEMO_TEMPO      :  Charger_tempo ();   break;       /* Update de la running config */
+               { case MNEMO_ENTREE     :  Charger_digitalInput(); break;   /* Update de la running config */
+                 case MNEMO_ENTREE_ANA :  Charger_analogInput (); break;   /* Update de la running config */
+                 case MNEMO_CPT_IMP    :  Charger_cpt_imp ();     break;   /* Update de la running config */
+                 case MNEMO_CPTH       :  Charger_cpth ();        break;   /* Update de la running config */
+                 case MNEMO_TEMPO      :  Charger_tempo ();       break;   /* Update de la running config */
                }
               g_free(result);
             }
            else
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate mnemo %s", rezo_mnemonique->libelle);
+                          "Unable to locate mnemo %s", rezo_mnemonique->mnemo_base.libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
@@ -271,14 +102,14 @@
 /* Entrée: le client demandeur et le mnemo en question                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_effacer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemonique )
+ void Proto_effacer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_BASE *rezo_mnemonique )
   { gboolean retour;
 
-    retour = Retirer_mnemoDB( rezo_mnemonique );
+    retour = Retirer_mnemo_baseDB( rezo_mnemonique );
 
     if (retour)
      { Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_DEL_MNEMONIQUE_OK,
-                     (gchar *)rezo_mnemonique, sizeof(struct CMD_TYPE_MNEMONIQUE) );
+                     (gchar *)rezo_mnemonique, sizeof(struct CMD_TYPE_MNEMO_BASE) );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -293,29 +124,29 @@
 /* Entrée: le mnemo à créer                                                                               */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_ajouter_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemonique )
-  { struct CMD_TYPE_MNEMONIQUE *result;
+ void Proto_ajouter_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_FULL *rezo_mnemonique )
+  { struct CMD_TYPE_MNEMO_BASE *result;
     gint id;
 
-    id = Ajouter_mnemoDB ( rezo_mnemonique );
+    id = Ajouter_mnemo_fullDB ( rezo_mnemonique );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to add mnemo %s", rezo_mnemonique->libelle);
+                   "Unable to add mnemo %s", rezo_mnemonique->mnemo_base.libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_mnemoDB( id );
+    else { result = Rechercher_mnemo_baseDB( id );
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate mnemo %s", rezo_mnemonique->libelle);
+                          "Unable to locate mnemo %s", rezo_mnemonique->mnemo_base.libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
             { Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_ADD_MNEMONIQUE_OK,
-                            (gchar *)result, sizeof(struct CMD_TYPE_MNEMONIQUE) );
+                            (gchar *)result, sizeof(struct CMD_TYPE_MNEMO_BASE) );
               g_free(result);
             }
          }
@@ -327,21 +158,21 @@
 /**********************************************************************************************************/
  void Proto_envoyer_type_num_mnemo_tag( int tag, int ss_tag, struct CLIENT *client,
                                         struct CMD_TYPE_NUM_MNEMONIQUE *critere )
-  { struct CMD_TYPE_MNEMONIQUE *mnemo;
+  { struct CMD_TYPE_MNEMO_BASE *mnemo;
 
-    mnemo = Rechercher_mnemoDB_type_num( critere );
+    mnemo = Rechercher_mnemo_baseDB_type_num( critere );
     if (mnemo)
-     { Envoi_client ( client, tag, ss_tag, (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMONIQUE) );
+     { Envoi_client ( client, tag, ss_tag, (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMO_BASE) );
        g_free(mnemo);
      }
     else
-     { struct CMD_TYPE_MNEMONIQUE inconnu;
+     { struct CMD_TYPE_MNEMO_BASE inconnu;
        inconnu.id = 0;
        inconnu.type = critere->type;
        inconnu.num = critere->num;
        g_snprintf( inconnu.libelle, sizeof(inconnu.libelle), "Unknown" );
        Envoi_client ( client, tag, ss_tag,
-                      (gchar *)&inconnu, sizeof(struct CMD_TYPE_MNEMONIQUE) );
+                      (gchar *)&inconnu, sizeof(struct CMD_TYPE_MNEMO_BASE) );
      }
   }
 /**********************************************************************************************************/
@@ -351,14 +182,14 @@
 /**********************************************************************************************************/
  static void Envoyer_mnemoniques_tag ( struct CLIENT *client, guint tag, gint sstag, gint sstag_fin )
   { struct CMD_TYPE_MNEMONIQUES *mnemos;
-    struct CMD_TYPE_MNEMONIQUE *mnemo;
+    struct CMD_TYPE_MNEMO_BASE *mnemo;
     struct CMD_ENREG nbr;
     struct DB *db;
     gint max_enreg;                                /* Nombre maximum d'enregistrement dans un bloc reseau */
 
     prctl(PR_SET_NAME, "W-EnvoiMnemo", 0, 0, 0 );
 
-    if ( ! Recuperer_mnemoDB( &db ) )
+    if ( ! Recuperer_mnemo_baseDB( &db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        return;
      }
@@ -367,7 +198,7 @@
     g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d mnemos", nbr.num );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
-    max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_MNEMONIQUES)) / sizeof(struct CMD_TYPE_MNEMONIQUE);
+    max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_MNEMONIQUES)) / sizeof(struct CMD_TYPE_MNEMO_BASE);
     mnemos = (struct CMD_TYPE_MNEMONIQUES *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );    
     if (!mnemos)
      { struct CMD_GTK_MESSAGE erreur;
@@ -382,9 +213,9 @@
     mnemos->nbr_mnemos = 0;                                 /* Valeurs par defaut si pas d'enregistrement */
 
     do
-     { mnemo = Recuperer_mnemoDB_suite( &db );                      /* Récupération d'un mnemo dans la DB */
+     { mnemo = Recuperer_mnemo_baseDB_suite( &db );                 /* Récupération d'un mnemo dans la DB */
        if (mnemo)                                              /* Si enregegistrement, alors on le pousse */
-        { memcpy ( &mnemos->mnemo[mnemos->nbr_mnemos], mnemo, sizeof(struct CMD_TYPE_MNEMONIQUE) );
+        { memcpy ( &mnemos->mnemo[mnemos->nbr_mnemos], mnemo, sizeof(struct CMD_TYPE_MNEMO_BASE) );
           mnemos->nbr_mnemos++;          /* Nous avons 1 enregistrement de plus dans la structure d'envoi */
           g_free(mnemo);
         }
@@ -392,7 +223,7 @@
        if ( (mnemo == NULL) || mnemos->nbr_mnemos == max_enreg ) /* Si depassement de tampon ou plus d'enreg */
         { Envoi_client ( client, tag, sstag, (gchar *)mnemos,
                          sizeof(struct CMD_TYPE_MNEMONIQUES) +
-                         mnemos->nbr_mnemos * sizeof(struct CMD_TYPE_MNEMONIQUE) );
+                         mnemos->nbr_mnemos * sizeof(struct CMD_TYPE_MNEMO_BASE) );
           mnemos->nbr_mnemos = 0;
         }
      }
@@ -408,12 +239,12 @@
 /**********************************************************************************************************/
  static void Envoyer_mnemoniques_for_courbe_tag ( struct CLIENT *client, guint tag, gint sstag, gint sstag_fin )
   { struct CMD_ENREG nbr;
-    struct CMD_TYPE_MNEMONIQUE *mnemo;
+    struct CMD_TYPE_MNEMO_BASE *mnemo;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-MnemoCourbe", 0, 0, 0 );
 
-    if ( ! Recuperer_mnemoDB_for_courbe( &db ) )
+    if ( ! Recuperer_mnemo_baseDB_for_courbe( &db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        return;
      }                                                                           /* Si pas de histos (??) */
@@ -423,14 +254,14 @@
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { mnemo = Recuperer_mnemoDB_suite( &db );
+     { mnemo = Recuperer_mnemo_baseDB_suite( &db );
        if (!mnemo)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           return;
         }
 
-       Envoi_client ( client, tag, sstag, (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMONIQUE) );
+       Envoi_client ( client, tag, sstag, (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMO_BASE) );
        g_free(mnemo);
      }
   }

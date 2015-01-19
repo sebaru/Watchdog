@@ -3,16 +3,16 @@
 #* Projet WatchDog version 2.0       Gestion d'habitat                      lun 02 jun 2003 14:24:24 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
-SUBDIRS = Include Serveur Dls TraductionDLS Archive \
+SUBDIRS = Include Serveur Dls TraductionDLS Archive Enocean \
 	  Rs485 Sms Modbus Audio Onduleur Lirc Rfxcom Imsg Satellite TeleinfoEDF Http
 
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
                     shm.c Config.c \
-                    db.c Mnemonique.c Message.c \
-		    Compteur_horaire.c Compteur_impulsion.c \
+                    db.c Mnemonique.c Mnemo_DI.c Mnemo_AI.c Mnemo_CPT_IMP.c Message.c \
+		    Compteur_horaire.c \
 		    Icones.c classe.c \
-		    EntreeANA.c Tempo.c Histo_msgs.c Camera.c \
+		    Mnemo_Tempo.c Histo_msgs.c Camera.c \
                     distrib_MSGxxx.c distrib_Ixxx.c distrib_Axxx.c distrib_EAxxx.c distrib_Exxx.c \
                     Admin.c Admin_running.c Admin_process.c Admin_dls.c Admin_set.c Admin_get.c Admin_dbcfg.c Admin_user.c \
                     Utilisateur.c Util_groupe.c Util_login_failed.c Util_actif.c \
@@ -21,7 +21,7 @@ Watchdogd_SOURCES = Watchdogd.c process.c \
 Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
 		    TraductionDLS/libtradDLS.la \
 		    Archive/libarchive.la \
-		    $(top_srcdir)/Commun/libwatchdog.la
+		    $(top_builddir)/Commun/libwatchdog.la
 
 # rdynamic pour autoriser l'utilsation des fonctions du thread principal par les librairies dlopened
 Watchdogd_LDFLAGS = -rdynamic -lpopt \
@@ -34,10 +34,10 @@ Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libcurl librrd open
                    `mysql_config --cflags`
 
 sysconf_DATA = watchdogd.conf
-pkgdata_DATA = init_db.sql migrate_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc motion.conf cam0001.conf
+pkgdata_DATA = init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
-	 -IInclude
+            -I$(top_srcdir)/Watchdogd/Include
 
-EXTRA_DIST = watchdogd.conf init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc motion.conf cam0001.conf
+EXTRA_DIST = watchdogd.conf init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
 MAINTAINERCLEANFILES = Makefile.in

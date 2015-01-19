@@ -106,13 +106,11 @@
 
  static void Menu_effacer_mnemonique ( void );
  static void Menu_editer_mnemonique ( void );
- static void Menu_options_bit_interne ( void );
  static void Menu_ajouter_mnemonique ( void );
 
  static GnomeUIInfo Menu_popup_select[]=
   { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_mnemonique, GNOME_STOCK_PIXMAP_ADD ),
     GNOMEUIINFO_ITEM_STOCK ( N_("Edit"), NULL, Menu_editer_mnemonique, GNOME_STOCK_PIXMAP_PROPERTIES ),
-    GNOMEUIINFO_ITEM_STOCK ( N_("Options"), NULL, Menu_options_bit_interne, GNOME_STOCK_PIXMAP_INDEX ),
     GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_ITEM_STOCK ( N_("Remove"), NULL, Menu_effacer_mnemonique, GNOME_STOCK_PIXMAP_CLEAR ),
     GNOMEUIINFO_END
@@ -180,7 +178,7 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_effacer_mnemonique ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { struct CMD_TYPE_MNEMONIQUE rezo_mnemonique;
+  { struct CMD_TYPE_MNEMO_BASE rezo_mnemonique;
     GtkTreeSelection *selection;
     GtkTreeModel *store;
     GList *lignes;
@@ -194,14 +192,14 @@
             while ( lignes )
              { gchar *libelle;
                gtk_tree_model_get_iter( store, &iter, lignes->data );  /* Recuperation ligne selectionnée */
-               gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_mnemonique.id, -1 );       /* Recup du id */
+               gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_mnemonique.id, -1 );    /* Recup du id */
                gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
 
                memcpy( &rezo_mnemonique.libelle, libelle, sizeof(rezo_mnemonique.libelle) );
                g_free( libelle );
 
                Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_DEL_MNEMONIQUE,
-                             (gchar *)&rezo_mnemonique, sizeof(struct CMD_TYPE_MNEMONIQUE) );
+                             (gchar *)&rezo_mnemonique, sizeof(struct CMD_TYPE_MNEMO_BASE) );
                gtk_tree_selection_unselect_iter( selection, &iter );
                lignes = lignes->next;
              }
@@ -245,47 +243,13 @@
     gtk_widget_show_all( dialog );
   }
 /**********************************************************************************************************/
-/* Menu_options_bit_interne: Positionnement des optionslié au bit interne                                 */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static void Menu_options_bit_interne ( void )
-  { GtkTreeSelection *selection;
-    struct CMD_TYPE_MNEMONIQUE rezo_mnemonique;
-    GtkTreeModel *store;
-    GtkTreeIter iter;
-    GList *lignes;
-    gchar *libelle;
-    guint nbr;
-
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_mnemonique) );
-    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_mnemonique) );
-
-    nbr = gtk_tree_selection_count_selected_rows( selection );
-    if (!nbr) return;                                                        /* Si rien n'est selectionné */
-
-    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
-    gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_mnemonique.id, -1 );               /* Recup du id */
-    gtk_tree_model_get( store, &iter, COLONNE_TYPE_INT, &rezo_mnemonique.type, -1 );     /* Recup du type */
-    gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
-    memcpy( &rezo_mnemonique.libelle, libelle, sizeof(rezo_mnemonique.libelle) );
-    g_free( libelle );
-printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_mnemonique.libelle );
-
-    Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_EDIT_OPTION_BIT_INTERNE,
-                  (gchar *)&rezo_mnemonique, sizeof(struct CMD_TYPE_MNEMONIQUE) );
-    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-    g_list_free (lignes);                                                           /* Liberation mémoire */
-  }
-/**********************************************************************************************************/
 /* Menu_editer_mnemonique: Demande d'edition du mnemonique selectionné                                    */
 /* Entrée: rien                                                                                           */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  static void Menu_editer_mnemonique ( void )
   { GtkTreeSelection *selection;
-    struct CMD_TYPE_MNEMONIQUE rezo_mnemonique;
+    struct CMD_TYPE_MNEMO_BASE rezo_mnemonique;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -307,7 +271,7 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
     g_free( libelle );
 
     Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_EDIT_MNEMONIQUE,
-                  (gchar *)&rezo_mnemonique, sizeof(struct CMD_TYPE_MNEMONIQUE) );
+                  (gchar *)&rezo_mnemonique, sizeof(struct CMD_TYPE_MNEMO_BASE) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }
@@ -579,7 +543,7 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
 /* Entrée: une reference sur le mnemonique                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_mnemonique( GtkTreeIter *iter, struct CMD_TYPE_MNEMONIQUE *mnemonique )
+ static void Rafraichir_visu_mnemonique( GtkTreeIter *iter, struct CMD_TYPE_MNEMO_BASE *mnemonique )
   { GtkTreeModel *store;
     gchar chaine[60], groupe_page[512];
        
@@ -600,7 +564,7 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
                          COLONNE_COMMAND_TEXT,    mnemonique->command_text,
                          COLONNE_TABLEAU,         mnemonique->tableau,
                          COLONNE_COULEUR,         Couleur_bit_interne( mnemonique->type ),
-                         COLONNE_COULEUR_TEXTE, Couleur_texte_bit_interne( mnemonique->type ),
+                         COLONNE_COULEUR_TEXTE,   Couleur_texte_bit_interne( mnemonique->type ),
                          -1
                        );
   }
@@ -609,7 +573,7 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
 /* Entrée: une reference sur le mnemonique                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_mnemonique( struct CMD_TYPE_MNEMONIQUE *mnemonique )
+ void Proto_afficher_un_mnemonique( struct CMD_TYPE_MNEMO_BASE *mnemonique )
   { GtkListStore *store;
     GtkTreeIter iter;
 
@@ -624,7 +588,7 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
 /* Entrée: une reference sur le mnemonique                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_cacher_un_mnemonique( struct CMD_TYPE_MNEMONIQUE *mnemonique )
+ void Proto_cacher_un_mnemonique( struct CMD_TYPE_MNEMO_BASE *mnemonique )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
@@ -650,7 +614,7 @@ printf("on veut les options du bit_interne %d %s\n", rezo_mnemonique.type, rezo_
 /* Entrée: une reference sur le mnemonique                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_rafraichir_un_mnemonique( struct CMD_TYPE_MNEMONIQUE *mnemonique )
+ void Proto_rafraichir_un_mnemonique( struct CMD_TYPE_MNEMO_BASE *mnemonique )
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;

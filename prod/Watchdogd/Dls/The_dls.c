@@ -38,10 +38,9 @@
 
  #include "watchdogd.h"
 
- static GSList *Cde_exterieure=NULL;                     /* Numero des monostables mis ‡ 1 via le serveur */
 /**********************************************************************************************************/
 /* Chrono: renvoi la difference de temps entre deux structures timeval                                    */
-/* EntrÈe: le temps avant, et le temps apres l'action                                                     */
+/* Entr√©e: le temps avant, et le temps apres l'action                                                     */
 /* Sortie: un float                                                                                       */
 /**********************************************************************************************************/
  static float Chrono ( struct timeval *avant, struct timeval *apres )
@@ -53,101 +52,95 @@
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  int E( int num )
-  { static gint last_log = 0;
-    if ( (num>=0) && (num<NBR_ENTRE_TOR) ) return ( ((Partage->e[ num>>3 ]) & (1<<(num%8)) ? 1 : 0) );
+  { if ( (num>=0) && (num<NBR_ENTRE_TOR) ) return ( (Partage->e[ num ].etat ? 1 : 0) );
     else
-     { if ( last_log + 60 < Partage->top )
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "E : num %d out of range", num );
-          last_log = Partage->top;
-        }
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "E : num %d out of range", num ); }
      }
     return(0);
   }
 /**********************************************************************************************************/
-/* EA_inrange : Renvoie 1 si l'EA en paramËtre est dans le range de mesure                                */
+/* SE : Met √† jour la valeur de l'entr√©e en parametre.                                                    */
+/* Utilis√© uniquement en tant que backend de Envoyer_entree_dls                                           */
+/**********************************************************************************************************/
+ static void SE( int num, int etat )
+  { if ( (E(num) && !etat) || (!E(num) && etat) )
+     { Ajouter_arch( MNEMO_ENTREE, num, 1.0*E(num) );   /* Archivage etat n-1 pour les courbes historique */
+       Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat );                        /* Archivage de l'etat courant */
+       pthread_mutex_lock( &Partage->com_msrv.synchro );  /* Ajout dans la liste de E a envoyer au master */
+       Partage->com_msrv.liste_e = g_slist_prepend( Partage->com_msrv.liste_e,
+                                                    GINT_TO_POINTER(num) );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       Partage->e[num].etat = etat;                                      /* Changement d'etat de l'entr√©e */
+     }
+  }
+/**********************************************************************************************************/
+/* EA_inrange : Renvoie 1 si l'EA en param√®tre est dans le range de mesure                                */
 /**********************************************************************************************************/
  int EA_inrange( int num )
-  { static gint last_log = 0;
-    if (num>=0 && num<NBR_ENTRE_ANA) return( Partage->ea[ num ].inrange);
+  { if (num>=0 && num<NBR_ENTRE_ANA) return( Partage->ea[ num ].inrange);
     else
-     { if ( last_log + 60 < Partage->top )
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_range : num %d out of range", num );
-          last_log = Partage->top;
-        }
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_range : num %d out of range", num ); }
      }
     return(0);
   }
 /**********************************************************************************************************/
-/* EA_ech : Renvoie la valeur de l'EA interprÈtÈe (mis ‡ l'Èchelle)                                       */
+/* EA_ech : Renvoie la valeur de l'EA interpr√©t√©e (mis √† l'√©chelle)                                       */
 /**********************************************************************************************************/
  float EA_ech( int num )
-  { static gint last_log = 0;
-    if (num>=0 && num<NBR_ENTRE_ANA)
+  { if (num>=0 && num<NBR_ENTRE_ANA)
      { gfloat val_ech;
        val_ech = Partage->ea[ num ].val_ech;
        return ( val_ech );
      }
     else
-     { if ( last_log + 60 < Partage->top )
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech : num %d out of range", num );
-          last_log = Partage->top;
-        }
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech : num %d out of range", num ); }
      }
     return(0.0);
   }
 /**********************************************************************************************************/
-/* EA_ech_inf : Teste si la valeur de l'EA est inf ‡ une mesure                                           */
+/* EA_ech_inf : Teste si la valeur de l'EA est inf √† une mesure                                           */
 /**********************************************************************************************************/
  int EA_ech_inf( float val, int num )
-  { static gint last_log = 0;
-    if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) < val); }
+  { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) < val); }
     else
-     { if ( last_log + 60 < Partage->top )
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_inf : num %d out of range", num );
-          last_log = Partage->top;
-        }
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_inf : num %d out of range", num ); }
      }
     return(0);
   }
 /**********************************************************************************************************/
-/* EA_ech_inf_egal : Teste si la valeur de l'EA est inf ou egale ‡ une mesure                             */
+/* EA_ech_inf_egal : Teste si la valeur de l'EA est inf ou egale √† une mesure                             */
 /**********************************************************************************************************/
  int EA_ech_inf_egal( float val, int num )
-  { static gint last_log = 0;
-    if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) <= val); }
+  { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) <= val); }
     else
-     { if ( last_log + 60 < Partage->top )
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_inf_egal : num %d out of range", num );
-          last_log = Partage->top;
-        }
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_inf_egal : num %d out of range", num ); }
      }
     return(0);
   }
 /**********************************************************************************************************/
-/* EA_ech_sup : Teste si la valeur de l'EA est sup ‡ une mesure                                           */
+/* EA_ech_sup : Teste si la valeur de l'EA est sup √† une mesure                                           */
 /**********************************************************************************************************/
  int EA_ech_sup( float val, int num )
-  { static gint last_log = 0;
-    if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) > val); }
+  { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) > val); }
     else
-     { if ( last_log + 60 < Partage->top )
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_sup : num %d out of range", num );
-          last_log = Partage->top;
-        }
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_sup : num %d out of range", num ); }
      }
     return(0);
   }
 /**********************************************************************************************************/
-/* EA_ech_sup_egal : Teste si la valeur de l'EA est sup ou egale ‡ une mesure                             */
+/* EA_ech_sup_egal : Teste si la valeur de l'EA est sup ou egale √† une mesure                             */
 /**********************************************************************************************************/
  int EA_ech_sup_egal( float val, int num )
-  { static gint last_log = 0;
-    if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) >= val); }
+  { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) >= val); }
     else
-     { if ( last_log + 60 < Partage->top )
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_sup_egal : num %d out of range", num );
-          last_log = Partage->top;
-        }
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_sup_egal : num %d out of range", num ); }
      }
     return(0);
   }
@@ -155,26 +148,21 @@
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  float CI( int num )
-  { static gint last_log = 0;
-    if (num<NBR_COMPTEUR_IMP) return (Partage->ci[ num ].cpt_impdb.valeur);
+  { if (num<NBR_COMPTEUR_IMP) return (Partage->ci[ num ].confDB.valeur);
     else
-     { if ( last_log + 60 < Partage->top )
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "CI : num %d out of range", num );
-          last_log = Partage->top;
-        }
-     }    return(0.0);
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "CI : num %d out of range", num ); }
+     }
+    return(0.0);
   }
 /**********************************************************************************************************/
 /* Renvoie la valeur d'une entre TOR                                                                      */
 /**********************************************************************************************************/
  int A( int num )
-  { static gint last_log = 0;
-    if ( num>=0 && num<NBR_SORTIE_TOR ) return ( Partage->a[ num ].etat );
+  { if ( num>=0 && num<NBR_SORTIE_TOR ) return ( Partage->a[ num ].etat );
     else
-     { if ( last_log + 60 < Partage->top )
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "A : num %d out of range", num );
-          last_log = Partage->top;
-        }
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "A : num %d out of range", num ); }
      }
     return(0);
   }
@@ -182,13 +170,10 @@
 /* Renvoie la valeur d'un bistable                                                                        */
 /**********************************************************************************************************/
  int B( int num )
-  { static gint last_log = 0;
-    if (num>=0 && num<NBR_BIT_BISTABLE) return( ((Partage->b[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
+  { if (num>=0 && num<NBR_BIT_BISTABLE) return( ((Partage->b[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
     else
-     { if ( last_log + 60 < Partage->top )
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "B : num %d out of range", num );
-          last_log = Partage->top;
-        }
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "B : num %d out of range", num ); }
      }
     return(0);
   }
@@ -196,13 +181,10 @@
 /* Renvoie la valeur d'un monostable                                                                      */
 /**********************************************************************************************************/
  int M( int num )
-  { static gint last_log = 0;
-    if (num>=0 && num<NBR_BIT_MONOSTABLE) return( ((Partage->m[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
+  { if (num>=0 && num<NBR_BIT_MONOSTABLE) return( ((Partage->m[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
     else
-     { if ( last_log + 60 < Partage->top )
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "M : num %d out of range", num );
-          last_log = Partage->top;
-        }
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "M : num %d out of range", num ); }
      }
     return(0);
   }
@@ -210,13 +192,10 @@
 /* Renvoie la valeur d'une tempo retard                                                                   */
 /**********************************************************************************************************/
  int T( int num )
-  { static gint last_log = 0;
-    if (num>=0 && num<NBR_TEMPO) return ( Partage->Tempo_R[num].state );
+  { if (num>=0 && num<NBR_TEMPO) return ( Partage->Tempo_R[num].state );
     else
-     { if ( last_log + 60 < Partage->top )
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "TR : num %d out of range", num );
-          last_log = Partage->top;
-        }
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "TR : num %d out of range", num ); }
      }
     return(0);
   }
@@ -224,8 +203,7 @@
 /* Renvoie la valeur d'une tempo retard                                                                   */
 /**********************************************************************************************************/
  char *Tdetail( int num )
-  { static gint last_log = 0;
-    static char chaine[90];
+  {  static char chaine[90];
     if (num>=0 && num<NBR_TEMPO)
      { snprintf( chaine, sizeof(chaine), "T%04d  = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", num,
                  Partage->Tempo_R[num].state, Partage->Tempo_R[num].status,
@@ -236,68 +214,32 @@
                );
      }
     else
-     { if ( last_log + 60 < Partage->top )
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "Tdetail : num %d out of range", num );
-          last_log = Partage->top;
-        }
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "Tdetail : num %d out of range", num ); }
        snprintf( chaine, sizeof(chaine), "%04d out of range", num );
      }
     return( chaine );
   }
-
 /**********************************************************************************************************/
-/* Met ‡ jour l'entrÈe num                                                                                */
-/**********************************************************************************************************/
- void SE( int num, int etat )
-  { static gint last_log = 0;
-    if (num<0 || num>=NBR_ENTRE_TOR)
-     { if ( last_log + 60 < Partage->top )
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SE : num %d out of range", num );
-          last_log = Partage->top;
-        }
-       return;
-     }
-
-    if ( (E(num) && !etat) || (!E(num) && etat) )
-     { Ajouter_arch( MNEMO_ENTREE, num, E(num) );/* Archivage de l'etat n-1 pour afficher des courbes correctes dans l'historique */
-       Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat );                        /* Archivage de l'etat courant */
-       pthread_mutex_lock( &Partage->com_msrv.synchro );  /* Ajout dans la liste de E a envoyer au master */
-       Partage->com_msrv.liste_e = g_slist_prepend( Partage->com_msrv.liste_e,
-                                                    GINT_TO_POINTER(num) );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
-
-       if (etat)                                                         /* Changement d'etat de l'entrÈe */
-        { Partage->e[ num>>3 ] |=  (1<<(num%8)); }
-       else
-        { Partage->e[ num>>3 ] &= ~(1<<(num%8)); }
-     }
-  }
-/**********************************************************************************************************/
-/* Met ‡ jour l'entrÈe analogique num    val_avant_ech sur 12 bits !!                                     */
+/* Met √† jour l'entr√©e analogique num    val_avant_ech sur 12 bits !!                                     */
 /**********************************************************************************************************/
  void SEA_range( int num, int range )
-  { static gint last_log = 0;
-    if (num<0 || num>=NBR_ENTRE_ANA)
-     { if ( last_log + 60 < Partage->top )
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SEA_range : num %d out of range", num );
-          last_log = Partage->top;
-        }
+  { if (num<0 || num>=NBR_ENTRE_ANA)
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SEA_range : num %d out of range", num ); }
        return;
      }
     Partage->ea[num].inrange = range;
   }
 /**********************************************************************************************************/
-/* Met ‡ jour l'entrÈe analogique num ‡ partir de sa valeur avant mise a l'echelle                        */
-/* Sortie : NÈant                                                                                         */
+/* Met √† jour l'entr√©e analogique num √† partir de sa valeur avant mise a l'echelle                        */
+/* Sortie : N√©ant                                                                                         */
 /**********************************************************************************************************/
  void SEA ( int num, float val_avant_ech )
-  { static gint last_log = 0;
-    gboolean need_arch;
+  { gboolean need_arch;
     if (num<0 || num>=NBR_ENTRE_ANA)
-     { if ( last_log + 60 < Partage->top )
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SEA : num %d out of range", num );
-          last_log = Partage->top;
-        }
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SEA : num %d out of range", num ); }
        return;
      }
 
@@ -307,46 +249,46 @@
        if ( Partage->ea[ num ].last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top )
         { need_arch = TRUE; }
 
-       switch ( Partage->ea[num].cmd_type_eana.type )
+       switch ( Partage->ea[num].confDB.type )
         { case ENTREEANA_NON_INTERP:
-               Partage->ea[ num ].val_ech = val_avant_ech;                     /* Pas d'interprÈtation !! */
+               Partage->ea[ num ].val_ech = val_avant_ech;                     /* Pas d'interpr√©tation !! */
                Partage->ea[ num ].inrange = 1;
                break;
           case ENTREEANA_4_20_MA_10BITS:
                if (val_avant_ech < 100)                            /* 204) Modification du range pour 4mA */
-                { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur ‡ l'echelle */ 
+                { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur √† l'echelle */ 
                   Partage->ea[ num ].inrange = 0;
                 }
                else
                 { if (val_avant_ech < 204) val_avant_ech = 204;
                   Partage->ea[ num ].val_ech = (gfloat)
-                  ((val_avant_ech-204)*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/820.0
-                  + Partage->ea[num].cmd_type_eana.min;                             /* Valeur ‡ l'echelle */ 
+                  ((val_avant_ech-204)*(Partage->ea[num].confDB.max - Partage->ea[num].confDB.min))/820.0
+                  + Partage->ea[num].confDB.min;                             /* Valeur √† l'echelle */ 
 
                   Partage->ea[ num ].inrange = 1;
                 }
                break;
           case ENTREEANA_4_20_MA_12BITS:
                if (val_avant_ech < 400)
-                { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur ‡ l'echelle */ 
+                { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur √† l'echelle */ 
                   Partage->ea[ num ].inrange = 0;
                 }
                else
                 { if (val_avant_ech < 816) val_avant_ech = 816;
                   Partage->ea[ num ].val_ech = (gfloat)
-                  ((val_avant_ech-816)*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/3280.0
-                     + Partage->ea[num].cmd_type_eana.min;                          /* Valeur ‡ l'echelle */ 
+                  ((val_avant_ech-816)*(Partage->ea[num].confDB.max - Partage->ea[num].confDB.min))/3280.0
+                     + Partage->ea[num].confDB.min;                          /* Valeur √† l'echelle */ 
                   Partage->ea[ num ].inrange = 1;
                 }
                break;
           case ENTREEANA_WAGO_750455:
                Partage->ea[ num ].val_ech = (gfloat)
-                  (val_avant_ech*(Partage->ea[num].cmd_type_eana.max - Partage->ea[num].cmd_type_eana.min))/4095.0
-                     + Partage->ea[num].cmd_type_eana.min;                          /* Valeur ‡ l'echelle */ 
+                  (val_avant_ech*(Partage->ea[num].confDB.max - Partage->ea[num].confDB.min))/4095.0
+                     + Partage->ea[num].confDB.min;                          /* Valeur √† l'echelle */ 
                Partage->ea[ num ].inrange = 1;
                break;
           case ENTREEANA_WAGO_750461:
-               Partage->ea[ num ].val_ech = (gfloat)(val_avant_ech/10.0);           /* Valeur ‡ l'echelle */ 
+               Partage->ea[ num ].val_ech = (gfloat)(val_avant_ech/10.0);           /* Valeur √† l'echelle */ 
                Partage->ea[ num ].inrange = 1;
                break;
           default:
@@ -368,13 +310,14 @@
   }
 /**********************************************************************************************************/
 /* SB: Positionnement d'un bistable DLS                                                                   */
-/* EntrÈe: numero, etat                                                                                   */
+/* Entr√©e: numero, etat                                                                                   */
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void SB( int num, int etat )
   { gint numero, bit;
     if (num<0 || num>=NBR_BIT_BISTABLE)
-     { Info_new( Config.log, Config.log_dls, LOG_INFO, "SB : num %d out of range", num );
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SB : num %d out of range", num ); }
        return;
      }
     numero = num>>3;
@@ -390,13 +333,14 @@
   }
 /**********************************************************************************************************/
 /* SM: Positionnement d'un monostable DLS                                                                 */
-/* EntrÈe: numero, etat                                                                                   */
+/* Entr√©e: numero, etat                                                                                   */
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void SM( int num, int etat )
   { gint numero, bit;
     if (num<0 || num>=NBR_BIT_MONOSTABLE)
-     { Info_new( Config.log, Config.log_dls, LOG_INFO, "SM : num %d out of range", num );
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SM : num %d out of range", num ); }
        return;
      }
     numero = num>>3;
@@ -412,12 +356,13 @@
   }
 /**********************************************************************************************************/
 /* SI: Positionnement d'un motif TOR                                                                      */
-/* EntrÈe: numero, etat                                                                                   */
+/* Entr√©e: numero, etat                                                                                   */
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void SI( int num, int etat, int rouge, int vert, int bleu, int cligno )
   { if ( num<0 || num>=NBR_BIT_CONTROLE )
-     { Info_new( Config.log, Config.log_dls, LOG_INFO, "SI : num %d out of range", num );
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SI : num %d out of range", num ); }
        return;
      }
 
@@ -437,7 +382,7 @@
              Partage->i[num].bleu   = 0;
              Partage->i[num].cligno = 1;                                                    /* Clignotant */
            }
-          else { Partage->i[num].etat   = etat;  /* Sinon on recopie ce qui est demandÈ par le plugin DLS */
+          else { Partage->i[num].etat   = etat;  /* Sinon on recopie ce qui est demand√© par le plugin DLS */
                  Partage->i[num].rouge  = rouge;
                  Partage->i[num].vert   = vert;
                  Partage->i[num].bleu   = bleu;
@@ -456,21 +401,22 @@
   }
 /**********************************************************************************************************/
 /* STR: Positionnement d'une Tempo retard DLS                                                             */
-/* EntrÈe: numero, etat                                                                                   */
+/* Entr√©e: numero, etat                                                                                   */
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void ST( int num, int etat )
   { struct TEMPO *tempo;
 
     if (num<0 || num>=NBR_TEMPO)
-     { Info_new( Config.log, Config.log_dls, LOG_INFO, "STR: num %d out of range", num );
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "STR: num %d out of range", num ); }
        return;
      }
-    tempo = &Partage->Tempo_R[num];                                       /* RÈcupÈration de la structure */
+    tempo = &Partage->Tempo_R[num];                                       /* R√©cup√©ration de la structure */
 
     if (tempo->status == TEMPO_NOT_COUNTING && etat == 1)
      { tempo->status = TEMPO_WAIT_FOR_DELAI_ON;
-       tempo->date_on = Partage->top + tempo->option_tempo.delai_on;
+       tempo->date_on = Partage->top + tempo->confDB.delai_on;
      }
 
     if (tempo->status == TEMPO_WAIT_FOR_DELAI_ON && etat == 0)
@@ -482,37 +428,37 @@
      }
 
     if (tempo->status == TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
-        Partage->top < tempo->date_on + tempo->option_tempo.min_on )
-     { if (Partage->top+tempo->option_tempo.delai_off <= tempo->date_on + tempo->option_tempo.min_on)
-            { tempo->date_off = tempo->date_on+tempo->option_tempo.min_on; }
-       else { tempo->date_off = Partage->top+tempo->option_tempo.delai_off; }
+        Partage->top < tempo->date_on + tempo->confDB.min_on )
+     { if (Partage->top+tempo->confDB.delai_off <= tempo->date_on + tempo->confDB.min_on)
+            { tempo->date_off = tempo->date_on+tempo->confDB.min_on; }
+       else { tempo->date_off = Partage->top+tempo->confDB.delai_off; }
        tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
      }
     
     if (tempo->status == TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
-        tempo->date_on + tempo->option_tempo.min_on <= Partage->top )
-     { tempo->date_off = Partage->top+tempo->option_tempo.delai_off;
+        tempo->date_on + tempo->confDB.min_on <= Partage->top )
+     { tempo->date_off = Partage->top+tempo->confDB.delai_off;
        tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
      }
 
     if (tempo->status == TEMPO_WAIT_FOR_MIN_ON && etat == 1 &&
-        tempo->date_on + tempo->option_tempo.min_on <= Partage->top )
+        tempo->date_on + tempo->confDB.min_on <= Partage->top )
      { tempo->status = TEMPO_WAIT_FOR_MAX_ON;
      }
 
     if (tempo->status == TEMPO_WAIT_FOR_MAX_ON && etat == 0 )
-     { if (tempo->option_tempo.max_on)
-            { if (Partage->top+tempo->option_tempo.delai_off < tempo->date_on+tempo->option_tempo.max_on)
-                   { tempo->date_off = Partage->top + tempo->option_tempo.delai_off; }
-              else { tempo->date_off = tempo->date_on+tempo->option_tempo.max_on; }
+     { if (tempo->confDB.max_on)
+            { if (Partage->top+tempo->confDB.delai_off < tempo->date_on+tempo->confDB.max_on)
+                   { tempo->date_off = Partage->top + tempo->confDB.delai_off; }
+              else { tempo->date_off = tempo->date_on+tempo->confDB.max_on; }
             }
-       else { tempo->date_off = Partage->top+tempo->option_tempo.delai_off; }
+       else { tempo->date_off = Partage->top+tempo->confDB.delai_off; }
        tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
      }
 
-    if (tempo->status == TEMPO_WAIT_FOR_MAX_ON && etat == 1 && tempo->option_tempo.max_on &&
-        tempo->date_on + tempo->option_tempo.max_on <= Partage->top )
-     { tempo->date_off = tempo->date_on+tempo->option_tempo.max_on;
+    if (tempo->status == TEMPO_WAIT_FOR_MAX_ON && etat == 1 && tempo->confDB.max_on &&
+        tempo->date_on + tempo->confDB.max_on <= Partage->top )
+     { tempo->date_off = tempo->date_on+tempo->confDB.max_on;
        tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
      }
 
@@ -527,7 +473,7 @@
   }
 /**********************************************************************************************************/
 /* SA: Positionnement d'un actionneur DLS                                                                 */
-/* EntrÈe: numero, etat                                                                                   */
+/* Entr√©e: numero, etat                                                                                   */
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void SA( int num, int etat )
@@ -551,14 +497,14 @@
                                                       GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Partage->a[num].changes++;                                              /* Un change de plus !! */
-        } else if ( ! (Partage->top % 50 ))                /* Si persistence on prÈvient toutes les 5 sec */
+        } else if ( ! (Partage->top % 50 ))                /* Si persistence on pr√©vient toutes les 5 sec */
         { Info_new( Config.log, Config.log_dls, LOG_INFO, "SA: last_change trop tot pour A%d !", num ); }
        Partage->a[num].last_change = Partage->top;
        Partage->audit_bit_interne_per_sec++;
      }
   }
 /**********************************************************************************************************/
-/* Met ‡ jour le compteur horaire                                                                         */
+/* Met √† jour le compteur horaire                                                                         */
 /* Le compteur compte les MINUTES !!                                                                      */
 /**********************************************************************************************************/
  void SCH( int num, int etat )
@@ -586,7 +532,7 @@
      { Partage->ch[ num ].actif = FALSE; }
   }
 /**********************************************************************************************************/
-/* Met ‡ jour le compteur impulsion                                                                       */
+/* Met √† jour le compteur impulsion                                                                       */
 /* Le compteur compte les impulsions !!                                                                   */
 /**********************************************************************************************************/
  void SCI( int num, int etat, int reset, int ratio )
@@ -596,9 +542,9 @@
        return;
      }
     if (etat)
-     { if (reset)                                                   /* Le compteur doit-il etre resettÈ ? */
-        { Partage->ci[num].val_en_cours1 = 0.0;                /* Valeur transitoire pour gÈrer les ratio */
-          Partage->ci[num].val_en_cours2 = 0.0;                /* Valeur transitoire pour gÈrer les ratio */
+     { if (reset)                                                   /* Le compteur doit-il etre resett√© ? */
+        { Partage->ci[num].val_en_cours1 = 0.0;                /* Valeur transitoire pour g√©rer les ratio */
+          Partage->ci[num].val_en_cours2 = 0.0;                /* Valeur transitoire pour g√©rer les ratio */
           changed = TRUE;
         }
 
@@ -615,16 +561,16 @@
     else
      { if (!reset) Partage->ci[ num ].actif = FALSE; }
 
-    switch (Partage->ci[ num ].cpt_impdb.type)                        /* Calcul de la valeur rÈelle du CI */
+    switch (Partage->ci[ num ].confDB.type)                        /* Calcul de la valeur r√©elle du CI */
      { case CI_TOTALISATEUR :
             if ( Partage->ci[num].last_update + 1 < Partage->top )
-             { Partage->ci[num].cpt_impdb.valeur = Partage->ci[num].val_en_cours2;
+             { Partage->ci[num].confDB.valeur = Partage->ci[num].val_en_cours2;
                Partage->ci[num].last_update = Partage->top;
              }
             break;
        case CI_MOYENNEUR_SEC:
             if ( Partage->ci[num].last_update + 10 < Partage->top )
-             { Partage->ci[num].cpt_impdb.valeur = (Partage->ci[num].cpt_impdb.valeur +
+             { Partage->ci[num].confDB.valeur = (Partage->ci[num].confDB.valeur +
                                                     Partage->ci[num].val_en_cours2)/2.0;
                Partage->ci[num].val_en_cours2 = 0.0;
                Partage->ci[num].last_update = Partage->top;
@@ -632,23 +578,24 @@
             break;
        case CI_MOYENNEUR_MIN:
             if ( Partage->ci[num].last_update + 600 < Partage->top )
-             { Partage->ci[num].cpt_impdb.valeur = (Partage->ci[num].cpt_impdb.valeur +
+             { Partage->ci[num].confDB.valeur = (Partage->ci[num].confDB.valeur +
                                                     Partage->ci[num].val_en_cours2)/2.0;
                Partage->ci[num].val_en_cours2 = 0.0;
                Partage->ci[num].last_update = Partage->top;
              }
             break;
      }
-    if (changed == TRUE) Ajouter_arch( MNEMO_CPT_IMP, num, Partage->ci[num].cpt_impdb.valeur );
+    if (changed == TRUE) Ajouter_arch( MNEMO_CPT_IMP, num, Partage->ci[num].confDB.valeur );
   }
 /**********************************************************************************************************/
 /* MSG: Positionnement des message DLS                                                                    */
-/* EntrÈe: numero, etat                                                                                   */
+/* Entr√©e: numero, etat                                                                                   */
 /* Sortie: Neant                                                                                          */
 /**********************************************************************************************************/
  void MSG( int num, int etat )
   { if ( num<0 || num>=NBR_MESSAGE_ECRITS )
-     { Info_new( Config.log, Config.log_dls, LOG_WARNING, "MSG : num %03d out of range", num );
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_WARNING, "MSG : num %03d out of range", num ); }
        return;
      }
 
@@ -664,7 +611,7 @@
                                                          GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           Partage->g[num].changes++;
-        } else if ( ! (Partage->top % 50 ))                /* Si persistence on prÈvient toutes les 5 sec */
+        } else if ( ! (Partage->top % 50 ))                /* Si persistence on pr√©vient toutes les 5 sec */
         { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "MSG: last_change trop tot for MSG%03d!", num ); }
        Partage->g[num].last_change = Partage->top;
        Partage->audit_bit_interne_per_sec++;
@@ -672,26 +619,75 @@
   }
 /**********************************************************************************************************/
 /* Envoyer_commande_dls: Gestion des envois de commande DLS                                               */
-/* EntrÈe/Sortie: rien                                                                                    */
+/* Entr√©e/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
  void Envoyer_commande_dls ( int num )
   { pthread_mutex_lock( &Partage->com_dls.synchro );
-    Partage->com_dls.liste_m_activer = g_slist_append ( Partage->com_dls.liste_m_activer, GINT_TO_POINTER(num) );
+    Partage->com_dls.Set_M = g_slist_append ( Partage->com_dls.Set_M, GINT_TO_POINTER(num) );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /**********************************************************************************************************/
-/* Raz_cde_exterieure: Mise ‡ zero des monostables de commande exterieure                                 */
-/* EntrÈe: rien                                                                                           */
+/* Envoyer_entree_dls: Demande a D.L.S de positionner le bit d'entr√©e en parametre, furtive ou non        */
+/* Entr√©e : le num√©ro de l'entr√©e, la valeur de l'√©tat a positionner, et la furtivit√© de l'evenement      */
+/* sortie : N√©ant                                                                                         */
+/**********************************************************************************************************/
+ void Envoyer_entree_dls( int num, int etat )
+  { if (num<0 || num>=NBR_ENTRE_TOR)
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "Envoyer_entree_dls : num %d out of range", num ); }
+       return;
+     }
+
+    if (Partage->e[num].confDB.furtif == FALSE) SE(num, etat);      /* Pas de furtivit√©, on y va direct ! */
+    else if ( etat == 1 )                        /* Pour les entr√©es furtive, la gestion est diff√©rente ! */
+     { pthread_mutex_lock( &Partage->com_dls.synchro );
+       Partage->com_dls.Set_E = g_slist_append ( Partage->com_dls.Set_E, GINT_TO_POINTER(num) );
+       pthread_mutex_unlock( &Partage->com_dls.synchro );
+     }
+  }
+/**********************************************************************************************************/
+/* Set_cde_exterieure: Mise √† un des bits de commande exterieure                                          */
+/* Entr√©e: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
- static void Raz_cde_exterieure ( void )
+ static void Set_cde_exterieure ( void )
   { gint num;
     pthread_mutex_lock( &Partage->com_dls.synchro );
-    while( Cde_exterieure )                                                      /* Reset des monostables */
-     { num = GPOINTER_TO_INT(Cde_exterieure->data);
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "Raz_cde_exterieure : Mise a zero du bit M%03d", num );
+    while( Partage->com_dls.Set_M )                                  /* A-t-on un monostable a allumer ?? */
+     { num = GPOINTER_TO_INT( Partage->com_dls.Set_M->data );
+       Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Set_cde_exterieure: Mise a un du bit M%03d", num );
+       Partage->com_dls.Set_M   = g_slist_remove ( Partage->com_dls.Set_M,   GINT_TO_POINTER(num) );
+       Partage->com_dls.Reset_M = g_slist_append ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) ); 
+       SM( num, 1 );                                                       /* Mise a un du bit monostable */
+     }
+    while( Partage->com_dls.Set_E )                                     /* A-t-on une entr√©e a allumer ?? */
+     { num = GPOINTER_TO_INT( Partage->com_dls.Set_E->data );
+       Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Set_cde_exterieure: Mise a un du bit E%03d", num );
+       Partage->com_dls.Set_E   = g_slist_remove ( Partage->com_dls.Set_E,   GINT_TO_POINTER(num) );
+       Partage->com_dls.Reset_E = g_slist_append ( Partage->com_dls.Reset_E, GINT_TO_POINTER(num) ); 
+       SE( num, 1 );                                                             /* Mise a un de l'entr√©e */
+     }
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+  }
+/**********************************************************************************************************/
+/* Reset_cde_exterieure: Mise √† zero des bits de commande exterieure                                      */
+/* Entr√©e: rien                                                                                           */
+/* Sortie: rien                                                                                           */
+/**********************************************************************************************************/
+ static void Reset_cde_exterieure ( void )
+  { gint num;
+    pthread_mutex_lock( &Partage->com_dls.synchro );
+    while( Partage->com_dls.Reset_M )                                            /* Reset des monostables */
+     { num = GPOINTER_TO_INT(Partage->com_dls.Reset_M->data);
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "Reset_cde_exterieure : Mise a zero du bit M%03d", num );
+       Partage->com_dls.Reset_M = g_slist_remove ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) );
        SM( num, 0 );
-       Cde_exterieure = g_slist_remove ( Cde_exterieure, GINT_TO_POINTER(num) );
+     }
+    while( Partage->com_dls.Reset_E )                                       /* Reset des entr√©es furtives */
+     { num = GPOINTER_TO_INT(Partage->com_dls.Reset_E->data);
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "Reset_cde_exterieure : Mise a zero du bit E%03d", num );
+       Partage->com_dls.Reset_E = g_slist_remove ( Partage->com_dls.Reset_E, GINT_TO_POINTER(num) );
+       SE( num, 0 );
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
@@ -701,11 +697,9 @@
 /**********************************************************************************************************/
  void Run_dls ( void )
   { gint Update_heure=0;
-    GList *plugins;
+    GSList *plugins;
 
-    Partage->com_dls.Plugins            = NULL;                 /* Initialisation des variables du thread */
-    Partage->com_dls.liste_m_activer    = NULL;
-    Partage->com_dls.liste_plugin_reset = NULL;
+    memset( &Partage->com_dls, 0, sizeof(Partage->com_dls) );   /* Initialisation des variables du thread */
     Partage->com_dls.Thread_run         = TRUE;                                     /* Le thread tourne ! */
 
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
@@ -732,19 +726,8 @@
         }
 
        if (Partage->top-Update_heure>=600)      /* Gestion des changements d'horaire (toutes les minutes) */
-        { Prendre_heure ();                            /* Mise ‡ jour des variables de gestion de l'heure */
+        { Prendre_heure ();                            /* Mise √† jour des variables de gestion de l'heure */
           Update_heure=Partage->top;
-        }
-
-       if (Partage->com_dls.liste_m_activer)                         /* A-t-on un monostable a allumer ?? */
-        { gint num;
-          pthread_mutex_lock( &Partage->com_dls.synchro );
-          num = GPOINTER_TO_INT( Partage->com_dls.liste_m_activer->data );
-          Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Run_dls: Mise a un du bit M%03d", num );
-          Partage->com_dls.liste_m_activer = g_slist_remove ( Partage->com_dls.liste_m_activer, GINT_TO_POINTER(num) );
-          pthread_mutex_unlock( &Partage->com_dls.synchro );
-          SM( num, 1 );                                                    /* Mise a un du bit monostable */
-          Cde_exterieure = g_slist_append( Cde_exterieure, GINT_TO_POINTER( num ) ); 
         }
 
        if (Partage->com_dls.admin_start)                                  /* A-t-on un plugin a allumer ? */
@@ -761,16 +744,18 @@
         { gint num;
           pthread_mutex_lock( &Partage->com_dls.synchro );
           num = GPOINTER_TO_INT( Partage->com_dls.liste_plugin_reset->data );
-          Partage->com_dls.liste_plugin_reset = g_list_remove ( Partage->com_dls.liste_plugin_reset,
-                                                                GINT_TO_POINTER(num) );
+          Partage->com_dls.liste_plugin_reset = g_slist_remove ( Partage->com_dls.liste_plugin_reset,
+                                                                 GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_dls.synchro );
           Reseter_un_plugin( num );
         }
 
+       Set_cde_exterieure();                        /* Mise √† un des bit de commande exterieure (furtifs) */
+
        SB(0, !B(0));                                            /* Change d'etat tous les tours programme */
-       SB(1, 0);                                                                   /* B1 est toujours ‡ 0 */
-       SB(2, 1);                                                                   /* B2 est toujours ‡ 1 */
-       SI(1, 1, 255, 0, 0, 0 );                                           /* Icone toujours ‡ 1:rouge */
+       SB(1, 0);                                                                   /* B1 est toujours √† 0 */
+       SB(2, 1);                                                                   /* B2 est toujours √† 1 */
+       SI(1, 1, 255, 0, 0, 0 );                                           /* Icone toujours √† 1:rouge */
 
        pthread_mutex_lock( &Partage->com_dls.synchro );
        plugins = Partage->com_dls.Plugins;
@@ -789,9 +774,9 @@
           plugins = plugins->next;
         }
        pthread_mutex_unlock( &Partage->com_dls.synchro );
-       SB(3, 1);                                  /* B3 est toujours ‡ un apres le premier tour programme */
+       SB(3, 1);                                  /* B3 est toujours √† un apres le premier tour programme */
 
-       Raz_cde_exterieure();                        /* Mise ‡ zero des monostables de commande exterieure */
+       Reset_cde_exterieure();                    /* Mise √† zero des bit de commande exterieure (furtifs) */
        Partage->audit_tour_dls_per_sec++;               /* Gestion de l'audit nbr de tour DLS par seconde */
 /************************************ Gestion des 1000 tours DLS par seconde ******************************/
        usleep(Partage->com_dls.temps_sched);

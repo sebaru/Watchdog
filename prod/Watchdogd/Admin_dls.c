@@ -30,7 +30,7 @@
 
 /**********************************************************************************************************/
 /* Admin_dls_reload: Demande le rechargement des conf DLS                                                 */
-/* Entrée: le connexion                                                                                      */
+/* Entrée: la connexion                                                                                   */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void Admin_dls_reload ( struct CONNEXION *connexion )
@@ -45,7 +45,7 @@
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
  static void Admin_dls_list ( struct CONNEXION *connexion )
-  { GList *liste_dls;
+  { GSList *liste_dls;
     gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Liste des modules D.L.S\n" );
@@ -70,7 +70,7 @@
 /* Sortie: FALSE si erreur                                                                                */
 /**********************************************************************************************************/
  static void Admin_dls_gcc ( struct CONNEXION *connexion, gint id )
-  { GList *liste_dls;
+  { GSList *liste_dls;
     gchar chaine[128], buffer[128];
 
     g_snprintf( chaine, sizeof(chaine), " -- Compilation des plugins D.L.S\n" );

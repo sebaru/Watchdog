@@ -39,16 +39,6 @@ CREATE TABLE IF NOT EXISTS `cameras` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `cameras_motion`
---
-
-CREATE TABLE IF NOT EXISTS `cameras_motion` (
-  `id` int(11) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `class`
 --
 
@@ -128,47 +118,10 @@ CREATE TABLE IF NOT EXISTS `dls_cpt_imp` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `dls_scenario`
---
-
-CREATE TABLE IF NOT EXISTS `dls_scenario` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `bitm` int(11) NOT NULL,
-  `heure` int(11) NOT NULL,
-  `minute` int(11) NOT NULL,
-  `libelle` varchar(200) COLLATE utf8_unicode_ci NOT NULL,
-  `lundi` tinyint(1) NOT NULL,
-  `mardi` tinyint(1) NOT NULL,
-  `mercredi` tinyint(1) NOT NULL,
-  `jeudi` tinyint(1) NOT NULL,
-  `vendredi` tinyint(1) NOT NULL,
-  `samedi` tinyint(1) NOT NULL,
-  `dimanche` tinyint(1) NOT NULL,
-  `janvier` tinyint(1) NOT NULL,
-  `fevrier` tinyint(1) NOT NULL,
-  `mars` tinyint(1) NOT NULL,
-  `avril` tinyint(1) NOT NULL,
-  `mai` tinyint(1) NOT NULL,
-  `juin` tinyint(1) NOT NULL,
-  `juillet` tinyint(1) NOT NULL,
-  `aout` tinyint(1) NOT NULL,
-  `septembre` tinyint(1) NOT NULL,
-  `octobre` tinyint(1) NOT NULL,
-  `novembre` tinyint(1) NOT NULL,
-  `decembre` tinyint(1) NOT NULL,
-  `ts_jour` tinyint(1) NOT NULL,
-  `ts_mois` tinyint(1) NOT NULL,
-  `actif` tinyint(1) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `eana`
 --
 
-CREATE TABLE IF NOT EXISTS `eana` (
+CREATE TABLE IF NOT EXISTS `mnemos_AnalogInput` (
   `id_mnemo` int(11) NOT NULL,
   `type` int(11) NOT NULL,
   `min` float NOT NULL DEFAULT '0',
@@ -184,6 +137,17 @@ INSERT INTO `eana` (`id_mnemo`, `type`, `min`, `max`, `unite`) VALUES
 (13, 0, 0, 100, 'arch'),
 (14, 0, 0, 100, 'dbs');
 
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `mnemos_DigitalInput`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_DigitalInput` (
+  `id_mnemo` int(11) NOT NULL,
+  `furtif` int(1) NOT NULL,
+  PRIMARY KEY (`id_mnemo`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -600,28 +564,31 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `mnemos` (`id`, `type`, `num`, `num_plugin`, `acronyme`, `libelle`, `command_text`) VALUES
-(01, 0, 0, 1, 'SYS_TOGGLE_RUN', 'Change d''Ã©tat tous les tours programme', ''),
-(02, 0, 1, 1, 'SYS_ALWAYS_0', 'Toujours Ã  0', ''),
-(03, 0, 2, 1, 'SYS_ALWAYS_1', 'Toujours Ã  1', ''),
-(04, 0, 3, 1, 'SYS_ONE_RUN', '0 le premier tour programme puis tout le temps 1', ''),
-(05, 0, 4, 1, 'SYS_TICK_1S', 'Cligno toutes les secondes', ''),
-(06, 0, 5, 1, 'SYS_TICK_0.5S', 'Cligno toutes les demi-secondes', ''),
-(07, 0, 6, 1, 'SYS_TICK_0.3S', 'Cligno toutes les 3 dixièmes de seconde', ''),
-(08, 0, 7, 1, 'SYS_SHUTDOWN', 'System is halting', ''),
-(09, 0, 8, 1, 'SYS_REBOOT', 'System is rebooting', ''),
-(10, 5,123,1, 'SYS_DLS_WAIT', 'Number of milli-second to wait to get target turn/sec', ''),
-(11, 5,124,1, 'SYS_TOUR_DLS_PER_SEC', 'Number of D.L.S turn in second', ''),
-(12, 5,125,1, 'SYS_BITS_PER_SEC', 'Number of bits toggled in one second', ''),
-(13, 5,126,1, 'SYS_ARCHREQUEST', 'Number of ArchiveRequest to proceed', ''),
-(14, 5,127,1, 'SYS_DBREQUEST_SIMULT', 'Number of simultaneous SQL request', ''),
-(15, 7, 1, 1, 'SYSTEME', 'Motif toujours en mode 1 couleur rouge', ''),
-(16, 7, 4, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
-(17, 7, 3, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
-(18, 7, 0, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
-(19, 7, 2, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
-(20, 1, 4, 1, 'AUDIO_START', 'Emission de message Audio.', ''),
-(21, 1, 5, 1, 'AUDIO_END', 'Fin d''emission de message Audio.', ''),
-(22, 1, 6, 1, 'AUDIO_INHIB', 'Inhibition des messages vocaux (hors alerte).', '');
+(01, 0,   0, 1, 'SYS_TOGGLE_RUN', 'Change d''Ã©tat tous les tours programme', ''),
+(02, 0,   1, 1, 'SYS_ALWAYS_0', 'Toujours Ã  0', ''),
+(03, 0,   2, 1, 'SYS_ALWAYS_1', 'Toujours Ã  1', ''),
+(04, 0,   3, 1, 'SYS_ONE_RUN', '0 le premier tour programme puis tout le temps 1', ''),
+(05, 0,   4, 1, 'SYS_TICK_1S', 'Cligno toutes les secondes', ''),
+(06, 0,   5, 1, 'SYS_TICK_0.5S', 'Cligno toutes les demi-secondes', ''),
+(07, 0,   6, 1, 'SYS_TICK_0.3S', 'Cligno toutes les 3 dixièmes de seconde', ''),
+(08, 0,   7, 1, 'SYS_SHUTDOWN', 'System is halting', ''),
+(09, 0,   8, 1, 'SYS_REBOOT', 'System is rebooting', ''),
+(10, 5, 123, 1, 'SYS_DLS_WAIT', 'Number of milli-second to wait to get target turn/sec', ''),
+(11, 5, 124, 1, 'SYS_TOUR_DLS_PER_SEC', 'Number of D.L.S turn in second', ''),
+(12, 5, 125, 1, 'SYS_BITS_PER_SEC', 'Number of bits toggled in one second', ''),
+(13, 5, 126, 1, 'SYS_ARCHREQUEST', 'Number of ArchiveRequest to proceed', ''),
+(14, 5, 127, 1, 'SYS_DBREQUEST_SIMULT', 'Number of simultaneous SQL request', ''),
+(15, 7,   1, 1, 'SYSTEME', 'Motif toujours en mode 1 couleur rouge', ''),
+(16, 7,   4, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
+(17, 7,   3, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
+(18, 7,   0, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
+(19, 7,   2, 1, 'SYSTEME', 'rÃ©servÃ©', ''),
+(20, 1,   4, 1, 'AUDIO_START', 'Emission de message Audio.', ''),
+(21, 1,   5, 1, 'AUDIO_END', 'Fin d''emission de message Audio.', ''),
+(22, 1,   6, 1, 'AUDIO_INHIB', 'Inhibition des messages vocaux (hors alerte).', ''),
+(23, 3,9999, 1, 'EVENT_NONE_TOR', 'Used for detected Event with no mapping yet.', ''),
+(24, 5,9999, 1, 'EVENT_NONE_ANA', 'Used for detected Event with no mapping yet.', '');
+
 -- --------------------------------------------------------
 
 --
@@ -690,7 +657,7 @@ INSERT INTO `msgs` (`id`, `num`, `libelle`, `libelle_audio`, `libelle_sms`, `typ
 -- Structure de la table `onduleurs`
 --
 
-CREATE TABLE `onduleurs` (
+CREATE TABLE IF NOT EXISTS `onduleurs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `instance_id` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `enable` tinyint(1) NOT NULL,

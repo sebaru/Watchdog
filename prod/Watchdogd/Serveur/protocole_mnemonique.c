@@ -56,26 +56,26 @@
              }
             break;
        case SSTAG_CLIENT_EDIT_MNEMONIQUE:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_BASE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
                Proto_editer_mnemonique( client, mnemo );
              }
             break;
        case SSTAG_CLIENT_ADD_MNEMONIQUE:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
                Proto_ajouter_mnemonique( client, mnemo );
              }
             break;
        case SSTAG_CLIENT_DEL_MNEMONIQUE:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_BASE *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
                Proto_effacer_mnemonique( client, mnemo );
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_MNEMONIQUE:
-             { struct CMD_TYPE_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
                Proto_valider_editer_mnemonique( client, mnemo );
              }
             break;
@@ -83,38 +83,6 @@
              { Ref_client( client );                             /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Envoyer_plugins_dls_pour_mnemo_thread, client );
                pthread_detach( tid );
-             }
-            break;
-       case SSTAG_CLIENT_EDIT_OPTION_BIT_INTERNE:
-             { struct CMD_TYPE_MNEMONIQUE *rezo_mnemo;
-               rezo_mnemo = (struct CMD_TYPE_MNEMONIQUE *)connexion->donnees;
-               switch ( rezo_mnemo->type )
-                { case MNEMO_ENTREE_ANA  : Proto_editer_option_entreeANA( client, rezo_mnemo );
-                                           break;
-                  case MNEMO_CPT_IMP     : Proto_editer_option_compteur_imp( client, rezo_mnemo );
-                                           break;
-                  case MNEMO_TEMPO       : Proto_editer_option_tempo( client, rezo_mnemo );
-                                           break;
-                  default: { struct CMD_GTK_MESSAGE erreur;
-                             g_snprintf( erreur.message, sizeof(erreur.message),
-                                         "No options for this object %s", rezo_mnemo->libelle);
-                             Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                                           (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-                           }
-                }
-             }
-            break;
-       case SSTAG_CLIENT_VALIDE_EDIT_OPTION_BIT_INTERNE:
-             { struct CMD_TYPE_OPTION_BIT_INTERNE *option;
-               option = (struct CMD_TYPE_OPTION_BIT_INTERNE *)connexion->donnees;
-               switch(option->type)
-                { case MNEMO_ENTREE_ANA  : Proto_valider_editer_option_entreeANA( client, &option->eana );
-                                           break;
-                  case MNEMO_CPT_IMP     : Proto_valider_editer_option_compteur_imp( client, &option->cpt_imp );
-                                           break;
-                  case MNEMO_TEMPO       : Proto_valider_editer_option_tempo( client, &option->tempo );
-                                           break;
-                }
              }
             break;
      }

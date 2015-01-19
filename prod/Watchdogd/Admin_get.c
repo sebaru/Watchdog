@@ -96,7 +96,8 @@
     if ( ! strcmp ( commande, "e" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       g_snprintf( chaine, sizeof(chaine), " E%03d = %d\n", num, E(num) );
+       g_snprintf( chaine, sizeof(chaine), " E%03d = %d (furtif=%02d)\n",
+                   num, E(num), Partage->e[num].confDB.furtif );
        Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "ea" ) )
@@ -105,10 +106,10 @@
        if (num<NBR_ENTRE_ANA)
         { g_snprintf( chaine, sizeof(chaine),
                       " EA%03d = %8.2f %s, val_avant_ech=%8.2f, inrange=%d, type=%d, last_arch=%d (%ds ago), min=%8.2f, max=%8.2f\n",
-                      num, EA_ech(num), Partage->ea[num].cmd_type_eana.unite, Partage->ea[num].val_avant_ech, EA_inrange(num),
-                      Partage->ea[num].cmd_type_eana.type, Partage->ea[num].last_arch, 
+                      num, EA_ech(num), Partage->ea[num].confDB.unite, Partage->ea[num].val_avant_ech, EA_inrange(num),
+                      Partage->ea[num].confDB.type, Partage->ea[num].last_arch, 
                       (Partage->top - Partage->ea[num].last_arch)/10,
-                      Partage->ea[num].cmd_type_eana.min, Partage->ea[num].cmd_type_eana.max 
+                      Partage->ea[num].confDB.min, Partage->ea[num].confDB.max 
                     );
         } else
         { g_snprintf( chaine, sizeof(chaine), " EA -> num '%d' out of range (max=%d)\n", num,NBR_ENTRE_ANA ); }
@@ -131,8 +132,8 @@
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        if (num<NBR_COMPTEUR_IMP)
         { g_snprintf( chaine, sizeof(chaine), " CI%03d = %8.2f, type=%d, actif=%d, unite=%s, multi=%8.2f, val1=%8.2f, val2=%8.2f\n",
-                      num, Partage->ci[num].cpt_impdb.valeur, Partage->ci[num].cpt_impdb.type, Partage->ci[num].actif,
-                      Partage->ci[num].cpt_impdb.unite, Partage->ci[num].cpt_impdb.multi,
+                      num, Partage->ci[num].confDB.valeur, Partage->ci[num].confDB.type, Partage->ci[num].actif,
+                      Partage->ci[num].confDB.unite, Partage->ci[num].confDB.multi,
                       Partage->ci[num].val_en_cours1, Partage->ci[num].val_en_cours2
                     );
         } else

@@ -170,21 +170,11 @@
 /* Entrée: néant                                                                                          */
 /**********************************************************************************************************/
  static void Charger_config_bit_interne( void )
-  { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des EANA" );
-    Charger_eana();
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des EANA fait" );
-
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des compteurs horaires" );
+  { Charger_digitalInput();
+    Charger_analogInput();
     Charger_cpth();
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des compteurs horaires fait" );
-
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des compteurs impulsion" );
     Charger_cpt_imp();
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des compteurs impulsion fait" );
-
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des temporisations" );
     Charger_tempo();
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Chargement des temporisations fait" );
   }
 /**********************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                         */
@@ -368,14 +358,14 @@
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  static gboolean Lire_ligne_commande( int argc, char *argv[] )
-  { gint help, log_level, fg, initrsa, single, compil;
-    gchar *home, *file, *run_as;
+  { gint help = 0, log_level = -1, fg = 0, single = 0, compil = 0, version = 0;
+    gchar *home = NULL, *file= NULL, *run_as = NULL;
     struct passwd *pwd, *old;
     struct poptOption Options[]= 
      { { "foreground", 'f', POPT_ARG_NONE,
          &fg,               0, "Run in foreground", NULL },
-       { "initrsa",    'r', POPT_ARG_NONE,
-         &initrsa,          0, "RSA initialisation", NULL },
+       { "version",    'v', POPT_ARG_NONE,
+         &version,          0, "Display Version Number", NULL },
        { "debug",      'd', POPT_ARG_INT,
          &log_level,      0, "Debug level", "LEVEL" },
        { "home",       'H', POPT_ARG_STRING,
@@ -395,22 +385,12 @@
     poptContext context;
     int rc;
 
-    home   = NULL;
-    file   = NULL;
-    run_as = NULL;
-    log_level      = -1;
-    initrsa        = 0;
-    fg             = 0;
-    help           = 0;
-    compil         = 0;
-    single         = 0;
-
     context = poptGetContext( NULL, argc, (const char **)argv, Options, POPT_CONTEXT_ARG_OPTS );
     while ( (rc = poptGetNextOpt( context )) != -1)                      /* Parse de la ligne de commande */
      { switch (rc)
-        { case POPT_ERROR_BADOPT: printf( "Option %s unknown\n", poptBadOption(context, 0) );
+        { case POPT_ERROR_BADOPT: printf( "Option %s is unknown\n", poptBadOption(context, 0) );
                                   help=1; break;
-          default: printf("Erreur de parsing ligne de commande\n");
+          default: printf("Parsing error\n");
         }
      }
 
@@ -420,6 +400,11 @@
        exit(EXIT_OK);
      }
     poptFreeContext( context );                                                     /* Liberation memoire */
+
+    if (version)                                                        /* Affichage du numéro de version */
+     { printf(" Watchdogd - Version %s\n", VERSION );
+       exit(EXIT_OK);
+     }
 
     Lire_config( file );                                    /* Lecture sur le fichier /etc/watchdogd.conf */
 
@@ -431,7 +416,7 @@
 
     pwd = getpwnam ( Config.run_as );
     if (!pwd)
-     { printf("Error, user '%s' not found in /etc/passwd (%s).. Could not set user run_as\n",
+     { printf("Error, user '%s' not found in /etc/passwd (%s).. Could not set run_as user\n",
               Config.run_as, strerror(errno) );
        exit(EXIT_ERREUR);
      }
@@ -439,7 +424,7 @@
 
     old = getpwuid ( getuid() );
     if (!old)
-     { printf("Error, actual user '%d' not found in /etc/passwd (%s).. Could not set user run_as\n",
+     { printf("Error, actual user '%d' not found in /etc/passwd (%s).. Could not set run_as user\n",
               getuid(), strerror(errno) );
        exit(EXIT_ERREUR);
      }
@@ -550,9 +535,10 @@
        if (!import)
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Clear Histo" );
           Clear_histoDB ();                                            /* Clear de la table histo au boot */
-          Info_new( Config.log, Config.log_msrv, LOG_INFO, "Clear Histo fait" );
+          Info_new( Config.log, Config.log_msrv, LOG_INFO, "Clear Histo done" );
         } else Info_new( Config.log, Config.log_msrv, LOG_INFO, "Import => pas de clear histo" );
 
+       Update_database_schema();                                /* Update du schéma de Database si besoin */
        Charger_config_bit_interne ();     /* Chargement des configurations des bits internes depuis la DB */
 
        if (Config.single == FALSE)                                             /* Si demarrage des thread */

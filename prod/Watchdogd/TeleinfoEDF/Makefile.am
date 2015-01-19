@@ -8,10 +8,13 @@ SUBDIRS=
 lib_LTLIBRARIES                         = libwatchdog-server-teleinfoedf.la
 libwatchdog_server_teleinfoedf_la_SOURCES    = Teleinfo.c Teleinfo.h admin_teleinfo.c
 
-AM_CPPFLAGS= `pkg-config --cflags glib-2.0` \
-          `mysql_config --cflags` \
-          -I$(top_srcdir)/Include \
-          -I../Include
+AM_CPPFLAGS=-I$(top_srcdir)/Include \
+            -I$(top_srcdir)/Watchdogd/Include
 
 libwatchdog_server_teleinfoedf_la_LDFLAGS = -rdynamic \
-                                            `pkg-config --libs glib-2.0`
+                                            `pkg-config --libs glib-2.0` \
+                                            `mysql_config --libs`
+
+libwatchdog_server_teleinfoedf_la_CFLAGS = `pkg-config --cflags glib-2.0` \
+                                           `mysql_config --cflags`
+

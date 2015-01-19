@@ -152,8 +152,11 @@
  extern void Proto_valider_message_mp3( struct CLIENT *client, struct CMD_TYPE_MESSAGE_MP3 *msg_mp3,
                                         gchar *buffer );
 
+#warning a virer
+#ifdef bouh
  extern void *Envoyer_entreeANA_for_courbe_thread ( struct CLIENT *client );     /* Dans envoi_entreana.c */
  extern void *Envoyer_entreeANA_for_histo_courbe_thread ( struct CLIENT *client );
+#endif
 
                                                                                /* Dans envoi_synoptique.c */
  extern void *Envoyer_synoptiques_thread ( struct CLIENT *client );
@@ -221,20 +224,10 @@
  extern void *Envoyer_mnemoniques_for_histo_courbe_thread ( struct CLIENT *client );
  extern void Proto_envoyer_type_num_mnemo_tag( int tag, int ss_tag, struct CLIENT *client,
                                                struct CMD_TYPE_NUM_MNEMONIQUE *critere );
- extern void Proto_editer_option_entreeANA ( struct CLIENT *client,
-                                             struct CMD_TYPE_MNEMONIQUE *rezo_mnemo );
- extern void Proto_valider_editer_option_entreeANA ( struct CLIENT *client,
-                                                     struct CMD_TYPE_OPTION_ENTREEANA *rezo_entree );
- extern void Proto_editer_option_compteur_imp ( struct CLIENT *client,
-                                                struct CMD_TYPE_MNEMONIQUE *rezo_mnemo );
- extern void Proto_valider_editer_option_compteur_imp ( struct CLIENT *client,
-                                                        struct CMD_TYPE_OPTION_COMPTEUR_IMP *rezo_cpt );
- extern void Proto_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemo );
- extern void Proto_valider_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemo );
- extern void Proto_effacer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemo );
- extern void Proto_ajouter_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemo );
- extern void Proto_editer_option_tempo ( struct CLIENT *client, struct CMD_TYPE_MNEMONIQUE *rezo_mnemo );
- extern void Proto_valider_editer_option_tempo ( struct CLIENT *client, struct CMD_TYPE_OPTION_TEMPO *rezo_tempo );
+ extern void Proto_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_BASE *rezo_mnemo );
+ extern void Proto_valider_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_FULL *rezo_mnemo );
+ extern void Proto_effacer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_BASE *rezo_mnemo );
+ extern void Proto_ajouter_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_FULL *rezo_mnemo );
 
  
  extern void *Envoyer_histo_thread ( struct CLIENT *client );                       /* Dans envoi_histo.c */

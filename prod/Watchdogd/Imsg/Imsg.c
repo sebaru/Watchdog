@@ -388,23 +388,20 @@
 
     if ( ! strcasecmp( (gchar *)lm_message_node_get_value ( body ), "ping" ) )     /* Interfacage de test */
      { Imsg_Envoi_message_to( from, "Pong !" ); }   
-    else if ( ! Recuperer_mnemoDB_by_command_text ( &db, (gchar *)lm_message_node_get_value ( body ) ) )
+    else if ( ! Recuperer_mnemo_baseDB_by_command_text ( &db, (gchar *)lm_message_node_get_value ( body ), FALSE ) )
      { Imsg_Envoi_message_to( from, "Error searching Database .. Sorry .." ); }   
     else 
-     { struct CMD_TYPE_MNEMONIQUE *mnemo, *result_mnemo;
+     { struct CMD_TYPE_MNEMO_BASE *mnemo, *result_mnemo = NULL;
           
        if ( db->nbr_result == 0 )                         /* Si pas d'enregistrement, demande de préciser */
         { Imsg_Envoi_message_to( from, "Error... No result found .. Sorry .." ); }   
        if ( db->nbr_result > 1 )                         /* Si trop d'enregistrement, demande de préciser */
         { Imsg_Envoi_message_to( from, " Need to choose ... :" ); }
 
-       for ( result_mnemo = NULL ; ; )
-        { mnemo = Recuperer_mnemoDB_suite( &db );
-          if (!mnemo) break;
-
-          if (db->nbr_result>1) Imsg_Envoi_message_to( from, mnemo->command_text );
-          if (db->nbr_result!=1) g_free(mnemo);
-                            else result_mnemo = mnemo;
+       while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL )
+        { if (db->nbr_result>1) Imsg_Envoi_message_to( from, mnemo->command_text );
+          if (db->nbr_result==1) result_mnemo = mnemo;
+                            else g_free(mnemo);
         }
        if (result_mnemo)
         { gchar chaine[80];

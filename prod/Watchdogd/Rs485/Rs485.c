@@ -505,7 +505,7 @@
                nbr_e = module->rs485.e_max - module->rs485.e_min + 1;
                for( cpt = 0; cpt<nbr_e; cpt++)
                 { e = ! (trame->donnees[cpt >> 3] & (0x80 >> (cpt & 0x07)));
-                  SE( module->rs485.e_min + cpt, e );
+                  Envoyer_entree_dls( module->rs485.e_min + cpt, e );
                 }
              }
 	    break;

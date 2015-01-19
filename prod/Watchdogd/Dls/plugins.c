@@ -75,7 +75,7 @@
     dls->starting = 1;
     dls->conso    = 0.0;
     pthread_mutex_lock( &Partage->com_dls.synchro );
-    Partage->com_dls.Plugins = g_list_append( Partage->com_dls.Plugins, dls );
+    Partage->com_dls.Plugins = g_slist_append( Partage->com_dls.Plugins, dls );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
     return(TRUE);
   }
@@ -122,7 +122,7 @@
 /**********************************************************************************************************/
  void Decharger_un_plugin_by_id ( gint id )
   { struct PLUGIN_DLS *plugin;
-    GList *plugins;
+    GSList *plugins;
 
     pthread_mutex_lock( &Partage->com_dls.synchro );
     plugins = Partage->com_dls.Plugins;
@@ -131,7 +131,7 @@
 
        if ( plugin->plugindb.id == id )
         { dlclose( plugin->handle );
-          Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
+          Partage->com_dls.Plugins = g_slist_remove( Partage->com_dls.Plugins, plugin );
           g_free( plugin );
           Info_new( Config.log, Config.log_dls, LOG_INFO,
                    "Decharger_un_plugin_by_id: plugin %04d unloaded", plugin->plugindb.id );
@@ -168,7 +168,7 @@
     while(Partage->com_dls.Plugins)                                     /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)Partage->com_dls.Plugins->data;
        dlclose( plugin->handle );
-       Partage->com_dls.Plugins = g_list_remove( Partage->com_dls.Plugins, plugin );
+       Partage->com_dls.Plugins = g_slist_remove( Partage->com_dls.Plugins, plugin );
                                                          /* Destruction de l'entete associé dans la GList */
        Info_new( Config.log, Config.log_dls, LOG_INFO, "Decharger_plugins: plugin %04d unloaded", plugin->plugindb.id );
        g_free( plugin );
@@ -219,7 +219,7 @@
 /**********************************************************************************************************/
  void Activer_plugin_by_id ( gint id, gboolean actif )
   { struct PLUGIN_DLS *plugin;
-    GList *plugins;
+    GSList *plugins;
 
     pthread_mutex_lock( &Partage->com_dls.synchro );
     plugins = Partage->com_dls.Plugins;
@@ -310,7 +310,7 @@
 
        if (reset)
         { pthread_mutex_lock( &Partage->com_dls.synchro );             /* Demande le reset du plugin à D.L.S */
-          Partage->com_dls.liste_plugin_reset = g_list_append ( Partage->com_dls.liste_plugin_reset,
+          Partage->com_dls.liste_plugin_reset = g_slist_append ( Partage->com_dls.liste_plugin_reset,
                                                                 GINT_TO_POINTER(id) );
           pthread_mutex_unlock( &Partage->com_dls.synchro );
         }

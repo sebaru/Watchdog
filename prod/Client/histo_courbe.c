@@ -115,14 +115,14 @@
        new_courbe->type  = rezo_courbe.type;    /* Récupération des données EANA dans la structure COURBE */
        switch( new_courbe->type )
         { case MNEMO_ENTREE_ANA:
-               new_courbe->eana.num = rezo_courbe.num;
-               gtk_tree_model_get( store, &iter, COLONNE_TYPE_EA, &new_courbe->eana.type, -1 );
-               gtk_tree_model_get( store, &iter, COLONNE_MIN, &new_courbe->eana.min, -1 );
-               gtk_tree_model_get( store, &iter, COLONNE_MAX, &new_courbe->eana.max, -1 );
+               new_courbe->eana.mnemo_base.num = rezo_courbe.num;
+               gtk_tree_model_get( store, &iter, COLONNE_TYPE_EA, &new_courbe->eana.mnemo_ai.type, -1 );
+               gtk_tree_model_get( store, &iter, COLONNE_MIN, &new_courbe->eana.mnemo_ai.min, -1 );
+               gtk_tree_model_get( store, &iter, COLONNE_MAX, &new_courbe->eana.mnemo_ai.max, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_UNITE_STRING, &unite, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
-               g_snprintf( new_courbe->eana.libelle, sizeof(new_courbe->eana.libelle), "%s", libelle );
-               g_snprintf( new_courbe->eana.unite,   sizeof(new_courbe->eana.unite),   "%s", unite );
+               g_snprintf( new_courbe->eana.mnemo_base.libelle, sizeof(new_courbe->eana.mnemo_base.libelle), "%s", libelle );
+               g_snprintf( new_courbe->eana.mnemo_ai.unite,     sizeof(new_courbe->eana.mnemo_ai.unite),     "%s", unite );
                g_free(libelle);
                g_free(unite);
                break;
@@ -294,7 +294,7 @@ printf("Envoie want page source for histo courbe\n");
        rezo_courbe.type = infos->Courbes[cpt].type;
        switch ( rezo_courbe.type )
         { case MNEMO_ENTREE_ANA:
-               rezo_courbe.num = infos->Courbes[cpt].eana.num;
+               rezo_courbe.num = infos->Courbes[cpt].eana.mnemo_base.num;
                break;
           case MNEMO_SORTIE:
           case MNEMO_ENTREE:
@@ -499,29 +499,27 @@ printf(" Date first/last = %d / %d\n", histo_courbe.date_first, histo_courbe.dat
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_source_EA_histo( GtkTreeIter *iter, struct CMD_TYPE_OPTION_ENTREEANA *source )
-  { struct TYPE_INFO_COURBE *infos;
-    struct PAGE_NOTEBOOK *page;
+ static void Rafraichir_visu_source_EA_histo( GtkTreeIter *iter, struct CMD_TYPE_MNEMO_FULL *source )
+  { struct PAGE_NOTEBOOK *page;
     GtkTreeModel *store;
     gchar chaine[20];
 
     page = Page_actuelle();
     if (page->type != TYPE_PAGE_HISTO_COURBE) return;                                      /* Bon type ?? */
-    infos = (struct TYPE_INFO_COURBE *)page->infos;
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_source) );              /* Acquisition du modele */
 
-    g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), source->num );
+    g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), source->mnemo_base.num );
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
-                         COLONNE_ID, source->num,
+                         COLONNE_ID, source->mnemo_base.num,
                          COLONNE_TYPE, MNEMO_ENTREE_ANA,
-                         COLONNE_TYPE_EA, source->type,
+                         COLONNE_TYPE_EA, source->mnemo_ai.type,
                          COLONNE_OBJET, "a venir",
                          COLONNE_NUM, chaine,
-                         COLONNE_MIN, source->min,
-                         COLONNE_MAX, source->max,
-                         COLONNE_UNITE_STRING, source->unite,
-                         COLONNE_LIBELLE, source->libelle,
+                         COLONNE_MIN, source->mnemo_ai.min,
+                         COLONNE_MAX, source->mnemo_ai.max,
+                         COLONNE_UNITE_STRING, source->mnemo_ai.unite,
+                         COLONNE_LIBELLE, source->mnemo_base.libelle,
                          -1
                        );
   }
@@ -530,15 +528,13 @@ printf(" Date first/last = %d / %d\n", histo_courbe.date_first, histo_courbe.dat
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_source_histo( GtkTreeIter *iter, struct CMD_TYPE_MNEMONIQUE *source )
-  { struct TYPE_INFO_COURBE *infos;
-    struct PAGE_NOTEBOOK *page;
+ static void Rafraichir_visu_source_histo( GtkTreeIter *iter, struct CMD_TYPE_MNEMO_BASE *source )
+  { struct PAGE_NOTEBOOK *page;
     GtkTreeModel *store;
     gchar chaine[20], groupe_page[512];
 
     page = Page_actuelle();
     if (page->type != TYPE_PAGE_HISTO_COURBE) return;                                      /* Bon type ?? */
-    infos = (struct TYPE_INFO_COURBE *)page->infos;
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_source) );              /* Acquisition du modele */
 
@@ -564,7 +560,7 @@ printf(" Date first/last = %d / %d\n", histo_courbe.date_first, histo_courbe.dat
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_une_source_EA_for_histo_courbe( struct CMD_TYPE_OPTION_ENTREEANA *source )
+ void Proto_afficher_une_source_EA_for_histo_courbe( struct CMD_TYPE_MNEMO_FULL *source )
   { GtkListStore *store;
     GtkTreeIter iter;
 
@@ -577,7 +573,7 @@ printf(" Date first/last = %d / %d\n", histo_courbe.date_first, histo_courbe.dat
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_une_source_for_histo_courbe( struct CMD_TYPE_MNEMONIQUE *source )
+ void Proto_afficher_une_source_for_histo_courbe( struct CMD_TYPE_MNEMO_BASE *source )
   { GtkListStore *store;
     GtkTreeIter iter;
 
