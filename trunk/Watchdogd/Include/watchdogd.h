@@ -135,6 +135,7 @@
   };
 
 /*************************************** Définitions des prototypes ***************************************/
+ extern void Charger_config_bit_interne( void );                                      /* Dans Watchdogd.c */
  extern gint Activer_ecoute ( void );                                                    /* Dans ecoute.c */
 
  extern struct PARTAGE *_init ( void );                                                     /* Dans shm.c */

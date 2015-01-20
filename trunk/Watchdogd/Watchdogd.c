@@ -169,7 +169,7 @@
 /* Charger_config_bit_interne: Chargement des configs bit interne depuis la base de données               */
 /* Entrée: néant                                                                                          */
 /**********************************************************************************************************/
- static void Charger_config_bit_interne( void )
+ void Charger_config_bit_interne( void )
   { Charger_digitalInput();
     Charger_analogInput();
     Charger_cpth();
