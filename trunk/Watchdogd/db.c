@@ -265,6 +265,12 @@
     gchar requete[1024];
     struct DB *db;
 
+    if (Config.instance_is_master != TRUE)                              /* Do not update DB if not master */
+     { Info_new( Config.log, Config.log_db, LOG_WARNING,
+                "Update_database_schema: Instance is not master. Don't update schema." );
+       return;
+     }
+
     database_version = 0;                                                            /* valeur par défaut */
     if ( ! Recuperer_configDB( &db, "global" ) )                        /* Connexion a la base de données */
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
