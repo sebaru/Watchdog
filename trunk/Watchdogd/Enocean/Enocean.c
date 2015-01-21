@@ -290,16 +290,17 @@
 
        mnemo = Map_event_to_mnemo ( event );
        if (!mnemo)                                   /* Si pas trouvé, création d'un mnemo 'discovered' ? */
-        { struct CMD_TYPE_MNEMO_BASE mnemo;
+        { struct CMD_TYPE_MNEMO_FULL mnemo;
           memset( &mnemo, 0, sizeof(mnemo) );
-          mnemo.type       = MNEMO_ENTREE;
-          mnemo.num        = 9999;
-          mnemo.num_plugin = 1;
-          g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "EnOcean EVENT" );
-          g_snprintf( mnemo.libelle,  sizeof(mnemo.libelle),  "Event %s discovered by %s", event, NOM_THREAD );
-          g_snprintf( mnemo.command_text, sizeof(mnemo.command_text), "%s", event );
+          mnemo.mnemo_base.type       = MNEMO_ENTREE;
+          mnemo.mnemo_base.num        = 9999;
+          mnemo.mnemo_base.num_plugin = 1;
+          g_snprintf( mnemo.mnemo_base.acronyme, sizeof(mnemo.mnemo_base.acronyme), "EnOcean EVENT" );
+          g_snprintf( mnemo.mnemo_base.libelle,  sizeof(mnemo.mnemo_base.libelle),  "Event %s discovered by %s",
+                      event, NOM_THREAD );
+          g_snprintf( mnemo.mnemo_base.command_text, sizeof(mnemo.mnemo_base.command_text), "%s", event );
 
-          if ( Ajouter_mnemo_baseDB ( &mnemo ) < 0 )             /* Ajout auto dans la base de mnemonique */
+          if ( Ajouter_mnemo_fullDB ( &mnemo ) < 0 )             /* Ajout auto dans la base de mnemonique */
            { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
                       "Map_event_to_mnemo: Error adding new mnemo in DB for event %s", event );
            }
