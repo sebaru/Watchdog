@@ -153,7 +153,7 @@
      { gchar thread[128], chaine[128];
        struct LIBRAIRIE *lib;
        sscanf ( ligne, "%s %s", commande, thread );
-       if ( (lib = Charger_librairie_par_fichier( FALSE, thread )) )/* Chargement de la librairie dynamique */
+       if ( (lib = Charger_librairie_par_prompt( thread )) )      /* Chargement de la librairie dynamique */
         { g_snprintf( chaine, sizeof(chaine), " Library %s loaded\n", thread );
           if (Start_librairie(lib))
            { g_snprintf( chaine, sizeof(chaine), " Library %s started\n", thread ); }

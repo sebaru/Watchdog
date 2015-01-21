@@ -154,7 +154,7 @@
  extern void Decharger_librairies ( void );
  extern gboolean Start_librairie ( struct LIBRAIRIE *lib );
  extern gboolean Stop_librairie ( struct LIBRAIRIE *lib );
- extern struct LIBRAIRIE *Charger_librairie_par_fichier ( gboolean fullname, gchar *nom_fichier );
+ extern struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *nom_fichier );
  extern gboolean Decharger_librairie_par_prompt ( gchar *nom_fichier );
 
  extern void Gerer_arrive_MSGxxx_dls ( void );                                   /* Dans distrib_MSGxxx.c */
