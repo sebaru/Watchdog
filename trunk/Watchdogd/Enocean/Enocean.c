@@ -309,6 +309,9 @@
 
        switch ( mnemo->type )
         { case MNEMO_MONOSTABLE:                                      /* Positionnement du bit interne */
+               Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
+                        "Processer_trame_ERP1: Mise a un du bit M%03d", mnemo->num );
+               Envoyer_commande_dls(mnemo->num);
                break;
           case MNEMO_ENTREE:
                Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
