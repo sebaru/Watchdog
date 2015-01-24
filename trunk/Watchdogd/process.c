@@ -245,7 +245,7 @@
        if (!strncmp( fichier->d_name, "libwatchdog-server-", 19 )) /* Chargement unitaire d'une librairie */
         { if ( ! strncmp( fichier->d_name + strlen(fichier->d_name) - 3, ".so", 4 ) )
            { struct LIBRAIRIE *lib;
-             g_snprintf( prompt, strlen(fichier->d_name)-22, "%s", fichier->d_name + 19 );
+             g_snprintf( prompt, strlen(fichier->d_name)-21, "%s", fichier->d_name + 19 );
              lib = Charger_librairie_par_prompt( prompt );
              Start_librairie( lib );
            }
