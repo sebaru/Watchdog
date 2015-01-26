@@ -266,7 +266,7 @@
                 { if (val_avant_ech < 204) val_avant_ech = 204;
                   Partage->ea[ num ].val_ech = (gfloat)
                   ((val_avant_ech-204)*(Partage->ea[num].confDB.max - Partage->ea[num].confDB.min))/820.0
-                  + Partage->ea[num].confDB.min;                             /* Valeur à l'echelle */ 
+                  + Partage->ea[num].confDB.min;                                    /* Valeur à l'echelle */ 
 
                   Partage->ea[ num ].inrange = 1;
                 }

@@ -146,6 +146,33 @@
     pthread_mutex_unlock ( &Cfg_satellite.lib->synchro );
   }
 /**********************************************************************************************************/
+/* Satellite_Gerer_events: Fonction d'abonné appellé par MSRV lorsqu'un EVENT est disponible              */
+/* Entrée: l'event associé                                                                                */
+/* Sortie : Néant                                                                                         */
+/**********************************************************************************************************/
+ static void Satellite_Gerer_events ( struct CMD_TYPE_MSRV_EVENT *event )
+  { gint taille;
+
+    pthread_mutex_lock( &Cfg_satellite.lib->synchro );                   /* Ajout dans la liste a traiter */
+    taille = g_slist_length( Cfg_satellite.liste_Events );
+    pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
+
+    if (taille > 150)
+     { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
+                "Satellite_Gerer_events: DROPPING (length = %03d > 150)", taille );
+       return;
+     }
+    else if (Cfg_satellite.lib->Thread_run == FALSE)
+     { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
+                "Satellite_Gerer_events: Thread is down. Dropping Event" );
+       return;
+     }
+
+    pthread_mutex_lock ( &Cfg_satellite.lib->synchro );                               /* Ajout a la liste */
+    Cfg_satellite.liste_Events = g_slist_append ( Cfg_satellite.liste_Events, event );
+    pthread_mutex_unlock ( &Cfg_satellite.lib->synchro );
+  }
+/**********************************************************************************************************/
 /* Envoyer_les_infos_au_master : se connecte au master pour lui envoyer les infos                         */
 /* Entrée : rien, sortie : rien                                                                           */
 /**********************************************************************************************************/
@@ -185,6 +212,22 @@
        Satellite_Envoyer_maitre( TAG_SATELLITE, SSTAG_CLIENT_SET_INTERNAL,
                                 (gchar *)&sat, sizeof(struct CMD_TYPE_SATELLITE) );
      }
+
+    sat.type = -1;
+    while (Cfg_satellite.liste_Events)
+     { struct CMD_TYPE_MSRV_EVENT *event;
+       pthread_mutex_lock( &Cfg_satellite.lib->synchro );                /* Récupération de l'E a traiter */
+       event = Cfg_satellite.liste_Events->data;
+       Cfg_satellite.liste_Events = g_slist_remove( Cfg_satellite.liste_Events, event );
+       pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
+
+       memcpy ( &sat.event, event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
+       Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
+                "Envoyer_les_infos_au_master: Sending EVENT !" );
+       Satellite_Envoyer_maitre( TAG_SATELLITE, SSTAG_CLIENT_SET_INTERNAL,
+                                (gchar *)&sat, sizeof(struct CMD_TYPE_SATELLITE) );
+     }
+
   }
 /**********************************************************************************************************/
 /* Run_thread: Thread principal                                                                           */
@@ -213,6 +256,7 @@
 
     Abonner_distribution_entree    ( Satellite_Gerer_entree );   /* Abonnement à la diffusion des entrees */
     Abonner_distribution_entreeANA ( Satellite_Gerer_entreeANA );/* Abonnement à la diffusion des entrees */
+    Abonner_distribution_events ( Satellite_Gerer_events );       /* Abonnement à la diffusion des events */
 
     Cfg_satellite.lib->Thread_run = TRUE;                                           /* Le thread tourne ! */
     Cfg_satellite.Mode = SAT_DISCONNECTED;
@@ -258,7 +302,9 @@
                break;
           case SAT_CONNECTED:
                 { if ( Cfg_satellite.Liste_entreeANA ||                 /* Si changement, envoi au master */
-                       Cfg_satellite.Liste_entreeTOR )
+                       Cfg_satellite.Liste_entreeTOR ||
+                       Cfg_satellite.liste_Events
+                     )
                     { Envoyer_les_infos_au_master(); } 
                 }
                break;
@@ -267,6 +313,7 @@
        if (Cfg_satellite.Mode >= SAT_ATTENTE_INTERNAL) Satellite_Ecouter_maitre();
      }
 
+   Desabonner_distribution_events ( Satellite_Gerer_events );     /* Abonnement à la diffusion des events */
    Desabonner_distribution_entreeANA ( Satellite_Gerer_entreeANA );/* Abonnement à la diffusion des entrees */
    Desabonner_distribution_entree    ( Satellite_Gerer_entree    );/* Abonnement à la diffusion des entrees */
 

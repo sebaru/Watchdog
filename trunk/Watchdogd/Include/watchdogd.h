@@ -99,6 +99,8 @@
     GSList *liste_ea;                                       /* liste de EA a traiter dans la distribution */
     GSList *liste_e;                                         /* liste de E a traiter dans la distribution */
 
+    GSList *liste_Event;                                     /* liste de E a traiter dans la distribution */
+
     pthread_mutex_t synchro_Liste_abonne_msg;                         /* Bit de synchronisation processus */
     GSList *Liste_abonne_msg;                                      /* liste de struct MSGDB msg a envoyer */
 
@@ -144,9 +146,7 @@
  extern void *w_malloc0( gint size, gchar *justification );
  extern void w_free( void *ptr, gchar *justification );
 
- extern void Gerer_jeton ( void );                                                      /* Dans process.c */
- extern void Gerer_manque_process ( void );
- extern void Stopper_fils ( gint flag );
+ extern void Stopper_fils ( gint flag );                                                /* Dans process.c */
  extern gboolean Demarrer_dls ( void );
  extern gboolean Demarrer_arch ( void );
  extern gboolean Demarrer_admin ( void );
@@ -156,6 +156,10 @@
  extern gboolean Stop_librairie ( struct LIBRAIRIE *lib );
  extern struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *nom_fichier );
  extern gboolean Decharger_librairie_par_prompt ( gchar *nom_fichier );
+
+ extern void Gerer_arrive_Events ( void );                                       /* Dans distrib_Events.c */
+ extern void Abonner_distribution_events ( void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event) );
+ extern void Desabonner_distribution_events ( void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event) );
 
  extern void Gerer_arrive_MSGxxx_dls ( void );                                   /* Dans distrib_MSGxxx.c */
  extern void Gerer_histo_repeat ( void );
