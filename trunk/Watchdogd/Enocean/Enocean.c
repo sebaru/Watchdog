@@ -254,7 +254,7 @@
        if(!event)                                                         /* Envoi de l'evenement au MSRV */
         { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
                    "Processer_trame_ERP1: Malloc ERROR, Could not send Event to MSRV (%s)", event );
-          return(TRUE);
+          return(FALSE);
         }
        event->type = EVENT_TYPE_STRING;
        g_snprintf( event->string, sizeof(event->string), "%s:%02X%02X%02X%02X:%s:%s",
@@ -264,7 +264,7 @@
 
        Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
                  "Processer_trame_ERP1: New_Event : %s", event->string );
-
+       return(TRUE);
      }
     else if (trame->data[0] == 0xA5)
      { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,

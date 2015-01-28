@@ -298,6 +298,7 @@
        Gerer_arrive_Axxx_dls();                       /* Distribution des changements d'etats sorties TOR */
        Gerer_arrive_EAxxx_dls();              /* Distribution des changements d'etats entrees Analogiques */
        Gerer_arrive_Exxx_dls();               /* Distribution des changements d'etats entrees Analogiques */
+       Gerer_arrive_Events();                   /* Gestion des evenements entre Thread, DLS, et satellite */
 
        if (Partage->com_msrv.Thread_reload)                                           /* On a recu RELOAD */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: RELOAD" );
