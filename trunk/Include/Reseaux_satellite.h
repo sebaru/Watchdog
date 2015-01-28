@@ -28,11 +28,23 @@
 #ifndef _RESEAUX_SATELLITE_H_
  #define _RESEAUX_SATELLITE_H_
 
+ enum
+  { EVENT_TYPE_STRING,
+  };
+
+ struct CMD_TYPE_MSRV_EVENT
+  { guint type;
+    union { gchar string[32];
+          };
+  };
+
+
  struct CMD_TYPE_SATELLITE
   { guchar type;
     guint  num;
     union { gint   val_int;
             gfloat val_float;
+            struct CMD_TYPE_MSRV_EVENT event;
           };
   };
 

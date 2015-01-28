@@ -63,7 +63,7 @@
                               Envoyer_Event_msrv( dup_event );
                             }
                            else Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                                         "Gerer_protocole_satellite: Memory Alloc Error (%s) for satellit %s",
+                                         "Gerer_protocole_satellite: Memory Alloc Error (%s) for satellite %s",
                                           strerrno(errno), client->util->nom );
                            break;
                   case MNEMO_ENTREE_ANA: SEA ( sat->num, sat->val_float );
