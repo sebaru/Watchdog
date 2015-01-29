@@ -610,7 +610,7 @@
 
        if ( Partage->g[num].changes <= 5 ) 
         { struct MESSAGES_EVENT *event;
-          event = (struct MESSAGES_EVENT *)g_malloc0( sizeof ( struct MESSAGES_EVENT ) );
+          event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
           if (!event)
            { Info_new( Config.log, Config.log_dls, LOG_ERR,
                       "MSG: malloc Event failed. Memory error for MSG%d", num );

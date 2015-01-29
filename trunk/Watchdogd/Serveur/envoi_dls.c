@@ -154,7 +154,7 @@
     Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_SOURCE_DLS_START,
                   (gchar *)rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
 
-    buffer_all = g_malloc0 ( Cfg_ssrv.taille_bloc_reseau );
+    buffer_all = g_try_malloc0 ( Cfg_ssrv.taille_bloc_reseau );
     if (!buffer_all)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message), "Memory Error %s", chaine );

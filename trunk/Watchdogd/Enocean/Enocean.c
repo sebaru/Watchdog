@@ -250,7 +250,7 @@
            }
         }
 
-       event = (struct CMD_TYPE_MSRV_EVENT *)g_malloc0( sizeof( struct CMD_TYPE_MSRV_EVENT ) );
+       event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc0( sizeof( struct CMD_TYPE_MSRV_EVENT ) );
        if(!event)                                                         /* Envoi de l'evenement au MSRV */
         { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
                    "Processer_trame_ERP1: Malloc ERROR, Could not send Event to MSRV (%s)", event );
