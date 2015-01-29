@@ -213,7 +213,7 @@
                                 (gchar *)&sat, sizeof(struct CMD_TYPE_SATELLITE) );
      }
 
-    sat.type = -1;
+    sat.type = 255;
     while (Cfg_satellite.liste_Events)
      { struct CMD_TYPE_MSRV_EVENT *event;
        pthread_mutex_lock( &Cfg_satellite.lib->synchro );                /* Récupération de l'E a traiter */

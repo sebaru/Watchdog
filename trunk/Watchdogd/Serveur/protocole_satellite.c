@@ -55,9 +55,10 @@
                struct CMD_TYPE_MSRV_EVENT *dup_event;
                sat = (struct CMD_TYPE_SATELLITE *)connexion->donnees;
                switch (sat->type)
-                { case -1: dup_event = (struct CMD_TYPE_MSRV_EVENT *)g_malloc( sizeof(struct CMD_TYPE_MSRV_EVENT ) );
+                { case 255: dup_event = (struct CMD_TYPE_MSRV_EVENT *)g_malloc( sizeof(struct CMD_TYPE_MSRV_EVENT) );
                            if (dup_event)
-                            { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                            { memcpy ( dup_event, &sat->event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
+                              Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                                          "Gerer_protocole_satellite: Receiving EVENT from satellite %s",
                                           client->util->nom );
                               Envoyer_Event_msrv( dup_event );
