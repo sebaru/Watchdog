@@ -587,7 +587,30 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `num_plugin`, `acronyme`, `libelle`, 
 (21, 1,   5, 1, 'AUDIO_END', 'Fin d''emission de message Audio.', ''),
 (22, 1,   6, 1, 'AUDIO_INHIB', 'Inhibition des messages vocaux (hors alerte).', ''),
 (23, 3,9999, 1, 'EVENT_NONE_TOR', 'Used for detected Event with no mapping yet.', ''),
-(24, 5,9999, 1, 'EVENT_NONE_ANA', 'Used for detected Event with no mapping yet.', '');
+(24, 5,9999, 1, 'EVENT_NONE_ANA', 'Used for detected Event with no mapping yet.', ''),
+(25, 5, 122, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(26, 5, 121, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(27, 5, 120, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(28, 5, 119, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(29, 5, 118, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(30, 5, 117, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(31, 5, 116, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(32, 5, 115, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(33, 5, 114, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(34, 5, 113, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(35, 5, 112, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(36, 5, 111, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(37, 5, 110, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(38, 5, 109, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(39, 5, 108, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(40, 5, 107, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(41, 5, 106, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(42, 5, 105, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(43, 5, 104, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(44, 5, 103, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(45, 5, 102, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(46, 5, 101, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(47, 5, 100, 1, 'SYS_RESERVED', 'Reserved for internal use', '');
 
 -- --------------------------------------------------------
 
@@ -751,6 +774,8 @@ CREATE TABLE IF NOT EXISTS `syns` (
   `access_groupe` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+INSERT INTO `syns` (`id`, `libelle`, `groupe`, `page`, `access_groupe` ) VALUES
+(1, 'Accueil', 'Defaut Groupe', 'Defaut Page', 0);
 
 -- --------------------------------------------------------
 

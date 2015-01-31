@@ -333,12 +333,42 @@
        Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
      }
 
-    if (database_version < 2543)
+    if (database_version < 2571)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `users` ADD `imsg_available` TINYINT NOT NULL AFTER `imsg_allow_cde`" );
        Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
      }
 
-    if (Modifier_configDB ( "global", "database_version", "2571" ))
+    if (database_version < 2573)
+     { g_snprintf( requete, sizeof(requete), "INSERT INTO `mnemos` "
+                   "(`id`, `type`, `num`, `num_plugin`, `acronyme`, `libelle`, `command_text`) VALUES "
+                   "(25, 5, 122, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(26, 5, 121, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(27, 5, 120, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(28, 5, 119, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(29, 5, 118, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(30, 5, 117, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(31, 5, 116, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(32, 5, 115, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(33, 5, 114, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(34, 5, 113, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(35, 5, 112, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(36, 5, 111, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(37, 5, 110, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(38, 5, 109, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(39, 5, 108, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(40, 5, 107, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(41, 5, 106, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(42, 5, 105, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(43, 5, 104, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(44, 5, 103, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(45, 5, 102, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(46, 5, 101, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(47, 5, 100, 1, 'SYS_RESERVED', 'Reserved for internal use', '');"
+                 );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+     }
+
+    if (Modifier_configDB ( "global", "database_version", "2573" ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
                 "Update_database_schema: updating Database_version OK" );
      }

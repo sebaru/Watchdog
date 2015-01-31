@@ -268,14 +268,14 @@
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
        Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
-       Admin_write ( connexion, "  add enable,bit,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
+       Admin_write ( connexion, "  add enable,bit_comm,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
        Admin_write ( connexion, "                                         - Ajoute un module modbus\n" );
-       Admin_write ( connexion, "  set id,enable,bit,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
+       Admin_write ( connexion, "  set id,enable,bit_comm,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
        Admin_write ( connexion, "                                         - Modifie le module id\n" );
        Admin_write ( connexion, "  del id                                 - Supprime le module id\n" );
        Admin_write ( connexion, "  start id                               - Demarre le module id\n" );
        Admin_write ( connexion, "  stop id                                - Arrete le module id\n" );
-       Admin_write ( connexion, "  show id                                - Affiche les infirmations du modbus ID\n" );
+       Admin_write ( connexion, "  show id                                - Affiche les informations du modbus ID\n" );
        Admin_write ( connexion, "  list                                   - Liste les modules MODBUS\n" );
        Admin_write ( connexion, "  reload                                 - Recharge la configuration\n" );
      }
