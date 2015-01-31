@@ -268,6 +268,7 @@
                Partage->com_dls.TID );
        return(FALSE);
      }
+    memset( &Partage->com_dls, 0, sizeof(Partage->com_dls) );   /* Initialisation des variables du thread */
     if ( pthread_create( &Partage->com_dls.TID, NULL, (void *)Run_dls, NULL ) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Demarrer_dls: pthread_create failed" );
        return(FALSE);

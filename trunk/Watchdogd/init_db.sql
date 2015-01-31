@@ -895,6 +895,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `imsg_enable` tinyint(1) NOT NULL DEFAULT '0',
   `imsg_jabberid` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `imsg_allow_cde` tinyint(1) NOT NULL DEFAULT '0',
+  `imsg_available` tinyint(1) NOT NULL DEFAULT '0',
   `ssrv_bit_presence` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)

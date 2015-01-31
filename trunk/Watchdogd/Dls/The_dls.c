@@ -711,12 +711,10 @@
   { gint Update_heure=0;
     GSList *plugins;
 
-    memset( &Partage->com_dls, 0, sizeof(Partage->com_dls) );   /* Initialisation des variables du thread */
-    Partage->com_dls.Thread_run         = TRUE;                                     /* Le thread tourne ! */
-
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
     Info_new( Config.log, Config.log_dls, LOG_NOTICE,
               "Run_dls: Demarrage . . . TID = %p", pthread_self() );
+    Partage->com_dls.Thread_run         = TRUE;                                     /* Le thread tourne ! */
              
     Prendre_heure();                                 /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                      /* Chargement des modules dls */

@@ -78,7 +78,7 @@
                    " | - X509 issuer name = %s\n", Nom_certif_signataire ( Cfg_ssrv.ssrv_certif ) );
        Admin_write( connexion, chaine );
      }
-    Admin_write( connexion, " |-\n" );
+    Admin_write( connexion, " -\n" );
   }
 /**********************************************************************************************************/
 /* Admin_command : Appeller par le thread admin pour traiter une commande                                 */
