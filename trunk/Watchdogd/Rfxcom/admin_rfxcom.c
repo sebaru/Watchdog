@@ -146,7 +146,7 @@
        return;
      }
 
-    sscanf ( ligne, "%s %s %s", id_char, param, valeur_char );
+    sscanf ( ligne, "%s %s %[^\n]", id_char, param, valeur_char );
     id     = atoi ( id_char     );
     valeur = atoi ( valeur_char );
 
@@ -214,11 +214,7 @@
     if ( ! strcmp ( commande, "add" ) )
      { struct RFXCOMDB rfxcom;
        memset( &rfxcom, 0, sizeof(struct RFXCOMDB) );                /* Découpage de la ligne de commande */
-       sscanf ( ligne, "%s %d,%d,(%d,%d,%d,%d),%d,%d,%d,%d,%d,%[^\n]", commande,
-                (gint *)&rfxcom.type, (gint *)&rfxcom.sous_type,
-                (gint *)&rfxcom.id1, (gint *)&rfxcom.id2, (gint *)&rfxcom.id3, (gint *)&rfxcom.id4,
-                (gint *)&rfxcom.housecode,(gint *)&rfxcom.unitcode,
-                &rfxcom.map_E, &rfxcom.map_EA, &rfxcom.map_A, rfxcom.libelle );
+       sscanf ( ligne, "%s %[^\n]", commande, rfxcom.libelle );
        Admin_rfxcom_add ( connexion, &rfxcom );
      }
     else if ( ! strcmp ( commande, "set" ) )
@@ -309,11 +305,10 @@
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'RFXCOM'\n" );
        Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
-       Admin_write ( connexion, "  add type,sstype,(id1,id2,id3,id4),housecode,unitcode,map_E,map_EA,map_A,libelle\n"
-                     "                                         - Ajoute un module\n" );
-       Admin_write ( connexion, "  set ID,type,sstype,(id1,id2,id3,id4),housecode,unitcode,map_E,map_EA,map_A,libelle\n"
-                     "                                         - Edite le module ID\n" );
-       Admin_write ( connexion, "  del ID                                 - Retire le module ID\n" );
+       Admin_write ( connexion, "  add $libelle                           - Ajoute un module\n" );
+       Admin_write ( connexion, "  set $id $champ $val                    - Set $val to $champ for module $id\n" );
+       Admin_write ( connexion, "  set list                               - List parameter that can be set\n" );
+       Admin_write ( connexion, "  del $id                                - Retire le module ID\n" );
        Admin_write ( connexion, "  light proto,housecode,unitcode,cmdnumber\n" );
        Admin_write ( connexion, "                                         - Envoie une commande RFXCOM proto = x10 or arc\n" );
        Admin_write ( connexion, "  light_ac (id1,id2,id3,id4),unitcode,cmdnumber,level\n" );

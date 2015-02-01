@@ -134,6 +134,75 @@
     Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
+/* Admin_ups_set: Change un parametre dans la DB ups                                                      */
+/* Entrée: La connexion et la ligne de commande (champ valeur)                                            */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Admin_ups_set ( struct CONNEXION *connexion, gchar *ligne )
+  { gchar id_char[16], param[32], valeur_char[64], chaine[128];
+    struct MODULE_UPS *module = NULL;
+    GSList *liste_modules;
+    guint id, valeur;
+    gint retour;
+
+    if ( ! strcmp ( ligne, "list" ) )
+     { Admin_write ( connexion, " | Parameter can be:\n" );
+       Admin_write ( connexion, " | - enable, host, ups, username, password, bit_comm,\n" );
+       Admin_write ( connexion, " | - map_E, map_EA, map_A\n" );
+       Admin_write ( connexion, " -\n" );
+       return;
+     }
+
+    sscanf ( ligne, "%s %s %[^\n]", id_char, param, valeur_char );
+    id     = atoi ( id_char     );
+    valeur = atoi ( valeur_char );
+
+    pthread_mutex_lock( &Cfg_ups.lib->synchro );                        /* Recherche du module en mémoire */
+    liste_modules = Cfg_ups.Modules_UPS;
+    while ( liste_modules )
+     { module = (struct MODULE_UPS *)liste_modules->data;
+       if (module->ups.id == id) break;
+       liste_modules = liste_modules->next;                                  /* Passage au module suivant */
+     }
+    pthread_mutex_unlock( &Cfg_ups.lib->synchro );
+
+    if (!module)                                                                         /* Si non trouvé */
+     { Admin_write( connexion, " Module not found\n");
+       return;
+     }
+
+    if ( ! strcmp( param, "enable" ) )
+     { module->ups.enable = (valeur ? TRUE : FALSE); }
+    else if ( ! strcmp( param, "bit_comm" ) )
+     { module->ups.bit_comm = valeur; }
+    else if ( ! strcmp( param, "map_E" ) )
+     { module->ups.map_E = valeur; }
+    else if ( ! strcmp( param, "map_EA" ) )
+     { module->ups.map_EA = valeur; }
+    else if ( ! strcmp( param, "map_A" ) )
+     { module->ups.map_A = valeur; }
+    else if ( ! strcmp( param, "host" ) )
+     { g_snprintf( module->ups.host, sizeof(module->ups.host), "%s", valeur_char ); }
+    else if ( ! strcmp( param, "ups" ) )
+     { g_snprintf( module->ups.ups, sizeof(module->ups.ups), "%s", valeur_char ); }
+    else if ( ! strcmp( param, "username" ) )
+     { g_snprintf( module->ups.username, sizeof(module->ups.username), "%s", valeur_char ); }
+    else if ( ! strcmp( param, "password" ) )
+     { g_snprintf( module->ups.password, sizeof(module->ups.password), "%s", valeur_char ); }
+    else
+     { g_snprintf( chaine, sizeof(chaine),
+                 " Parameter %s not known for UPS id %s ('ups set list' can help)\n", param, id_char );
+       Admin_write ( connexion, chaine );
+       return;
+     }
+
+    retour = Modifier_upsDB ( &module->ups );
+    if (retour)
+     { Admin_write ( connexion, " ERROR : UPS module NOT set\n" ); }
+    else
+     { Admin_write ( connexion, " UPS module parameter set\n" ); }
+  }
+/**********************************************************************************************************/
 /* Admin_command : Fonction principale de traitement des commandes du thread                              */
 /* Entrée: La connexion et la ligne de commande a parser                                                  */
 /* Sortie: Néant                                                                                          */
@@ -167,10 +236,7 @@
     else if ( ! strcmp ( commande, "add" ) )
      { struct UPSDB ups;
        gint retour;
-       sscanf ( ligne, "%s %[^,],%[^,],%[^,],%[^,],%d,%d,%d,%d", commande,    /* Découpage de la ligne de commande */
-                ups.ups, ups.host, ups.username, ups.password,
-                &ups.bit_comm, &ups.map_EA, &ups.map_E, &ups.map_A
-              );
+       sscanf ( ligne, "%s %[^\n]", commande, ups.ups );
        ups.enable = TRUE;
        retour = Ajouter_upsDB ( &ups );
        if (retour == -1)
@@ -179,25 +245,12 @@
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), " UPS %s added. New ID=%d\n", ups.ups, retour );
           Admin_write ( connexion, chaine );
-          Cfg_ups.reload = TRUE;                     /* Rechargement des modules RS en mémoire de travail */
+          Cfg_ups.reload = TRUE;                    /* Rechargement des modules UPS en mémoire de travail */
         }
      }
     else if ( ! strcmp ( commande, "set" ) )
-     { struct UPSDB ups;
-       gint retour;
-       sscanf ( ligne, "%s %d,%[^,],%[^,],%[^,],%[^,],%d,%d,%d,%d", commande, /* Découpage de la ligne de commande */
-                &ups.id, ups.ups, ups.host, ups.username, ups.password,
-                &ups.bit_comm, &ups.map_EA, &ups.map_E, &ups.map_A
-              );
-       retour = Modifier_upsDB ( &ups );
-       if (retour == FALSE)
-        { Admin_write ( connexion, "Error, UPS not changed\n" ); }
-       else
-        { gchar chaine[80];
-          g_snprintf( chaine, sizeof(chaine), " UPS %s changed\n", ups.ups );
-          Admin_write ( connexion, chaine );
-          Cfg_ups.reload = TRUE;                     /* Rechargement des modules RS en mémoire de travail */
-        }
+     { Admin_rfxcom_set ( connexion, ligne+4 );
+       Cfg_ups.reload = TRUE;                       /* Rechargement des modules UPS en mémoire de travail */
      }
     else if ( ! strcmp ( commande, "del" ) )
      { struct UPSDB ups;
@@ -224,17 +277,16 @@
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'UPS'\n" );
-       Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
-       Admin_write ( connexion, "  add name,host,username,password,bit_comm,map_EA,map_E,map_A\n");
-       Admin_write ( connexion, "                                         - Ajoute un UPS\n" );
-       Admin_write ( connexion, "  set id,name,host,username,password,bit_comm,map_EA,map_E,map_A\n");
-       Admin_write ( connexion, "                                         - Change UPS id\n" );
-       Admin_write ( connexion, "  del id                                 - Delete UPS id\n" );
-       Admin_write ( connexion, "  start id                               - Start UPS id\n" );
-       Admin_write ( connexion, "  stop id                                - Stop UPS id\n" );
-       Admin_write ( connexion, "  show id                                - Show UPS id\n" );
-       Admin_write ( connexion, "  list                                   - Liste les modules ONDULEUR\n" );
-       Admin_write ( connexion, "  reload                                 - Recharge la configuration\n" );
+       Admin_write ( connexion, "  dbcfg ...             - Get/Set Database Parameters\n" );
+       Admin_write ( connexion, "  add $ups              - Ajoute un UPS\n" );
+       Admin_write ( connexion, "  set $id $champ $val   - Set $val to $champ for module $id\n" );
+       Admin_write ( connexion, "  set list              - List parameter that can be set\n" );
+       Admin_write ( connexion, "  del $id               - Delete UPS id\n" );
+       Admin_write ( connexion, "  start $id             - Start UPS id\n" );
+       Admin_write ( connexion, "  stop $id              - Stop UPS id\n" );
+       Admin_write ( connexion, "  show $id              - Show UPS id\n" );
+       Admin_write ( connexion, "  list                  - Liste les modules ONDULEUR\n" );
+       Admin_write ( connexion, "  reload                - Recharge la configuration\n" );
      }
     else
      { gchar chaine[128];
