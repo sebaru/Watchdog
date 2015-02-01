@@ -53,7 +53,7 @@
     guchar id4;                                                                    /* Numéro de la rfxcom */
     guchar housecode;                                                              /* Numéro de la rfxcom */
     guchar unitcode;                                                               /* Numéro de la rfxcom */
-    gint e_min, ea_min, a_min;
+    gint map_E, map_EA, map_A;
     gchar libelle[NBR_CARAC_LIBELLE_RFXCOM];                                      /* Libelle de la rfxcom */
   };
 

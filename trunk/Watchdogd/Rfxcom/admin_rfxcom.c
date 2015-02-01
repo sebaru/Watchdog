@@ -42,14 +42,14 @@
                 "  | - type = %02d (0x%02X), sous_type = %02d (0x%02X)\n"
                 "  | - IDs  = %03d %03d %03d %03d\n"
                 "  | - housecode = %03d, unitcode=%03d\n"
-                "  | - e_min = %03d, ea_min = %03d, a_min = %03d\n"
+                "  | - map_E = %03d, map_EA = %03d, map_A = %03d\n"
                 "  -\n",
                 module->rfxcom.id, (Partage->top - module->date_last_view)/10, module->rfxcom.libelle,
                 module->rfxcom.type, module->rfxcom.type,
                 module->rfxcom.sous_type, module->rfxcom.sous_type,
                 module->rfxcom.id1, module->rfxcom.id2, module->rfxcom.id3, module->rfxcom.id4, 
                 module->rfxcom.housecode, module->rfxcom.unitcode,
-                module->rfxcom.e_min, module->rfxcom.ea_min, module->rfxcom.a_min
+                module->rfxcom.map_E, module->rfxcom.map_EA, module->rfxcom.map_A
               );
     Admin_write ( connexion, chaine );
   }
@@ -131,17 +131,75 @@
 /* Entrée: le connexion et la structure de reference du capteur                                           */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_rfxcom_set ( struct CONNEXION *connexion, struct RFXCOMDB *rfxcom )
-  { gchar chaine[128];
+ static void Admin_rfxcom_set ( struct CONNEXION *connexion, gchar *ligne )
+  { gchar id_char[16], param[32], valeur_char[64], chaine[128];
+    struct MODULE_RFXCOM *module = NULL;
+    GSList *liste_modules;
+    guint id, valeur;
+    gint retour;
 
-    g_snprintf( chaine, sizeof(chaine), " -- Modification du module rfxcom %03d\n", rfxcom->id );
-    Admin_write ( connexion, chaine );
+    if ( ! strcmp ( ligne, "list" ) )
+     { Admin_write ( connexion, " | Parameter can be:\n" );
+       Admin_write ( connexion, " | - type, sous_type, id1, id2, id3, id4, housecode, unitcode,\n" );
+       Admin_write ( connexion, " | - map_E, map_EA, map_A, libelle\n" );
+       Admin_write ( connexion, " -\n" );
+       return;
+     }
 
-    if ( Modifier_rfxcomDB( rfxcom ) )
-     { g_snprintf( chaine, sizeof(chaine), " Module %03d changed.\n", rfxcom->id ); }
+    sscanf ( ligne, "%s %s %s", id_char, param, valeur_char );
+    id     = atoi ( id_char     );
+    valeur = atoi ( valeur_char );
+
+    pthread_mutex_lock( &Cfg_rfxcom.lib->synchro );                     /* Recherche du module en mémoire */
+    liste_modules = Cfg_rfxcom.Modules_RFXCOM;
+    while ( liste_modules )
+     { module = (struct MODULE_RFXCOM *)liste_modules->data;
+       if (module->rfxcom.id == id) break;
+       liste_modules = liste_modules->next;                                  /* Passage au module suivant */
+     }
+    pthread_mutex_unlock( &Cfg_rfxcom.lib->synchro );
+
+    if (!module)                                                                         /* Si non trouvé */
+     { Admin_write( connexion, " Module not found\n");
+       return;
+     }
+
+    if ( ! strcmp( param, "type" ) )
+     { module->rfxcom.type = valeur; }
+    else if ( ! strcmp( param, "bit" ) )
+     { module->rfxcom.sous_type = valeur; }
+    else if ( ! strcmp( param, "id1" ) )
+     { module->rfxcom.id1 = valeur; }
+    else if ( ! strcmp( param, "id2" ) )
+     { module->rfxcom.id2 = valeur; }
+    else if ( ! strcmp( param, "id3" ) )
+     { module->rfxcom.id3 = valeur; }
+    else if ( ! strcmp( param, "id4" ) )
+     { module->rfxcom.id4 = valeur; }
+    else if ( ! strcmp( param, "housecode" ) )
+     { module->rfxcom.housecode = valeur; }
+    else if ( ! strcmp( param, "unitcode" ) )
+     { module->rfxcom.unitcode = valeur; }
+    else if ( ! strcmp( param, "map_E" ) )
+     { module->rfxcom.map_E = valeur; }
+    else if ( ! strcmp( param, "map_EA" ) )
+     { module->rfxcom.map_EA = valeur; }
+    else if ( ! strcmp( param, "map_A" ) )
+     { module->rfxcom.map_A = valeur; }
+    else if ( ! strcmp( param, "libelle" ) )
+     { g_snprintf( module->rfxcom.libelle, sizeof(module->rfxcom.libelle), "%s", valeur_char ); }
     else
-     { g_snprintf( chaine, sizeof(chaine), " Error. Module %03d NOT changed.\n", rfxcom->id ); }
-    Admin_write ( connexion, chaine );
+     { g_snprintf( chaine, sizeof(chaine),
+                 " Parameter %s not known for RFXCOM id %s ('rfxcom set list' can help)\n", param, id_char );
+       Admin_write ( connexion, chaine );
+       return;
+     }
+
+    retour = Modifier_rfxcomDB ( &module->rfxcom );
+    if (retour)
+     { Admin_write ( connexion, " ERROR : RFXCOM module NOT set\n" ); }
+    else
+     { Admin_write ( connexion, " RFXCOM module parameter set\n" ); }
   }
 /**********************************************************************************************************/
 /* Admin_rfxcom: Fonction gerant les différentes commandes possible pour l'administration rfxcom          */
@@ -160,18 +218,11 @@
                 (gint *)&rfxcom.type, (gint *)&rfxcom.sous_type,
                 (gint *)&rfxcom.id1, (gint *)&rfxcom.id2, (gint *)&rfxcom.id3, (gint *)&rfxcom.id4,
                 (gint *)&rfxcom.housecode,(gint *)&rfxcom.unitcode,
-                &rfxcom.e_min, &rfxcom.ea_min, &rfxcom.a_min, rfxcom.libelle );
+                &rfxcom.map_E, &rfxcom.map_EA, &rfxcom.map_A, rfxcom.libelle );
        Admin_rfxcom_add ( connexion, &rfxcom );
      }
     else if ( ! strcmp ( commande, "set" ) )
-     { struct RFXCOMDB rfxcom;
-       memset( &rfxcom, 0, sizeof(struct RFXCOMDB) );                /* Découpage de la ligne de commande */
-       sscanf ( ligne, "%s %d,%d,%d,(%d,%d,%d,%d),%d,%d,%d,%d,%d,%[^\n]", commande,
-                &rfxcom.id, (gint *)&rfxcom.type, (gint *)&rfxcom.sous_type,
-                (gint *)&rfxcom.id1, (gint *)&rfxcom.id2, (gint *)&rfxcom.id3, (gint *)&rfxcom.id4,
-                (gint *)&rfxcom.housecode,(gint *)&rfxcom.unitcode,
-                &rfxcom.e_min, &rfxcom.ea_min, &rfxcom.a_min, rfxcom.libelle );
-       Admin_rfxcom_set ( connexion, &rfxcom );
+     { Admin_rfxcom_set ( connexion, ligne+4 );
      }
     else if ( ! strcmp ( commande, "light" ) )
      { gchar trame_send_AC[] = { 0x07, 0x10, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
@@ -258,9 +309,9 @@
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'RFXCOM'\n" );
        Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
-       Admin_write ( connexion, "  add type,sstype,(id1,id2,id3,id4),housecode,unitcode,e_min,ea_min,a_min,libelle\n"
+       Admin_write ( connexion, "  add type,sstype,(id1,id2,id3,id4),housecode,unitcode,map_E,map_EA,map_A,libelle\n"
                      "                                         - Ajoute un module\n" );
-       Admin_write ( connexion, "  set ID,type,sstype,(id1,id2,id3,id4),housecode,unitcode,e_min,ea_min,a_min,libelle\n"
+       Admin_write ( connexion, "  set ID,type,sstype,(id1,id2,id3,id4),housecode,unitcode,map_E,map_EA,map_A,libelle\n"
                      "                                         - Edite le module ID\n" );
        Admin_write ( connexion, "  del ID                                 - Retire le module ID\n" );
        Admin_write ( connexion, "  light proto,housecode,unitcode,cmdnumber\n" );

@@ -233,7 +233,8 @@
     else if ( ! strcmp( param, "ip" ) )
      { g_snprintf( module->modbus.ip, sizeof(module->modbus.ip), "%s", valeur_char ); }
     else
-     { g_snprintf( chaine, sizeof(chaine), " Parameter %s not known for MODBUS id %s ('modbus set list' can help)\n", param, id_char );
+     { g_snprintf( chaine, sizeof(chaine),
+                 " Parameter %s not known for MODBUS id %s ('modbus set list' can help)\n", param, id_char );
        Admin_write ( connexion, chaine );
        return;
      }

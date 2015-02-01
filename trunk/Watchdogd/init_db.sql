@@ -752,10 +752,9 @@ CREATE TABLE IF NOT EXISTS `rfxcom` (
   `id4` int(11) NOT NULL DEFAULT '0',
   `housecode` int(11) NOT NULL DEFAULT '0',
   `unitcode` int(11) NOT NULL DEFAULT '0',
-  `e_min` int(11) NOT NULL DEFAULT '-1',
-  `ea_min` int(11) NOT NULL DEFAULT '-1',
-  `sa_min` int(11) NOT NULL DEFAULT '-1',
-  `a_min` int(11) NOT NULL DEFAULT '-1',
+  `map_E` int(11) NOT NULL DEFAULT '-1',
+  `map_EA` int(11) NOT NULL DEFAULT '-1',
+  `map_A` int(11) NOT NULL DEFAULT '-1',
   `libelle` text NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;

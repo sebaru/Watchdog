@@ -379,7 +379,16 @@
        Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
      }
 
-    if (Modifier_configDB ( "global", "database_version", "2581" ))
+    if (database_version < 2582)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `rfxcom` CHANGE `e_min` `map_E` INT(11) NOT NULL" );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `rfxcom` CHANGE `ea_min` `map_EA` INT(11) NOT NULL" );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `rfxcom` CHANGE `a_min` `map_A` INT(11) NOT NULL" );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+     }
+
+    if (Modifier_configDB ( "global", "database_version", "2582" ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
                 "Update_database_schema: updating Database_version OK" );
      }
