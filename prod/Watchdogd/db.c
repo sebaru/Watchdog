@@ -262,7 +262,7 @@
  void Update_database_schema ( void )
   { gint database_version;
     gchar *nom, *valeur;
-    gchar requete[1024];
+    gchar requete[4096];
     struct DB *db;
 
     if (Config.instance_is_master != TRUE)                              /* Do not update DB if not master */

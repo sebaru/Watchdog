@@ -249,7 +249,7 @@
         }
      }
     else if ( ! strcmp ( commande, "set" ) )
-     { Admin_rfxcom_set ( connexion, ligne+4 );
+     { Admin_ups_set ( connexion, ligne+4 );
        Cfg_ups.reload = TRUE;                       /* Rechargement des modules UPS en mémoire de travail */
      }
     else if ( ! strcmp ( commande, "del" ) )
