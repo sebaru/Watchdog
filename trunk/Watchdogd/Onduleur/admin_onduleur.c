@@ -53,13 +53,13 @@
     g_snprintf( chaine, sizeof(chaine),
                 " UPS[%02d] ------> %s@%s %s\n"
                 "  | - enable = %d, started = %d (bit B%04d=%d)\n"
-                "  | - ea_min = EA%03d, e_min = E%03d, a_min = A%03d\n"
+                "  | - map_EA = EA%03d, map_E = E%03d, map_A = A%03d\n"
                 "  | - username = %s, password = %s,\n"
                 "  | - date_next_connexion = in %03ds\n"
                 "  -\n",
                 module->ups.id, module->ups.ups, module->ups.host, module->libelle,
                 module->ups.enable, module->started, module->ups.bit_comm, B(module->ups.bit_comm),
-                module->ups.ea_min, module->ups.e_min, module->ups.a_min,
+                module->ups.map_EA, module->ups.map_E, module->ups.map_A,
                 module->ups.username, module->ups.password,
           (int)(module->date_next_connexion > Partage->top ? (module->date_next_connexion - Partage->top)/10 : -1)
               );
@@ -169,7 +169,7 @@
        gint retour;
        sscanf ( ligne, "%s %[^,],%[^,],%[^,],%[^,],%d,%d,%d,%d", commande,    /* Découpage de la ligne de commande */
                 ups.ups, ups.host, ups.username, ups.password,
-                &ups.bit_comm, &ups.ea_min, &ups.e_min, &ups.a_min
+                &ups.bit_comm, &ups.map_EA, &ups.map_E, &ups.map_A
               );
        ups.enable = TRUE;
        retour = Ajouter_upsDB ( &ups );
@@ -187,7 +187,7 @@
        gint retour;
        sscanf ( ligne, "%s %d,%[^,],%[^,],%[^,],%[^,],%d,%d,%d,%d", commande, /* Découpage de la ligne de commande */
                 &ups.id, ups.ups, ups.host, ups.username, ups.password,
-                &ups.bit_comm, &ups.ea_min, &ups.e_min, &ups.a_min
+                &ups.bit_comm, &ups.map_EA, &ups.map_E, &ups.map_A
               );
        retour = Modifier_upsDB ( &ups );
        if (retour == FALSE)
@@ -225,9 +225,9 @@
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'UPS'\n" );
        Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
-       Admin_write ( connexion, "  add name,host,username,password,bit_comm,ea_min,e_min,a_min\n");
+       Admin_write ( connexion, "  add name,host,username,password,bit_comm,map_EA,map_E,map_A\n");
        Admin_write ( connexion, "                                         - Ajoute un UPS\n" );
-       Admin_write ( connexion, "  set id,name,host,username,password,bit_comm,ea_min,e_min,a_min\n");
+       Admin_write ( connexion, "  set id,name,host,username,password,bit_comm,map_EA,map_E,map_A\n");
        Admin_write ( connexion, "                                         - Change UPS id\n" );
        Admin_write ( connexion, "  del id                                 - Delete UPS id\n" );
        Admin_write ( connexion, "  start id                               - Start UPS id\n" );

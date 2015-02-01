@@ -109,7 +109,7 @@
   }
 /**********************************************************************************************************/
 /* Admin_rfxcom_add: Ajoute un capteur/module RFXCOM                                                      */
-/* Entrée: le connexion et la structure de reference du capteur                                              */
+/* Entrée: le connexion et la structure de reference du capteur                                           */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
  static void Admin_rfxcom_add ( struct CONNEXION *connexion, struct RFXCOMDB *rfxcom )

@@ -104,7 +104,7 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,host,ups,bit_comm,enable,ea_min,e_min,a_min,username,password "
+                "SELECT id,host,ups,bit_comm,enable,map_EA,map_E,map_A,username,password "
                 " FROM %s WHERE instance_id='%s' ORDER BY host,ups", NOM_TABLE_UPS, Config.instance_id );
 
     return ( Lancer_requete_SQL ( db, requete ) );             /* Execution de la requete SQL */
@@ -133,9 +133,9 @@
        ups->id                = atoi(db->row[0]);
        ups->bit_comm          = atoi(db->row[3]);
        ups->enable            = atoi(db->row[4]);
-       ups->ea_min            = atoi(db->row[5]);
-       ups->e_min             = atoi(db->row[6]);
-       ups->a_min             = atoi(db->row[7]);
+       ups->map_EA            = atoi(db->row[5]);
+       ups->map_E             = atoi(db->row[6]);
+       ups->map_A             = atoi(db->row[7]);
      }
     return(ups);
   }
@@ -181,21 +181,21 @@
     if (ajout == TRUE)
      { g_snprintf( requete, sizeof(requete),
                    "INSERT INTO %s"
-                   "(instance_id,host,ups,bit_comm,enable,ea_min,e_min,a_min,username,password) "
+                   "(instance_id,host,ups,bit_comm,enable,map_EA,map_E,map_A,username,password) "
                    "VALUES ('%s','%s','%s',%d,%d,%d,%d,%d,'%s','%s')",
                    NOM_TABLE_UPS, Config.instance_id, host, name, ups->bit_comm, ups->enable,
-                   ups->ea_min, ups->e_min, ups->a_min, username, password
+                   ups->map_EA, ups->map_E, ups->map_A, username, password
                  );
      }
     else
      { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
                    "UPDATE %s SET "             
                    "host='%s',ups='%s',bit_comm=%d,enable=%d,"
-                   "ea_min=%d,e_min=%d,a_min=%d,"
+                   "map_EA=%d,map_E=%d,map_A=%d,"
                    "username='%s',password='%s' "
                    "WHERE id=%d",
                    NOM_TABLE_UPS, host, name, ups->bit_comm, ups->enable,
-                   ups->ea_min, ups->e_min, ups->a_min,
+                   ups->map_EA, ups->map_E, ups->map_A,
                    username, password,
                    ups->id );
      }
@@ -352,7 +352,7 @@
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_INFO, "Deconnecter_module %d", module->ups.id );
     if (module->ups.bit_comm) SB( module->ups.bit_comm, 0 );  /* Mise a zero du bit interne lié au module */
 
-    num_ea = module->ups.ea_min;
+    num_ea = module->ups.map_EA;
     SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
     SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
     SEA_range( num_ea++, 0);                                             /* Numéro de l'EA pour la valeur */
@@ -447,7 +447,7 @@
     module->date_next_connexion = 0;
     module->started = TRUE;
     if (module->ups.bit_comm) SB( module->ups.bit_comm, 1 );    /* Mise a un du bit interne lié au module */
-    num_ea = module->ups.ea_min;
+    num_ea = module->ups.map_EA;
     SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
     SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
     SEA_range( num_ea++, 1);                                             /* Numéro de l'EA pour la valeur */
@@ -543,7 +543,7 @@
  static gboolean Envoyer_sortie_ups( struct MODULE_UPS *module )
   { gint num_a;
 
-    num_a = module->ups.a_min;
+    num_a = module->ups.map_A;
     if (A(num_a)) { if (Onduleur_set_instcmd ( module, "load.off" ) == FALSE) return(FALSE); SA(num_a,0); }
     num_a++;
     if (A(num_a)) { if (Onduleur_set_instcmd ( module, "load.on" ) == FALSE) return(FALSE); SA(num_a,0); }
@@ -572,7 +572,7 @@
   { gfloat valeur;
     gint num_ea;
 
-    num_ea = module->ups.ea_min;
+    num_ea = module->ups.map_EA;
 
     if ( Onduleur_get_var ( module, "ups.load", &valeur ) )
      { SEA( num_ea, valeur ); }                                          /* Numéro de l'EA pour la valeur */

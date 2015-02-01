@@ -31,7 +31,7 @@
  #include "Reseaux.h"
 
  #define NOM_THREAD      "ups"
- #define NOM_TABLE_UPS   "onduleurs"
+ #define NOM_TABLE_UPS   "ups"
 
  #define UPS_PORT_TCP    3493                             /* Port de connexion TCP pour accès aux modules */
  #define UPS_RETRY       1800                          /* 3 minutes entre chaque retry si pb de connexion */
@@ -69,9 +69,9 @@
     gchar username[NBR_CARAC_USERNAME_UPS_UTF8+1];                                    /* Username associé */
     gchar password[NBR_CARAC_PASSWORD_UPS_UTF8+1];                                    /* Password associé */
     guint bit_comm;                                  /* Bit interne B d'etat communication avec le module */
-    guint ea_min;                                                    /* Numéro de la premiere EA impactée */
-    guint e_min;                                                      /* Numéro de la premiere E impactée */
-    guint a_min;                                                      /* Numéro de la premiere A impactée */
+    guint map_EA;                                                    /* Numéro de la premiere EA impactée */
+    guint map_E;                                                      /* Numéro de la premiere E impactée */
+    guint map_A;                                                      /* Numéro de la premiere A impactée */
   };
 
  struct MODULE_UPS

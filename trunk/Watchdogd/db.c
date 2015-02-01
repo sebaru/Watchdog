@@ -388,7 +388,18 @@
        Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
      }
 
-    if (Modifier_configDB ( "global", "database_version", "2582" ))
+    if (database_version < 2583)
+     { g_snprintf( requete, sizeof(requete), "RENAME TABLE onduleurs TO ups" );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `ups` CHANGE `e_min` `map_E` INT(11) NOT NULL" );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `ups` CHANGE `ea_min` `map_EA` INT(11) NOT NULL" );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `ups` CHANGE `a_min` `map_A` INT(11) NOT NULL" );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+     }
+
+    if (Modifier_configDB ( "global", "database_version", "2583" ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
                 "Update_database_schema: updating Database_version OK" );
      }
