@@ -133,7 +133,6 @@
 /**********************************************************************************************************/
  static void Admin_modbus_show ( struct CONNEXION *connexion, gint num )
   { GSList *liste_modules;
-    gchar chaine[512];
 
     pthread_mutex_lock( &Cfg_modbus.lib->synchro );
     liste_modules = Cfg_modbus.Modules_MODBUS;
@@ -269,10 +268,9 @@
      { struct MODBUSDB modbus;
        gint retour;
 
-       sscanf ( ligne, "%s %d,%d,%[^,],%d,%d,%d,%d,%[^\n]", commande,/* Découpage de la ligne de commande */
-                &modbus.enable, &modbus.bit, modbus.ip,
-                &modbus.min_e_tor, &modbus.min_e_ana, &modbus.min_s_tor, &modbus.min_s_ana,
-                modbus.libelle
+       memset( &modbus, 0, sizeof(struct MODBUSDB) );
+       sscanf ( ligne, "%s %s %s", commande,                         /* Découpage de la ligne de commande */
+                modbus.ip, modbus.libelle
               );
        modbus.watchdog = 40;
        retour = Ajouter_modbusDB ( &modbus );
@@ -286,23 +284,6 @@
      }
     else if ( ! strcmp ( commande, "set" ) )
      { Admin_modbus_set ( connexion, ligne+4 );
-     }
-    else if ( ! strcmp ( commande, "set_old" ) )
-     { struct MODBUSDB modbus;
-       gint retour;
-       sscanf ( ligne, "%s %d,%d,%d,%[^,],%d,%d,%d,%d,%[^\n]", commande,/* Découpage de la ligne de commande */
-                &modbus.id, &modbus.enable, &modbus.bit, modbus.ip,
-                &modbus.min_e_tor, &modbus.min_e_ana, &modbus.min_s_tor, &modbus.min_s_ana,
-                modbus.libelle
-              );
-       retour = Modifier_modbusDB ( &modbus );
-       if (retour == FALSE)
-        { Admin_write ( connexion, "Error, MODBUS not setd\n" ); }
-       else
-        { gchar chaine[80];
-          g_snprintf( chaine, sizeof(chaine), " MODBUS %s setd\n", modbus.ip );
-          Admin_write ( connexion, chaine );
-        }
      }
     else if ( ! strcmp ( commande, "del" ) )
      { struct MODBUSDB modbus;
@@ -328,18 +309,18 @@
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
-       Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
-       Admin_write ( connexion, "  add enable,bit_comm,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
-       Admin_write ( connexion, "                                         - Ajoute un module modbus\n" );
-       Admin_write ( connexion, "  set $id $champ $val                    - Set $val to $champ for module $id\n" );
-       Admin_write ( connexion, "  set_old id,enable,bit_comm,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
-       Admin_write ( connexion, "                                         - Modifie le module id\n" );
-       Admin_write ( connexion, "  del id                                 - Supprime le module id\n" );
-       Admin_write ( connexion, "  start id                               - Demarre le module id\n" );
-       Admin_write ( connexion, "  stop id                                - Arrete le module id\n" );
-       Admin_write ( connexion, "  show id                                - Affiche les informations du modbus ID\n" );
-       Admin_write ( connexion, "  list                                   - Liste les modules MODBUS\n" );
-       Admin_write ( connexion, "  reload                                 - Recharge la configuration\n" );
+       Admin_write ( connexion, "  dbcfg ...            - Get/Set Database Parameters\n" );
+       Admin_write ( connexion, "  add $ip $libelle     - Ajoute un module modbus\n" );
+       Admin_write ( connexion, "  set $id $champ $val  - Set $val to $champ for module $id\n" );
+       Admin_write ( connexion, "                         $champ  = enable, bit, watchdog,\n" );
+       Admin_write ( connexion, "                                   min_e_tor, min_e_ana, min_s_tor, min_s_ana,\n" );
+       Admin_write ( connexion, "                                   libelle \n" );
+       Admin_write ( connexion, "  del $id              - Erase module $id\n" );
+       Admin_write ( connexion, "  start $id            - Demarre le module $id\n" );
+       Admin_write ( connexion, "  stop $id             - Arrete le module $id\n" );
+       Admin_write ( connexion, "  show $id             - Affiche les informations du modbus $id\n" );
+       Admin_write ( connexion, "  list                 - Liste les modules MODBUS\n" );
+       Admin_write ( connexion, "  reload               - Recharge la configuration\n" );
      }
     else
      { gchar chaine[128];
