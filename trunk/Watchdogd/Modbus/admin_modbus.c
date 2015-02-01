@@ -186,10 +186,17 @@
     struct MODULE_MODBUS *module = NULL;
     GSList *liste_modules;
     guint id, valeur;
+    gint retour;
+
+    if ( ! strcmp ( ligne, "list" ) )
+     { Admin_write ( connexion, " | Parameter can be:\n" );
+       Admin_write ( connexion, " | - enable, bit, watchdog, libelle,\n" );
+       Admin_write ( connexion, " | - min_e_tor, min_e_ana, min_s_tor, min_s_ana\n" );
+       Admin_write ( connexion, " -\n" );
+       return;
+     }
 
     sscanf ( ligne, "%s %s %s", id_char, param, valeur_char );
-    g_snprintf( chaine, sizeof(chaine), " Trying to set %s=%s for id %s\n", param, valeur_char, id_char );
-    Admin_write ( connexion, chaine );
     id     = atoi ( id_char     );
     valeur = atoi ( valeur_char );
 
@@ -225,13 +232,17 @@
      { g_snprintf( module->modbus.libelle, sizeof(module->modbus.libelle), "%s", valeur_char ); }
     else if ( ! strcmp( param, "ip" ) )
      { g_snprintf( module->modbus.ip, sizeof(module->modbus.ip), "%s", valeur_char ); }
+    else
+     { g_snprintf( chaine, sizeof(chaine), " Parameter %s not known for MODBUS id %s ('modbus set list' can help)\n", param, id_char );
+       Admin_write ( connexion, chaine );
+       return;
+     }
 
-       gint retour;
     retour = Modifier_modbusDB ( &module->modbus );
     if (retour)
      { Admin_write ( connexion, " ERROR : MODBUS module NOT set\n" ); }
     else
-     { Admin_write ( connexion, " MODBUS module set\n" ); }
+     { Admin_write ( connexion, " MODBUS module parameter set\n" ); }
   }
 /**********************************************************************************************************/
 /* Admin_command : Fonction principale de traitement des commandes du thread                              */
@@ -312,9 +323,7 @@
        Admin_write ( connexion, "  dbcfg ...            - Get/Set Database Parameters\n" );
        Admin_write ( connexion, "  add $ip $libelle     - Ajoute un module modbus\n" );
        Admin_write ( connexion, "  set $id $champ $val  - Set $val to $champ for module $id\n" );
-       Admin_write ( connexion, "                         $champ  = enable, bit, watchdog,\n" );
-       Admin_write ( connexion, "                                   min_e_tor, min_e_ana, min_s_tor, min_s_ana,\n" );
-       Admin_write ( connexion, "                                   libelle \n" );
+       Admin_write ( connexion, "  set list             - List parameter that can be set\n" );
        Admin_write ( connexion, "  del $id              - Erase module $id\n" );
        Admin_write ( connexion, "  start $id            - Demarre le module $id\n" );
        Admin_write ( connexion, "  stop $id             - Arrete le module $id\n" );
