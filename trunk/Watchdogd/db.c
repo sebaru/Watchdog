@@ -368,17 +368,18 @@
        Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
      }
 
-    if (database_version < 2579)
-     { g_snprintf( requete, sizeof(requete), 
-                  "ALTER TABLE `modbus_modules` CHANGE `min_e_tor` `map_E` INT(11) NOT NULL;"
-                  "ALTER TABLE `modbus_modules` CHANGE `min_e_ana` `map_EA` INT(11) NOT NULL;"
-                  "ALTER TABLE `modbus_modules` CHANGE `min_s_tor` `map_A` INT(11) NOT NULL;"
-                  "ALTER TABLE `modbus_modules` CHANGE `min_s_ana` `map_AA` INT(11) NOT NULL;"
-                 );
+    if (database_version < 2580)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` CHANGE `min_e_tor` `map_E`" );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` CHANGE `min_e_ana` `map_EA`" );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` CHANGE `min_s_tor` `map_A`" );
+       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` CHANGE `min_s_ana` `map_AA`" );
        Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
      }
 
-    if (Modifier_configDB ( "global", "database_version", "2579" ))
+    if (Modifier_configDB ( "global", "database_version", "2580" ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
                 "Update_database_schema: updating Database_version OK" );
      }
