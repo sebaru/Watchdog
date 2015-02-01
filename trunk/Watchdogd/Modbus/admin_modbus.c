@@ -178,6 +178,63 @@
     Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
+/* Admin_modbus_set: Change un parametre dans la DB modbus                                                */
+/* Entrée: La connexion et la ligne de commande (champ valeur)                                            */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Admin_modbus_set ( struct CONNEXION *connexion, gchar *ligne )
+  { gchar id_char[16], param[32], valeur_char[64], chaine[128];
+    struct MODULE_MODBUS *module = NULL;
+    GSList *liste_modules;
+    guint id, valeur;
+
+    sscanf ( ligne, "%s %s %s", id_char, param, valeur_char );
+    g_snprintf( chaine, sizeof(chaine), " Trying to set %s=%s for id %s\n", param, valeur_char, id_char );
+    Admin_write ( connexion, chaine );
+    id     = atoi ( id_char     );
+    valeur = atoi ( valeur_char );
+
+    pthread_mutex_lock( &Cfg_modbus.lib->synchro );                     /* Recherche du module en mémoire */
+    liste_modules = Cfg_modbus.Modules_MODBUS;
+    while ( liste_modules )
+     { module = (struct MODULE_MODBUS *)liste_modules->data;
+       if (module->modbus.id == id) break;
+       liste_modules = liste_modules->next;                                  /* Passage au module suivant */
+     }
+    pthread_mutex_unlock( &Cfg_modbus.lib->synchro );
+
+    if (!module)                                                                         /* Si non trouvé */
+     { Admin_write( connexion, " Module not found\n");
+       return;
+     }
+
+    if ( ! strcmp( param, "enable" ) )
+     { module->modbus.enable = (valeur ? TRUE : FALSE); }
+    else if ( ! strcmp( param, "bit" ) )
+     { module->modbus.bit = valeur; }
+    else if ( ! strcmp( param, "watchdog" ) )
+     { module->modbus.watchdog = valeur; }
+    else if ( ! strcmp( param, "min_e_tor" ) )
+     { module->modbus.min_e_tor = valeur; }
+    else if ( ! strcmp( param, "min_e_ana" ) )
+     { module->modbus.min_e_ana = valeur; }
+    else if ( ! strcmp( param, "min_s_tor" ) )
+     { module->modbus.min_s_tor = valeur; }
+    else if ( ! strcmp( param, "min_s_ana" ) )
+     { module->modbus.min_s_ana = valeur; }
+    else if ( ! strcmp( param, "libelle" ) )
+     { g_snprintf( module->modbus.libelle, sizeof(module->modbus.libelle), "%s", valeur_char ); }
+    else if ( ! strcmp( param, "ip" ) )
+     { g_snprintf( module->modbus.ip, sizeof(module->modbus.ip), "%s", valeur_char ); }
+
+       gint retour;
+    retour = Modifier_modbusDB ( &module->modbus );
+    if (retour == FALSE)
+     { Admin_write ( connexion, " ERROR : MODBUS module NOT set\n" ); }
+    else
+     { Admin_write ( connexion, " MODBUS module set\n" ); }
+  }
+/**********************************************************************************************************/
 /* Admin_command : Fonction principale de traitement des commandes du thread                              */
 /* Entrée: La connexion et la ligne de commande a parser                                                  */
 /* Sortie: Néant                                                                                          */
@@ -217,6 +274,7 @@
                 &modbus.min_e_tor, &modbus.min_e_ana, &modbus.min_s_tor, &modbus.min_s_ana,
                 modbus.libelle
               );
+       modbus.watchdog = 40;
        retour = Ajouter_modbusDB ( &modbus );
        if (retour == -1)
         { Admin_write ( connexion, "Error, MODBUS not added\n" ); }
@@ -227,6 +285,9 @@
         }
      }
     else if ( ! strcmp ( commande, "set" ) )
+     { Admin_modbus_set ( connexion, ligne+4 );
+     }
+    else if ( ! strcmp ( commande, "set_old" ) )
      { struct MODBUSDB modbus;
        gint retour;
        sscanf ( ligne, "%s %d,%d,%d,%[^,],%d,%d,%d,%d,%[^\n]", commande,/* Découpage de la ligne de commande */
@@ -270,7 +331,8 @@
        Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
        Admin_write ( connexion, "  add enable,bit_comm,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
        Admin_write ( connexion, "                                         - Ajoute un module modbus\n" );
-       Admin_write ( connexion, "  set id,enable,bit_comm,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
+       Admin_write ( connexion, "  set $id $champ $val                    - Set $val to $champ for module $id\n" );
+       Admin_write ( connexion, "  set_old id,enable,bit_comm,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
        Admin_write ( connexion, "                                         - Modifie le module id\n" );
        Admin_write ( connexion, "  del id                                 - Supprime le module id\n" );
        Admin_write ( connexion, "  start id                               - Demarre le module id\n" );
