@@ -87,17 +87,17 @@
     g_snprintf( chaine, sizeof(chaine),
                 " MODBUS[%02d] ------> %s - %s\n"
                 "  | - enable = %d, started = %d (bit B%04d=%d), watchdog = %03d, IP = %s\n"
-                "  | - %03d Digital Input,  min_e_tor = E%03d, %03d Analog  Input,  min_e_ana = EA%03d\n"
-                "  | - %03d Digital Output, min_a_tor = A%03d, %03d Analog  Output, min_a_ana = AA%03d\n"
+                "  | - %03d Digital Input,  map_E = E%03d, %03d Analog  Input,  map_EA = EA%03d\n"
+                "  | - %03d Digital Output, map_A = A%03d, %03d Analog  Output, map_AA = AA%03d\n"
                 "  | - transaction_id = %06d, nbr_deconnect = %02d, last_reponse = %03ds ago, date_next_eana = in %03ds\n"
                 "  -\n",
                 module->modbus.id, module->modbus.libelle,  Modbus_mode_to_string(module),
                 module->modbus.enable, module->started, module->modbus.bit, B(module->modbus.bit),
                 module->modbus.watchdog, module->modbus.ip,
-                module->nbr_entree_tor, module->modbus.min_e_tor, 
-                module->nbr_entree_ana, module->modbus.min_e_ana, 
-                module->nbr_sortie_tor, module->modbus.min_s_tor, 
-                module->nbr_sortie_ana, module->modbus.min_s_ana, 
+                module->nbr_entree_tor, module->modbus.map_E, 
+                module->nbr_entree_ana, module->modbus.map_EA, 
+                module->nbr_sortie_tor, module->modbus.map_A, 
+                module->nbr_sortie_ana, module->modbus.map_AA, 
                 module->transaction_id, module->nbr_deconnect,
                (Partage->top - module->date_last_reponse)/10,                   
                (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1)
@@ -191,7 +191,7 @@
     if ( ! strcmp ( ligne, "list" ) )
      { Admin_write ( connexion, " | Parameter can be:\n" );
        Admin_write ( connexion, " | - enable, bit, watchdog, libelle,\n" );
-       Admin_write ( connexion, " | - min_e_tor, min_e_ana, min_s_tor, min_s_ana\n" );
+       Admin_write ( connexion, " | - map_E, map_EA, map_A, map_AA\n" );
        Admin_write ( connexion, " -\n" );
        return;
      }
@@ -220,14 +220,14 @@
      { module->modbus.bit = valeur; }
     else if ( ! strcmp( param, "watchdog" ) )
      { module->modbus.watchdog = valeur; }
-    else if ( ! strcmp( param, "min_e_tor" ) )
-     { module->modbus.min_e_tor = valeur; }
-    else if ( ! strcmp( param, "min_e_ana" ) )
-     { module->modbus.min_e_ana = valeur; }
-    else if ( ! strcmp( param, "min_s_tor" ) )
-     { module->modbus.min_s_tor = valeur; }
-    else if ( ! strcmp( param, "min_s_ana" ) )
-     { module->modbus.min_s_ana = valeur; }
+    else if ( ! strcmp( param, "map_E" ) )
+     { module->modbus.map_E = valeur; }
+    else if ( ! strcmp( param, "map_EA" ) )
+     { module->modbus.map_EA = valeur; }
+    else if ( ! strcmp( param, "map_A" ) )
+     { module->modbus.map_A = valeur; }
+    else if ( ! strcmp( param, "map_AA" ) )
+     { module->modbus.map_AA = valeur; }
     else if ( ! strcmp( param, "libelle" ) )
      { g_snprintf( module->modbus.libelle, sizeof(module->modbus.libelle), "%s", valeur_char ); }
     else if ( ! strcmp( param, "ip" ) )

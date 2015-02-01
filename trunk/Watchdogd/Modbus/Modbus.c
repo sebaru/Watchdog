@@ -129,21 +129,21 @@
 
     if ( ajout == TRUE )
      { g_snprintf( requete, sizeof(requete),
-                  "INSERT INTO %s(instance_id,enable,ip,bit,watchdog,libelle,min_e_tor,min_e_ana,min_s_tor,min_s_ana) "
+                  "INSERT INTO %s(instance_id,enable,ip,bit,watchdog,libelle,map_E,map_EA,map_A,map_AA) "
                   "VALUES ('%s','%d','%s',%d,%d,'%s','%d','%d','%d','%d')",
                    NOM_TABLE_MODULE_MODBUS, Config.instance_id, modbus->enable, ip, modbus->bit, modbus->watchdog, libelle,
-                   modbus->min_e_tor, modbus->min_e_ana, modbus->min_s_tor, modbus->min_s_ana
+                   modbus->map_E, modbus->map_EA, modbus->map_A, modbus->map_AA
                  );
      }
     else
      { g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                   "UPDATE %s SET "             
                   "enable='%d',ip='%s',bit='%d',watchdog='%d',libelle='%s',"
-                  "min_e_tor='%d',min_e_ana='%d',min_s_tor='%d',min_s_ana='%d'"
+                  "map_E='%d',map_EA='%d',map_A='%d',map_AA='%d'"
                   " WHERE id=%d",
                    NOM_TABLE_MODULE_MODBUS,
                    modbus->enable, ip, modbus->bit, modbus->watchdog, libelle,
-                   modbus->min_e_tor, modbus->min_e_ana, modbus->min_s_tor, modbus->min_s_ana,
+                   modbus->map_E, modbus->map_EA, modbus->map_A, modbus->map_AA,
                    modbus->id );
       }
     w_free(ip, "free ip");
@@ -188,7 +188,7 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,enable,ip,bit,watchdog,libelle,min_e_tor,min_e_ana,min_s_tor,min_s_ana "
+                "SELECT id,enable,ip,bit,watchdog,libelle,map_E,map_EA,map_A,map_AA "
                 " FROM %s WHERE instance_id='%s' ORDER BY libelle",
                 NOM_TABLE_MODULE_MODBUS, Config.instance_id );
 
@@ -218,10 +218,10 @@
        modbus->enable     = atoi(db->row[1]);
        modbus->bit       = atoi(db->row[3]);
        modbus->watchdog  = atoi(db->row[4]);
-       modbus->min_e_tor = atoi(db->row[6]);
-       modbus->min_e_ana = atoi(db->row[7]);
-       modbus->min_s_tor = atoi(db->row[8]);
-       modbus->min_s_ana = atoi(db->row[9]);
+       modbus->map_E = atoi(db->row[6]);
+       modbus->map_EA = atoi(db->row[7]);
+       modbus->map_A = atoi(db->row[8]);
+       modbus->map_AA = atoi(db->row[9]);
      }
     return(modbus);
   }
@@ -306,7 +306,7 @@
     module->request = FALSE;
     module->nbr_deconnect++;
     module->date_retente = Partage->top + MODBUS_RETRY;
-    for ( cpt = module->modbus.min_e_ana; cpt<module->nbr_entree_ana; cpt++)
+    for ( cpt = module->modbus.map_EA; cpt<module->nbr_entree_ana; cpt++)
      { SEA_range( cpt, 0 ); }
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
              "Deconnecter_module : Module %d disconnected", module->modbus.id );
@@ -781,7 +781,7 @@
     requete.adresse        = 0x00;
     requete.nbr            = htons( module->nbr_sortie_tor );                                /* bit count */
     requete.data[2]        = (module->nbr_sortie_tor/8);                                    /* Byte count */
-    cpt_a = module->modbus.min_s_tor;
+    cpt_a = module->modbus.map_A;
     for ( cpt_poid = 1, cpt_byte = 3, cpt = 0; cpt<module->nbr_sortie_tor; cpt++)
       { if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
         if ( A(cpt_a) ) requete.data[cpt_byte] |= cpt_poid;
@@ -813,7 +813,7 @@
     requete.adresse        = 0x00;
     requete.nbr            = htons( module->nbr_sortie_ana );                                /* bit count */
     requete.data[2]        = (module->nbr_sortie_ana*2);                                    /* Byte count */
-    cpt_a = module->modbus.min_s_ana;
+    cpt_a = module->modbus.map_AA;
     for ( cpt_byte = 3, cpt = 0; cpt<module->nbr_sortie_ana; cpt++)
       { /* Attention, parser selon le type de sortie ! (12 bits ? 10 bits ? conversion ??? */
         requete.data [cpt_byte  ] = 0x30; /*Partage->aa[cpt_a].val_int>>5;*/
@@ -855,7 +855,7 @@
         }
        else switch (module->mode)
         { case MODBUS_GET_DI:
-               cpt_e = module->modbus.min_e_tor;
+               cpt_e = module->modbus.map_E;
                for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<module->nbr_entree_tor; cpt++)
                 { Envoyer_entree_dls( cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) );
                   cpt_e++;
@@ -865,7 +865,7 @@
                module->mode = MODBUS_GET_AI;
                break;
           case MODBUS_GET_AI:
-               cpt_e = module->modbus.min_e_ana;
+               cpt_e = module->modbus.map_EA;
                for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
                 { switch(Partage->ea[cpt_e].confDB.type)
                    { case ENTREEANA_WAGO_750455:
