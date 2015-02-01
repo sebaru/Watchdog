@@ -87,9 +87,9 @@
     g_snprintf( chaine, sizeof(chaine),
                 " MODBUS[%02d] ------> %s - %s\n"
                 "  | - enable = %d, started = %d (bit B%04d=%d), watchdog = %03d, IP = %s\n"
-                "  | - %03d Digital Input,  First = E%03d, %03d Analog  Input,  First = EA%03d\n"
-                "  | - %03d Digital Output, First = A%03d, %03d Analog  Output, First = AA%03d\n"
-                "  | - transaction_id = %06d, nbr_deconnect = %02d, last_reponse=%03ds ago, date_next_eana=in %03ds\n"
+                "  | - %03d Digital Input,  min_e_tor = E%03d, %03d Analog  Input,  min_e_ana = EA%03d\n"
+                "  | - %03d Digital Output, min_a_tor = A%03d, %03d Analog  Output, min_a_ana = AA%03d\n"
+                "  | - transaction_id = %06d, nbr_deconnect = %02d, last_reponse = %03ds ago, date_next_eana = in %03ds\n"
                 "  -\n",
                 module->modbus.id, module->modbus.libelle,  Modbus_mode_to_string(module),
                 module->modbus.enable, module->started, module->modbus.bit, B(module->modbus.bit),
@@ -228,7 +228,7 @@
 
        gint retour;
     retour = Modifier_modbusDB ( &module->modbus );
-    if (retour == FALSE)
+    if (retour)
      { Admin_write ( connexion, " ERROR : MODBUS module NOT set\n" ); }
     else
      { Admin_write ( connexion, " MODBUS module set\n" ); }
