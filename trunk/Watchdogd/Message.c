@@ -45,6 +45,8 @@
     gboolean retour;
     struct DB *db;
 
+    if (msg->id < 10000) return(FALSE);
+
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MSG, msg->id );
 

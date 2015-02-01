@@ -46,6 +46,8 @@
     gboolean retour;
     struct DB *db;
 
+    if (mnemo->id < 10000) return(FALSE);
+
     db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_mnemoDB: DB connexion failed" );

@@ -45,6 +45,8 @@
     gboolean retour;
     struct DB *db;
 
+    if (icone->id < 10000) return(FALSE);
+
     db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_iconeDB: DB connexion failed" );
