@@ -91,6 +91,34 @@
     guint last_arch;                                 /* Date de dernier enregistrement en base de données */
   };
 
+ struct SORTIE_TOR                                                         /* Définition d'une sortie TOR */
+  { gchar etat;                                                               /* Etat de la sortie 0 ou 1 */
+    gint last_change;                                                /* Date du dernier changement d'etat */
+    gint changes;           /* Compte le nombre de changes afin de ne pas depasser une limite par seconde */
+  };
+
+ struct MESSAGES
+  { gchar etat;
+    gint last_change;
+    gint changes;
+    gint next_repeat;
+  };
+
+ struct MESSAGES_EVENT
+  { guint num;
+    gchar etat;
+  };
+
+ struct I_MOTIF
+  { gint etat;
+    gint rouge;
+    gint vert;
+    gint bleu;
+    gint cligno;
+    gint last_change;
+    gint changes;
+  };
+
  struct COM_DLS                                             /* Communication entre le serveur et DLS */
   { pthread_t TID;                                                               /* Identifiant du thread */
     pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */

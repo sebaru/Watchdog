@@ -169,7 +169,7 @@
 /* Charger_config_bit_interne: Chargement des configs bit interne depuis la base de données               */
 /* Entrée: néant                                                                                          */
 /**********************************************************************************************************/
- static void Charger_config_bit_interne( void )
+ void Charger_config_bit_interne( void )
   { Charger_digitalInput();
     Charger_analogInput();
     Charger_cpth();
@@ -298,6 +298,7 @@
        Gerer_arrive_Axxx_dls();                       /* Distribution des changements d'etats sorties TOR */
        Gerer_arrive_EAxxx_dls();              /* Distribution des changements d'etats entrees Analogiques */
        Gerer_arrive_Exxx_dls();               /* Distribution des changements d'etats entrees Analogiques */
+       Gerer_arrive_Events();                   /* Gestion des evenements entre Thread, DLS, et satellite */
 
        if (Partage->com_msrv.Thread_reload)                                           /* On a recu RELOAD */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: RELOAD" );
@@ -547,7 +548,9 @@
           else if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
            { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb ARCH" ); }
 
-          if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
+          if (!Config.instance_is_master)
+           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "D.L.S Thread is administratively DOWN (instance is not Master)" ); }
+          else if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
            { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb DLS" ); }
 
           Charger_librairies();                           /* Chargement de toutes les librairies Watchdog */

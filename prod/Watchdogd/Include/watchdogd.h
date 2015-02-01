@@ -99,33 +99,12 @@
     GSList *liste_ea;                                       /* liste de EA a traiter dans la distribution */
     GSList *liste_e;                                         /* liste de E a traiter dans la distribution */
 
+    GSList *liste_Event;                                     /* liste de E a traiter dans la distribution */
+
     pthread_mutex_t synchro_Liste_abonne_msg;                         /* Bit de synchronisation processus */
     GSList *Liste_abonne_msg;                                      /* liste de struct MSGDB msg a envoyer */
 
     GSList *Librairies;                                    /* Liste des librairies chargées pour Watchdog */
-  };
-
- struct SORTIE_TOR                                                         /* Définition d'une sortie TOR */
-  { gchar etat;                                                               /* Etat de la sortie 0 ou 1 */
-    gint last_change;                                                /* Date du dernier changement d'etat */
-    gint changes;           /* Compte le nombre de changes afin de ne pas depasser une limite par seconde */
-  };
-
- struct MESSAGES
-  { gchar etat;
-    gint last_change;
-    gint changes;
-    gint next_repeat;
-  };
-
- struct I_MOTIF
-  { gint etat;
-    gint rouge;
-    gint vert;
-    gint bleu;
-    gint cligno;
-    gint last_change;
-    gint changes;
   };
 
  struct PARTAGE                                                        /* Structure des données partagées */
@@ -158,6 +137,7 @@
   };
 
 /*************************************** Définitions des prototypes ***************************************/
+ extern void Charger_config_bit_interne( void );                                      /* Dans Watchdogd.c */
  extern gint Activer_ecoute ( void );                                                    /* Dans ecoute.c */
 
  extern struct PARTAGE *_init ( void );                                                     /* Dans shm.c */
@@ -166,9 +146,7 @@
  extern void *w_malloc0( gint size, gchar *justification );
  extern void w_free( void *ptr, gchar *justification );
 
- extern void Gerer_jeton ( void );                                                      /* Dans process.c */
- extern void Gerer_manque_process ( void );
- extern void Stopper_fils ( gint flag );
+ extern void Stopper_fils ( gint flag );                                                /* Dans process.c */
  extern gboolean Demarrer_dls ( void );
  extern gboolean Demarrer_arch ( void );
  extern gboolean Demarrer_admin ( void );
@@ -176,8 +154,13 @@
  extern void Decharger_librairies ( void );
  extern gboolean Start_librairie ( struct LIBRAIRIE *lib );
  extern gboolean Stop_librairie ( struct LIBRAIRIE *lib );
- extern struct LIBRAIRIE *Charger_librairie_par_fichier ( gboolean fullname, gchar *nom_fichier );
+ extern struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *nom_fichier );
  extern gboolean Decharger_librairie_par_prompt ( gchar *nom_fichier );
+
+ extern void Gerer_arrive_Events ( void );                                       /* Dans distrib_Events.c */
+ extern void Abonner_distribution_events ( void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event) );
+ extern void Desabonner_distribution_events ( void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event) );
+ extern void Envoyer_Event_msrv( struct CMD_TYPE_MSRV_EVENT *event );
 
  extern void Gerer_arrive_MSGxxx_dls ( void );                                   /* Dans distrib_MSGxxx.c */
  extern void Gerer_histo_repeat ( void );

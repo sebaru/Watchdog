@@ -46,6 +46,8 @@
     gboolean retour;
     struct DB *db;
 
+    if (mnemo->id < 10000) return(FALSE);
+
     db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_mnemoDB: DB connexion failed" );
@@ -127,9 +129,9 @@
      } else
      { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
                    "UPDATE %s SET "             
-                   "libelle='%s',acronyme='%s',command_text='%s',num_plugin=%d,num=%d,tableau='%s' "
+                   "type=%d,libelle='%s',acronyme='%s',command_text='%s',num_plugin=%d,num=%d,tableau='%s' "
                    "WHERE id=%d",
-                   NOM_TABLE_MNEMO, libelle, acro, command_text, 
+                   NOM_TABLE_MNEMO, mnemo->type, libelle, acro, command_text, 
                    mnemo->num_plugin, mnemo->num, tableau, mnemo->id );
      }
     g_free(libelle);

@@ -219,39 +219,6 @@
     return( resultCRC );
   }
 /**********************************************************************************************************/
-/* Map_event_to_mnemo: Associe l'event en parametre aux mnemoniques D.L.S                                 */
-/* Entrée: l'evenement à traiter                                                                          */
-/* Sortie: le mnemo en question, ou NULL si non-trouvé (ou multi trouvailles)                             */
-/**********************************************************************************************************/
- static struct CMD_TYPE_MNEMO_BASE *Map_event_to_mnemo( gchar *event )
-  { struct CMD_TYPE_MNEMO_BASE *mnemo, *result_mnemo = NULL;
-    gint nbr_result;
-    struct DB *db;
-
-    if ( ! Recuperer_mnemo_baseDB_by_command_text ( &db, event, TRUE ) )
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
-                 "Map_event_to_mnemo: Error searching Database" );
-       return(FALSE);
-     }
-    nbr_result = db->nbr_result;
-          
-    if ( nbr_result == 0 )                                              /* Si pas d'enregistrement trouvé */
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
-                "Map_event_to_mnemo: No match found for %s", event );
-     }
-
-    while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-                "Map_event_to_mnemo: Match found for %s: Type %d Num %d - %s",
-                 event, mnemo->type, mnemo->num, mnemo->libelle );
-
-       if (nbr_result==1) result_mnemo = mnemo;                /* Si un seul enregistrement, c'est le bon */
-       else g_free(mnemo);      /* Si trop, on les libere tous dans la mesure ou l'on ne sait que choisir */
-     }
-
-    return (result_mnemo);                       /* A-t'on le seul et unique Mnemo associé à cet event ?? */
-  }
-/**********************************************************************************************************/
 /* Processer_trame_ERP1: traitement de la trame ERP1 recue par le controleur EnOcean                      */
 /* Entrée: la trame a recue                                                                               */
 /* Sortie: TRUE si processed                                                                              */
@@ -259,7 +226,7 @@
  static gboolean Processer_trame_ERP1( struct TRAME_ENOCEAN *trame )
   { struct CMD_TYPE_MNEMO_BASE *mnemo;
     gchar *action, *button = "unknown";
-    gchar event[64];
+    struct CMD_TYPE_MSRV_EVENT *event;
        
     if (trame->data[0] == 0xD2)
      { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
@@ -282,24 +249,41 @@
              case 1: button = "3/4-Buttons"; break;
            }
         }
-       g_snprintf( event, sizeof(event), "%s:%02X%02X%02X%02X:%s:%s",
+
+       event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc0( sizeof( struct CMD_TYPE_MSRV_EVENT ) );
+       if(!event)                                                         /* Envoi de l'evenement au MSRV */
+        { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
+                   "Processer_trame_ERP1: Malloc ERROR, Could not send Event to MSRV (%s)", event );
+          return(FALSE);
+        }
+       event->type = EVENT_TYPE_STRING;
+       g_snprintf( event->string, sizeof(event->string), "%s:%02X%02X%02X%02X:%s:%s",
                    NOM_THREAD, trame->data[2], trame->data[3], trame->data[4], trame->data[5],
                    button, action );
-       Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                 "Processer_trame_ERP1: New_Event : %s", event );
+       Envoyer_Event_msrv( event );
 
+       Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
+                 "Processer_trame_ERP1: New_Event : %s", event->string );
+       return(TRUE);
+     }
+    else if (trame->data[0] == 0xA5)
+     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
+                "Processer_trame_ERP1: Received RADIO_ERP1-4BS" );
+     }
+#ifdef bouh
        mnemo = Map_event_to_mnemo ( event );
        if (!mnemo)                                   /* Si pas trouvé, création d'un mnemo 'discovered' ? */
-        { struct CMD_TYPE_MNEMO_BASE mnemo;
+        { struct CMD_TYPE_MNEMO_FULL mnemo;
           memset( &mnemo, 0, sizeof(mnemo) );
-          mnemo.type       = MNEMO_ENTREE;
-          mnemo.num        = 9999;
-          mnemo.num_plugin = 1;
-          g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "EnOcean EVENT" );
-          g_snprintf( mnemo.libelle,  sizeof(mnemo.libelle),  "Event %s discovered by %s", event, NOM_THREAD );
-          g_snprintf( mnemo.command_text, sizeof(mnemo.command_text), "%s", event );
+          mnemo.mnemo_base.type       = MNEMO_ENTREE;
+          mnemo.mnemo_base.num        = 9999;
+          mnemo.mnemo_base.num_plugin = 1;
+          g_snprintf( mnemo.mnemo_base.acronyme, sizeof(mnemo.mnemo_base.acronyme), "EnOcean EVENT" );
+          g_snprintf( mnemo.mnemo_base.libelle,  sizeof(mnemo.mnemo_base.libelle),  "Event %s discovered by %s",
+                      event, NOM_THREAD );
+          g_snprintf( mnemo.mnemo_base.command_text, sizeof(mnemo.mnemo_base.command_text), "%s", event );
 
-          if ( Ajouter_mnemo_baseDB ( &mnemo ) < 0 )             /* Ajout auto dans la base de mnemonique */
+          if ( Ajouter_mnemo_fullDB ( &mnemo ) < 0 )             /* Ajout auto dans la base de mnemonique */
            { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
                       "Map_event_to_mnemo: Error adding new mnemo in DB for event %s", event );
            }
@@ -308,6 +292,9 @@
 
        switch ( mnemo->type )
         { case MNEMO_MONOSTABLE:                                      /* Positionnement du bit interne */
+               Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
+                        "Processer_trame_ERP1: Mise a un du bit M%03d", mnemo->num );
+               Envoyer_commande_dls(mnemo->num);
                break;
           case MNEMO_ENTREE:
                Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
@@ -324,10 +311,7 @@
        g_free(mnemo);                                                  /* Libération du mnémonique traité */
        return(TRUE);
      }
-    else if (trame->data[0] == 0xA5)
-     { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
-                "Processer_trame_ERP1: Received RADIO_ERP1-4BS" );
-     }
+#endif
     return(FALSE);
   }
 /**********************************************************************************************************/

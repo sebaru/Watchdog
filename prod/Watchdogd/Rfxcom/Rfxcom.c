@@ -115,11 +115,11 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(instance_id,type,sstype,id1,id2,id3,id4,housecode,unitcode,libelle,e_min,ea_min,a_min) "
+                "INSERT INTO %s(instance_id,type,sstype,id1,id2,id3,id4,housecode,unitcode,libelle,map_E,map_EA,map_A) "
                 " VALUES ('%s','%d','%d','%d','%d','%d','%d','%d','%d','%s','%d','%d','%d')",
                 NOM_TABLE_MODULE_RFXCOM, Config.instance_id, rfxcom->type, rfxcom->sous_type,
                 rfxcom->id1, rfxcom->id2, rfxcom->id3, rfxcom->id4, rfxcom->housecode, rfxcom->unitcode, 
-                libelle, rfxcom->e_min, rfxcom->ea_min, rfxcom->a_min
+                libelle, rfxcom->map_E, rfxcom->map_EA, rfxcom->map_A
               );
     g_free(libelle);
 
@@ -147,7 +147,7 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,type,sstype,id1,id2,id3,id4,housecode,unitcode,libelle,e_min,ea_min,a_min"
+                "SELECT id,type,sstype,id1,id2,id3,id4,housecode,unitcode,libelle,map_E,map_EA,map_A"
                 " FROM %s WHERE instance_id = '%s' ORDER BY type,sstype",
                 NOM_TABLE_MODULE_RFXCOM, Config.instance_id );/* Ne selectionne que le instance_id spécifique */
 
@@ -181,9 +181,9 @@
        rfxcom->id4               = atoi(db->row[6]);
        rfxcom->housecode         = atoi(db->row[7]);
        rfxcom->unitcode          = atoi(db->row[8]);
-       rfxcom->e_min             = atoi(db->row[10]);
-       rfxcom->ea_min            = atoi(db->row[11]);
-       rfxcom->a_min             = atoi(db->row[12]);
+       rfxcom->map_E             = atoi(db->row[10]);
+       rfxcom->map_EA            = atoi(db->row[11]);
+       rfxcom->map_A             = atoi(db->row[12]);
      }
     return(rfxcom);
   }
@@ -215,12 +215,12 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "type='%d',sstype='%d',id1='%d',id2='%d',id3='%d',id4='%d',housecode='%d',unitcode='%d',"
-                "libelle='%s',e_min='%d',ea_min='%d',a_min='%d' "
+                "libelle='%s',map_E='%d',map_EA='%d',map_A='%d' "
                 " WHERE id=%d",
                 NOM_TABLE_MODULE_RFXCOM,
                 rfxcom->type, rfxcom->sous_type,
                 rfxcom->id1, rfxcom->id2, rfxcom->id3, rfxcom->id4, rfxcom->housecode, rfxcom->unitcode, 
-                libelle, rfxcom->e_min, rfxcom->ea_min, rfxcom->a_min,
+                libelle, rfxcom->map_E, rfxcom->map_EA, rfxcom->map_A,
                 rfxcom->id );
     g_free(libelle);
 
@@ -401,7 +401,7 @@
      { module = (struct MODULE_RFXCOM *)liste_modules->data;
 
        if (module->rfxcom.type == 0x11 && module->rfxcom.sous_type == 0x00 && 
-           module->rfxcom.a_min == num_a
+           module->rfxcom.map_A == num_a
           )
         { gint cpt;
           Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
@@ -544,11 +544,11 @@
        module = Chercher_rfxcom( trame->type, trame->sous_type, TRUE, trame->data[0], TRUE, trame->data[1],
                                  FALSE, 0, FALSE, 0, FALSE, 0, FALSE, 0 );
        if (module)
-        { SEA( module->rfxcom.ea_min,     (trame->data[2] & 0x80 ? -1.0 : 1.0)* ( ((trame->data[2] & 0x7F)<<8) + trame->data[3])
+        { SEA( module->rfxcom.map_EA,     (trame->data[2] & 0x80 ? -1.0 : 1.0)* ( ((trame->data[2] & 0x7F)<<8) + trame->data[3])
                                            / 10.0 );                                              /* Temp */
-          SEA( module->rfxcom.ea_min + 1,  trame->data[4] );                                  /* Humidity */
-          SEA( module->rfxcom.ea_min + 2,  trame->data[6] >> 4);                               /* Battery */
-          SEA( module->rfxcom.ea_min + 3,  trame->data[6] & 0x0F );                               /* RSSI */
+          SEA( module->rfxcom.map_EA + 1,  trame->data[4] );                                  /* Humidity */
+          SEA( module->rfxcom.map_EA + 2,  trame->data[6] >> 4);                               /* Battery */
+          SEA( module->rfxcom.map_EA + 3,  trame->data[6] & 0x0F );                               /* RSSI */
 
           module->date_last_view = Partage->top;
         }
@@ -568,9 +568,9 @@
        module = Chercher_rfxcom( trame->type, trame->sous_type, TRUE, trame->data[0] & 0x03, TRUE, trame->data[1],
                                  TRUE, trame->data[2], TRUE, trame->data[3], FALSE, 0, TRUE, trame->data[4] );
        if (module)
-        { Envoyer_entree_dls( module->rfxcom.e_min, trame->data[5] );
+        { Envoyer_entree_dls( module->rfxcom.map_E, trame->data[5] );
           Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
-                    "Processer_trame : Module found (%s), Setting E%03d=%d", module->rfxcom.libelle, module->rfxcom.e_min, trame->data[5] );
+                    "Processer_trame : Module found (%s), Setting E%03d=%d", module->rfxcom.libelle, module->rfxcom.map_E, trame->data[5] );
           module->date_last_view = Partage->top;
         }
        else Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,

@@ -416,15 +416,18 @@
     else { sms.remote.type = GN_GSM_NUMBER_Unknown; }
 
     if (!sms.smsc.number[0])                                                      /* Récupération du SMSC */
-     { data.message_center = g_malloc0(sizeof(gn_sms_message_center));
-       data.message_center->id = 1;
-       if (gn_sm_functions(GN_OP_GetSMSCenter, &data, state) == GN_ERR_NONE)
-        { strcpy(sms.smsc.number, data.message_center->smsc.number);
-          sms.smsc.type = data.message_center->smsc.type;
-        }
-       else
-        { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING, "Envoi_sms_gsm: Pb avec le SMSC" ); }
-       g_free(data.message_center);
+     { data.message_center = g_try_malloc0(sizeof(gn_sms_message_center));
+       if (data.message_center)
+       { data.message_center->id = 1;
+          if (gn_sm_functions(GN_OP_GetSMSCenter, &data, state) == GN_ERR_NONE)
+           { strcpy(sms.smsc.number, data.message_center->smsc.number);
+             sms.smsc.type = data.message_center->smsc.type;
+           }
+          else
+           { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING, "Envoi_sms_gsm: Pb avec le SMSC" ); }
+          g_free(data.message_center);
+       }
+      else { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_ERR, "Envoi_sms_gsm: Memory Alloc Error" ); }
      }
 
     if (!sms.smsc.type) sms.smsc.type = GN_GSM_NUMBER_Unknown;

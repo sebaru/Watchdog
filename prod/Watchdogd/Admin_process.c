@@ -153,7 +153,7 @@
      { gchar thread[128], chaine[128];
        struct LIBRAIRIE *lib;
        sscanf ( ligne, "%s %s", commande, thread );
-       if ( (lib = Charger_librairie_par_fichier( FALSE, thread )) )/* Chargement de la librairie dynamique */
+       if ( (lib = Charger_librairie_par_prompt( thread )) )      /* Chargement de la librairie dynamique */
         { g_snprintf( chaine, sizeof(chaine), " Library %s loaded\n", thread );
           if (Start_librairie(lib))
            { g_snprintf( chaine, sizeof(chaine), " Library %s started\n", thread ); }
@@ -179,12 +179,14 @@
        g_snprintf( chaine, sizeof(chaine), " -- Liste des process\n" );
        Admin_write ( connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Built-in D.L.S    -> ------------- running = %s, TID = %p\n",
+       g_snprintf( chaine, sizeof(chaine),
+                  " Built-in D.L.S          -> ------------- running = %s, TID = %p\n",
                    (Partage->com_dls.Thread_run ? "YES" : " NO"), (void *)Partage->com_dls.TID
                  );
        Admin_write ( connexion, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " Built-in ARCHIVE  -> ------------- running = %s, TID = %p\n",
+       g_snprintf( chaine, sizeof(chaine),
+                  " Built-in ARCHIVE        -> ------------- running = %s, TID = %p\n",
                    (Partage->com_arch.Thread_run ? "YES" : " NO"), (void *)Partage->com_arch.TID
                  );
        Admin_write ( connexion, chaine );

@@ -45,7 +45,7 @@
     gboolean retour;
     struct DB *db;
 
-    if (syn->id == 1) return(TRUE);                                 /* Le synoptique 1 est indestructible */
+    if (syn->id == 1) return(FALSE);                                /* Le synoptique 1 est indestructible */
 
     db = Init_DB_SQL();       
     if (!db)

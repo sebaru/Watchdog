@@ -106,19 +106,19 @@ CREATE TABLE IF NOT EXISTS `dls_cpth` (
 -- Structure de la table `dls_cpt_imp`
 --
 
-CREATE TABLE IF NOT EXISTS `dls_cpt_imp` (
+CREATE TABLE IF NOT EXISTS `mnemos_CptImp` (
   `id_mnemo` int(11) NOT NULL,
   `val` float NOT NULL,
   `type_ci` int(11) NOT NULL,
   `multi` float NOT NULL DEFAULT '1',
-  `unite` text COLLATE utf8_unicode_ci NOT NULL,
+  `unite_string` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id_mnemo`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `eana`
+-- Structure de la table `mnemos_AnalogInput`
 --
 
 CREATE TABLE IF NOT EXISTS `mnemos_AnalogInput` (
@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AnalogInput` (
   PRIMARY KEY (`id_mnemo`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-INSERT INTO `eana` (`id_mnemo`, `type`, `min`, `max`, `unite`) VALUES
+INSERT INTO `mnemos_AnalogInput` (`id_mnemo`, `type`, `min`, `max`, `unite`) VALUES
 (10, 0, 0, 100, 'ms'),
 (11, 0, 0, 100, 't/s'),
 (12, 0, 0, 100, 'bit/s'),
@@ -587,7 +587,30 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `num_plugin`, `acronyme`, `libelle`, 
 (21, 1,   5, 1, 'AUDIO_END', 'Fin d''emission de message Audio.', ''),
 (22, 1,   6, 1, 'AUDIO_INHIB', 'Inhibition des messages vocaux (hors alerte).', ''),
 (23, 3,9999, 1, 'EVENT_NONE_TOR', 'Used for detected Event with no mapping yet.', ''),
-(24, 5,9999, 1, 'EVENT_NONE_ANA', 'Used for detected Event with no mapping yet.', '');
+(24, 5,9999, 1, 'EVENT_NONE_ANA', 'Used for detected Event with no mapping yet.', ''),
+(25, 5, 122, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(26, 5, 121, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(27, 5, 120, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(28, 5, 119, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(29, 5, 118, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(30, 5, 117, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(31, 5, 116, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(32, 5, 115, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(33, 5, 114, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(34, 5, 113, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(35, 5, 112, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(36, 5, 111, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(37, 5, 110, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(38, 5, 109, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(39, 5, 108, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(40, 5, 107, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(41, 5, 106, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(42, 5, 105, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(43, 5, 104, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(44, 5, 103, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(45, 5, 102, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(46, 5, 101, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(47, 5, 100, 1, 'SYS_RESERVED', 'Reserved for internal use', '');
 
 -- --------------------------------------------------------
 
@@ -603,10 +626,10 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `watchdog` int(11) NOT NULL,
   `bit` int(11) NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `min_e_tor` int(11) NOT NULL,
-  `min_e_ana` int(11) NOT NULL,
-  `min_s_tor` int(11) NOT NULL,
-  `min_s_ana` int(11) NOT NULL,  PRIMARY KEY (`id`),
+  `map_E` int(11) NOT NULL,
+  `map_EA` int(11) NOT NULL,
+  `map_A` int(11) NOT NULL,
+  `map_AA` int(11) NOT NULL,  PRIMARY KEY (`id`),
   UNIQUE KEY `ip` (`ip`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
@@ -654,10 +677,10 @@ INSERT INTO `msgs` (`id`, `num`, `libelle`, `libelle_audio`, `libelle_sms`, `typ
 -- --------------------------------------------------------
 
 --
--- Structure de la table `onduleurs`
+-- Structure de la table `ups`
 --
 
-CREATE TABLE IF NOT EXISTS `onduleurs` (
+CREATE TABLE IF NOT EXISTS `ups` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `instance_id` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `enable` tinyint(1) NOT NULL,
@@ -666,9 +689,9 @@ CREATE TABLE IF NOT EXISTS `onduleurs` (
   `username` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `password` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `bit_comm` int(11) NOT NULL,
-  `ea_min` int(11) NOT NULL,
-  `e_min` int(11) NOT NULL,
-  `a_min` int(11) NOT NULL,
+  `map_EA` int(11) NOT NULL,
+  `map_E` int(11) NOT NULL,
+  `map_A` int(11) NOT NULL,
 
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
@@ -703,7 +726,7 @@ CREATE TABLE IF NOT EXISTS `rs485` (
 -- Structure de la table `tempo`
 --
 
-CREATE TABLE IF NOT EXISTS `tempo` (
+CREATE TABLE IF NOT EXISTS `mnemos_Tempo` (
   `id_mnemo` int(11) NOT NULL,
   `delai_on` int(11) NOT NULL DEFAULT '0',
   `delai_off` tinyint(1) NOT NULL DEFAULT '0',
@@ -729,10 +752,9 @@ CREATE TABLE IF NOT EXISTS `rfxcom` (
   `id4` int(11) NOT NULL DEFAULT '0',
   `housecode` int(11) NOT NULL DEFAULT '0',
   `unitcode` int(11) NOT NULL DEFAULT '0',
-  `e_min` int(11) NOT NULL DEFAULT '-1',
-  `ea_min` int(11) NOT NULL DEFAULT '-1',
-  `sa_min` int(11) NOT NULL DEFAULT '-1',
-  `a_min` int(11) NOT NULL DEFAULT '-1',
+  `map_E` int(11) NOT NULL DEFAULT '-1',
+  `map_EA` int(11) NOT NULL DEFAULT '-1',
+  `map_A` int(11) NOT NULL DEFAULT '-1',
   `libelle` text NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
@@ -751,6 +773,8 @@ CREATE TABLE IF NOT EXISTS `syns` (
   `access_groupe` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+INSERT INTO `syns` (`id`, `libelle`, `groupe`, `page`, `access_groupe` ) VALUES
+(1, 'Accueil', 'Defaut Groupe', 'Defaut Page', 0);
 
 -- --------------------------------------------------------
 
@@ -895,13 +919,14 @@ CREATE TABLE IF NOT EXISTS `users` (
   `imsg_enable` tinyint(1) NOT NULL DEFAULT '0',
   `imsg_jabberid` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `imsg_allow_cde` tinyint(1) NOT NULL DEFAULT '0',
-  `ssrv_bit_presence` int(11) NOT NULL, DEFAULT '0',
+  `imsg_available` tinyint(1) NOT NULL DEFAULT '0',
+  `ssrv_bit_presence` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `users` (`id`, `name`, `mustchangepwd`, `cansetpwd`, `salt`, `hash`, `comment`, `login_failed`, `enable`, `date_create`, `enable_expire`, `date_expire`, `date_modif`) VALUES
-(0, 'root', 1, 1, 'DAABBD177CC38489DD70B61010C336439798F53F814920510C2A93A5BB4A64AA6A5E2F70CC85EBEF6E1D2E3F3E4592FAC0963068EF81E2B37549058A628DA943', 'C420585111C6F0E833D822E1FE562053E7722E1457186EE93C0F5590F4469CC089FFC6A1DC8878A9F54EDB5802F1D6B4111106D11ABFF1CFFB03714C7F52D393', 'Utilisateur Root', 0, 1, 0, 0, 0, 0),
+(0, 'root', 1, 1, '9311D076CDB709623503B3D3461EA8E9DFE842076C8A6B348AA78215BF7B7B797ABBE33F29CDF86B88F1B2D6071D4916ACAD1C997B832AE774D3AB4186077386', '529612B992460427C7C6FF21F5AC6965C36A735B8AB813FC3FF083AA3D2D19190AB1A700BEE2ADFA9D797F301C2E3D491D12AA04C69C7652CE875721E1E6F1B4', 'Utilisateur Root', 0, 1, 0, 0, 0, 0),
 (1, 'guest', 0, 0, '0FE3B94BCC1E52AC4BEE0DE31D6306890854EAFC77F855FBD9D17BB0D7256A5E23ED8D58FA85E345FE71D046211745B6B50382CD939DC7FDAA2FBE6B7D586069', '6E14D7124DF5FC4C018D845F351553F751265C37834455B96EE3014BCA7CFE53B87CAD8FFA739B39C4A5BCD61E267560EAA7F2AEFFAB3C457B1E0F6BE5BCF8C4', 'Utilisateur Guest', 0, 1, 0, 0, 0, 0);
 
 

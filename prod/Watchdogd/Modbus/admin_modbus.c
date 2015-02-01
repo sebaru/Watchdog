@@ -87,17 +87,17 @@
     g_snprintf( chaine, sizeof(chaine),
                 " MODBUS[%02d] ------> %s - %s\n"
                 "  | - enable = %d, started = %d (bit B%04d=%d), watchdog = %03d, IP = %s\n"
-                "  | - %03d Digital Input,  First = E%03d, %03d Analog  Input,  First = EA%03d\n"
-                "  | - %03d Digital Output, First = A%03d, %03d Analog  Output, First = AA%03d\n"
-                "  | - transaction_id = %06d, nbr_deconnect = %02d, last_reponse=%03ds ago, date_next_eana=in %03ds\n"
+                "  | - %03d Digital Input,  map_E = E%03d, %03d Analog  Input,  map_EA = EA%03d\n"
+                "  | - %03d Digital Output, map_A = A%03d, %03d Analog  Output, map_AA = AA%03d\n"
+                "  | - transaction_id = %06d, nbr_deconnect = %02d, last_reponse = %03ds ago, date_next_eana = in %03ds\n"
                 "  -\n",
                 module->modbus.id, module->modbus.libelle,  Modbus_mode_to_string(module),
                 module->modbus.enable, module->started, module->modbus.bit, B(module->modbus.bit),
                 module->modbus.watchdog, module->modbus.ip,
-                module->nbr_entree_tor, module->modbus.min_e_tor, 
-                module->nbr_entree_ana, module->modbus.min_e_ana, 
-                module->nbr_sortie_tor, module->modbus.min_s_tor, 
-                module->nbr_sortie_ana, module->modbus.min_s_ana, 
+                module->nbr_entree_tor, module->modbus.map_E, 
+                module->nbr_entree_ana, module->modbus.map_EA, 
+                module->nbr_sortie_tor, module->modbus.map_A, 
+                module->nbr_sortie_ana, module->modbus.map_AA, 
                 module->transaction_id, module->nbr_deconnect,
                (Partage->top - module->date_last_reponse)/10,                   
                (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1)
@@ -133,7 +133,6 @@
 /**********************************************************************************************************/
  static void Admin_modbus_show ( struct CONNEXION *connexion, gint num )
   { GSList *liste_modules;
-    gchar chaine[512];
 
     pthread_mutex_lock( &Cfg_modbus.lib->synchro );
     liste_modules = Cfg_modbus.Modules_MODBUS;
@@ -178,6 +177,75 @@
     Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
+/* Admin_modbus_set: Change un parametre dans la DB modbus                                                */
+/* Entrée: La connexion et la ligne de commande (champ valeur)                                            */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ static void Admin_modbus_set ( struct CONNEXION *connexion, gchar *ligne )
+  { gchar id_char[16], param[32], valeur_char[64], chaine[128];
+    struct MODULE_MODBUS *module = NULL;
+    GSList *liste_modules;
+    guint id, valeur;
+    gint retour;
+
+    if ( ! strcmp ( ligne, "list" ) )
+     { Admin_write ( connexion, " | Parameter can be:\n" );
+       Admin_write ( connexion, " | - enable, bit, watchdog, libelle,\n" );
+       Admin_write ( connexion, " | - map_E, map_EA, map_A, map_AA\n" );
+       Admin_write ( connexion, " -\n" );
+       return;
+     }
+
+    sscanf ( ligne, "%s %s %[^\n]", id_char, param, valeur_char );
+    id     = atoi ( id_char     );
+    valeur = atoi ( valeur_char );
+
+    pthread_mutex_lock( &Cfg_modbus.lib->synchro );                     /* Recherche du module en mémoire */
+    liste_modules = Cfg_modbus.Modules_MODBUS;
+    while ( liste_modules )
+     { module = (struct MODULE_MODBUS *)liste_modules->data;
+       if (module->modbus.id == id) break;
+       liste_modules = liste_modules->next;                                  /* Passage au module suivant */
+     }
+    pthread_mutex_unlock( &Cfg_modbus.lib->synchro );
+
+    if (!module)                                                                         /* Si non trouvé */
+     { Admin_write( connexion, " Module not found\n");
+       return;
+     }
+
+    if ( ! strcmp( param, "enable" ) )
+     { module->modbus.enable = (valeur ? TRUE : FALSE); }
+    else if ( ! strcmp( param, "bit" ) )
+     { module->modbus.bit = valeur; }
+    else if ( ! strcmp( param, "watchdog" ) )
+     { module->modbus.watchdog = valeur; }
+    else if ( ! strcmp( param, "map_E" ) )
+     { module->modbus.map_E = valeur; }
+    else if ( ! strcmp( param, "map_EA" ) )
+     { module->modbus.map_EA = valeur; }
+    else if ( ! strcmp( param, "map_A" ) )
+     { module->modbus.map_A = valeur; }
+    else if ( ! strcmp( param, "map_AA" ) )
+     { module->modbus.map_AA = valeur; }
+    else if ( ! strcmp( param, "libelle" ) )
+     { g_snprintf( module->modbus.libelle, sizeof(module->modbus.libelle), "%s", valeur_char ); }
+    else if ( ! strcmp( param, "ip" ) )
+     { g_snprintf( module->modbus.ip, sizeof(module->modbus.ip), "%s", valeur_char ); }
+    else
+     { g_snprintf( chaine, sizeof(chaine),
+                 " Parameter %s not known for MODBUS id %s ('modbus set list' can help)\n", param, id_char );
+       Admin_write ( connexion, chaine );
+       return;
+     }
+
+    retour = Modifier_modbusDB ( &module->modbus );
+    if (retour)
+     { Admin_write ( connexion, " ERROR : MODBUS module NOT set\n" ); }
+    else
+     { Admin_write ( connexion, " MODBUS module parameter set\n" ); }
+  }
+/**********************************************************************************************************/
 /* Admin_command : Fonction principale de traitement des commandes du thread                              */
 /* Entrée: La connexion et la ligne de commande a parser                                                  */
 /* Sortie: Néant                                                                                          */
@@ -212,11 +280,11 @@
      { struct MODBUSDB modbus;
        gint retour;
 
-       sscanf ( ligne, "%s %d,%d,%[^,],%d,%d,%d,%d,%[^\n]", commande,/* Découpage de la ligne de commande */
-                &modbus.enable, &modbus.bit, modbus.ip,
-                &modbus.min_e_tor, &modbus.min_e_ana, &modbus.min_s_tor, &modbus.min_s_ana,
-                modbus.libelle
+       memset( &modbus, 0, sizeof(struct MODBUSDB) );
+       sscanf ( ligne, "%s %s %s", commande,                         /* Découpage de la ligne de commande */
+                modbus.ip, modbus.libelle
               );
+       modbus.watchdog = 40;
        retour = Ajouter_modbusDB ( &modbus );
        if (retour == -1)
         { Admin_write ( connexion, "Error, MODBUS not added\n" ); }
@@ -227,21 +295,7 @@
         }
      }
     else if ( ! strcmp ( commande, "set" ) )
-     { struct MODBUSDB modbus;
-       gint retour;
-       sscanf ( ligne, "%s %d,%d,%d,%[^,],%d,%d,%d,%d,%[^\n]", commande,/* Découpage de la ligne de commande */
-                &modbus.id, &modbus.enable, &modbus.bit, modbus.ip,
-                &modbus.min_e_tor, &modbus.min_e_ana, &modbus.min_s_tor, &modbus.min_s_ana,
-                modbus.libelle
-              );
-       retour = Modifier_modbusDB ( &modbus );
-       if (retour == FALSE)
-        { Admin_write ( connexion, "Error, MODBUS not setd\n" ); }
-       else
-        { gchar chaine[80];
-          g_snprintf( chaine, sizeof(chaine), " MODBUS %s setd\n", modbus.ip );
-          Admin_write ( connexion, chaine );
-        }
+     { Admin_modbus_set ( connexion, ligne+4 );
      }
     else if ( ! strcmp ( commande, "del" ) )
      { struct MODBUSDB modbus;
@@ -267,17 +321,16 @@
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'MODBUS'\n" );
-       Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
-       Admin_write ( connexion, "  add enable,bit,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
-       Admin_write ( connexion, "                                         - Ajoute un module modbus\n" );
-       Admin_write ( connexion, "  set id,enable,bit,ip,min_e_tor,min_e_ana,min_s_tor,min_s_ana,libelle\n" );
-       Admin_write ( connexion, "                                         - Modifie le module id\n" );
-       Admin_write ( connexion, "  del id                                 - Supprime le module id\n" );
-       Admin_write ( connexion, "  start id                               - Demarre le module id\n" );
-       Admin_write ( connexion, "  stop id                                - Arrete le module id\n" );
-       Admin_write ( connexion, "  show id                                - Affiche les infirmations du modbus ID\n" );
-       Admin_write ( connexion, "  list                                   - Liste les modules MODBUS\n" );
-       Admin_write ( connexion, "  reload                                 - Recharge la configuration\n" );
+       Admin_write ( connexion, "  dbcfg ...            - Get/Set Database Parameters\n" );
+       Admin_write ( connexion, "  add $ip $libelle     - Ajoute un module modbus\n" );
+       Admin_write ( connexion, "  set $id $champ $val  - Set $val to $champ for module $id\n" );
+       Admin_write ( connexion, "  set list             - List parameter that can be set\n" );
+       Admin_write ( connexion, "  del $id              - Erase module $id\n" );
+       Admin_write ( connexion, "  start $id            - Demarre le module $id\n" );
+       Admin_write ( connexion, "  stop $id             - Arrete le module $id\n" );
+       Admin_write ( connexion, "  show $id             - Affiche les informations du modbus $id\n" );
+       Admin_write ( connexion, "  list                 - Liste les modules MODBUS\n" );
+       Admin_write ( connexion, "  reload               - Recharge la configuration\n" );
      }
     else
      { gchar chaine[128];

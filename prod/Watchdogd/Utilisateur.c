@@ -63,7 +63,7 @@
     EVP_MD_CTX *mdctx;
     guint md_len, cpt;
 
-    result = (gchar *)g_malloc0( 2*EVP_MAX_MD_SIZE + 1 );
+    result = (gchar *)g_try_malloc0( 2*EVP_MAX_MD_SIZE + 1 );
     if (!result) return(NULL);
 
     mdctx = EVP_MD_CTX_create();                                        /* Creation du HASH correspondant */

@@ -112,8 +112,8 @@
     pthread_mutex_unlock( &client->mutex_struct_used );
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "Unref_client: struct_used = %d for %s(SSRV%06d) ",
-              client->struct_used, client->machine, client->ssrv_id );
+             "Unref_client: struct_used = %d for %s ",
+              client->struct_used, client->machine );
 
     if (client->struct_used == 0)
      { pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
@@ -121,8 +121,8 @@
        pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
     
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Unref_client: struct_used = 0. closing  %s(SSRV%06d)... ",
-                 client->machine, client->ssrv_id );
+                "Unref_client: struct_used = 0. closing %s. ",
+                 client->machine );
        Fermer_connexion( client->connexion );
        pthread_mutex_destroy( &client->mutex_struct_used );
        if (client->util)            { g_free( client->util ); }
@@ -421,9 +421,10 @@
 
        pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
        Cfg_ssrv.Clients = g_slist_prepend( Cfg_ssrv.Clients, client );
-       pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-                "Accueillir_un_client: Connexion accepted (id=%d) from %s", id, client->machine );
+                "Accueillir_un_client: Connexion accepted (id=%d) from %s - (%03d clients managed)",
+                 id, client->machine, g_slist_length(Cfg_ssrv.Clients) );
+       pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
        Client_mode( client, ENVOI_INTERNAL );
        return(client);
      }

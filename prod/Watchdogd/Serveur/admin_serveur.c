@@ -78,7 +78,7 @@
                    " | - X509 issuer name = %s\n", Nom_certif_signataire ( Cfg_ssrv.ssrv_certif ) );
        Admin_write( connexion, chaine );
      }
-    Admin_write( connexion, " |-\n" );
+    Admin_write( connexion, " -\n" );
   }
 /**********************************************************************************************************/
 /* Admin_command : Appeller par le thread admin pour traiter une commande                                 */
@@ -100,10 +100,12 @@
        pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
        liste = Cfg_ssrv.Clients;
        while ( liste )                              /* Parcours de la liste des ssrv (et donc de clients) */
-        { client = (struct CLIENT *)liste->data;
-          g_snprintf( chaine, sizeof(chaine), " | SSRV%06d - v%s - mode %d defaut %d date %s - %s@%s\n",
+        { gchar date[32];
+          client = (struct CLIENT *)liste->data;
+          strftime( date, sizeof(date), "%F %T", localtime(&client->date_connexion) );
+          g_snprintf( chaine, sizeof(chaine), " | SSRV%06d - v%s - mode %02d defaut %02d date %s - %s@%s\n",
                           client->ssrv_id, client->ident.version,
-                          client->mode, client->defaut, ctime(&client->date_connexion),
+                          client->mode, client->defaut, date,
                          (client->util ? client->util->nom : "unknown"), client->machine
                     );
           Admin_write ( connexion, chaine );

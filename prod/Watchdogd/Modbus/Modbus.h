@@ -99,10 +99,10 @@
     guint bit;                                       /* Bit interne B d'etat communication avec le module */
     gchar ip[32];                                                         /* Adresses IP du module MODBUS */
     gchar libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                             /* Libelle de la modbus */
-    guint min_e_tor;
-    guint min_e_ana;
-    guint min_s_tor;
-    guint min_s_ana;
+    guint map_E;
+    guint map_EA;
+    guint map_A;
+    guint map_AA;
   };
 
  struct MODULE_MODBUS

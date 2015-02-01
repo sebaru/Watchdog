@@ -57,11 +57,10 @@
               "   |               -> imsg_enable       = %d\n"
               "   |               -> imsg_jabberid     = %s\n"
               "   |               -> imsg_allow_cde    = %d\n"
-              "   |               -> imsg_bit_presence = %d\n"
               "   |               -> imsg_availability = %d\n"
               "   |----------------> %s\n",
                 imsg->user_id, imsg->user_name, imsg->user_enable, imsg->user_imsg_enable, imsg->user_jabberid,
-                imsg->user_allow_cde, imsg->user_bit_presence, imsg->user_available, imsg->user_comment
+                imsg->user_allow_cde, imsg->user_available, imsg->user_comment
               );
 
     Admin_write ( connexion, chaine );

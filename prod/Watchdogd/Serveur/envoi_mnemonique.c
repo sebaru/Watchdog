@@ -62,41 +62,78 @@
 /* Entrée: le client demandeur et le mnemo en question                                                    */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
- void Proto_valider_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_FULL *rezo_mnemonique )
+ static void Proto_ajouter_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_FULL *rezo_mnemonique,
+                                               gboolean ajout )
   { struct CMD_TYPE_MNEMO_BASE *result;
     gboolean retour = FALSE;
+    gint id = 0;
 
-    retour = Modifier_mnemo_fullDB ( rezo_mnemonique );
+    if (ajout)
+     { id = Ajouter_mnemo_fullDB ( rezo_mnemonique );
+       if (id == -1)
+        { struct CMD_GTK_MESSAGE erreur;
+          g_snprintf( erreur.message, sizeof(erreur.message),
+                      "Unable to add mnemo %s", rezo_mnemonique->mnemo_base.libelle);
+          Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                        (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+          return;
+        }
+     }
+    else
+     { id = rezo_mnemonique->mnemo_base.id;
+       retour = Modifier_mnemo_fullDB ( rezo_mnemonique );
+       if (retour==FALSE)
+        { struct CMD_GTK_MESSAGE erreur;
+          g_snprintf( erreur.message, sizeof(erreur.message),
+                      "Unable to edit mnemo %s", rezo_mnemonique->mnemo_base.libelle);
+          Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                        (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+          return;
+        }
+     }
 
-    if (retour==FALSE)
+    result = Rechercher_mnemo_baseDB( id );
+    if (!result) 
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to edit mnemo %s", rezo_mnemonique->mnemo_base.libelle);
+                  "Unable to locate mnemo %s", rezo_mnemonique->mnemo_base.libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+                    (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
+       return;
      }
-    else { result = Rechercher_mnemo_baseDB( rezo_mnemonique->mnemo_base.id );
-           if (result) 
-            { Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_VALIDE_EDIT_MNEMONIQUE_OK,
-                            (gchar *)result, sizeof(struct CMD_TYPE_MNEMO_BASE) );
-              switch( result->type )
-               { case MNEMO_ENTREE     :  Charger_digitalInput(); break;   /* Update de la running config */
-                 case MNEMO_ENTREE_ANA :  Charger_analogInput (); break;   /* Update de la running config */
-                 case MNEMO_CPT_IMP    :  Charger_cpt_imp ();     break;   /* Update de la running config */
-                 case MNEMO_CPTH       :  Charger_cpth ();        break;   /* Update de la running config */
-                 case MNEMO_TEMPO      :  Charger_tempo ();       break;   /* Update de la running config */
-               }
-              g_free(result);
-            }
-           else
-            { struct CMD_GTK_MESSAGE erreur;
-              g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate mnemo %s", rezo_mnemonique->mnemo_base.libelle);
-              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-            }
-         }
+
+    if (ajout)
+     { Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_ADD_MNEMONIQUE_OK,
+                    (gchar *)result, sizeof(struct CMD_TYPE_MNEMO_BASE) );
+     }
+    else
+     { Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_VALIDE_EDIT_MNEMONIQUE_OK,
+                    (gchar *)result, sizeof(struct CMD_TYPE_MNEMO_BASE) );
+     }
+
+    switch( result->type )
+     { case MNEMO_ENTREE     :  Charger_digitalInput(); break;             /* Update de la running config */
+       case MNEMO_ENTREE_ANA :  Charger_analogInput (); break;             /* Update de la running config */
+       case MNEMO_CPT_IMP    :  Charger_cpt_imp ();     break;             /* Update de la running config */
+       case MNEMO_CPTH       :  Charger_cpth ();        break;             /* Update de la running config */
+       case MNEMO_TEMPO      :  Charger_tempo ();       break;             /* Update de la running config */
+     }
+    g_free(result);
   }
+/**********************************************************************************************************/
+/* Proto_valider_editer_mnemonique: Le client valide l'edition d'un mnemo                                 */
+/* Entrée: le client demandeur et le mnemo en question                                                    */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_valider_editer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_FULL *rezo_mnemonique )
+  { Proto_ajouter_editer_mnemonique ( client, rezo_mnemonique, FALSE ); }
+/**********************************************************************************************************/
+/* Proto_ajouter_mnemonique: Un client nous demande d'ajouter un mnemo Watchdog                           */
+/* Entrée: le mnemo à créer                                                                               */
+/* Sortie: Niet                                                                                           */
+/**********************************************************************************************************/
+ void Proto_ajouter_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_FULL *rezo_mnemonique )
+  { Proto_ajouter_editer_mnemonique ( client, rezo_mnemonique, TRUE ); }
 /**********************************************************************************************************/
 /* Proto_effacer_mnemonique: Retrait du mnemo en parametre                                                */
 /* Entrée: le client demandeur et le mnemo en question                                                    */
@@ -118,38 +155,6 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-  }
-/**********************************************************************************************************/
-/* Proto_ajouter_mnemonique: Un client nous demande d'ajouter un mnemo Watchdog                           */
-/* Entrée: le mnemo à créer                                                                               */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- void Proto_ajouter_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_FULL *rezo_mnemonique )
-  { struct CMD_TYPE_MNEMO_BASE *result;
-    gint id;
-
-    id = Ajouter_mnemo_fullDB ( rezo_mnemonique );
-    if (id == -1)
-     { struct CMD_GTK_MESSAGE erreur;
-       g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to add mnemo %s", rezo_mnemonique->mnemo_base.libelle);
-       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-     }
-    else { result = Rechercher_mnemo_baseDB( id );
-           if (!result) 
-            { struct CMD_GTK_MESSAGE erreur;
-              g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate mnemo %s", rezo_mnemonique->mnemo_base.libelle);
-              Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                            (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-            }
-           else
-            { Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_ADD_MNEMONIQUE_OK,
-                            (gchar *)result, sizeof(struct CMD_TYPE_MNEMO_BASE) );
-              g_free(result);
-            }
-         }
   }
 /**********************************************************************************************************/
 /* Proto_envoyer_type_num_mnemonique: Recherche et envoi du mnemonique de type et num en parametre        */

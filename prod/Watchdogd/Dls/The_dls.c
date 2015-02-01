@@ -67,10 +67,13 @@
   { if ( (E(num) && !etat) || (!E(num) && etat) )
      { Ajouter_arch( MNEMO_ENTREE, num, 1.0*E(num) );   /* Archivage etat n-1 pour les courbes historique */
        Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat );                        /* Archivage de l'etat courant */
-       pthread_mutex_lock( &Partage->com_msrv.synchro );  /* Ajout dans la liste de E a envoyer au master */
-       Partage->com_msrv.liste_e = g_slist_prepend( Partage->com_msrv.liste_e,
-                                                    GINT_TO_POINTER(num) );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       if ( ! (etat == 0 && Partage->e[num].confDB.furtif == TRUE ) )         /* On informe du chgmt MSRV */
+        {                                 /* Uniquement l'etat 1 sur le mode de fonctionnement est furtif */
+          pthread_mutex_lock( &Partage->com_msrv.synchro ); /* Ajout dans la liste d'E envoyées au master */
+          Partage->com_msrv.liste_e = g_slist_prepend( Partage->com_msrv.liste_e,
+                                                       GINT_TO_POINTER(num) );
+          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+        }
        Partage->e[num].etat = etat;                                      /* Changement d'etat de l'entrée */
      }
   }
@@ -263,7 +266,7 @@
                 { if (val_avant_ech < 204) val_avant_ech = 204;
                   Partage->ea[ num ].val_ech = (gfloat)
                   ((val_avant_ech-204)*(Partage->ea[num].confDB.max - Partage->ea[num].confDB.min))/820.0
-                  + Partage->ea[num].confDB.min;                             /* Valeur à l'echelle */ 
+                  + Partage->ea[num].confDB.min;                                    /* Valeur à l'echelle */ 
 
                   Partage->ea[ num ].inrange = 1;
                 }
@@ -606,10 +609,19 @@
         { Partage->g[num].changes = 0; }
 
        if ( Partage->g[num].changes <= 5 ) 
-        { pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
-          Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg,
-                                                         GINT_TO_POINTER(num) );
-          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+        { struct MESSAGES_EVENT *event;
+          event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
+          if (!event)
+           { Info_new( Config.log, Config.log_dls, LOG_ERR,
+                      "MSG: malloc Event failed. Memory error for MSG%d", num );
+           }
+          else
+           { event->num  = num;
+             event->etat = etat;
+             pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
+             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
+             pthread_mutex_unlock( &Partage->com_msrv.synchro );
+           }
           Partage->g[num].changes++;
         } else if ( ! (Partage->top % 50 ))                /* Si persistence on prévient toutes les 5 sec */
         { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "MSG: last_change trop tot for MSG%03d!", num ); }
@@ -699,12 +711,10 @@
   { gint Update_heure=0;
     GSList *plugins;
 
-    memset( &Partage->com_dls, 0, sizeof(Partage->com_dls) );   /* Initialisation des variables du thread */
-    Partage->com_dls.Thread_run         = TRUE;                                     /* Le thread tourne ! */
-
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
     Info_new( Config.log, Config.log_dls, LOG_NOTICE,
               "Run_dls: Demarrage . . . TID = %p", pthread_self() );
+    Partage->com_dls.Thread_run         = TRUE;                                     /* Le thread tourne ! */
              
     Prendre_heure();                                 /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                      /* Chargement des modules dls */
