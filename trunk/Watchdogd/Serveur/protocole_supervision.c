@@ -38,7 +38,7 @@
   { struct CONNEXION *connexion;
     connexion = client->connexion;
 
-    if ( ! Tester_groupe_util( client->util, GID_TOUTLEMONDE) )
+    if ( ! Tester_groupe_util( client->util, GID_TOUTLEMONDE ) )
      { struct CMD_GTK_MESSAGE gtkmessage;
        g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied for user..." );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
@@ -61,7 +61,7 @@
                                 (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
                 }
                else
-                { if ( ! Tester_groupe_util( client->util, syn->access_groupe ) )
+                { if ( ! Tester_groupe_util( client->util, syndb->access_groupe ) )
                    { struct CMD_GTK_MESSAGE gtkmessage;
                      g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied for this syn..." );
                      Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
@@ -70,7 +70,7 @@
                   else
                    { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_AFFICHE_PAGE_SUP,
                                    (gchar *)syndb, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
-                     memcpy( &client->syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
+                     memcpy( &client->syn, syndb, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
                      Client_mode( client, ENVOI_MOTIF_SUPERVISION );
                    }
                   g_free(syndb);
