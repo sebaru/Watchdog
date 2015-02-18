@@ -237,10 +237,10 @@
 
     buffer = gtk_source_buffer_new( NULL );                               /* Création d'un nouveau buffer */
     gtk_text_buffer_create_tag ( GTK_TEXT_BUFFER(buffer), "active",
-                                "background", "green", "foreground", "white"
+                                "background", "green", "foreground", "white", NULL
                                );
     gtk_text_buffer_create_tag ( GTK_TEXT_BUFFER(buffer), "down",
-                                "background", "red",   "foreground", "white"
+                                "background", "red",   "foreground", "white", NULL
                                );
 
     while ( valide  )                                            /* Pour tous les groupe_pages du tableau */

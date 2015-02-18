@@ -299,7 +299,7 @@
      { gtk_text_buffer_create_tag ( GTK_TEXT_BUFFER(buffer), Type_bit_interne(cpt),
                                    "background-gdk", Couleur_bit_interne(cpt),
                                    "foreground-gdk", Couleur_texte_bit_interne(cpt),
-                                   NULL);
+                                   NULL );
      }
 
     while ( valide  )                                            /* Pour tous les groupe_pages du tableau */

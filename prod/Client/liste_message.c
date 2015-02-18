@@ -234,14 +234,14 @@
     for ( cpt=0; cpt < NBR_TYPE_MSG; cpt++ )
      { gtk_text_buffer_create_tag ( GTK_TEXT_BUFFER(buffer), Type_vers_string(cpt),
                                    "background-gdk", &COULEUR_FOND[cpt],
-                                   "foreground-gdk", &COULEUR_TEXTE[cpt]
-                                  );
+                                   "foreground-gdk", &COULEUR_TEXTE[cpt],
+                                   NULL );
      }
     gtk_text_buffer_create_tag ( GTK_TEXT_BUFFER(buffer), "active",
-                                "background", "green", "foreground", "white"
+                                "background", "green", "foreground", "white", NULL
                                );
     gtk_text_buffer_create_tag ( GTK_TEXT_BUFFER(buffer), "down",
-                                "background", "red",   "foreground", "white"
+                                "background", "red",   "foreground", "white", NULL
                                );
 
     while ( valide  )                                            /* Pour tous les groupe_pages du tableau */
