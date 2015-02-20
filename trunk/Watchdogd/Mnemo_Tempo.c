@@ -189,7 +189,10 @@
        if (!tempo) break;
 
        if (tempo->num < NBR_TEMPO)
-        { memcpy( &Partage->Tempo_R[tempo->num].confDB, tempo, sizeof(struct CMD_TYPE_MNEMO_TEMPO) );
+        { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+                   "Charger_tempo: Setting T(%03d) -> delai_on=%d, min_on=%d, max_on=%d, delai_off=%d",
+                    tempo->num, tempo->delai_on, tempo->min_on, tempo->max_on, tempo->delai_off );
+          memcpy( &Partage->Tempo_R[tempo->num].confDB, tempo, sizeof(struct CMD_TYPE_MNEMO_TEMPO) );
         }
        else
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING,

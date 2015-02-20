@@ -422,7 +422,7 @@
                 "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,%s.name"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
-                " AND (%s.type=%d OR %s.type=%d)"
+                " AND (%s.type=%d OR %s.type=%d OR %s.type=%d OR %s.type=%d)"
                 " ORDER BY groupe,page,name,type,num",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
@@ -430,7 +430,10 @@
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS,
-                NOM_TABLE_MNEMO, MNEMO_ENTREE, NOM_TABLE_MNEMO, MNEMO_SORTIE
+                NOM_TABLE_MNEMO, MNEMO_ENTREE,
+                NOM_TABLE_MNEMO, MNEMO_ENTREE_ANA,
+                NOM_TABLE_MNEMO, MNEMO_SORTIE,
+                NOM_TABLE_MNEMO, MNEMO_SORTIE_ANA
               );                                                                /* order by test 25/01/06 */
 
     db = Init_DB_SQL();       
