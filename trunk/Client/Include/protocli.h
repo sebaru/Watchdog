@@ -483,7 +483,6 @@
                                   GtkPrintContext   *context,
                                   gpointer           user_data );
                                                                                          /* Dans courbe.c */
- extern void Proto_afficher_une_source_EA_for_courbe( struct CMD_TYPE_MNEMO_FULL *entreeANA );
  extern void Proto_afficher_une_source_for_courbe( struct CMD_TYPE_MNEMO_BASE *mnemo );
  extern void Creer_page_courbe ( gchar *libelle );
  extern void Detruire_page_courbe( struct PAGE_NOTEBOOK *page );

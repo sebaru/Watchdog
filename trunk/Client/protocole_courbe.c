@@ -40,8 +40,7 @@
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
  void Gerer_protocole_courbe ( struct CONNEXION *connexion )
-  { static GList *Arrivee_eana = NULL;
-    static GList *Arrivee_mnemo = NULL;
+  { static GList *Arrivee_mnemo = NULL;
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_ADD_COURBE_OK:
@@ -63,37 +62,18 @@
                Proto_append_courbe( courbe );
              }
             break;
-       case SSTAG_SERVEUR_ADDPROGRESS_ENTREEANA_FOR_COURBE:
-             { struct CMD_TYPE_MNEMO_FULL *eana;
-               Set_progress_plus(1);
-
-               eana = (struct CMD_TYPE_MNEMO_FULL *)g_try_malloc0( sizeof( struct CMD_TYPE_MNEMO_FULL ) );
-               if (!eana) return; 
-               memcpy( eana, connexion->donnees, sizeof(struct CMD_TYPE_MNEMO_FULL ) );
-               Arrivee_eana = g_list_append( Arrivee_eana, eana );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_ENTREEANA_FOR_COURBE_FIN:
-             { 
-             }
-            break;
        case SSTAG_SERVEUR_ADDPROGRESS_MNEMO_FOR_COURBE:
              { struct CMD_TYPE_MNEMO_FULL *mnemo;
                Set_progress_plus(1);
 
-               mnemo = (struct CMD_TYPE_MNEMO_FULL *)g_try_malloc0( sizeof( struct CMD_TYPE_MNEMO_FULL ) );
+               mnemo = (struct CMD_TYPE_MNEMO_BASE *)g_try_malloc0( sizeof( struct CMD_TYPE_MNEMO_BASE ) );
                if (!mnemo) return; 
-               memcpy( mnemo, connexion->donnees, sizeof(struct CMD_TYPE_MNEMO_FULL ) );
+               memcpy( mnemo, connexion->donnees, sizeof(struct CMD_TYPE_MNEMO_BASE ) );
                Arrivee_mnemo = g_list_append( Arrivee_mnemo, mnemo );
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_MNEMO_FOR_COURBE_FIN:
-             { g_list_foreach( Arrivee_eana, (GFunc)Proto_afficher_une_source_EA_for_courbe, NULL );
-               g_list_foreach( Arrivee_eana, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_eana );
-               Arrivee_eana = NULL;
-
-               g_list_foreach( Arrivee_mnemo, (GFunc)Proto_afficher_une_source_for_courbe, NULL );
+             { g_list_foreach( Arrivee_mnemo, (GFunc)Proto_afficher_une_source_for_courbe, NULL );
                g_list_foreach( Arrivee_mnemo, (GFunc)g_free, NULL );
                g_list_free( Arrivee_mnemo );
                Arrivee_mnemo = NULL;

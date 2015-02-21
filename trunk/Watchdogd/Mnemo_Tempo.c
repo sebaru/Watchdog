@@ -196,7 +196,8 @@
         }
        else
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                   "Charger_tempo: tempo->num (%d) out of range (max=%d)", tempo->num, NBR_TEMPO ); }
+                   "Charger_tempo: tempo->num (%d) out of range (max=%d)", tempo->num, NBR_TEMPO );
+        }
        g_free(tempo);
      }
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Charger_tempo: DB reloaded" );

@@ -57,8 +57,6 @@
 
  enum 
   { SSTAG_CLIENT_WANT_PAGE_SOURCE_FOR_COURBE,                        /* Envoi des infos eana pour courbes */
-    SSTAG_SERVEUR_ADDPROGRESS_ENTREEANA_FOR_COURBE,            /* Ajout d'un groupe dans la liste cliente */
-    SSTAG_SERVEUR_ADDPROGRESS_ENTREEANA_FOR_COURBE_FIN,
     SSTAG_SERVEUR_ADDPROGRESS_MNEMO_FOR_COURBE,                /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_MNEMO_FOR_COURBE_FIN,
     SSTAG_CLIENT_ADD_COURBE,                               /* Le client a fait son choix -> ajout demandé */

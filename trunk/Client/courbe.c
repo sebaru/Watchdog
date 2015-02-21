@@ -525,36 +525,6 @@
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_source_EA( GtkTreeIter *iter, struct CMD_TYPE_MNEMO_FULL *source )
-  { struct PAGE_NOTEBOOK *page;
-    GtkTreeModel *store;
-    gchar chaine[20], groupe[128];
-
-    page = Page_actuelle();
-    if (page->type != TYPE_PAGE_COURBE) return;                                            /* Bon type ?? */
-
-    store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_source) );              /* Acquisition du modele */
-
-    g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(MNEMO_ENTREE_ANA), source->mnemo_base.num );
-    g_snprintf( groupe, sizeof(groupe), "%s/%s/%s", source->mnemo_base.groupe, source->mnemo_base.page, source->mnemo_base.plugin_dls );
-    gtk_list_store_set ( GTK_LIST_STORE(store), iter,
-                         COLONNE_ID, source->mnemo_base.num,
-                         COLONNE_TYPE, MNEMO_ENTREE_ANA,
-                         COLONNE_TYPE_EA, source->mnemo_ai.type,
-                         COLONNE_OBJET, groupe,
-                         COLONNE_NUM, chaine,
-                         COLONNE_MIN, source->mnemo_ai.min,
-                         COLONNE_MAX, source->mnemo_ai.max,
-                         COLONNE_UNITE_STRING, source->mnemo_ai.unite,
-                         COLONNE_LIBELLE, source->mnemo_base.libelle,
-                         -1
-                       );
-  }
-/**********************************************************************************************************/
-/* Rafraichir_visu_source: Rafraichissement d'un source la liste à l'écran                                */
-/* Entrée: une reference sur le source                                                                    */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
  static void Rafraichir_visu_source( GtkTreeIter *iter, struct CMD_TYPE_MNEMO_BASE *source )
   { struct PAGE_NOTEBOOK *page;
     GtkTreeModel *store;
@@ -581,19 +551,6 @@
                          COLONNE_LIBELLE, source->libelle,
                          -1
                        );
-  }
-/**********************************************************************************************************/
-/* Afficher_un_source: Ajoute un source dans la liste des sources                                         */
-/* Entrée: une reference sur le source                                                                    */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Proto_afficher_une_source_EA_for_courbe( struct CMD_TYPE_MNEMO_FULL *source )
-  { GtkListStore *store;
-    GtkTreeIter iter;
-
-    store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_source) ));
-    gtk_list_store_append ( store, &iter );                                      /* Acquisition iterateur */
-    Rafraichir_visu_source_EA ( &iter, source );
   }
 /**********************************************************************************************************/
 /* Afficher_un_source: Ajoute un source dans la liste des sources                                         */

@@ -152,18 +152,6 @@
                pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_propriete_synoptique_thread, client );
                pthread_detach( tid );
                break;
-          case ENVOI_MNEMONIQUE_FOR_COURBE:
-               Client_mode( client, VALIDE );
-               Ref_client( client );                       /* Indique que la structure est utilisée */
-               pthread_create( &tid, NULL, (void *)Envoyer_mnemoniques_for_courbe_thread, client );
-               pthread_detach( tid );
-               break;
-          case ENVOI_MNEMONIQUE_FOR_HISTO_COURBE:
-               Client_mode( client, VALIDE );
-               Ref_client( client );                       /* Indique que la structure est utilisée */
-               pthread_create( &tid, NULL, (void *)Envoyer_mnemoniques_for_histo_courbe_thread, client );
-               pthread_detach( tid );
-               break;
           case ENVOI_MOTIF_ATELIER:
                Client_mode( client, VALIDE );
                Ref_client( client );                       /* Indique que la structure est utilisée */

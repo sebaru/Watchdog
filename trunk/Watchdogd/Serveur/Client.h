@@ -52,8 +52,6 @@
     VALIDE,
 
     ENVOI_GROUPE_FOR_UTIL,
-    ENVOI_MNEMONIQUE_FOR_COURBE,
-    ENVOI_MNEMONIQUE_FOR_HISTO_COURBE,                 /* Envoi des infos mnemo pour la page histo_courbe */
     ENVOI_MOTIF_ATELIER,                                     /* Envoi des motifs associés à un synoptique */
     ENVOI_COMMENT_ATELIER,                                 /* Envoi des comments associés à un synoptique */
     ENVOI_PASSERELLE_ATELIER,                              /* Envoi des passerelles dans l'atelier client */
