@@ -37,7 +37,7 @@
 /**********************************************************************************************************/
  static void Autoriser_client ( struct CLIENT *client )
   { struct REZO_SRV_IDENT ident;
-    g_snprintf( ident.comment, sizeof(ident.comment), "Serveur Watchdog %s", VERSION );
+    g_snprintf( ident.comment, sizeof(ident.comment), "Serveur Watchdog v%s", VERSION );
     if ( Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_AUTORISE,
                        (gchar *)&ident, sizeof(struct REZO_SRV_IDENT) ) )
      { return; }
@@ -149,6 +149,6 @@
              "Tester_autorisation: Autorisation sent for %s(id=%d)", client->util->nom, client->util->id );
                                                            /* Le client est connecté, on en informe D.L.S */
     if (client->util->ssrv_bit_presence) SB(client->util->ssrv_bit_presence, 1);
-    Client_mode (client, ENVOI_HISTO);
+    Client_mode (client, ENVOI_SYNCHRO);
   }
 /*--------------------------------------------------------------------------------------------------------*/

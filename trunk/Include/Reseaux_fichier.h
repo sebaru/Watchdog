@@ -33,7 +33,10 @@
   };
 
  enum 
-  { SSTAG_SERVEUR_DEL_FICHIER,
+  { SSTAG_SERVEUR_VERSION,
+    SSTAG_SERVEUR_DEL_FICHIER,
+    SSTAG_SERVEUR_APPEND_FICHIER,
+    
   };
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

@@ -120,29 +120,32 @@
                 }
                else
                 { Client_mode ( client, WAIT_FOR_IDENT ); }
-               Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_END,                /* Tag de fin */
+               Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_END,                      /* Tag de fin */
                              NULL, 0 );
                break;                 
           case ATTENTE_CONNEXION_SSL:
-               Connecter_ssl ( client );                        /* Tentative de connexion securisée */
+               Connecter_ssl ( client );                              /* Tentative de connexion securisée */
                break;
-          case ENVOI_HISTO        :
+          case ENVOI_SYNCHRO      :
                Client_mode( client, VALIDE_NON_ROOT );
-               Ref_client( client );                       /* Indique que la structure est utilisée */
+               Ref_client( client );                             /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Envoyer_histo_thread, client );
                pthread_detach( tid );
+               Ref_client( client );                             /* Indique que la structure est utilisée */
+               pthread_create( &tid, NULL, (void *)Envoyer_synchro_directory_thread, client );
+               pthread_detach( tid );
                break;
-          case VALIDE_NON_ROOT    : /*Client_mode(client, VALIDE); */           /* Etat transitoire */
+          case VALIDE_NON_ROOT    : Client_mode(client, VALIDE);                      /* Etat transitoire */
                break;
           case ENVOI_GROUPE_FOR_UTIL:
                Client_mode( client, VALIDE );
-               Ref_client( client );                       /* Indique que la structure est utilisée */
+               Ref_client( client );                             /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_util_thread, client );
                pthread_detach( tid );
                break;
           case ENVOI_GROUPE_FOR_SYNOPTIQUE:
                Client_mode( client, VALIDE );
-               Ref_client( client );                       /* Indique que la structure est utilisée */
+               Ref_client( client );                             /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_synoptique_thread, client );
                pthread_detach( tid );
                break;

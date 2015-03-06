@@ -399,6 +399,8 @@
        Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
      }
 
+    Libere_DB_SQL(&db);
+
     if (Modifier_configDB ( "global", "database_version", "2583" ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
                 "Update_database_schema: updating Database_version OK" );
@@ -408,6 +410,5 @@
                 "Update_database_schema: updating Database_version FAILED" );
      }
 
-    Libere_DB_SQL(&db);
   }
 /*--------------------------------------------------------------------------------------------------------*/

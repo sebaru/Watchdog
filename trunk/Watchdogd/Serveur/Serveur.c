@@ -168,7 +168,7 @@
        case ENVOI_INTERNAL              : return("ENVOI_INTERNAL");
        case WAIT_FOR_IDENT              : return("WAIT_FOR_IDENT");
        case WAIT_FOR_NEWPWD             : return("WAIT_FOR_NEWPWD");
-       case ENVOI_HISTO                 : return("ENVOI_HISTO");
+       case ENVOI_SYNCHRO               : return("ENVOI_SYNCHRO");
 
        case ENVOI_GROUPE_FOR_UTIL       : return("ENVOI_GROUPE_FOR_UTIL");
        case ENVOI_MOTIF_ATELIER         : return("ENVOI_MOTIF_ATELIER");

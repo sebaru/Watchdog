@@ -59,5 +59,7 @@
  extern gint Ajouter_classeDB ( struct CMD_TYPE_CLASSE *classe );
  extern gboolean Retirer_classeDB ( struct CMD_TYPE_CLASSE *classe );
  extern gboolean Modifier_classeDB( struct CMD_TYPE_CLASSE *classe );
+ extern gint Icone_get_data_version ( void );
+ extern void Icone_set_data_version ( void );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
