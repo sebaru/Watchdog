@@ -116,13 +116,16 @@
               client->struct_used, client->machine );
 
     if (client->struct_used == 0)
-     { pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-       Cfg_ssrv.Clients = g_slist_remove( Cfg_ssrv.Clients, client );
-       pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-    
-       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Unref_client: struct_used = 0. closing %s. ",
                  client->machine );
+
+       pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
+       Cfg_ssrv.Clients = g_slist_remove( Cfg_ssrv.Clients, client );
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                "Unref_client: %03d clients managed left", g_slist_length( Cfg_ssrv.Clients ) );
+       pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
+    
        Fermer_connexion( client->connexion );
        pthread_mutex_destroy( &client->mutex_struct_used );
        if (client->util)            { g_free( client->util ); }
