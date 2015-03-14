@@ -383,28 +383,26 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
 /* Sortie: taille globale                                                                                 */
 /**********************************************************************************************************/
  void Envoyer_synchro_directory_thread ( struct CLIENT *client )
-  { struct dirent *fichier;
-    struct CMD_ENREG nbr;
-    DIR *repertoire;
-    guint taille, icone_version;
+  { struct CMD_ENREG nbr;
+    gint taille, icone_version;
 
     icone_version = Icone_get_data_version ();
-    if (client->icone_version >= icone_version)
+    if (client->icone_version >= icone_version && icone_version != -1)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_synchro_directory_thread: client already synchronized" );
-       return;
      }
+    else
+     { client->Liste_file = NULL;
+       taille = 0;
+       taille += Preparer_synchro_directory ( client, "Gif", icone_version );
+       taille += Preparer_synchro_directory ( client, "Son", icone_version );
 
-    client->Liste_file = NULL;
-    taille = 0;
-    taille += Preparer_synchro_directory ( client, "Gif", icone_version );
-    taille += Preparer_synchro_directory ( client, "Son", icone_version );
-
-    nbr.num = taille;
-    g_snprintf( nbr.comment, sizeof(nbr.comment), "Synchronizing Files" );
-    Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
-                   (gchar *)&nbr, sizeof(struct CMD_ENREG) );
-    Send_synchro_directory ( client, icone_version );
+       nbr.num = taille;
+       g_snprintf( nbr.comment, sizeof(nbr.comment), "Synchronizing Files" );
+       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
+                      (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+       Send_synchro_directory ( client, icone_version );
+     }
     Unref_client( client ); 
   }
 /*--------------------------------------------------------------------------------------------------------*/

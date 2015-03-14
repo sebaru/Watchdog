@@ -257,7 +257,7 @@
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
      { Info_new( Config.log, Config.log_db, LOG_INFO,                                     /* Print Config */
-                "Icone_get_data_version: '%s' = %s", nom, valeur );
+                "Icone_get_data_version: found param '%s' = %s", nom, valeur );
        if ( ! g_ascii_strcasecmp ( nom, "icone_version" ) )
         { icone_version = atoi( valeur ); }
      }
