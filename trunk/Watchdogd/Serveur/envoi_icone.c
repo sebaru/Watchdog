@@ -405,5 +405,6 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
     Send_synchro_directory ( client, icone_version );
+    Unref_client( client ); 
   }
 /*--------------------------------------------------------------------------------------------------------*/
