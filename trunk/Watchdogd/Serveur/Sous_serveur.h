@@ -74,6 +74,7 @@
  extern void Ref_client ( struct CLIENT *client );
  extern void Deconnecter ( struct CLIENT *client );
  extern void Run_handle_client ( struct CLIENT *client );
+ extern gchar *Mode_vers_string ( gint mode );
 
  extern void Ecouter_client ( struct CLIENT *client );                                /* Dans protocole.c */
 

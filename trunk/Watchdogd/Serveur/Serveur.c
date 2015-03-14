@@ -165,7 +165,7 @@
 /* Entrée: un mode                                                                                        */
 /* Sortie: un gchar *                                                                                     */
 /**********************************************************************************************************/
- static gchar *Mode_vers_string ( gint mode )
+ gchar *Mode_vers_string ( gint mode )
   { switch (mode)
      { case ATTENTE_CONNEXION_SSL       : return("ATTENTE_CONNEXION_SSL");
        case ENVOI_INTERNAL              : return("ENVOI_INTERNAL");

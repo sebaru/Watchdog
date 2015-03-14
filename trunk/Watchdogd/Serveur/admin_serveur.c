@@ -105,7 +105,7 @@
           strftime( date, sizeof(date), "%F %T", localtime(&client->date_connexion) );
           g_snprintf( chaine, sizeof(chaine), " | SSRV%06d - v%s - mode %02d (%s) defaut %02d date %s - %s@%s\n",
                           client->ssrv_id, client->ident.version,
-                          client->mode, Mode_to_string(client->mode), client->defaut, date,
+                          client->mode, Mode_vers_string(client->mode), client->defaut, date,
                          (client->util ? client->util->nom : "unknown"), client->machine
                     );
           Admin_write ( connexion, chaine );
