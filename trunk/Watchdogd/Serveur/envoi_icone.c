@@ -401,7 +401,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
     taille += Preparer_synchro_directory ( client, "Son", icone_version );
 
     nbr.num = taille;
-    g_snprintf( nbr.comment, sizeof(nbr.comment), _("Synchronizing Files") );
+    g_snprintf( nbr.comment, sizeof(nbr.comment), "Synchronizing Files" );
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
     Send_synchro_directory ( client, icone_version );
