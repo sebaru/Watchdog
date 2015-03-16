@@ -69,6 +69,8 @@
             }
            write( id_fichier, &new_version, sizeof(new_version) );
            close(id_fichier);
+           Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
+                    "Action_icone_version: write %s sucessfull (version %d)", FICHIER_VERSION, new_version );
            return(new_version);
          }
   }
@@ -118,7 +120,7 @@
             break;
        case SSTAG_SERVEUR_VERSION:
              { guint *cmd_version;
-               cmd_version = (guint *)connexion->donnees;
+               cmd_version = (gint *)connexion->donnees;
                Set_icone_version( *cmd_version );
                Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
                         "Nouvelle version données %d", *cmd_version );
