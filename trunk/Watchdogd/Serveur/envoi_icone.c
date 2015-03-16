@@ -300,7 +300,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
 /* Entrée: structure cliente distante                                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Send_synchro_directory( struct CLIENT *client, guint icone_version )
+ static void Send_synchro_directory( struct CLIENT *client, gint icone_version )
   { gchar *filename;
     gint taille, fd;
     void *buffer;
@@ -349,7 +349,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
 /* Entrée: la liste en cours, le repertoire                                                               */
 /* Sortie: taille globale                                                                                 */
 /**********************************************************************************************************/
- static gint Preparer_synchro_directory ( struct CLIENT *client, gchar *directory, guint icone_version )
+ static gint Preparer_synchro_directory ( struct CLIENT *client, gchar *directory, gint icone_version )
   { struct dirent *fichier;
     DIR *repertoire;
     int taille;
@@ -369,7 +369,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
 
        g_snprintf( full_filename, sizeof(full_filename), "%s/%s", directory, fichier->d_name );
        stat( full_filename, &info );
-       if ( info.st_mtime > icone_version )
+       if ( icone_version < info.st_mtime )
         { taille += info.st_size;
           client->Liste_file = g_slist_prepend( client->Liste_file, strdup(full_filename) );
         }

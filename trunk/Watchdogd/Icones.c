@@ -271,7 +271,7 @@
  void Icone_set_data_version ( void )
   { gchar chaine[32];
     g_snprintf( chaine, sizeof(chaine), "%d", (gint)time(NULL) );
-    if (Modifier_configDB ( "global", "icone_version", "2583" ))
+    if (Modifier_configDB ( "global", "icone_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
                 "Icone_set_data_version: updating Database_version OK" );
      }
