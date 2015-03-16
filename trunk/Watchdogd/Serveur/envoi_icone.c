@@ -374,7 +374,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
 
        g_snprintf( full_filename, sizeof(full_filename), "%s/%s", directory, fichier->d_name );
        stat( full_filename, &info );
-       if ( client->icone_version < info.st_mtime )
+       if ( client->ident.icone_version < info.st_mtime )
         { taille += info.st_size;
           client->Liste_file = g_slist_prepend( client->Liste_file, strdup(full_filename) );
         }
@@ -395,9 +395,9 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
              "Envoyer_synchro_directory_thread: Get local  icone_version = %d", icone_version );
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-             "Envoyer_synchro_directory_thread: Get remote icone_version = %d", client->icone_version );
+             "Envoyer_synchro_directory_thread: Get remote icone_version = %d", client->ident.icone_version );
 
-    if (client->icone_version >= icone_version && icone_version != -1)
+    if (client->ident.icone_version >= icone_version && icone_version != -1)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_synchro_directory_thread: client already synchronized" );
      }

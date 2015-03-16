@@ -85,7 +85,6 @@
     guchar defaut;                                                            /* Defaut d'envoi au client */
     time_t date_connexion;                                                              /* Date connexion */
     guint  pulse;                                                                      /* pulse du client */
-    guint  icone_version;                          /* Numéro de version de la synchro file à la connexion */
     struct CONNEXION *connexion;                       /* Connexion distante pour dialogue client-serveur */
 
     pthread_mutex_t mutex_struct_used;/* Zone critique: Compteurs du nombre d'utilisation de la structure */
