@@ -354,7 +354,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
 /* Entrée: la liste en cours, le repertoire                                                               */
 /* Sortie: taille globale                                                                                 */
 /**********************************************************************************************************/
- static gint Preparer_synchro_directory ( struct CLIENT *client, gchar *directory, gint icone_version )
+ static gint Preparer_synchro_directory ( struct CLIENT *client, gchar *directory )
   { struct dirent *fichier;
     DIR *repertoire;
     int taille;
@@ -374,7 +374,7 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
 
        g_snprintf( full_filename, sizeof(full_filename), "%s/%s", directory, fichier->d_name );
        stat( full_filename, &info );
-       if ( icone_version < info.st_mtime )
+       if ( client->icone_version < info.st_mtime )
         { taille += info.st_size;
           client->Liste_file = g_slist_prepend( client->Liste_file, strdup(full_filename) );
         }
@@ -404,8 +404,8 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
     else
      { client->Liste_file = NULL;
        taille = 0;
-       taille += Preparer_synchro_directory ( client, "Gif", icone_version );
-       taille += Preparer_synchro_directory ( client, "Son", icone_version );
+       taille += Preparer_synchro_directory ( client, "Gif" );
+       taille += Preparer_synchro_directory ( client, "Son" );
 
        nbr.num = taille;
        g_snprintf( nbr.comment, sizeof(nbr.comment), "Synchronizing Files" );
