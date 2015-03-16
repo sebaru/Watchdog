@@ -332,7 +332,8 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
                    "Send_synchro_file: Sending failed for %s (%s)", filename, strerror(errno) );
         }
        else
-        { Envoi_client( client, TAG_FICHIER, SSTAG_SERVEUR_DEL_FICHIER, filename, strlen(filename) );
+        { Envoi_client( client, TAG_FICHIER, SSTAG_SERVEUR_DEL_FICHIER,
+                        buffer, sizeof(struct CMD_FICHIER) );
 
           while( (taille = read( fd, buffer + sizeof(struct CMD_FICHIER),/* On n'est pas a fin de fichier */
                                  client->connexion->taille_bloc - sizeof(struct CMD_FICHIER) ) ) > 0 )
@@ -343,6 +344,8 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
         }
        g_free(filename);
      }
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+             "Send_synchro_file: Send successfull" );
     Envoi_client( client, TAG_FICHIER, SSTAG_SERVEUR_VERSION,
                  (gchar *)&icone_version, sizeof( icone_version ) );
   }

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 mkdir ~/.watchdog
+mkdir ~/.watchdog/Gif
+mkdir ~/.watchdog/Son
 
-cp -rv Gif/* ~/.watchdog
-
-echo "Directory created and Files copied for CLIENT"
+echo "Directory created for CLIENT"
