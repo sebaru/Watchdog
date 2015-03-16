@@ -230,7 +230,7 @@
  extern void Gerer_protocole_histo_courbe ( struct CONNEXION *connexion );
  extern void Gerer_protocole_camera ( struct CONNEXION *connexion );
  extern void Gerer_protocole_admin ( struct CONNEXION *connexion );
- extern guint Get_icone_version( void );
+ extern gint Get_icone_version( void );
 
  extern gboolean Timer ( gpointer data );                                                 /* Dans timer.c */
 
