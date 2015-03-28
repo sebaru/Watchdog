@@ -520,7 +520,7 @@
                 Cfg_enocean.fd = 0;
               }
              Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
-                      "Run_thread: ENOCEAN Disconnected. Re-Trying in %s sec...",
+                      "Run_thread: ENOCEAN Disconnected. Re-Trying in %d sec...",
                        ENOCEAN_RECONNECT_DELAY );
              Cfg_enocean.date_retry_connect = Partage->top + ENOCEAN_RECONNECT_DELAY;
              Cfg_enocean.comm_status = ENOCEAN_WAIT_BEFORE_RECONNECT;
