@@ -232,4 +232,52 @@
     Libere_DB_SQL(&db);
     return(retour);
   }
+/**********************************************************************************************************/
+/* Icone_get_data_version: Récupère le numéro de version des données Icones en bases de données           */
+/* Entrée: Néant                                                                                          */
+/* Sortie: int (time_t en fait)                                                                           */
+/**********************************************************************************************************/
+ gint Icone_get_data_version ( void )
+  { gint icone_version;
+    gchar *nom, *valeur;
+    struct DB *db;
+
+    if (Config.instance_is_master != TRUE)                              /* Do not update DB if not master */
+     { Info_new( Config.log, Config.log_db, LOG_WARNING,
+                "Icone_get_data_version: Instance is not master. Quitting." );
+       return(-1);
+     }
+
+    icone_version = -1;                                                               /* valeur par défaut */
+    if ( ! Recuperer_configDB( &db, "global" ) )                        /* Connexion a la base de données */
+     { Info_new( Config.log, Config.log_db, LOG_WARNING,
+                "Icone_get_data_version: Database connexion failed" );
+       return(-1);
+     }
+
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Config.log_db, LOG_INFO,                                     /* Print Config */
+                "Icone_get_data_version: found param '%s' = %s", nom, valeur );
+       if ( ! g_ascii_strcasecmp ( nom, "icone_version" ) )
+        { icone_version = atoi( valeur ); }
+     }
+   return(icone_version);
+  }
+/**********************************************************************************************************/
+/* Icone_set_data_version: Positionne le numéro de version des données Icones en bases de données         */
+/* Entrée: Néant                                                                                          */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void Icone_set_data_version ( void )
+  { gchar chaine[32];
+    g_snprintf( chaine, sizeof(chaine), "%d", (gint)time(NULL) );
+    if (Modifier_configDB ( "global", "icone_version", chaine ))
+     { Info_new( Config.log, Config.log_db, LOG_NOTICE,
+                "Icone_set_data_version: updating Database_version OK" );
+     }
+    else
+     { Info_new( Config.log, Config.log_db, LOG_NOTICE,
+                "Icone_set_data_version: updating Database_version FAILED" );
+     }
+  }
 /*--------------------------------------------------------------------------------------------------------*/

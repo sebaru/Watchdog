@@ -74,6 +74,7 @@
  extern void Ref_client ( struct CLIENT *client );
  extern void Deconnecter ( struct CLIENT *client );
  extern void Run_handle_client ( struct CLIENT *client );
+ extern gchar *Mode_vers_string ( gint mode );
 
  extern void Ecouter_client ( struct CLIENT *client );                                /* Dans protocole.c */
 
@@ -250,6 +251,7 @@
  extern void Proto_ajouter_icone_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone,
                                        gint taille, gchar *buffer );
  extern void Proto_ajouter_icone_fin_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone );
+ extern void Envoyer_synchro_directory_thread ( struct CLIENT *client );
  
  extern void *Proto_envoyer_histo_msgs_thread ( struct CLIENT *client );       /* Dans envoi_histo_hard.c */
 

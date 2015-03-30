@@ -45,15 +45,13 @@
     WAIT_FOR_IDENT,                                /* Permet de demander l'identification du client lourd */
     WAIT_FOR_NEWPWD,                                    /* Si l'utilisateur doit changer son mot de passe */
 
-    ENVOI_HISTO,
+    ENVOI_SYNCHRO,
 
     VALIDE_NON_ROOT,
 
     VALIDE,
 
     ENVOI_GROUPE_FOR_UTIL,
-    ENVOI_MNEMONIQUE_FOR_COURBE,
-    ENVOI_MNEMONIQUE_FOR_HISTO_COURBE,                 /* Envoi des infos mnemo pour la page histo_courbe */
     ENVOI_MOTIF_ATELIER,                                     /* Envoi des motifs associés à un synoptique */
     ENVOI_COMMENT_ATELIER,                                 /* Envoi des comments associés à un synoptique */
     ENVOI_PASSERELLE_ATELIER,                              /* Envoi des passerelles dans l'atelier client */
@@ -102,6 +100,9 @@
 
 /* Communication des Histo depuis SSRV vers les clients */
     GSList *Liste_histo;
+
+/* Communication des fichiers de travail vers les clients */
+    GSList *Liste_file;
 
 /* Courbes en temps réel */
     struct CMD_TYPE_COURBE courbe;                    /* Structure parametres Proto_ajouter_courbe_thread */

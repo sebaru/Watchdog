@@ -214,14 +214,14 @@
     else
      { memcpy( &modbus->libelle, db->row[5], sizeof(modbus->libelle) );
        memcpy( &modbus->ip,      db->row[2], sizeof(modbus->ip) );
-       modbus->id        = atoi(db->row[0]);
-       modbus->enable     = atoi(db->row[1]);
-       modbus->bit       = atoi(db->row[3]);
-       modbus->watchdog  = atoi(db->row[4]);
-       modbus->map_E = atoi(db->row[6]);
-       modbus->map_EA = atoi(db->row[7]);
-       modbus->map_A = atoi(db->row[8]);
-       modbus->map_AA = atoi(db->row[9]);
+       modbus->id       = atoi(db->row[0]);
+       modbus->enable   = atoi(db->row[1]);
+       modbus->bit      = atoi(db->row[3]);
+       modbus->watchdog = atoi(db->row[4]);
+       modbus->map_E    = atoi(db->row[6]);
+       modbus->map_EA   = atoi(db->row[7]);
+       modbus->map_A    = atoi(db->row[8]);
+       modbus->map_AA   = atoi(db->row[9]);
      }
     return(modbus);
   }
@@ -1030,7 +1030,8 @@
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_CRIT,
                    "Recuperer_reponse_module: bute = %d >= %d (sizeof(module->reponse)=%d, taille recue = %d)",
                     bute, sizeof(struct TRAME_MODBUS_REPONSE), sizeof(module->response), ntohs(module->response.taille) );
-          bute = sizeof(struct TRAME_MODBUS_REPONSE) - 1;
+          Deconnecter_module( module );
+          return;
         }
 
        cpt = read( module->connexion,

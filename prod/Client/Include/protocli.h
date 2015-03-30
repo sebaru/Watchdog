@@ -230,6 +230,7 @@
  extern void Gerer_protocole_histo_courbe ( struct CONNEXION *connexion );
  extern void Gerer_protocole_camera ( struct CONNEXION *connexion );
  extern void Gerer_protocole_admin ( struct CONNEXION *connexion );
+ extern gint Get_icone_version( void );
 
  extern gboolean Timer ( gpointer data );                                                 /* Dans timer.c */
 
@@ -483,7 +484,6 @@
                                   GtkPrintContext   *context,
                                   gpointer           user_data );
                                                                                          /* Dans courbe.c */
- extern void Proto_afficher_une_source_EA_for_courbe( struct CMD_TYPE_MNEMO_FULL *entreeANA );
  extern void Proto_afficher_une_source_for_courbe( struct CMD_TYPE_MNEMO_BASE *mnemo );
  extern void Creer_page_courbe ( gchar *libelle );
  extern void Detruire_page_courbe( struct PAGE_NOTEBOOK *page );

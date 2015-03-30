@@ -34,6 +34,7 @@
   { gchar  nom [ NBR_CARAC_LOGIN_UTF8 + 1 ];
     gchar  passwd  [24];
     gchar  version [32];
+    gint   icone_version;
   };
 
  struct REZO_SRV_IDENT

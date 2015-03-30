@@ -520,14 +520,14 @@
                 Cfg_enocean.fd = 0;
               }
              Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
-                      "Run_thread: ENOCEAN Disconnected. Re-Trying in %s sec...",
-                       ENOCEAN_RECONNECT_DELAY );
+                      "Run_thread: ENOCEAN Disconnected. Re-Trying in %d sec...",
+                       ENOCEAN_RECONNECT_DELAY/10 );
              Cfg_enocean.date_retry_connect = Partage->top + ENOCEAN_RECONNECT_DELAY;
              Cfg_enocean.comm_status = ENOCEAN_WAIT_BEFORE_RECONNECT;
              break;
            }
           case ENOCEAN_WAIT_BEFORE_RECONNECT:
-           { if (Cfg_enocean.date_retry_connect >= Partage->top)
+           { if (Cfg_enocean.date_retry_connect <= Partage->top)
               { Cfg_enocean.comm_status = ENOCEAN_CONNECT;
                 Cfg_enocean.date_retry_connect = 0;
               }

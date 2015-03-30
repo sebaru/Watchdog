@@ -164,6 +164,7 @@ one_again:
 /**********************************************************************************************************/
  void Envoyer_authentification ( void )
   { g_snprintf( Client.ident.version, sizeof(Client.ident.version), "%s", VERSION );
+    Client.ident.icone_version = Get_icone_version();
     if (!Client.cli_certif)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
                 "Envoyer_identification: sending login(%s)/password(XX) and version number(%s)",
@@ -244,9 +245,15 @@ one_again:
        close(connexion);
      }
     freeaddrinfo(result);
-    if (rp == NULL) return(FALSE);                                                 /* Erreur de connexion */
+    if (rp == NULL)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, 
+                    "Connecter_au_serveur: all family connexion failed for server %s (%s)",
+                    Client.host, service );
+       Log( "Connexion refused by server" );
+       return(FALSE);                                                              /* Erreur de connexion */
+     }
 
-    Client.connexion = Nouvelle_connexion( Config_cli.log, connexion, -1 );          /* Creation de la structure */
+    Client.connexion = Nouvelle_connexion( Config_cli.log, connexion, -1 );   /* Creation de la structure */
     if (!Client.connexion)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, 
                  _("Connecter_au_serveur: cannot create new connexion") );

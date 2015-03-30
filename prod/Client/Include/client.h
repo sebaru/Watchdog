@@ -39,6 +39,7 @@
  #define EXIT_INACTIF      1                                             /* Un fils est mort d'inactivité */
 
  #define REPERTOIR_CONF    ".watchdog"         /* Repertoire ou sont stocké les fichiers de configuration */
+ #define FICHIER_VERSION   "icone_version.dat"
  
  enum
   { DISCONNECTED,

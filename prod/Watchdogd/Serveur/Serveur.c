@@ -116,13 +116,16 @@
               client->struct_used, client->machine );
 
     if (client->struct_used == 0)
-     { pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-       Cfg_ssrv.Clients = g_slist_remove( Cfg_ssrv.Clients, client );
-       pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-    
-       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Unref_client: struct_used = 0. closing %s. ",
                  client->machine );
+
+       pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
+       Cfg_ssrv.Clients = g_slist_remove( Cfg_ssrv.Clients, client );
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                "Unref_client: %03d clients managed left", g_slist_length( Cfg_ssrv.Clients ) );
+       pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
+    
        Fermer_connexion( client->connexion );
        pthread_mutex_destroy( &client->mutex_struct_used );
        if (client->util)            { g_free( client->util ); }
@@ -162,17 +165,15 @@
 /* Entrée: un mode                                                                                        */
 /* Sortie: un gchar *                                                                                     */
 /**********************************************************************************************************/
- static gchar *Mode_vers_string ( gint mode )
+ gchar *Mode_vers_string ( gint mode )
   { switch (mode)
      { case ATTENTE_CONNEXION_SSL       : return("ATTENTE_CONNEXION_SSL");
        case ENVOI_INTERNAL              : return("ENVOI_INTERNAL");
        case WAIT_FOR_IDENT              : return("WAIT_FOR_IDENT");
        case WAIT_FOR_NEWPWD             : return("WAIT_FOR_NEWPWD");
-       case ENVOI_HISTO                 : return("ENVOI_HISTO");
+       case ENVOI_SYNCHRO               : return("ENVOI_SYNCHRO");
 
        case ENVOI_GROUPE_FOR_UTIL       : return("ENVOI_GROUPE_FOR_UTIL");
-       case ENVOI_MNEMONIQUE_FOR_COURBE : return("ENVOI_MNEMONIQUE_FOR_COURBE");
-       case ENVOI_MNEMONIQUE_FOR_HISTO_COURBE : return("ENVOI_MNEMONIQUE_FOR_HISTO_COURBE");
        case ENVOI_MOTIF_ATELIER         : return("ENVOI_MOTIF_ATELIER");
        case ENVOI_COMMENT_ATELIER       : return("ENVOI_COMMENT_ATELIER");
        case ENVOI_PASSERELLE_ATELIER    : return("ENVOI_PASSERELLE_ATELIER");
