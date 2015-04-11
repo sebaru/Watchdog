@@ -135,9 +135,9 @@
        pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
 
        Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_les_infos_au_master: Sending EVENT (%03d to proceed)!", taille );
+                "Envoyer_les_infos_au_master: Sending EVENT %s (%03d to proceed)!", event->from, taille );
        Satellite_Envoyer_maitre( TAG_SATELLITE, SSTAG_CLIENT_SAT_SET_INTERNAL,
-                                (gchar *)&event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
+                                (gchar *)event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
        g_free(event);
      }
   }
