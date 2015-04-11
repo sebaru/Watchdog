@@ -30,11 +30,16 @@
 
  enum
   { EVENT_TYPE_STRING,
+	EVENT_TYPE_EA
   };
 
  struct CMD_TYPE_MSRV_EVENT
   { guint type;
     union { gchar string[48];
+		    struct { gint num;
+				     gboolean in_range;
+				     gint val_float;
+				   };
           };
   };
 

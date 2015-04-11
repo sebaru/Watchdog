@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Teleinfo/Teleinfo.c  Gestion des capteurs TELEINFO Watchdog 2.0                           */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     dim. 27 mai 2012 12:52:37 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Teleinfo/Teleinfo.c  Gestion des capteurs TELEINFO Watchdog 2.0                                                  */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                         dim. 27 mai 2012 12:52:37 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Teleinfo.c
  * This file is part of Watchdog
@@ -35,32 +35,32 @@
  #include <fcntl.h>
  #include <unistd.h>
 
- #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
+ #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Teleinfo.h"
 
-/**********************************************************************************************************/
-/* Teleinfo_Lire_config : Lit la config Watchdog et rempli la structure mémoire                           */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Teleinfo_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                               */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  gboolean Teleinfo_Lire_config ( void )
   { gchar *nom, *valeur;
     struct DB *db;
 
-    Cfg_teleinfo.lib->Thread_debug = FALSE;                                /* Settings default parameters */
+    Cfg_teleinfo.lib->Thread_debug = FALSE;                                                    /* Settings default parameters */
     Cfg_teleinfo.enable            = FALSE; 
     Cfg_teleinfo.min_ea            = 0;
     g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port),
                "%s", DEFAUT_PORT_TELEINFO );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                      /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_WARNING,
                 "Sms_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,                    /* Print Config */
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,                                        /* Print Config */
                 "Teleinfo_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "port" ) )
         { g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port), "%s", valeur ); }
@@ -77,15 +77,15 @@
      }
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Init_teleinfo: Initialisation de la ligne TELEINFO                                                     */
-/* Sortie: l'identifiant de la connexion                                                                  */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Init_teleinfo: Initialisation de la ligne TELEINFO                                                                         */
+/* Sortie: l'identifiant de la connexion                                                                                      */
+/******************************************************************************************************************************/
  static int Init_teleinfo ( void )
   { struct termios oldtio;
     int fd;
 
-    SEA_range( Cfg_teleinfo.min_ea + 0, 0 );                                  /* Initialisation des range */
+    SEA_range( Cfg_teleinfo.min_ea + 0, 0 );                                                      /* Initialisation des range */
     SEA_range( Cfg_teleinfo.min_ea + 1, 0 );
     SEA_range( Cfg_teleinfo.min_ea + 2, 0 );
     SEA_range( Cfg_teleinfo.min_ea + 3, 0 );
@@ -113,27 +113,53 @@
 
     return(fd);
   }
-/**********************************************************************************************************/
-/* Processer_trame: traitement de la trame recue par un microcontroleur                                   */
-/* Entrée: la trame a recue                                                                               */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Processer_trame: traitement de la trame recue par un microcontroleur                                                       */
+/* Entrée: la trame a recue                                                                                                   */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Processer_trame( void )
-  { 
+  { struct CMD_TYPE_MSRV_EVENT *event;
+	gint taille;
+
+    event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc0( sizeof( struct CMD_TYPE_MSRV_EVENT ) );
+    if(!event)                                                         /* Envoi de l'evenement au MSRV */
+     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
+                "Processer_trame: Malloc ERROR, Could not send Event to MSRV (%s)", Cfg_teleinfo.buffer );
+       return;
+     }
+
+    event->type = EVENT_TYPE_EA;
+    event->in_range = TRUE;
+    taille = 0;
     if ( ! strncmp ( Cfg_teleinfo.buffer, "ADCO", 4 ) )
-     { SEA( Cfg_teleinfo.min_ea, atof( Cfg_teleinfo.buffer + 5 ) ); }
+     { event->num = Cfg_teleinfo.min_ea;
+	   taille = 5;
+     }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "ISOUS", 5 ) )
-     { SEA( Cfg_teleinfo.min_ea + 1, atof( Cfg_teleinfo.buffer + 6 ) ); }
+     { event->num = Cfg_teleinfo.min_ea + 1;
+	   taille = 6;
+     }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHC", 4 ) )
-     { SEA( Cfg_teleinfo.min_ea + 2, atof( Cfg_teleinfo.buffer + 5 ) ); }
+     { event->num = Cfg_teleinfo.min_ea + 2;
+	   taille = 5;
+     }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHP", 4 ) )
-     { SEA( Cfg_teleinfo.min_ea + 3, atof( Cfg_teleinfo.buffer + 5 ) ); }
+     { event->num = Cfg_teleinfo.min_ea + 3;
+	   taille = 5;
+     }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "IINST", 5 ) )
-     { SEA( Cfg_teleinfo.min_ea + 4, atof( Cfg_teleinfo.buffer + 6 ) ); }
+     { event->num = Cfg_teleinfo.min_ea + 4;
+	   taille = 6;
+     }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "IMAX", 4 ) )
-     { SEA( Cfg_teleinfo.min_ea + 5, atof( Cfg_teleinfo.buffer + 5 ) ); }
+     { event->num = Cfg_teleinfo.min_ea + 5;
+	   taille = 5;
+     }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "PAPP", 4 ) )
-     { SEA( Cfg_teleinfo.min_ea + 6, atof( Cfg_teleinfo.buffer + 5 ) ); }
+     { event->num = Cfg_teleinfo.min_ea + 6;
+	   taille = 5;
+     }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HHPHC", 5 ) )
      { 
      }
@@ -150,25 +176,27 @@
                      "Processer_trame unknown trame = %s", Cfg_teleinfo.buffer );
            return;
          }
+    event->val_float = atof( Cfg_teleinfo.buffer + taille );
+    Envoyer_Event_msrv( event );
     Cfg_teleinfo.last_view = Partage->top;
   }
-/**********************************************************************************************************/
-/* Main: Fonction principale du thread Teleinfo                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Main: Fonction principale du thread Teleinfo                                                                               */
+/******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { gint retval, nbr_octet_lu;
     struct timeval tv;
     fd_set fdselect;
 
     prctl(PR_SET_NAME, "W-TINFOEDF", 0, 0, 0 );
-    memset( &Cfg_teleinfo, 0, sizeof(Cfg_teleinfo) );           /* Mise a zero de la structure de travail */
-    Cfg_teleinfo.lib = lib;                    /* Sauvegarde de la structure pointant sur cette librairie */
-    Cfg_teleinfo.lib->TID = pthread_self();                             /* Sauvegarde du TID pour le pere */
-    Teleinfo_Lire_config ();                            /* Lecture de la configuration logiciel du thread */
+    memset( &Cfg_teleinfo, 0, sizeof(Cfg_teleinfo) );                               /* Mise a zero de la structure de travail */
+    Cfg_teleinfo.lib = lib;                                        /* Sauvegarde de la structure pointant sur cette librairie */
+    Cfg_teleinfo.lib->TID = pthread_self();                                                 /* Sauvegarde du TID pour le pere */
+    Teleinfo_Lire_config ();                                                /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Demarrage . . . TID = %p", pthread_self() );
-    Cfg_teleinfo.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
+    Cfg_teleinfo.lib->Thread_run = TRUE;                                                                /* Le thread tourne ! */
 
     g_snprintf( lib->admin_prompt, sizeof(lib->admin_prompt), NOM_THREAD );
     g_snprintf( lib->admin_help,   sizeof(lib->admin_help),   "Manage TELEINFOEDF sensors" );
@@ -180,10 +208,10 @@
        goto end;
      }
 
-    nbr_octet_lu = 0;                                           /* Initialisation des compteurs et buffer */
+    nbr_octet_lu = 0;                                                               /* Initialisation des compteurs et buffer */
     memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
     Cfg_teleinfo.mode = TINFO_RETRING;
-    while( lib->Thread_run == TRUE)                                      /* On tourne tant que necessaire */
+    while( lib->Thread_run == TRUE)                                                          /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
 
@@ -194,9 +222,9 @@
 
        if (Cfg_teleinfo.reload == TRUE)
         { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE, "Run_thread: Reloading in progress" );
-          close(Cfg_teleinfo.fd);                                               /* Fermeture de la connexion FD */
+          close(Cfg_teleinfo.fd);                                                             /* Fermeture de la connexion FD */
           Cfg_teleinfo.fd = Init_teleinfo();
-          if (Cfg_teleinfo.fd<0)                                                   /* On valide l'acces aux ports */
+          if (Cfg_teleinfo.fd<0)                                                               /* On valide l'acces aux ports */
            { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_CRIT,
                       "Run_thread: Reloading with port %s failed", Cfg_teleinfo.port );
            }

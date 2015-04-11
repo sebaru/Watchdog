@@ -176,14 +176,17 @@
     reste = g_slist_length(Partage->com_msrv.liste_Event);
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-/*    Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-              "Gerer_arrive_Events: Recu Event EA(%03d)=%8.2f(int). Reste a traiter %03d",
-              num, Partage->ea[num].val_avant_ech, reste
-            );*/
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+              "Gerer_arrive_Events: Recu one event. Reste a traiter %03d",
+              reste
+            );
     Envoyer_Events_aux_abonnes ( event );
     if (Config.instance_is_master == TRUE)
      { switch( event->type )
         { case EVENT_TYPE_STRING: Gerer_arrive_Event_string ( event ); break;
+	      case EVENT_TYPE_EA    : SEA( event->num, event->val_float );
+	                              SEA_range( event->num, event->in_range );
+	                              break;
         }
      }
     g_free(event);
