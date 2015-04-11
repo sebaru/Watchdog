@@ -53,17 +53,17 @@
      { case SSTAG_CLIENT_SAT_SET_INTERNAL:
              { struct CMD_TYPE_MSRV_EVENT *event, *dup_event;
                event = (struct CMD_TYPE_MSRV_EVENT *)connexion->donnees;
-               dup_event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc( sizeof(struct CMD_TYPE_MSRV_EVENT) );
+               dup_event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc0( sizeof(struct CMD_TYPE_MSRV_EVENT) );
                if (dup_event)
                 { memcpy ( dup_event, event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
                   Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                           "Gerer_protocole_satellite: Receiving EVENT from satellite %s",
-                            client->util->nom );
+                           "Gerer_protocole_satellite: Receiving EVENT from satellite %s (thread %s)",
+                            client->util->nom, event->from );
                   Envoyer_Event_msrv( dup_event );
                 }
                else Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                             "Gerer_protocole_satellite: Memory Alloc Error for satellite %s",
-                              client->util->nom );
+                             "Gerer_protocole_satellite: Memory Alloc Error for satellite %s (thread %s)",
+                              client->util->nom, event->from );
              }
             break;
      }
