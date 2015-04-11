@@ -182,7 +182,7 @@
 
     nbr_octet_lu = 0;                                           /* Initialisation des compteurs et buffer */
     memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
-    Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
+    Cfg_teleinfo.mode = TINFO_RETRING;
     while( lib->Thread_run == TRUE)                                      /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
