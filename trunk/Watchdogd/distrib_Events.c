@@ -71,7 +71,7 @@
   { struct CMD_TYPE_MSRV_EVENT *event;
 
     event = New_Event( from, EVENT_TYPE_EA );
-    if(!event)                                                         /* Envoi de l'evenement au MSRV */
+    if(!event)                                                                                /* Envoi de l'evenement au MSRV */
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "New_Event_EA: Malloc ERROR, from = %s EA%03d=%6.2f(int)", from,num, val );
        return;
@@ -80,31 +80,31 @@
     event->val_float = val;
     Envoyer_Event_msrv ( event );
   }
-/**********************************************************************************************************/
-/* Abonner_distribution_EANA: Abonnement d'un thread aux diffusions d'une entree ANA                      */
-/* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
-/* Sortie : Néant                                                                                         */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Abonner_distribution_EANA: Abonnement d'un thread aux diffusions d'une entree ANA                                          */
+/* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                                             */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
  void Abonner_distribution_events ( void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event) )
   { pthread_mutex_lock ( &Partage->com_msrv.synchro );
     Liste_clients_Events = g_slist_prepend( Liste_clients_Events, Gerer_event );
     pthread_mutex_unlock ( &Partage->com_msrv.synchro );
   }
-/**********************************************************************************************************/
-/* Desabonner_distribution_EANA: Desabonnement d'un thread aux diffusions d'une entree ANA                */
-/* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
-/* Sortie : Néant                                                                                         */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Desabonner_distribution_EANA: Desabonnement d'un thread aux diffusions d'une entree ANA                                    */
+/* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                                             */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
  void Desabonner_distribution_events ( void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event) )
   { pthread_mutex_lock ( &Partage->com_msrv.synchro );
     Liste_clients_Events = g_slist_remove( Liste_clients_Events, Gerer_event );
     pthread_mutex_unlock ( &Partage->com_msrv.synchro );
   }
-/**********************************************************************************************************/
-/* Envoyer_message_aux_abonnes: Envoi le message en parametre aux abonnes                                 */
-/* Entrée : le message a envoyer                                                                          */
-/* Sortie : Néant                                                                                         */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Envoyer_message_aux_abonnes: Envoi le message en parametre aux abonnes                                                     */
+/* Entrée : le message a envoyer                                                                                              */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
  static void Envoyer_Events_aux_abonnes ( struct CMD_TYPE_MSRV_EVENT *event )
   { struct CMD_TYPE_MSRV_EVENT *dup_event;
 	GSList *liste;
@@ -123,11 +123,11 @@
      }
     pthread_mutex_unlock ( &Partage->com_msrv.synchro );
   }
-/**********************************************************************************************************/
-/* Map_event_to_mnemo: Associe l'event en parametre aux mnemoniques D.L.S                                 */
-/* Entrée: l'evenement à traiter                                                                          */
-/* Sortie: le mnemo en question, ou NULL si non-trouvé (ou multi trouvailles)                             */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Map_event_to_mnemo: Associe l'event en parametre aux mnemoniques D.L.S                                                     */
+/* Entrée: l'evenement à traiter                                                                                              */
+/* Sortie: le mnemo en question, ou NULL si non-trouvé (ou multi trouvailles)                                                 */
+/******************************************************************************************************************************/
  static struct CMD_TYPE_MNEMO_BASE *Map_event_to_mnemo( gchar *event )
   { struct CMD_TYPE_MNEMO_BASE *mnemo, *result_mnemo = NULL;
     gint nbr_result;
@@ -140,7 +140,7 @@
      }
     nbr_result = db->nbr_result;
           
-    if ( nbr_result == 0 )                                              /* Si pas d'enregistrement trouvé */
+    if ( nbr_result == 0 )                                                                  /* Si pas d'enregistrement trouvé */
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Map_event_to_mnemo: No match found for %s", event );
      }
@@ -150,28 +150,28 @@
                 "Map_event_to_mnemo: Match found for %s: Type %d Num %d - %s",
                  event, mnemo->type, mnemo->num, mnemo->libelle );
 
-       if (nbr_result==1) result_mnemo = mnemo;                /* Si un seul enregistrement, c'est le bon */
-       else g_free(mnemo);      /* Si trop, on les libere tous dans la mesure ou l'on ne sait que choisir */
+       if (nbr_result==1) result_mnemo = mnemo;                                    /* Si un seul enregistrement, c'est le bon */
+       else g_free(mnemo);                          /* Si trop, on les libere tous dans la mesure ou l'on ne sait que choisir */
      }
 
-    return (result_mnemo);                       /* A-t'on le seul et unique Mnemo associé à cet event ?? */
+    return (result_mnemo);                                           /* A-t'on le seul et unique Mnemo associé à cet event ?? */
   }
-/**********************************************************************************************************/
-/* Gerer_arrive_Event_string: Gere l'arrive d'un event de type string                                     */
-/* Entrée : l'evenement a traiter                                                                         */
-/* sortie : Néant                                                                                         */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Gerer_arrive_Event_string: Gere l'arrive d'un event de type string                                                         */
+/* Entrée : l'evenement a traiter                                                                                             */
+/* sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
  static void Gerer_arrive_Event_EA( struct CMD_TYPE_MSRV_EVENT *event )
   { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
              "Gerer_arrive_Event_EA: From %s -> Received EA%03d=%6.2f (val_int)",
               event->num, event->val_float );
     SEA( event->num, event->val_float );
   }
-/**********************************************************************************************************/
-/* Gerer_arrive_Event_string: Gere l'arrive d'un event de type string                                     */
-/* Entrée : l'evenement a traiter                                                                         */
-/* sortie : Néant                                                                                         */
-/**********************************************************************************************************/
+/*******************************************************************************************************************************/
+/* Gerer_arrive_Event_string: Gere l'arrive d'un event de type string                                                         */
+/* Entrée : l'evenement a traiter                                                                                             */
+/* sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
  static void Gerer_arrive_Event_string( struct CMD_TYPE_MSRV_EVENT *event )
   { struct CMD_TYPE_MNEMO_BASE *mnemo;
     mnemo = Map_event_to_mnemo ( event->string );
@@ -185,7 +185,7 @@
        g_snprintf( new_mnemo.mnemo_base.libelle,      sizeof(new_mnemo.mnemo_base.libelle),  "To be filled" );
        g_snprintf( new_mnemo.mnemo_base.command_text, sizeof(new_mnemo.mnemo_base.command_text), "%s", event->string );
 
-       if ( Ajouter_mnemo_fullDB ( &new_mnemo ) < 0 )            /* Ajout auto dans la base de mnemonique */
+       if ( Ajouter_mnemo_fullDB ( &new_mnemo ) < 0 )                                /* Ajout auto dans la base de mnemonique */
         { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                    "Gerer_arrive_Events_string: Error adding new mnemo in DB for event %s", event->string );
         }
@@ -193,7 +193,7 @@
      }
 
     switch ( mnemo->type )
-     { case MNEMO_MONOSTABLE:                                            /* Positionnement du bit interne */
+     { case MNEMO_MONOSTABLE:                                                                /* Positionnement du bit interne */
             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
                      "Gerer_arrive_Event_string: From %s -> Mise a un du bit M%03d", event->from, mnemo->num );
             Envoyer_commande_dls(mnemo->num);
@@ -210,19 +210,19 @@
                           mnemo->type, mnemo->num, event );
                 break;
      } 
-   g_free(mnemo);                                                      /* Libération du mnémonique traité */
+   g_free(mnemo);                                                                          /* Libération du mnémonique traité */
   }
-/**********************************************************************************************************/
-/* Gerer_arrive_Events_dls: Gestion de l'arrive des entrees ANAlogiques depuis DLS                        */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Gerer_arrive_Events_dls: Gestion de l'arrive des entrees ANAlogiques depuis DLS                                            */
+/* Entrée/Sortie: rien                                                                                                        */
+/******************************************************************************************************************************/
  void Gerer_arrive_Events ( void )
   { struct CMD_TYPE_MSRV_EVENT *event;
 
-    if (!Partage->com_msrv.liste_Event) return;                              /* Si pas de ea, on se barre */
+    if (!Partage->com_msrv.liste_Event) return;                                                  /* Si pas de ea, on se barre */
 
-    pthread_mutex_lock( &Partage->com_msrv.synchro );              /* Ajout dans la liste de ea a traiter */
-    event = Partage->com_msrv.liste_Event->data;                          /* Recuperation du numero de ea */
+    pthread_mutex_lock( &Partage->com_msrv.synchro );                                  /* Ajout dans la liste de ea a traiter */
+    event = Partage->com_msrv.liste_Event->data;                                              /* Recuperation du numero de ea */
     Partage->com_msrv.liste_Event = g_slist_remove ( Partage->com_msrv.liste_Event, event );
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
@@ -235,4 +235,4 @@
      }
     g_free(event);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

@@ -134,10 +134,16 @@
        taille = g_slist_length( Cfg_satellite.liste_Events );
        pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
 
-       Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_les_infos_au_master: Sending EVENT %s (%03d to proceed)!", event->from, taille );
-       Satellite_Envoyer_maitre( TAG_SATELLITE, SSTAG_CLIENT_SAT_SET_INTERNAL,
-                                (gchar *)event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
+       if ( event->type == EVENT_TYPE_EA &&                                    /* No man's land des EA pour la partie SYSteme */
+            100<=event->num && event->num<128 )
+        { /* Ignoring NoMan'sLand */ }
+       else
+        { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
+                   "Envoyer_les_infos_au_master: Sending EVENT %s (%03d to proceed)!", event->from, taille );
+
+          Satellite_Envoyer_maitre( TAG_SATELLITE, SSTAG_CLIENT_SAT_SET_INTERNAL,
+                                   (gchar *)event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
+        }
        g_free(event);
      }
   }
