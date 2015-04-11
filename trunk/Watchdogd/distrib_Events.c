@@ -163,10 +163,9 @@
 /**********************************************************************************************************/
  static void Gerer_arrive_Event_EA( struct CMD_TYPE_MSRV_EVENT *event )
   { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-             "Gerer_arrive_Event_EA: Received EA%03d=%d (val_int). In_range = %d",
-              event->num, event->val_float, event->in_range );
+             "Gerer_arrive_Event_EA: From %s -> Received EA%03d=%6.2f (val_int)",
+              event->num, event->val_float );
     SEA( event->num, event->val_float );
-    SEA_range( event->num, event->in_range );
   }
 /**********************************************************************************************************/
 /* Gerer_arrive_Event_string: Gere l'arrive d'un event de type string                                     */
@@ -196,12 +195,12 @@
     switch ( mnemo->type )
      { case MNEMO_MONOSTABLE:                                            /* Positionnement du bit interne */
             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                     "Gerer_arrive_Event_string: Mise a un du bit M%03d", mnemo->num );
+                     "Gerer_arrive_Event_string: From %s -> Mise a un du bit M%03d", event->from, mnemo->num );
             Envoyer_commande_dls(mnemo->num);
             break;
        case MNEMO_ENTREE:
             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                     "Gerer_arrive_Event_string: Mise a un du bit E%03d", mnemo->num );
+                     "Gerer_arrive_Event_string: From %s -> Mise a un du bit E%03d", event->from, mnemo->num );
             Envoyer_entree_dls(mnemo->num, 1);
             break;
        case MNEMO_ENTREE_ANA:
@@ -219,20 +218,14 @@
 /**********************************************************************************************************/
  void Gerer_arrive_Events ( void )
   { struct CMD_TYPE_MSRV_EVENT *event;
-    gint reste;
 
     if (!Partage->com_msrv.liste_Event) return;                              /* Si pas de ea, on se barre */
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );              /* Ajout dans la liste de ea a traiter */
     event = Partage->com_msrv.liste_Event->data;                          /* Recuperation du numero de ea */
     Partage->com_msrv.liste_Event = g_slist_remove ( Partage->com_msrv.liste_Event, event );
-    reste = g_slist_length(Partage->com_msrv.liste_Event);
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-              "Gerer_arrive_Events: Recu one event from %s. Reste a traiter %03d. Sending to abonnes",
-              event->from, reste
-            );
     Envoyer_Events_aux_abonnes ( event );
     if (Config.instance_is_master == TRUE)
      { switch( event->type )

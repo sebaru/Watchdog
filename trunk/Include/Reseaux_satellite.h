@@ -38,7 +38,6 @@
 	gchar from[12];
     union { gchar string[48];
 		    struct { gint num;
-				     gboolean in_range;
 				     gint val_float;
 				   };
           };
