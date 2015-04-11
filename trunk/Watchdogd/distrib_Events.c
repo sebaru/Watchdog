@@ -71,7 +71,7 @@
        if (dup_event)
         { memcpy( dup_event, event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
 	      Gerer_event = liste->data;
-          Gerer_event ( event );
+          Gerer_event ( dup_event );
         }
        liste = liste->next;
      }
