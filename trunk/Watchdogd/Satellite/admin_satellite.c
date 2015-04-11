@@ -74,9 +74,8 @@
     Admin_write( connexion, chaine );
 
     pthread_mutex_lock ( &Cfg_satellite.lib->synchro );
-    g_snprintf( chaine, sizeof(chaine), " | - processing %03d DI, %03d AI\n",
-                g_slist_length ( Cfg_satellite.Liste_entreeTOR ),
-                g_slist_length ( Cfg_satellite.Liste_entreeANA ) );
+    g_snprintf( chaine, sizeof(chaine), " | - processing %03d Events\n",
+                g_slist_length ( Cfg_satellite.liste_Events ) );
     pthread_mutex_unlock ( &Cfg_satellite.lib->synchro );
     Admin_write( connexion, chaine );
     Admin_write( connexion, " -\n" );

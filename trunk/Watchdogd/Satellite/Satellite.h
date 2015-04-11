@@ -47,8 +47,6 @@
   { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
     gboolean enable;                              /* True si la config indique que le thread doit tourner */
-    GSList *Liste_entreeTOR;                                       /* liste de struct MSGDB msg a envoyer */
-    GSList *Liste_entreeANA;                                       /* liste de struct MSGDB msg a envoyer */
     GSList *liste_Events;                                          /* liste de struct MSGDB msg a envoyer */
     gchar master_host[80];                                                /* Nom DNS du l'instance MASTER */
     guint master_port;                                         /* Port TCP d'attaque de l'instance MASTER */
