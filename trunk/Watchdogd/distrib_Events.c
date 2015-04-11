@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/distrib_Events.c        Distribution des changements d'etats motif                           */
-/* Projet WatchDog version 2.0       Gestion d'habitat                    sam. 24 janv. 2015 13:53:26 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/distrib_Events.c        Distribution des changements d'etats motif                                               */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                        sam. 24 janv. 2015 13:53:26 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * distrib_Events.c
  * This file is part of Watchdog
@@ -29,11 +29,57 @@
  #include <unistd.h>
  #include <time.h>
 
-/******************************************** Prototypes de fonctions *************************************/
+/****************************************************** Prototypes de fonctions ***********************************************/
  #include "watchdogd.h"
 
  static GSList *Liste_clients_Events = NULL;
 
+/******************************************************************************************************************************/
+/* Envoyer_Event_msrv: ajoute un evenement dans la liste a traiter                                                            */
+/* Entrée : l'evenement en question                                                                                           */
+/* sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Envoyer_Event_msrv( struct CMD_TYPE_MSRV_EVENT *event )
+  { pthread_mutex_lock( &Partage->com_msrv.synchro );
+    Partage->com_msrv.liste_Event = g_slist_append ( Partage->com_msrv.liste_Event, event );
+    pthread_mutex_unlock( &Partage->com_msrv.synchro );
+  }
+/******************************************************************************************************************************/
+/* New_Event: Creation d'un nouvel evenement                                                                                  */
+/* Entrée : la source de l'evenement (thread et son type)                                                                     */
+/* Sortie : Une structure Event ou NULL si pb                                                                                 */
+/******************************************************************************************************************************/
+ static struct CMD_TYPE_MSRV_EVENT *New_Event ( gchar *from, gint type )
+  { struct CMD_TYPE_MSRV_EVENT *event;
+
+    event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc0( sizeof( struct CMD_TYPE_MSRV_EVENT ) );
+    if(!event)                                                         /* Envoi de l'evenement au MSRV */
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "New_Event: Malloc ERROR, from = %s", from );
+       return(NULL);
+     }
+    g_snprintf( event->from, sizeof(event->from), from );
+    event->type = type;
+    return(event);
+  }
+/******************************************************************************************************************************/
+/* New_Event: Creation d'un nouvel evenement EA                                                                               */
+/* Entrée : la source de l'evenement (thread et son type)                                                                     */
+/* Sortie : Une structure Event ou NULL si pb                                                                                 */
+/******************************************************************************************************************************/
+ void Send_Event_EA ( gchar *from, gint num, gfloat val )
+  { struct CMD_TYPE_MSRV_EVENT *event;
+
+    event = New_Event( from, EVENT_TYPE_EA );
+    if(!event)                                                         /* Envoi de l'evenement au MSRV */
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "New_Event_EA: Malloc ERROR, from = %s EA%03d=%6.2f(int)", from,num, val );
+       return;
+     }
+    event->num = num;
+    event->val_float = val;
+    Envoyer_Event_msrv ( event );
+  }
 /**********************************************************************************************************/
 /* Abonner_distribution_EANA: Abonnement d'un thread aux diffusions d'une entree ANA                      */
 /* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                         */
@@ -166,16 +212,6 @@
                 break;
      } 
    g_free(mnemo);                                                      /* Libération du mnémonique traité */
-  }
-/**********************************************************************************************************/
-/* Envoyer_Event_msrv: Demande a D.L.S de positionner le bit d'entrée en parametre, furtive ou non        */
-/* Entrée : le numéro de l'entrée, la valeur de l'état a positionner, et la furtivité de l'evenement      */
-/* sortie : Néant                                                                                         */
-/**********************************************************************************************************/
- void Envoyer_Event_msrv( struct CMD_TYPE_MSRV_EVENT *event )
-  { pthread_mutex_lock( &Partage->com_msrv.synchro );
-    Partage->com_msrv.liste_Event = g_slist_append ( Partage->com_msrv.liste_Event, event );
-    pthread_mutex_unlock( &Partage->com_msrv.synchro );
   }
 /**********************************************************************************************************/
 /* Gerer_arrive_Events_dls: Gestion de l'arrive des entrees ANAlogiques depuis DLS                        */
