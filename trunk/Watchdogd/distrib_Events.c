@@ -110,6 +110,18 @@
 /* Entrée : l'evenement a traiter                                                                         */
 /* sortie : Néant                                                                                         */
 /**********************************************************************************************************/
+ static void Gerer_arrive_Event_EA( struct CMD_TYPE_MSRV_EVENT *event )
+  { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+             "Gerer_arrive_Event_EA: Received EA%03d=%d (val_int). In_range = %d",
+              event->num, event->val_float, event->in_range );
+    SEA( event->num, event->val_float );
+    SEA_range( event->num, event->in_range );
+  }
+/**********************************************************************************************************/
+/* Gerer_arrive_Event_string: Gere l'arrive d'un event de type string                                     */
+/* Entrée : l'evenement a traiter                                                                         */
+/* sortie : Néant                                                                                         */
+/**********************************************************************************************************/
  static void Gerer_arrive_Event_string( struct CMD_TYPE_MSRV_EVENT *event )
   { struct CMD_TYPE_MNEMO_BASE *mnemo;
     mnemo = Map_event_to_mnemo ( event->string );
@@ -184,9 +196,7 @@
     if (Config.instance_is_master == TRUE)
      { switch( event->type )
         { case EVENT_TYPE_STRING: Gerer_arrive_Event_string ( event ); break;
-	      case EVENT_TYPE_EA    : SEA( event->num, event->val_float );
-	                              SEA_range( event->num, event->in_range );
-	                              break;
+	      case EVENT_TYPE_EA    : Gerer_arrive_Event_EA( event );      break;
         }
      }
     g_free(event);
