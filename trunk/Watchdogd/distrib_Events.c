@@ -60,14 +60,19 @@
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
  static void Envoyer_Events_aux_abonnes ( struct CMD_TYPE_MSRV_EVENT *event )
-  { GSList *liste;
+  { struct CMD_TYPE_MSRV_EVENT *dup_event;
+	GSList *liste;
 
     pthread_mutex_lock ( &Partage->com_msrv.synchro );
     liste = Liste_clients_Events;
     while (liste)                                                              /* Pour chacun des abonnes */
      { void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event);
-       Gerer_event = liste->data;
-       Gerer_event ( event );
+       dup_event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc ( sizeof(struct CMD_TYPE_MSRV_EVENT) );
+       if (dup_event)
+        { memcpy( dup_event, event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
+	      Gerer_event = liste->data;
+          Gerer_event ( event );
+        }
        liste = liste->next;
      }
     pthread_mutex_unlock ( &Partage->com_msrv.synchro );

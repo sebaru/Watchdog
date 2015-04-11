@@ -106,11 +106,13 @@
     if (taille > 150)
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
                 "Satellite_Gerer_events: DROPPING (length = %03d > 150)", taille );
+       g_free( event );
        return;
      }
     else if (Cfg_satellite.lib->Thread_run == FALSE)
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
                 "Satellite_Gerer_events: Thread is down. Dropping Event" );
+       g_free( event );
        return;
      }
 
