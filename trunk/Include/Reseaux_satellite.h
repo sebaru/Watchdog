@@ -38,7 +38,7 @@
 	gchar from[12];
     union { gchar string[48];
 		    struct { gint num;
-				     gint val_float;
+				     gfloat val_float;
 				   };
           };
   };

@@ -53,7 +53,7 @@
   { struct CMD_TYPE_MSRV_EVENT *event;
 
     event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc0( sizeof( struct CMD_TYPE_MSRV_EVENT ) );
-    if(!event)                                                         /* Envoi de l'evenement au MSRV */
+    if(!event)                                                                                /* Envoi de l'evenement au MSRV */
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "New_Event: Malloc ERROR, from = %s", from );
        return(NULL);
@@ -71,11 +71,7 @@
   { struct CMD_TYPE_MSRV_EVENT *event;
 
     event = New_Event( from, EVENT_TYPE_EA );
-    if(!event)                                                                                /* Envoi de l'evenement au MSRV */
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "New_Event_EA: Malloc ERROR, from = %s EA%03d=%6.2f(int)", from,num, val );
-       return;
-     }
+    if(!event) return;
     event->num = num;
     event->val_float = val;
     Envoyer_Event_msrv ( event );
