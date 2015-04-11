@@ -45,12 +45,6 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_tempoDB: DB connexion failed" );
-       return(FALSE);
-     }
-
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.num,%s.delai_on,%s.min_on,%s.max_on,%s.delai_off"
                 " FROM %s"
