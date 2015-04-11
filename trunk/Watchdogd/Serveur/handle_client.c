@@ -100,7 +100,7 @@
               "Run_handle_client: Demarrage . . . TID = %p", pthread_self() );
 
     while( Cfg_ssrv.lib->Thread_run == TRUE )                            /* On tourne tant que necessaire */
-     { usleep(100000);
+     { usleep(1000);
        sched_yield();
 
        if (client->mode == DECONNECTE)                                        /* Deconnection des clients */

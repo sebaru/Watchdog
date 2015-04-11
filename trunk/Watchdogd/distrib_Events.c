@@ -194,8 +194,8 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-              "Gerer_arrive_Events: Recu one event. Reste a traiter %03d",
-              reste
+              "Gerer_arrive_Events: Recu one event from %s. Reste a traiter %03d. Sending to abonnes",
+              event->from, reste
             );
     Envoyer_Events_aux_abonnes ( event );
     if (Config.instance_is_master == TRUE)

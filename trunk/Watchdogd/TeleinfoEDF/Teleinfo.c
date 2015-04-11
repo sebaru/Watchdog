@@ -129,6 +129,7 @@
        return;
      }
 
+    g_snprintf( event->from, sizeof(event->from), "%s", NOM_THREAD );
     event->type = EVENT_TYPE_EA;
     event->in_range = TRUE;
     taille = 0;

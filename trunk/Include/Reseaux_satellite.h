@@ -35,6 +35,7 @@
 
  struct CMD_TYPE_MSRV_EVENT
   { guint type;
+	gchar from[12];
     union { gchar string[48];
 		    struct { gint num;
 				     gboolean in_range;
