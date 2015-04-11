@@ -186,11 +186,11 @@
      { Partage->top++;
        if (!Partage->top)                         /* Si on passe par zero, on le dit (DEBUG interference) */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Traitement Signaux: Timer: Partage->top = 0 !!" ); }
-       if (!(Partage->top%5))                                          /* Cligno toutes les demi-secondes */
+       if (!(Partage->top%5))                                                              /* Cligno toutes les demi-secondes */
         { SB(5, !B(5)); }
-       if (!(Partage->top%3))                                             /* Cligno toutes les 3 dixièmes */
+       if (!(Partage->top%3))                                                                 /* Cligno toutes les 3 dixièmes */
         { SB(6, !B(6)); }
-       if (!(Partage->top%10))                                              /* Cligno toutes les secondes */
+       if (!(Partage->top%10))                                                                  /* Cligno toutes les secondes */
         { SB(4, !B(4));
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
           Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
@@ -201,15 +201,15 @@
           Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
           Partage->audit_tour_dls_per_sec = 0;
           Send_Event_EA ( Config.instance_id, NUM_EA_SYS_TOUR_DLS_PER_SEC, Partage->audit_tour_dls_per_sec_hold );/* historique */
-          if (Partage->audit_tour_dls_per_sec_hold > 100)                       /* Moyennage tour DLS/sec */
+          if (Partage->audit_tour_dls_per_sec_hold > 100)                                           /* Moyennage tour DLS/sec */
            { Partage->com_dls.temps_sched += 50; }
           else if (Partage->audit_tour_dls_per_sec_hold < 80)
            { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
           Send_Event_EA ( Config.instance_id, NUM_EA_SYS_DLS_WAIT, Partage->com_dls.temps_sched );              /* historique */
         }
 
-       Partage->top_cdg_plugin_dls++;                                        /* Chien de garde plugin DLS */
-       if (Partage->top_cdg_plugin_dls>200)                     /* Si pas de réponse D.L.S en 20 secondes */
+       Partage->top_cdg_plugin_dls++;                                                            /* Chien de garde plugin DLS */
+       if (Partage->top_cdg_plugin_dls>200)                                         /* Si pas de réponse D.L.S en 20 secondes */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Traitement signaux: CDG plugin DLS !!" );
           Partage->top_cdg_plugin_dls = 0;
         }

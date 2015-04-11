@@ -164,7 +164,7 @@
  static void Gerer_arrive_Event_EA( struct CMD_TYPE_MSRV_EVENT *event )
   { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
              "Gerer_arrive_Event_EA: From %s -> Received EA%03d=%6.2f (val_int)",
-              event->num, event->val_float );
+              event->from, event->num, event->val_float );
     SEA( event->num, event->val_float );
   }
 /*******************************************************************************************************************************/
