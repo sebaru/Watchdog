@@ -180,16 +180,9 @@
        goto end;
      }
 
-    Cfg_teleinfo.fd = Init_teleinfo();
-    if (Cfg_teleinfo.fd<0)                                                   /* On valide l'acces aux ports */
-     { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_CRIT,
-                 "Run_thread: Init TELEINFO failed. exiting..." );
-       goto end;
-     }
-    else { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,"Acces TELEINFO FD=%d", Cfg_teleinfo.fd ); }
-
     nbr_octet_lu = 0;                                           /* Initialisation des compteurs et buffer */
     memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
+    Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
     while( lib->Thread_run == TRUE)                                      /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
@@ -210,30 +203,53 @@
           Cfg_teleinfo.reload = FALSE;
         }
 
-/***************************************** Reception trame TELEINFO ***************************************/
-       FD_ZERO(&fdselect);                                       /* Reception sur la ligne serie TELEINFO */
+       if (Cfg_teleinfo.mode == TINFO_WAIT_BEFORE_RETRY)
+        { if ( Partage->top <= Cfg_teleinfo.date_next_retry )
+		   { Cfg_teleinfo.mode = TINFO_RETRING;
+			 Cfg_teleinfo.date_next_retry = 0;
+		   }
+		  else continue;
+		}
+
+       if (Cfg_teleinfo.mode == TINFO_RETRING)
+        { Cfg_teleinfo.fd = Init_teleinfo();
+          if (Cfg_teleinfo.fd<0)                                                               /* On valide l'acces aux ports */
+           { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
+                       "Run_thread: Init TELEINFO failed. Re-trying in %ds", TINFO_RETRY_DELAI );
+             Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
+             Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
+           }
+          else
+           { Cfg_teleinfo.mode = TINFO_CONNECTED;
+			 Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_INFO,"Acces TELEINFO FD=%d", Cfg_teleinfo.fd );
+		   }
+        }
+
+/************************************************ Reception trame TELEINFO ****************************************************/
+       if (Cfg_teleinfo.mode != TINFO_CONNECTED) continue;
+       FD_ZERO(&fdselect);                                                           /* Reception sur la ligne serie TELEINFO */
        FD_SET(Cfg_teleinfo.fd, &fdselect );
        tv.tv_sec = 1;
        tv.tv_usec= 0;
-       retval = select(Cfg_teleinfo.fd+1, &fdselect, NULL, NULL, &tv );         /* Attente d'un caractere */
+       retval = select(Cfg_teleinfo.fd+1, &fdselect, NULL, NULL, &tv );                             /* Attente d'un caractere */
        if (retval>=0 && FD_ISSET(Cfg_teleinfo.fd, &fdselect) )
         { int cpt;
 
           cpt = read( Cfg_teleinfo.fd, (unsigned char *)&Cfg_teleinfo.buffer + nbr_octet_lu, 1 );
           if (cpt>0)
-           { if (Cfg_teleinfo.buffer[nbr_octet_lu] == '\n')                      /* Process de la trame ? */
-              { Cfg_teleinfo.buffer[nbr_octet_lu] = 0x0;                        /* Caractère fin de trame */
+           { if (Cfg_teleinfo.buffer[nbr_octet_lu] == '\n')                                          /* Process de la trame ? */
+              { Cfg_teleinfo.buffer[nbr_octet_lu] = 0x0;                                            /* Caractère fin de trame */
                 Processer_trame();
                 nbr_octet_lu = 0;
                 memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
               }
-             else if (nbr_octet_lu + cpt < TAILLE_BUFFER_TELEINFO)    /* Encore en dessous de la limite ? */
+             else if (nbr_octet_lu + cpt < TAILLE_BUFFER_TELEINFO)                        /* Encore en dessous de la limite ? */
               { /* Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
                          "Run_thread: Get one char : %d, %c (pos %d)",
                           Cfg_teleinfo.buffer[nbr_octet_lu], Cfg_teleinfo.buffer[nbr_octet_lu], nbr_octet_lu );*/
-                nbr_octet_lu += cpt;                                 /* Preparation du prochain caractere */
+                nbr_octet_lu += cpt;                                                     /* Preparation du prochain caractere */
               }
-             else { nbr_octet_lu = 0;                                          /* Depassement de tampon ! */
+             else { nbr_octet_lu = 0;                                                              /* Depassement de tampon ! */
                     memset (&Cfg_teleinfo.buffer, 0, TAILLE_BUFFER_TELEINFO );
                     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
                              "Run_thread: BufferOverflow, dropping trame" );
@@ -241,15 +257,21 @@
              
            }
         }
-       else if (retval < 0) sleep(2);                               /* Si erreur, on attend deux secondes */
+       else if (retval < 0)                                       /* Si erreur, on ferme la connexion et on retente plus tard */
+        { close(Cfg_teleinfo.fd);
+	      Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
+                   "Run_thread: Select Error, closing connexion and re-trying in %ds", TINFO_RETRY_DELAI );
+          Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
+          Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
+        }
      }
-    close(Cfg_teleinfo.fd);                                               /* Fermeture de la connexion FD */
+    close(Cfg_teleinfo.fd);                                                                   /* Fermeture de la connexion FD */
 
 end:
     Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Down . . . TID = %p", pthread_self() );
-    Cfg_teleinfo.lib->Thread_run = FALSE;                                   /* Le thread ne tourne plus ! */
-    Cfg_teleinfo.lib->TID = 0;                            /* On indique au master que le thread est mort. */
+    Cfg_teleinfo.lib->Thread_run = FALSE;                                                       /* Le thread ne tourne plus ! */
+    Cfg_teleinfo.lib->TID = 0;                                                /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

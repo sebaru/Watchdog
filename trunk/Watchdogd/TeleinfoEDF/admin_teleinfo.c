@@ -54,8 +54,8 @@
         }
      }
     else if ( ! strcmp ( commande, "status" ) )
-     { g_snprintf( chaine, sizeof(chaine), " Port '%s' -> Last_view = %d (%.1ds ago)\n",
-                   Cfg_teleinfo.port, Cfg_teleinfo.last_view, (Partage->top - Cfg_teleinfo.last_view)/10
+     { g_snprintf( chaine, sizeof(chaine), " Port '%s' mode %d -> Last_view = %d (%.1ds ago)\n",
+                   Cfg_teleinfo.port, Cfg_teleinfo.mode, Cfg_teleinfo.last_view, (Partage->top - Cfg_teleinfo.last_view)/10
                  );
        Admin_write ( connexion, chaine );
      }
