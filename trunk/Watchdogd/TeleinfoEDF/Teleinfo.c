@@ -133,33 +133,40 @@
     event->type = EVENT_TYPE_EA;
     event->in_range = TRUE;
     taille = 0;
-    if ( ! strncmp ( Cfg_teleinfo.buffer, "ADCO", 4 ) )
+    if ( (! strncmp ( Cfg_teleinfo.buffer, "ADCO", 4 )) && Cfg_teleinfo.last_view_adco + 300 <= Partage->top )
      { event->num = Cfg_teleinfo.min_ea;
 	   taille = 5;
+	   Cfg_teleinfo.last_view_adco = Partage->top;
      }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "ISOUS", 5 ) )
+    else if ( (! strncmp ( Cfg_teleinfo.buffer, "ISOUS", 5 )) && Cfg_teleinfo.last_view_isous + 300 <= Partage->top )
      { event->num = Cfg_teleinfo.min_ea + 1;
 	   taille = 6;
+	   Cfg_teleinfo.last_view_isous = Partage->top;
      }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHC", 4 ) )
+    else if ( (! strncmp ( Cfg_teleinfo.buffer, "HCHC", 4 )) && Cfg_teleinfo.last_view_hchc + 300 <= Partage->top )
      { event->num = Cfg_teleinfo.min_ea + 2;
 	   taille = 5;
+	   Cfg_teleinfo.last_view_hchc = Partage->top;
      }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "HCHP", 4 ) )
+    else if ( (! strncmp ( Cfg_teleinfo.buffer, "HCHP", 4 )) && Cfg_teleinfo.last_view_hchp + 300 <= Partage->top )
      { event->num = Cfg_teleinfo.min_ea + 3;
 	   taille = 5;
+	   Cfg_teleinfo.last_view_hchp = Partage->top;
      }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "IINST", 5 ) )
+    else if ( (! strncmp ( Cfg_teleinfo.buffer, "IINST", 5 )) && Cfg_teleinfo.last_view_iinst + 300 <= Partage->top )
      { event->num = Cfg_teleinfo.min_ea + 4;
 	   taille = 6;
+	   Cfg_teleinfo.last_view_iinst = Partage->top;
      }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "IMAX", 4 ) )
+    else if ( (! strncmp ( Cfg_teleinfo.buffer, "IMAX", 4 )) && Cfg_teleinfo.last_view_imax + 300 <= Partage->top )
      { event->num = Cfg_teleinfo.min_ea + 5;
 	   taille = 5;
+	   Cfg_teleinfo.last_view_imax = Partage->top;
      }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "PAPP", 4 ) )
+    else if ( (! strncmp ( Cfg_teleinfo.buffer, "PAPP", 4 )) && Cfg_teleinfo.last_view_papp + 300 <= Partage->top )
      { event->num = Cfg_teleinfo.min_ea + 6;
 	   taille = 5;
+	   Cfg_teleinfo.last_view_papp = Partage->top;
      }
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "HHPHC", 5 ) )
      { 
@@ -173,10 +180,7 @@
     else if ( ! strncmp ( Cfg_teleinfo.buffer, "OPTARIF", 7 ) )
      { 
      }
-    else { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_DEBUG,
-                     "Processer_trame unknown trame = %s", Cfg_teleinfo.buffer );
-           return;
-         }
+    else { return; }
     event->val_float = atof( Cfg_teleinfo.buffer + taille );
     Envoyer_Event_msrv( event );
     Cfg_teleinfo.last_view = Partage->top;

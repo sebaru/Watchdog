@@ -48,6 +48,13 @@
     gint  min_ea;                                    /* Numéro de la premiere entrée analogique gérée par la TELEINFO EDF USB */
     gint  fd;                                                               /* File Descriptor d'acces au module Teleinfo USB */
     gint  last_view;                                                                            /* Date du dernier echange OK */
+    gint  last_view_adco;
+    gint  last_view_isous;
+    gint  last_view_hchc;
+    gint  last_view_hchp;
+    gint  last_view_iinst;
+    gint  last_view_imax;
+    gint  last_view_papp;
     gboolean reload;
     gboolean enable;                                                                                      /* Enable at boot ? */
     gchar buffer[TAILLE_BUFFER_TELEINFO];
