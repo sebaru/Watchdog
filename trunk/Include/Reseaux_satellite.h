@@ -43,20 +43,10 @@
           };
   };
 
-
- struct CMD_TYPE_SATELLITE
-  { guchar type;
-    guint  num;
-    union { gint   val_int;
-            gfloat val_float;
-            struct CMD_TYPE_MSRV_EVENT event;
-          };
-  };
-
  enum 
-  { SSTAG_CLIENT_SET_INTERNAL,                      /* Le client demande le positionnement de bit interne */
+  { SSTAG_CLIENT_SAT_SET_INTERNAL,                                      /* Le client demande le positionnement de bit interne */
   };
 
 #endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
 

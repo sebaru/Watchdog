@@ -50,35 +50,20 @@
      }
 
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_CLIENT_SET_INTERNAL:
-             { struct CMD_TYPE_SATELLITE *sat;
-               struct CMD_TYPE_MSRV_EVENT *dup_event;
-               sat = (struct CMD_TYPE_SATELLITE *)connexion->donnees;
-               switch (sat->type)
-                { case 255: dup_event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc( sizeof(struct CMD_TYPE_MSRV_EVENT) );
-                           if (dup_event)
-                            { memcpy ( dup_event, &sat->event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
-                              Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                                         "Gerer_protocole_satellite: Receiving EVENT from satellite %s",
-                                          client->util->nom );
-                              Envoyer_Event_msrv( dup_event );
-                            }
-                           else Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                                         "Gerer_protocole_satellite: Memory Alloc Error for satellite %s",
-                                          client->util->nom );
-                           break;
-                  case MNEMO_ENTREE_ANA: SEA ( sat->num, sat->val_float );
-
-                                         Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                                        "Gerer_protocole_satellite: Setting type SEA(%03d)=%8.2f from satellite %s",
-                                         sat->num, sat->val_float, client->util->nom );
-                                         break;
-                  case MNEMO_ENTREE    : Envoyer_entree_dls ( sat->num, sat->val_int );
-                                         Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                                        "Gerer_protocole_satellite: Setting type SE(%03d)=%03d from satellite %s",
-                                         sat->num, sat->val_int, client->util->nom );
-                                         break;
+     { case SSTAG_CLIENT_SAT_SET_INTERNAL:
+             { struct CMD_TYPE_MSRV_EVENT *event, *dup_event;
+               event = (struct CMD_TYPE_MSRV_EVENT *)connexion->donnees;
+               dup_event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc( sizeof(struct CMD_TYPE_MSRV_EVENT) );
+               if (dup_event)
+                { memcpy ( dup_event, event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
+                  Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                           "Gerer_protocole_satellite: Receiving EVENT from satellite %s",
+                            client->util->nom );
+                  Envoyer_Event_msrv( dup_event );
                 }
+               else Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
+                             "Gerer_protocole_satellite: Memory Alloc Error for satellite %s",
+                              client->util->nom );
              }
             break;
      }

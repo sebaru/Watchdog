@@ -92,60 +92,6 @@
     return(TRUE);
   }
 /**********************************************************************************************************/
-/* Satellite_Gerer_message: Fonction d'abonné appellé lorsqu'une EANA est modifiée.                       */
-/* Entrée: le numéro de EANA                                                                              */
-/* Sortie : Néant                                                                                         */
-/**********************************************************************************************************/
- static void Satellite_Gerer_entreeANA ( gint num_ea )
-  { gint taille;
-
-    pthread_mutex_lock( &Cfg_satellite.lib->synchro );                   /* Ajout dans la liste a traiter */
-    taille = g_slist_length( Cfg_satellite.Liste_entreeANA );
-    pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
-
-    if (taille > 150)
-     { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
-                "Satellite_Gerer_entreeANA: DROP EANA %03d (length = %03d > 150)", num_ea, taille);
-       return;
-     }
-    else if (Cfg_satellite.lib->Thread_run == FALSE)
-     { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
-                "Satellite_Gerer_entreeANA: Thread is down. Dropping num_ea = %03d", num_ea );
-       return;
-     }
-
-    pthread_mutex_lock ( &Cfg_satellite.lib->synchro );                               /* Ajout a la liste */
-    Cfg_satellite.Liste_entreeANA = g_slist_append ( Cfg_satellite.Liste_entreeANA, GINT_TO_POINTER(num_ea) );
-    pthread_mutex_unlock ( &Cfg_satellite.lib->synchro );
-  }
-/**********************************************************************************************************/
-/* Satellite_Gerer_message: Fonction d'abonné appellé lorsqu'une EANA est modifiée.                       */
-/* Entrée: le numéro de EANA                                                                              */
-/* Sortie : Néant                                                                                         */
-/**********************************************************************************************************/
- static void Satellite_Gerer_entree ( gint num )
-  { gint taille;
-
-    pthread_mutex_lock( &Cfg_satellite.lib->synchro );                   /* Ajout dans la liste a traiter */
-    taille = g_slist_length( Cfg_satellite.Liste_entreeTOR );
-    pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
-
-    if (taille > 150)
-     { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_WARNING,
-                "Satellite_Gerer_entree: DROP E%03d (length = %03d > 150)", num, taille);
-       return;
-     }
-    else if (Cfg_satellite.lib->Thread_run == FALSE)
-     { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_INFO,
-                "Satellite_Gerer_entree: Thread is down. Dropping num_e = %03d", num );
-       return;
-     }
-
-    pthread_mutex_lock ( &Cfg_satellite.lib->synchro );                               /* Ajout a la liste */
-    Cfg_satellite.Liste_entreeTOR = g_slist_append ( Cfg_satellite.Liste_entreeTOR, GINT_TO_POINTER(num) );
-    pthread_mutex_unlock ( &Cfg_satellite.lib->synchro );
-  }
-/**********************************************************************************************************/
 /* Satellite_Gerer_events: Fonction d'abonné appellé par MSRV lorsqu'un EVENT est disponible              */
 /* Entrée: l'event associé                                                                                */
 /* Sortie : Néant                                                                                         */
@@ -177,57 +123,18 @@
 /* Entrée : rien, sortie : rien                                                                           */
 /**********************************************************************************************************/
  static void Envoyer_les_infos_au_master ( void )
-  { struct CMD_TYPE_SATELLITE sat;
-
-    sat.type = MNEMO_ENTREE_ANA;
-    while (Cfg_satellite.Liste_entreeANA)
-     { gint num_ea;
-       pthread_mutex_lock( &Cfg_satellite.lib->synchro );               /* Récupération de l'EA a traiter */
-       num_ea = GPOINTER_TO_INT(Cfg_satellite.Liste_entreeANA->data);
-       Cfg_satellite.Liste_entreeANA = g_slist_remove( Cfg_satellite.Liste_entreeANA, GINT_TO_POINTER(num_ea) );
-       pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
-
-       if ( 100<=num_ea && num_ea<128 ) continue;          /* No man's land des EA pour la partie SYSteme */
-
-       sat.num       = num_ea;
-       sat.val_float = Partage->ea[ num_ea ].val_avant_ech;
-       Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_les_infos_au_master: Sending EA(%03d)=%f", sat.num, sat.val_float );
-       Satellite_Envoyer_maitre( TAG_SATELLITE, SSTAG_CLIENT_SET_INTERNAL,
-                                (gchar *)&sat, sizeof(struct CMD_TYPE_SATELLITE) );
-     }
-
-    sat.type = MNEMO_ENTREE;
-    while (Cfg_satellite.Liste_entreeTOR)
-     { gint num;
-       pthread_mutex_lock( &Cfg_satellite.lib->synchro );                /* Récupération de l'E a traiter */
-       num = GPOINTER_TO_INT(Cfg_satellite.Liste_entreeTOR->data);
-       Cfg_satellite.Liste_entreeTOR = g_slist_remove( Cfg_satellite.Liste_entreeTOR, GINT_TO_POINTER(num) );
-       pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
-
-       sat.num     = num;
-       sat.val_int = E(num);
-       Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_les_infos_au_master: Sending E (%03d)=%d", sat.num, sat.val_int );
-       Satellite_Envoyer_maitre( TAG_SATELLITE, SSTAG_CLIENT_SET_INTERNAL,
-                                (gchar *)&sat, sizeof(struct CMD_TYPE_SATELLITE) );
-     }
-
-    sat.type = 255;
-    while (Cfg_satellite.liste_Events)
+  { while (Cfg_satellite.liste_Events)
      { struct CMD_TYPE_MSRV_EVENT *event;
-       pthread_mutex_lock( &Cfg_satellite.lib->synchro );                /* Récupération de l'E a traiter */
+       pthread_mutex_lock( &Cfg_satellite.lib->synchro );
        event = Cfg_satellite.liste_Events->data;
        Cfg_satellite.liste_Events = g_slist_remove( Cfg_satellite.liste_Events, event );
        pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
 
-       memcpy ( &sat.event, event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
        Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_les_infos_au_master: Sending EVENT !" );
-       Satellite_Envoyer_maitre( TAG_SATELLITE, SSTAG_CLIENT_SET_INTERNAL,
-                                (gchar *)&sat, sizeof(struct CMD_TYPE_SATELLITE) );
+       Satellite_Envoyer_maitre( TAG_SATELLITE, SSTAG_CLIENT_SAT_SET_INTERNAL,
+                                (gchar *)&event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
      }
-
   }
 /**********************************************************************************************************/
 /* Run_thread: Thread principal                                                                           */
@@ -254,8 +161,6 @@
        goto end;
      }
 
-    Abonner_distribution_entree    ( Satellite_Gerer_entree );   /* Abonnement à la diffusion des entrees */
-    Abonner_distribution_entreeANA ( Satellite_Gerer_entreeANA );/* Abonnement à la diffusion des entrees */
     Abonner_distribution_events ( Satellite_Gerer_events );       /* Abonnement à la diffusion des events */
 
     Cfg_satellite.lib->Thread_run = TRUE;                                           /* Le thread tourne ! */
@@ -314,11 +219,6 @@
      }
 
    Desabonner_distribution_events ( Satellite_Gerer_events );     /* Abonnement à la diffusion des events */
-   Desabonner_distribution_entreeANA ( Satellite_Gerer_entreeANA );/* Abonnement à la diffusion des entrees */
-   Desabonner_distribution_entree    ( Satellite_Gerer_entree    );/* Abonnement à la diffusion des entrees */
-
-   if (Cfg_satellite.Liste_entreeANA)                                    /* Si la liste est encore pleine */
-    { g_slist_free ( Cfg_satellite.Liste_entreeANA ); }
 
 end:
     Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_NOTICE,
