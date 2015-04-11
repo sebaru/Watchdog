@@ -168,19 +168,8 @@
 	   taille = 5;
 	   Cfg_teleinfo.last_view_papp = Partage->top;
      }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "HHPHC", 5 ) )
-     { 
-     }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "MOTDETAT", 8 ) )
-     { 
-     }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "PTEC", 4 ) )
-     { 
-     }
-    else if ( ! strncmp ( Cfg_teleinfo.buffer, "OPTARIF", 7 ) )
-     { 
-     }
     else { return; }
+/* Other buffer : HHPHC, MOTDETAT, PTEC, OPTARIF */
     event->val_float = atof( Cfg_teleinfo.buffer + taille );
     Envoyer_Event_msrv( event );
     Cfg_teleinfo.last_view = Partage->top;
