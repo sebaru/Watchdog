@@ -63,9 +63,9 @@
     return(event);
   }
 /******************************************************************************************************************************/
-/* New_Event: Creation d'un nouvel evenement EA                                                                               */
+/* Send_Event_EA: Creation d'un nouvel evenement EA                                                                           */
 /* Entrée : la source de l'evenement (thread et son type)                                                                     */
-/* Sortie : Une structure Event ou NULL si pb                                                                                 */
+/* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Send_Event_EA ( gchar *from, gint num, gfloat val )
   { struct CMD_TYPE_MSRV_EVENT *event;
@@ -74,6 +74,19 @@
     if(!event) return;
     event->num = num;
     event->val_float = val;
+    Envoyer_Event_msrv ( event );
+  }
+/******************************************************************************************************************************/
+/* Send_Event_String: Creation d'un nouvel evenement String                                                                   */
+/* Entrée : la source de l'evenement (thread et son type)                                                                     */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Send_Event_String ( gchar *from, gchar *string )
+  { struct CMD_TYPE_MSRV_EVENT *event;
+
+    event = New_Event( from, EVENT_TYPE_STRING );
+    if(!event) return;
+    g_snprintf( event->string, sizeof(event->string), "%s", string );
     Envoyer_Event_msrv ( event );
   }
 /******************************************************************************************************************************/

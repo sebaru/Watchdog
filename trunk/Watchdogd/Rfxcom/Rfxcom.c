@@ -632,17 +632,10 @@
        goto end;
      }
 
-    Cfg_rfxcom.fd = Init_rfxcom();
-    if (Cfg_rfxcom.fd<0)                                                   /* On valide l'acces aux ports */
-     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_CRIT,
-                 "Run_thread: Init RFXCOM failed. exiting..." );
-       goto end;
-     }
-    else { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,"Acces RFXCOM FD=%d", Cfg_rfxcom.fd ); }
-
     Abonner_distribution_sortie ( Rfxcom_Gerer_sortie );     /* Desabonnement de la diffusion des sorties */
     Charger_tous_rfxcom();                          /* Chargement de tous les capteurs/actionneurs RFXCOM */
     nbr_oct_lu = 0;
+    Cfg_rfxcom.mode = RFXCOM_RETRING;
     while( lib->Thread_run == TRUE)                                      /* On tourne tant que necessaire */
      { usleep(1);
        sched_yield();
@@ -659,13 +652,35 @@
           Cfg_rfxcom.reload = FALSE;
         }
 
-/******************************************* Reception trame RFXCOM ***************************************/
-       FD_ZERO(&fdselect);                                         /* Reception sur la ligne serie RFXCOM */
+       if (Cfg_rfxcom.mode == RFXCOM_WAIT_BEFORE_RETRY)
+        { if ( Partage->top <= Cfg_rfxcom.date_next_retry )
+		   { Cfg_rfxcom.mode = RFXCOM_RETRING;
+			 Cfg_rfxcom.date_next_retry = 0;
+		   }
+		  else continue;
+		}
+
+       if (Cfg_rfxcom.mode == RFXCOM_RETRING)
+        { Cfg_rfxcom.fd = Init_rfxcom();
+          if (Cfg_rfxcom.fd<0)                                                   /* On valide l'acces aux ports */
+           { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_CRIT,
+                      "Run_thread: Init RFXCOM failed. Re-trying in %ds", RFXCOM_RETRY_DELAI );
+             Cfg_rfxcom.mode = RFXCOM_WAIT_BEFORE_RETRY;
+             Cfg_rfxcom.date_next_retry = Partage->top + RFXCOM_RETRY_DELAI;
+           }
+          else
+           { Cfg_rfxcom.mode = RFXCOM_CONNECTED;
+			 Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,"Acces RFXCOM FD=%d", Cfg_rfxcom.fd );
+		   }
+        }
+/*************************************************** Reception trame RFXCOM ***************************************************/
+       if (Cfg_rfxcom.mode != RFXCOM_CONNECTED) continue;
+       FD_ZERO(&fdselect);                                                             /* Reception sur la ligne serie RFXCOM */
        FD_SET(Cfg_rfxcom.fd, &fdselect );
        tv.tv_sec = 0;
        tv.tv_usec= 100000;
-       retval = select(Cfg_rfxcom.fd+1, &fdselect, NULL, NULL, &tv );               /* Attente d'un caractere */
-       if (retval>=0 && FD_ISSET(Cfg_rfxcom.fd, &fdselect) )
+       retval = select(Cfg_rfxcom.fd+1, &fdselect, NULL, NULL, &tv );                               /* Attente d'un caractere */
+       if (retval>0 && FD_ISSET(Cfg_rfxcom.fd, &fdselect) )
         { int bute, cpt;
 
           if (nbr_oct_lu<TAILLE_ENTETE_RFXCOM)
@@ -675,18 +690,25 @@
           if (cpt>0)
            { nbr_oct_lu = nbr_oct_lu + cpt;
 
-             if (nbr_oct_lu >= TAILLE_ENTETE_RFXCOM + Trame.taille)                   /* traitement trame */
+             if (nbr_oct_lu >= TAILLE_ENTETE_RFXCOM + Trame.taille)                                       /* traitement trame */
               { nbr_oct_lu = 0;
                 if (Trame.taille > 0) Processer_trame( &Trame );
                 memset (&Trame, 0, sizeof(struct TRAME_RFXCOM) );
               }
            }
         }
-/********************************************** Transmission des trames aux sorties ***********************/
-       if (Cfg_rfxcom.Liste_sortie)                            /* Si pas de message, on tourne */
+       else if (retval < 0)                                       /* Si erreur, on ferme la connexion et on retente plus tard */
+        { close(Cfg_rfxcom.fd);
+	      Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
+                   "Run_thread: Select Error, closing connexion and re-trying in %ds", RFXCOM_RETRY_DELAI );
+          Cfg_rfxcom.mode = RFXCOM_WAIT_BEFORE_RETRY;
+          Cfg_rfxcom.date_next_retry = Partage->top + RFXCOM_RETRY_DELAI;
+        }
+/************************************************** Transmission des trames aux sorties ***************************************/
+       if (Cfg_rfxcom.Liste_sortie)                                                           /* Si pas de message, on tourne */
         { gint num_a;
-          pthread_mutex_lock( &Cfg_rfxcom.lib->synchro );                                /* lockage futex */
-          num_a = GPOINTER_TO_INT(Cfg_rfxcom.Liste_sortie->data);               /* Recuperation du numero */
+          pthread_mutex_lock( &Cfg_rfxcom.lib->synchro );                                                    /* lockage futex */
+          num_a = GPOINTER_TO_INT(Cfg_rfxcom.Liste_sortie->data);                                   /* Recuperation du numero */
           Cfg_rfxcom.Liste_sortie = g_slist_remove ( Cfg_rfxcom.Liste_sortie, GINT_TO_POINTER(num_a) );
           Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                    "Run_rfxcom: Reste a traiter %d",
@@ -695,16 +717,16 @@
 
           Rfxcom_Envoyer_sortie ( num_a );
         }
-     }                                                                     /* Fin du while partage->arret */
+     }                                                                                         /* Fin du while partage->arret */
 
-    Desabonner_distribution_sortie ( Rfxcom_Gerer_sortie );  /* Desabonnement de la diffusion des sorties */
+    Desabonner_distribution_sortie ( Rfxcom_Gerer_sortie );                      /* Desabonnement de la diffusion des sorties */
     Decharger_tous_rfxcom ();
-    close(Cfg_rfxcom.fd);                                                 /* Fermeture de la connexion FD */
+    close(Cfg_rfxcom.fd);                                                                     /* Fermeture de la connexion FD */
 end:
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Down . . . TID = %p", pthread_self() );
-    Cfg_rfxcom.lib->Thread_run = FALSE;                                     /* Le thread ne tourne plus ! */
-    Cfg_rfxcom.lib->TID = 0;                              /* On indique au master que le thread est mort. */
+    Cfg_rfxcom.lib->Thread_run = FALSE;                                                         /* Le thread ne tourne plus ! */
+    Cfg_rfxcom.lib->TID = 0;                                                  /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

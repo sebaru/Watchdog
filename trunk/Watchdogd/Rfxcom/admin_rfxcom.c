@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Rfxcom/admin_rfxcom.c        Gestion des connexions Admin RFXCOM au serveur watchdog         */
-/* Projet WatchDog version 2.0       Gestion d'habitat                    mer. 13 juin 2012 23:02:08 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Rfxcom/admin_rfxcom.c        Gestion des connexions Admin RFXCOM au serveur watchdog                             */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                        mer. 13 juin 2012 23:02:08 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * admin_rfxcom.c
  * This file is part of Watchdog
@@ -30,11 +30,11 @@
  #include "watchdogd.h"
  #include "Rfxcom.h"
 
-/**********************************************************************************************************/
-/* Admin_rfxcom_print : Affiche en details les infos d'un onduleur en parametre                           */
-/* Entrée: La connexion connexion ADMIN et l'onduleur                                                     */
-/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_rfxcom_print : Affiche en details les infos d'un onduleur en parametre                                               */
+/* Entrée: La connexion connexion ADMIN et l'onduleur                                                                         */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                                           */
+/******************************************************************************************************************************/
  static void Admin_rfxcom_print ( struct CONNEXION *connexion, struct MODULE_RFXCOM *module )
   { gchar chaine[1024];
     g_snprintf( chaine, sizeof(chaine),
@@ -53,11 +53,11 @@
               );
     Admin_write ( connexion, chaine );
   }
-/**********************************************************************************************************/
-/* Admin_rfxcom_list: Liste l'ensemble des capteurs rfxcom présent dans la conf                           */
-/* Entrée: le connexion                                                                                   */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_rfxcom_list: Liste l'ensemble des capteurs rfxcom présent dans la conf                                               */
+/* Entrée: le connexion                                                                                                       */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Admin_rfxcom_list ( struct CONNEXION *connexion )
   { GSList *liste_modules;
     pthread_mutex_lock ( &Cfg_rfxcom.lib->synchro );
@@ -70,11 +70,11 @@
      }
     pthread_mutex_unlock ( &Cfg_rfxcom.lib->synchro );
   }
-/**********************************************************************************************************/
-/* Admin_rfxcom_list: Liste l'ensemble des capteurs rfxcom présent dans la conf                           */
-/* Entrée: le connexion                                                                                   */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_rfxcom_list: Liste l'ensemble des capteurs rfxcom présent dans la conf                                               */
+/* Entrée: le connexion                                                                                                       */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Admin_rfxcom_show ( struct CONNEXION *connexion, gint id )
   { GSList *liste_modules;
     pthread_mutex_lock ( &Cfg_rfxcom.lib->synchro );
@@ -90,11 +90,11 @@
      }
     pthread_mutex_unlock ( &Cfg_rfxcom.lib->synchro );
   }
-/**********************************************************************************************************/
-/* Admin_rfxcom_del: Retire le capteur/module rfxcom dont l'id est en parametre                           */
-/* Entrée: le connexion et l'id                                                                           */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_rfxcom_del: Retire le capteur/module rfxcom dont l'id est en parametre                                               */
+/* Entrée: le connexion et l'id                                                                                               */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Admin_rfxcom_del ( struct CONNEXION *connexion, gint id )
   { gchar chaine[128];
 
@@ -107,11 +107,11 @@
      { g_snprintf( chaine, sizeof(chaine), " Error. Module %03d NOT erased.\n", id ); }
     Admin_write ( connexion, chaine );
   }
-/**********************************************************************************************************/
-/* Admin_rfxcom_add: Ajoute un capteur/module RFXCOM                                                      */
-/* Entrée: le connexion et la structure de reference du capteur                                           */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_rfxcom_add: Ajoute un capteur/module RFXCOM                                                                          */
+/* Entrée: le connexion et la structure de reference du capteur                                                               */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Admin_rfxcom_add ( struct CONNEXION *connexion, struct RFXCOMDB *rfxcom )
   { gchar chaine[128];
     gint last_id;
@@ -126,11 +126,11 @@
      { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT added.\n" ); }
     Admin_write ( connexion, chaine );
   }
-/**********************************************************************************************************/
-/* Admin_rfxcom_change: Modifie la configuration d'un capteur RFXCOM                                      */
-/* Entrée: le connexion et la structure de reference du capteur                                           */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_rfxcom_change: Modifie la configuration d'un capteur RFXCOM                                                          */
+/* Entrée: le connexion et la structure de reference du capteur                                                               */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Admin_rfxcom_set ( struct CONNEXION *connexion, gchar *ligne )
   { gchar id_char[16], param[32], valeur_char[64], chaine[128];
     struct MODULE_RFXCOM *module = NULL;
@@ -150,16 +150,16 @@
     id     = atoi ( id_char     );
     valeur = atoi ( valeur_char );
 
-    pthread_mutex_lock( &Cfg_rfxcom.lib->synchro );                     /* Recherche du module en mémoire */
+    pthread_mutex_lock( &Cfg_rfxcom.lib->synchro );                                         /* Recherche du module en mémoire */
     liste_modules = Cfg_rfxcom.Modules_RFXCOM;
     while ( liste_modules )
      { module = (struct MODULE_RFXCOM *)liste_modules->data;
        if (module->rfxcom.id == id) break;
-       liste_modules = liste_modules->next;                                  /* Passage au module suivant */
+       liste_modules = liste_modules->next;                                                      /* Passage au module suivant */
      }
     pthread_mutex_unlock( &Cfg_rfxcom.lib->synchro );
 
-    if (!module)                                                                         /* Si non trouvé */
+    if (!module)                                                                                             /* Si non trouvé */
      { Admin_write( connexion, " Module not found\n");
        return;
      }
@@ -201,19 +201,19 @@
     else
      { Admin_write ( connexion, " RFXCOM module parameter set\n" ); }
   }
-/**********************************************************************************************************/
-/* Admin_rfxcom: Fonction gerant les différentes commandes possible pour l'administration rfxcom          */
-/* Entrée: le connexion d'admin et la ligne de commande                                                   */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_rfxcom: Fonction gerant les différentes commandes possible pour l'administration rfxcom                              */
+/* Entrée: le connexion d'admin et la ligne de commande                                                                       */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  void Admin_command( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128], chaine[128];
 
-    sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
+    sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
 
     if ( ! strcmp ( commande, "add" ) )
      { struct RFXCOMDB rfxcom;
-       memset( &rfxcom, 0, sizeof(struct RFXCOMDB) );                /* Découpage de la ligne de commande */
+       memset( &rfxcom, 0, sizeof(struct RFXCOMDB) );                                    /* Découpage de la ligne de commande */
        sscanf ( ligne, "%s %[^\n]", commande, rfxcom.libelle );
        Admin_rfxcom_add ( connexion, &rfxcom );
      }
@@ -225,7 +225,7 @@
        gint housecode, unitcode, cmd, retour;
        gchar proto[32];
 
-       sscanf ( ligne, "%s %s,%d,%d,%d", commande,                   /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %s,%d,%d,%d", commande,                                       /* Découpage de la ligne de commande */
                 proto, &housecode, &unitcode, &cmd );
 
        trame_send_AC[0] = 0x07; /* Taille */
@@ -254,7 +254,7 @@
      { gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
        gint id1, id2, id3, id4, unitcode, cmd, retour;
 
-       sscanf ( ligne, "%s (%d,%d,%d,%d),%d,%d", commande,           /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s (%d,%d,%d,%d),%d,%d", commande,                               /* Découpage de la ligne de commande */
                 &id1, &id2, &id3, &id4, &unitcode, &cmd );
 
        trame_send_AC[0]  = 0x0B; /* Taille */
@@ -282,19 +282,32 @@
      }
     else if ( ! strcmp ( commande, "del" ) )
      { gint num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
        Admin_rfxcom_del ( connexion, num );
      }
     else if ( ! strcmp ( commande, "show" ) )
      { gint num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
        Admin_rfxcom_show ( connexion, num );
+     }
+    else if ( ! strcmp ( commande, "status" ) )
+     { gchar chaine[128];
+       g_snprintf( chaine, sizeof(chaine), " RFXCOM Status:\n" );
+       Admin_write ( connexion, chaine );
+       g_snprintf( chaine, sizeof(chaine), " | mode = %d\n", Cfg_rfxcom.mode );
+       Admin_write ( connexion, chaine );
+       g_snprintf( chaine, sizeof(chaine), " | fd = %d\n", Cfg_rfxcom.fd );
+       Admin_write ( connexion, chaine );
+       g_snprintf( chaine, sizeof(chaine), " | date_next_retry = in %02.1fs\n",
+                   (Partage->top - Cfg_rfxcom.date_next_retry) / 10.0 );
+       Admin_write ( connexion, chaine );
+       Admin_write ( connexion, " -\n" );
      }
     else if ( ! strcmp ( commande, "list" ) )
      { Admin_rfxcom_list ( connexion );
      }
-    else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)   /* Si changement de parametre */
+    else if ( ! strcmp ( commande, "dbcfg" ) )                /* Appelle de la fonction dédiée à la gestion des parametres DB */
+     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)                       /* Si changement de parametre */
         { gboolean retour;
           retour = Rfxcom_Lire_config();
           g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s\n",
@@ -315,6 +328,7 @@
        Admin_write ( connexion, "                                         - Envoie une commande RFXCOM Protocol AC, HomeEasy EU, ANSLUT\n" );
        Admin_write ( connexion, "  list                                   - Affiche les status des equipements RFXCOM\n" );
        Admin_write ( connexion, "  show $id                               - Affiche les status de l'equipements RFXCOM $id\n" );
+       Admin_write ( connexion, "  status                                 - Affiche le statut de la connexion\n" );
      }
     else
      { gchar chaine[128];
@@ -322,4 +336,4 @@
        Admin_write ( connexion, chaine );
      }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

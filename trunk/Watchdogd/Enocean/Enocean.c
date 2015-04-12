@@ -224,10 +224,8 @@
 /* Sortie: TRUE si processed                                                                              */
 /**********************************************************************************************************/
  static gboolean Processer_trame_ERP1( struct TRAME_ENOCEAN *trame )
-  { struct CMD_TYPE_MNEMO_BASE *mnemo;
-    gchar *action, *button = "unknown";
-    struct CMD_TYPE_MSRV_EVENT *event;
-       
+  { gchar *action, *button = "unknown", chaine[128];
+
     if (trame->data[0] == 0xD2)
      { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
                 "Processer_trame_ERP1: Received VLD" );
@@ -250,68 +248,19 @@
            }
         }
 
-       event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc0( sizeof( struct CMD_TYPE_MSRV_EVENT ) );
-       if(!event)                                                         /* Envoi de l'evenement au MSRV */
-        { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
-                   "Processer_trame_ERP1: Malloc ERROR, Could not send Event to MSRV (%s)", event );
-          return(FALSE);
-        }
-       event->type = EVENT_TYPE_STRING;
-       g_snprintf( event->string, sizeof(event->string), "%s:%02X%02X%02X%02X:%s:%s",
-                   NOM_THREAD, trame->data[2], trame->data[3], trame->data[4], trame->data[5],
+       g_snprintf( chaine, sizeof(chaine), "%02X%02X%02X%02X:%s:%s",
+                   trame->data[2], trame->data[3], trame->data[4], trame->data[5],
                    button, action );
-       Envoyer_Event_msrv( event );
+       Send_Event_String( NOM_THREAD, chaine );
 
        Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
-                 "Processer_trame_ERP1: New_Event : %s", event->string );
+                 "Processer_trame_ERP1: New_Event : %s", chaine );
        return(TRUE);
      }
     else if (trame->data[0] == 0xA5)
      { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_DEBUG,
                 "Processer_trame_ERP1: Received RADIO_ERP1-4BS" );
      }
-#ifdef bouh
-       mnemo = Map_event_to_mnemo ( event );
-       if (!mnemo)                                   /* Si pas trouvé, création d'un mnemo 'discovered' ? */
-        { struct CMD_TYPE_MNEMO_FULL mnemo;
-          memset( &mnemo, 0, sizeof(mnemo) );
-          mnemo.mnemo_base.type       = MNEMO_ENTREE;
-          mnemo.mnemo_base.num        = 9999;
-          mnemo.mnemo_base.num_plugin = 1;
-          g_snprintf( mnemo.mnemo_base.acronyme, sizeof(mnemo.mnemo_base.acronyme), "EnOcean EVENT" );
-          g_snprintf( mnemo.mnemo_base.libelle,  sizeof(mnemo.mnemo_base.libelle),  "Event %s discovered by %s",
-                      event, NOM_THREAD );
-          g_snprintf( mnemo.mnemo_base.command_text, sizeof(mnemo.mnemo_base.command_text), "%s", event );
-
-          if ( Ajouter_mnemo_fullDB ( &mnemo ) < 0 )             /* Ajout auto dans la base de mnemonique */
-           { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_ERR,
-                      "Map_event_to_mnemo: Error adding new mnemo in DB for event %s", event );
-           }
-          return(FALSE);
-        }
-
-       switch ( mnemo->type )
-        { case MNEMO_MONOSTABLE:                                      /* Positionnement du bit interne */
-               Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
-                        "Processer_trame_ERP1: Mise a un du bit M%03d", mnemo->num );
-               Envoyer_commande_dls(mnemo->num);
-               break;
-          case MNEMO_ENTREE:
-               Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE,
-                        "Processer_trame_ERP1: Mise a un du bit E%03d", mnemo->num );
-               Envoyer_entree_dls(mnemo->num, 1);
-               break;
-          case MNEMO_ENTREE_ANA:
-               break;
-          default: Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_WARNING,
-                            "Processer_trame_ERP1: Cannot handle commande type %d (num=%03d) for event %s",
-                             mnemo->type, mnemo->num, event );
-                   break;
-        }
-       g_free(mnemo);                                                  /* Libération du mnémonique traité */
-       return(TRUE);
-     }
-#endif
     return(FALSE);
   }
 /**********************************************************************************************************/
