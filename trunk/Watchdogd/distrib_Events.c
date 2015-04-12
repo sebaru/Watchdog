@@ -39,7 +39,7 @@
 /* Entrée : l'evenement en question                                                                                           */
 /* sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Envoyer_Event_msrv( struct CMD_TYPE_MSRV_EVENT *event )
+ void Envoyer_Event_msrv( struct CMD_TYPE_MSRV_EVENT *event )
   { pthread_mutex_lock( &Partage->com_msrv.synchro );
     Partage->com_msrv.liste_Event = g_slist_append ( Partage->com_msrv.liste_Event, event );
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
