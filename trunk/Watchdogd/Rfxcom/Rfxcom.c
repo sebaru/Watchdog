@@ -697,7 +697,7 @@
            }
         }
        else if ( (retval < 0) ||                                     /* Si erreur, on ferme la connexion et on retente plus tard */
-                 (fcntl(Cfg_rfxcom.fd, F_GETFL)) )
+                 (fcntl(Cfg_rfxcom.fd, F_GETFL)==-1) )
         { close(Cfg_rfxcom.fd);
 	      Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
                    "Run_thread: Select Error, closing connexion and re-trying in %ds", RFXCOM_RETRY_DELAI/10 );
