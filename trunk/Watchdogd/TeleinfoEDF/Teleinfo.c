@@ -204,7 +204,7 @@
         }
 
        if (Cfg_teleinfo.mode == TINFO_WAIT_BEFORE_RETRY)
-        { if ( Partage->top <= Cfg_teleinfo.date_next_retry )
+        { if ( Cfg_teleinfo.date_next_retry <= Partage->top )
 		   { Cfg_teleinfo.mode = TINFO_RETRING;
 			 Cfg_teleinfo.date_next_retry = 0;
 		   }
@@ -215,7 +215,7 @@
         { Cfg_teleinfo.fd = Init_teleinfo();
           if (Cfg_teleinfo.fd<0)                                                               /* On valide l'acces aux ports */
            { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
-                       "Run_thread: Init TELEINFO failed. Re-trying in %ds", TINFO_RETRY_DELAI );
+                       "Run_thread: Init TELEINFO failed. Re-trying in %ds", TINFO_RETRY_DELAI/10 );
              Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
              Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
            }
@@ -257,10 +257,11 @@
              
            }
         }
-       else if (retval < 0)                                       /* Si erreur, on ferme la connexion et on retente plus tard */
+       else if ( (retval < 0) ||                                     /* Si erreur, on ferme la connexion et on retente plus tard */
+                 (fcntl(Cfg_teleinfo.fd, F_GETFL)) )
         { close(Cfg_teleinfo.fd);
 	      Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
-                   "Run_thread: Select Error, closing connexion and re-trying in %ds", TINFO_RETRY_DELAI );
+                   "Run_thread: Select Error, closing connexion and re-trying in %ds", TINFO_RETRY_DELAI/10 );
           Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
           Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
         }

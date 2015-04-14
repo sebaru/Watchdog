@@ -653,18 +653,17 @@
         }
 
        if (Cfg_rfxcom.mode == RFXCOM_WAIT_BEFORE_RETRY)
-        { if ( Partage->top <= Cfg_rfxcom.date_next_retry )
+        { if ( Cfg_rfxcom.date_next_retry <= Partage->top )
 		   { Cfg_rfxcom.mode = RFXCOM_RETRING;
 			 Cfg_rfxcom.date_next_retry = 0;
 		   }
-		  else continue;
 		}
 
        if (Cfg_rfxcom.mode == RFXCOM_RETRING)
         { Cfg_rfxcom.fd = Init_rfxcom();
           if (Cfg_rfxcom.fd<0)                                                   /* On valide l'acces aux ports */
            { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_CRIT,
-                      "Run_thread: Init RFXCOM failed. Re-trying in %ds", RFXCOM_RETRY_DELAI );
+                      "Run_thread: Init RFXCOM failed. Re-trying in %ds", RFXCOM_RETRY_DELAI/10 );
              Cfg_rfxcom.mode = RFXCOM_WAIT_BEFORE_RETRY;
              Cfg_rfxcom.date_next_retry = Partage->top + RFXCOM_RETRY_DELAI;
            }
@@ -701,7 +700,7 @@
                  (fcntl(Cfg_rfxcom.fd, F_GETFL)) )
         { close(Cfg_rfxcom.fd);
 	      Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
-                   "Run_thread: Select Error, closing connexion and re-trying in %ds", RFXCOM_RETRY_DELAI );
+                   "Run_thread: Select Error, closing connexion and re-trying in %ds", RFXCOM_RETRY_DELAI/10 );
           Cfg_rfxcom.mode = RFXCOM_WAIT_BEFORE_RETRY;
           Cfg_rfxcom.date_next_retry = Partage->top + RFXCOM_RETRY_DELAI;
         }
