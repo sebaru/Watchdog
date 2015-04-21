@@ -696,13 +696,35 @@
               }
            }
         }
-       else if ( (retval < 0) ||                                     /* Si erreur, on ferme la connexion et on retente plus tard */
-                 (fcntl(Cfg_rfxcom.fd, F_GETFL)==-1) )
+       else if ( retval < 0 )                                     /* Si erreur, on ferme la connexion et on retente plus tard */
         { close(Cfg_rfxcom.fd);
 	      Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
-                   "Run_thread: Select Error, closing connexion and re-trying in %ds", RFXCOM_RETRY_DELAI/10 );
+                   "Run_thread: Select Error (%s), closing connexion and re-trying in %ds",
+                    strerror(errno), RFXCOM_RETRY_DELAI/10 );
           Cfg_rfxcom.mode = RFXCOM_WAIT_BEFORE_RETRY;
           Cfg_rfxcom.date_next_retry = Partage->top + RFXCOM_RETRY_DELAI;
+        }
+       else if (!(Partage->top % 500))                                                          /* Test toutes les 5 secondes */
+        { gboolean closing = FALSE;
+          struct stat buf;
+	      gint retour;
+		  retour = fstat( Cfg_rfxcom.fd, &buf );
+		  if (retour == -1)
+           { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
+                      "Run_thread: Fstat Error (%s), closing connexion and re-trying in %ds",
+                       strerror(errno), RFXCOM_RETRY_DELAI/10 );
+             closing = TRUE;
+           }
+          else if ( buf.st_nlink < 1 )
+           { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
+                      "Run_thread: USB device disappeared. Closing connexion and re-trying in %ds", RFXCOM_RETRY_DELAI/10 );
+             closing = TRUE;
+           }
+          if (closing == TRUE)
+           { close(Cfg_rfxcom.fd);
+             Cfg_rfxcom.mode = RFXCOM_WAIT_BEFORE_RETRY;
+             Cfg_rfxcom.date_next_retry = Partage->top + RFXCOM_RETRY_DELAI;
+           }
         }
 /************************************************** Transmission des trames aux sorties ***************************************/
        if (Cfg_rfxcom.Liste_sortie)                                                           /* Si pas de message, on tourne */
