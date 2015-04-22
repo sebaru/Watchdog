@@ -319,7 +319,8 @@
     fd = open( Cfg_rfxcom.port, O_RDWR | O_NOCTTY | O_NONBLOCK );
     if (fd<0)
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_ERR,
-               "Init_rfxcom: Impossible d'ouvrir le port rfxcom %s, erreur %d", Cfg_rfxcom.port, fd );
+               "Init_rfxcom: Impossible d'ouvrir le port rfxcom %s, erreur %d:%s",
+                Cfg_rfxcom.port, fd, strerror(errno) );
        return(-1);
      }
     else
