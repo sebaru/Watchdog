@@ -705,7 +705,7 @@
           Cfg_rfxcom.date_next_retry = Partage->top + RFXCOM_RETRY_DELAI;
         }
 
-       if (!(Partage->top % 500))                                                               /* Test toutes les 5 secondes */
+       if (!(Partage->top % 50))                                                                /* Test toutes les 5 secondes */
         { gboolean closing = FALSE;
           struct stat buf;
 	      gint retour;
