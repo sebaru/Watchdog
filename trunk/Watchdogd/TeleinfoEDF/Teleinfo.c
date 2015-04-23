@@ -257,13 +257,27 @@
              
            }
         }
-       else if ( (retval < 0) ||                                     /* Si erreur, on ferme la connexion et on retente plus tard */
-                 (fcntl(Cfg_teleinfo.fd, F_GETFL)) )
-        { close(Cfg_teleinfo.fd);
-	      Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
-                   "Run_thread: Select Error, closing connexion and re-trying in %ds", TINFO_RETRY_DELAI/10 );
-          Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
-          Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
+       if (!(Partage->top % 50))                                                                /* Test toutes les 5 secondes */
+        { gboolean closing = FALSE;
+          struct stat buf;
+	      gint retour;
+		  retour = fstat( Cfg_teleinfo.fd, &buf );
+		  if (retour == -1)
+           { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
+                      "Run_thread: Fstat Error (%s), closing connexion and re-trying in %ds",
+                       strerror(errno), TINFO_RETRY_DELAI/10 );
+             closing = TRUE;
+           }
+          else if ( buf.st_nlink < 1 )
+           { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_ERR,
+                      "Run_thread: USB device disappeared. Closing connexion and re-trying in %ds", TINFO_RETRY_DELAI/10 );
+             closing = TRUE;
+           }
+          if (closing == TRUE)
+           { close(Cfg_teleinfo.fd);
+             Cfg_teleinfo.mode = TINFO_WAIT_BEFORE_RETRY;
+             Cfg_teleinfo.date_next_retry = Partage->top + TINFO_RETRY_DELAI;
+           }
         }
      }
     close(Cfg_teleinfo.fd);                                                                   /* Fermeture de la connexion FD */
