@@ -148,17 +148,17 @@
      { Send_Event ( Config.instance_id, NOM_THREAD, "PAPP", atof( Cfg_teleinfo.buffer + 5) );
 	      Cfg_teleinfo.last_view_papp = Partage->top;
      }
-    else if ( (! strncmp ( Cfg_teleinfo.buffer, "PTEC", 4 )) && Cfg_teleinfo.last_view_papp + 300 <= Partage->top )
+    else if ( (! strncmp ( Cfg_teleinfo.buffer, "PTEC", 4 )) && Cfg_teleinfo.last_view_ptec + 300 <= Partage->top )
      { Send_Event ( Config.instance_id, NOM_THREAD, "PTEC", atof( Cfg_teleinfo.buffer + 5) );
-	      Cfg_teleinfo.last_view_papp = Partage->top;
+	      Cfg_teleinfo.last_view_ptec = Partage->top;
      }
-    else if ( (! strncmp ( Cfg_teleinfo.buffer, "HHPHC", 5 )) && Cfg_teleinfo.last_view_papp + 300 <= Partage->top )
+    else if ( (! strncmp ( Cfg_teleinfo.buffer, "HHPHC", 5 )) && Cfg_teleinfo.last_view_hhchp + 300 <= Partage->top )
      { Send_Event ( Config.instance_id, NOM_THREAD, "HHPHC", atof( Cfg_teleinfo.buffer + 6) );
-	      Cfg_teleinfo.last_view_papp = Partage->top;
+	      Cfg_teleinfo.last_view_hhchp = Partage->top;
      }
-    else if ( (! strncmp ( Cfg_teleinfo.buffer, "OPTARIF", 7 )) && Cfg_teleinfo.last_view_papp + 300 <= Partage->top )
+    else if ( (! strncmp ( Cfg_teleinfo.buffer, "OPTARIF", 7 )) && Cfg_teleinfo.last_view_optarif + 300 <= Partage->top )
      { Send_Event ( Config.instance_id, NOM_THREAD, "OPTARIF", atof( Cfg_teleinfo.buffer + 8) );
-	      Cfg_teleinfo.last_view_papp = Partage->top;
+	      Cfg_teleinfo.last_view_optarif = Partage->top;
      }
     else { return; }
 /* Other buffer : HHPHC, MOTDETAT, PTEC, OPTARIF */
