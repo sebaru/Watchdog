@@ -57,13 +57,13 @@
                if (dup_event)
                 { memcpy ( dup_event, event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
                   Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                           "Gerer_protocole_satellite: Receiving EVENT from satellite %s (thread %s)",
-                            client->util->nom, event->from );
+                           "Gerer_protocole_satellite: Receiving EVENT from satellite user %s (instance %s thread %s objet %s)",
+                            client->util->nom, event->instance, event->thread, event->objet );
                   Envoyer_Event_msrv( dup_event );
                 }
                else Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                             "Gerer_protocole_satellite: Memory Alloc Error for satellite %s (thread %s)",
-                              client->util->nom, event->from );
+                             "Gerer_protocole_satellite: Memory Alloc Error for satellite user %s (instance %s thread %s objet %s)",
+                              client->util->nom, event->instance, event->thread, event->objet );
              }
             break;
      }

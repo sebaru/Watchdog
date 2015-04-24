@@ -305,10 +305,12 @@
     if (need_arch)
      { Ajouter_arch( MNEMO_ENTREE_ANA, num, Partage->ea[num].val_ech );            /* Archivage si besoin */
        Partage->ea[ num ].last_arch = Partage->top;                       /* Communications aux threads ! */
+#ifdef bouh
        pthread_mutex_lock( &Partage->com_msrv.synchro );           /* Ajout dans la liste de EA a traiter */
        Partage->com_msrv.liste_ea = g_slist_prepend( Partage->com_msrv.liste_ea,
                                                      GINT_TO_POINTER(num) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
+#endif
      }
   }
 /**********************************************************************************************************/

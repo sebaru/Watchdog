@@ -49,17 +49,15 @@
 /* Entrée : la source de l'evenement (thread et son type)                                                                     */
 /* Sortie : Une structure Event ou NULL si pb                                                                                 */
 /******************************************************************************************************************************/
- static struct CMD_TYPE_MSRV_EVENT *New_Event ( gchar *from, gint type )
+ static struct CMD_TYPE_MSRV_EVENT *New_Event ( void )
   { struct CMD_TYPE_MSRV_EVENT *event;
 
     event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc0( sizeof( struct CMD_TYPE_MSRV_EVENT ) );
     if(!event)                                                                                /* Envoi de l'evenement au MSRV */
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "New_Event: Malloc ERROR, from = %s", from );
+                "New_Event: Malloc ERROR" );
        return(NULL);
      }
-    g_snprintf( event->from, sizeof(event->from), from );
-    event->type = type;
     return(event);
   }
 /******************************************************************************************************************************/
@@ -69,24 +67,28 @@
 /******************************************************************************************************************************/
  void Send_Event_EA ( gchar *from, gint num, gfloat val )
   { struct CMD_TYPE_MSRV_EVENT *event;
-
+#ifdef bouh
     event = New_Event( from, EVENT_TYPE_EA );
     if(!event) return;
     event->num = num;
     event->val_float = val;
     Envoyer_Event_msrv ( event );
+ #endif
   }
 /******************************************************************************************************************************/
 /* Send_Event_String: Creation d'un nouvel evenement String                                                                   */
 /* Entrée : la source de l'evenement (thread et son type)                                                                     */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Send_Event_String ( gchar *from, gchar *string )
+ void Send_Event ( gchar *instance, gchar *thread, gchar *objet, gfloat val_float )
   { struct CMD_TYPE_MSRV_EVENT *event;
 
-    event = New_Event( from, EVENT_TYPE_STRING );
+    event = New_Event();
     if(!event) return;
-    g_snprintf( event->string, sizeof(event->string), "%s", string );
+    g_snprintf( event->instance, sizeof(event->instance), "%s", instance );
+    g_snprintf( event->thread, sizeof(event->thread), "%s", thread );
+    g_snprintf( event->objet, sizeof(event->objet), "%s", objet );
+    event->val_float = val_float;
     Envoyer_Event_msrv ( event );
   }
 /******************************************************************************************************************************/
@@ -171,19 +173,24 @@
 /* sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Gerer_arrive_Event_EA( struct CMD_TYPE_MSRV_EVENT *event )
-  { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+  {
+#ifdef bouh
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
              "Gerer_arrive_Event_EA: From %s -> Received EA%03d=%6.2f (val_int)",
               event->from, event->num, event->val_float );
     SEA( event->num, event->val_float );
+ #endif
   }
 /*******************************************************************************************************************************/
 /* Gerer_arrive_Event_string: Gere l'arrive d'un event de type string                                                         */
 /* Entrée : l'evenement a traiter                                                                                             */
 /* sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Gerer_arrive_Event_string( struct CMD_TYPE_MSRV_EVENT *event )
+ static void Gerer_arrive_Event( struct CMD_TYPE_MSRV_EVENT *event )
   { struct CMD_TYPE_MNEMO_BASE *mnemo;
-    mnemo = Map_event_to_mnemo ( event->string );
+    gchar request[128];
+    g_snprintf( request, sizeof(request), "%s:%s:%s", event->instance, event->thread, event->objet );
+    mnemo = Map_event_to_mnemo ( request );
     if (!mnemo)                                      /* Si pas trouvé, création d'un mnemo 'discovered' ? */
      { struct CMD_TYPE_MNEMO_FULL new_mnemo;
        memset( &new_mnemo, 0, sizeof(new_mnemo) );
@@ -192,11 +199,11 @@
        new_mnemo.mnemo_base.num_plugin = 1;
        g_snprintf( new_mnemo.mnemo_base.acronyme,     sizeof(new_mnemo.mnemo_base.acronyme), "Discovered Event" );
        g_snprintf( new_mnemo.mnemo_base.libelle,      sizeof(new_mnemo.mnemo_base.libelle),  "To be filled" );
-       g_snprintf( new_mnemo.mnemo_base.command_text, sizeof(new_mnemo.mnemo_base.command_text), "%s", event->string );
+       g_snprintf( new_mnemo.mnemo_base.command_text, sizeof(new_mnemo.mnemo_base.command_text), "%s", request );
 
        if ( Ajouter_mnemo_fullDB ( &new_mnemo ) < 0 )                                /* Ajout auto dans la base de mnemonique */
         { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                   "Gerer_arrive_Events_string: Error adding new mnemo in DB for event %s", event->string );
+                   "Gerer_arrive_Events_string: Error adding new mnemo in DB for event %s", request );
         }
        return;
      }
@@ -204,19 +211,22 @@
     switch ( mnemo->type )
      { case MNEMO_MONOSTABLE:                                                                /* Positionnement du bit interne */
             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                     "Gerer_arrive_Event_string: From %s -> Mise a un du bit M%03d", event->from, mnemo->num );
+                     "Gerer_arrive_Event: From %s -> Mise a un du bit M%03d", request, mnemo->num );
             Envoyer_commande_dls(mnemo->num);
             break;
        case MNEMO_ENTREE:
             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                     "Gerer_arrive_Event_string: From %s -> Mise a un du bit E%03d", event->from, mnemo->num );
+                     "Gerer_arrive_Event: From %s -> Mise a un du bit E%03d", request, mnemo->num );
             Envoyer_entree_dls(mnemo->num, 1);
             break;
        case MNEMO_ENTREE_ANA:
+            Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                     "Gerer_arrive_Event: From %s -> Positionnement de EA%03d=%f", request, mnemo->num, event->val_float );
+            SEA(mnemo->num, event->val_float);
             break;
        default: Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                         "Gerer_arrive_Event_string: Cannot handle commande type %d (num=%03d) for event %s",
-                          mnemo->type, mnemo->num, event );
+                         "Gerer_arrive_Event: Cannot handle commande type %d (num=%03d) for event %s",
+                          mnemo->type, mnemo->num, request );
                 break;
      } 
    g_free(mnemo);                                                                          /* Libération du mnémonique traité */
@@ -237,11 +247,7 @@
 
     Envoyer_Events_aux_abonnes ( event );
     if (Config.instance_is_master == TRUE)
-     { switch( event->type )
-        { case EVENT_TYPE_STRING: Gerer_arrive_Event_string ( event ); break;
-	      case EVENT_TYPE_EA    : Gerer_arrive_Event_EA( event );      break;
-        }
-     }
+     { Gerer_arrive_Event ( event ); }
     g_free(event);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

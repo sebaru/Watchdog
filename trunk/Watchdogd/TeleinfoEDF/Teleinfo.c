@@ -121,32 +121,44 @@
  static void Processer_trame( void )
   { 
     if ( (! strncmp ( Cfg_teleinfo.buffer, "ADCO", 4 )) && Cfg_teleinfo.last_view_adco + 300 <= Partage->top )
-     { Send_Event_EA ( NOM_THREAD, Cfg_teleinfo.min_ea, atof( Cfg_teleinfo.buffer + 5) );
-	   Cfg_teleinfo.last_view_adco = Partage->top;
+     { Send_Event ( Config.instance_id, NOM_THREAD, "ADCO", atof( Cfg_teleinfo.buffer + 5) );
+       Cfg_teleinfo.last_view_adco = Partage->top;
      }
     else if ( (! strncmp ( Cfg_teleinfo.buffer, "ISOUS", 5 )) && Cfg_teleinfo.last_view_isous + 300 <= Partage->top )
-     { Send_Event_EA ( NOM_THREAD, Cfg_teleinfo.min_ea + 1, atof( Cfg_teleinfo.buffer + 6) );
-	   Cfg_teleinfo.last_view_isous = Partage->top;
+     { Send_Event ( Config.instance_id, NOM_THREAD, "ISOUS", atof( Cfg_teleinfo.buffer + 6) );
+       Cfg_teleinfo.last_view_isous = Partage->top;
      }
     else if ( (! strncmp ( Cfg_teleinfo.buffer, "HCHC", 4 )) && Cfg_teleinfo.last_view_hchc + 300 <= Partage->top )
-     { Send_Event_EA ( NOM_THREAD, Cfg_teleinfo.min_ea + 2, atof( Cfg_teleinfo.buffer + 5) );
-	   Cfg_teleinfo.last_view_hchc = Partage->top;
+     { Send_Event ( Config.instance_id, NOM_THREAD, "HCHC", atof( Cfg_teleinfo.buffer + 5) );
+	      Cfg_teleinfo.last_view_hchc = Partage->top;
      }
     else if ( (! strncmp ( Cfg_teleinfo.buffer, "HCHP", 4 )) && Cfg_teleinfo.last_view_hchp + 300 <= Partage->top )
-     { Send_Event_EA ( NOM_THREAD, Cfg_teleinfo.min_ea + 3, atof( Cfg_teleinfo.buffer + 5) );
-	   Cfg_teleinfo.last_view_hchp = Partage->top;
+     { Send_Event ( Config.instance_id, NOM_THREAD, "HCHP", atof( Cfg_teleinfo.buffer + 5) );
+	      Cfg_teleinfo.last_view_hchp = Partage->top;
      }
     else if ( (! strncmp ( Cfg_teleinfo.buffer, "IINST", 5 )) && Cfg_teleinfo.last_view_iinst + 300 <= Partage->top )
-     { Send_Event_EA ( NOM_THREAD, Cfg_teleinfo.min_ea + 4, atof( Cfg_teleinfo.buffer + 6) );
-	   Cfg_teleinfo.last_view_iinst = Partage->top;
+     { Send_Event ( Config.instance_id, NOM_THREAD, "IINST", atof( Cfg_teleinfo.buffer + 6) );
+	      Cfg_teleinfo.last_view_iinst = Partage->top;
      }
     else if ( (! strncmp ( Cfg_teleinfo.buffer, "IMAX", 4 )) && Cfg_teleinfo.last_view_imax + 300 <= Partage->top )
-     { Send_Event_EA ( NOM_THREAD, Cfg_teleinfo.min_ea + 5, atof( Cfg_teleinfo.buffer + 5) );
-	   Cfg_teleinfo.last_view_imax = Partage->top;
+     { Send_Event ( Config.instance_id, NOM_THREAD, "IMAX", atof( Cfg_teleinfo.buffer + 5) );
+	      Cfg_teleinfo.last_view_imax = Partage->top;
      }
     else if ( (! strncmp ( Cfg_teleinfo.buffer, "PAPP", 4 )) && Cfg_teleinfo.last_view_papp + 300 <= Partage->top )
-     { Send_Event_EA ( NOM_THREAD, Cfg_teleinfo.min_ea + 6, atof( Cfg_teleinfo.buffer + 5) );
-	   Cfg_teleinfo.last_view_papp = Partage->top;
+     { Send_Event ( Config.instance_id, NOM_THREAD, "PAPP", atof( Cfg_teleinfo.buffer + 5) );
+	      Cfg_teleinfo.last_view_papp = Partage->top;
+     }
+    else if ( (! strncmp ( Cfg_teleinfo.buffer, "PTEC", 4 )) && Cfg_teleinfo.last_view_ptec + 300 <= Partage->top )
+     { Send_Event ( Config.instance_id, NOM_THREAD, "PTEC", atof( Cfg_teleinfo.buffer + 5) );
+	      Cfg_teleinfo.last_view_ptec = Partage->top;
+     }
+    else if ( (! strncmp ( Cfg_teleinfo.buffer, "HHPHC", 5 )) && Cfg_teleinfo.last_view_hhchp + 300 <= Partage->top )
+     { Send_Event ( Config.instance_id, NOM_THREAD, "HHPHC", atof( Cfg_teleinfo.buffer + 6) );
+	      Cfg_teleinfo.last_view_hhchp = Partage->top;
+     }
+    else if ( (! strncmp ( Cfg_teleinfo.buffer, "OPTARIF", 7 )) && Cfg_teleinfo.last_view_optarif + 300 <= Partage->top )
+     { Send_Event ( Config.instance_id, NOM_THREAD, "OPTARIF", atof( Cfg_teleinfo.buffer + 8) );
+	      Cfg_teleinfo.last_view_optarif = Partage->top;
      }
     else { return; }
 /* Other buffer : HHPHC, MOTDETAT, PTEC, OPTARIF */

@@ -36,8 +36,8 @@
 
  enum
   { TINFO_WAIT_BEFORE_RETRY,
-	TINFO_RETRING,
-	TINFO_CONNECTED
+	   TINFO_RETRING,
+   	TINFO_CONNECTED
   };
 
  struct TELEINFO_CONFIG
@@ -55,6 +55,9 @@
     gint  last_view_iinst;
     gint  last_view_imax;
     gint  last_view_papp;
+    gint  last_view_hhchp;
+    gint  last_view_ptec;
+    gint  last_view_optarif;
     gboolean reload;
     gboolean enable;                                                                                      /* Enable at boot ? */
     gchar buffer[TAILLE_BUFFER_TELEINFO];

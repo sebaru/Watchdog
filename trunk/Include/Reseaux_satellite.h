@@ -30,17 +30,14 @@
 
  enum
   { EVENT_TYPE_STRING,
-	EVENT_TYPE_EA
+	   EVENT_TYPE_EA
   };
 
  struct CMD_TYPE_MSRV_EVENT
-  { guint type;
-	gchar from[12];
-    union { gchar string[48];
-		    struct { gint num;
-				     gfloat val_float;
-				   };
-          };
+  { gchar instance[12];
+    gchar thread[12];
+    gchar objet[60];
+    gfloat val_float;
   };
 
  enum 

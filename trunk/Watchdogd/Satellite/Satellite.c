@@ -126,7 +126,7 @@
 /******************************************************************************************************************************/
  static void Envoyer_les_infos_au_master ( void )
   { gint taille;
-	while (Cfg_satellite.liste_Events)
+   	while (Cfg_satellite.liste_Events)
      { struct CMD_TYPE_MSRV_EVENT *event;
        pthread_mutex_lock( &Cfg_satellite.lib->synchro );
        event = Cfg_satellite.liste_Events->data;
@@ -134,12 +134,15 @@
        taille = g_slist_length( Cfg_satellite.liste_Events );
        pthread_mutex_unlock( &Cfg_satellite.lib->synchro );
 
+#ifdef bouh
        if ( event->type == EVENT_TYPE_EA &&                                    /* No man's land des EA pour la partie SYSteme */
             100<=event->num && event->num<128 )
         { /* Ignoring NoMan'sLand */ }
        else
+#endif
         { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_DEBUG,
-                   "Envoyer_les_infos_au_master: Sending EVENT %s (%03d to proceed)!", event->from, taille );
+                   "Envoyer_les_infos_au_master: Sending EVENT %s:%s:%s:%f (%03d to proceed)!",
+                    event->instance, event->thread, event->objet, event->val_float, taille );
 
           Satellite_Envoyer_maitre( TAG_SATELLITE, SSTAG_CLIENT_SAT_SET_INTERNAL,
                                    (gchar *)event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
