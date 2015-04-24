@@ -1,9 +1,0 @@
-
-Where can you find ChangeLog ?
-
-- Before 2009, see Documentation/ChangeLog-1988-2009
-- Between 2009 and Q1-2014, see "svn log"
-- After Q1-2014, see "git log"
-
-Sébastien LEFEVRE
-
