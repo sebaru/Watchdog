@@ -220,6 +220,9 @@
             Envoyer_entree_dls(mnemo->num, 1);
             break;
        case MNEMO_ENTREE_ANA:
+            Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                     "Gerer_arrive_Event: From %s -> Positionnement de EA%03d=%f", request, mnemo->num, event->val_float );
+            SEA(mnemo->num, event->val_float);
             break;
        default: Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                          "Gerer_arrive_Event: Cannot handle commande type %d (num=%03d) for event %s",
