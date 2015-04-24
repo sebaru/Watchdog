@@ -45,7 +45,6 @@
     gint  mode;                                                                    /* Statut de connexion au port TeleInfoEDF */
     gint  date_next_retry;                                                 /* Date de la prochaine connexion au port teleinfo */
     gchar port[80];
-    gint  min_ea;                                    /* Numéro de la premiere entrée analogique gérée par la TELEINFO EDF USB */
     gint  fd;                                                               /* File Descriptor d'acces au module Teleinfo USB */
     gint  last_view;                                                                            /* Date du dernier echange OK */
     gint  last_view_adco;

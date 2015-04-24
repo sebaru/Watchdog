@@ -49,7 +49,6 @@
 
     Cfg_teleinfo.lib->Thread_debug = FALSE;                                                    /* Settings default parameters */
     Cfg_teleinfo.enable            = FALSE; 
-    Cfg_teleinfo.min_ea            = 0;
     g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port),
                "%s", DEFAUT_PORT_TELEINFO );
 
@@ -64,8 +63,6 @@
                 "Teleinfo_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "port" ) )
         { g_snprintf( Cfg_teleinfo.port, sizeof(Cfg_teleinfo.port), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "min_ea" ) )
-        { Cfg_teleinfo.min_ea = atoi ( valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_teleinfo.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
@@ -84,14 +81,6 @@
  static int Init_teleinfo ( void )
   { struct termios oldtio;
     int fd;
-
-    SEA_range( Cfg_teleinfo.min_ea + 0, 0 );                                                      /* Initialisation des range */
-    SEA_range( Cfg_teleinfo.min_ea + 1, 0 );
-    SEA_range( Cfg_teleinfo.min_ea + 2, 0 );
-    SEA_range( Cfg_teleinfo.min_ea + 3, 0 );
-    SEA_range( Cfg_teleinfo.min_ea + 4, 0 );
-    SEA_range( Cfg_teleinfo.min_ea + 5, 0 );
-    SEA_range( Cfg_teleinfo.min_ea + 6, 0 );
 
     fd = open( Cfg_teleinfo.port, O_RDONLY | O_NOCTTY | O_NONBLOCK );
     if (fd<0)
