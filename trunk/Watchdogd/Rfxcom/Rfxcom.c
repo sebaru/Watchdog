@@ -534,8 +534,7 @@
         }
      } 
     else if (trame->type == 0x52 && trame->sous_type == 0x01)                                   /* Oregon */
-     { struct MODULE_RFXCOM *module;
-       gchar chaine[128];
+     { gchar chaine[128];
 
        g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:%03d:TEMP",
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
@@ -554,7 +553,6 @@
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
        Send_Event ( Config.instance_id, NOM_THREAD, chaine, 1.0 * (trame->data[6] & 0x0F) );
        
-
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                  "Processer_trame : get status type=%03d(0x%02X), sous_type=%03d(0x%02X), id1=%03d, id2=%03d, high=%03d, "
                  "signe=%02d, low=%03d, hum=%02d, humstatus=%02d, battery=%02d, rssi=%02d",
@@ -562,22 +560,6 @@
                  trame->data[2] & 0x7F, trame->data[2] & 0x80, trame->data[3], trame->data[4], trame->data[5],
                  trame->data[6] >> 4, trame->data[6] & 0x0F
                );   
-#ifdef bouh
-       module = Chercher_rfxcom( trame->type, trame->sous_type, TRUE, trame->data[0], TRUE, trame->data[1],
-                                 FALSE, 0, FALSE, 0, FALSE, 0, FALSE, 0 );
-       if (module)
-        { SEA( module->rfxcom.map_EA,     (trame->data[2] & 0x80 ? -1.0 : 1.0)* ( ((trame->data[2] & 0x7F)<<8) + trame->data[3])
-                                           / 10.0 );                                              /* Temp */
-          SEA( module->rfxcom.map_EA + 1,  trame->data[4] );                                  /* Humidity */
-          SEA( module->rfxcom.map_EA + 2,  trame->data[6] >> 4);                               /* Battery */
-          SEA( module->rfxcom.map_EA + 3,  trame->data[6] & 0x0F );                               /* RSSI */
-
-          module->date_last_view = Partage->top;
-        }
-       else Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                      "Processer_trame: No module found for packet received type=%02d(0x%02X), sous_type=%02d(0x%02X)",
-                      trame->type, trame->type, trame->sous_type, trame->sous_type );
-#endif
      }
     else if (trame->type == 0x11 && trame->sous_type == 0x00)                            /* Lighting 2 AC */
      { struct MODULE_RFXCOM *module;

@@ -260,19 +260,18 @@
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
  static void Traiter_sigusr1 ( void )
-  { guint nbr_i, nbr_msg, nbr_msg_repeat, nbr_ea, nbr_e;
+  { guint nbr_i, nbr_msg, nbr_msg_repeat, nbr_e;
     gchar chaine[256];
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );
     nbr_i          = g_slist_length( Partage->com_msrv.liste_i );
     nbr_msg        = g_slist_length( Partage->com_msrv.liste_msg );        /* Recuperation du numero de i */
     nbr_msg_repeat = g_slist_length( Partage->com_msrv.liste_msg_repeat );            /* liste des repeat */
-    nbr_ea         = g_slist_length( Partage->com_msrv.liste_ea );  /* liste des ea a envoyer aux threads */
     nbr_e          = g_slist_length( Partage->com_msrv.liste_e );    /* liste des e a envoyer aux threads */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-    g_snprintf( chaine, sizeof(chaine), "Reste %d I, %d MSG, %d MSG_REPEAT, %d EA, %d E",
-                nbr_i, nbr_msg, nbr_msg_repeat, nbr_ea, nbr_e );
+    g_snprintf( chaine, sizeof(chaine), "Reste %d I, %d MSG, %d MSG_REPEAT, %d E",
+                nbr_i, nbr_msg, nbr_msg_repeat, nbr_e );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, chaine );
   }
 /**********************************************************************************************************/
@@ -296,7 +295,6 @@
      { Gerer_arrive_MSGxxx_dls();             /* Redistrib des messages DLS vers les clients + Historique */ 
        Gerer_arrive_Ixxx_dls();                             /* Distribution des changements d'etats motif */
        Gerer_arrive_Axxx_dls();                       /* Distribution des changements d'etats sorties TOR */
-       Gerer_arrive_EAxxx_dls();              /* Distribution des changements d'etats entrees Analogiques */
        Gerer_arrive_Exxx_dls();               /* Distribution des changements d'etats entrees Analogiques */
        Gerer_arrive_Events();                   /* Gestion des evenements entre Thread, DLS, et satellite */
 

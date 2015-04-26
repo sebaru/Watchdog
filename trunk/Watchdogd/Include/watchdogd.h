@@ -96,7 +96,6 @@
     GSList *liste_msg;                                             /* liste de struct MSGDB msg a envoyer */
     GSList *liste_i;                                         /* liste de I a traiter dans la distribution */
     GSList *liste_a;                                         /* liste de A a traiter dans la distribution */
-    GSList *liste_ea;                                       /* liste de EA a traiter dans la distribution */
     GSList *liste_e;                                         /* liste de E a traiter dans la distribution */
 
     GSList *liste_Event;                                     /* liste de E a traiter dans la distribution */
