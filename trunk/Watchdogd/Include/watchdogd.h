@@ -160,7 +160,6 @@
  extern void Abonner_distribution_events ( void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event) );
  extern void Desabonner_distribution_events ( void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event) );
  extern void Send_Event ( gchar *instance, gchar *thread, gchar *objet, gfloat val_float );
- extern void Send_Event_EA ( gchar *from, gint num, gfloat val );
  extern void Envoyer_Event_msrv( struct CMD_TYPE_MSRV_EVENT *event );
 
  extern void Gerer_arrive_MSGxxx_dls ( void );                                   /* Dans distrib_MSGxxx.c */

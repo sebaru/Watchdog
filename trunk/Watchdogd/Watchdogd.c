@@ -195,17 +195,17 @@
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
           Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
           Partage->audit_bit_interne_per_sec = 0;
-          Send_Event_EA ( Config.instance_id, NUM_EA_SYS_BITS_PER_SEC, Partage->audit_bit_interne_per_sec_hold );/* historique */
+          SEA ( NUM_EA_SYS_BITS_PER_SEC, Partage->audit_bit_interne_per_sec_hold );                             /* historique */
 
           Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
           Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
           Partage->audit_tour_dls_per_sec = 0;
-          Send_Event_EA ( Config.instance_id, NUM_EA_SYS_TOUR_DLS_PER_SEC, Partage->audit_tour_dls_per_sec_hold );/* historique */
+          SEA ( NUM_EA_SYS_TOUR_DLS_PER_SEC, Partage->audit_tour_dls_per_sec_hold );                            /* historique */
           if (Partage->audit_tour_dls_per_sec_hold > 100)                                           /* Moyennage tour DLS/sec */
            { Partage->com_dls.temps_sched += 50; }
           else if (Partage->audit_tour_dls_per_sec_hold < 80)
            { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
-          Send_Event_EA ( Config.instance_id, NUM_EA_SYS_DLS_WAIT, Partage->com_dls.temps_sched );              /* historique */
+          SEA ( NUM_EA_SYS_DLS_WAIT, Partage->com_dls.temps_sched );                                            /* historique */
         }
 
        Partage->top_cdg_plugin_dls++;                                                            /* Chien de garde plugin DLS */

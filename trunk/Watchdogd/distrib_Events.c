@@ -45,37 +45,6 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
   }
 /******************************************************************************************************************************/
-/* New_Event: Creation d'un nouvel evenement                                                                                  */
-/* Entrée : la source de l'evenement (thread et son type)                                                                     */
-/* Sortie : Une structure Event ou NULL si pb                                                                                 */
-/******************************************************************************************************************************/
- static struct CMD_TYPE_MSRV_EVENT *New_Event ( void )
-  { struct CMD_TYPE_MSRV_EVENT *event;
-
-    event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc0( sizeof( struct CMD_TYPE_MSRV_EVENT ) );
-    if(!event)                                                                                /* Envoi de l'evenement au MSRV */
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "New_Event: Malloc ERROR" );
-       return(NULL);
-     }
-    return(event);
-  }
-/******************************************************************************************************************************/
-/* Send_Event_EA: Creation d'un nouvel evenement EA                                                                           */
-/* Entrée : la source de l'evenement (thread et son type)                                                                     */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Send_Event_EA ( gchar *from, gint num, gfloat val )
-  { struct CMD_TYPE_MSRV_EVENT *event;
-#ifdef bouh
-    event = New_Event( from, EVENT_TYPE_EA );
-    if(!event) return;
-    event->num = num;
-    event->val_float = val;
-    Envoyer_Event_msrv ( event );
- #endif
-  }
-/******************************************************************************************************************************/
 /* Send_Event_String: Creation d'un nouvel evenement String                                                                   */
 /* Entrée : la source de l'evenement (thread et son type)                                                                     */
 /* Sortie : néant                                                                                                             */
@@ -83,7 +52,7 @@
  void Send_Event ( gchar *instance, gchar *thread, gchar *objet, gfloat val_float )
   { struct CMD_TYPE_MSRV_EVENT *event;
 
-    event = New_Event();
+    event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc0( sizeof( struct CMD_TYPE_MSRV_EVENT ) );
     if(!event) return;
     g_snprintf( event->instance, sizeof(event->instance), "%s", instance );
     g_snprintf( event->thread, sizeof(event->thread), "%s", thread );
@@ -118,7 +87,7 @@
 /******************************************************************************************************************************/
  static void Envoyer_Events_aux_abonnes ( struct CMD_TYPE_MSRV_EVENT *event )
   { struct CMD_TYPE_MSRV_EVENT *dup_event;
-	GSList *liste;
+	   GSList *liste;
 
     pthread_mutex_lock ( &Partage->com_msrv.synchro );
     liste = Liste_clients_Events;
@@ -166,20 +135,6 @@
      }
 
     return (result_mnemo);                                           /* A-t'on le seul et unique Mnemo associé à cet event ?? */
-  }
-/******************************************************************************************************************************/
-/* Gerer_arrive_Event_string: Gere l'arrive d'un event de type string                                                         */
-/* Entrée : l'evenement a traiter                                                                                             */
-/* sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Gerer_arrive_Event_EA( struct CMD_TYPE_MSRV_EVENT *event )
-  {
-#ifdef bouh
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-             "Gerer_arrive_Event_EA: From %s -> Received EA%03d=%6.2f (val_int)",
-              event->from, event->num, event->val_float );
-    SEA( event->num, event->val_float );
- #endif
   }
 /*******************************************************************************************************************************/
 /* Gerer_arrive_Event_string: Gere l'arrive d'un event de type string                                                         */

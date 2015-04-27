@@ -209,7 +209,7 @@
           Info_new( Config.log, Config.log_arch, LOG_DEBUG, "Run_arch: archive saved" );
         }
        Libere_DB_SQL( &db );
-       Send_Event_EA ( Config.instance_id, NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );        /* pour historique */
+       SEA ( NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );                                      /* pour historique */
      }
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Run_arch: Down (%p)", pthread_self() );
