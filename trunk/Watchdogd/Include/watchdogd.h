@@ -157,7 +157,7 @@
  extern gboolean Decharger_librairie_par_prompt ( gchar *nom_fichier );
 
  extern void Gerer_arrive_Events ( void );                                       /* Dans distrib_Events.c */
- extern void Abonner_distribution_events ( void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event) );
+ extern void Abonner_distribution_events ( void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event), gchar *thread );
  extern void Desabonner_distribution_events ( void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event) );
  extern void Send_Event ( gchar *instance, gchar *thread, gchar *objet, gfloat val_float );
  extern void Envoyer_Event_msrv( struct CMD_TYPE_MSRV_EVENT *event );

@@ -175,7 +175,7 @@
        goto end;
      }
 
-    Abonner_distribution_events ( Satellite_Gerer_events );                           /* Abonnement à la diffusion des events */
+    Abonner_distribution_events ( Satellite_Gerer_events, NOM_THREAD );               /* Abonnement à la diffusion des events */
 
     Cfg_satellite.lib->Thread_run = TRUE;                                                               /* Le thread tourne ! */
     Cfg_satellite.Mode = SAT_DISCONNECTED;
