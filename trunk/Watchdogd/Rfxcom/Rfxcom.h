@@ -78,7 +78,7 @@
     gboolean enable;                                                                               /* Thread enable at boot ? */
     gboolean reload;
     GSList *Modules_RFXCOM;                                                                      /* Listes des modules RFXCOM */
-    GSList *Liste_sortie;                                                                  /* Liste des sorties a positionner */
+    GSList *Liste_events;                                                                  /* Liste des sorties a positionner */
  } Cfg_rfxcom;
 
 /************************************************** Définitions des prototypes ************************************************/

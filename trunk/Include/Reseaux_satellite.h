@@ -28,11 +28,6 @@
 #ifndef _RESEAUX_SATELLITE_H_
  #define _RESEAUX_SATELLITE_H_
 
- enum
-  { EVENT_TYPE_STRING,
-	   EVENT_TYPE_EA
-  };
-
  struct CMD_TYPE_MSRV_EVENT
   { gchar instance[12];
     gchar thread[12];
