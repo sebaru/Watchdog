@@ -116,7 +116,7 @@
     if ( ! Recuperer_mnemo_baseDB_by_command_text ( &db, event, TRUE ) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                  "Map_event_to_mnemo: Error searching Database" );
-       return(FALSE);
+       return(NULL);
      }
     nbr_result = db->nbr_result;
           
@@ -201,8 +201,41 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
     Envoyer_Events_aux_abonnes ( event );
-    if (Config.instance_is_master == TRUE)
+    if (Config.instance_is_master == TRUE && strcmp ( event->thread, "MSRV" ) )
      { Gerer_arrive_Event ( event ); }
     g_free(event);
+  }
+/******************************************************************************************************************************/
+/* Gerer_arrive_Axxx_dls: Gestion de l'arrive des sorties depuis DLS                                                          */
+/* Entrée/Sortie: rien                                                                                                        */
+/******************************************************************************************************************************/
+ void Gerer_arrive_Axxx_dls ( void )
+  { struct CMD_TYPE_NUM_MNEMONIQUE critere;
+    struct CMD_TYPE_MNEMO_BASE *mnemo;
+    gint num, reste;
+
+    if (!Partage->com_msrv.liste_a) return;                                                       /* Si pas de a, on se barre */
+
+    pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Ajout dans la liste de msg a traiter */
+    num = GPOINTER_TO_INT(Partage->com_msrv.liste_a->data);                                    /* Recuperation du numero de a */
+    Partage->com_msrv.liste_a = g_slist_remove ( Partage->com_msrv.liste_a, GINT_TO_POINTER(num) );
+    reste = g_slist_length(Partage->com_msrv.liste_a);
+    pthread_mutex_unlock( &Partage->com_msrv.synchro );
+
+    critere.type = MNEMO_SORTIE;                                           /* Recherche du command_text associé au mnemonique */
+    critere.num  = num;
+    mnemo = Rechercher_mnemo_baseDB_type_num ( &critere );
+    if (!mnemo)
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+                "Gerer_arrive_Axxx_dls: Mnemo not found for A%03d", num
+               );
+       return;
+     }
+
+    Send_Event ( Config.instance_id, "MSRV", mnemo->command_text, 1.0*A(num) );
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+              "Gerer_arrive_Axxx_dls: Recu A(%03d)=%d. Reste a traiter %03d",
+              num, A(num), reste
+            );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
