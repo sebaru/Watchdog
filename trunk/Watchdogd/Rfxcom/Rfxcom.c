@@ -390,11 +390,14 @@
 /* Entrée: les paramètres de critères de recherche                                                        */
 /* Sortie: le module, ou NULL si erreur                                                                   */
 /**********************************************************************************************************/
- static void Rfxcom_Envoyer_event ( event )
+ static void Rfxcom_Envoyer_event ( struct CMD_TYPE_MSRV_EVENT *event )
   { gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
     struct MODULE_RFXCOM *module;
     GSList *liste_modules;
 
+    Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
+             "Rfxcom_envoyer_event: Processing event %s (from instance %s, thread %s)",
+              event->objet, event->instance, event->thread );
 #ifdef bouh
     module = NULL;
     pthread_mutex_lock ( &Cfg_rfxcom.lib->synchro );
