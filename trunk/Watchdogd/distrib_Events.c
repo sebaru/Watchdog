@@ -167,14 +167,12 @@
      { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                 "Map_event_to_mnemo: Match found for %s: Type %d Num %d - %s",
                  event, mnemo->type, mnemo->num, mnemo->libelle );
-
-       if (nbr_result==1) result_mnemo = mnemo;                                    /* Si un seul enregistrement, c'est le bon */
-       else g_free(mnemo);                          /* Si trop, on les libere tous dans la mesure ou l'on ne sait que choisir */
+       if (result_mnemo != NULL) { g_free(result_mnemo); result_mnemo = mnemo; }                            /* Last result OK */
      }
 
     return (result_mnemo);                                           /* A-t'on le seul et unique Mnemo associé à cet event ?? */
   }
-/*******************************************************************************************************************************/
+/******************************************************************************************************************************/
 /* Gerer_arrive_Event_string: Gere l'arrive d'un event de type string                                                         */
 /* Entrée : l'evenement a traiter                                                                                             */
 /* sortie : Néant                                                                                                             */
