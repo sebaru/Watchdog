@@ -167,7 +167,8 @@
      { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                 "Map_event_to_mnemo: Match found for %s: Type %d Num %d - %s",
                  event, mnemo->type, mnemo->num, mnemo->libelle );
-       if (result_mnemo != NULL) { g_free(result_mnemo); result_mnemo = mnemo; }                            /* Last result OK */
+       if (result_mnemo != NULL) { g_free(result_mnemo); }
+       result_mnemo = mnemo;                                                                                /* Last result OK */
      }
 
     return (result_mnemo);                                           /* A-t'on le seul et unique Mnemo associé à cet event ?? */
