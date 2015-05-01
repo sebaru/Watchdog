@@ -128,13 +128,13 @@
         { if ( ! strcmp ( event->thread, "MSRV" ) )
            { if ( strcmp ( abonne->thread, "satellite" ) ) send = TRUE; }
           else if ( ! strcmp ( abonne->thread, "satellite" ) ) send = TRUE;
-         
-          if ( send ==TRUE )                                                                              /* Decision d'envoie ? */
-           { dup_event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc ( sizeof(struct CMD_TYPE_MSRV_EVENT) );
-             if (dup_event)
-              { memcpy( dup_event, event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
-                abonne->Gerer_event ( dup_event );
-              }
+        } 
+
+       if ( send ==TRUE )                                                                              /* Decision d'envoie ? */
+        { dup_event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc ( sizeof(struct CMD_TYPE_MSRV_EVENT) );
+          if (dup_event)
+           { memcpy( dup_event, event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
+             abonne->Gerer_event ( dup_event );
            }
         }
        liste = liste->next;
@@ -237,15 +237,10 @@
     Partage->com_msrv.liste_Event = g_slist_remove ( Partage->com_msrv.liste_Event, event );
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-    if (Config.instance_is_master == FALSE)                                            /* Si slave, on ne fait que passe plat */
-     { Envoyer_Events_aux_abonnes ( event ); }
+    Envoyer_Events_aux_abonnes ( event );                                                 /* Le tri est fait dans la fonction */
 
-    if (Config.instance_is_master == TRUE)
-     { if ( strcmp ( event->thread, "MSRV" ) )                                           /* Event d'entrée ? On gere en local */
-        { Gerer_arrive_Event ( event ); }
-       else
-        { Envoyer_Events_aux_abonnes ( event ); }                                         /* Sinon on passe l'info au threads */
-     }
+    if (Config.instance_is_master == TRUE && strcmp ( event->thread, "MSRV" ) )          /* Event d'entrée ? On gere en local */
+     { Gerer_arrive_Event ( event ); }
     g_free(event);
   }
 /******************************************************************************************************************************/
