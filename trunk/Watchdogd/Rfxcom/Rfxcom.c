@@ -567,7 +567,14 @@
                );   
      }
     else if (trame->type == 0x11 && trame->sous_type == 0x00)                            /* Lighting 2 AC */
-     { struct MODULE_RFXCOM *module;
+     { gchar chaine[128];
+
+       g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:CMD:%03d",
+                    trame->type, trame->sous_type, trame->data[0] & 0x03, trame->data[1],
+                    trame->data[2], trame->data[3], trame->data[4], trame->data[5] );
+
+       Send_Event ( Config.instance_id, NOM_THREAD, chaine, 1.0 * trame->data[6] );
+
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                  "Processer_trame : get lighting ! type=%03d(0x%02X), sous_type=%03d(0x%02X), id1=%03d, id2=%03d, "
                  "id3=%03d, id4=%03d, unitcode=%03d, cmnd=%03d, level=%03d rssi=%02d",
@@ -575,17 +582,6 @@
                  trame->data[2], trame->data[3], trame->data[4], trame->data[5],
                  trame->data[6], trame->data[7] & 0x0F
                );   
-       module = Chercher_rfxcom( trame->type, trame->sous_type, TRUE, trame->data[0] & 0x03, TRUE, trame->data[1],
-                                 TRUE, trame->data[2], TRUE, trame->data[3], FALSE, 0, TRUE, trame->data[4] );
-       if (module)
-        { Envoyer_entree_dls( module->rfxcom.map_E, trame->data[5] );
-          Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
-                    "Processer_trame : Module found (%s), Setting E%03d=%d", module->rfxcom.libelle, module->rfxcom.map_E, trame->data[5] );
-          module->date_last_view = Partage->top;
-        }
-       else Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                      "Processer_trame: No module found for packet received type=%02d(0x%02X), sous_type=%02d(0x%02X)",
-                      trame->type, trame->type, trame->sous_type, trame->sous_type );
      }
     else Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                    "Processer_trame unknown packet type %02d(0x%02X), sous_type=%02d(0x%02X)",
