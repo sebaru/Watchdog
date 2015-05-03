@@ -385,16 +385,18 @@
     if (liste_modules) return(module);
     return(NULL);
   }
-/**********************************************************************************************************/
-/* Chercher_rfxcom: Retrouve un module/capteur dans la liste gérée en fonction des paramètres             */
-/* Entrée: les paramètres de critères de recherche                                                        */
-/* Sortie: le module, ou NULL si erreur                                                                   */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Rfxcom_Envoyer_event : Process un evenement en entrée                                                                      */
+/* Entrée: l'evenement a processer                                                                                            */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Rfxcom_Envoyer_event ( struct CMD_TYPE_MSRV_EVENT *event )
   { gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
     gint type,sstype,id1,id2,id3,id4,housecode,unitcode,val, cpt;
     gchar instance[24], thread[24];
     
+    if ( strcmp ( event->thread, "MSRV" ) ) return;                                               /* On ecoute que le MSRV ?? */
+
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
              "Rfxcom_envoyer_event: Processing event %s (from instance %s, thread %s)",
               event->objet, event->instance, event->thread );

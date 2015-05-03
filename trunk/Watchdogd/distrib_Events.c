@@ -263,6 +263,8 @@
     reste = g_slist_length(Partage->com_msrv.liste_a);
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
+    if ( ! A(num) ) return;                                                  /* Une sortie qui tombe n'est pas un evenement ! */
+
     critere.type = MNEMO_SORTIE;                                           /* Recherche du command_text associé au mnemonique */
     critere.num  = num;
     mnemo = Rechercher_mnemo_baseDB_type_num ( &critere );
@@ -273,10 +275,11 @@
        return;
      }
 
-    Send_Event ( Config.instance_id, "MSRV", mnemo->command_text, 1.0*A(num) );
+    Send_Event ( Config.instance_id, "MSRV", mnemo->command_text, 1.0 );
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-              "Gerer_arrive_Axxx_dls: Recu A(%03d)=%d (%s). Reste a traiter %03d",
-              num, A(num), mnemo->command_text, reste
+              "Gerer_arrive_Axxx_dls: Recu A(%03d) (%s). Reste a traiter %03d",
+              num, mnemo->command_text, reste
             );
+    SA ( num, 0 );                                                       /* L'evenement est traité, on fait retombé la sortie */
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
