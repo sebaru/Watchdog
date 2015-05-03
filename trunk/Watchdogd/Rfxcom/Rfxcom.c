@@ -639,7 +639,6 @@
      }
 
     Abonner_distribution_events ( Rfxcom_Gerer_event, NOM_THREAD );              /* Desabonnement de la diffusion des sorties */
-    Charger_tous_rfxcom();                                              /* Chargement de tous les capteurs/actionneurs RFXCOM */
     nbr_oct_lu = 0;
     Cfg_rfxcom.mode = RFXCOM_RETRING;
     while( lib->Thread_run == TRUE)                                      /* On tourne tant que necessaire */
@@ -740,7 +739,7 @@
           event = (struct CMD_TYPE_MSRV_EVENT *)Cfg_rfxcom.Liste_events->data;                      /* Recuperation du numero */
           Cfg_rfxcom.Liste_events = g_slist_remove ( Cfg_rfxcom.Liste_events, event );
           Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                   "Run_rfxcom: Reste a traiter %d",
+                   "Run_rfxcom: Reste a traiter %03d events",
                     g_slist_length(Cfg_rfxcom.Liste_events) );
           pthread_mutex_unlock( &Cfg_rfxcom.lib->synchro );
           Rfxcom_Envoyer_event ( event );
@@ -749,7 +748,6 @@
      }                                                                                         /* Fin du while partage->arret */
 
     Desabonner_distribution_events ( Rfxcom_Gerer_event );                       /* Desabonnement de la diffusion des sorties */
-    Decharger_tous_rfxcom ();
     close(Cfg_rfxcom.fd);                                                                     /* Fermeture de la connexion FD */
 end:
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_NOTICE,

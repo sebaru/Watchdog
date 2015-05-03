@@ -120,17 +120,20 @@
        send = FALSE;
        abonne = (struct ABONNE_EVENT *)liste->data;
 
-       if (Config.instance_is_master == TRUE)
-        { if ( ! strcmp ( event->thread, "MSRV" ) ) send = TRUE;
-          else if ( strcmp ( abonne->thread, "ssrv" ) ) send = TRUE;
+                                                             /* Si Instance/thread source != de l'instance/thread destination */
+       if ( ! ((! strcmp ( Config.instance_id, event->instance )) && (! strcmp( event->thread, abonne->thread )) ) )
+        { if (Config.instance_is_master == TRUE)
+           { if ( ! strcmp ( event->thread, "MSRV" ) ) send = TRUE;
+             else if ( strcmp ( abonne->thread, "ssrv" ) ) send = TRUE;
+           }
+          else
+           { if ( ! strcmp ( event->thread, "MSRV" ) )
+              { if ( strcmp ( abonne->thread, "satellite" ) ) send = TRUE; }
+             else if ( ! strcmp ( abonne->thread, "satellite" ) ) send = TRUE;
+           } 
         }
-       else
-        { if ( ! strcmp ( event->thread, "MSRV" ) )
-           { if ( strcmp ( abonne->thread, "satellite" ) ) send = TRUE; }
-          else if ( ! strcmp ( abonne->thread, "satellite" ) ) send = TRUE;
-        } 
 
-       if ( send ==TRUE )                                                                              /* Decision d'envoie ? */
+       if ( send == TRUE )                                                                             /* Decision d'envoie ? */
         { dup_event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc ( sizeof(struct CMD_TYPE_MSRV_EVENT) );
           if (dup_event)
            { memcpy( dup_event, event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
