@@ -67,6 +67,7 @@
   { if ( (E(num) && !etat) || (!E(num) && etat) )
      { Ajouter_arch( MNEMO_ENTREE, num, 1.0*E(num) );   /* Archivage etat n-1 pour les courbes historique */
        Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat );                        /* Archivage de l'etat courant */
+#ifdef bouh
        if ( ! (etat == 0 && Partage->e[num].confDB.furtif == TRUE ) )         /* On informe du chgmt MSRV */
         {                                 /* Uniquement l'etat 1 sur le mode de fonctionnement est furtif */
           pthread_mutex_lock( &Partage->com_msrv.synchro ); /* Ajout dans la liste d'E envoyées au master */
@@ -74,6 +75,7 @@
                                                        GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
         }
+#endif
        Partage->e[num].etat = etat;                                      /* Changement d'etat de l'entrée */
      }
   }

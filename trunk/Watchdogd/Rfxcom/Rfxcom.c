@@ -392,52 +392,55 @@
 /**********************************************************************************************************/
  static void Rfxcom_Envoyer_event ( struct CMD_TYPE_MSRV_EVENT *event )
   { gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
-    struct MODULE_RFXCOM *module;
-    GSList *liste_modules;
-
+    gint type,sstype,id1,id2,id3,id4,housecode,unitcode,val, cpt;
+    gchar instance[24], thread[24];
+    
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
              "Rfxcom_envoyer_event: Processing event %s (from instance %s, thread %s)",
               event->objet, event->instance, event->thread );
-#ifdef bouh
-    module = NULL;
-    pthread_mutex_lock ( &Cfg_rfxcom.lib->synchro );
-    liste_modules = Cfg_rfxcom.Modules_RFXCOM;
-    while ( liste_modules )
-     { module = (struct MODULE_RFXCOM *)liste_modules->data;
 
-       if (module->rfxcom.type == 0x11 && module->rfxcom.sous_type == 0x00 && 
-           module->rfxcom.map_A == num_a
-          )
-        { gint cpt;
-          Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
-              "Rfxcom_envoyer_sortie: Envoi de A(%03d)=%d au module ids=%02d %02d %02d %02d unit %02d",
-               num_a, A(num_a), module->rfxcom.id1, module->rfxcom.id2,
-               module->rfxcom.id3, module->rfxcom.id4, module->rfxcom.unitcode );
-          trame_send_AC[0]  = 0x0B; /* Taille */
-          trame_send_AC[1]  = 0x11; /* lightning 2 */
-          trame_send_AC[2]  = 0x00; /* AC */
-          trame_send_AC[3]  = 0x01; /* Seqnbr */
-          trame_send_AC[4]  = module->rfxcom.id1 << 6;
-          trame_send_AC[5]  = module->rfxcom.id2;
-          trame_send_AC[6]  = module->rfxcom.id3;
-          trame_send_AC[7]  = module->rfxcom.id4;
-          trame_send_AC[8]  = module->rfxcom.unitcode;
-          trame_send_AC[9]  = (A(num_a) ? 1 : 0);
-          trame_send_AC[10] = 0x0; /* level */
-          trame_send_AC[11] = 0x0; /* rssi */
-          for ( cpt = 0; cpt < 3 ; cpt++)
-           { gint retour;
-             retour = write ( Cfg_rfxcom.fd, &trame_send_AC, trame_send_AC[0] + 1 );
-             if (retour == -1)
-              { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
-                         "Rfxcom_envoyer_sortie: Write Error for A(%03d) : %s", num_a, strerror(errno) );
-              }
-           }
-        }
-       liste_modules = liste_modules->next;
+    if ( sscanf ( event->objet, "%s:%s:%d:%d:%d:%d:%d:%d:%d:%d:%d",
+                  instance, thread, &type, &sstype, &id1, &id2, &id3, &id4, &housecode, &unitcode, &val ) != 11 )
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
+                "Rfxcom_envoyer_event: Event %s Syntax Error (from instance %s, thread %s)",
+                 event->objet, event->instance, event->thread );
+       return;
      }
-    pthread_mutex_unlock ( &Cfg_rfxcom.lib->synchro );
-#endif
+
+    if ( strcmp ( instance, Config.instance_id ) ) return;                                      /* Are we the right thread ?? */
+    if ( strcmp ( thread, NOM_THREAD ) ) return;
+    
+    if ( type == 0x11 && sstype == 0x00 )                                                             /* Envoi de lighting ?? */
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
+           "Rfxcom_envoyer_sortie: Envoi de %s au module ids=%02d %02d %02d %02d unit %02d",
+            (val ? "ON " : "OFF"), id1, id2, id3, id4, unitcode );
+       trame_send_AC[0]  = 0x0B; /* Taille */
+       trame_send_AC[1]  = 0x11; /* lightning 2 */
+       trame_send_AC[2]  = 0x00; /* AC */
+       trame_send_AC[3]  = 0x01; /* Seqnbr */
+       trame_send_AC[4]  = id1 << 6;
+       trame_send_AC[5]  = id2;
+       trame_send_AC[6]  = id3;
+       trame_send_AC[7]  = id4;
+       trame_send_AC[8]  = unitcode;
+       trame_send_AC[9]  = (val ? 1 : 0);
+       trame_send_AC[10] = 0x0; /* level */
+       trame_send_AC[11] = 0x0; /* rssi */
+     }
+    else { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
+                    "Rfxcom_envoyer_event: Event %s not supported (from instance %s, thread %s)",
+                     event->objet, event->instance, event->thread );
+           return;
+         }
+
+    for ( cpt = 0; cpt < 3 ; cpt++)                                                                       /* Send Three times */
+     { gint retour;
+       retour = write ( Cfg_rfxcom.fd, &trame_send_AC, trame_send_AC[0] + 1 );
+       if (retour == -1)
+        { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
+                   "Rfxcom_envoyer_sortie: Write Error for event %s (%s)", event->objet, strerror(errno) );
+        }
+     }
   }
 /**********************************************************************************************************/
 /* Processer_trame: traitement de la trame recue par un microcontroleur                                   */
