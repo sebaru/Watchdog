@@ -35,7 +35,6 @@
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
  #include "Sms.h"
- #define PRESMS   "CDE:"
 
 /**********************************************************************************************************/
 /* Sms_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                */
@@ -290,7 +289,7 @@
        return;
      }
 
-    if ( ! Recuperer_mnemo_baseDB_by_command_text ( &db, (gchar *)texte, FALSE ) )
+    if ( ! Recuperer_mnemo_baseDB_by_libelle ( &db, (gchar *)texte ) )
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_ERR,
                  "Traiter_commande_sms : Error searching Database" );
        return;

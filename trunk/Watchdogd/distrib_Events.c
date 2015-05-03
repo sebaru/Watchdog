@@ -154,7 +154,7 @@
     gint nbr_result;
     struct DB *db;
 
-    if ( ! Recuperer_mnemo_baseDB_by_command_text ( &db, event, TRUE ) )
+    if ( ! Recuperer_mnemo_baseDB_by_command_text ( &db, event ) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                  "Map_event_to_mnemo: Error searching Database" );
        return(NULL);

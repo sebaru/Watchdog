@@ -42,8 +42,9 @@
  extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB ( guint id );
  extern gboolean Recuperer_mnemo_baseDB ( struct DB **db );
  extern gboolean Recuperer_mnemo_baseDB_for_courbe ( struct DB **db );
- extern gboolean Recuperer_mnemo_baseDB_by_command_text ( struct DB **db,
-                                                     gchar *commande_pure, gboolean exact );
+ extern gboolean Recuperer_mnemo_baseDB_by_command_text ( struct DB **db_retour, gchar *commande_pure );
+ extern gboolean Recuperer_mnemo_baseDB_by_libelle ( struct DB **db_retour, gchar *libelle_pur );
+  
  extern struct CMD_TYPE_MNEMO_BASE *Recuperer_mnemo_baseDB_suite( struct DB **db );
  extern gint Ajouter_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo );
  extern gboolean Retirer_mnemo_baseDB ( struct CMD_TYPE_MNEMO_BASE *mnemo );
