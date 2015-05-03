@@ -44,25 +44,6 @@
     unsigned char data[40];
   };
 
- struct RFXCOMDB
-  { guint id;                                                                                       /* ID unique de la rfxcom */
-    guchar type;                                                                                       /* Numéro de la rfxcom */
-    guchar sous_type;                                                                                  /* Numéro de la rfxcom */
-    guchar id1;                                                                                        /* Numéro de la rfxcom */
-    guchar id2;                                                                                        /* Numéro de la rfxcom */
-    guchar id3;                                                                                        /* Numéro de la rfxcom */
-    guchar id4;                                                                                        /* Numéro de la rfxcom */
-    guchar housecode;                                                                                  /* Numéro de la rfxcom */
-    guchar unitcode;                                                                                   /* Numéro de la rfxcom */
-    gint map_E, map_EA, map_A;
-    gchar libelle[NBR_CARAC_LIBELLE_RFXCOM];                                                          /* Libelle de la rfxcom */
-  };
-
- struct MODULE_RFXCOM
-  { struct RFXCOMDB rfxcom;
-    guint date_last_view;
-  };
-
  enum
   { RFXCOM_WAIT_BEFORE_RETRY,
 	   RFXCOM_RETRING,
@@ -83,9 +64,6 @@
 
 /************************************************** Définitions des prototypes ************************************************/
  extern gboolean Rfxcom_Lire_config ( void );
- extern gboolean Retirer_rfxcomDB ( gint id );
- extern gint Ajouter_rfxcomDB ( struct RFXCOMDB *rfxcom );
- extern gboolean Modifier_rfxcomDB( struct RFXCOMDB *rfxcom );
 
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
