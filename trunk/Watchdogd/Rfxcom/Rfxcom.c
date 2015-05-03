@@ -401,7 +401,7 @@
              "Rfxcom_envoyer_event: Processing event %s (from instance %s, thread %s)",
               event->objet, event->instance, event->thread );
 
-    if ( sscanf ( event->objet, "%s:%s:%d:%d:%d:%d:%d:%d:%d:%d:%d",
+    if ( sscanf ( event->objet, "%[^:]:%[^:]:%d:%d:%d:%d:%d:%d:%d:%d:%d",
                   instance, thread, &type, &sstype, &id1, &id2, &id3, &id4, &housecode, &unitcode, &val ) != 11 )
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
                 "Rfxcom_envoyer_event: Event %s Syntax Error (from instance %s, thread %s)",
