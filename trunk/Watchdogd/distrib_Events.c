@@ -168,7 +168,7 @@
 
     while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
      { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "Map_event_to_mnemo: Match found for %s: Type %d Num %d - %s",
+                "Map_event_to_mnemo: Match found for %s Type %d Num %d - %s",
                  event, mnemo->type, mnemo->num, mnemo->libelle );
        if (result_mnemo != NULL) { g_free(result_mnemo); }
        result_mnemo = mnemo;                                                                                /* Last result OK */
@@ -212,7 +212,7 @@
        case MNEMO_ENTREE:
             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
                      "Gerer_arrive_Event: From %s -> Mise a un du bit E%03d", request, mnemo->num );
-            Envoyer_entree_dls(mnemo->num, 1);
+            Envoyer_entree_furtive_dls(mnemo->num);
             break;
        case MNEMO_ENTREE_ANA:
             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,

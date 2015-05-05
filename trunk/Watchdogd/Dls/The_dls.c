@@ -59,20 +59,20 @@
      }
     return(0);
   }
-/**********************************************************************************************************/
-/* SE : Met à jour la valeur de l'entrée en parametre.                                                    */
-/* Utilisé uniquement en tant que backend de Envoyer_entree_dls                                           */
-/**********************************************************************************************************/
- static void SE( int num, int etat )
+/******************************************************************************************************************************/
+/* SE : Met à jour la valeur de l'entrée en parametre.                                                                        */
+/* Utilisé directement par les threads locaux, via Envoyer_entree_furtive_dls pour les evenements                             */
+/******************************************************************************************************************************/
+ void SE( int num, int etat )
   { if ( (E(num) && !etat) || (!E(num) && etat) )
-     { Ajouter_arch( MNEMO_ENTREE, num, 1.0*E(num) );   /* Archivage etat n-1 pour les courbes historique */
-       Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat );                        /* Archivage de l'etat courant */
-       Partage->e[num].etat = etat;                                      /* Changement d'etat de l'entrée */
+     { Ajouter_arch( MNEMO_ENTREE, num, 1.0*E(num) );                       /* Archivage etat n-1 pour les courbes historique */
+       Ajouter_arch( MNEMO_ENTREE, num, 1.0*etat );                                            /* Archivage de l'etat courant */
+       Partage->e[num].etat = etat;                                                          /* Changement d'etat de l'entrée */
      }
   }
-/**********************************************************************************************************/
-/* EA_inrange : Renvoie 1 si l'EA en paramètre est dans le range de mesure                                */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* EA_inrange : Renvoie 1 si l'EA en paramètre est dans le range de mesure                                                    */
+/******************************************************************************************************************************/
  int EA_inrange( int num )
   { if (num>=0 && num<NBR_ENTRE_ANA) return( Partage->ea[ num ].inrange);
     else
@@ -627,24 +627,15 @@
     Partage->com_dls.Set_M = g_slist_append ( Partage->com_dls.Set_M, GINT_TO_POINTER(num) );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
-/**********************************************************************************************************/
-/* Envoyer_entree_dls: Demande a D.L.S de positionner le bit d'entrée en parametre, furtive ou non        */
-/* Entrée : le numéro de l'entrée, la valeur de l'état a positionner, et la furtivité de l'evenement      */
-/* sortie : Néant                                                                                         */
-/**********************************************************************************************************/
- void Envoyer_entree_dls( int num, int etat )
-  { if (num<0 || num>=NBR_ENTRE_TOR)
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "Envoyer_entree_dls : num %d out of range", num ); }
-       return;
-     }
-
-    if (Partage->e[num].confDB.furtif == FALSE) SE(num, etat);      /* Pas de furtivité, on y va direct ! */
-    else if ( etat == 1 )                        /* Pour les entrées furtive, la gestion est différente ! */
-     { pthread_mutex_lock( &Partage->com_dls.synchro );
-       Partage->com_dls.Set_E = g_slist_append ( Partage->com_dls.Set_E, GINT_TO_POINTER(num) );
-       pthread_mutex_unlock( &Partage->com_dls.synchro );
-     }
+/******************************************************************************************************************************/
+/* Envoyer_entree_furtive_dls: Demande a D.L.S de positionner furtivement le bit d'entrée en parametre                        */
+/* Entrée : le numéro de l'entrée                                                                                             */
+/* sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Envoyer_entree_furtive_dls( int num )
+  { pthread_mutex_lock( &Partage->com_dls.synchro );
+    Partage->com_dls.Set_E = g_slist_append ( Partage->com_dls.Set_E, GINT_TO_POINTER(num) );
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /**********************************************************************************************************/
 /* Set_cde_exterieure: Mise à un des bits de commande exterieure                                          */

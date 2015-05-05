@@ -157,10 +157,11 @@
  extern float EA_ech( int num );
  extern int A( int num );
  extern char *Tdetail( int num );
+ extern void SE( int num, int etat );
  extern void SEA( int num, float val_avant_ech );
  extern void SEA_range( int num, int range );
  extern void SEA_ech( int num, float val_ech );
- extern void Envoyer_entree_dls( int num, int etat );
+ extern void Envoyer_entree_furtive_dls( int num );
  extern void Envoyer_commande_dls ( int num );
 
  extern void Prendre_heure ( void );                                                      /* Dans heure.c */ 
