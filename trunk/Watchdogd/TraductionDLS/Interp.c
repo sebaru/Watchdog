@@ -358,11 +358,11 @@
     g_list_free( Alias );
     Alias = NULL;
   }
-/**********************************************************************************************************/
-/* Traduire: Traduction du fichier en paramètre du langage DLS vers le langage C                          */
-/* Entrée: la structure de log, l'id du modul, new = true si il faut compiler le .dls.new                 */
-/* Sortie: TRAD_DLS_OK, _WARNING ou _ERROR                                                                */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Traduire: Traduction du fichier en paramètre du langage DLS vers le langage C                                              */
+/* Entrée: l'id du modul, new = true si il faut compiler le .dls.new                                                          */
+/* Sortie: TRAD_DLS_OK, _WARNING ou _ERROR                                                                                    */
+/******************************************************************************************************************************/
  gint Traduire_DLS( gboolean new, gint id )
   { gchar source[80], source_ok[80], cible[80], log[80];
     struct ALIAS *alias;

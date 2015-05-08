@@ -102,7 +102,7 @@
              { memcpy( &client->dls, (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees,
                        sizeof( client->dls ) );
                Ref_client( client );                             /* Indique que la structure est utilisée */
-               pthread_create( &tid, NULL, (void *)Proto_compiler_source_dls, client );
+               pthread_create( &tid, NULL, (void *)Proto_compiler_source_dls_thread, client );
                pthread_detach( tid );
              }
             break;

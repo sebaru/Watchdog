@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Serveur/envoi_dls.c        Configuration du DLS de Watchdog v2.0                             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       dim 08 mar 2009 14:28:35 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Serveur/envoi_dls.c        Configuration du DLS de Watchdog v2.0                                                 */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                           dim 08 mar 2009 14:28:35 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * envoi_dls.c
  * This file is part of Watchdog
@@ -32,18 +32,18 @@
  #include <sys/types.h>
  #include <fcntl.h>
  #include <unistd.h>
- #include <sys/file.h>                                            /* Gestion des verrous sur les fichiers */
+ #include <sys/file.h>                                                                /* Gestion des verrous sur les fichiers */
  #include <sys/wait.h>
 
-/******************************************** Prototypes de fonctions *************************************/
+/****************************************************** Prototypes de fonctions ***********************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
 
-/**********************************************************************************************************/
-/* Proto_effacer_fichier_dls: Suppression du code d'un plugin avant reception du nouveau code client      */
-/* Entrée: le client demandeur et l'id du fichier plugin                                                  */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_effacer_fichier_dls: Suppression du code d'un plugin avant reception du nouveau code client                          */
+/* Entrée: le client demandeur et l'id du fichier plugin                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_effacer_fichier_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls )
   { gchar chaine[80];
     gint id_fichier;
@@ -53,11 +53,11 @@
     close(id_fichier);
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "Proto_effacer_fichier_plugin_dls : Zeroing... %s", chaine );
   }
-/**********************************************************************************************************/
-/* Proto_effacer_plugin_dls: Destruction du plugin en parametre                                           */
-/* Entrée: le client demandeur et le groupe en question                                                   */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_effacer_plugin_dls: Destruction du plugin en parametre                                                               */
+/* Entrée: le client demandeur et le groupe en question                                                                       */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_effacer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { gboolean retour;
 
@@ -79,11 +79,11 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
   }
-/**********************************************************************************************************/
-/* Proto_editer_msg: Le client desire editer un msg                                                       */
-/* Entrée: le client demandeur et le msg en question                                                      */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_editer_msg: Le client desire editer un msg                                                                           */
+/* Entrée: le client demandeur et le msg en question                                                                          */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { struct CMD_TYPE_PLUGIN_DLS *dls;
 
@@ -92,7 +92,7 @@
     if (dls)
      { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_EDIT_PLUGIN_DLS_OK,
                   (gchar *)dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-       g_free(dls);                                                                 /* liberation mémoire */
+       g_free(dls);                                                                                     /* liberation mémoire */
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -102,11 +102,11 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
   }
-/**********************************************************************************************************/
-/* Proto_valider_editer_msg: Le client valide l'edition d'un msg                                          */
-/* Entrée: le client demandeur et le msg en question                                                      */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_valider_editer_msg: Le client valide l'edition d'un msg                                                              */
+/* Entrée: le client demandeur et le msg en question                                                                          */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_valider_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { struct CMD_TYPE_PLUGIN_DLS *result;
     gboolean retour;
@@ -140,11 +140,11 @@
             }
          }
   }
-/**********************************************************************************************************/
-/* Proto_editer_source_dls: Edition d'un programme DLS                                                    */
-/* Entrée: le client demandeur et le groupe en question                                                   */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_editer_source_dls: Edition d'un programme DLS                                                                        */
+/* Entrée: le client demandeur et le groupe en question                                                                       */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_editer_source_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { struct CMD_TYPE_SOURCE_DLS *source_dls;
     gint taille, fd, taille_max_data;
@@ -164,10 +164,10 @@
                 "Proto_editer_source_dls: Memory alloc error" );
        return;
      }
-                                                 /* Utilisation du debut du buffer pour stocker structure */
+                                                                     /* Utilisation du debut du buffer pour stocker structure */
     source_dls = (struct CMD_TYPE_SOURCE_DLS *)buffer_all;
     source_dls->id = rezo_dls->id;
-    buffer_data = buffer_all + sizeof(struct CMD_TYPE_SOURCE_DLS);       /* Index data dans le buffer_all */
+    buffer_data = buffer_all + sizeof(struct CMD_TYPE_SOURCE_DLS);                           /* Index data dans le buffer_all */
     taille_max_data = Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_SOURCE_DLS);
 
     g_snprintf( chaine, sizeof(chaine), "Dls/%d.dls", rezo_dls->id );
@@ -181,10 +181,10 @@
        return;
      }
 
-    lockf( fd, F_LOCK, 0 );                                                    /* Verrouillage du fichier */
-    for ( ; ; )                                                         /* On balance le fichier source ! */
+    lockf( fd, F_LOCK, 0 );                                                                        /* Verrouillage du fichier */
+    for ( ; ; )                                                                             /* On balance le fichier source ! */
      { taille = read ( fd, buffer_data, taille_max_data );
-       if (taille<=0)                                                      /* Détection de fin de fichier */
+       if (taille<=0)                                                                          /* Détection de fin de fichier */
         { close(fd);
           break;
         }
@@ -197,11 +197,11 @@
                    buffer_all, sizeof(struct CMD_TYPE_SOURCE_DLS) );
     g_free(buffer_all);
   }
-/**********************************************************************************************************/
-/* Proto_valider_source_dls: Le client nous envoie un prg DLS qu'il nous faudra compiler ensuite          */
-/* Entrée: le client demandeur et le groupe en question                                                   */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_valider_source_dls: Le client nous envoie un prg DLS qu'il nous faudra compiler ensuite                              */
+/* Entrée: le client demandeur et le groupe en question                                                                       */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_valider_source_dls( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls,
                                 gchar *buffer )
   { gchar chaine[80];
@@ -224,15 +224,15 @@
        close (client->id_creation_plugin_dls);
      }
   }
-/**********************************************************************************************************/
-/* Proto_compiler_source_dls: Compilation de la source DLS                                                */
-/* Entrée: le client demandeur et le groupe en question                                                   */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- void *Proto_compiler_source_dls( struct CLIENT *client )
+/******************************************************************************************************************************/
+/* Proto_compiler_source_dls: Compilation de la source DLS                                                                    */
+/* Entrée: le client demandeur et le groupe en question                                                                       */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void *Proto_compiler_source_dls_thread( struct CLIENT *client )
   { struct CMD_GTK_MESSAGE erreur;
 
-    close( client->id_creation_plugin_dls );                               /* Fermeture du fichier plugin */
+    close( client->id_creation_plugin_dls );                                                   /* Fermeture du fichier plugin */
     client->id_creation_plugin_dls = 0;
 
     switch ( Compiler_source_dls ( TRUE, TRUE, client->dls.id, erreur.message, sizeof(erreur.message) ) )
@@ -268,13 +268,14 @@
                            (gchar *)&erreur, sizeof(erreur) );
             break;
      }
+    Unref_client ( client );                                                           /* Plus besoin de la structure cliente */
     pthread_exit( NULL );
   }
-/**********************************************************************************************************/
-/* Proto_ajouter_groupe: Un client nous demande d'ajouter un groupe Watchdog                              */
-/* Entrée: le groupe à créer                                                                              */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_ajouter_groupe: Un client nous demande d'ajouter un groupe Watchdog                                                  */
+/* Entrée: le groupe à créer                                                                                                  */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_ajouter_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { struct CMD_TYPE_PLUGIN_DLS *result;
     gint id;
@@ -315,18 +316,18 @@
                       }
                      close(id_fichier); 
 
-                     Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_ADD_PLUGIN_DLS_OK,      /* Tout va bien */
+                     Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_ADD_PLUGIN_DLS_OK,                          /* Tout va bien */
                                    (gchar *)result, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
                      g_free(result);
                    }
             }
          }
   }
-/**********************************************************************************************************/
-/* Envoyer_groupes: Envoi des groupes au client GID_USERS                                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Envoyer_groupes: Envoi des groupes au client GID_USERS                                                                     */
+/* Entrée: Néant                                                                                                              */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  static void *Envoyer_plugins_dls_thread_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
   { struct CMD_ENREG nbr;
     struct CMD_TYPE_PLUGIN_DLS *dls;
@@ -340,7 +341,7 @@
           
     if ( ! Recuperer_plugins_dlsDB( &db ) )
      { return(NULL);
-     }                                                                           /* Si pas de histos (??) */
+     }                                                                                               /* Si pas de histos (??) */
 
     nbr.num = db->nbr_result;
     g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d plugins", nbr.num );
@@ -362,28 +363,28 @@
        g_free(dls);
      }
   }
-/**********************************************************************************************************/
-/* Envoyer_plugins_dls_thread: Envoi la liste des plugin D.L.S au client                                  */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Envoyer_plugins_dls_thread: Envoi la liste des plugin D.L.S au client                                                      */
+/* Entrée: Néant                                                                                                              */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void *Envoyer_plugins_dls_thread ( struct CLIENT *client )
   { Envoyer_plugins_dls_thread_tag ( client, TAG_DLS, SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS,
                                                       SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS_FIN
                                    );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
+    Unref_client( client );                                                               /* Déréférence la structure cliente */
     pthread_exit ( NULL );
   }
-/**********************************************************************************************************/
-/* Envoyer_plugins_dls_thread: Envoi la liste des plugin D.L.S au client                                  */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Envoyer_plugins_dls_thread: Envoi la liste des plugin D.L.S au client                                                      */
+/* Entrée: Néant                                                                                                              */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void *Envoyer_plugins_dls_pour_mnemo_thread ( struct CLIENT *client )
   { Envoyer_plugins_dls_thread_tag ( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO,
                                                              SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO_FIN
                                    );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
+    Unref_client( client );                                                               /* Déréférence la structure cliente */
     pthread_exit ( NULL );
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
