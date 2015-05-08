@@ -115,7 +115,7 @@
     struct ABONNE_EVENT *abonne;
     GSList *liste;
 
-    if ( sscanf ( event->objet, "%[^:]:%[^:]:%s", dest_instance, dest_thread, dest_objet ) != 3 )
+    if ( event->type == EVENT_OUTPUT && sscanf ( event->objet, "%[^:]:%[^:]:%s", dest_instance, dest_thread, dest_objet ) != 3 )
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Envoyer_Events_aux_abonnes: Event %s Syntax Error (from instance %s, thread %s)",
                  event->objet, event->instance, event->thread );
