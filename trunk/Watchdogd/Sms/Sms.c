@@ -269,9 +269,7 @@
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
  static void Traiter_commande_sms ( gchar *from, gchar *texte )
-  { struct CMD_TYPE_MNEMO_BASE *mnemo, *result_mnemo = NULL;
-    struct SMSDB *sms;
-    struct DB *db;
+  { struct SMSDB *sms;
 
     sms = Sms_is_recipient_authorized ( from );
     if ( sms == NULL )
@@ -289,34 +287,7 @@
        return;
      }
 
-    if ( ! Recuperer_mnemo_baseDB_by_libelle ( &db, (gchar *)texte ) )
-     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_ERR,
-                 "Traiter_commande_sms : Error searching Database" );
-       return;
-     }
-          
-    while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL )
-     {  if (db->nbr_result==1) result_mnemo = mnemo;                         /* Save for re-use si unique */
-                          else g_free(mnemo);                                 /* we don't need it anymore */
-     }
-    if (result_mnemo)
-     { switch ( result_mnemo->type )
-        { case MNEMO_MONOSTABLE:                                         /* Positionnement du bit interne */
-               Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
-                          "Traiter_commande_sms: Mise a un du bit M%03d = 1", result_mnemo->num );
-               Envoyer_commande_dls(result_mnemo->num); 
-               break;
-          case MNEMO_ENTREE:
-               break;
-          case MNEMO_ENTREE_ANA:
-               break;
-          default: Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
-                            "Traiter_commande_sms: Cannot handle commande type %d (num=%03d)",
-                             result_mnemo->type, result_mnemo->num );
-                   break;
-        }
-       g_free(result_mnemo);
-     }
+    Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, texte, 0 );
   }
 /**********************************************************************************************************/
 /* Lire_sms_gsm: Lecture de tous les SMS du GSM                                                           */

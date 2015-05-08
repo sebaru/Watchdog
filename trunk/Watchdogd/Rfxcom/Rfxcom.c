@@ -282,25 +282,25 @@
                               "Processer_trame : Transceiver message : unknown packet ssous_type %d", trame->sous_type);
         }
      } 
-    else if (trame->type == 0x52 && trame->sous_type == 0x01)                                   /* Oregon */
+    else if (trame->type == 0x52 && trame->sous_type == 0x01)                                                       /* Oregon */
      { gchar chaine[128];
 
        g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:%03d:TEMP",
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
-       Send_Event ( Config.instance_id, NOM_THREAD, chaine,
+       Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, chaine,
                      (trame->data[2] & 0x80 ? -1.0 : 1.0)* ( ((trame->data[2] & 0x7F)<<8) + trame->data[3]) / 10.0 );
                   
        g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:%03d:HUMIDITY",
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
-       Send_Event ( Config.instance_id, NOM_THREAD, chaine, 1.0 * trame->data[4] );
+       Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, chaine, 1.0 * trame->data[4] );
 
        g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:%03d:BATTERY",
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
-       Send_Event ( Config.instance_id, NOM_THREAD, chaine, 1.0 * (trame->data[6] >> 4) );
+       Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, chaine, 1.0 * (trame->data[6] >> 4) );
        
        g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:%03d:RSSI",
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
-       Send_Event ( Config.instance_id, NOM_THREAD, chaine, 1.0 * (trame->data[6] & 0x0F) );
+       Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, chaine, 1.0 * (trame->data[6] & 0x0F) );
        
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                  "Processer_trame : get status type=%03d(0x%02X), sous_type=%03d(0x%02X), id1=%03d, id2=%03d, high=%03d, "
@@ -310,14 +310,14 @@
                  trame->data[6] >> 4, trame->data[6] & 0x0F
                );   
      }
-    else if (trame->type == 0x11 && trame->sous_type == 0x00)                            /* Lighting 2 AC */
+    else if (trame->type == 0x11 && trame->sous_type == 0x00)                                                /* Lighting 2 AC */
      { gchar chaine[128];
 
        g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:CMD:%03d",
                     trame->type, trame->sous_type, trame->data[0] & 0x03, trame->data[1],
                     trame->data[2], trame->data[3], trame->data[4], trame->data[5] );
 
-       Send_Event ( Config.instance_id, NOM_THREAD, chaine, 1.0 * trame->data[6] );
+       Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, chaine, 1.0 * trame->data[6] );
 
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                  "Processer_trame : get lighting ! type=%03d(0x%02X), sous_type=%03d(0x%02X), id1=%03d, id2=%03d, "
@@ -333,23 +333,40 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Rfxcom_Pick_event: Récpère un evenement de la liste des events                                                             */
+/* Entrées: néant                                                                                                             */
+/* Sortie: l'evenement, à freer a la fin                                                                                      */
+/******************************************************************************************************************************/
+ static struct CMD_TYPE_MSRV_EVENT *Rfxcom_Pick_event ( void )
+  { struct CMD_TYPE_MSRV_EVENT *event;
+    if (!Cfg_rfxcom.Liste_events) return(NULL);
+    pthread_mutex_lock( &Cfg_rfxcom.lib->synchro );                                                          /* lockage futex */
+    event = (struct CMD_TYPE_MSRV_EVENT *)Cfg_rfxcom.Liste_events->data;                            /* Recuperation du numero */
+    Cfg_rfxcom.Liste_events = g_slist_remove ( Cfg_rfxcom.Liste_events, event );
+    Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
+             "Rfxcom_Pick_event: Reste a traiter %03d events",
+              g_slist_length(Cfg_rfxcom.Liste_events) );
+    pthread_mutex_unlock( &Cfg_rfxcom.lib->synchro );
+    return(event);
+  }
+/******************************************************************************************************************************/
 /* Rfxcom_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois RFXCOM                                         */
 /* Entrées: le numéro de la sortie                                                                                            */
 /******************************************************************************************************************************/
  void Rfxcom_Gerer_event( struct CMD_TYPE_MSRV_EVENT *event )                                  /* Num_a est l'id de la sortie */
   { gint taille;
 
-    pthread_mutex_lock( &Cfg_rfxcom.lib->synchro );              /* Ajout dans la liste de tell a traiter */
+    pthread_mutex_lock( &Cfg_rfxcom.lib->synchro );                                  /* Ajout dans la liste de tell a traiter */
     taille = g_slist_length( Cfg_rfxcom.Liste_events );
     pthread_mutex_unlock( &Cfg_rfxcom.lib->synchro );
 
-    if (taille > 150)
+    if (taille > MAX_ENREG_QUEUE)
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
-                "Rfxcom_Gerer_event: DROP (taille>150)");
+                "Rfxcom_Gerer_event: DROP (taille>MAX_ENREG_QUEUE(%d))", MAX_ENREG_QUEUE);
        return;
      }
 
-    pthread_mutex_lock( &Cfg_rfxcom.lib->synchro );       /* Ajout dans la liste de tell a traiter */
+    pthread_mutex_lock( &Cfg_rfxcom.lib->synchro );                                  /* Ajout dans la liste de tell a traiter */
     Cfg_rfxcom.Liste_events = g_slist_prepend( Cfg_rfxcom.Liste_events, event );
     pthread_mutex_unlock( &Cfg_rfxcom.lib->synchro );
   }
@@ -477,19 +494,12 @@
 /************************************************** Transmission des trames aux sorties ***************************************/
        if (Cfg_rfxcom.Liste_events)                                                           /* Si pas de message, on tourne */
         { struct CMD_TYPE_MSRV_EVENT *event;
-          pthread_mutex_lock( &Cfg_rfxcom.lib->synchro );                                                    /* lockage futex */
-          event = (struct CMD_TYPE_MSRV_EVENT *)Cfg_rfxcom.Liste_events->data;                      /* Recuperation du numero */
-          Cfg_rfxcom.Liste_events = g_slist_remove ( Cfg_rfxcom.Liste_events, event );
-          Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-                   "Run_rfxcom: Reste a traiter %03d events",
-                    g_slist_length(Cfg_rfxcom.Liste_events) );
-          pthread_mutex_unlock( &Cfg_rfxcom.lib->synchro );
+          event = Rfxcom_Pick_event();                                                             /* Recuperation d'un event */
           Rfxcom_Envoyer_event ( event );
           g_free(event);
         }
      }                                                                                         /* Fin du while partage->arret */
 
-    Desabonner_distribution_events ( Rfxcom_Gerer_event );                       /* Desabonnement de la diffusion des sorties */
     close(Cfg_rfxcom.fd);                                                                     /* Fermeture de la connexion FD */
 end:
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_NOTICE,

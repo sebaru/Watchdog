@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Include/Sous_serveur.h      Définition des prototypes du serveur watchdog                    */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      mar 03 jun 2003 10:39:28 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Include/Sous_serveur.h      Définition des prototypes du serveur watchdog                                        */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          mar 03 jun 2003 10:39:28 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Sousèserveyr.h
  * This file is part of Watchdog
@@ -33,7 +33,7 @@
 
  #include "Client.h"
 
- #define NOM_THREAD                    "SSRV"
+ #define NOM_THREAD                    "ssrv"
  #define SSRV_DEFAUT_PORT              5558
  #define SSRV_DEFAUT_SSL_NEEDED        FALSE
  #define SSRV_DEFAUT_SSL_PEER_CERT     FALSE
@@ -44,30 +44,30 @@
 
  struct SSRV_CONFIG
   { struct LIBRAIRIE *lib;
-    gint Socket_ecoute;                                      /* Socket de connexion (d'écoute) du serveur */
-    SSL_CTX *Ssl_ctx;                                              /* Contexte de cryptage des connexions */
-    X509 *ssrv_certif;
-    gint  port;                                                    /* Port d'ecoute des requetes clientes */
+    gint Socket_ecoute;                                                          /* Socket de connexion (d'écoute) du serveur */
+    SSL_CTX *Ssl_ctx;                                                                  /* Contexte de cryptage des connexions */
+    X509 *ssrv_certif; 
+    gint  port;                                                                        /* Port d'ecoute des requetes clientes */
     gint  taille_bloc_reseau;
-    gboolean ssl_needed;                                                 /* Cryptage des transmissions ?? */
-    gboolean ssl_peer_cert;                                 /* Devons-nous valider le certificat client ? */
+    gboolean ssl_needed;                                                                     /* Cryptage des transmissions ?? */
+    gboolean ssl_peer_cert;                                                     /* Devons-nous valider le certificat client ? */
     gchar ssl_file_cert[80];
     gchar ssl_file_key[80];
     gchar ssl_file_ca[80];
-    gint  timeout_connexion;                       /* Temps max d'attente de reponse de la part du client */
-    GSList *Clients;                                             /* Liste des clients en cours de gestion */
-    GSList *Liste_histo;                                                  /* Envoi d'un histo aux clients */
-    GSList *Liste_motif;                                                 /* Destruction d'un histo client */
+    gint  timeout_connexion;                                           /* Temps max d'attente de reponse de la part du client */
+    GSList *Clients;                                                                 /* Liste des clients en cours de gestion */
+    GSList *Liste_histo;                                                                      /* Envoi d'un histo aux clients */
+    GSList *Liste_motif;                                                                     /* Destruction d'un histo client */
+    GSList *Liste_events;                                                                       /* Liste des evenements recus */
   } Cfg_ssrv;
 
  struct CAPTEUR
-  { gint   type;                                                               /* type du bit de controle */
+  { gint   type;                                                                                   /* type du bit de controle */
     guint  bit_controle;
     gfloat val_ech;
   };
 
-/*---------------------------- Déclarations des prototypes de fonctions ----------------------------------*/
-
+/*---------------------------------------- Déclarations des prototypes de fonctions ------------------------------------------*/
                                                                                         /* Dans serveur.c */
  extern gboolean Ssrv_Lire_config ( void );
  extern void Unref_client ( struct CLIENT *client );

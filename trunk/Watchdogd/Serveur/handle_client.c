@@ -99,6 +99,7 @@
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
               "Run_handle_client: Demarrage . . . TID = %p", pthread_self() );
 
+
     while( Cfg_ssrv.lib->Thread_run == TRUE )                            /* On tourne tant que necessaire */
      { usleep(1000);
        sched_yield();
@@ -334,8 +335,7 @@
 
 /********************************************* Arret du hangle_client *************************************/
 
-/*  if (Cfg_ssrv.lib->Thread_run == FALSE)            /* Arret demandé par MSRV. Nous prevenons le client */
-     { Deconnecter(client); }
+    Deconnecter(client);
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
               "Run_handle_client: Down . . . TID = %p", pthread_self() );

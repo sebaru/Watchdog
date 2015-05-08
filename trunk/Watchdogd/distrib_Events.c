@@ -49,18 +49,19 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
   }
 /******************************************************************************************************************************/
-/* Send_Event_String: Creation d'un nouvel evenement String                                                                   */
+/* Send_Input_Event_String: Creation d'un nouvel evenement String                                                                   */
 /* Entrée : la source de l'evenement (thread et son type)                                                                     */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Send_Event ( gchar *instance, gchar *thread, gchar *objet, gfloat val_float )
+ void Send_Event ( gchar *instance, gchar *thread, guint type, gchar *objet, gfloat val_float )
   { struct CMD_TYPE_MSRV_EVENT *event;
 
     event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc0( sizeof( struct CMD_TYPE_MSRV_EVENT ) );
     if(!event) return;
     g_snprintf( event->instance, sizeof(event->instance), "%s", instance );
-    g_snprintf( event->thread, sizeof(event->thread), "%s", thread );
-    g_snprintf( event->objet, sizeof(event->objet), "%s", objet );
+    g_snprintf( event->thread,   sizeof(event->thread),   "%s", thread );
+    g_snprintf( event->objet,    sizeof(event->objet),    "%s", objet );
+    event->type      = type;
     event->val_float = val_float;
     Envoyer_Event_msrv ( event );
   }
@@ -71,10 +72,10 @@
 /******************************************************************************************************************************/
  void Abonner_distribution_events ( void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event), gchar *thread )
   { struct ABONNE_EVENT *abonne;
-     abonne = (struct ABONNE_EVENT *)g_try_malloc0( sizeof (struct ABONNE_EVENT) );
+    abonne = (struct ABONNE_EVENT *)g_try_malloc0( sizeof (struct ABONNE_EVENT) );
     if (!abonne)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                 "Abonner_distribution_events: Memoru Alloc error for thread %s", thread );
+                 "Abonner_distribution_events: Memory Alloc error for thread %s", thread );
      }
     abonne->Gerer_event = Gerer_event;
     g_snprintf( abonne->thread, sizeof(abonne->thread), thread );
@@ -109,30 +110,29 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Envoyer_Events_aux_abonnes ( struct CMD_TYPE_MSRV_EVENT *event )
-  { struct CMD_TYPE_MSRV_EVENT *dup_event;
+  { gchar dest_instance[64], dest_thread[64], dest_objet[64];
+    struct CMD_TYPE_MSRV_EVENT *dup_event;
     struct ABONNE_EVENT *abonne;
-	   GSList *liste;
+    GSList *liste;
+
+    if ( sscanf ( event->objet, "%[^:]:%[^:]:%s", dest_instance, dest_thread, dest_objet ) != 3 )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "Envoyer_Events_aux_abonnes: Event %s Syntax Error (from instance %s, thread %s)",
+                 event->objet, event->instance, event->thread );
+       return;
+     }
 
     pthread_mutex_lock ( &Partage->com_msrv.synchro );
     liste = Liste_clients_Events;
     while (liste)                                                                                  /* Pour chacun des abonnes */
-     { gboolean send;
-       send = FALSE;
+     { gboolean send = FALSE;
        abonne = (struct ABONNE_EVENT *)liste->data;
 
-                                                             /* Si Instance/thread source != de l'instance/thread destination */
-       if ( ! ((! strcmp ( Config.instance_id, event->instance )) && (! strcmp( event->thread, abonne->thread )) ) )
-        { if (Config.instance_is_master == TRUE)
-           { if ( ! strcmp ( event->thread, "MSRV" ) ) send = TRUE;
-             else if ( strcmp ( abonne->thread, "ssrv" ) ) send = TRUE;
-           }
-          else
-           { if ( ! strcmp ( event->thread, "MSRV" ) )
-              { if ( strcmp ( abonne->thread, "satellite" ) ) send = TRUE; }
-             else if ( ! strcmp ( abonne->thread, "satellite" ) ) send = TRUE;
-           } 
-        }
+       if (event->type == EVENT_INPUT && (!(strcmp ( abonne->thread, "satellite" ) )) ) send = TRUE;
 
+       if (event->type == EVENT_OUTPUT && (!(strcmp ( abonne->thread, "ssrv" ) )) )      send = TRUE;
+       if (event->type == EVENT_OUTPUT && (!(strcmp ( dest_thread, abonne->thread ) )) ) send = TRUE;
+     
        if ( send == TRUE )                                                                             /* Decision d'envoie ? */
         { dup_event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc ( sizeof(struct CMD_TYPE_MSRV_EVENT) );
           if (dup_event)
@@ -177,11 +177,11 @@
     return (result_mnemo);                                           /* A-t'on le seul et unique Mnemo associé à cet event ?? */
   }
 /******************************************************************************************************************************/
-/* Gerer_arrive_Event_string: Gere l'arrive d'un event de type string                                                         */
+/* Gerer_arrive_Event_string: Gere l'arrive d'un event EVENT_INPUT                                                            */
 /* Entrée : l'evenement a traiter                                                                                             */
 /* sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Gerer_arrive_Event( struct CMD_TYPE_MSRV_EVENT *event )
+ static void Gerer_Input_Event ( struct CMD_TYPE_MSRV_EVENT *event )
   { struct CMD_TYPE_MNEMO_BASE *mnemo;
     gchar request[128];
     g_snprintf( request, sizeof(request), "%s:%s:%s", event->instance, event->thread, event->objet );
@@ -242,8 +242,9 @@
 
     Envoyer_Events_aux_abonnes ( event );                                                 /* Le tri est fait dans la fonction */
 
-    if (Config.instance_is_master == TRUE && strcmp ( event->thread, "MSRV" ) )          /* Event d'entrée ? On gere en local */
-     { Gerer_arrive_Event ( event ); }
+    if (event->type == EVENT_INPUT && Config.instance_is_master == TRUE)                 /* Event d'entrée ? On gere en local */
+     { Gerer_Input_Event ( event ); }
+
     g_free(event);
   }
 /******************************************************************************************************************************/
@@ -275,7 +276,7 @@
        return;
      }
 
-    Send_Event ( Config.instance_id, "MSRV", mnemo->command_text, 1.0 );
+    Send_Event ( Config.instance_id, "MSRV", EVENT_OUTPUT, mnemo->command_text, 1.0 );
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
               "Gerer_arrive_Axxx_dls: Recu A(%03d) (%s). Reste a traiter %03d",
               num, mnemo->command_text, reste

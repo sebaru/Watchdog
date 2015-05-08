@@ -236,65 +236,6 @@
     *db_retour = db;
     return ( retour );
   }
-/******************************************************************************************************************************/
-/* Recuperer_mnemo_baseDB_by_command_text: Recupération de la liste des mnemo par libelle                                     */
-/* Entrée: un pointeur vers une nouvelle connexion de base de données, le critere de recherche                                */
-/* Sortie: FALSE si erreur                                                                                                    */
-/******************************************************************************************************************************/
- gboolean Recuperer_mnemo_baseDB_by_libelle ( struct DB **db_retour, gchar *libelle_pur )
-  { gchar requete[1024], critere[256], libelle_final[1024];
-    gchar *libelle;
-    gboolean space, retour;
-    gint i, j;
-    struct DB *db;
-
-    libelle = Normaliser_chaine ( libelle_pur );
-    if (!libelle)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                 "Recuperer_mnemo_by_libelle: Normalisation impossible libelle" );
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,"
-                "%s.name, %s.tableau"
-                " FROM %s,%s,%s"
-                " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id",
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
-                NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_DLS, NOM_TABLE_MNEMO,
-                NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,                                                 /* FROM */
-                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,                                                                 /* WHERE */
-                NOM_TABLE_MNEMO, NOM_TABLE_DLS
-              );
-
-    i = 0; j = 0; space = TRUE;
-    while ( libelle[i] )
-     { if ( libelle[i] == ' ') { libelle_final[j++] = ' '; space = TRUE; }
-       else if (space == TRUE) { libelle_final[j++] = '+'; libelle_final[j++] = libelle[i]; space = FALSE; }
-                          else { libelle_final[j++] = libelle[i]; space = FALSE; }
-       if(i<strlen(libelle_pur) && j<sizeof(libelle_final)) 
-        { i++; } else break;
-     }
-    libelle_final[j] = '\0';
-    g_free(libelle);
-
-    g_snprintf( critere, sizeof(critere),
-               " AND MATCH (%s.command_text) AGAINST ('%s' IN BOOLEAN MODE) LIMIT 10",
-                NOM_TABLE_MNEMO, libelle_final );
-    g_strlcat( requete, critere, sizeof(requete) );
-
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_mnemo_by_libelle: DB connexion failed" );
-       return(FALSE);
-     }
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    if (retour == FALSE) Libere_DB_SQL (&db);
-    *db_retour = db;
-    return ( retour );
-  }
 /**********************************************************************************************************/
 /* Recuperer_mnemo_base_db: Récupération de la liste des mnemos de base                                   */
 /* Entrée: un pointeur vers la nouvelle connexion base de données                                         */

@@ -28,8 +28,14 @@
 #ifndef _RESEAUX_SATELLITE_H_
  #define _RESEAUX_SATELLITE_H_
 
+ enum MSRV_EVENT_TYPE
+  { EVENT_INPUT,
+    EVENT_OUTPUT
+  };
+
  struct CMD_TYPE_MSRV_EVENT
-  { gchar instance[12];
+  { guint type;
+    gchar instance[12];
     gchar thread[12];
     gchar objet[60];
     gfloat val_float;
