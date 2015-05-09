@@ -43,6 +43,7 @@
 
  enum 
   { SSTAG_CLIENT_SAT_SET_INTERNAL,                                      /* Le client demande le positionnement de bit interne */
+    SSTAG_SSRV_SAT_SET_INTERNAL,                                                 /* Le serveur envoi un evenement au client ! */
   };
 
 #endif
