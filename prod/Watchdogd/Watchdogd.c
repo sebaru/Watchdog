@@ -186,30 +186,30 @@
      { Partage->top++;
        if (!Partage->top)                         /* Si on passe par zero, on le dit (DEBUG interference) */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Traitement Signaux: Timer: Partage->top = 0 !!" ); }
-       if (!(Partage->top%5))                                          /* Cligno toutes les demi-secondes */
+       if (!(Partage->top%5))                                                              /* Cligno toutes les demi-secondes */
         { SB(5, !B(5)); }
-       if (!(Partage->top%3))                                             /* Cligno toutes les 3 dixièmes */
+       if (!(Partage->top%3))                                                                 /* Cligno toutes les 3 dixièmes */
         { SB(6, !B(6)); }
-       if (!(Partage->top%10))                                              /* Cligno toutes les secondes */
+       if (!(Partage->top%10))                                                                  /* Cligno toutes les secondes */
         { SB(4, !B(4));
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
           Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
           Partage->audit_bit_interne_per_sec = 0;
-          SEA ( NUM_EA_SYS_BITS_PER_SEC, Partage->audit_bit_interne_per_sec_hold );         /* historique */
+          SEA ( NUM_EA_SYS_BITS_PER_SEC, Partage->audit_bit_interne_per_sec_hold );                             /* historique */
 
           Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
           Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
           Partage->audit_tour_dls_per_sec = 0;
-          SEA ( NUM_EA_SYS_TOUR_DLS_PER_SEC, Partage->audit_tour_dls_per_sec_hold );        /* historique */
-          if (Partage->audit_tour_dls_per_sec_hold > 100)                       /* Moyennage tour DLS/sec */
+          SEA ( NUM_EA_SYS_TOUR_DLS_PER_SEC, Partage->audit_tour_dls_per_sec_hold );                            /* historique */
+          if (Partage->audit_tour_dls_per_sec_hold > 100)                                           /* Moyennage tour DLS/sec */
            { Partage->com_dls.temps_sched += 50; }
           else if (Partage->audit_tour_dls_per_sec_hold < 80)
            { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
-          SEA ( NUM_EA_SYS_DLS_WAIT, Partage->com_dls.temps_sched );                        /* historique */
+          SEA ( NUM_EA_SYS_DLS_WAIT, Partage->com_dls.temps_sched );                                            /* historique */
         }
 
-       Partage->top_cdg_plugin_dls++;                                        /* Chien de garde plugin DLS */
-       if (Partage->top_cdg_plugin_dls>200)                     /* Si pas de réponse D.L.S en 20 secondes */
+       Partage->top_cdg_plugin_dls++;                                                            /* Chien de garde plugin DLS */
+       if (Partage->top_cdg_plugin_dls>200)                                         /* Si pas de réponse D.L.S en 20 secondes */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Traitement signaux: CDG plugin DLS !!" );
           Partage->top_cdg_plugin_dls = 0;
         }
@@ -260,19 +260,17 @@
 /* Sortie : Néant                                                                                         */
 /**********************************************************************************************************/
  static void Traiter_sigusr1 ( void )
-  { guint nbr_i, nbr_msg, nbr_msg_repeat, nbr_ea, nbr_e;
+  { guint nbr_i, nbr_msg, nbr_msg_repeat;
     gchar chaine[256];
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );
     nbr_i          = g_slist_length( Partage->com_msrv.liste_i );
     nbr_msg        = g_slist_length( Partage->com_msrv.liste_msg );        /* Recuperation du numero de i */
     nbr_msg_repeat = g_slist_length( Partage->com_msrv.liste_msg_repeat );            /* liste des repeat */
-    nbr_ea         = g_slist_length( Partage->com_msrv.liste_ea );  /* liste des ea a envoyer aux threads */
-    nbr_e          = g_slist_length( Partage->com_msrv.liste_e );    /* liste des e a envoyer aux threads */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-    g_snprintf( chaine, sizeof(chaine), "Reste %d I, %d MSG, %d MSG_REPEAT, %d EA, %d E",
-                nbr_i, nbr_msg, nbr_msg_repeat, nbr_ea, nbr_e );
+    g_snprintf( chaine, sizeof(chaine), "Reste %d I, %d MSG, %d MSG_REPEAT",
+                nbr_i, nbr_msg, nbr_msg_repeat );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, chaine );
   }
 /**********************************************************************************************************/
@@ -296,8 +294,6 @@
      { Gerer_arrive_MSGxxx_dls();             /* Redistrib des messages DLS vers les clients + Historique */ 
        Gerer_arrive_Ixxx_dls();                             /* Distribution des changements d'etats motif */
        Gerer_arrive_Axxx_dls();                       /* Distribution des changements d'etats sorties TOR */
-       Gerer_arrive_EAxxx_dls();              /* Distribution des changements d'etats entrees Analogiques */
-       Gerer_arrive_Exxx_dls();               /* Distribution des changements d'etats entrees Analogiques */
        Gerer_arrive_Events();                   /* Gestion des evenements entre Thread, DLS, et satellite */
 
        if (Partage->com_msrv.Thread_reload)                                           /* On a recu RELOAD */

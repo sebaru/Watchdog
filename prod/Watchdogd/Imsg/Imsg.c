@@ -387,7 +387,7 @@
 
     if ( ! strcasecmp( (gchar *)lm_message_node_get_value ( body ), "ping" ) )     /* Interfacage de test */
      { Imsg_Envoi_message_to( from, "Pong !" ); }   
-    else if ( ! Recuperer_mnemo_baseDB_by_command_text ( &db, (gchar *)lm_message_node_get_value ( body ), FALSE ) )
+    else if ( ! Recuperer_mnemo_baseDB_by_libelle ( &db, (gchar *)lm_message_node_get_value ( body ) ) )
      { Imsg_Envoi_message_to( from, "Error searching Database .. Sorry .." ); }   
     else 
      { struct CMD_TYPE_MNEMO_BASE *mnemo, *result_mnemo = NULL;

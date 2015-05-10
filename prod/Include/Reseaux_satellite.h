@@ -28,30 +28,24 @@
 #ifndef _RESEAUX_SATELLITE_H_
  #define _RESEAUX_SATELLITE_H_
 
- enum
-  { EVENT_TYPE_STRING,
+ enum MSRV_EVENT_TYPE
+  { EVENT_INPUT,
+    EVENT_OUTPUT
   };
 
  struct CMD_TYPE_MSRV_EVENT
   { guint type;
-    union { gchar string[48];
-          };
-  };
-
-
- struct CMD_TYPE_SATELLITE
-  { guchar type;
-    guint  num;
-    union { gint   val_int;
-            gfloat val_float;
-            struct CMD_TYPE_MSRV_EVENT event;
-          };
+    gchar instance[12];
+    gchar thread[12];
+    gchar objet[60];
+    gfloat val_float;
   };
 
  enum 
-  { SSTAG_CLIENT_SET_INTERNAL,                      /* Le client demande le positionnement de bit interne */
+  { SSTAG_CLIENT_SAT_SET_INTERNAL,                                      /* Le client demande le positionnement de bit interne */
+    SSTAG_SSRV_SAT_SET_INTERNAL,                                                 /* Le serveur envoi un evenement au client ! */
   };
 
 #endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
 

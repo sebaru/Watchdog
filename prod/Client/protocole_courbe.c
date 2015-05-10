@@ -63,7 +63,7 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_MNEMO_FOR_COURBE:
-             { struct CMD_TYPE_MNEMO_FULL *mnemo;
+             { struct CMD_TYPE_MNEMO_BASE *mnemo;
                Set_progress_plus(1);
 
                mnemo = (struct CMD_TYPE_MNEMO_BASE *)g_try_malloc0( sizeof( struct CMD_TYPE_MNEMO_BASE ) );

@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Include/Reseaux.h:   Utilisation/Gestion du reseaux pour watchdog 2.0   par lefevre Sebastien          */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      jeu 13 mai 2004 12:01:49 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Include/Reseaux.h:   Utilisation/Gestion du reseaux pour watchdog 2.0                       par lefevre Sebastien          */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          jeu 13 mai 2004 12:01:49 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Reseaux.h
  * This file is part of Watchdog
@@ -50,7 +50,7 @@
  #include "Reseaux_admin.h"
  #include "Reseaux_satellite.h"
 
- #define TIMEOUT_BUFFER_PLEIN    4          /* 1 seconde max d'attente de disponibilite du tampon d'envoi */
+ #define TIMEOUT_BUFFER_PLEIN   30                              /* 1 seconde max d'attente de disponibilite du tampon d'envoi */
 
  struct ENTETE_CONNEXION
   { gint32  ss_tag;
@@ -71,46 +71,46 @@
     gint32  index_donnees;
     gint32  taille_bloc;
     gint32  socket;
-    pthread_mutex_t mutex_write;              /* Zone critique: envoi des données au client par le reseau */
+    pthread_mutex_t mutex_write;                                  /* Zone critique: envoi des données au client par le reseau */
     time_t last_use;
     SSL    *ssl;
     struct LOG *log;
   };
 
- struct CMD_ENREG            /* Pour le comptage et la description des données en cours de telechargement */
+ struct CMD_ENREG                                /* Pour le comptage et la description des données en cours de telechargement */
   { gint32 num;
     gchar comment[ 30 ];
   };
 
  enum
-  { TAG_INTERNAL,                                                     /* Gestion interne librairie Reseau */
-    TAG_GTK_MESSAGE,                                                              /* Envoi de message GTK */
-    TAG_FICHIER,                                           /* Echange de fichiers entre serveur et client */
-    TAG_CONNEXION,                                                              /* Gestion des connexions */
-    TAG_ICONE,                                                                      /* Gestion des icones */
-    TAG_DLS,                                                    /* Gestion des plugins et des sources DLS */
-    TAG_UTILISATEUR,                                                  /* Gestion des utilisateurs/groupes */
-    TAG_SYNOPTIQUE,                                                            /* Gestion des synoptiques */
-    TAG_MNEMONIQUE,                                                            /* Gestion des mnemoniques */
-    TAG_MESSAGE,                                                                  /* Gestion des messages */
-    TAG_SUPERVISION,                                                 /* Gestions de la partie supervision */
-    TAG_HISTO,                                                                      /* Gestions des histo */
-    TAG_ATELIER,                                                                 /* Gestions de l'atelier */
-    TAG_COURBE,                                                                   /* Gestions des courbes */
-    TAG_HISTO_COURBE,                                                 /* Gestions des historiques courbes */
-    TAG_CAMERA,                                                                     /* Gestion des camera */
-    TAG_ADMIN,                                /* Utilisation des commandes d'admin depuis le client lourd */
-    TAG_SATELLITE,                                                         /* Echange vers les satellites */
+  { TAG_INTERNAL,                                                                         /* Gestion interne librairie Reseau */
+    TAG_GTK_MESSAGE,                                                                                  /* Envoi de message GTK */
+    TAG_FICHIER,                                                               /* Echange de fichiers entre serveur et client */
+    TAG_CONNEXION,                                                                                  /* Gestion des connexions */
+    TAG_ICONE,                                                                                          /* Gestion des icones */
+    TAG_DLS,                                                                        /* Gestion des plugins et des sources DLS */
+    TAG_UTILISATEUR,                                                                      /* Gestion des utilisateurs/groupes */
+    TAG_SYNOPTIQUE,                                                                                /* Gestion des synoptiques */
+    TAG_MNEMONIQUE,                                                                                /* Gestion des mnemoniques */
+    TAG_MESSAGE,                                                                                      /* Gestion des messages */
+    TAG_SUPERVISION,                                                                     /* Gestions de la partie supervision */
+    TAG_HISTO,                                                                                          /* Gestions des histo */
+    TAG_ATELIER,                                                                                     /* Gestions de l'atelier */
+    TAG_COURBE,                                                                                       /* Gestions des courbes */
+    TAG_HISTO_COURBE,                                                                     /* Gestions des historiques courbes */
+    TAG_CAMERA,                                                                                         /* Gestion des camera */
+    TAG_ADMIN,                                                    /* Utilisation des commandes d'admin depuis le client lourd */
+    TAG_SATELLITE,                                                                             /* Echange vers les satellites */
   };
 
  enum
-  { SSTAG_INTERNAL_PAQUETSIZE,                                       /* Taille d'un bloc d'échange reseau */
-    SSTAG_INTERNAL_SSLNEEDED,                                      /* La communication doit passer en ssl */
-    SSTAG_INTERNAL_SSLNEEDED_WITH_CERT,                   /* SSL + authentification reseau via certificat */
-    SSTAG_INTERNAL_END                                                       /* Fin des echanges internes */
+  { SSTAG_INTERNAL_PAQUETSIZE,                                                           /* Taille d'un bloc d'échange reseau */
+    SSTAG_INTERNAL_SSLNEEDED,                                                          /* La communication doit passer en ssl */
+    SSTAG_INTERNAL_SSLNEEDED_WITH_CERT,                                       /* SSL + authentification reseau via certificat */
+    SSTAG_INTERNAL_END                                                                           /* Fin des echanges internes */
   };
 
-/************************************* Définitions des prototypes *****************************************/
+/********************************************* Définitions des prototypes *****************************************************/
  extern gint Recevoir_reseau( struct CONNEXION *Connexion );
  extern struct CONNEXION *Nouvelle_connexion ( struct LOG *Log, gint socket, gint taille_bloc );
  extern gint Attendre_envoi_disponible ( struct CONNEXION *connexion );
@@ -121,7 +121,7 @@
  extern gint Reseau_tag( struct CONNEXION *connexion );
  extern gint Reseau_ss_tag( struct CONNEXION *connexion );
 
- extern gchar *Nom_certif_signataire( X509 *certif );                                       /* Dans Ssl.c */
+ extern gchar *Nom_certif_signataire( X509 *certif );                                                           /* Dans Ssl.c */
  extern gchar *Nom_certif( X509 *certif );
 #endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

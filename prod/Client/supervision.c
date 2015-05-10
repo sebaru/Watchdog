@@ -103,7 +103,6 @@
 /**********************************************************************************************************/
  static void Menu_exporter_synoptique( struct TYPE_INFO_SUPERVISION *infos )
   { GtkPrintOperation *print;
-    GtkPrintOperationResult res;
     GError *error;
 
     print = New_print_job ( "Print Synoptique" );
@@ -111,8 +110,8 @@
     g_signal_connect (G_OBJECT(print), "draw-page", G_CALLBACK (draw_page), infos );
     gtk_print_operation_set_n_pages ( print, 1 );
 
-    res = gtk_print_operation_run (print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
-                                   GTK_WINDOW(F_client), &error);
+    gtk_print_operation_run (print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
+                             GTK_WINDOW(F_client), &error);
   }
 /**********************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                    */

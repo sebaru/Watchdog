@@ -131,12 +131,10 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_editer_propriete_pass ( GtkDialog *dialog, gint reponse )
-  { struct TYPE_INFO_ATELIER *infos;
-    struct PAGE_NOTEBOOK *page;
+  { struct PAGE_NOTEBOOK *page;
    
     page = Page_actuelle();                                               /* On recupere la page actuelle */
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return(TRUE);         /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
 
     switch(reponse)
      { case GTK_RESPONSE_OK:

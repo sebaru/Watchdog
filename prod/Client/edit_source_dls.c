@@ -221,7 +221,6 @@
     GError *error;
 
     infos = (struct TYPE_INFO_SOURCE_DLS *)page->infos;
-   /* infos->print_ligne = 0;                                                   /* Init du compteur de lige */
 
     compositor = gtk_source_print_compositor_new ( GTK_SOURCE_BUFFER(infos->text) );
     gtk_source_print_compositor_set_print_line_numbers ( compositor, 5 );

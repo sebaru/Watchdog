@@ -203,7 +203,7 @@
   { gint help = 0, port = -1, gui_tech = -1, debug_level = -1;
     struct sigaction sig;
     GnomeClient *client;
-    GnomeProgram *prg;
+
     gchar *file = NULL, *host = NULL, *user = NULL, *passwd = NULL;
     struct poptOption Options[]= 
      { { "conffile", 'c',   POPT_ARG_STRING,
@@ -238,8 +238,8 @@
 
     Config_cli.log = Info_init( "Watchdog_client", LOG_DEBUG );                    /* Init msgs d'erreurs */
 
-    prg = gnome_program_init( PROGRAMME, VERSION, LIBGNOMEUI_MODULE, argc, argv,            /* Init gnome */
-                              GNOME_PARAM_POPT_TABLE, Options, GNOME_PARAM_NONE );
+    gnome_program_init( PROGRAMME, VERSION, LIBGNOMEUI_MODULE, argc, argv,                  /* Init gnome */
+                        GNOME_PARAM_POPT_TABLE, Options, GNOME_PARAM_NONE );
     client = gnome_master_client();
     g_signal_connect( GTK_OBJECT( client ), "save_yourself", GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 

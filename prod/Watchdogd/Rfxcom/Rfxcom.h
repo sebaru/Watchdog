@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Rfxcom/Rfxcom.h        Déclaration structure internes des communication RFXCOM               */
-/* Projet WatchDog version 2.0       Gestion d'habitat                    dim. 27 mai 2012 13:02:55 CEST  */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Rfxcom/Rfxcom.h        Déclaration structure internes des communication RFXCOM                                   */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                        dim. 27 mai 2012 13:02:55 CEST  */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Rfxcom.h
  * This file is part of Watchdog
@@ -34,8 +34,9 @@
  #define NOM_TABLE_MODULE_RFXCOM   "rfxcom"
  #define NBR_CARAC_LIBELLE_RFXCOM  128
  #define TAILLE_ENTETE_RFXCOM      1
+ #define RFXCOM_RETRY_DELAI        600                                      /* Une minute avant de se reconnecter si probleme */
 
- struct TRAME_RFXCOM                                                     /* Definition d'une trame RFXCOM */
+ struct TRAME_RFXCOM                                                                         /* Definition d'une trame RFXCOM */
   { unsigned char taille;
     unsigned char type;
     unsigned char sous_type;
@@ -43,40 +44,26 @@
     unsigned char data[40];
   };
 
- struct RFXCOMDB
-  { guint id;                                                                   /* ID unique de la rfxcom */
-    guchar type;                                                                   /* Numéro de la rfxcom */
-    guchar sous_type;                                                              /* Numéro de la rfxcom */
-    guchar id1;                                                                    /* Numéro de la rfxcom */
-    guchar id2;                                                                    /* Numéro de la rfxcom */
-    guchar id3;                                                                    /* Numéro de la rfxcom */
-    guchar id4;                                                                    /* Numéro de la rfxcom */
-    guchar housecode;                                                              /* Numéro de la rfxcom */
-    guchar unitcode;                                                               /* Numéro de la rfxcom */
-    gint map_E, map_EA, map_A;
-    gchar libelle[NBR_CARAC_LIBELLE_RFXCOM];                                      /* Libelle de la rfxcom */
+ enum
+  { RFXCOM_WAIT_BEFORE_RETRY,
+	   RFXCOM_RETRING,
+	   RFXCOM_CONNECTED
   };
-
- struct MODULE_RFXCOM
-  { struct RFXCOMDB rfxcom;
-    guint date_last_view;
-  };
-
+  
  struct RFXCOM_CONFIG
   { struct LIBRAIRIE *lib;
+    gint  mode;                                                                                /* Mode de connexion au RFXCOM */
+    gint  date_next_retry;                                                 /* Date de la prochaine connexion au port teleinfo */
     gchar port[80];
-    gint fd;                                                /* File descripteur de la connexion au RFXCOM */
-    gboolean enable;                                                           /* Thread enable at boot ? */
+    gint fd;                                                                    /* File descripteur de la connexion au RFXCOM */
+    gboolean enable;                                                                               /* Thread enable at boot ? */
     gboolean reload;
-    GSList *Modules_RFXCOM;                                                  /* Listes des modules RFXCOM */
-    GSList *Liste_sortie;                                              /* Liste des sorties a positionner */
+    GSList *Modules_RFXCOM;                                                                      /* Listes des modules RFXCOM */
+    GSList *Liste_events;                                                                  /* Liste des sorties a positionner */
  } Cfg_rfxcom;
 
-/*************************************** Définitions des prototypes ***************************************/
+/************************************************** Définitions des prototypes ************************************************/
  extern gboolean Rfxcom_Lire_config ( void );
- extern gboolean Retirer_rfxcomDB ( gint id );
- extern gint Ajouter_rfxcomDB ( struct RFXCOMDB *rfxcom );
- extern gboolean Modifier_rfxcomDB( struct RFXCOMDB *rfxcom );
 
 #endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Archive/Archive.c  Gestion des archivages bit_internes Watchdog 2.0                          */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     mer. 09 mai 2012 12:44:56 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Archive/Archive.c  Gestion des archivages bit_internes Watchdog 2.0                                              */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                         mer. 09 mai 2012 12:44:56 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Archive.c
  * This file is part of Watchdog
@@ -33,36 +33,36 @@
  #include <unistd.h>
  #include <rrd.h>
 
- #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
+ #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
 
-/**********************************************************************************************************/
-/* Arch_clear_list: efface la liste des archives a prendre en compte                                      */
-/* Entrées: le type de bit, le numéro du bit, et sa valeur                                                */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Arch_clear_list: efface la liste des archives a prendre en compte                                                          */
+/* Entrées: le type de bit, le numéro du bit, et sa valeur                                                                    */
+/******************************************************************************************************************************/
  gint Arch_Clear_list ( void )
   { struct ARCHDB *arch;
     gint save_nbr;
-    pthread_mutex_lock( &Partage->com_arch.synchro );                                    /* lockage futex */
+    pthread_mutex_lock( &Partage->com_arch.synchro );                                                        /* lockage futex */
     save_nbr = Partage->com_arch.taille_arch;
     while ( Partage->com_arch.liste_arch )
-     { arch = Partage->com_arch.liste_arch->data;                                 /* Recuperation du arch */
-       g_free(arch);                                                                /* Libération mémoire */
+     { arch = Partage->com_arch.liste_arch->data;                                                     /* Recuperation du arch */
+       g_free(arch);                                                                                    /* Libération mémoire */
        Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
        Partage->com_arch.taille_arch--;
      }
     pthread_mutex_unlock( &Partage->com_arch.synchro );
     return(save_nbr);
  }
-/**********************************************************************************************************/
-/* Ajouter_arch: Ajoute une archive dans la base de données                                               */
-/* Entrées: le type de bit, le numéro du bit, et sa valeur                                                */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Ajouter_arch: Ajoute une archive dans la base de données                                                                   */
+/* Entrées: le type de bit, le numéro du bit, et sa valeur                                                                    */
+/******************************************************************************************************************************/
  void Ajouter_arch( gint type, gint num, gfloat valeur )
   { static gint last_log = 0;
     struct timeval tv;
     struct ARCHDB *arch;
 
-    if (Config.instance_is_master == FALSE) return;              /* Les instances Slave n'archivent pas ! */
+    if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
     else if (Partage->com_arch.taille_arch > 10000)
      { if ( last_log + 60 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
@@ -72,7 +72,7 @@
        return;
      }
     else if (Partage->com_arch.Thread_run == FALSE)
-     { if (Config.instance_is_master == FALSE) return;               /* Si administratively DOWN, on sort */
+     { if (Config.instance_is_master == FALSE) return;                                   /* Si administratively DOWN, on sort */
        if ( last_log + 60 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
                    "Ajouter_arch: Thread is down. Dropping type=%d, num=%d", type, num );
@@ -88,23 +88,23 @@
     arch = (struct ARCHDB *)g_try_malloc0( sizeof(struct ARCHDB) );
     if (!arch) return;
 
-    gettimeofday( &tv, NULL );                                               /* On prend l'heure actuelle */
+    gettimeofday( &tv, NULL );                                                                   /* On prend l'heure actuelle */
     arch->type      = type;
     arch->num       = num;
     arch->valeur    = valeur;
     arch->date_sec  = tv.tv_sec;
     arch->date_usec = tv.tv_usec;
 
-    pthread_mutex_lock( &Partage->com_arch.synchro );            /* Ajout dans la liste de arch a traiter */
+    pthread_mutex_lock( &Partage->com_arch.synchro );                                /* Ajout dans la liste de arch a traiter */
     Partage->com_arch.liste_arch = g_slist_append( Partage->com_arch.liste_arch, arch );
     Partage->com_arch.taille_arch++;
     pthread_mutex_unlock( &Partage->com_arch.synchro );
   }
-/**********************************************************************************************************/
-/* Ajouter_archRRA: Ajout d'un enregistrement dans les fichiers RRAs                                      */
-/* Entrée: une structure d'archivage                                                                      */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Ajouter_archRRA: Ajout d'un enregistrement dans les fichiers RRAs                                                          */
+/* Entrée: une structure d'archivage                                                                                          */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Ajouter_archRRD ( struct ARCHDB *arch )
   { gchar fichier[80], update[80];
     gchar *params[11];
@@ -114,7 +114,7 @@
     g_snprintf( fichier, sizeof(fichier), "RRA/%02d-%04d.rrd", arch->type, arch->num );
     params[1] = fichier;
 
-    if ( stat ( fichier, &sbuf ) == -1)                                       /* Test présence du fichier */
+    if ( stat ( fichier, &sbuf ) == -1)                                                           /* Test présence du fichier */
      { Info_new( Config.log, Config.log_arch, LOG_WARNING,
                 "Ajouter_archRRD: Unable to Stat file %s (%s). Trying to create RRD file", fichier, strerror(errno) );
        params[0] = "create";
@@ -149,32 +149,32 @@
                 "Ajouter_archRRD: RRD error %d (%s)", result, rrd_get_error() );
      }
   }
-/**********************************************************************************************************/
-/* Main: Fonction principale du thread                                                                    */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Main: Fonction principale du thread                                                                                        */
+/******************************************************************************************************************************/
  void Run_arch ( void )
   { struct DB *db;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
 
-    Partage->com_arch.liste_arch  = NULL;                                 /* Initialisation des variables */
-    Partage->com_arch.Thread_run  = TRUE;                                           /* Le thread tourne ! */
+    Partage->com_arch.liste_arch  = NULL;                                                     /* Initialisation des variables */
+    Partage->com_arch.Thread_run  = TRUE;                                                               /* Le thread tourne ! */
     Partage->com_arch.taille_arch = 0;
     Info_new( Config.log, Config.log_arch, LOG_NOTICE,
               "Run_arch: Demarrage . . . TID = %p", pthread_self() );
 
-    while(Partage->com_arch.Thread_run == TRUE)                          /* On tourne tant que necessaire */
+    while(Partage->com_arch.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
      { struct ARCHDB *arch;
 
-       if (Partage->com_arch.Thread_reload)                                         /* On a recu RELOAD ? */
+       if (Partage->com_arch.Thread_reload)                                                             /* On a recu RELOAD ? */
         { Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Run_arch: RELOAD" );
           Partage->com_arch.Thread_reload = FALSE;
         }
 
-       if (Partage->com_arch.Thread_sigusr1)                                      /* On a recu sigusr1 ?? */
+       if (Partage->com_arch.Thread_sigusr1)                                                          /* On a recu sigusr1 ?? */
         { Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Run_arch: SIGUSR1" );
-          pthread_mutex_lock( &Partage->com_arch.synchro );                              /* lockage futex */
+          pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
           Info_new( Config.log, Config.log_arch, LOG_INFO,
                    "Run_arch: Reste %03d a traiter",
                     g_slist_length(Partage->com_arch.liste_arch) );
@@ -182,7 +182,7 @@
           Partage->com_arch.Thread_sigusr1 = FALSE;
         }
 
-       if (!Partage->com_arch.liste_arch)                                 /* Si pas de message, on tourne */
+       if (!Partage->com_arch.liste_arch)                                                     /* Si pas de message, on tourne */
         { sched_yield();
           usleep(10000);
           continue;
@@ -196,8 +196,8 @@
         }
 
        while (Partage->com_arch.liste_arch)
-        { pthread_mutex_lock( &Partage->com_arch.synchro );                                 /* lockage futex */
-          arch = Partage->com_arch.liste_arch->data;                                 /* Recuperation du arch */
+        { pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
+          arch = Partage->com_arch.liste_arch->data;                                                  /* Recuperation du arch */
           Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
           Partage->com_arch.taille_arch--;
           Info_new( Config.log, Config.log_arch, LOG_DEBUG,
@@ -209,12 +209,12 @@
           Info_new( Config.log, Config.log_arch, LOG_DEBUG, "Run_arch: archive saved" );
         }
        Libere_DB_SQL( &db );
-       SEA ( NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );   /* Enregistrement pour historique */
+       SEA ( NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );                                      /* pour historique */
      }
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Run_arch: Down (%p)", pthread_self() );
-    Partage->com_arch.Thread_run  = FALSE;                                          /* Le thread tourne ! */
-    Partage->com_arch.TID = 0;                            /* On indique au master que le thread est mort. */
+    Partage->com_arch.Thread_run  = FALSE;                                                              /* Le thread tourne ! */
+    Partage->com_arch.TID = 0;                                                /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

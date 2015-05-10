@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Admin/admin_set.c        Gestion des connexions Admin SET au serveur watchdog                */
-/* Projet WatchDog version 2.0       Gestion d'habitat                    jeu. 05 janv. 2012 23:24:09 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Admin/admin_set.c        Gestion des connexions Admin SET au serveur watchdog                                    */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                        jeu. 05 janv. 2012 23:24:09 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * admin_set.c
  * This file is part of Watchdog
@@ -26,18 +26,18 @@
  */
  
  #include <glib.h>
- #include <unistd.h>                                                                  /* Pour gethostname */
+ #include <unistd.h>                                                                                      /* Pour gethostname */
  #include "watchdogd.h"
 
-/**********************************************************************************************************/
-/* Admin_set: Gere une commande 'admin set' depuis une connexion admin                                    */
-/* Entrée: La connexion connexione et la ligne de commande, et le buffer de sortie                           */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_set: Gere une commande 'admin set' depuis une connexion admin                                                        */
+/* Entrée: La connexion connexione et la ligne de commande, et le buffer de sortie                                            */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Admin_set ( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128], chaine[128];
 
-    sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
+    sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'SET'\n" );
        Admin_write ( connexion, "  e num val             - Set E[num]   = val\n" );
@@ -52,7 +52,7 @@
      } else
     if ( ! strcmp ( commande, "ch" ) )
      { int num, val, actif;
-       sscanf ( ligne, "%s %d %d %d", commande, &num, &val, &actif );/* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d %d %d", commande, &num, &val, &actif );                    /* Découpage de la ligne de commande */
        if (num<NBR_COMPTEUR_H)
         { Partage->ch[num].cpthdb.valeur = val;
           Partage->ch[num].actif = actif;
@@ -63,7 +63,7 @@
      } else
     if ( ! strcmp ( commande, "ci" ) )
      { int num, val;
-       sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d %d", commande, &num, &val );                               /* Découpage de la ligne de commande */
        if (num<NBR_COMPTEUR_IMP)
         { Partage->ci[num].confDB.valeur = (gfloat)val;
           Partage->ci[num].val_en_cours1 = 0.0;
@@ -74,7 +74,7 @@
        Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "i" ) )
-     { int num, etat, rouge, vert, bleu, cligno;                     /* Découpage de la ligne de commande */
+     { int num, etat, rouge, vert, bleu, cligno;                                         /* Découpage de la ligne de commande */
        sscanf ( ligne, "%s %d %d %d %d %d %d", commande, &num, &etat, &rouge, &vert, &bleu, &cligno );
        if (num<NBR_BIT_CONTROLE)
         { SI(num, etat, rouge, vert, bleu, cligno);
@@ -91,7 +91,7 @@
      } else
     if ( ! strcmp ( commande, "msg" ) )
      { int num, val;
-       sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d %d", commande, &num, &val );                               /* Découpage de la ligne de commande */
        if (num<NBR_MESSAGE_ECRITS)
         { MSG ( num, val );
           g_snprintf( chaine, sizeof(chaine), " MSG%03d = %d\n", num, val );
@@ -101,9 +101,9 @@
      } else
     if ( ! strcmp ( commande, "e" ) )
      { int num, val;
-       sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d %d", commande, &num, &val );                               /* Découpage de la ligne de commande */
        if (num<NBR_ENTRE_TOR)
-        { Envoyer_entree_dls( num, val );                                             /* Pas de furtivité */
+        { SE( num, val );                                                                                 /* Pas de furtivité */
           g_snprintf( chaine, sizeof(chaine), " E%03d = %d\n", num, val );
         } else
         { g_snprintf( chaine, sizeof(chaine), " E -> num '%d' out of range\n", num ); }
@@ -111,7 +111,7 @@
      } else
     if ( ! strcmp ( commande, "m" ) )
      { int num, val;
-       sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d %d", commande, &num, &val );                               /* Découpage de la ligne de commande */
        if (num<NBR_BIT_MONOSTABLE)
         { if (val) Envoyer_commande_dls( num );
               else SM ( num, 0 );
@@ -122,7 +122,7 @@
      } else
     if ( ! strcmp ( commande, "b" ) )
      { int num, val;
-       sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d %d", commande, &num, &val );                               /* Découpage de la ligne de commande */
        if (num<NBR_BIT_BISTABLE)
         { SB ( num, val );
           g_snprintf( chaine, sizeof(chaine), " B%03d = %d\n", num, val );
@@ -132,7 +132,7 @@
      } else
     if ( ! strcmp ( commande, "a" ) )
      { int num, val;
-       sscanf ( ligne, "%s %d %d", commande, &num, &val );           /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d %d", commande, &num, &val );                               /* Découpage de la ligne de commande */
        if (num<NBR_SORTIE_TOR)
         { SA ( num, val );
           g_snprintf( chaine, sizeof(chaine), " A%03d = %d\n", num, val );
@@ -144,4 +144,4 @@
        Admin_write ( connexion, chaine );
      }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
