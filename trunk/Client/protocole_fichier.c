@@ -119,7 +119,7 @@
              }
             break;
        case SSTAG_SERVEUR_VERSION:
-             { guint *cmd_version;
+             { gint *cmd_version;
                cmd_version = (gint *)connexion->donnees;
                Set_icone_version( *cmd_version );
                Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,

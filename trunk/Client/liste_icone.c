@@ -574,7 +574,6 @@ printf("bouh\n");
   { GtkTreeSelection *selection;
     GtkTreeModel *store;
     GtkTreeIter iter;
-    gboolean valide;
     GList *lignes;
     gint id, nbr;
 
@@ -592,9 +591,8 @@ printf("bouh\n");
     if(id!=icone->id_classe) return;
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_icone) );
-    valide = gtk_tree_model_get_iter_first( store, &iter );
-
     gtk_list_store_append ( GTK_LIST_STORE(store), &iter );                      /* Acquisition iterateur */
+
     Rafraichir_visu_icone ( &iter, icone );
   }
 /**********************************************************************************************************/
@@ -629,13 +627,11 @@ printf("bouh\n");
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  void Proto_rafraichir_un_icone( struct CMD_TYPE_ICONE *icone )
-  { struct CMD_TYPE_ICONE id_icone;
-    GtkTreeModel *store;
+  { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
     gint id, classe_id;
 
-    id_icone.id = icone->id;
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_icone) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
 

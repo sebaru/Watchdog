@@ -251,7 +251,7 @@
        g_snprintf( chaine, sizeof(chaine), "%02X%02X%02X%02X:%s:%s",
                    trame->data[2], trame->data[3], trame->data[4], trame->data[5],
                    button, action );
-       Send_Event_String( NOM_THREAD, chaine );
+       Send_Event( Config.instance_id, NOM_THREAD, EVENT_INPUT, chaine, 0 );
 
        Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
                  "Processer_trame_ERP1: New_Event : %s", chaine );
@@ -288,7 +288,7 @@
 /* Entrées: le numéro de la sortie                                                                        */
 /**********************************************************************************************************/
  void Enocean_Gerer_sortie( gint num_a )                                   /* Num_a est l'id de la sortie */
-  { gint taille;
+  { 
 #ifdef bouh
     pthread_mutex_lock( &Cfg_enocean.lib->synchro );             /* Ajout dans la liste de tell a traiter */
     taille = g_slist_length( Cfg_enocean.Liste_sortie );

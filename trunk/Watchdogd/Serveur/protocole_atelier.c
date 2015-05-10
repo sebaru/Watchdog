@@ -223,8 +223,7 @@
             break;
 /************************************* Gestion des palettes synoptiques ***********************************/
        case SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER_PALETTE: 
-             { struct CMD_TYPE_SYNOPTIQUE *syn;
-               Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+             { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                          "Le client desire les syn pour palettes atelier" );
                memcpy ( &client->syn, connexion->donnees, sizeof (struct CMD_TYPE_SYNOPTIQUE) );
                Client_mode( client, ENVOI_SYNOPTIQUE_FOR_ATELIER_PALETTE );

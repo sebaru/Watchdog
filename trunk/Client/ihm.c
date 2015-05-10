@@ -134,8 +134,7 @@
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
  void Set_progress_plus( gint plus )
-  { GtkProgressBar *progress;
-    gdouble fraction;
+  { gdouble fraction;
     gchar chaine[20];
 
     nbr_enreg += plus;
