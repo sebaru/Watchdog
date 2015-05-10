@@ -276,11 +276,14 @@
        return;
      }
 
-    Send_Event ( Config.instance_id, "MSRV", EVENT_OUTPUT, mnemo->command_text, 1.0 );
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-              "Gerer_arrive_Axxx_dls: Recu A(%03d) (%s). Reste a traiter %03d",
-              num, mnemo->command_text, reste
-            );
-    SA ( num, 0 );                                                       /* L'evenement est traité, on fait retombé la sortie */
+    if ( strlen ( mnemo->command_text ) > 0 )                      /* Existe t'il un evenement associé ? (implique furtivité) */
+     { Send_Event ( Config.instance_id, "MSRV", EVENT_OUTPUT, mnemo->command_text, 1.0 );
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+                 "Gerer_arrive_Axxx_dls: Recu A(%03d) (%s). Reste a traiter %03d",
+                 num, mnemo->command_text, reste
+               );
+       SA ( num, 0 );                                                    /* L'evenement est traité, on fait retombé la sortie */
+     }
+    g_free(mnemo);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
