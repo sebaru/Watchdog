@@ -1,7 +1,7 @@
-/**********************************************************************************************************/
-/* Watchdogd/Include/Dls.h                  Définitions des constantes programme DLS                      */
-/*        projet Watchdog v2.0     par LEFEVRE Sebastien                    sam 09 oct 2004 10:10:32 CEST */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Include/Dls.h                  Définitions des constantes programme DLS                                          */
+/*        projet Watchdog v2.0     par LEFEVRE Sebastien                                        sam 09 oct 2004 10:10:32 CEST */
+/******************************************************************************************************************************/
 /*
  * Dls.h
  * This file is part of Watchdog
@@ -35,11 +35,11 @@
 
  struct PLUGIN_DLS
   { struct CMD_TYPE_PLUGIN_DLS plugindb;
-    gchar nom_fichier[60];                                                              /* Nom du fichier */
-    gint starting;                  /* 1 si les bits internes "start" du plugins doivent etre positionnés */
-    void *handle;                                                          /* Handle du fichier librairie */
-    void (*go)(int);                                                  /* Fonction de traitement du module */
-    float conso;                                                     /* Consommation temporelle du plugin */
+    gchar nom_fichier[60];                                                                                  /* Nom du fichier */
+    gint starting;                                      /* 1 si les bits internes "start" du plugins doivent etre positionnés */
+    void *handle;                                                                              /* Handle du fichier librairie */
+    void (*go)(int);                                                                      /* Fonction de traitement du module */
+    float conso;                                                                         /* Consommation temporelle du plugin */
   };
 
  enum
@@ -51,21 +51,21 @@
     DLS_COMPIL_OK
   };
 
- enum                                                              /* différent statut des temporisations */
-  { TEMPO_NOT_COUNTING,                                                 /* La tempo ne compte pas du tout */
-    TEMPO_WAIT_FOR_DELAI_ON,                       /* La tempo compte, en attendant le delai de mise à un */
-    TEMPO_WAIT_FOR_MIN_ON,                         /* Delai de MAU dépassé, en attente du creneau minimum */
-    TEMPO_WAIT_FOR_MAX_ON,                      /* Creneau minimum atteint, en attente du creneau maximum */
-    TEMPO_WAIT_FOR_DELAI_OFF,                /* Creneau max atteint, en attente du delai de remise a zero */
-    TEMPO_WAIT_FOR_COND_OFF                           /* Atteint que la condition soit tombée avant reset */
+ enum                                                                                  /* différent statut des temporisations */
+  { TEMPO_NOT_COUNTING,                                                                     /* La tempo ne compte pas du tout */
+    TEMPO_WAIT_FOR_DELAI_ON,                                           /* La tempo compte, en attendant le delai de mise à un */
+    TEMPO_WAIT_FOR_MIN_ON,                                             /* Delai de MAU dépassé, en attente du creneau minimum */
+    TEMPO_WAIT_FOR_MAX_ON,                                          /* Creneau minimum atteint, en attente du creneau maximum */
+    TEMPO_WAIT_FOR_DELAI_OFF,                                    /* Creneau max atteint, en attente du delai de remise a zero */
+    TEMPO_WAIT_FOR_COND_OFF                                               /* Atteint que la condition soit tombée avant reset */
   };
 
- struct TEMPO                                                           /* Définition d'une temporisation */
+ struct TEMPO                                                                               /* Définition d'une temporisation */
   { struct CMD_TYPE_MNEMO_TEMPO confDB;
-                                                                            /* Variables de travail (run) */
-    guint status;                                                           /* Statut de la temporisation */
-    guint date_on;                                          /* date a partir de laquelle la tempo sera ON */
-    guint date_off;                                        /* date a partir de laquelle la tempo sera OFF */
+                                                                                                /* Variables de travail (run) */
+    guint status;                                                                               /* Statut de la temporisation */
+    guint date_on;                                                              /* date a partir de laquelle la tempo sera ON */
+    guint date_off;                                                            /* date a partir de laquelle la tempo sera OFF */
     gboolean state;
   };
 
@@ -78,23 +78,23 @@
   { struct CMD_TYPE_MNEMO_AI confDB;
     gfloat  val_ech;
     gfloat  val_avant_ech;
-    guint   last_arch;                                                     /* Date de la derniere archive */
+    guint   last_arch;                                                                         /* Date de la derniere archive */
     guint   inrange;
   };
 
  struct CPT_IMP
   { struct CMD_TYPE_MNEMO_CPT_IMP confDB;
-    gboolean actif;                                                       /* Mémorisation de l'etat du CI */
-    gfloat val_en_cours1;                                 /* valeur en cours pour le calcul via les ratio */
-    gfloat val_en_cours2;                     /* valeur en cours avant interprétation selon le type de CI */
-    time_t last_update;                               /* date de derniere update de la valeur du compteur */
-    guint last_arch;                                 /* Date de dernier enregistrement en base de données */
+    gboolean actif;                                                                           /* Mémorisation de l'etat du CI */
+    gfloat val_en_cours1;                                                     /* valeur en cours pour le calcul via les ratio */
+    gfloat val_en_cours2;                                         /* valeur en cours avant interprétation selon le type de CI */
+    time_t last_update;                                                   /* date de derniere update de la valeur du compteur */
+    guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
   };
 
- struct SORTIE_TOR                                                         /* Définition d'une sortie TOR */
-  { gchar etat;                                                               /* Etat de la sortie 0 ou 1 */
-    gint last_change;                                                /* Date du dernier changement d'etat */
-    gint changes;           /* Compte le nombre de changes afin de ne pas depasser une limite par seconde */
+ struct SORTIE_TOR                                                                             /* Définition d'une sortie TOR */
+  { gchar etat;                                                                                   /* Etat de la sortie 0 ou 1 */
+    gint last_change;                                                                    /* Date du dernier changement d'etat */
+    gint changes;                               /* Compte le nombre de changes afin de ne pas depasser une limite par seconde */
   };
 
  struct MESSAGES
@@ -119,25 +119,25 @@
     gint changes;
   };
 
- struct COM_DLS                                             /* Communication entre le serveur et DLS */
-  { pthread_t TID;                                                               /* Identifiant du thread */
-    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
-    pthread_mutex_t synchro_ea_access;                /* Bit de synchro pour read/write les bits internes */
-    GSList *Plugins;                                                  /* Liste des plugins chargés de DLS */
-    GSList *Set_M;                                          /* liste des Mxxx a activer au debut tour prg */
-    GSList *Reset_M;                                  /* liste des Mxxx a désactiver à la fin du tour prg */
-    GSList *Set_E;                                          /* liste des Exxx a activer au debut tour prg */
-    GSList *Reset_E;                                  /* liste des Exxx a désactiver à la fin du tour prg */
-    GSList *liste_plugin_reset;                                           /* liste des plugins a resetter */
-    gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
-    gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
-    guint admin_start;                                                          /* Demande de deconnexion */
-    guint admin_stop;                                                           /* Demande de deconnexion */
+ struct COM_DLS                                                                      /* Communication entre le serveur et DLS */
+  { pthread_t TID;                                                                                   /* Identifiant du thread */
+    pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
+    pthread_mutex_t synchro_traduction;                  /* Mutex pour interdire les traductions simultanées de plugins D.L.S */
+    GSList *Plugins;                                                                      /* Liste des plugins chargés de DLS */
+    GSList *Set_M;                                                              /* liste des Mxxx a activer au debut tour prg */
+    GSList *Reset_M;                                                      /* liste des Mxxx a désactiver à la fin du tour prg */
+    GSList *Set_E;                                                              /* liste des Exxx a activer au debut tour prg */
+    GSList *Reset_E;                                                      /* liste des Exxx a désactiver à la fin du tour prg */
+    GSList *liste_plugin_reset;                                                               /* liste des plugins a resetter */
+    gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
+    gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
+    gboolean Thread_sigusr1;                                                          /* TRUE si le thread doit gerer le USR1 */
+    guint admin_start;                                                                              /* Demande de deconnexion */
+    guint admin_stop;                                                                               /* Demande de deconnexion */
     guint temps_sched;
   };
 
-/*************************************** Prototypes de fonctions ******************************************/
+/************************************************ Prototypes de fonctions *****************************************************/
  extern gboolean Retirer_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls );
  extern gint Ajouter_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls );
  extern gboolean Recuperer_plugins_dlsDB( struct DB **db );
@@ -152,7 +152,7 @@
  extern void Activer_plugin_by_id ( gint id, gboolean actif );
  extern gint Compiler_source_dls( gboolean new, gboolean reset, gint id, gchar *buffer, gint taille_buffer );
 
- extern void Run_dls ( void );                                                          /* Dans The_dls.c */
+ extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
  extern int EA_inrange( int num );
  extern float EA_ech( int num );
  extern int A( int num );
@@ -164,6 +164,6 @@
  extern void Envoyer_entree_furtive_dls( int num );
  extern void Envoyer_commande_dls ( int num );
 
- extern void Prendre_heure ( void );                                                      /* Dans heure.c */ 
+ extern void Prendre_heure ( void );                                                                          /* Dans heure.c */ 
  #endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
