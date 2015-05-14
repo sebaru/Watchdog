@@ -63,7 +63,7 @@
  void Emettre( char *chaine )
   { int taille;
     taille = strlen(chaine);
-    Info_new( Config.log, Config.log_dls, LOG_INFO, "Emettre %s", chaine );
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "Emettre %s", chaine );
     write( Id_cible, chaine, taille );
   }
 /**********************************************************************************************************/
@@ -76,12 +76,12 @@
     int taille;
     if ( nbr_erreur < 15 )
      { taille = strlen(chaine);
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "Emettre_erreur %s", chaine );
+       Info_new( Config.log, Config.log_dls, LOG_ERR, "Emettre_erreur %s", chaine );
        write( Id_log, chaine, taille );
      } else
     if ( nbr_erreur == 15 )
      { taille = strlen(too_many);
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "Emettre_erreur: %s", too_many );
+       Info_new( Config.log, Config.log_dls, LOG_ERR, "Emettre_erreur: %s", too_many );
        write( Id_log, too_many, taille );
      }
     nbr_erreur++;
