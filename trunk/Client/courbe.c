@@ -525,30 +525,39 @@
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_source( GtkTreeIter *iter, struct CMD_TYPE_MNEMO_BASE *source )
+ static void Rafraichir_visu_source( GtkTreeIter *iter, struct CMD_TYPE_MNEMO_FULL *source )
   { struct PAGE_NOTEBOOK *page;
     GtkTreeModel *store;
-    gchar chaine[20], groupe_page[512];
+    gchar chaine[20], groupe_page[512], *unite;
+    gdouble min, max;
 
     page = Page_actuelle();
     if (page->type != TYPE_PAGE_COURBE) return;                                            /* Bon type ?? */
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_source) );              /* Acquisition du modele */
 
-    g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(source->type), source->num );
+    g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(source->mnemo_base.type), source->mnemo_base.num );
     g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s/%s",
-                source->groupe, source->page, source->plugin_dls );
+                source->mnemo_base.groupe, source->mnemo_base.page, source->mnemo_base.plugin_dls );
+
+    if (source->mnemo_base.type == MNEMO_ENTREE_ANA)
+     { min = source->mnemo_ai.min;
+       max = source->mnemo_ai.max;
+       unite = source->mnemo_ai.unite;
+     }
+    else
+     { min = 0.0; max = 1.0; unite="On/Off"; }
 
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
-                         COLONNE_ID, source->num,
-                         COLONNE_TYPE, source->type,
-                         COLONNE_TYPE_EA, 0,
+                         COLONNE_ID, source->mnemo_base.num,
+                         COLONNE_TYPE, source->mnemo_base.type,
+                         COLONNE_TYPE_EA, source->mnemo_ai.type,
                          COLONNE_OBJET, groupe_page,
                          COLONNE_NUM, chaine,
-                         COLONNE_MIN, 0.0,
-                         COLONNE_MAX, 1.0,
-                         COLONNE_UNITE_STRING, "On/Off",
-                         COLONNE_LIBELLE, source->libelle,
+                         COLONNE_MIN, min,
+                         COLONNE_MAX, max,
+                         COLONNE_UNITE_STRING, unite,
+                         COLONNE_LIBELLE, source->mnemo_base.libelle,
                          -1
                        );
   }
@@ -557,7 +566,7 @@
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_une_source_for_courbe( struct CMD_TYPE_MNEMO_BASE *source )
+ void Proto_afficher_une_source_for_courbe( struct CMD_TYPE_MNEMO_FULL *source )
   { GtkListStore *store;
     GtkTreeIter iter;
 

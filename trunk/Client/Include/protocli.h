@@ -484,7 +484,7 @@
                                   GtkPrintContext   *context,
                                   gpointer           user_data );
                                                                                          /* Dans courbe.c */
- extern void Proto_afficher_une_source_for_courbe( struct CMD_TYPE_MNEMO_BASE *mnemo );
+ extern void Proto_afficher_une_source_for_courbe( struct CMD_TYPE_MNEMO_FULL *mnemo );
  extern void Creer_page_courbe ( gchar *libelle );
  extern void Detruire_page_courbe( struct PAGE_NOTEBOOK *page );
  extern gboolean CB_deplacement_databox ( struct TYPE_INFO_COURBE *infos, GdkEvent *event, gpointer data );
@@ -502,7 +502,8 @@
  extern gboolean Append_courbe ( struct TYPE_INFO_COURBE *infos, struct COURBE *courbe,
                                  struct CMD_APPEND_COURBE *append_courbe );
  extern void Proto_ajouter_histo_courbe( struct CMD_TYPE_COURBE *courbe );
-
+ extern void Proto_start_histo_courbe( struct CMD_START_COURBE *start_courbe );
+ 
  extern void Proto_afficher_un_camera( struct CMD_TYPE_CAMERA *camera );           /* Dans liste_camera.c */
  extern void Proto_cacher_un_camera( struct CMD_TYPE_CAMERA *camera );
  extern void Proto_rafraichir_un_camera( struct CMD_TYPE_CAMERA *camera );
