@@ -108,11 +108,7 @@
     guint taille_donnees;                         /* Taille (en nombre de gfloat) des tableaux ci dessous */
     gfloat *X;                                                              /* Coordonnées X de la courbe */
     gfloat *Y;                                                              /* Coordonnées Y de la courbe */
-    guint type;
-    union                                                                      /* Option liée à la courbe */
-     { struct CMD_TYPE_MNEMO_FULL eana;
-       struct CMD_TYPE_MNEMO_BASE mnemo;
-     };
+    struct CMD_TYPE_MNEMO_FULL mnemo;
   };
 
  #define NBR_MAX_COURBES   6                             /* Nombre maximum de courbes affichées a l'écran */

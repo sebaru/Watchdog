@@ -68,7 +68,7 @@
   };
 
 /**********************************************************************************************************/
-/* CB_ajouter_editer_source: Fonction appelée qd on appuie sur un des boutons de l'interface           */
+/* CB_ajouter_editer_source: Fonction appelée qd on appuie sur un des boutons de l'interface              */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
@@ -111,28 +111,24 @@
        rezo_courbe.slot_id = infos->slot_id;
 
        new_courbe = &infos->Courbes[infos->slot_id];
-       new_courbe->actif = TRUE;                /* Récupération des données EANA dans la structure COURBE */
-       new_courbe->type  = rezo_courbe.type;    /* Récupération des données EANA dans la structure COURBE */
-       switch( new_courbe->type )
+       new_courbe->actif = TRUE;                                    /* Récupération des données EANA dans la structure COURBE */
+       new_courbe->mnemo.mnemo_base.type = rezo_courbe.type;        /* Récupération des données EANA dans la structure COURBE */
+       new_courbe->mnemo.mnemo_base.num  = rezo_courbe.num;
+       gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
+       g_snprintf( new_courbe->mnemo.mnemo_base.libelle, sizeof(new_courbe->mnemo.mnemo_base.libelle), "%s", libelle );
+       g_free(libelle);
+       switch( new_courbe->mnemo.mnemo_base.type )
         { case MNEMO_ENTREE_ANA:
-               new_courbe->eana.mnemo_base.num = rezo_courbe.num;
-               gtk_tree_model_get( store, &iter, COLONNE_TYPE_EA, &new_courbe->eana.mnemo_ai.type, -1 );
-               gtk_tree_model_get( store, &iter, COLONNE_MIN, &new_courbe->eana.mnemo_ai.min, -1 );
-               gtk_tree_model_get( store, &iter, COLONNE_MAX, &new_courbe->eana.mnemo_ai.max, -1 );
+               new_courbe->mnemo.mnemo_ai.num = rezo_courbe.num;
+               gtk_tree_model_get( store, &iter, COLONNE_TYPE_EA, &new_courbe->mnemo.mnemo_ai.type, -1 );
+               gtk_tree_model_get( store, &iter, COLONNE_MIN, &new_courbe->mnemo.mnemo_ai.min, -1 );
+               gtk_tree_model_get( store, &iter, COLONNE_MAX, &new_courbe->mnemo.mnemo_ai.max, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_UNITE_STRING, &unite, -1 );
-               gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
-               g_snprintf( new_courbe->eana.mnemo_base.libelle, sizeof(new_courbe->eana.mnemo_base.libelle), "%s", libelle );
-               g_snprintf( new_courbe->eana.mnemo_ai.unite,     sizeof(new_courbe->eana.mnemo_ai.unite),     "%s", unite );
-               g_free(libelle);
+               g_snprintf( new_courbe->mnemo.mnemo_ai.unite,     sizeof(new_courbe->mnemo.mnemo_ai.unite),     "%s", unite );
                g_free(unite);
                break;
           case MNEMO_SORTIE:
           case MNEMO_ENTREE:
-               new_courbe->mnemo.id = rezo_courbe.num;
-               new_courbe->mnemo.num = rezo_courbe.num;
-               gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
-               g_snprintf( new_courbe->mnemo.libelle, sizeof(new_courbe->mnemo.libelle), "%s", libelle );
-               g_free(libelle);
                break;
         }
                                                           /* Placement de la nouvelle courbe sur l'id gui */
@@ -143,10 +139,10 @@
        Envoi_serveur( TAG_HISTO_COURBE, SSTAG_CLIENT_ADD_HISTO_COURBE,
                       (gchar *)&rezo_courbe, sizeof(struct CMD_TYPE_COURBE) );
      }
-    else if (reponse == GTK_RESPONSE_REJECT)                            /* On retire la courbe de la visu */
+    else if (reponse == GTK_RESPONSE_REJECT)                                                /* On retire la courbe de la visu */
      { new_courbe = &infos->Courbes[infos->slot_id];
-       new_courbe->actif = FALSE;               /* Récupération des données EANA dans la structure COURBE */
-       new_courbe->type  = 0;                   /* Récupération des données EANA dans la structure COURBE */
+       new_courbe->actif = FALSE;                                   /* Récupération des données EANA dans la structure COURBE */
+       new_courbe->mnemo.mnemo_base.type  = 0;                      /* Récupération des données EANA dans la structure COURBE */
        gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->index );
        gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->marker_select );
        gtk_widget_queue_draw (infos->Databox);
@@ -284,23 +280,14 @@ printf("Envoie want page source for histo courbe\n");
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  static void Menu_rescale ( struct TYPE_INFO_COURBE *infos )
-  { 
-    struct CMD_TYPE_COURBE rezo_courbe;
+  { struct CMD_TYPE_COURBE rezo_courbe;
     guint cpt;
     for ( cpt=0; cpt<NBR_MAX_COURBES; cpt++ )
      { if (!infos->Courbes[cpt].actif) continue;
 
        rezo_courbe.slot_id = cpt;
-       rezo_courbe.type = infos->Courbes[cpt].type;
-       switch ( rezo_courbe.type )
-        { case MNEMO_ENTREE_ANA:
-               rezo_courbe.num = infos->Courbes[cpt].eana.mnemo_base.num;
-               break;
-          case MNEMO_SORTIE:
-          case MNEMO_ENTREE:
-               rezo_courbe.num = infos->Courbes[cpt].mnemo.id;
-               break;
-        }
+       rezo_courbe.type = infos->Courbes[cpt].mnemo.mnemo_base.type;
+       rezo_courbe.num  = infos->Courbes[cpt].mnemo.mnemo_base.num;
 
        printf("Envoi serveur TAG_CLIENT_ADD_HISTO_COURBE %d\n", rezo_courbe.slot_id );
        Envoi_serveur( TAG_HISTO_COURBE, SSTAG_CLIENT_ADD_HISTO_COURBE,
