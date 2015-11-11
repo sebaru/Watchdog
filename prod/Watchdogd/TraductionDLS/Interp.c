@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/TraductionDLS/Interp.c          Interpretation du langage DLS                                */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 05 avr 2009 12:47:37 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/TraductionDLS/Interp.c          Interpretation du langage DLS                                                    */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          dim 05 avr 2009 12:47:37 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Interp.c
  * This file is part of Watchdog
@@ -39,78 +39,78 @@
  #include "lignes.h"
 
  GList *Alias=NULL;
- static int Id_cible;                                           /* Pour la création du fichier temporaire */
- static int Id_log;                                                 /* Pour la creation du fichier de log */
+ static int Id_cible;                                                               /* Pour la création du fichier temporaire */
+ static int Id_log;                                                                     /* Pour la creation du fichier de log */
  static int nbr_erreur;
 
  extern gboolean Interpreter_source_dls ( gchar *source );
-/**********************************************************************************************************/
-/* New_chaine: Alloue une certaine quantité de mémoire pour utiliser des chaines de caractères            */
-/* Entrées: la longueur souhaitée                                                                         */
-/* Sortie: NULL si probleme                                                                               */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* New_chaine: Alloue une certaine quantité de mémoire pour utiliser des chaines de caractères                                */
+/* Entrées: la longueur souhaitée                                                                                             */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
  char *New_chaine( int longueur )
   { char *chaine;
     chaine = g_try_malloc0( longueur );
     if (!chaine) { return(NULL); }
     return(chaine);
   }
-/**********************************************************************************************************/
-/* Emettre: Met a jour le fichier temporaire en code intermédiaire                                        */
-/* Entrées: la ligne d'instruction à mettre                                                               */
-/* Sortie: void                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Emettre: Met a jour le fichier temporaire en code intermédiaire                                                            */
+/* Entrées: la ligne d'instruction à mettre                                                                                   */
+/* Sortie: void                                                                                                               */
+/******************************************************************************************************************************/
  void Emettre( char *chaine )
   { int taille;
     taille = strlen(chaine);
-    Info_new( Config.log, Config.log_dls, LOG_INFO, "Emettre %s", chaine );
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "Emettre %s", chaine );
     write( Id_cible, chaine, taille );
   }
-/**********************************************************************************************************/
-/* Emettre: Met a jour le fichier temporaire en code intermédiaire                                        */
-/* Entrées: la ligne d'instruction à mettre                                                               */
-/* Sortie: void                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Emettre: Met a jour le fichier temporaire en code intermédiaire                                                            */
+/* Entrées: la ligne d'instruction à mettre                                                                                   */
+/* Sortie: void                                                                                                               */
+/******************************************************************************************************************************/
  void Emettre_erreur( char *chaine )
   { static gchar *too_many="Too many errors...";
     int taille;
     if ( nbr_erreur < 15 )
      { taille = strlen(chaine);
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "Emettre_erreur %s", chaine );
+       Info_new( Config.log, Config.log_dls, LOG_ERR, "Emettre_erreur %s", chaine );
        write( Id_log, chaine, taille );
      } else
     if ( nbr_erreur == 15 )
      { taille = strlen(too_many);
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "Emettre_erreur: %s", too_many );
+       Info_new( Config.log, Config.log_dls, LOG_ERR, "Emettre_erreur: %s", too_many );
        write( Id_log, too_many, taille );
      }
     nbr_erreur++;
   }
-/**********************************************************************************************************/
-/* New_option: Alloue une certaine quantité de mémoire pour les options                                   */
-/* Entrées: rien                                                                                          */
-/* Sortie: NULL si probleme                                                                               */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* New_option: Alloue une certaine quantité de mémoire pour les options                                                       */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
  struct COMPARATEUR *New_comparateur( void )
   { struct COMPARATEUR *comparateur;
     comparateur=(struct COMPARATEUR *)g_try_malloc0( sizeof(struct COMPARATEUR) );
     return(comparateur);
   }
-/**********************************************************************************************************/
-/* New_option: Alloue une certaine quantité de mémoire pour les options                                   */
-/* Entrées: rien                                                                                          */
-/* Sortie: NULL si probleme                                                                               */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* New_option: Alloue une certaine quantité de mémoire pour les options                                                       */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
  struct OPTION *New_option( void )
   { struct OPTION *option;
     option=(struct OPTION *)g_try_malloc0( sizeof(struct OPTION) );
     return(option);
   }
-/**********************************************************************************************************/
-/* Get_option_entier: Cherche une option et renvoie sa valeur                                             */
-/* Entrées: rien                                                                                          */
-/* Sortie: NULL si probleme                                                                               */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Get_option_entier: Cherche une option et renvoie sa valeur                                                                 */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
  int Get_option_entier( GList *liste_options, gint type )
   { struct OPTION *option;
     GList *liste;
@@ -123,11 +123,11 @@
      }
     return(-1);
   }
-/**********************************************************************************************************/
-/* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                               */
-/* Entrées: rien                                                                                          */
-/* Sortie: NULL si probleme                                                                               */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
+/* Entrées: rien                                                                                                              */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
  struct ACTION *New_action( void )
   { struct ACTION *action;
     action=(struct ACTION *)g_try_malloc0( sizeof(struct ACTION) );
@@ -136,11 +136,11 @@
     action->sinon = NULL;
     return(action);
   }
-/**********************************************************************************************************/
-/* New_action_msg: Prepare une struct action avec une commande MSG                                        */
-/* Entrées: numero du message                                                                             */
-/* Sortie: la structure action                                                                            */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* New_action_msg: Prepare une struct action avec une commande MSG                                                            */
+/* Entrées: numero du message                                                                                                 */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
  struct ACTION *New_action_msg( int num )
   { struct ACTION *action;
     int taille;
@@ -153,11 +153,11 @@
     g_snprintf( action->sinon, taille, "MSG(%d,0);", num );
     return(action);
   }
-/**********************************************************************************************************/
-/* New_action_sortie: Prepare une struct action avec une commande SA                                      */
-/* Entrées: numero de la sortie, sa logique                                                               */
-/* Sortie: la structure action                                                                            */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* New_action_sortie: Prepare une struct action avec une commande SA                                                          */
+/* Entrées: numero de la sortie, sa logique                                                                                   */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
  struct ACTION *New_action_sortie( int num, int barre )
   { struct ACTION *action;
     int taille;
@@ -168,11 +168,11 @@
     g_snprintf( action->alors, taille, "SA(%d,%d);", num, !barre );
     return(action);
   }
-/**********************************************************************************************************/
-/* New_action_mono: Prepare une struct action avec une commande SM                                        */
-/* Entrées: numero du monostable, sa logique                                                              */
-/* Sortie: la structure action                                                                            */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* New_action_mono: Prepare une struct action avec une commande SM                                                            */
+/* Entrées: numero du monostable, sa logique                                                                                  */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
  struct ACTION *New_action_mono( int num )
   { struct ACTION *action;
     int taille;
@@ -186,11 +186,11 @@
     g_snprintf( action->sinon, taille, "SM(%d,0);", num );
     return(action);
   }
-/**********************************************************************************************************/
-/* New_action_mono: Prepare une struct action avec une commande SM                                        */
-/* Entrées: numero du monostable, sa logique                                                              */
-/* Sortie: la structure action                                                                            */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* New_action_mono: Prepare une struct action avec une commande SM                                                            */
+/* Entrées: numero du monostable, sa logique                                                                                  */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
  struct ACTION *New_action_cpt_h( int num )
   { struct ACTION *action;
     int taille;
@@ -204,11 +204,11 @@
     g_snprintf( action->sinon, taille, "SCH(%d,0);", num );
     return(action);
   }
-/**********************************************************************************************************/
-/* New_action_cpt_imp: Prepare une struct action avec une commande SCI                                    */
-/* Entrées: numero du compteur d'impulsion, sa logique, son reset                                         */
-/* Sortie: la structure action                                                                            */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* New_action_cpt_imp: Prepare une struct action avec une commande SCI                                                        */
+/* Entrées: numero du compteur d'impulsion, sa logique, son reset                                                             */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
  struct ACTION *New_action_cpt_imp( int num, GList *options )
   { struct ACTION *action;
     int taille, reset, ratio;
@@ -224,11 +224,11 @@
     g_snprintf( action->sinon, taille, "SCI(%d,0,%d,%d);", num, reset, ratio );
     return(action);
   }
-/**********************************************************************************************************/
-/* New_action_icone: Prepare une struct action avec une commande SI                                       */
-/* Entrées: numero du motif                                                                               */
-/* Sortie: la structure action                                                                            */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* New_action_icone: Prepare une struct action avec une commande SI                                                           */
+/* Entrées: numero du motif                                                                                                   */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
  struct ACTION *New_action_icone( int num, GList *options )
   { struct ACTION *action;
     int taille, rouge, vert, bleu, val, coul, cligno;
@@ -255,11 +255,11 @@
     return(action);
   }
 
-/**********************************************************************************************************/
-/* New_action_tempo: Prepare une struct action avec une commande TR                                       */
-/* Entrées: numero de la tempo, sa consigne                                                               */
-/* Sortie: la structure action                                                                            */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* New_action_tempo: Prepare une struct action avec une commande TR                                                           */
+/* Entrées: numero de la tempo, sa consigne                                                                                   */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
  struct ACTION *New_action_tempo( int num, GList *options )
   { struct ACTION *action;
     int taille;
@@ -273,11 +273,11 @@
     return(action);
   }
 
-/**********************************************************************************************************/
-/* New_action_bi: Prepare une struct action avec une commande SB                                          */
-/* Entrées: numero du bistable, sa logique                                                                */
-/* Sortie: la structure action                                                                            */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* New_action_bi: Prepare une struct action avec une commande SB                                                              */
+/* Entrées: numero du bistable, sa logique                                                                                    */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
  struct ACTION *New_action_bi( int num, int barre )
   { struct ACTION *action;
     int taille;
@@ -289,16 +289,15 @@
     g_snprintf( action->alors, taille, "SB(%d,%d);", num, !barre );
     return(action);
   }
-/**********************************************************************************************************/
-/* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                             */
-/* Entrées: le nom de l'alias, le tableau et le numero du bit                                             */
-/* Sortie: False si il existe deja, true sinon                                                            */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
+/* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
+/* Sortie: False si il existe deja, true sinon                                                                                */
+/******************************************************************************************************************************/
  gboolean New_alias( char *nom, int bit, int num, int barre, GList *options )
   { struct ALIAS *alias;
 
-    if (Get_alias_par_nom( nom )) return(FALSE);                                     /* ID deja definit ? */
-    /*if (Get_alias_par_bit( bit, num )) return(FALSE);                           /* Bit/Num deja definit ? */
+    if (Get_alias_par_nom( nom )) return(FALSE);                                                         /* ID deja definit ? */
 
     alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
     if (!alias) { return(FALSE); }
@@ -311,48 +310,48 @@
     Alias = g_list_append( Alias, alias );
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Get_alias: Recherche un alias donné en paramètre                                                       */
-/* Entrées: le nom de l'alias                                                                             */
-/* Sortie: NULL si probleme                                                                               */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Get_alias: Recherche un alias donné en paramètre                                                                           */
+/* Entrées: le nom de l'alias                                                                                                 */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
  struct ALIAS *Get_alias_par_nom( char *nom )
   { struct ALIAS *alias;
     GList *liste;
     liste = Alias;
     while(liste)
      { alias = (struct ALIAS *)liste->data;
-       if (!strcmp(alias->nom, nom)) { alias->used++; return(alias); }  /* Si deja present, on renvoie un */
+       if (!strcmp(alias->nom, nom)) { alias->used++; return(alias); }                      /* Si deja present, on renvoie un */
        liste = liste->next;
      }
     return(NULL);
   }
-/**********************************************************************************************************/
-/* Liberer_alias: Liberation de toutes les zones de mémoire précédemment allouées                         */
-/* Entrées: kedal                                                                                         */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Liberer_alias: Liberation de toutes les zones de mémoire précédemment allouées                                             */
+/* Entrées: kedal                                                                                                             */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Liberer_options ( GList *options )
   { if (options)
      { g_list_foreach( options, (GFunc)g_free, NULL );
        g_list_free( options );
      }
   }
-/**********************************************************************************************************/
-/* Liberer_alias: Liberation de toutes les zones de mémoire précédemment allouées                         */
-/* Entrées: kedal                                                                                         */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Liberer_alias: Liberation de toutes les zones de mémoire précédemment allouées                                             */
+/* Entrées: kedal                                                                                                             */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  static void Liberer_alias ( struct ALIAS *alias )
   { Liberer_options( alias->options );
     g_free(alias->nom);
     g_free(alias);
   }
-/**********************************************************************************************************/
-/* Liberer_memoire: Liberation de toutes les zones de mémoire précédemment allouées                       */
-/* Entrées: kedal                                                                                         */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Liberer_memoire: Liberation de toutes les zones de mémoire précédemment allouées                                           */
+/* Entrées: kedal                                                                                                             */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Liberer_memoire( void )
   { g_list_foreach( Alias, (GFunc) Liberer_alias, NULL );
     g_list_free( Alias );
@@ -370,6 +369,7 @@
     GList *liste;
 
     prctl(PR_SET_NAME, "W-Trad.DLS", 0, 0, 0 );
+
     g_snprintf( source,    sizeof(source),    "Dls/%d.dls.new", id );
     g_snprintf( source_ok, sizeof(source_ok), "Dls/%d.dls", id );
     g_snprintf( cible,     sizeof(cible),     "Dls/%d.c",   id );
@@ -378,10 +378,13 @@
     unlink ( log );
     Info_new( Config.log, Config.log_dls, LOG_INFO, "Traduire_DLS: source=%s", (new ? source : source_ok) );
 
+    pthread_mutex_lock( &Partage->com_dls.synchro_traduction );                           /* Attente unicité de la traduction */
+
     Id_cible = open( cible, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (Id_cible<0)
      { Info_new( Config.log, Config.log_dls, LOG_WARNING,
                 "Traduire_DLS: Target creation failed %s (%s)", cible, strerror(errno) ); 
+       pthread_mutex_unlock( &Partage->com_dls.synchro_traduction );                                      /* Libération Mutex */
        return(TRAD_DLS_ERROR_FILE);
      }
 
@@ -390,16 +393,17 @@
      { Info_new( Config.log, Config.log_dls, LOG_WARNING,
                 "Traduire_DLS: Log creation failed %s (%s)", cible, strerror(errno) ); 
        close(Id_cible);
+       pthread_mutex_unlock( &Partage->com_dls.synchro_traduction );                                      /* Libération Mutex */
        return(TRAD_DLS_ERROR_FILE);
      }
 
-    Alias = NULL;                                                              /* Par défaut, pas d'alias */
-    nbr_erreur = 0;                                               /* Au départ, nous n'avons pas d'erreur */
+    Alias = NULL;                                                                                  /* Par défaut, pas d'alias */
+    nbr_erreur = 0;                                                                   /* Au départ, nous n'avons pas d'erreur */
     if ( Interpreter_source_dls( (new ? source : source_ok) ) )
          { retour = TRAD_DLS_OK; }
     else { retour = TRAD_DLS_ERROR; }
 
-    if (retour==TRAD_DLS_OK)                                  /* Si pas d'erreur, on regarde les warnings */
+    if (retour==TRAD_DLS_OK)                                                      /* Si pas d'erreur, on regarde les warnings */
      { liste = Alias;
        while(liste)
         { alias = (struct ALIAS *)liste->data;
@@ -418,9 +422,10 @@
     Liberer_memoire();
 
     if (new)
-     { unlink ( source_ok );                               /* Recopie sur le fichier "officiel" du plugin */
+     { unlink ( source_ok );                                                   /* Recopie sur le fichier "officiel" du plugin */
        rename( source, source_ok );
      }
+    pthread_mutex_unlock( &Partage->com_dls.synchro_traduction );                                         /* Libération Mutex */
     return(retour);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

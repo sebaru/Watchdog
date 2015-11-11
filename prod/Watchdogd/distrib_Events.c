@@ -248,7 +248,7 @@
     g_free(event);
   }
 /******************************************************************************************************************************/
-/* Gerer_arrive_Axxx_dls: Gestion de l'arrive des sorties depuis DLS                                                          */
+/* Gerer_arrive_Axxx_dls: Gestion de l'arrive des sorties depuis DLS (Axxx = 1)                                               */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Gerer_arrive_Axxx_dls ( void )
@@ -263,8 +263,6 @@
     Partage->com_msrv.liste_a = g_slist_remove ( Partage->com_msrv.liste_a, GINT_TO_POINTER(num) );
     reste = g_slist_length(Partage->com_msrv.liste_a);
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
-
-    if ( ! A(num) ) return;                                                  /* Une sortie qui tombe n'est pas un evenement ! */
 
     critere.type = MNEMO_SORTIE;                                           /* Recherche du command_text associé au mnemonique */
     critere.num  = num;
@@ -282,7 +280,7 @@
                  "Gerer_arrive_Axxx_dls: Recu A(%03d) (%s). Reste a traiter %03d",
                  num, mnemo->command_text, reste
                );
-       SA ( num, 0 );                                                    /* L'evenement est traité, on fait retombé la sortie */
+       SA ( num, 0 );                                                   /* L'evenement est traité, on fait retomber la sortie */
      }
     g_free(mnemo);
   }

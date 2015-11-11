@@ -243,8 +243,9 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Envoyer_mnemoniques_for_courbe_tag ( struct CLIENT *client, guint tag, gint sstag, gint sstag_fin )
-  { struct CMD_ENREG nbr;
-    struct CMD_TYPE_MNEMO_BASE *mnemo;
+  { struct CMD_TYPE_MNEMO_BASE *mnemo_base;
+    struct CMD_TYPE_MNEMO_FULL *mnemo_full;
+    struct CMD_ENREG nbr;
     struct DB *db;
 
     prctl(PR_SET_NAME, "W-MnemoCourbe", 0, 0, 0 );
@@ -259,15 +260,20 @@
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
     for( ; ; )
-     { mnemo = Recuperer_mnemo_baseDB_suite( &db );
-       if (!mnemo)
+     { mnemo_base = Recuperer_mnemo_baseDB_suite( &db );
+       if (!mnemo_base)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
           Unref_client( client );                                     /* Déréférence la structure cliente */
           return;
         }
 
-       Envoi_client ( client, tag, sstag, (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMO_BASE) );
-       g_free(mnemo);
+       mnemo_full = Rechercher_mnemo_fullDB ( mnemo_base->id );
+       if (mnemo_full)
+        { Envoi_client ( client, tag, sstag, (gchar *)mnemo_full, sizeof(struct CMD_TYPE_MNEMO_FULL) );
+          g_free(mnemo_full);
+        }
+
+       g_free(mnemo_base);
      }
   }
 /**********************************************************************************************************/

@@ -801,7 +801,7 @@ couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE | KAK
     rc = fopen(source, "r");
     if (rc)
      { Emettre(" #include <Module_dls.h>\n void Go ( int start )\n {\n");
-       Dls_debug = 1;                                                        /* Debug de la traduction ?? */
+       Dls_debug = 0;                                                        /* Debug de la traduction ?? */
        Dls_restart(rc);
        Dls_parse();
        Emettre(" }\n");

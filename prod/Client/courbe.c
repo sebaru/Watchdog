@@ -76,19 +76,19 @@
   { static gchar description[80];
     float valeur;
     
-    switch(courbe->type)
+    switch(courbe->mnemo.mnemo_base.type)
            { case MNEMO_SORTIE:
              case MNEMO_ENTREE:
                   g_snprintf( description, sizeof(description),
-                              "%s%d=%d",
-                              Type_bit_interne_court(courbe->type),
-                              courbe->mnemo.num,
+                              "%s%04d=%d",
+                              Type_bit_interne_court(courbe->mnemo.mnemo_base.type),
+                              courbe->mnemo.mnemo_base.num,
                               ( (gint)courbe->Y[index_posx] % ENTREAXE_Y_TOR == 0 ? 0 : 1) );
                   break;
              case MNEMO_ENTREE_ANA:
                   valeur = courbe->Y[index_posx];
                   g_snprintf( description, sizeof(description),
-                              "EA%d=%8.2f %s", courbe->eana.mnemo_base.num, valeur, courbe->eana.mnemo_ai.unite );
+                              "EA%04d=%8.2f %s", courbe->mnemo.mnemo_base.num, valeur, courbe->mnemo.mnemo_ai.unite );
                   break;
              default: g_snprintf( description, sizeof(description), "type unknown" );
            }
@@ -206,26 +206,26 @@
                                                           /* Placement de la nouvelle courbe sur l'id gui */
        new_courbe = &infos->Courbes[infos->slot_id];
        new_courbe->actif = TRUE;                /* Récupération des données EANA dans la structure COURBE */
-       new_courbe->type  = rezo_courbe.type;    /* Récupération des données EANA dans la structure COURBE */
-       switch( new_courbe->type )
+       new_courbe->mnemo.mnemo_base.type  = rezo_courbe.type;    /* Récupération des données EANA dans la structure COURBE */
+       switch( new_courbe->mnemo.mnemo_base.type )
         { case MNEMO_ENTREE_ANA:
-               new_courbe->eana.mnemo_base.num = rezo_courbe.num;
-               gtk_tree_model_get( store, &iter, COLONNE_TYPE_EA, &new_courbe->eana.mnemo_ai.type, -1 );
-               gtk_tree_model_get( store, &iter, COLONNE_MIN, &new_courbe->eana.mnemo_ai.min, -1 );
-               gtk_tree_model_get( store, &iter, COLONNE_MAX, &new_courbe->eana.mnemo_ai.max, -1 );
+               new_courbe->mnemo.mnemo_base.num = rezo_courbe.num;
+               gtk_tree_model_get( store, &iter, COLONNE_TYPE_EA, &new_courbe->mnemo.mnemo_ai.type, -1 );
+               gtk_tree_model_get( store, &iter, COLONNE_MIN, &new_courbe->mnemo.mnemo_ai.min, -1 );
+               gtk_tree_model_get( store, &iter, COLONNE_MAX, &new_courbe->mnemo.mnemo_ai.max, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_UNITE_STRING, &unite, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
-               g_snprintf( new_courbe->eana.mnemo_base.libelle, sizeof(new_courbe->eana.mnemo_base.libelle), "%s", libelle );
-               g_snprintf( new_courbe->eana.mnemo_ai.unite,   sizeof(new_courbe->eana.mnemo_ai.unite),   "%s", unite );
+               g_snprintf( new_courbe->mnemo.mnemo_base.libelle, sizeof(new_courbe->mnemo.mnemo_base.libelle), "%s", libelle );
+               g_snprintf( new_courbe->mnemo.mnemo_ai.unite,   sizeof(new_courbe->mnemo.mnemo_ai.unite),   "%s", unite );
                g_free(libelle);
                g_free(unite);
                break;
           case MNEMO_SORTIE:
           case MNEMO_ENTREE:
-               new_courbe->mnemo.id = rezo_courbe.num;
-               new_courbe->mnemo.num = rezo_courbe.num;
+               new_courbe->mnemo.mnemo_base.id = rezo_courbe.num;
+               new_courbe->mnemo.mnemo_base.num = rezo_courbe.num;
                gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
-               g_snprintf( new_courbe->mnemo.libelle, sizeof(new_courbe->mnemo.libelle), "%s", libelle );
+               g_snprintf( new_courbe->mnemo.mnemo_base.libelle, sizeof(new_courbe->mnemo.mnemo_base.libelle), "%s", libelle );
                g_free(libelle);
                break;
         }
@@ -245,7 +245,7 @@
 
        new_courbe = &infos->Courbes[infos->slot_id];
        new_courbe->actif = FALSE;               /* Récupération des données EANA dans la structure COURBE */
-       new_courbe->type  = 0;                   /* Récupération des données EANA dans la structure COURBE */
+       new_courbe->mnemo.mnemo_base.type  = 0;                   /* Récupération des données EANA dans la structure COURBE */
        gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->index );
        gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->marker_select );
        gtk_databox_graph_remove ( GTK_DATABOX(infos->Databox), new_courbe->marker_last );
@@ -525,30 +525,39 @@
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Rafraichir_visu_source( GtkTreeIter *iter, struct CMD_TYPE_MNEMO_BASE *source )
+ static void Rafraichir_visu_source( GtkTreeIter *iter, struct CMD_TYPE_MNEMO_FULL *source )
   { struct PAGE_NOTEBOOK *page;
     GtkTreeModel *store;
-    gchar chaine[20], groupe_page[512];
+    gchar chaine[20], groupe_page[512], *unite;
+    gdouble min, max;
 
     page = Page_actuelle();
     if (page->type != TYPE_PAGE_COURBE) return;                                            /* Bon type ?? */
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_source) );              /* Acquisition du modele */
 
-    g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(source->type), source->num );
+    g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court(source->mnemo_base.type), source->mnemo_base.num );
     g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s/%s",
-                source->groupe, source->page, source->plugin_dls );
+                source->mnemo_base.groupe, source->mnemo_base.page, source->mnemo_base.plugin_dls );
+
+    if (source->mnemo_base.type == MNEMO_ENTREE_ANA)
+     { min = source->mnemo_ai.min;
+       max = source->mnemo_ai.max;
+       unite = source->mnemo_ai.unite;
+     }
+    else
+     { min = 0.0; max = 1.0; unite="On/Off"; }
 
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
-                         COLONNE_ID, source->num,
-                         COLONNE_TYPE, source->type,
-                         COLONNE_TYPE_EA, 0,
+                         COLONNE_ID, source->mnemo_base.num,
+                         COLONNE_TYPE, source->mnemo_base.type,
+                         COLONNE_TYPE_EA, source->mnemo_ai.type,
                          COLONNE_OBJET, groupe_page,
                          COLONNE_NUM, chaine,
-                         COLONNE_MIN, 0.0,
-                         COLONNE_MAX, 1.0,
-                         COLONNE_UNITE_STRING, "On/Off",
-                         COLONNE_LIBELLE, source->libelle,
+                         COLONNE_MIN, min,
+                         COLONNE_MAX, max,
+                         COLONNE_UNITE_STRING, unite,
+                         COLONNE_LIBELLE, source->mnemo_base.libelle,
                          -1
                        );
   }
@@ -557,7 +566,7 @@
 /* Entrée: une reference sur le source                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_une_source_for_courbe( struct CMD_TYPE_MNEMO_BASE *source )
+ void Proto_afficher_une_source_for_courbe( struct CMD_TYPE_MNEMO_FULL *source )
   { GtkListStore *store;
     GtkTreeIter iter;
 
@@ -604,7 +613,7 @@
         } else printf("Append_courbe : realloc failed\n");
      }
                   
-    switch(courbe->type)
+    switch(courbe->mnemo.mnemo_base.type)
      { case MNEMO_ENTREE_ANA:
                 { courbe->X[courbe->taille_donnees-1] = append_courbe->date*1.0;
                   courbe->Y[courbe->taille_donnees-1] = append_courbe->val_ech;
@@ -619,7 +628,7 @@
                   printf("3 - append courbe : X=%f, Y=%f\n", courbe->X[courbe->taille_donnees-1], courbe->Y[courbe->taille_donnees-1] );
                 }
                break;
-       default: printf("type inconnu %d\n", courbe->type);
+       default: printf("type inconnu %d\n", courbe->mnemo.mnemo_base.type);
                 return(FALSE);
      }
     if (courbe->marker_last)
@@ -701,19 +710,20 @@
 
     gtk_widget_queue_draw (infos->Databox);
 
-    switch(new_courbe->type)
+    switch(new_courbe->mnemo.mnemo_base.type)
      { case MNEMO_SORTIE:
        case MNEMO_ENTREE:
-            g_snprintf( description, sizeof(description), "%s%d  - %s",
-                        Type_bit_interne_court(new_courbe->type),
-                        new_courbe->mnemo.num,
-                        new_courbe->mnemo.libelle );
+            g_snprintf( description, sizeof(description), "%s%04d  - %s",
+                        Type_bit_interne_court(new_courbe->mnemo.mnemo_base.type),
+                        new_courbe->mnemo.mnemo_base.num,
+                        new_courbe->mnemo.mnemo_base.libelle );
             break;
        case MNEMO_ENTREE_ANA:
-            g_snprintf( description, sizeof(description), "EA%d - %s (%8.2f/%8.2f)",
-                        new_courbe->eana.mnemo_ai.num,
-                        new_courbe->eana.mnemo_base.libelle,
-                        new_courbe->eana.mnemo_ai.min, new_courbe->eana.mnemo_ai.max );
+            g_snprintf( description, sizeof(description), "%s%04d - %s (%8.2f/%8.2f)",
+                        Type_bit_interne_court(new_courbe->mnemo.mnemo_base.type),
+                        new_courbe->mnemo.mnemo_ai.num,
+                        new_courbe->mnemo.mnemo_base.libelle,
+                        new_courbe->mnemo.mnemo_ai.min, new_courbe->mnemo.mnemo_ai.max );
             break;
        default: g_snprintf( description, sizeof(description), " -- type unknown -- " );
      }

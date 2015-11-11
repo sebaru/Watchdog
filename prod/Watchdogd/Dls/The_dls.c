@@ -463,11 +463,11 @@
     if (tempo->status == TEMPO_WAIT_FOR_COND_OFF && etat == 0 )
      { tempo->status = TEMPO_NOT_COUNTING; }
   }
-/**********************************************************************************************************/
-/* SA: Positionnement d'un actionneur DLS                                                                 */
-/* Entrée: numero, etat                                                                                   */
-/* Sortie: Neant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* SA: Positionnement d'un actionneur DLS                                                                                     */
+/* Entrée: numero, etat                                                                                                       */
+/* Sortie: Neant                                                                                                              */
+/******************************************************************************************************************************/
  void SA( int num, int etat )
   { if (num<0 || num>=NBR_SORTIE_TOR)
      { if (!(Partage->top % 600))
@@ -478,18 +478,20 @@
     if ( Partage->a[num].etat != etat )
      { Partage->a[num].etat = etat;
 
-       if ( Partage->a[num].last_change + 10 <= Partage->top )   /* Si pas de change depuis plus de 1 sec */
+       if ( Partage->a[num].last_change + 10 <= Partage->top )                       /* Si pas de change depuis plus de 1 sec */
         { Partage->a[num].changes = 0; }
 
-       if ( Partage->a[num].changes <= 5 )/* Arbitraire : si plus de 5 changes dans la seconde, on bloque */
-        { Ajouter_arch( MNEMO_SORTIE, num, !etat );       /* Sauvegarde etat n-1 pour courbes historiques */
-          Ajouter_arch( MNEMO_SORTIE, num, 1.0*etat );                          /* Sauvegarde de l'etat n */
-          pthread_mutex_lock( &Partage->com_msrv.synchro );         /* Ajout dans la liste de A a traiter */
-          Partage->com_msrv.liste_a = g_slist_append( Partage->com_msrv.liste_a,
-                                                      GINT_TO_POINTER(num) );
-          pthread_mutex_unlock( &Partage->com_msrv.synchro );
-          Partage->a[num].changes++;                                              /* Un change de plus !! */
-        } else if ( ! (Partage->top % 50 ))                /* Si persistence on prévient toutes les 5 sec */
+       if ( Partage->a[num].changes <= 5 )                    /* Arbitraire : si plus de 5 changes dans la seconde, on bloque */
+        { Ajouter_arch( MNEMO_SORTIE, num, !etat );                           /* Sauvegarde etat n-1 pour courbes historiques */
+          Ajouter_arch( MNEMO_SORTIE, num, 1.0*etat );                                              /* Sauvegarde de l'etat n */
+          if (etat == 1)
+           { pthread_mutex_lock( &Partage->com_msrv.synchro );                  /* Ajout dans la liste des Events A a traiter */
+             Partage->com_msrv.liste_a = g_slist_append( Partage->com_msrv.liste_a,
+                                                         GINT_TO_POINTER(num) );
+             pthread_mutex_unlock( &Partage->com_msrv.synchro );
+           }
+          Partage->a[num].changes++;                                                                  /* Un change de plus !! */
+        } else if ( ! (Partage->top % 50 ))                                    /* Si persistence on prévient toutes les 5 sec */
         { Info_new( Config.log, Config.log_dls, LOG_INFO, "SA: last_change trop tot pour A%d !", num ); }
        Partage->a[num].last_change = Partage->top;
        Partage->audit_bit_interne_per_sec++;

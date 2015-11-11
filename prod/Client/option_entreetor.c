@@ -62,7 +62,7 @@
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 2, i, i+1 );
 
     i++;
-    Check_DI_furtif = gtk_check_button_new_with_label( _("Furtif") );
+    Check_DI_furtif = gtk_check_button_new_with_label( _("Reserved") );
     gtk_table_attach_defaults( GTK_TABLE(table), Check_DI_furtif, 0, 1, i, i+1 );
 
     return(table);
