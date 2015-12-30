@@ -72,7 +72,7 @@
     gchar *nom;
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "Tester_autorisation: Auth in progress for nom=%s, version=%s (socket %d)",
+             "Tester_autorisation: Auth in progress for nom='%s', version='%s' (socket %d)",
               ident->nom, ident->version, client->connexion->socket );
     memcpy( &client->ident, ident, sizeof( struct REZO_CLI_IDENT ) );          /* Recopie pour sauvegarde */
             
@@ -94,7 +94,7 @@
                    else nom = ident->nom;                                /* Ou par login / mot de passe ? */
     client->util = Rechercher_utilisateurDB_by_name ( nom );
     if (!client->util)
-     { g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Unknown User %s", nom );
+     { g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Unknown User '%s'", nom );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, gtkmessage.message );
@@ -127,7 +127,7 @@
     if (!client->certif)                                                        /* si pas de certificat ! */
      { if ( Check_utilisateur_password( client->util, ident->passwd ) == FALSE ) /* Comparaison des codes */
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  
-                  "Tester_autorisation: Password error for %s(id=%d)", client->util->nom, client->util->id );
+                  "Tester_autorisation: Password error for '%s'(id=%d)", client->util->nom, client->util->id );
           Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
           Ajouter_one_login_failed( client->util->id, Config.max_login_failed );             /* Dommage ! */
           Client_mode (client, DECONNECTE);
@@ -137,7 +137,7 @@
 
     if (client->util->mustchangepwd)                    /* L'utilisateur doit-il changer son mot de passe */
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  
-                "Tester_autorisation: User %s(id=%d) has to change his password",
+                "Tester_autorisation: User '%s'(id=%d) has to change his password",
                  client->util->nom, client->util->id );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_NEEDCHANGEPWD, NULL, 0 );
        Client_mode (client, WAIT_FOR_NEWPWD);
