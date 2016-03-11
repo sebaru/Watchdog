@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Dls/plugins.c  -> Gestion des plugins pour DLS                                               */
-/* Projet WatchDog version 2.0       Gestion d'habitat                    dim. 02 janv. 2011 19:04:47 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Dls/plugins.c  -> Gestion des plugins pour DLS                                                                   */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                        dim. 02 janv. 2011 19:04:47 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+ /*****************************************************************************************************************************/
 /*
  * plugins.c
  * This file is part of Watchdog
@@ -33,61 +33,64 @@
  #include <sys/types.h>
  #include <fcntl.h>
  #include <unistd.h>
- #include <sys/file.h>                                            /* Gestion des verrous sur les fichiers */
+ #include <sys/file.h>                                                                /* Gestion des verrous sur les fichiers */
  #include <sys/wait.h>
 
-/******************************************** Prototypes de fonctions *************************************/
+/************************************************** Prototypes de fonctions ***************************************************/
  #include "watchdogd.h"
 
  #ifndef REP_INCLUDE_GLIB
  #define REP_INCLUDE_GLIB  "/usr/include/glib-2.0"
  #endif
 
-/**********************************************************************************************************/
-/* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                          */
-/* Entrée: Le nom de fichier correspondant                                                                */
-/* Sortie: Rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                                              */
+/* Entrée: Le nom de fichier correspondant                                                                                    */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
  static gboolean Charger_un_plugin ( struct PLUGIN_DLS *dls )
   { gchar nom_fichier_absolu[60];
+    gboolean retour;
     void (*Go)(int);
-    void *handle;
 
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%d.so", dls->plugindb.id );
-
-    handle = dlopen( nom_fichier_absolu, RTLD_GLOBAL | RTLD_NOW );
-    if (!handle) { Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                            "Charger_un_plugin: Candidat %04d failed (%s)", dls->plugindb.id, dlerror() );
-                   return(FALSE);
-                 }
-    Go = dlsym( handle, "Go" );                                         /* Recherche de la fonction 'Go' */
-    if (!Go) { Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                        "Charger_un_plugin: Candidat %04d failed sur absence GO", dls->plugindb.id ); 
-               dlclose( handle );
-               return(FALSE);
-             }
-
-    Info_new( Config.log, Config.log_dls, LOG_INFO, "Charger_un_plugin: plugin %04d loaded (%s)",
-              dls->plugindb.id, dls->plugindb.nom );
-    strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );
-    dls->handle   = handle;
-    dls->go       = Go;
+    strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );                 /* Init des variables communes */
     dls->starting = 1;
     dls->conso    = 0.0;
-    pthread_mutex_lock( &Partage->com_dls.synchro );
+
+    retour = FALSE;                                                                          /* Par défaut, on retourne FALSE */
+    dls->handle = dlopen( nom_fichier_absolu, RTLD_GLOBAL | RTLD_NOW );                     /* Ouverture du fichier librairie */
+    if (!dls->handle)
+     { Info_new( Config.log, Config.log_dls, LOG_WARNING,
+                "Charger_un_plugin: Candidat %04d failed (%s)", dls->plugindb.id, dlerror() );
+     }
+    else
+     { dls->go = dlsym( dls->handle, "Go" );                                                 /* Recherche de la fonction 'Go' */
+       if (!dls->go) { Info_new( Config.log, Config.log_dls, LOG_WARNING,
+                                "Charger_un_plugin: Candidat %04d failed sur absence GO", dls->plugindb.id ); 
+                       dlclose( dls->handle );
+                       dls->handle = NULL;
+                     }
+       else
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "Charger_un_plugin: plugin %04d loaded (%s)",
+                    dls->plugindb.id, dls->plugindb.nom );
+          retour = TRUE;
+        }
+     }
+    pthread_mutex_lock( &Partage->com_dls.synchro );                                  /* Ajout dans la liste de travail D.L.S */
     Partage->com_dls.Plugins = g_slist_append( Partage->com_dls.Plugins, dls );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
-    return(TRUE);
+    return(retour);
   }
-/**********************************************************************************************************/
-/* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                          */
-/* Entrée: Le nom de fichier correspondant                                                                */
-/* Sortie: Rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                                              */
+/* Entrée: Le nom de fichier correspondant                                                                                    */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
  static gboolean Charger_un_plugin_by_id ( gint id )
   { struct CMD_TYPE_PLUGIN_DLS *plugin_dls;
     struct PLUGIN_DLS *dls;
-    struct DB *db;                                                                   /* Database Watchdog */
+    struct DB *db;                                                                                       /* Database Watchdog */
 
     db = Init_DB_SQL();       
     if (!db)
@@ -115,22 +118,22 @@
 
     return ( Charger_un_plugin ( dls ) );
   }
-/**********************************************************************************************************/
-/* Retirer_plugins: Decharge toutes les librairies                                                        */
-/* Entrée: Rien                                                                                           */
-/* Sortie: Rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Retirer_plugins: Decharge toutes les librairies                                                                            */
+/* Entrée: Le numéro du plugin a décharger                                                                                    */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
  void Decharger_un_plugin_by_id ( gint id )
   { struct PLUGIN_DLS *plugin;
     GSList *plugins;
 
     pthread_mutex_lock( &Partage->com_dls.synchro );
     plugins = Partage->com_dls.Plugins;
-    while(plugins)                                                       /* Liberation mémoire des modules */
+    while(plugins)                                                                                 /* Pour chacun des plugins */
      { plugin = (struct PLUGIN_DLS *)plugins->data;
 
        if ( plugin->plugindb.id == id )
-        { dlclose( plugin->handle );
+        { if (plugin->handle) dlclose( plugin->handle );
           Partage->com_dls.Plugins = g_slist_remove( Partage->com_dls.Plugins, plugin );
           g_free( plugin );
           Info_new( Config.log, Config.log_dls, LOG_INFO,
@@ -145,52 +148,52 @@
                 "Decharger_un_plugin_by_id: plugin %04d not found", id );
      }
   }
-/**********************************************************************************************************/
-/* Retirer_un_plugin: Decharge le plugin dont le numero est en parametre                                  */
-/* Entrée: L'identifiant du plugin                                                                        */
-/* Sortie: Rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Retirer_un_plugin: Decharge le plugin dont le numero est en parametre                                                      */
+/* Entrée: L'identifiant du plugin                                                                                            */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
  void Reseter_un_plugin ( gint id )
   { Info_new( Config.log, Config.log_dls, LOG_INFO, "Reseter_un_plugin: Reset plugin %04d", id );
 
     Decharger_un_plugin_by_id ( id );
     Charger_un_plugin_by_id ( id );
   }
-/**********************************************************************************************************/
-/* Decharger_plugins: Decharge tous les plugins DLS                                                       */
-/* Entrée: Rien                                                                                           */
-/* Sortie: Rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Decharger_plugins: Decharge tous les plugins DLS                                                                           */
+/* Entrée: Rien                                                                                                               */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
  void Decharger_plugins ( void )
   { struct PLUGIN_DLS *plugin;
 
     pthread_mutex_lock( &Partage->com_dls.synchro );
-    while(Partage->com_dls.Plugins)                                     /* Liberation mémoire des modules */
+    while(Partage->com_dls.Plugins)                                                         /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)Partage->com_dls.Plugins->data;
-       dlclose( plugin->handle );
+       if (plugin->handle) dlclose( plugin->handle );
        Partage->com_dls.Plugins = g_slist_remove( Partage->com_dls.Plugins, plugin );
-                                                         /* Destruction de l'entete associé dans la GList */
+                                                                             /* Destruction de l'entete associé dans la GList */
        Info_new( Config.log, Config.log_dls, LOG_INFO, "Decharger_plugins: plugin %04d unloaded (%s)",
                  plugin->plugindb.id, plugin->plugindb.nom );
        g_free( plugin );
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
-/**********************************************************************************************************/
-/* Charger_plugins: Ouverture de toutes les librairies possibles pour le DLS                              */
-/* Entrée: Rien                                                                                           */
-/* Sortie: Rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Charger_plugins: Ouverture de toutes les librairies possibles pour le DLS                                                  */
+/* Entrée: Rien                                                                                                               */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
  void Charger_plugins ( void )
   { struct CMD_TYPE_PLUGIN_DLS *plugin;
     struct PLUGIN_DLS *dls;
-    struct DB *db;                                                                   /* Database Watchdog */
+    struct DB *db;                                                                                       /* Database Watchdog */
 
     if (Recuperer_plugins_dlsDB( &db ))
      { do
         { plugin = Recuperer_plugins_dlsDB_suite( &db );
           if (!plugin)
-           { Config.compil = 0;
+           { Config.compil = 0;                                                                          /* fin de traitement */
              return;
            }
    
@@ -201,9 +204,9 @@
            }
           else { memcpy( &dls->plugindb, plugin, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
                  g_free(plugin);
-                                                                      /* Si option "compil" au demarrage" */
+                                                                                          /* Si option "compil" au demarrage" */
                  if (Config.compil == 1) Compiler_source_dls( FALSE, FALSE, dls->plugindb.id, NULL, 0 );
-                 if (Charger_un_plugin( dls )==FALSE) g_free(dls);                                                  /* Libération mémoire */
+                 Charger_un_plugin( dls );                                                            /* Chargement du plugin */
                }
         } while ( TRUE );
      }
@@ -211,18 +214,18 @@
             return;
           }
  }
-/**********************************************************************************************************/
-/* Activer_plugin_by_id: Active ou non un plugin by id                                                    */
-/* Entrée: l'ID du plugin                                                                                 */
-/* Sortie: Rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Activer_plugin_by_id: Active ou non un plugin by id                                                                        */
+/* Entrée: l'ID du plugin                                                                                                     */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
  void Activer_plugin_by_id ( gint id, gboolean actif )
   { struct PLUGIN_DLS *plugin;
     GSList *plugins;
 
     pthread_mutex_lock( &Partage->com_dls.synchro );
     plugins = Partage->com_dls.Plugins;
-    while(plugins)                                                       /* Liberation mémoire des modules */
+    while(plugins)                                                                                  /* Pour chacun des plugin */
      { plugin = (struct PLUGIN_DLS *)plugins->data;
 
        if ( plugin->plugindb.id == id )
@@ -237,15 +240,15 @@
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
-/**********************************************************************************************************/
-/* Proto_compiler_source_dls: Compilation de la source DLS                                                */
-/* Entrée: le client demandeur et le groupe en question                                                   */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_compiler_source_dls: Compilation de la source DLS                                                                    */
+/* Entrée: le client demandeur et le groupe en question                                                                       */
+/* Sortie: code d'erreur ou 0 si OK                                                                                           */
+/******************************************************************************************************************************/
  gint Compiler_source_dls( gboolean new, gboolean reset, gint id, gchar *buffer, gint taille_buffer )
   { gint retour;
 
-    if (buffer) memset (buffer, 0, taille_buffer);                             /* RAZ du buffer de sortie */
+    if (buffer) memset (buffer, 0, taille_buffer);                                                 /* RAZ du buffer de sortie */
 
     Info_new( Config.log, Config.log_dls, LOG_NOTICE,
              "THRCompil: Compiler_source_dls: Compilation module DLS %d", id );
@@ -253,7 +256,7 @@
     Info_new( Config.log, Config.log_dls, LOG_DEBUG,
              "THRCompil: Compiler_source_dls: fin traduction %d", retour );
 
-    if (retour == TRAD_DLS_ERROR_FILE)                            /* Retour de la traduction D.L.S vers C */
+    if (retour == TRAD_DLS_ERROR_FILE)                                                /* Retour de la traduction D.L.S vers C */
      { Info_new( Config.log, Config.log_dls, LOG_DEBUG,
                "THRCompil: Compiler_source_dls: envoi erreur file Traduction D.L.S %d", id );
        return( DLS_COMPIL_ERROR_LOAD_SOURCE );
@@ -308,9 +311,9 @@
                "THRCompil: Proto_compiler_source_dls: gcc is down, OK %d", pidgcc );
 
        if (reset)
-        { pthread_mutex_lock( &Partage->com_dls.synchro );             /* Demande le reset du plugin à D.L.S */
+        { pthread_mutex_lock( &Partage->com_dls.synchro );                              /* Demande le reset du plugin à D.L.S */
           Partage->com_dls.liste_plugin_reset = g_slist_append ( Partage->com_dls.liste_plugin_reset,
-                                                                GINT_TO_POINTER(id) );
+                                                                 GINT_TO_POINTER(id) );
           pthread_mutex_unlock( &Partage->com_dls.synchro );
         }
 
@@ -320,4 +323,4 @@
      }
     return( DLS_COMPIL_OK );
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
