@@ -33,8 +33,8 @@
  #include <goocanvas.h>                                                            /* Interface GooCanvas */
  #include "Reseaux.h"
 
- #define TAILLE_SYNOPTIQUE_X        900               /* Généralités sur la taille de la Trame synoptique */
- #define TAILLE_SYNOPTIQUE_Y        600
+ #define TAILLE_SYNOPTIQUE_X        1024               /* Généralités sur la taille de la Trame synoptique */
+ #define TAILLE_SYNOPTIQUE_Y        768
  #define TAILLE_FONT                60                  /* Nombre de caractere pour la police d'affichage */
  #define COULEUR_FOND_SYN           "MidnightBlue"
  #define COULEUR_ACTIVE             200
