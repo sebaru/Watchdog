@@ -63,7 +63,7 @@
   }
 /**********************************************************************************************************/
 /* Admin_modbus_reload: Demande le rechargement des conf MODBUS                                           */
-/* Entrée: le connexion                                                                                   */
+/* Entrée: la connexion                                                                                   */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void Admin_modbus_reload ( struct CONNEXION *connexion )
@@ -87,17 +87,21 @@
     g_snprintf( chaine, sizeof(chaine),
                 " MODBUS[%02d] ------> %s - %s\n"
                 "  | - enable = %d, started = %d (bit B%04d=%d), watchdog = %03d, IP = %s\n"
-                "  | - %03d Digital Input,  map_E = E%03d, %03d Analog  Input,  map_EA = EA%03d\n"
-                "  | - %03d Digital Output, map_A = A%03d, %03d Analog  Output, map_AA = AA%03d\n"
+                "  | - %03d Digital Input,  map_E = E%03d(->E%03d), %03d Analog  Input,  map_EA = EA%03d(->EA%03d)\n"
+                "  | - %03d Digital Output, map_A = A%03d(->A%03d), %03d Analog  Output, map_AA = AA%03d(->AA%03d)\n"
                 "  | - transaction_id = %06d, nbr_deconnect = %02d, last_reponse = %03ds ago, date_next_eana = in %03ds\n"
                 "  -\n",
                 module->modbus.id, module->modbus.libelle,  Modbus_mode_to_string(module),
                 module->modbus.enable, module->started, module->modbus.bit, B(module->modbus.bit),
                 module->modbus.watchdog, module->modbus.ip,
-                module->nbr_entree_tor, module->modbus.map_E, 
+                module->nbr_entree_tor, module->modbus.map_E,
+               (module->nbr_entree_tor ? module->modbus.map_E + module->nbr_entree_tor - 1 : module->modbus.map_E),
                 module->nbr_entree_ana, module->modbus.map_EA, 
+               (module->nbr_entree_ana ? module->modbus.map_EA + module->nbr_entree_ana - 1 : module->modbus.map_EA),
                 module->nbr_sortie_tor, module->modbus.map_A, 
+               (module->nbr_sortie_tor ? module->modbus.map_A + module->nbr_sortie_tor - 1 : module->modbus.map_A),
                 module->nbr_sortie_ana, module->modbus.map_AA, 
+               (module->nbr_sortie_ana ? module->modbus.map_AA + module->nbr_sortie_ana - 1 : module->modbus.map_AA),
                 module->transaction_id, module->nbr_deconnect,
                (Partage->top - module->date_last_reponse)/10,                   
                (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1)
