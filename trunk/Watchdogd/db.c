@@ -403,6 +403,13 @@
      { g_snprintf( requete, sizeof(requete), "DROP TABLE rfxcom" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
+
+    if (database_version < 2696)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` ADD `compil_date` int(11) NOT NULL AFTER `actif`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` ADD `compil_status` int(11) NOT NULL AFTER `compil_date`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
      
     Libere_DB_SQL(&db);
 

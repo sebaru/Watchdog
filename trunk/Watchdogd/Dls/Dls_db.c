@@ -89,8 +89,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                    "INSERT INTO %s"             
-                   "(name,actif,type,num_syn)"
-                   "VALUES ('%s','%s','%d',%d);",
+                   "(name,actif,type,num_syn,compil_date,compil_status)"
+                   "VALUES ('%s','%s','%d',%d,0,0);",
                    NOM_TABLE_DLS, nom, (dls->on ? "true" : "false"), dls->type, dls->num_syn );
     g_free(nom);
 
@@ -257,4 +257,29 @@
     Libere_DB_SQL(&db);
     return(retour);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/******************************************************************************************************************************/
+/* Set_compil_status_plugin_dlsDB: Met a jour la date et statut de compilation                                                */
+/* Entrées: l'id du plugin DLS                                                                                                */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ gboolean Set_compil_status_plugin_dlsDB( gint id, gint status )
+  { gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "UPDATE %s SET "
+                "compil_date='%d', compil_status='%d' WHERE id=%d",
+                NOM_TABLE_DLS, time(NULL), status, id );
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Set_compil_status_plugin_dlsDB: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
+  }
+/*----------------------------------------------------------------------------------------------------------------------------*/

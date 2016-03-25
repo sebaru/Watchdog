@@ -51,7 +51,6 @@
  static gboolean Charger_un_plugin ( struct PLUGIN_DLS *dls )
   { gchar nom_fichier_absolu[60];
     gboolean retour;
-    void (*Go)(int);
 
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%d.so", dls->plugindb.id );
     strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );                 /* Init des variables communes */
@@ -259,10 +258,11 @@
     if (retour == TRAD_DLS_ERROR_FILE)                                                /* Retour de la traduction D.L.S vers C */
      { Info_new( Config.log, Config.log_dls, LOG_DEBUG,
                "THRCompil: Compiler_source_dls: envoi erreur file Traduction D.L.S %d", id );
-       return( DLS_COMPIL_ERROR_LOAD_SOURCE );
+      Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_LOAD_SOURCE );
+      return( DLS_COMPIL_ERROR_LOAD_SOURCE );
      }
 
-    if ( buffer )
+    if ( buffer )                             /* Chargement de fichier de log dans le buffer mis à disposition par l'appelant */
      { gint id_fichier;
        gchar log[20];
 
@@ -270,8 +270,11 @@
                 "THRCompil: Compiler_source_dls: Chargement du fichier de log D.L.S %d", id );
        g_snprintf( log, sizeof(log), "Dls/%d.log", id );
 
-       id_fichier = open( log, O_RDONLY, 0 );
-       if (id_fichier<0) { return(DLS_COMPIL_ERROR_LOAD_LOG); }
+       id_fichier = open( log, O_RDONLY, 0 );                /* Ouverture du fichier log et chargement du contenu dans buffer */
+       if (id_fichier<0)
+        { Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_LOAD_LOG );
+          return(DLS_COMPIL_ERROR_LOAD_LOG);
+        }
        else { int nbr_car, index_buffer_erreur;
               nbr_car = index_buffer_erreur = 0; 
               while ( (nbr_car = read (id_fichier, buffer + index_buffer_erreur,
@@ -281,7 +284,10 @@
             }
      }
 
-    if ( retour == TRAD_DLS_ERROR ) return ( DLS_COMPIL_ERROR_TRAD );
+    if ( retour == TRAD_DLS_ERROR )
+     { Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_TRAD );
+       return ( DLS_COMPIL_ERROR_TRAD );
+     }
 
     if (retour == TRAD_DLS_WARNING || retour == TRAD_DLS_OK)
      { gint pidgcc;
@@ -289,6 +295,7 @@
        if (pidgcc<0)
         { Info_new( Config.log, Config.log_dls, LOG_WARNING,
                    "THRCompilFils: Compiler_source_dls: envoi erreur Fork GCC %d", id );
+          Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_FORK_GCC );
           return(DLS_COMPIL_ERROR_FORK_GCC);
         }
        else if (!pidgcc)
@@ -318,9 +325,14 @@
         }
 
        Info_new( Config.log, Config.log_dls, LOG_DEBUG, "THRCompil: Compiler_source_dls: end of %d", id );
-       if (retour == TRAD_DLS_WARNING)
-        { return( DLS_COMPIL_OK_WITH_WARNINGS ); }
      }
+
+    if (retour == TRAD_DLS_WARNING)
+     { Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_OK_WITH_WARNINGS );
+       return( DLS_COMPIL_OK_WITH_WARNINGS );
+     }
+
+    Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_OK );
     return( DLS_COMPIL_OK );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
