@@ -74,7 +74,7 @@
     DLS_COMPIL_OK_WITH_WARNINGS,
     DLS_COMPIL_OK
   };
-  
+
  enum
   { PLUGIN_MODULE,                                                                         /* Definitions des types de plugin */
     PLUGIN_SSGROUPE,
