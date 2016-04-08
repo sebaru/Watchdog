@@ -255,7 +255,7 @@
             break;
        case DLS_COMPIL_OK:
             g_snprintf( erreur.message, sizeof(erreur.message),
-                      "-> Compilation OK\nReset plugin OK" );
+                      "-- No error --\n-- Reset plugin OK --" );
             break;
        default : g_snprintf( erreur.message, sizeof(erreur.message), "Unknown Error !");
      }

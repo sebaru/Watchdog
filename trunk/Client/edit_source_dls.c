@@ -170,7 +170,7 @@
 /* sortie: TRUE                                                                                                               */
 /******************************************************************************************************************************/
  void Dls_set_compil_status ( gchar *chaine )
-  { gtk_entry_set_text ( GTK_ENTRY(Entry_compil_status), chaine );
+  { gtk_label_set_text ( GTK_LABEL(Entry_compil_status), chaine );
   }
 /*****************************************************************************************************************************/
 /* CB_valider_source_dls: Fonction appelée le client clique sur le bouton de la fenetre de statut de compilation              */
@@ -195,15 +195,21 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Valider_source_dls ( struct PAGE_NOTEBOOK *page )
-  { GtkWidget *vboite, *frame, *texte, *progress;
+  { GtkWidget *vboite, *frame, *progress;
     GtkTextBuffer *text_buffer;
     GtkTextIter start, end;
     struct CMD_TYPE_SOURCE_DLS *edit_dls;
     gchar *Source, *Source_fin, *source, *buffer_envoi;
-    gint taille_max, taille_source, taille_sent;
+    gint taille_max, taille_source, taille_sent, nb_car;
     
+    text_buffer = GTK_TEXT_BUFFER( ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->text );               /* Recup du TextBuffer */
+    gtk_text_buffer_get_start_iter( text_buffer, &start );                        /* Recup des iter de debut et fin de buffer */
+    gtk_text_buffer_get_end_iter( text_buffer, &end );
+    nb_car = gtk_text_buffer_get_char_count( text_buffer );                               /* Nombre de caractere a transférer */
 
-    F_send_dls = gtk_dialog_new_with_buttons( "Send a plugin",
+    if (!nb_car) return;                                                              /* On ne compile pas des buffer vides ! */
+
+    F_send_dls = gtk_dialog_new_with_buttons( "Apply a plugin",
                                               GTK_WINDOW(F_client),
                                               GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
                                               GTK_STOCK_OK, GTK_RESPONSE_OK,
@@ -212,7 +218,7 @@
                       G_CALLBACK(CB_valider_source_dls), NULL );
     gtk_window_set_default_size(GTK_WINDOW(F_send_dls), 400, 100);
 
-    frame = gtk_frame_new("Sending D.L.S source");
+    frame = gtk_frame_new("Live Status");
     gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
     gtk_box_pack_start( GTK_BOX( GTK_DIALOG(F_send_dls)->vbox ), frame, TRUE, TRUE, 0 );
 
@@ -221,28 +227,20 @@
     gtk_container_add( GTK_CONTAINER(frame), vboite );
 
 /************************************************** Interface de progression **************************************************/
-    texte = gtk_label_new( _("Ready to send") );
-    gtk_box_pack_start( GTK_BOX(vboite), texte, FALSE, FALSE, 0 );
-
     progress = gtk_progress_bar_new();
-    gtk_box_pack_start( GTK_BOX(vboite), progress, TRUE, TRUE, 0 );
+    gtk_progress_bar_set_text( GTK_PROGRESS_BAR(progress), "Ready to send" );
+    gtk_box_pack_start( GTK_BOX(vboite), progress, FALSE, FALSE, 0 );
     
-    Entry_compil_status = gtk_entry_new();
-    gtk_entry_set_editable ( GTK_ENTRY(Entry_compil_status), FALSE );
-    gtk_box_pack_start( GTK_BOX(vboite), Entry_compil_status, FALSE, FALSE, 0 );
+    Entry_compil_status = gtk_label_new("");
+    gtk_box_pack_start( GTK_BOX(vboite), Entry_compil_status, TRUE, TRUE, 0 );
 
     gtk_widget_show_all( F_send_dls );
 
     edit_dls = (struct CMD_TYPE_SOURCE_DLS *)g_try_malloc0( Client.connexion->taille_bloc );
     if (!edit_dls)
-     { gtk_label_set_text ( GTK_LABEL(texte), "Memory Error ..." );
+     { gtk_progress_bar_set_text( GTK_PROGRESS_BAR(progress), "Memory Error !" );
        return;
      }
-
-    text_buffer = GTK_TEXT_BUFFER( ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->text );               /* Recup du TextBuffer */
-    gtk_text_buffer_get_start_iter( text_buffer, &start );                        /* Recup des iter de debut et fin de buffer */
-    gtk_text_buffer_get_end_iter( text_buffer, &end );
-    taille_source = gtk_text_buffer_get_char_count( text_buffer );                        /* Nombre de caractere a transférer */
 
     Source = gtk_text_buffer_get_text( text_buffer, &start, &end, FALSE );               /* Export du buffer au format chaine */
 
@@ -254,11 +252,11 @@
     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_DEB,
                    (gchar *)edit_dls, sizeof(struct CMD_TYPE_SOURCE_DLS) );
 
-    taille_sent = 0;
     source = Source;
-    Source_fin = g_utf8_offset_to_pointer( Source, taille_source );
-    gtk_label_set_text ( GTK_LABEL(texte), "Sending..." );
-       
+    Source_fin = g_utf8_offset_to_pointer( Source, nb_car );
+    taille_sent = 0;
+    taille_source = Source_fin - Source;                                                                /* Taill en octets !! */
+
     while( source != Source_fin )
      { gchar chaine[16];
        gint taille;
@@ -280,6 +278,7 @@
      }
     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_FIN,
                    (gchar *)edit_dls, sizeof(struct CMD_TYPE_SOURCE_DLS) );
+    Dls_set_compil_status( "Preparing compilation ... Please Wait ..." );
     g_free(Source);
     g_free(edit_dls);
   }

@@ -352,13 +352,13 @@ unite:          modulateur ENTIER HEURE ENTIER
                 {{ int taille;
                    taille = 18;
                    $$ = New_chaine(taille);
-                   g_snprintf( $$, taille, "(TRUE)" );
+                   g_snprintf( $$, taille, "(1)" );
                 }}
                 | T_FALSE
                 {{ int taille;
                    taille = 18;
                    $$ = New_chaine(taille);
-                   g_snprintf( $$, taille, "(FALSE)" );
+                   g_snprintf( $$, taille, "(0)" );
                 }}
                 | barre BI ENTIER
                 {{ int taille;
