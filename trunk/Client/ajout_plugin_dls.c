@@ -142,14 +142,14 @@
     gtk_box_pack_start( GTK_BOX(vboite), table, FALSE, FALSE, 0 );
 
     i = 0;
-    Check_actif = gtk_check_button_new_with_label( _("Enable") );
-    gtk_table_attach_defaults( GTK_TABLE(table), Check_actif, 0, 1, i, i+1 );
-
-    texte = gtk_label_new( _("ID") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 1, 2, i, i+1 );
+    texte = gtk_label_new( _("Plugin ID") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_id = gtk_entry_new();
     gtk_entry_set_editable( GTK_ENTRY(Entry_id), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_id, 2, 3, i, i+1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_id, 1, 2, i, i+1 );
+
+    Check_actif = gtk_check_button_new_with_label( _("Enable") );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_actif, 2, 3, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("Type") );                         /* Création de l'option menu pour le choix du type de message */
