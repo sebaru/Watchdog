@@ -94,11 +94,21 @@
     GNOMEUIINFO_END
   };
 
-/**********************************************************************************************************/
-/* CB_effacer_utilisateur: Fonction appelée qd on appuie sur un des boutons de l'interface                */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
-/* sortie: TRUE                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Dls_compil_status: Renvoie le statut en clair de la derniere compilation D.L.S                                             */
+/* Entrée : le statut au format entier                                                                                        */
+/* Sortie : le statut au format chaine                                                                                        */
+/******************************************************************************************************************************/
+ static gchar *Dls_compil_status ( guint status )
+  { if (status >= NBR_DLS_COMPIL_STATUS)
+         return("Unknown");
+    else return ( DLS_COMPIL_STATUS[status]);
+  }
+/******************************************************************************************************************************/
+/* CB_effacer_utilisateur: Fonction appelée qd on appuie sur un des boutons de l'interface                                    */
+/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
+/* sortie: TRUE                                                                                                               */
+/******************************************************************************************************************************/
  static gboolean CB_effacer_plugin_dls ( GtkDialog *dialog, gint reponse, gboolean edition )
   { struct CMD_TYPE_PLUGIN_DLS rezo_dls;
     GtkTreeSelection *selection;
@@ -530,7 +540,7 @@
                          COLONNE_GROUPE_PAGE, groupe_page,
                          COLONNE_NOM, plugin_dls->nom,
                          COLONNE_COMPIL_DATE, date_compil,
-                         COLONNE_COMPIL_STATUS, DLS_COMPIL_STATUS[plugin_dls->compil_status],
+                         COLONNE_COMPIL_STATUS, Dls_compil_status(plugin_dls->compil_status),
                          COLONNE_COLOR_FOND, &COULEUR_PLUGIN_FOND[plugin_dls->type],
                          COLONNE_COLOR_TEXTE, &COULEUR_PLUGIN_TEXTE[plugin_dls->type],
                           -1
