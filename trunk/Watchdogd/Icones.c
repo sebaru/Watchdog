@@ -280,11 +280,11 @@
     g_snprintf( chaine, sizeof(chaine), "%d", (gint)time(NULL) );
     if (Modifier_configDB ( "global", "icone_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
-                "Icone_set_data_version: updating Database_version OK" );
+                "Icone_set_data_version: updating Database_version to %s OK", chaine );
      }
     else
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
-                "Icone_set_data_version: updating Database_version FAILED" );
+                "Icone_set_data_version: updating Database_version to %s FAILED", chaine );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
