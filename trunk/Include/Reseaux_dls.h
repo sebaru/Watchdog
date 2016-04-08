@@ -109,6 +109,8 @@
     SSTAG_SERVEUR_SOURCE_DLS,
     SSTAG_SERVEUR_SOURCE_DLS_END,
 
+    SSTAG_SERVEUR_DLS_COMPIL_STATUS,                                                           /* Résultat de ocmpilation DLS */
+            
     SSTAG_CLIENT_WANT_SYN_FOR_PLUGIN_DLS,                                           /* Envoi des synoptiques pour les plugins */
     SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_PLUGIN_DLS,
     SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_PLUGIN_DLS_FIN,

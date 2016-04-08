@@ -91,6 +91,12 @@
                dls = (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees;*/
              }
             break;
+       case SSTAG_SERVEUR_DLS_COMPIL_STATUS:
+             { struct CMD_GTK_MESSAGE *erreur;
+               erreur = (struct CMD_GTK_MESSAGE *)connexion->donnees;
+               Dls_set_compil_status ( erreur->message );
+             }
+            break;
        case SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS:
              { struct CMD_TYPE_PLUGIN_DLS *dls;
                Set_progress_plus(1);

@@ -260,6 +260,7 @@
  extern void Creer_page_source_dls( struct CMD_TYPE_PLUGIN_DLS *rezo_dls );       /* Dans edit_source_dls.c */
  extern void Proto_append_source_dls( struct CMD_TYPE_SOURCE_DLS *dls, gchar *buffer );
  extern void Proto_afficher_mnemo_dls ( struct CMD_TYPE_MNEMO_BASE *mnemo );
+ extern void Dls_set_compil_status ( gchar *chaine );
 
  extern void Proto_afficher_un_histo( struct CMD_TYPE_HISTO *histo );               /* Dans liste_histo.c */
  extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );

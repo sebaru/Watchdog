@@ -37,6 +37,7 @@
  #include "protocli.h"
 
  static GtkWidget *F_send_dls;                                                             /* Fenetre de suivi de progression */
+ static GtkWidget *Entry_compil_status;                                                /* Retour d'état de la compilation DLS */
 
  extern GtkWidget *Notebook;                                                             /* Le Notebook de controle du client */
  extern GList *Liste_pages;                                                       /* Liste des pages ouvertes sur le notebook */  
@@ -163,11 +164,36 @@
     gtk_text_buffer_get_end_iter( text_buffer, &iter );
     gtk_text_buffer_insert( text_buffer, &iter, buffer, dls->taille );
   }
-/**********************************************************************************************************/
-/* Valider_source_dls: Confirmation de la source DLS et envoie au serveur                                 */
-/* Entrée: la page du notebook en cours d'edition                                                         */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/*****************************************************************************************************************************/
+/* CB_valider_source_dls: Fonction appelée le client clique sur le bouton de la fenetre de statut de compilation              */
+/* Entrée: la reponse de l'utilisateur                                                                                        */
+/* sortie: TRUE                                                                                                               */
+/******************************************************************************************************************************/
+ void Dls_set_compil_status ( gchar *chaine )
+  { gtk_entry_set_text ( GTK_ENTRY(Entry_compil_status), chaine );
+  }
+/*****************************************************************************************************************************/
+/* CB_valider_source_dls: Fonction appelée le client clique sur le bouton de la fenetre de statut de compilation              */
+/* Entrée: la reponse de l'utilisateur                                                                                        */
+/* sortie: TRUE                                                                                                               */
+/******************************************************************************************************************************/
+ static gboolean CB_valider_source_dls ( GtkDialog *dialog, gint reponse, gpointer data )
+  { switch(reponse)
+     { case GTK_RESPONSE_OK:
+             { break;
+             }
+       default: break;
+     }
+    gtk_widget_destroy(F_send_dls);
+    F_send_dls = NULL;
+    Entry_compil_status = NULL;
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Valider_source_dls: Confirmation de la source DLS et envoie au serveur                                                     */
+/* Entrée: la page du notebook en cours d'edition                                                                             */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  static void Valider_source_dls ( struct PAGE_NOTEBOOK *page )
   { GtkWidget *vboite, *frame, *texte, *progress;
     GtkTextBuffer *text_buffer;
@@ -179,12 +205,11 @@
 
     F_send_dls = gtk_dialog_new_with_buttons( "Send a plugin",
                                               GTK_WINDOW(F_client),
-                                              /* GTK_DIALOG_MODAL | */ GTK_DIALOG_DESTROY_WITH_PARENT,
-                                              /*GTK_STOCK_OK, GTK_RESPONSE_OK,*/
+                                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                              GTK_STOCK_OK, GTK_RESPONSE_OK,
                                               NULL);
-/*    g_signal_connect( F_ajout, "response",
-                      G_CALLBACK(CB_ajouter_editer_plugin_dls),
-                      GINT_TO_POINTER( (edit_dls ? TRUE : FALSE) ) );*/
+    g_signal_connect( F_send_dls, "response",
+                      G_CALLBACK(CB_valider_source_dls), NULL );
     gtk_window_set_default_size(GTK_WINDOW(F_send_dls), 400, 100);
 
     frame = gtk_frame_new("Sending D.L.S source");
@@ -202,6 +227,10 @@
     progress = gtk_progress_bar_new();
     gtk_box_pack_start( GTK_BOX(vboite), progress, TRUE, TRUE, 0 );
     
+    Entry_compil_status = gtk_entry_new();
+    gtk_entry_set_editable ( GTK_ENTRY(Entry_compil_status), FALSE );
+    gtk_box_pack_start( GTK_BOX(vboite), Entry_compil_status, FALSE, FALSE, 0 );
+
     gtk_widget_show_all( F_send_dls );
 
     edit_dls = (struct CMD_TYPE_SOURCE_DLS *)g_try_malloc0( Client.connexion->taille_bloc );
@@ -253,7 +282,6 @@
                    (gchar *)edit_dls, sizeof(struct CMD_TYPE_SOURCE_DLS) );
     g_free(Source);
     g_free(edit_dls);
-    gtk_widget_destroy( F_send_dls );
   }
 /**********************************************************************************************************/
 /* Menu_exporter_message: Exportation de la base dans un fichier texte                                    */
