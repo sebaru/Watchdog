@@ -91,6 +91,12 @@
                dls = (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees;*/
              }
             break;
+       case SSTAG_SERVEUR_DLS_COMPIL_STATUS:
+             { struct CMD_GTK_MESSAGE *erreur;
+               erreur = (struct CMD_GTK_MESSAGE *)connexion->donnees;
+               Dls_set_compil_status ( erreur->message );
+             }
+            break;
        case SSTAG_SERVEUR_ADDPROGRESS_PLUGIN_DLS:
              { struct CMD_TYPE_PLUGIN_DLS *dls;
                Set_progress_plus(1);
@@ -98,7 +104,7 @@
                dls = (struct CMD_TYPE_PLUGIN_DLS *)g_try_malloc0( sizeof( struct CMD_TYPE_PLUGIN_DLS ) );
                if (!dls) return; 
                memcpy( dls, connexion->donnees, sizeof(struct CMD_TYPE_PLUGIN_DLS ) );
-               printf("One plugin receive %s\n", dls->nom );
+               printf("One plugin receive %s %d\n", dls->nom, dls->compil_date );
                Arrivee_dls = g_list_append( Arrivee_dls, dls );
              }
             break;

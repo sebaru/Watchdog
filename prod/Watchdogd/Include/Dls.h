@@ -42,15 +42,6 @@
     float conso;                                                                         /* Consommation temporelle du plugin */
   };
 
- enum
-  { DLS_COMPIL_ERROR_LOAD_SOURCE,
-    DLS_COMPIL_ERROR_LOAD_LOG,
-    DLS_COMPIL_ERROR_TRAD,
-    DLS_COMPIL_ERROR_FORK_GCC,
-    DLS_COMPIL_OK_WITH_WARNINGS,
-    DLS_COMPIL_OK
-  };
-
  enum                                                                                  /* différent statut des temporisations */
   { TEMPO_NOT_COUNTING,                                                                     /* La tempo ne compte pas du tout */
     TEMPO_WAIT_FOR_DELAI_ON,                                           /* La tempo compte, en attendant le delai de mise à un */
@@ -138,20 +129,21 @@
   };
 
 /************************************************ Prototypes de fonctions *****************************************************/
- extern gboolean Retirer_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls );
+ extern gboolean Retirer_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls );                                    /* Dans Dls_db.c */
  extern gint Ajouter_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls );
  extern gboolean Recuperer_plugins_dlsDB( struct DB **db );
  extern struct CMD_TYPE_PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct DB **db );
  extern struct CMD_TYPE_PLUGIN_DLS *Rechercher_plugin_dlsDB( gint id );
  extern gboolean Modifier_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls );
-
- extern void Reseter_un_plugin ( gint id );
+ extern gboolean Set_compil_status_plugin_dlsDB( gint id, gint status );
+ 
+ extern void Reseter_un_plugin ( gint id );                                                                 /* Dans plugins.c */
  extern void Decharger_un_plugin_by_id ( gint id );
  extern void Decharger_plugins ( void );
  extern void Charger_plugins ( void );
  extern void Activer_plugin_by_id ( gint id, gboolean actif );
  extern gint Compiler_source_dls( gboolean new, gboolean reset, gint id, gchar *buffer, gint taille_buffer );
-
+ 
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
  extern int EA_inrange( int num );
  extern float EA_ech( int num );

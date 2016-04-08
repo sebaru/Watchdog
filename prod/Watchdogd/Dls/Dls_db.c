@@ -89,8 +89,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                    "INSERT INTO %s"             
-                   "(name,actif,type,num_syn)"
-                   "VALUES ('%s','%s','%d',%d);",
+                   "(name,actif,type,num_syn,compil_date,compil_status)"
+                   "VALUES ('%s','%s','%d',%d,0,0);",
                    NOM_TABLE_DLS, nom, (dls->on ? "true" : "false"), dls->type, dls->num_syn );
     g_free(nom);
 
@@ -127,7 +127,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.name,actif,type,num_syn,groupe,page"
+                "SELECT %s.id,%s.name,actif,type,num_syn,groupe,page,compil_date,compil_status"
                 " FROM %s,%s"
                 " WHERE %s.num_syn = %s.id"
                 " ORDER BY groupe,page,name",
@@ -164,10 +164,12 @@
      { memcpy( &dls->nom,      db->row[1], sizeof(dls->nom   ) );            /* Recopie dans la structure */
        memcpy( &dls->groupe,   db->row[5], sizeof(dls->groupe) );
        memcpy( &dls->page,     db->row[6], sizeof(dls->page  ) );
-       dls->id      = atoi(db->row[0]);
-       dls->on      = atoi(db->row[2]);
-       dls->type    = atoi(db->row[3]);
-       dls->num_syn = atoi(db->row[4]);
+       dls->id            = atoi(db->row[0]);
+       dls->on            = atoi(db->row[2]);
+       dls->type          = atoi(db->row[3]);
+       dls->num_syn       = atoi(db->row[4]);
+       dls->compil_date   = atoi(db->row[7]);
+       dls->compil_status = atoi(db->row[8]);
      }
     return( dls );
   }
@@ -188,7 +190,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.name,actif,type,num_syn,groupe,page"
+                "SELECT %s.id,%s.name,actif,type,num_syn,groupe,page,compil_date,compil_status"
                 " FROM %s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.id = %d",
                 NOM_TABLE_DLS, NOM_TABLE_DLS,
@@ -202,25 +204,7 @@
        return(NULL);
      }
 
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "Rechercher_dlsDB: DLS %03d not found in DB", id );
-       return(NULL);
-     }
-
-    dls = (struct CMD_TYPE_PLUGIN_DLS *)g_try_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-    if (!dls) Info_new( Config.log, Config.log_dls, LOG_ERR, "Rechercher_dlsDB: memory error" );
-    else
-     { memcpy( &dls->nom,      db->row[1], sizeof(dls->nom   ) );            /* Recopie dans la structure */
-       memcpy( &dls->groupe,   db->row[5], sizeof(dls->groupe) );
-       memcpy( &dls->page,     db->row[6], sizeof(dls->page  ) );
-       dls->id      = atoi(db->row[0]);
-       dls->on      = atoi(db->row[2]);
-       dls->type    = atoi(db->row[3]);
-       dls->num_syn = atoi(db->row[4]);
-     }
+    dls = Recuperer_plugins_dlsDB_suite( &db );
     Libere_DB_SQL( &db );
     return( dls );
   }
@@ -257,4 +241,29 @@
     Libere_DB_SQL(&db);
     return(retour);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/******************************************************************************************************************************/
+/* Set_compil_status_plugin_dlsDB: Met a jour la date et statut de compilation                                                */
+/* Entrées: l'id du plugin DLS                                                                                                */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ gboolean Set_compil_status_plugin_dlsDB( gint id, gint status )
+  { gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "UPDATE %s SET "
+                "compil_date='%d', compil_status='%d' WHERE id=%d",
+                NOM_TABLE_DLS, (gint)time(NULL), status, id );
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Set_compil_status_plugin_dlsDB: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
+  }
+/*----------------------------------------------------------------------------------------------------------------------------*/

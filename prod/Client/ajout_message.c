@@ -338,11 +338,11 @@
     Liste_index_syn = NULL;
     Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_WANT_SYN_FOR_MESSAGE, NULL, 0 );
 
-/****************************************** Paragraphe Voix ***********************************************/
+/******************************************************** Paragraphe Voix *****************************************************/
     i++;
-    texte = gtk_label_new( _("Profil Audio") );                          /* Numéro du bit M a positionner */
+    texte = gtk_label_new( _("Profil Audio") );                                              /* Numéro du bit M a positionner */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );;
-    Spin_bit_voc = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
+    Spin_bit_voc = gtk_spin_button_new_with_range( 30, 59, 1 );                                       /* Range M0030 -> M0059 */
     g_signal_connect( G_OBJECT(Spin_bit_voc), "changed",
                       G_CALLBACK(Afficher_mnemo_voc), NULL );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit_voc, 1, 2, i, i+1 );;
@@ -352,7 +352,7 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_voc, 2, 4, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Type Voix") );   /* Création de l'option menu pour le choix du type de voix */
+    texte = gtk_label_new( _("Type Voix") );                       /* Création de l'option menu pour le choix du type de voix */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
 
     Combo_type_voc = gtk_combo_box_new_text();

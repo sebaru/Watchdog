@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/edit_source_dls.c        Edition des modules D.L.S de watchdog v2.0                             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 30 oct 2004 14:26:13 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/edit_source_dls.c        Edition des modules D.L.S de watchdog v2.0                                                 */
+/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 30 oct 2004 14:26:13 CEST                     */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * edit_source_dls.c
  * This file is part of Watchdog
@@ -31,16 +31,19 @@
 
  #include "Reseaux.h"
 
-/********************************* Définitions des prototypes programme ***********************************/
+/***************************************** Définitions des prototypes programme ***********************************************/
  #include "Config_cli.h"
  #include "client.h"
  #include "protocli.h"
 
- extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
- extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
- extern struct CLIENT Client;                                                     /* Structure de travail */
+ static GtkWidget *F_send_dls;                                                             /* Fenetre de suivi de progression */
+ static GtkWidget *Entry_compil_status;                                                /* Retour d'état de la compilation DLS */
+
+ extern GtkWidget *Notebook;                                                             /* Le Notebook de controle du client */
+ extern GList *Liste_pages;                                                       /* Liste des pages ouvertes sur le notebook */  
+ extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
+ extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
+ extern struct CLIENT Client;                                                                         /* Structure de travail */
 
 /**********************************************************************************************************/
 /* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
@@ -161,51 +164,121 @@
     gtk_text_buffer_get_end_iter( text_buffer, &iter );
     gtk_text_buffer_insert( text_buffer, &iter, buffer, dls->taille );
   }
-/**********************************************************************************************************/
-/* Valider_source_dls: Confirmation de la source DLS et envoie au serveur                                 */
-/* Entrée: la page du notebook en cours d'edition                                                         */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/*****************************************************************************************************************************/
+/* CB_valider_source_dls: Fonction appelée le client clique sur le bouton de la fenetre de statut de compilation              */
+/* Entrée: la reponse de l'utilisateur                                                                                        */
+/* sortie: TRUE                                                                                                               */
+/******************************************************************************************************************************/
+ void Dls_set_compil_status ( gchar *chaine )
+  { gtk_label_set_text ( GTK_LABEL(Entry_compil_status), chaine );
+  }
+/*****************************************************************************************************************************/
+/* CB_valider_source_dls: Fonction appelée le client clique sur le bouton de la fenetre de statut de compilation              */
+/* Entrée: la reponse de l'utilisateur                                                                                        */
+/* sortie: TRUE                                                                                                               */
+/******************************************************************************************************************************/
+ static gboolean CB_valider_source_dls ( GtkDialog *dialog, gint reponse, gpointer data )
+  { switch(reponse)
+     { case GTK_RESPONSE_OK:
+             { break;
+             }
+       default: break;
+     }
+    gtk_widget_destroy(F_send_dls);
+    F_send_dls = NULL;
+    Entry_compil_status = NULL;
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Valider_source_dls: Confirmation de la source DLS et envoie au serveur                                                     */
+/* Entrée: la page du notebook en cours d'edition                                                                             */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  static void Valider_source_dls ( struct PAGE_NOTEBOOK *page )
-  { GtkTextBuffer *text_buffer;
+  { GtkWidget *vboite, *frame, *progress;
+    GtkTextBuffer *text_buffer;
     GtkTextIter start, end;
     struct CMD_TYPE_SOURCE_DLS *edit_dls;
     gchar *Source, *Source_fin, *source, *buffer_envoi;
-    gint taille_max;
-
-    text_buffer = GTK_TEXT_BUFFER( ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->text );
-    gtk_text_buffer_get_start_iter( text_buffer, &start );
+    gint taille_max, taille_source, taille_sent, nb_car;
+    
+    text_buffer = GTK_TEXT_BUFFER( ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->text );               /* Recup du TextBuffer */
+    gtk_text_buffer_get_start_iter( text_buffer, &start );                        /* Recup des iter de debut et fin de buffer */
     gtk_text_buffer_get_end_iter( text_buffer, &end );
+    nb_car = gtk_text_buffer_get_char_count( text_buffer );                               /* Nombre de caractere a transférer */
 
-    Source = gtk_text_buffer_get_text( text_buffer, &start, &end, FALSE );
+    if (!nb_car) return;                                                              /* On ne compile pas des buffer vides ! */
+
+    F_send_dls = gtk_dialog_new_with_buttons( "Apply a plugin",
+                                              GTK_WINDOW(F_client),
+                                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                              GTK_STOCK_OK, GTK_RESPONSE_OK,
+                                              NULL);
+    g_signal_connect( F_send_dls, "response",
+                      G_CALLBACK(CB_valider_source_dls), NULL );
+    gtk_window_set_default_size(GTK_WINDOW(F_send_dls), 400, 100);
+
+    frame = gtk_frame_new("Live Status");
+    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
+    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(F_send_dls)->vbox ), frame, TRUE, TRUE, 0 );
+
+    vboite = gtk_vbox_new( FALSE, 6 );
+    gtk_container_set_border_width( GTK_CONTAINER(vboite), 6 );
+    gtk_container_add( GTK_CONTAINER(frame), vboite );
+
+/************************************************** Interface de progression **************************************************/
+    progress = gtk_progress_bar_new();
+    gtk_progress_bar_set_text( GTK_PROGRESS_BAR(progress), "Ready to send" );
+    gtk_box_pack_start( GTK_BOX(vboite), progress, FALSE, FALSE, 0 );
+    
+    Entry_compil_status = gtk_label_new("");
+    gtk_box_pack_start( GTK_BOX(vboite), Entry_compil_status, TRUE, TRUE, 0 );
+
+    gtk_widget_show_all( F_send_dls );
 
     edit_dls = (struct CMD_TYPE_SOURCE_DLS *)g_try_malloc0( Client.connexion->taille_bloc );
-    if (!edit_dls) return;
+    if (!edit_dls)
+     { gtk_progress_bar_set_text( GTK_PROGRESS_BAR(progress), "Memory Error !" );
+       return;
+     }
+
+    Source = gtk_text_buffer_get_text( text_buffer, &start, &end, FALSE );               /* Export du buffer au format chaine */
+
     buffer_envoi     = (gchar *)edit_dls + sizeof(struct CMD_TYPE_SOURCE_DLS);
     taille_max       = Client.connexion->taille_bloc - sizeof(struct CMD_TYPE_SOURCE_DLS);
     edit_dls->id     = ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->id;
     edit_dls->taille = 0;
-                                                          /* Demande de suppression du fichier source DLS */
+                                                                              /* Demande de suppression du fichier source DLS */
     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_DEB,
                    (gchar *)edit_dls, sizeof(struct CMD_TYPE_SOURCE_DLS) );
 
     source = Source;
-    Source_fin = g_utf8_offset_to_pointer( Source, gtk_text_buffer_get_char_count( text_buffer ) );
+    Source_fin = g_utf8_offset_to_pointer( Source, nb_car );
+    taille_sent = 0;
+    taille_source = Source_fin - Source;                                                                /* Taill en octets !! */
 
     while( source != Source_fin )
-     { gint taille;
-       taille = Source_fin-source;                                                 /* Combien il reste ?? */
-       if (taille>Client.connexion->taille_bloc) taille = taille_max;
-       memcpy( buffer_envoi, source, taille );                                         /* Recopie mémoire */  
+     { gchar chaine[16];
+       gint taille;
+       taille = Source_fin-source;                                                                     /* Combien il reste ?? */
+       if (taille>Client.connexion->taille_bloc) taille = taille_max;                /* Borne supérieure lié au paquet reseau */
+       memcpy( buffer_envoi, source, taille );                                                             /* Recopie mémoire */  
        edit_dls->taille = taille;
        if (!Envoi_serveur( TAG_DLS, SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS,
                            (gchar *)edit_dls, taille + sizeof(struct CMD_TYPE_SOURCE_DLS) ))
         { printf("erreur envoi au serveur\n"); }
-       printf("Octets envoyés: %d\n", taille);
+       printf("Octets sent: %d / %d\n", taille, taille_source);
        source += taille;
+       taille_sent+=taille;
+       gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR(progress), (gdouble)taille_sent/taille_source );
+       g_snprintf( chaine, sizeof(chaine), "%3.1f%%", 100.0*taille_sent/taille_source );
+       gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR(progress), (gdouble)taille_sent/taille_source );
+       gtk_progress_bar_set_text( GTK_PROGRESS_BAR(progress), chaine );
+       gtk_main_iteration_do(FALSE);
      }
     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_FIN,
                    (gchar *)edit_dls, sizeof(struct CMD_TYPE_SOURCE_DLS) );
+    Dls_set_compil_status( "Preparing compilation ... Please Wait ..." );
     g_free(Source);
     g_free(edit_dls);
   }

@@ -254,33 +254,33 @@
      }
     pthread_mutex_unlock ( &Partage->com_db.synchro );
   }
-/**********************************************************************************************************/
-/* Update_database_schema: Vérifie la connexion et le schéma de la base de données                        */
-/* Entrée: néant                                                                                          */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Update_database_schema: Vérifie la connexion et le schéma de la base de données                                            */
+/* Entrée: néant                                                                                                              */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  void Update_database_schema ( void )
   { gint database_version;
     gchar *nom, *valeur;
     gchar requete[4096];
     struct DB *db;
 
-    if (Config.instance_is_master != TRUE)                              /* Do not update DB if not master */
+    if (Config.instance_is_master != TRUE)                                                  /* Do not update DB if not master */
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
                 "Update_database_schema: Instance is not master. Don't update schema." );
        return;
      }
 
-    database_version = 0;                                                            /* valeur par défaut */
-    if ( ! Recuperer_configDB( &db, "global" ) )                        /* Connexion a la base de données */
+    database_version = 0;                                                                                /* valeur par défaut */
+    if ( ! Recuperer_configDB( &db, "global" ) )                                            /* Connexion a la base de données */
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
                 "Update_database_schema: Database connexion failed" );
        return;
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Config.log_db, LOG_INFO,                                     /* Print Config */
-                "Update_database_schema: '%s' = %s", nom, valeur );
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Config.log_db, LOG_INFO,                                                         /* Print Config */
+                "Update_database_schema: found global param '%s' = %s in DB", nom, valeur );
        if ( ! g_ascii_strcasecmp ( nom, "database_version" ) )
         { database_version = atoi( valeur ); }
      }
@@ -296,46 +296,46 @@
 
     if (database_version < 2500)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE users DROP `imsg_bit_presence`" );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete),
                   "ALTER TABLE users ADD `ssrv_bit_presence` INT NOT NULL DEFAULT '0'"
                  );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
     if (database_version < 2510)
-     { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
+     { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                   "INSERT INTO `mnemos` (`id`, `type`, `num`, `num_plugin`, `acronyme`, `libelle`, `command_text`) VALUES"
                   "(23, 3,9999, 1, 'EVENT_NONE_TOR', 'Used for detected Event with no mapping yet.', ''),"
                   "(24, 5,9999, 1, 'EVENT_NONE_ANA', 'Used for detected Event with no mapping yet.', '')"
                  );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
     if (database_version < 2532)
      { g_snprintf( requete, sizeof(requete), "RENAME TABLE eana TO mnemos_AnalogInput" );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), 
                   "CREATE TABLE `mnemos_DigitalInput`"
                   "(`id_mnemo` int(11) NOT NULL, `furtif` int(1) NOT NULL, PRIMARY KEY (`id_mnemo`)"
                   ") ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
                  );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
     if (database_version < 2541)
      { g_snprintf( requete, sizeof(requete), "RENAME TABLE dls_cpt_imp TO mnemos_CptImp" );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
     if (database_version < 2543)
      { g_snprintf( requete, sizeof(requete), "RENAME TABLE tempo TO mnemos_Tempo" );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
     if (database_version < 2571)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `users` ADD `imsg_available` TINYINT NOT NULL AFTER `imsg_allow_cde`" );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
     if (database_version < 2573)
@@ -365,43 +365,50 @@
                    "(46, 5, 101, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
                    "(47, 5, 100, 1, 'SYS_RESERVED', 'Reserved for internal use', '');"
                  );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
     if (database_version < 2581)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` CHANGE `min_e_tor` `map_E` INT(11) NOT NULL" );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` CHANGE `min_e_ana` `map_EA` INT(11) NOT NULL" );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` CHANGE `min_s_tor` `map_A` INT(11) NOT NULL" );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` CHANGE `min_s_ana` `map_AA` INT(11) NOT NULL" );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
     if (database_version < 2582)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `rfxcom` CHANGE `e_min` `map_E` INT(11) NOT NULL" );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `rfxcom` CHANGE `ea_min` `map_EA` INT(11) NOT NULL" );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `rfxcom` CHANGE `a_min` `map_A` INT(11) NOT NULL" );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
     if (database_version < 2583)
      { g_snprintf( requete, sizeof(requete), "RENAME TABLE onduleurs TO ups" );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `ups` CHANGE `e_min` `map_E` INT(11) NOT NULL" );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `ups` CHANGE `ea_min` `map_EA` INT(11) NOT NULL" );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `ups` CHANGE `a_min` `map_A` INT(11) NOT NULL" );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
     if (database_version < 2669)
      { g_snprintf( requete, sizeof(requete), "DROP TABLE rfxcom" );
-       Lancer_requete_SQL ( db, requete );                                 /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 2696)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` ADD `compil_date` int(11) NOT NULL AFTER `actif`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` ADD `compil_status` int(11) NOT NULL AFTER `compil_date`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
      
     Libere_DB_SQL(&db);

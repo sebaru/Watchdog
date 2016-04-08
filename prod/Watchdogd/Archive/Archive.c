@@ -144,10 +144,10 @@
     params[2] = update;
     rrd_clear_error();
     result = rrd_update( 3, params );
-    if (result)
+    /*if (result)
      { Info_new( Config.log, Config.log_arch, LOG_WARNING,
                 "Ajouter_archRRD: RRD error %d (%s)", result, rrd_get_error() );
-     }
+     }*/
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du thread                                                                                        */

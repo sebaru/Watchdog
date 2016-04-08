@@ -211,7 +211,7 @@
        id_fichier = open( chaine, O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR );
        if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
-                   "Proto_valider_source_dls: append failed %d", edit_dls->id );
+                   "Proto_valider_source_dls: append failed %d (%s)", edit_dls->id, strerror(errno) );
           return;
         }
        lockf( id_fichier, F_LOCK, 0 );
@@ -231,43 +231,35 @@
 /******************************************************************************************************************************/
  void *Proto_compiler_source_dls_thread( struct CLIENT *client )
   { struct CMD_GTK_MESSAGE erreur;
-
     close( client->id_creation_plugin_dls );                                                   /* Fermeture du fichier plugin */
     client->id_creation_plugin_dls = 0;
-
     switch ( Compiler_source_dls ( TRUE, TRUE, client->dls.id, erreur.message, sizeof(erreur.message) ) )
      { case DLS_COMPIL_ERROR_LOAD_SOURCE:
             g_snprintf( erreur.message, sizeof(erreur.message),
                        "Unable to open file for compilation ID %d", client->dls.id );
-            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                           (gchar *)&erreur, sizeof(erreur) );
             break;
        case DLS_COMPIL_ERROR_LOAD_LOG:
             g_snprintf( erreur.message, sizeof(erreur.message),
                        "Unable to open log file for DLS %d", client->dls.id );
-            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                           (gchar *)&erreur, sizeof(erreur) );
             break;
        case DLS_COMPIL_OK_WITH_WARNINGS:
-            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_WARNING,
+            Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_WARNING,
                            (gchar *)&erreur, sizeof(erreur) );
             break;
        case DLS_COMPIL_ERROR_TRAD:
-            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+            Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_ERREUR,
                            (gchar *)&erreur, sizeof(erreur) );
             break;
        case DLS_COMPIL_ERROR_FORK_GCC:
             g_snprintf( erreur.message, sizeof(erreur.message), "Gcc fork failed !" );
-            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                           (gchar *)&erreur, sizeof(erreur) );
             break;
        case DLS_COMPIL_OK:
             g_snprintf( erreur.message, sizeof(erreur.message),
-                      "-> Compilation OK\nReset plugin OK" );
-            Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_INFO,
-                           (gchar *)&erreur, sizeof(erreur) );
+                      "-- No error --\n-- Reset plugin OK --" );
             break;
+       default : g_snprintf( erreur.message, sizeof(erreur.message), "Unknown Error !");
      }
+    Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_DLS_COMPIL_STATUS, (gchar *)&erreur, sizeof(erreur) );
     Unref_client ( client );                                                           /* Plus besoin de la structure cliente */
     pthread_exit( NULL );
   }
