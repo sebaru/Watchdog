@@ -98,7 +98,7 @@
                dls = (struct CMD_TYPE_PLUGIN_DLS *)g_try_malloc0( sizeof( struct CMD_TYPE_PLUGIN_DLS ) );
                if (!dls) return; 
                memcpy( dls, connexion->donnees, sizeof(struct CMD_TYPE_PLUGIN_DLS ) );
-               printf("One plugin receive %s\n", dls->nom );
+               printf("One plugin receive %s %d\n", dls->nom, dls->compil_date );
                Arrivee_dls = g_list_append( Arrivee_dls, dls );
              }
             break;

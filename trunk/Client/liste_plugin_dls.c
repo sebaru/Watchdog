@@ -79,6 +79,7 @@
  static void Menu_editer_source_dls ( void );
  static void Menu_editer_plugin_dls ( void );
  static void Menu_ajouter_plugin_dls ( void );
+ static void Menu_refresh_plugin_dls ( void );
 
  static GnomeUIInfo Menu_popup_select[]=
   { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_plugin_dls, GNOME_STOCK_PIXMAP_ADD ),
@@ -103,6 +104,17 @@
   { if (status >= NBR_DLS_COMPIL_STATUS)
          return("Unknown");
     else return ( DLS_COMPIL_STATUS[status]);
+  }
+/******************************************************************************************************************************/
+/* Menu_refresh_plugin_D.L.S: rafraichir la liste des plugins D.L.S                                                           */
+/* Entrée : néant                                                                                                             */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Menu_refresh_plugin_dls ( void )
+  { GtkListStore *store;
+    store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_plugin_dls) ));      /* Récupération du model de data */
+    gtk_list_store_clear ( store );
+    Envoi_serveur( TAG_DLS, SSTAG_CLIENT_WANT_PAGE_DLS, NULL, 0 );
   }
 /******************************************************************************************************************************/
 /* CB_effacer_utilisateur: Fonction appelée qd on appuie sur un des boutons de l'interface                                    */
@@ -483,6 +495,11 @@
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Detruire_page), page );
 
+    bouton = gtk_button_new_from_stock( GTK_STOCK_REFRESH );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                              G_CALLBACK(Menu_refresh_plugin_dls), NULL );
+
     separateur = gtk_hseparator_new();
     gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
 
@@ -511,7 +528,6 @@
 
     gtk_widget_show_all( hboite );
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( _("Plugins D.L.S") ) );
-
   }
 /******************************************************************************************************************************/
 /* Rafraichir_visu_plugin_dls: Rafraichissement d'un plugin_dls la liste à l'écran                                            */

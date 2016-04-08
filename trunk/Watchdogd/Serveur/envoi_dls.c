@@ -211,7 +211,7 @@
        id_fichier = open( chaine, O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR );
        if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
-                   "Proto_valider_source_dls: append failed %d", edit_dls->id );
+                   "Proto_valider_source_dls: append failed %d (%s)", edit_dls->id, strerror(errno) );
           return;
         }
        lockf( id_fichier, F_LOCK, 0 );
