@@ -275,8 +275,8 @@ one_again:
 
     if ( taille_buffer > connexion->taille_bloc )
      { Info_new( connexion->log, FALSE, LOG_ERR,
-                "Envoyer_reseau: Paquet trop grand !! (socket %d, size to send %d, max %d)",
-                 connexion->socket, taille_buffer, connexion->taille_bloc );
+                "Envoyer_reseau: Paquet trop grand !! (socket %d, tag %d, sstag %d, size to send %d, max %d)",
+                 connexion->socket, tag, sstag, taille_buffer, connexion->taille_bloc );
        return(-1);
      }
 
