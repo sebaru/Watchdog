@@ -275,8 +275,8 @@ one_again:
 
     if ( taille_buffer > connexion->taille_bloc )
      { Info_new( connexion->log, FALSE, LOG_ERR,
-                "Envoyer_reseau: Paquet trop grand !! (socket %d, tag %d, sstag %d, size to send %d, max %d)",
-                 connexion->socket, tag, sstag, taille_buffer, connexion->taille_bloc );
+                "Envoyer_reseau: Paquet trop grand !! (socket %d, tag %d, ss_tag %d, size to send %d, max %d)",
+                 connexion->socket, tag, ss_tag, taille_buffer, connexion->taille_bloc );
        return(-1);
      }
 
@@ -293,7 +293,7 @@ one_again:
     Entete.taille_donnees = taille_buffer;
 
     Info_new( connexion->log, FALSE, LOG_DEBUG,
-             "Envoyer_reseau: Sending to %d (ssl=%s), tag=%d, sstag=%d, taille_buffer=%d",
+             "Envoyer_reseau: Sending to %d (ssl=%s), tag=%d, ss_tag=%d, taille_buffer=%d",
              connexion->socket, (connexion->ssl ? "yes" : "no" ), tag, ss_tag, taille_buffer );
 
     cpt = sizeof(struct ENTETE_CONNEXION);
