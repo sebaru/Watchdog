@@ -43,7 +43,7 @@
   { guint id;                                                      /* Numero du message dans la structure */
     gchar libelle[ NBR_CARAC_LIBELLE_ICONE_UTF8+1 ];
     guint id_classe;
-    gchar nom_fichier[ 128 ];
+    gchar nom_fichier[ 256 ];
   };
 
  enum 
