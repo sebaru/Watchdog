@@ -739,10 +739,10 @@ printf("bouh\n");
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Proto_envoyer_gif ( struct CMD_TYPE_ICONE *icone )
-  { gchar from_fichier[80], to_fichier[80];
+  { gchar from_fichier[256], to_fichier[256];
     gint source, cible, taille;
     gchar buffer[1024];
-    gchar fichier[80];
+    gchar fichier[256];
     guint cpt_frame;
 
     memcpy ( &fichier, icone->nom_fichier, sizeof(fichier) );

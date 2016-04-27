@@ -419,7 +419,7 @@
 /**********************************************************************************************************/
  void Charger_pixbuf_file ( struct TRAME_ITEM_MOTIF *trame_item, gchar *fichier )
   { gint cpt_frame, source;
-    gchar from_fichier[80];
+    gchar from_fichier[256];
     GdkPixbuf *pixbuf;
 
     trame_item->images = NULL;

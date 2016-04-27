@@ -104,10 +104,15 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_ajouter_editer_icone ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { g_snprintf( Edit_icone.libelle, sizeof(Edit_icone.libelle),
+  { gchar *filename;
+    g_snprintf( Edit_icone.libelle, sizeof(Edit_icone.libelle),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_libelle) ) );
-    g_snprintf( Edit_icone.nom_fichier, sizeof(Edit_icone.nom_fichier),
-                "%s", gnome_file_entry_get_full_path ( GNOME_FILE_ENTRY(Entry_file), TRUE ) );
+    filename = gnome_file_entry_get_full_path ( GNOME_FILE_ENTRY(Entry_file), TRUE );
+    if (strlen (filename) >= sizeof(Edit_icone.nom_fichier) )
+     { printf("CB_AJouter_editer_icone : filename too long... abort\n");
+       reponse = GTK_RESPONSE_CANCEL;
+     }
+    else g_snprintf( Edit_icone.nom_fichier, sizeof(Edit_icone.nom_fichier), "%s", filename );
                   
     switch(reponse)
      { case GTK_RESPONSE_OK:
@@ -376,6 +381,6 @@
     else { gtk_entry_set_text( GTK_ENTRY(Entry_classe_id), _("?") );
            gtk_widget_set_sensitive( Entry_classe_id, FALSE );
          }
-gtk_widget_show_all( F_ajout );
+    gtk_widget_show_all( F_ajout );
   }
 /*--------------------------------------------------------------------------------------------------------*/
