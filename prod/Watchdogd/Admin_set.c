@@ -93,7 +93,8 @@
      { int num, val;
        sscanf ( ligne, "%s %d %d", commande, &num, &val );                               /* Découpage de la ligne de commande */
        if (num<NBR_MESSAGE_ECRITS)
-        { MSG ( num, val );
+        { if (val) val = 1;
+          MSG ( num, val );
           g_snprintf( chaine, sizeof(chaine), " MSG%03d = %d\n", num, val );
         } else
         { g_snprintf( chaine, sizeof(chaine), " MSG -> num '%d' out of range\n", num ); }
@@ -103,7 +104,8 @@
      { int num, val;
        sscanf ( ligne, "%s %d %d", commande, &num, &val );                               /* Découpage de la ligne de commande */
        if (num<NBR_ENTRE_TOR)
-        { SE( num, val );                                                                                 /* Pas de furtivité */
+        { if (val) val = 1;
+          SE( num, val );                                                                                 /* Pas de furtivité */
           g_snprintf( chaine, sizeof(chaine), " E%03d = %d\n", num, val );
         } else
         { g_snprintf( chaine, sizeof(chaine), " E -> num '%d' out of range\n", num ); }
@@ -113,7 +115,8 @@
      { int num, val;
        sscanf ( ligne, "%s %d %d", commande, &num, &val );                               /* Découpage de la ligne de commande */
        if (num<NBR_BIT_MONOSTABLE)
-        { if (val) Envoyer_commande_dls( num );
+        { if (val) val = 1;
+          if (val) Envoyer_commande_dls( num );
               else SM ( num, 0 );
           g_snprintf( chaine, sizeof(chaine), " M%03d = %d\n", num, val );
         } else
@@ -124,7 +127,8 @@
      { int num, val;
        sscanf ( ligne, "%s %d %d", commande, &num, &val );                               /* Découpage de la ligne de commande */
        if (num<NBR_BIT_BISTABLE)
-        { SB ( num, val );
+        { if (val) val = 1;
+          SB ( num, val );
           g_snprintf( chaine, sizeof(chaine), " B%03d = %d\n", num, val );
         } else
         { g_snprintf( chaine, sizeof(chaine), " B -> num '%d' out of range\n", num ); }
@@ -134,7 +138,8 @@
      { int num, val;
        sscanf ( ligne, "%s %d %d", commande, &num, &val );                               /* Découpage de la ligne de commande */
        if (num<NBR_SORTIE_TOR)
-        { SA ( num, val );
+        { if (val) val = 1;
+          SA ( num, val );
           g_snprintf( chaine, sizeof(chaine), " A%03d = %d\n", num, val );
         } else
         { g_snprintf( chaine, sizeof(chaine), " A -> num '%d' out of range\n", num ); }
