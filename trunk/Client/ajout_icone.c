@@ -107,13 +107,23 @@
   { gchar *filename;
     g_snprintf( Edit_icone.libelle, sizeof(Edit_icone.libelle),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_libelle) ) );
-    filename = gnome_file_entry_get_full_path ( GNOME_FILE_ENTRY(Entry_file), TRUE );
-    if (strlen (filename) >= sizeof(Edit_icone.nom_fichier) )
-     { printf("CB_AJouter_editer_icone : filename too long... abort\n");
-       reponse = GTK_RESPONSE_CANCEL;
+
+    if ( ! edition )
+     { filename = gnome_file_entry_get_full_path ( GNOME_FILE_ENTRY(Entry_file), TRUE );
+       if (!filename)
+        { printf("CB_AJouter_editer_icone : file not exist.. abort\n");
+          reponse = GTK_RESPONSE_CANCEL;
+        }
+       else if (strlen (filename) >= sizeof(Edit_icone.nom_fichier) )
+        { printf("CB_AJouter_editer_icone : filename too long... abort\n");
+          reponse = GTK_RESPONSE_CANCEL;
+          g_free(filename);
+        }
+       else { g_snprintf( Edit_icone.nom_fichier, sizeof(Edit_icone.nom_fichier), "%s", filename );
+              g_free(filename);
+            }
      }
-    else g_snprintf( Edit_icone.nom_fichier, sizeof(Edit_icone.nom_fichier), "%s", filename );
-                  
+                 
     switch(reponse)
      { case GTK_RESPONSE_OK:
              { guint classe_icone;
