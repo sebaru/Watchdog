@@ -350,8 +350,8 @@ printf("Proto_effacer_icone: id=%d retour = %d\n", rezo_icone->id, retour );
                  (gchar *)&icone_version, sizeof( icone_version ) );
   }
 /**********************************************************************************************************/
-/* Envoyer_synchro_icone: Balance l'ensemble des fichiers de travail aux clients                          */
-/* Entrée: la liste en cours, le repertoire                                                               */
+/* Preparer_synchro_directory: Prepare l'envoi groupée de l'ensemble des fichiers de travail aux clients  */
+/* Entrée: le client destinataire et le directory a envoyer                                               */
 /* Sortie: taille globale                                                                                 */
 /**********************************************************************************************************/
  static gint Preparer_synchro_directory ( struct CLIENT *client, gchar *directory )
