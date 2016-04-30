@@ -50,7 +50,7 @@
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_CLASSE:
              { Envoi_client( client, TAG_SYNOPTIQUE, SSTAG_SERVEUR_CREATE_PAGE_ICONE_OK, NULL, 0 );
-               Ref_client( client );                             /* Indique que la structure est utilisée */
+               Ref_client( client, "Send Classe" );
                pthread_create( &tid, NULL, (void *)Envoyer_classes_thread, client );
                pthread_detach( tid );
              }
@@ -83,7 +83,7 @@
        case SSTAG_CLIENT_WANT_PAGE_ICONE:
             { client->classe_icone = ((struct CMD_TYPE_CLASSE *)connexion->donnees)->id;
               Envoi_client( client, TAG_ICONE, SSTAG_SERVEUR_CREATE_PAGE_ICONE_OK, NULL, 0 );
-              Ref_client( client );                              /* Indique que la structure est utilisée */
+              Ref_client( client, "Send Icone" );
               pthread_create( &tid, NULL, (void *)Envoyer_icones_thread, client );
               pthread_detach( tid );
              }

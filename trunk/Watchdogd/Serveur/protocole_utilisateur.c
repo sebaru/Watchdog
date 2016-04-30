@@ -55,7 +55,7 @@
              }
             break;
        case SSTAG_CLIENT_WANT_PAGE_GROUPE:
-             { Ref_client( client );                             /* Indique que la structure est utilisée */
+             { Ref_client( client, "Send Groupe" );
                pthread_create( &tid, NULL, (void *)Envoyer_groupes_thread, client );
                pthread_detach( tid );
              }
@@ -81,17 +81,15 @@
 
        case SSTAG_CLIENT_WANT_PAGE_UTIL:
              { Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_CREATE_PAGE_UTIL_OK, NULL, 0 );
-               Ref_client( client );                             /* Indique que la structure est utilisée */
+               Ref_client( client, "Send Util" );
                pthread_create( &tid, NULL, (void *)Envoyer_utilisateurs_thread, client );
                pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_WANT_GROUPE_FOR_UTIL:
-             { Ref_client( client );                             /* Indique que la structure est utilisée */
-                                          pthread_create( &tid, NULL,
-                                                          (void *)Envoyer_groupes_pour_util_thread, client );
-                                          pthread_detach( tid );
-                                          break;
+             { Ref_client( client, "Send Groupe for util" );
+               pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_util_thread, client );
+               pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_EDIT_UTIL:

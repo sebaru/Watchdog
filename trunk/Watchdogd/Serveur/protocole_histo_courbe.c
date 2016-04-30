@@ -49,7 +49,7 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_SOURCE_FOR_HISTO_COURBE:
-             { Ref_client( client );                             /* Indique que la structure est utilisée */
+             { /*Ref_client( client );                             /* Indique que la structure est utilisée */
                /*pthread_create( &tid, NULL, (void *)Envoyer_entreeANA_for_histo_courbe_thread, client );
                pthread_detach( tid );*/
              }
@@ -57,7 +57,7 @@
        case SSTAG_CLIENT_ADD_HISTO_COURBE:
              { while (client->courbe.num != -1) { printf("attends\n"); sched_yield(); }
                memcpy( &client->courbe, connexion->donnees, sizeof(struct CMD_TYPE_COURBE) );
-               Ref_client( client );                             /* Indique que la structure est utilisée */
+               Ref_client( client, "Ajouter histo courbe" );
                pthread_create( &tid, NULL, (void *)Proto_ajouter_histo_courbe_thread, client );
                pthread_detach( tid );
              }

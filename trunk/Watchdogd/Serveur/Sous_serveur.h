@@ -4,7 +4,7 @@
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * Sousèserveyr.h
+ * Sous_serveur.h
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -71,7 +71,7 @@
                                                                                                             /* Dans serveur.c */
  extern gboolean Ssrv_Lire_config ( void );
  extern void Unref_client ( struct CLIENT *client );
- extern void Ref_client ( struct CLIENT *client );
+ extern void Ref_client ( struct CLIENT *client, gchar *reason );
  extern void Deconnecter ( struct CLIENT *client );
  extern void Run_handle_client ( struct CLIENT *client );
  extern gchar *Mode_vers_string ( gint mode );
