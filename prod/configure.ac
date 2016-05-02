@@ -1,16 +1,13 @@
 dnl Process this file with autoconf to produce a configure script.
 
-
-
 dnl define([gittag], esyscmd([sh -c "git describe --always  | tr -d '\n'"]))
-define([SVNVERSION], esyscmd([sh -c "cat RevisionNumber.txt"]))
+define([SVNVERSION], esyscmd([sh -c "svnversion -n | sed s/M//g"]))
 AC_INIT([Watchdog], [2.10.SVNVERSION], [project.watchdog@gmail.com], [Watchdog], [https://wiki.connect4all.fr] )
 AC_CANONICAL_TARGET
 AC_CONFIG_SRCDIR([Watchdogd/Watchdogd.c])
 AM_INIT_AUTOMAKE
 
 AC_CONFIG_HEADER(config.h)
-
 
 dnl Checks for programs.
 AC_PROG_CXX
