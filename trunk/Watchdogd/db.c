@@ -260,9 +260,9 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Update_database_schema ( void )
-  { gint database_version;
+  { gint database_version, server_major, server_minor, server_svnrev;
+    gchar chaine[32], requete[4096];
     gchar *nom, *valeur;
-    gchar requete[4096];
     struct DB *db;
 
     if (Config.instance_is_master != TRUE)                                                  /* Do not update DB if not master */
@@ -413,13 +413,15 @@
      
     Libere_DB_SQL(&db);
 
-    if (Modifier_configDB ( "global", "database_version", "2669" ))
+    sscanf ( VERSION, "%d.%d.%d", &server_major, &server_minor, &server_svnrev );
+     g_snprintf( chaine, sizeof(chaine), "%s", server_svnrev );
+    if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
-                "Update_database_schema: updating Database_version OK" );
+                "Update_database_schema: updating Database_version to %d OK", server_svnrev );
      }
     else
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
-                "Update_database_schema: updating Database_version FAILED" );
+                "Update_database_schema: updating Database_version to %d FAILED", server_svnrev );
      }
 
   }
