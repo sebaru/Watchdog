@@ -51,7 +51,7 @@
      { case SSTAG_CLIENT_REQUETE_HISTO_MSGS:
              { memcpy( &client->requete, (struct CMD_REQUETE_HISTO_MSGS *)connexion->donnees,
                        sizeof( client->requete ) );
-               Ref_client( client );  /* Indique que la structure est utilisée */
+               Ref_client( client, "Send histo msgs" );
                pthread_create( &tid, NULL, (void *)Proto_envoyer_histo_msgs_thread, client );
                pthread_detach( tid );
                Client_mode( client, VALIDE );

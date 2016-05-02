@@ -150,10 +150,10 @@
                break;
           case ENVOI_SYNCHRO      :
                Client_mode( client, VALIDE_NON_ROOT );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Synchro Histo" );
                pthread_create( &tid, NULL, (void *)Envoyer_histo_thread, client );
                pthread_detach( tid );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Synchro Directory" );
                pthread_create( &tid, NULL, (void *)Envoyer_synchro_directory_thread, client );
                pthread_detach( tid );
                break;
@@ -161,122 +161,122 @@
                break;
           case ENVOI_GROUPE_FOR_UTIL:
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send groupe util" );
                pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_util_thread, client );
                pthread_detach( tid );
                break;
           case ENVOI_GROUPE_FOR_SYNOPTIQUE:
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send groupe synoptique" );
                pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_synoptique_thread, client );
                pthread_detach( tid );
                break;
           case ENVOI_GROUPE_FOR_PROPRIETE_SYNOPTIQUE:
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send groupe propriete syn" );
                pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_propriete_synoptique_thread, client );
                pthread_detach( tid );
                break;
           case ENVOI_MOTIF_ATELIER:
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send motif atelier" );
                pthread_create( &tid, NULL, (void *)Envoyer_motif_atelier_thread, client );
                pthread_detach( tid );
                break;
           case ENVOI_COMMENT_ATELIER:
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send comment atelier" );
                pthread_create( &tid, NULL, (void *)Envoyer_comment_atelier_thread, client );
                pthread_detach( tid );
                break;
           case ENVOI_PASSERELLE_ATELIER:
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send passerelle atelier" );
                pthread_create( &tid, NULL, (void *)Envoyer_passerelle_atelier_thread, client );
                pthread_detach( tid );
                break;
           case ENVOI_CAPTEUR_ATELIER:
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send capteur atelier" );
                pthread_create( &tid, NULL, (void *)Envoyer_capteur_atelier_thread, client );
                pthread_detach( tid );
                break;
           case ENVOI_CAMERA_SUP_ATELIER:
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send camera sup atelier" );
                pthread_create( &tid, NULL, (void *)Envoyer_camera_sup_atelier_thread, client );
                pthread_detach( tid );
                break;
 
           case ENVOI_MOTIF_SUPERVISION:
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send motif supervision" );
                pthread_create( &tid, NULL, (void *)Envoyer_motif_supervision_thread, client );
                pthread_detach( tid );
                break;   
           case ENVOI_COMMENT_SUPERVISION:
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send comment supervision" );
                pthread_create( &tid, NULL, (void *)Envoyer_comment_supervision_thread, client );
                pthread_detach( tid );
                break;
           case ENVOI_PASSERELLE_SUPERVISION:
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send passerelle supervision" );
                pthread_create( &tid, NULL, (void *)Envoyer_passerelle_supervision_thread, client );
                pthread_detach( tid );
                break;   
           case ENVOI_PALETTE_SUPERVISION:
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send palette supervision" );
                pthread_create( &tid, NULL, (void *)Envoyer_palette_supervision_thread, client );
                pthread_detach( tid );
                break;   
           case ENVOI_CAPTEUR_SUPERVISION:
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send palette supervision" );
                pthread_create( &tid, NULL, (void *)Envoyer_capteur_supervision_thread, client );
                pthread_detach( tid );
                break;   
           case ENVOI_CAMERA_SUP_SUPERVISION:
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send camera sup supervision" );
                pthread_create( &tid, NULL, (void *)Envoyer_camera_sup_supervision_thread, client );
                pthread_detach( tid );
                break;
           case ENVOI_IXXX_SUPERVISION :
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send bit init supervision" );
                pthread_create( &tid, NULL, (void *)Envoyer_bit_init_supervision_thread, client );
                pthread_detach( tid );
                break;   
           case ENVOI_ICONE_FOR_ATELIER:
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send icone atelier" );
                pthread_create( &tid, NULL, (void *)Envoyer_icones_pour_atelier_thread, client );
                pthread_detach( tid );
                break;
           case ENVOI_CLASSE_FOR_ATELIER:
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send classes atelier" );
                pthread_create( &tid, NULL, (void *)Envoyer_classes_pour_atelier_thread, client );
                pthread_detach( tid );
                break;
           case ENVOI_SYNOPTIQUE_FOR_ATELIER:
                Client_mode( client, VALIDE );
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send synoptique atelier" );
                pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_atelier_thread, client );
                pthread_detach( tid );
                break;
           case ENVOI_SYNOPTIQUE_FOR_ATELIER_PALETTE:
                Client_mode( client, VALIDE );                             /* Si pas de comments ... */
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send synoptique atelier palette" );
                pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_atelier_palette_thread, client );
                pthread_detach( tid );
                break;
           case ENVOI_PALETTE_FOR_ATELIER_PALETTE:
                Client_mode( client, VALIDE );                             /* Si pas de comments ... */
-               Ref_client( client );                                                 /* Indique que la structure est utilisée */
+               Ref_client( client, "Send palette atelier" );
                pthread_create( &tid, NULL, (void *)Envoyer_palette_atelier_thread, client );
                pthread_detach( tid );
                break;

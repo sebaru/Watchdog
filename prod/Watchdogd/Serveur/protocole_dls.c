@@ -50,7 +50,7 @@
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_DLS:
              { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_CREATE_PAGE_DLS_OK, NULL, 0 );
-               Ref_client( client );                             /* Indique que la structure est utilisée */
+               Ref_client( client, "Send plugins dls" );
                pthread_create( &tid, NULL, (void *)Envoyer_plugins_dls_thread, client );
                pthread_detach( tid );
              }
@@ -101,13 +101,13 @@
        case SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_FIN:
              { memcpy( &client->dls, (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees,
                        sizeof( client->dls ) );
-               Ref_client( client );                             /* Indique que la structure est utilisée */
+               Ref_client( client, "Send Compiler D.L.S" );
                pthread_create( &tid, NULL, (void *)Proto_compiler_source_dls_thread, client );
                pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_WANT_SYN_FOR_PLUGIN_DLS:
-             { Ref_client( client );                             /* Indique que la structure est utilisée */
+             { Ref_client( client, "Send Synoptique pour plugin dls" );
                pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_plugin_dls_thread, client );
                pthread_detach( tid );
              }

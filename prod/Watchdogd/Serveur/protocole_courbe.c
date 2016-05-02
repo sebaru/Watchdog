@@ -50,7 +50,7 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_SOURCE_FOR_COURBE:
-             { Ref_client( client );  /* Indique que la structure est utilisée */
+             { Ref_client( client, "Send mnemonique for courbe" );
                pthread_create( &tid, NULL, (void *)Envoyer_mnemoniques_for_courbe_thread, client );
                pthread_detach( tid );
              }
@@ -58,7 +58,7 @@
        case SSTAG_CLIENT_ADD_COURBE:
              { while (client->courbe.num != -1) { printf("attends\n"); sched_yield(); }
                memcpy( &client->courbe, connexion->donnees, sizeof(struct CMD_TYPE_COURBE) );
-               Ref_client( client );                             /* Indique que la structure est utilisée */
+               Ref_client( client, "Send Ajouter courbe" );
                pthread_create( &tid, NULL, (void *)Proto_ajouter_courbe_thread, client );
                pthread_detach( tid );
              }

@@ -50,7 +50,7 @@
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE:
              { Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_CREATE_PAGE_MNEMO_OK, NULL, 0 );
-               Ref_client( client );                             /* Indique que la structure est utilisée */
+               Ref_client( client, "Send Mnemonique" );
                pthread_create( &tid, NULL, (void *)Envoyer_mnemoniques_thread, client );
                pthread_detach( tid );
              }
@@ -80,7 +80,7 @@
              }
             break;
        case SSTAG_CLIENT_WANT_DLS_FOR_MNEMO:
-             { Ref_client( client );                             /* Indique que la structure est utilisée */
+             { Ref_client( client, "Send DLS for mnemo" );
                pthread_create( &tid, NULL, (void *)Envoyer_plugins_dls_pour_mnemo_thread, client );
                pthread_detach( tid );
              }

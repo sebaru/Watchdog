@@ -167,7 +167,7 @@
             break;
 /************************************* Gestion des cameras synoptiques ************************************/
        case SSTAG_CLIENT_WANT_PAGE_CAMERA_FOR_ATELIER:
-             { Ref_client( client );                             /* Indique que la structure est utilisée */
+             { Ref_client( client, "Send Camera for atelier" );
                pthread_create( &tid, NULL, (void *)Envoyer_cameras_for_atelier_thread, client );
                pthread_detach( tid );
              }

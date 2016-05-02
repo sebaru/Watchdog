@@ -51,7 +51,7 @@
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_MESSAGE:
              { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_CREATE_PAGE_MESSAGE_OK, NULL, 0 );
-               Ref_client( client );  /* Indique que la structure est utilisée */
+               Ref_client( client, "Send Message" );
                pthread_create( &tid, NULL, (void *)Envoyer_messages_thread, client );
                pthread_detach( tid );
              }
@@ -81,7 +81,7 @@
              }
             break;
        case SSTAG_CLIENT_WANT_SYN_FOR_MESSAGE:
-             { Ref_client(client);
+             { Ref_client( client, "Send Synoptique for message" );
                pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_message_thread, client );
                pthread_detach( tid );
              }
