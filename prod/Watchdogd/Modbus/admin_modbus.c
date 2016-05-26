@@ -149,38 +149,6 @@
     pthread_mutex_unlock( &Cfg_modbus.lib->synchro );
   }
 /**********************************************************************************************************/
-/* Admin_modbus_start: Demande le demarrage d'un module en parametre                                      */
-/* Entrée: La connexion et le numéro de module                                                            */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Admin_modbus_start ( struct CONNEXION *connexion, gint id )
-  { gchar chaine[128];
-
-    g_snprintf( chaine, sizeof(chaine), " -- Demarrage d'un module MODBUS\n" );
-    Admin_write ( connexion, chaine );
-
-    Cfg_modbus.admin_start = id;
-
-    g_snprintf( chaine, sizeof(chaine), " Module MODBUS %d started\n", id );
-    Admin_write ( connexion, chaine );
-  }
-/**********************************************************************************************************/
-/* Admin_modbus_stop: Demande l'arret d'un module en parametre                                            */
-/* Entrée: La connexion et le numéro de module                                                            */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Admin_modbus_stop ( struct CONNEXION *connexion, gint id )
-  { gchar chaine[128];
-
-    g_snprintf( chaine, sizeof(chaine), " -- Arret d'un module MODBUS\n" );
-    Admin_write ( connexion, chaine );
-
-    Cfg_modbus.admin_stop = id;
-
-    g_snprintf( chaine, sizeof(chaine), " Module MODBUS %d stopped\n", id );
-    Admin_write ( connexion, chaine );
-  }
-/**********************************************************************************************************/
 /* Admin_modbus_set: Change un parametre dans la DB modbus                                                */
 /* Entrée: La connexion et la ligne de commande (champ valeur)                                            */
 /* Sortie: Néant                                                                                          */
@@ -245,36 +213,39 @@
 
     retour = Modifier_modbusDB ( &module->modbus );
     if (retour)
-     { Admin_write ( connexion, " ERROR : MODBUS module NOT set\n" ); }
+     { snprintf( chaine, sizeof(chaine), " ERROR : MODBUS module parameter '%s' NOT set\n", param ); }
     else
-     { Admin_write ( connexion, " MODBUS module parameter set\n" ); }
+     { snprintf( chaine, sizeof(chaine), " MODBUS module parameter '%s' set\n", param ); }
+    Admin_write ( connexion, chaine );
   }
-/**********************************************************************************************************/
-/* Admin_command : Fonction principale de traitement des commandes du thread                              */
-/* Entrée: La connexion et la ligne de commande a parser                                                  */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_command : Fonction principale de traitement des commandes du thread                                                  */
+/* Entrée: La connexion et la ligne de commande a parser                                                                      */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128], chaine[128];
 
-    sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
+    sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
 
     if ( ! strcmp ( commande, "start" ) )
      { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_modbus_start ( connexion, num );
+       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
+       snprintf( chaine, sizeof(chaine), "%d enable 1", num );
+       Admin_modbus_set ( connexion, chaine );
+     }
+    else if ( ! strcmp ( commande, "stop" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
+       snprintf( chaine, sizeof(chaine), "%d enable 0", num );
+       Admin_modbus_set ( connexion, chaine );
      }
     else if ( ! strcmp ( commande, "list" ) )
      { Admin_modbus_list ( connexion );
      }
-    else if ( ! strcmp ( commande, "stop" ) )
-     { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_modbus_stop ( connexion, num );
-     }
     else if ( ! strcmp ( commande, "show" ) )
      { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
        Admin_modbus_show ( connexion, num );
      }
     else if ( ! strcmp ( commande, "reload" ) )

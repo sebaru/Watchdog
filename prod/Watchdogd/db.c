@@ -410,11 +410,26 @@
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` ADD `compil_status` int(11) NOT NULL AFTER `compil_date`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
-     
+
+    if (database_version < 2728)
+     { g_snprintf( requete, sizeof(requete),
+      "ALTER TABLE `config` CHANGE `instance_id` `instance_id` VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete),
+      "ALTER TABLE `config` CHANGE `nom_thread` `nom_thread` VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete),
+      "ALTER TABLE `config` CHANGE `nom` `nom` VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete),
+      "ALTER TABLE `config` ADD PRIMARY KEY( `instance_id`, `nom_thread`, `nom`);" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
     Libere_DB_SQL(&db);
 
     sscanf ( VERSION, "%d.%d.%d", &server_major, &server_minor, &server_svnrev );
-     g_snprintf( chaine, sizeof(chaine), "%s", server_svnrev );
+    g_snprintf( chaine, sizeof(chaine), "%d", server_svnrev );
     if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
                 "Update_database_schema: updating Database_version to %d OK", server_svnrev );
@@ -425,4 +440,4 @@
      }
 
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

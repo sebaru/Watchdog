@@ -990,17 +990,17 @@
      }
     memset (&module->response, 0, sizeof(struct TRAME_MODBUS_REPONSE) );
   }
-/**********************************************************************************************************/
-/* Recuperer_borne: Recupere les informations d'une borne MODBUS                                          */
-/* Entrée: identifiants des modules et borne                                                              */
-/* Sortie: ?                                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Recuperer_borne: Recupere les informations d'une borne MODBUS                                                              */
+/* Entrée: identifiants des modules et borne                                                                                  */
+/* Sortie: ?                                                                                                                  */
+/******************************************************************************************************************************/
  static void Recuperer_reponse_module( struct MODULE_MODBUS *module )
   { fd_set fdselect;
     struct timeval tv;
     gint retval, cpt;
 
-    if (module->date_last_reponse + 300 < Partage->top)                  /* Detection attente trop longue */
+    if (module->date_last_reponse + 300 < Partage->top)                                      /* Detection attente trop longue */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                 "Recuperer_reponse_module: Pb reponse module %d, enable=%d, started=%d, mode=%02d,"
                 "transactionID=%06d, nbr_deconnect=%02d, last_reponse=%03ds ago, retente=in %03ds, date_next_eana=in %03ds",
@@ -1017,7 +1017,7 @@
     FD_ZERO(&fdselect);
     FD_SET(module->connexion, &fdselect );
     tv.tv_sec = 0;
-    tv.tv_usec= 1000;                                                          /* Attente d'un caractere */
+    tv.tv_usec= 1000;                                                                               /* Attente d'un caractere */
     retval = select(module->connexion+1, &fdselect, NULL, NULL, &tv );
 
     if ( retval>0 && FD_ISSET(module->connexion, &fdselect) )
@@ -1043,7 +1043,7 @@
           if (module->nbr_oct_lu >= 
               TAILLE_ENTETE_MODBUS + ntohs(module->response.taille))
            { 
-             Processer_trame( module );                         /* Si l'on a trouvé une trame complète !! */
+             Processer_trame( module );                                             /* Si l'on a trouvé une trame complète !! */
              module->nbr_oct_lu = 0;
            }
         }
@@ -1055,22 +1055,22 @@
         }
       }
   }
-/**********************************************************************************************************/
-/* Main: Fonction principale du MODBUS                                                                    */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Main: Fonction principale du MODBUS                                                                                        */
+/******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct MODULE_MODBUS *module;
     GSList *liste;
 
     prctl(PR_SET_NAME, "W-MODBUS", 0, 0, 0 );
-    memset( &Cfg_modbus, 0, sizeof(Cfg_modbus) );               /* Mise a zero de la structure de travail */
-    Cfg_modbus.lib = lib;                      /* Sauvegarde de la structure pointant sur cette librairie */
-    Cfg_modbus.lib->TID = pthread_self();                               /* Sauvegarde du TID pour le pere */
-    Modbus_Lire_config ();                              /* Lecture de la configuration logiciel du thread */
+    memset( &Cfg_modbus, 0, sizeof(Cfg_modbus) );                                   /* Mise a zero de la structure de travail */
+    Cfg_modbus.lib = lib;                                          /* Sauvegarde de la structure pointant sur cette librairie */
+    Cfg_modbus.lib->TID = pthread_self();                                                   /* Sauvegarde du TID pour le pere */
+    Modbus_Lire_config ();                                                  /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Demarrage . . . TID = %p", pthread_self() );
-    Cfg_modbus.lib->Thread_run = TRUE;                                              /* Le thread tourne ! */
+    Cfg_modbus.lib->Thread_run = TRUE;                                                                  /* Le thread tourne ! */
 
     g_snprintf( Cfg_modbus.lib->admin_prompt, sizeof(Cfg_modbus.lib->admin_prompt), "modbus" );
     g_snprintf( Cfg_modbus.lib->admin_help,   sizeof(Cfg_modbus.lib->admin_help),   "Manage Modbus system" );
@@ -1082,14 +1082,14 @@
        goto end;
      }
 
-    Cfg_modbus.Modules_MODBUS = NULL;                                     /* Init des variables du thread */
+    Cfg_modbus.Modules_MODBUS = NULL;                                                         /* Init des variables du thread */
 
-    if ( Charger_tous_MODBUS() == FALSE )                                /* Chargement des modules modbus */
+    if ( Charger_tous_MODBUS() == FALSE )                                                    /* Chargement des modules modbus */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "Run_modbus: No module MODBUS found -> stop" );
-       Cfg_modbus.lib->Thread_run = FALSE;                                  /* Le thread ne tourne plus ! */
+       Cfg_modbus.lib->Thread_run = FALSE;                                                      /* Le thread ne tourne plus ! */
      }
 
-    while(lib->Thread_run == TRUE)                                       /* On tourne tant que necessaire */
+    while(lib->Thread_run == TRUE)                                                           /* On tourne tant que necessaire */
      { usleep(10000);
 
        if (lib->Thread_sigusr1 == TRUE)
@@ -1104,34 +1104,28 @@
           Cfg_modbus.reload = FALSE;
         }
 
-       if (Cfg_modbus.admin_start)
-        { module = Chercher_module_by_id ( Cfg_modbus.admin_start );
-          module->modbus.enable = TRUE;
-          Cfg_modbus.admin_start = 0;
-        }
-
-       if (Cfg_modbus.admin_stop)
-        { module = Chercher_module_by_id ( Cfg_modbus.admin_stop );
-          if (module) module->modbus.enable = FALSE;
-          Deconnecter_module  ( module );
-          Cfg_modbus.admin_stop = 0;
-        }
-
-       if (Cfg_modbus.Modules_MODBUS == NULL ||                 /* Si pas de module référencés, on attend */
+       if (Cfg_modbus.Modules_MODBUS == NULL ||                                     /* Si pas de module référencés, on attend */
            Modbus_is_actif() == FALSE)
         { sleep(2); continue; }
 
        liste = Cfg_modbus.Modules_MODBUS;
        while (liste && (lib->Thread_run == TRUE) && (Cfg_modbus.reload == FALSE) )
         { module = (struct MODULE_MODBUS *)liste->data;
-          if ( module->modbus.enable != TRUE || 
-               Partage->top < module->date_retente )           /* Si attente retente, on change de module */
-           { liste = liste->next;                      /* On prépare le prochain accès au prochain module */
+
+          if ( module->modbus.enable == FALSE && module->started )                                  /* Module a deconnecter ! */
+           { Deconnecter_module  ( module );
+             liste = liste->next;                                          /* On prépare le prochain accès au prochain module */
              continue;
            }
 
-/*********************************** Début de l'interrogation du module ***********************************/
-          if ( ! module->started )                                           /* Communication OK ou non ? */
+          if ( module->modbus.enable == FALSE ||                       /* Si module DOWN ou si UP mais dans le delai de retry */
+               Partage->top < module->date_retente )                               /* Si attente retente, on change de module */
+           { liste = liste->next;                                          /* On prépare le prochain accès au prochain module */
+             continue;
+           }
+
+/********************************************* Début de l'interrogation du module *********************************************/
+          if ( ! module->started )                                                               /* Communication OK ou non ? */
            { if ( ! Connecter_module( module ) )
               { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
                           "Run_modbus: Module %03d DOWN. retrying in %d", module->modbus.id, MODBUS_RETRY/10 );
@@ -1139,11 +1133,11 @@
               }
            }
           else
-           { if ( module->request )                                  /* Requete en cours pour ce module ? */
+           { if ( module->request )                                                      /* Requete en cours pour ce module ? */
               { Recuperer_reponse_module ( module ); }
              else 
-              { if (module->date_next_eana<Partage->top)           /* Gestion décalée des I/O Analogiques */
-                 { module->date_next_eana = Partage->top + MBUS_TEMPS_UPDATE_IO_ANA;/* Tous les 2 dixieme */
+              { if (module->date_next_eana<Partage->top)                               /* Gestion décalée des I/O Analogiques */
+                 { module->date_next_eana = Partage->top + MBUS_TEMPS_UPDATE_IO_ANA;                    /* Tous les 2 dixieme */
                    module->do_check_eana = TRUE;
                  }
                 switch (module->mode)
@@ -1171,13 +1165,13 @@
                                                  { Interroger_sortie_ana( module );
                                                  }
                                                 else module->mode = MODBUS_GET_DI;
-                                                module->do_check_eana = FALSE;       /* Le check est fait */
+                                                module->do_check_eana = FALSE;                           /* Le check est fait */
                                                 break;
                    
                  }
               }
            }
-          liste = liste->next;                         /* On prépare le prochain accès au prochain module */
+          liste = liste->next;                                             /* On prépare le prochain accès au prochain module */
         }
      }
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
@@ -1186,8 +1180,8 @@
 end:
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
              "Run_thread: Down . . . TID = %p", pthread_self() );
-    Cfg_modbus.lib->Thread_run = FALSE;                                     /* Le thread ne tourne plus ! */
-    Cfg_modbus.lib->TID = 0;                              /* On indique au master que le thread est mort. */
+    Cfg_modbus.lib->Thread_run = FALSE;                                                         /* Le thread ne tourne plus ! */
+    Cfg_modbus.lib->TID = 0;                                                  /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
