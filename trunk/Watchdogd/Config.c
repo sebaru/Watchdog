@@ -147,7 +147,7 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db host              %s", Config.db_host );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db database          %s", Config.db_database );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db username          %s", Config.db_username );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db password          %s", Config.db_password );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db password          *******" );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db port              %d", Config.db_port );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config compil               %d", Config.compil );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
