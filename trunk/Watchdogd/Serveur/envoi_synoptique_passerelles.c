@@ -103,11 +103,11 @@
      }
   }
 /**********************************************************************************************************/
-/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
-/* Entrée: Néant                                                                                          */
+/* Envoyer_passerelle_tag: Envoi des passerelles au client en parametre                                   */
+/* Entrée: Le client destinataire et les tags reseaux                                                     */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void *Envoyer_passerelle_atelier_thread ( struct CLIENT *client )
+ static void Envoyer_passerelle_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
   { struct CMD_ENREG nbr;
     struct CMD_TYPE_PASSERELLE *pass;
     struct DB *db;
@@ -115,54 +115,9 @@
     g_snprintf( titre, sizeof(titre), "W-PASS-%06d", client->ssrv_id );
     prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
-    if ( ! Recuperer_passerelleDB( &db, client->syn.id ) )
-     { Client_mode( client, ENVOI_CAPTEUR_ATELIER );                            /* Si pas de comments ... */
-       Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit ( NULL );
-     }
-
-    nbr.num = db->nbr_result;
-    if (nbr.num)
-     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d gateways", nbr.num );
-       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
-                       (gchar *)&nbr, sizeof(struct CMD_ENREG) );
-     }
-
-    for( ; ; )
-     { pass = Recuperer_passerelleDB_suite( &db );
-       if (!pass)
-        { Client_mode( client, ENVOI_CAPTEUR_ATELIER );               /* Si pas de comments ... */
-          Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS_FIN, NULL, 0 );
-          Unref_client( client );                                     /* Déréférence la structure cliente */
-          pthread_exit ( NULL );
-        }
-
-       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_passerelle_atelier: pass %d (%s) to client %s",
-                 pass->id, pass->libelle, client->machine );
-       Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS,
-                      (gchar *)pass, sizeof(struct CMD_TYPE_PASSERELLE) );
-       g_free(pass);
-     }
-  }
-/**********************************************************************************************************/
-/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_passerelle_supervision_thread ( struct CLIENT *client )
-  { struct CMD_ENREG nbr;
-    struct CMD_TYPE_PASSERELLE *pass;
-    struct DB *db;
-
-    prctl(PR_SET_NAME, "W-EnvoiPass", 0, 0, 0 );
-
-    if ( ! Recuperer_passerelleDB( &db, client->syn.id ) )
-     { Client_mode( client, ENVOI_PALETTE_SUPERVISION );                        /* Si pas de comments ... */
-       Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit ( NULL );
-     }
-
+    if ( ! Recuperer_passerelleDB( &db, client->syn.id ) )                        /* Si pas de passerelle */
+     { return; }
+     
     nbr.num = db->nbr_result;
     if (nbr.num)
      { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d gateways", nbr.num );
@@ -173,10 +128,8 @@
     for( ; ; )
      { pass = Recuperer_passerelleDB_suite( &db );
        if (!pass)                                                                           /* Terminé ?? */
-        { Client_mode( client, ENVOI_PALETTE_SUPERVISION );
-          Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN, NULL, 0 );
-          Unref_client( client );                                     /* Déréférence la structure cliente */
-          pthread_exit( NULL );
+        { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
+          return;
         }
 
        if ( ! g_list_find(client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_1) )
@@ -201,11 +154,37 @@
         }
 
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_passerelle_supervision: pass %d (%s) to client %s",
+                "Envoyer_passerelle_tag: pass %d (%s) to client %s",
                  pass->id, pass->libelle, client->machine );
-       Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS,
+       Envoi_client ( client, tag, sstag,
                       (gchar *)pass, sizeof(struct CMD_TYPE_PASSERELLE) );
        g_free(pass);
      }
+  }
+/**********************************************************************************************************/
+/* Envoyer_passerelle_atelier_thread: Envoi des passerelles au client en mode atelier                     */
+/* Entrée: Le client destinaire                                                                           */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void *Envoyer_passerelle_atelier_thread ( struct CLIENT *client )
+  { Envoyer_passerelle_tag ( client, TAG_ATELIER,
+	                         SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS,
+	                         SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS_FIN );
+    Client_mode( client, ENVOI_CAPTEUR_ATELIER );
+    Unref_client( client );                                           /* Déréférence la structure cliente */
+    pthread_exit ( NULL );
+  }
+/**********************************************************************************************************/
+/* Envoyer_passerelle_supervision_thread: Envoi des passerelles au client en mode supervision             */
+/* Entrée: Le client destinaire                                                                           */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void *Envoyer_passerelle_supervision_thread ( struct CLIENT *client )
+  { Envoyer_passerelle_tag ( client, TAG_SUPERVISION,
+	                         SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS,
+	                         SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN );
+    Client_mode( client, ENVOI_PALETTE_SUPERVISION );
+    Unref_client( client );                                           /* Déréférence la structure cliente */
+    pthread_exit ( NULL );
   }
 /*--------------------------------------------------------------------------------------------------------*/
