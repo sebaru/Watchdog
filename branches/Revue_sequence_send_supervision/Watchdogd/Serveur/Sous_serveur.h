@@ -202,8 +202,7 @@
                                                        struct CMD_TYPE_CAMERA_SUP *camera_sup );
 
                                                                                           /* Dans envoi_synoptique_palettes.c */
- extern void *Envoyer_palette_atelier_thread ( struct CLIENT *client );
- extern void *Envoyer_palette_supervision_thread ( struct CLIENT *client );
+ extern void Envoyer_palette_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
  extern void Proto_effacer_palette_atelier ( struct CLIENT *client, struct CMD_TYPE_PALETTE *rezo_palette );
  extern void Proto_ajouter_palette_atelier ( struct CLIENT *client, struct CMD_TYPE_PALETTE *rezo_palette );
  extern void Proto_valider_editer_palette_atelier ( struct CLIENT *client, struct CMD_TYPE_PALETTE *rezo_palette );

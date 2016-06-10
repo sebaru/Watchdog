@@ -133,10 +133,6 @@
        if (client->bit_capteurs)    { g_list_foreach( client->bit_capteurs, (GFunc) g_free, NULL );
                                       g_list_free(client->bit_capteurs);
                                     }
-       if (client->bit_init_capteur)
-                                    { g_list_foreach( client->bit_init_capteur, (GFunc) g_free, NULL );
-                                      g_list_free(client->bit_init_capteur);
-                                    }
        if (client->courbes)         { g_list_foreach( client->courbes, (GFunc)g_free, NULL );
                                       g_list_free(client->courbes);
                                     }

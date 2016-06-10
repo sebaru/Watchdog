@@ -36,16 +36,30 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void *Proto_Envoyer_supervision_thread ( struct CLIENT *client )
-  { GSList *liste_bit_init;
+  { GSList *liste_bits_init, *liste_capteurs;
     gchar titre[20];
     g_snprintf( titre, sizeof(titre), "W-SUPR-%06d", client->ssrv_id );
     prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
-    liste_bit_init = Envoyer_motif_tag ( client, TAG_SUPERVISION,
-                                         SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
-	                                     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN );
+    liste_bits_init = Envoyer_motif_tag ( client, TAG_SUPERVISION,
+                                          SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
+	                                      SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN );
     /*Client_mode( client, ENVOI_COMMENT_SUPERVISION );*/
-    g_slist_free ( liste_bit_init );
+
+
+    Envoyer_palette_ ( client, TAG_SUPERVISION,
+                               SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,
+                               SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE_FIN );
+    /*Client_mode( client, ENVOI_CAPTEUR_SUPERVISION );                        /* Si pas de comments ... */
+
+
+    liste_capteurs = NULL;
+    Envoyer_bit_init_supervision ( client, liste_bits_init, liste_capteurs );
+
+    g_slist_free ( liste_bits_init );
+    g_slist_foreach( liste_capteurs, (GFunc) g_free, NULL );
+    g_slist_free( liste_capteurs );
+
     g_free(client->syn_to_send);
     client->syn_to_send = NULL;
     Unref_client( client );                                           /* Déréférence la structure cliente */
