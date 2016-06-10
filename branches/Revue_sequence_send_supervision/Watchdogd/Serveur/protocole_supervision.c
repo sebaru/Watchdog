@@ -47,13 +47,16 @@
     /*Client_mode( client, ENVOI_COMMENT_SUPERVISION );*/
 
 
-    Envoyer_palette_ ( client, TAG_SUPERVISION,
-                               SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,
-                               SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE_FIN );
+    Envoyer_palette_tag ( client, TAG_SUPERVISION,
+                          SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,
+                          SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE_FIN );
+    liste_capteurs = Envoyer_capteur_tag ( client,  TAG_SUPERVISION, 
+                                           SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR,
+                                           SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR_FIN );
+
     /*Client_mode( client, ENVOI_CAPTEUR_SUPERVISION );                        /* Si pas de comments ... */
 
 
-    liste_capteurs = NULL;
     Envoyer_bit_init_supervision ( client, liste_bits_init, liste_capteurs );
 
     g_slist_free ( liste_bits_init );

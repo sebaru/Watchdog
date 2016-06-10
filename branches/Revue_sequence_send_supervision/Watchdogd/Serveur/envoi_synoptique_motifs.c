@@ -152,10 +152,10 @@
           g_free(motif);
         }
 
-       if ( motif && (! g_slist_find(liste_bit_init, GINT_TO_POINTER(motif->bit_controle) ) ) &&
+       if ( tag == TAG_SUPERVISION && motif && (! g_slist_find(liste_bit_init, GINT_TO_POINTER(motif->bit_controle) ) ) &&
             motif->type_gestion != 0 /* TYPE_INERTE */
           )
-        { liste_bit_init = g_slist_append( liste_bit_init, GINT_TO_POINTER(motif->bit_controle) );
+        { liste_bit_init = g_slist_preppend( liste_bit_init, GINT_TO_POINTER(motif->bit_controle) );
           Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                    "liste des bit_init_syn adding bit i %d", motif->bit_controle );
         }

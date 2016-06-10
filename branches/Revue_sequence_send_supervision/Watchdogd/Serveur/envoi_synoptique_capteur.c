@@ -26,7 +26,6 @@
  */
  
  #include <glib.h>
- #include <sys/prctl.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
@@ -108,13 +107,11 @@
 /* Entrée: Néant                                                                                          */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- static void Envoyer_capteur_thread_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
-  { struct CMD_ENREG nbr;
+ GSList *Envoyer_capteur_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
+  { GSList *liste = NULL;
+    struct CMD_ENREG nbr;
     struct CMD_TYPE_CAPTEUR *capteur;
     struct DB *db;
-    gchar titre[20];
-    g_snprintf( titre, sizeof(titre), "W-CAPT-%06d", client->ssrv_id );
-    prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
     if ( ! Recuperer_capteurDB( &db, client->syn_to_send->id ) )
      { return; }                                                                                   /* Si pas de capteurs (??) */
@@ -126,15 +123,9 @@
                       (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
 
-    for( ; ; )
-     { capteur = Recuperer_capteurDB_suite( &db );
-       if (!capteur)
-        { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          return;
-        }
-
-       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_capteur_thread_tag: capteur %d (%s) to client %s",
+    while ( capteur = Recuperer_capteurDB_suite( &db ) )
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                "Envoyer_capteur_tag: capteur %d (%s) to client %s",
                  capteur->id, capteur->libelle, client->machine );
        if (tag == TAG_SUPERVISION)
         { struct CAPTEUR *capteur_new;
@@ -143,7 +134,7 @@
            { capteur_new->type = capteur->type;
              capteur_new->bit_controle = capteur->bit_controle;
 
-             if ( ! g_list_find_custom(client->bit_init_capteur, capteur_new, (GCompareFunc) Chercher_bit_capteurs ) )
+             if ( ! g_slist_find_custom(liste, capteur_new, (GCompareFunc) Chercher_bit_capteurs ) )
               { client->bit_init_capteur = g_list_append( client->bit_init_capteur, capteur_new );
                 Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                          "liste des bit_init_capteur %d", capteur->id );
@@ -156,6 +147,8 @@
                       (gchar *)capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
        g_free(capteur);
      }
+    Envoi_client ( client, tag, sstag_fin, NULL, 0 );
+    return(liste);
   }
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */

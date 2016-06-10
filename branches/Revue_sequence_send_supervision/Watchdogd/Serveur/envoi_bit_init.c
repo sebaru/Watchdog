@@ -29,14 +29,14 @@
  #include <string.h>
  #include <unistd.h>
 
-/******************************************** Prototypes de fonctions *************************************/
+/*************************************************** Prototypes de fonctions **************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
-/**********************************************************************************************************/
-/* Chercher_bit_capteurs: Renvoie 0 si l'element en argument est dans la liste                            */
-/* Entrée: L'element                                                                                      */
-/* Sortie: 0 si present, 1 sinon                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Chercher_bit_capteurs: Renvoie 0 si l'element en argument est dans la liste                                                */
+/* Entrée: L'element                                                                                                          */
+/* Sortie: 0 si present, 1 sinon                                                                                              */
+/******************************************************************************************************************************/
  gint Chercher_bit_capteurs ( struct CAPTEUR *element, struct CAPTEUR *cherche )
   { if (element->bit_controle == cherche->bit_controle &&
         element->type == cherche->type)
