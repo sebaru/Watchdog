@@ -117,8 +117,7 @@
     prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
     if ( ! Recuperer_commentDB( &db, client->syn.id ) )
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       return;                                                                   /* Si pas de histos (??) */
+     { return;                                                             /* Si pas de commentaires (??) */
      }
 
     nbr.num = db->nbr_result;
@@ -131,7 +130,6 @@
      { comment = Recuperer_commentDB_suite( &db );
        if (!comment)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Unref_client( client );                                     /* Déréférence la structure cliente */
           return;
         } 
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
@@ -151,6 +149,7 @@
   { Envoyer_comment_thread_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT,
                                                       SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT_FIN );
     Client_mode( client, ENVOI_PASSERELLE_ATELIER );
+    Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit(EXIT_SUCCESS);
   }
 /**********************************************************************************************************/
@@ -162,6 +161,7 @@
   { Envoyer_comment_thread_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,
                                                           SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT_FIN );
     Client_mode( client, ENVOI_PASSERELLE_SUPERVISION );
+    Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit(EXIT_SUCCESS);
   }
 /*--------------------------------------------------------------------------------------------------------*/

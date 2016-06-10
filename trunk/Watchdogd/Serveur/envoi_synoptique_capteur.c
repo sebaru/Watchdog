@@ -117,9 +117,7 @@
     prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
     if ( ! Recuperer_capteurDB( &db, client->syn.id ) )
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       return;
-     }                                                                           /* Si pas de histos (??) */
+     { return; }                                                               /* Si pas de capteurs (??) */
 
     nbr.num = db->nbr_result;
     if (nbr.num)
@@ -132,7 +130,6 @@
      { capteur = Recuperer_capteurDB_suite( &db );
        if (!capteur)
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Unref_client( client );                                     /* Déréférence la structure cliente */
           return;
         }
 
@@ -170,6 +167,7 @@
                                           SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR,
                                           SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR_FIN );
     Client_mode( client, ENVOI_CAMERA_SUP_ATELIER );
+    Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit(EXIT_SUCCESS);
   }
 /**********************************************************************************************************/
@@ -182,6 +180,7 @@
                                           SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR,
                                           SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR_FIN );
     Client_mode( client, ENVOI_CAMERA_SUP_SUPERVISION );
+    Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit(EXIT_SUCCESS);
   }
 /*--------------------------------------------------------------------------------------------------------*/

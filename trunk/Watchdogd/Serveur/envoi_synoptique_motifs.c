@@ -107,120 +107,41 @@
      }
   }
 /**********************************************************************************************************/
-/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
-/* Entrée: Néant                                                                                          */
+/* Envoyer_motif_tag: Envoi des syns au client selon les tags retenus                                     */
+/* Entrée: Le client destinataire et les tags de connexion                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void *Envoyer_motif_atelier_thread ( struct CLIENT *client )
+ static void Envoyer_motif_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
   { struct CMD_TYPE_MOTIFS *motifs;
     struct CMD_TYPE_MOTIF *motif;
     struct CMD_ENREG nbr;
-    struct DB *db;
-    gint max_enreg;                                /* Nombre maximum d'enregistrement dans un bloc reseau */
     gchar titre[20];
-    g_snprintf( titre, sizeof(titre), "W-MOTI-%06d", client->ssrv_id );
-    prctl(PR_SET_NAME, titre, 0, 0, 0 );
-
-    max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_MOTIFS)) / sizeof(struct CMD_TYPE_MOTIF);
-    motifs = (struct CMD_TYPE_MOTIFS *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );    
-    if (!motifs)
-     { struct CMD_GTK_MESSAGE erreur;
-       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                "Envoyer_motif_atelier_thread: Pb d'allocation memoire motifs" );
-       g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
-       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit ( NULL );
-     }
-
-    if ( ! Recuperer_motifDB( &db, client->syn.id ) )
-     { Client_mode( client, ENVOI_COMMENT_ATELIER );
-       g_free(motifs);
-       Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit ( NULL );
-     }                                                                           /* Si pas de histos (??) */
-
-    nbr.num = db->nbr_result;
-    if (nbr.num)
-     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d motifs", nbr.num );
-       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
-                      (gchar *)&nbr, sizeof(struct CMD_ENREG) );
-     }
-
-    motifs->nbr_motifs = 0;                                 /* Valeurs par defaut si pas d'enregistrement */
-
-    do
-     { motif = Recuperer_motifDB_suite( &db );                        /* Récupération du motif dans la DB */
-       if (motif)                                              /* Si enregegistrement, alors on le pousse */
-        { memcpy ( &motifs->motif[motifs->nbr_motifs], motif, sizeof(struct CMD_TYPE_MOTIF) );
-          motifs->nbr_motifs++;          /* Nous avons 1 enregistrement de plus dans la structure d'envoi */
-          g_free(motif);
-        }
-
-       if ( motif && (! g_list_find(client->bit_init_syn, GINT_TO_POINTER(motif->bit_controle) ) ) &&
-            motif->type_gestion != 0 /* TYPE_INERTE */
-          )
-        { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(motif->bit_controle) );
-                 Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                          "liste des bit_init_syn %d", motif->bit_controle );
-        }
-
-       if ( (motif == NULL) || motifs->nbr_motifs == max_enreg )/* Si depassement de tampon ou plus d'enreg */
-        { Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF,
-                        (gchar *)motifs,
-                         sizeof(struct CMD_TYPE_MOTIFS) + motifs->nbr_motifs * sizeof(struct CMD_TYPE_MOTIF)
-                       );
-          motifs->nbr_motifs = 0;
-        }
-     }
-    while (motif);                                            /* Tant que l'on a des messages e envoyer ! */
-    g_free(motifs);
-
-    Client_mode( client, ENVOI_COMMENT_ATELIER );
-    Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF_FIN, NULL, 0 );
-    Unref_client( client );                                     /* Déréférence la structure cliente */
-    pthread_exit ( NULL ); 
-  }
-/**********************************************************************************************************/
-/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_motif_supervision_thread ( struct CLIENT *client )
-  { struct CMD_TYPE_MOTIFS *motifs;
-    struct CMD_TYPE_MOTIF *motif;
-    struct CMD_ENREG nbr;
-    struct DB *db;
     gint max_enreg;                                /* Nombre maximum d'enregistrement dans un bloc reseau */
+    struct DB *db;
 
+    g_snprintf( titre, sizeof(titre), "W-MOTI-%06d", client->ssrv_id );
     prctl(PR_SET_NAME, "W-EnvoiMotif", 0, 0, 0 );
 
-    printf("1 - Recherche supervision %d\n", client->syn.id);
     if (client->bit_init_syn)
      { g_list_free( client->bit_init_syn );
        client->bit_init_syn = NULL;
      }
-    printf("2 - Recherche supervision %d\n", client->syn.id);
 
     max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_MOTIFS)) / sizeof(struct CMD_TYPE_MOTIF);
     motifs = (struct CMD_TYPE_MOTIFS *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );    
     if (!motifs)
      { struct CMD_GTK_MESSAGE erreur;
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                "Envoyer_motif_supervision_thread: Pb d'allocation memoire motifs" );
+                "Envoyer_motif_tag: Pb d'allocation memoire motifs" );
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       Libere_DB_SQL( &db );
-       Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit ( NULL );
+       return;
      }
 
-    if ( ! Recuperer_motifDB( &db, client->syn.id ) )
-     { Client_mode( client, ENVOI_COMMENT_SUPERVISION );
-       Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit ( NULL );
+    if ( ! Recuperer_motifDB( &db, client->syn.id ) )                       /* Si pas de motifs a envoyer */
+     { g_free(motifs);
+       return;
      }                                                                           /* Si pas de histos (??) */
 
     nbr.num = db->nbr_result;
@@ -249,19 +170,41 @@
         }
 
        if ( (motif == NULL) || motifs->nbr_motifs == max_enreg )/* Si depassement de tampon ou plus d'enreg */
-        { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
-                        (gchar *)motifs,
+        { Envoi_client ( client, tag, sstag, (gchar *)motifs,
                          sizeof(struct CMD_TYPE_MOTIFS) + motifs->nbr_motifs * sizeof(struct CMD_TYPE_MOTIF)
                        );
           motifs->nbr_motifs = 0;
         }
      }
     while (motif);                                            /* Tant que l'on a des messages e envoyer ! */
-    g_free(motifs);
+    g_free(motifs);                                                  /* Libération du tampon multi-motifs */
 
+    Envoi_client ( client, tag, sstag_fin, NULL, 0 );
+  }
+/**********************************************************************************************************/
+/* Envoyer_motif_atelier_thread: Envoi des syns au client en mode atelier                                 */
+/* Entrée: Le client destinaire                                                                           */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void *Envoyer_motif_atelier_thread ( struct CLIENT *client )
+  { Envoyer_motif_tag ( client, TAG_ATELIER,
+	                    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF,
+	                    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF_FIN );
+    Client_mode( client, ENVOI_COMMENT_ATELIER );
+    Unref_client( client );                                           /* Déréférence la structure cliente */
+    pthread_exit ( NULL );
+  }
+/**********************************************************************************************************/
+/* Envoyer_motif_supervision_thread: Envoi des syns au client en mode supervision                         */
+/* Entrée: Le client destinaire                                                                           */
+/* Sortie: Néant                                                                                          */
+/**********************************************************************************************************/
+ void *Envoyer_motif_supervision_thread ( struct CLIENT *client )
+  { Envoyer_motif_tag ( client, TAG_SUPERVISION,
+	                    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
+	                    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN );
     Client_mode( client, ENVOI_COMMENT_SUPERVISION );
-    Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN, NULL, 0 );
-    Unref_client( client );                                     /* Déréférence la structure cliente */
-    pthread_exit( NULL );
+    Unref_client( client );                                           /* Déréférence la structure cliente */
+    pthread_exit ( NULL );
   }
 /*--------------------------------------------------------------------------------------------------------*/
