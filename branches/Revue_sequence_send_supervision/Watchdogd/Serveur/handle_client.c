@@ -179,9 +179,11 @@
                break;
           case ENVOI_MOTIF_ATELIER:
                Client_mode( client, VALIDE );
+               #ifdef bouh
                Ref_client( client, "Send motif atelier" );
                pthread_create( &tid, NULL, (void *)Envoyer_motif_atelier_thread, client );
                pthread_detach( tid );
+               #endif
                break;
           case ENVOI_COMMENT_ATELIER:
                Client_mode( client, VALIDE );
@@ -208,12 +210,6 @@
                pthread_detach( tid );
                break;
 
-          case ENVOI_MOTIF_SUPERVISION:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send motif supervision" );
-               pthread_create( &tid, NULL, (void *)Envoyer_motif_supervision_thread, client );
-               pthread_detach( tid );
-               break;   
           case ENVOI_COMMENT_SUPERVISION:
                Client_mode( client, VALIDE );
                Ref_client( client, "Send comment supervision" );
@@ -244,12 +240,6 @@
                pthread_create( &tid, NULL, (void *)Envoyer_camera_sup_supervision_thread, client );
                pthread_detach( tid );
                break;
-          case ENVOI_IXXX_SUPERVISION :
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send bit init supervision" );
-               pthread_create( &tid, NULL, (void *)Envoyer_bit_init_supervision_thread, client );
-               pthread_detach( tid );
-               break;   
           case ENVOI_ICONE_FOR_ATELIER:
                Client_mode( client, VALIDE );
                Ref_client( client, "Send icone atelier" );

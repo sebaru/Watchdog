@@ -115,7 +115,7 @@
     g_snprintf( titre, sizeof(titre), "W-PASS-%06d", client->ssrv_id );
     prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
-    if ( ! Recuperer_passerelleDB( &db, client->syn.id ) )                        /* Si pas de passerelle */
+    if ( ! Recuperer_passerelleDB( &db, client->syn_to_send->id ) )                                   /* Si pas de passerelle */
      { return; }
      
     nbr.num = db->nbr_result;
@@ -131,8 +131,8 @@
         { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
           return;
         }
-
-       if ( ! g_list_find(client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_1) )
+#ifdef bouh
+       if ( ! g_slist_find(client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_1) )
           )
         { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_1) );
           Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
@@ -152,7 +152,7 @@
           Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                    "liste des bit_init_syn pass %d", pass->bit_controle_3 );
         }
-
+#endif
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_passerelle_tag: pass %d (%s) to client %s",
                  pass->id, pass->libelle, client->machine );

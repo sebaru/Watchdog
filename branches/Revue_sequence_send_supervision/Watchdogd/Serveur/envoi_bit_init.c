@@ -43,75 +43,63 @@
          return 0;
     else return 1;
   }
-/**********************************************************************************************************/
-/* Envoyer_ixxx_supervision: Envoi des etats initiaux motifs dans la trame supervision                    */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Envoyer_bit_init_supervision_thread ( struct CLIENT *client )
+/******************************************************************************************************************************/
+/* Envoyer_ixxx_supervision: Envoi des etats initiaux motifs dans la trame supervision                                        */
+/* Entrée: Le client, la liste des bits à envoyer ainsi que les capteurs                                                      */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Envoyer_bit_init_supervision ( struct CLIENT *client, GSList *Liste_Bits_i, GSList *Liste_Capteurs )
   { struct CMD_ETAT_BIT_CTRL init_etat;
-    GList *liste;
+    GSList *liste;
     guint bit_controle;
 
-    if (client->bit_init_syn)
-     { liste = client->bit_init_syn;                                                    /* Debut de liste */
-       while(liste)
-        { bit_controle = GPOINTER_TO_INT( liste->data );
+    liste = Liste_Bits_i;
+    while(liste)
+     { bit_controle = GPOINTER_TO_INT( liste->data );
     
-          if ( ! g_slist_find(client->Liste_bit_syns, GINT_TO_POINTER(bit_controle) ) )
-           { client->Liste_bit_syns = g_slist_prepend( client->Liste_bit_syns, GINT_TO_POINTER(bit_controle) );
-             Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                      "Envoyer_bit_init_supervision_thread: ajout du bit_syn %03d dans la liste",
-                       bit_controle );
-           }
-
-          if (bit_controle>=NBR_BIT_CONTROLE) bit_controle=0;                  /* Verification des bornes */
-
-          init_etat.num    = bit_controle;                                  /* Prévoir le champ cligno !! */
-          init_etat.etat   = Partage->i[ bit_controle ].etat;
-          init_etat.rouge  = Partage->i[ bit_controle ].rouge;
-          init_etat.vert   = Partage->i[ bit_controle ].vert;
-          init_etat.bleu   = Partage->i[ bit_controle ].bleu;
-          init_etat.cligno = Partage->i[ bit_controle ].cligno;
-
-          Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
-                        (gchar *)&init_etat, sizeof(struct CMD_ETAT_BIT_CTRL) );
-          liste = liste->next;
+       if (bit_controle>=NBR_BIT_CONTROLE) bit_controle=0;                                         /* Verification des bornes */
+       if ( ! g_slist_find(client->Liste_bit_syns, GINT_TO_POINTER(bit_controle) ) )        /* Ajout dans la liste recurrente */
+        { client->Liste_bit_syns = g_slist_prepend( client->Liste_bit_syns, GINT_TO_POINTER(bit_controle) );
+          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                   "Envoyer_bit_init_supervision: ajout du bit_syn %03d dans la liste",
+                    bit_controle );
         }
-       g_list_free( client->bit_init_syn );
-       client->bit_init_syn = NULL;
+
+       init_etat.num    = bit_controle;                             /* Initialisation de la structure avant envoi au client ! */
+       init_etat.etat   = Partage->i[ bit_controle ].etat;
+       init_etat.rouge  = Partage->i[ bit_controle ].rouge;
+       init_etat.vert   = Partage->i[ bit_controle ].vert;
+       init_etat.bleu   = Partage->i[ bit_controle ].bleu;
+       init_etat.cligno = Partage->i[ bit_controle ].cligno;
+
+       Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
+                     (gchar *)&init_etat, sizeof(struct CMD_ETAT_BIT_CTRL) );
+       liste = liste->next;
      }
 
-    if (client->bit_init_capteur)
-     { liste = client->bit_init_capteur;                                                /* Debut de liste */
-       while(liste)
-        { struct CAPTEUR *capteur;
-          struct CMD_ETAT_BIT_CAPTEUR *init_capteur;
+    liste = Liste_Capteurs;                                                                                 /* Debut de liste */
+    while(liste)
+     { struct CAPTEUR *capteur;
+       struct CMD_ETAT_BIT_CAPTEUR *init_capteur;
 
-          if ( !g_list_find_custom(client->bit_capteurs, liste->data,
-                                   (GCompareFunc) Chercher_bit_capteurs) )
-           { capteur = (struct CAPTEUR *)g_try_malloc0( sizeof(struct CAPTEUR) );
-             if (capteur) 
-              { memcpy( capteur, liste->data, sizeof(struct CAPTEUR) );
-                client->bit_capteurs = g_list_append( client->bit_capteurs, capteur );
-              }
-           } else capteur = (struct CAPTEUR *)liste->data;
-
-          init_capteur = Formater_capteur(capteur);                    /* Formatage de la chaine associée */
-
-          if (init_capteur)                                                               /* envoi client */
-           { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CAPTEUR,
-                           (gchar *)init_capteur, sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
-             g_free(init_capteur);                                                /* On libere la mémoire */
+       if ( ! g_list_find_custom(client->bit_capteurs, liste->data, (GCompareFunc) Chercher_bit_capteurs) )
+        { capteur = (struct CAPTEUR *)g_try_malloc0( sizeof(struct CAPTEUR) );
+          if (capteur) 
+           { memcpy( capteur, liste->data, sizeof(struct CAPTEUR) );
+             client->bit_capteurs = g_list_append( client->bit_capteurs, capteur );
            }
-          liste = liste->next;
+        } else capteur = (struct CAPTEUR *)liste->data;
+
+       init_capteur = Formater_capteur(capteur);                                           /* Formatage de la chaine associée */
+
+       if (init_capteur)                                                                                      /* envoi client */
+        { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CAPTEUR,
+                        (gchar *)init_capteur, sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
+          g_free(init_capteur);                                                                       /* On libere la mémoire */
         }
-       g_list_foreach( client->bit_init_capteur, (GFunc) g_free, NULL );
-       g_list_free( client->bit_init_capteur );
-       client->bit_init_capteur = NULL;
+       liste = liste->next;
      }
-    Unref_client( client );                                           /* Déréférence la structure cliente */
-    pthread_exit( NULL );
+    g_list_foreach( client->bit_init_capteur, (GFunc) g_free, NULL );
+    g_list_free( client->bit_init_capteur );
   }
-/*--------------------------------------------------------------------------------------------------------*/
-
+/*----------------------------------------------------------------------------------------------------------------------------*/

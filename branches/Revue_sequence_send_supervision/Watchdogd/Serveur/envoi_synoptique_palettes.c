@@ -116,7 +116,7 @@
     g_snprintf( titre, sizeof(titre), "W-PALE-%06d", client->ssrv_id );
     prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
-    if ( ! Recuperer_paletteDB( &db, client->syn.id ) )
+    if ( ! Recuperer_paletteDB( &db, client->syn_to_send->id ) )
      { return;
      }
 

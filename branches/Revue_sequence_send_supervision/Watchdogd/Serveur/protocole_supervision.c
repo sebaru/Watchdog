@@ -26,6 +26,7 @@
  */
  
  #include <glib.h>
+ #include <sys/prctl.h>
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
@@ -35,14 +36,16 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void *Proto_Envoyer_supervision_thread ( struct CLIENT *client )
-  { gchar titre[20];
+  { GSList *liste_bit_init;
+    gchar titre[20];
     g_snprintf( titre, sizeof(titre), "W-SUPR-%06d", client->ssrv_id );
     prctl(PR_SET_NAME, titre, 0, 0, 0 );
-    Envoyer_motif_tag ( client, TAG_SUPERVISION,
-                                SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
-	                            SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN );
-    /*Client_mode( client, ENVOI_COMMENT_SUPERVISION );*/
 
+    liste_bit_init = Envoyer_motif_tag ( client, TAG_SUPERVISION,
+                                         SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
+	                                     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN );
+    /*Client_mode( client, ENVOI_COMMENT_SUPERVISION );*/
+    g_slist_free ( liste_bit_init );
     g_free(client->syn_to_send);
     client->syn_to_send = NULL;
     Unref_client( client );                                           /* Déréférence la structure cliente */
@@ -68,6 +71,7 @@
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_SUPERVISION:
              { struct CMD_TYPE_SYNOPTIQUE *syn;
+	           pthread_t tid;
                syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;         /* Récupération du numéro du synoptique désiré */
 
                if ( client->syn_to_send )
@@ -98,7 +102,7 @@
                 }
 
                Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_AFFICHE_PAGE_SUP,
-                              (gchar *)syndb, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
+                              (gchar *)client->syn_to_send, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
                Ref_client( client, "Send supervision" );
                pthread_create( &tid, NULL, (void *)Proto_Envoyer_supervision_thread, client );
                pthread_detach( tid );

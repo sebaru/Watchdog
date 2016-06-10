@@ -166,7 +166,7 @@
  extern void Proto_editer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn );
 
                                                                                                      /* Dans envoi_bit_init.c */
- extern void Envoyer_bit_init_supervision_thread ( struct CLIENT *client );
+ extern void Envoyer_bit_init_supervision ( struct CLIENT *client, GSList *Liste_Bits_i, GSList *Liste_Capteurs );
  extern gint Chercher_bit_capteurs ( struct CAPTEUR *element, struct CAPTEUR *cherche );
 
                                                                                        /* Dans envoi_synoptique_passerelles.c */
@@ -188,8 +188,7 @@
                                                     struct CMD_TYPE_COMMENT *rezo_comment );
 
                                                                                             /* Dans envoi_synoptique_motifs.c */
- extern void *Envoyer_motif_atelier_thread ( struct CLIENT *client );
- extern void *Envoyer_motif_supervision_thread ( struct CLIENT *client );
+ extern GSList *Envoyer_motif_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
  extern void Proto_effacer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
  extern void Proto_ajouter_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
  extern void Proto_valider_editer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );

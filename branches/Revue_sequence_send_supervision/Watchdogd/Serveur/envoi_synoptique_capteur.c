@@ -116,8 +116,8 @@
     g_snprintf( titre, sizeof(titre), "W-CAPT-%06d", client->ssrv_id );
     prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
-    if ( ! Recuperer_capteurDB( &db, client->syn.id ) )
-     { return; }                                                               /* Si pas de capteurs (??) */
+    if ( ! Recuperer_capteurDB( &db, client->syn_to_send->id ) )
+     { return; }                                                                                   /* Si pas de capteurs (??) */
 
     nbr.num = db->nbr_result;
     if (nbr.num)

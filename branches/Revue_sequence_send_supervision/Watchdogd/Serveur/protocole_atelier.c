@@ -55,9 +55,11 @@
                syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                          "Le client desire le synoptique numéro %d: %s", syn->id, syn->libelle );
+#ifdef bouh
                memcpy( &client->syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
                                                               /* Sauvegarde du syn voulu pour envoi motif */
                Client_mode( client, ENVOI_MOTIF_ATELIER );
+#endif
              }
             break;
        case SSTAG_CLIENT_ATELIER_ADD_MOTIF:
@@ -225,8 +227,10 @@
        case SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER_PALETTE: 
              { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                          "Le client desire les syn pour palettes atelier" );
+#ifdef bouh
                memcpy ( &client->syn, connexion->donnees, sizeof (struct CMD_TYPE_SYNOPTIQUE) );
                Client_mode( client, ENVOI_SYNOPTIQUE_FOR_ATELIER_PALETTE );
+#endif
              }
             break;
        case SSTAG_CLIENT_ATELIER_ADD_PALETTE:
