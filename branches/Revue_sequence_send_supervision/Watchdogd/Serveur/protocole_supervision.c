@@ -36,12 +36,13 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void *Proto_Envoyer_supervision_thread ( struct CLIENT *client )
-  { GSList *liste_bits_init, *liste_capteurs;
+  { GSList *liste_bits_init, *liste_bits_motif, *liste_bits_pass, *liste_capteurs;
     gchar titre[20];
+
     g_snprintf( titre, sizeof(titre), "W-SUPR-%06d", client->ssrv_id );
     prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
-    liste_bits_init = Envoyer_motif_tag ( client, TAG_SUPERVISION,
+    liste_bits_motif = Envoyer_motif_tag ( client, TAG_SUPERVISION,
                                           SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
 	                                      SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN );
     /*Client_mode( client, ENVOI_COMMENT_SUPERVISION );*/
@@ -57,6 +58,19 @@
     /*Client_mode( client, ENVOI_CAPTEUR_SUPERVISION );                        /* Si pas de comments ... */
 
 
+    liste_bits_pass = Envoyer_passerelle_tag ( client, TAG_SUPERVISION,
+	                                              SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS,
+	                                              SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN );
+
+                                                                  /* Fusion des listes de bits I à envoyer au client à l'init */
+    liste_bits_init = liste_bits_motif;
+    while ( liste_bits_pass )
+     { if ( ! g_slist_find( liste_bits_init, GINT_TO_POINTER(liste_bits_pass->data) ) )
+        { liste_bits_init = g_slist_prepend( liste_bits_init, GINT_TO_POINTER(liste_bits_pass->data) ); }
+       liste_bits_pass = g_slist_remove( liste_bits_pass, GINT_TO_POINTER(liste_bits_pass->data) );
+     }
+
+  
     Envoyer_bit_init_supervision ( client, liste_bits_init, liste_capteurs );
 
     g_slist_free ( liste_bits_init );

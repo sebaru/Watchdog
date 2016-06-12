@@ -191,13 +191,13 @@
                pthread_create( &tid, NULL, (void *)Envoyer_comment_atelier_thread, client );
                pthread_detach( tid );
                break;
+#ifdef bouh
           case ENVOI_PASSERELLE_ATELIER:
                Client_mode( client, VALIDE );
                Ref_client( client, "Send passerelle atelier" );
                pthread_create( &tid, NULL, (void *)Envoyer_passerelle_atelier_thread, client );
                pthread_detach( tid );
                break;
-#ifdef bouh
           case ENVOI_CAPTEUR_ATELIER:
                Client_mode( client, VALIDE );
                Ref_client( client, "Send capteur atelier" );
@@ -218,12 +218,6 @@
                pthread_create( &tid, NULL, (void *)Envoyer_comment_supervision_thread, client );
                pthread_detach( tid );
                break;
-          case ENVOI_PASSERELLE_SUPERVISION:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send passerelle supervision" );
-               pthread_create( &tid, NULL, (void *)Envoyer_passerelle_supervision_thread, client );
-               pthread_detach( tid );
-               break;   
           case ENVOI_CAMERA_SUP_SUPERVISION:
                Client_mode( client, VALIDE );
                Ref_client( client, "Send camera sup supervision" );
