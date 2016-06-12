@@ -179,8 +179,7 @@
                                                 struct CMD_TYPE_PASSERELLE *rezo_pass );
                                                 
                                                                                           /* Dans envoi_synoptique_comments.c */
- extern void *Envoyer_comment_atelier_thread ( struct CLIENT *client );
- extern void *Envoyer_comment_supervision_thread ( struct CLIENT *client );
+ extern void Envoyer_comment_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
  extern void Proto_effacer_comment_atelier ( struct CLIENT *client, struct CMD_TYPE_COMMENT *rezo_comment );
  extern void Proto_ajouter_comment_atelier ( struct CLIENT *client, struct CMD_TYPE_COMMENT *rezo_motif );
  extern void Proto_valider_editer_comment_atelier ( struct CLIENT *client,

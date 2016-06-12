@@ -177,53 +177,6 @@
                pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_propriete_synoptique_thread, client );
                pthread_detach( tid );
                break;
-          case ENVOI_MOTIF_ATELIER:
-               Client_mode( client, VALIDE );
-               #ifdef bouh
-               Ref_client( client, "Send motif atelier" );
-               pthread_create( &tid, NULL, (void *)Envoyer_motif_atelier_thread, client );
-               pthread_detach( tid );
-               #endif
-               break;
-          case ENVOI_COMMENT_ATELIER:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send comment atelier" );
-               pthread_create( &tid, NULL, (void *)Envoyer_comment_atelier_thread, client );
-               pthread_detach( tid );
-               break;
-#ifdef bouh
-          case ENVOI_PASSERELLE_ATELIER:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send passerelle atelier" );
-               pthread_create( &tid, NULL, (void *)Envoyer_passerelle_atelier_thread, client );
-               pthread_detach( tid );
-               break;
-          case ENVOI_CAPTEUR_ATELIER:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send capteur atelier" );
-               pthread_create( &tid, NULL, (void *)Envoyer_capteur_atelier_thread, client );
-               pthread_detach( tid );
-               break;
-#endif
-          case ENVOI_CAMERA_SUP_ATELIER:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send camera sup atelier" );
-               pthread_create( &tid, NULL, (void *)Envoyer_camera_sup_atelier_thread, client );
-               pthread_detach( tid );
-               break;
-
-          case ENVOI_COMMENT_SUPERVISION:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send comment supervision" );
-               pthread_create( &tid, NULL, (void *)Envoyer_comment_supervision_thread, client );
-               pthread_detach( tid );
-               break;
-          case ENVOI_CAMERA_SUP_SUPERVISION:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send camera sup supervision" );
-               pthread_create( &tid, NULL, (void *)Envoyer_camera_sup_supervision_thread, client );
-               pthread_detach( tid );
-               break;
           case ENVOI_ICONE_FOR_ATELIER:
                Client_mode( client, VALIDE );
                Ref_client( client, "Send icone atelier" );

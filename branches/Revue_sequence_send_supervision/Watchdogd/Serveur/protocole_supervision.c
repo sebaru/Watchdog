@@ -61,6 +61,8 @@
     liste_bits_pass = Envoyer_passerelle_tag ( client, TAG_SUPERVISION,
 	                                              SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS,
 	                                              SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN );
+    Envoyer_comment_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,
+                                                   SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT_FIN );
 
                                                                   /* Fusion des listes de bits I à envoyer au client à l'init */
     liste_bits_init = liste_bits_motif;

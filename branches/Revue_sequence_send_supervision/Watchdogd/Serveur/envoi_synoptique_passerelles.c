@@ -26,7 +26,6 @@
  */
  
  #include <glib.h>
- #include <sys/prctl.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
@@ -112,9 +111,6 @@
     struct CMD_ENREG nbr;
     GSList *Liste = NULL;
     struct DB *db;
-    gchar titre[20];
-    g_snprintf( titre, sizeof(titre), "W-PASS-%06d", client->ssrv_id );
-    prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
     if ( ! Recuperer_passerelleDB( &db, client->syn_to_send->id ) )                                   /* Si pas de passerelle */
      { return(NULL); }
