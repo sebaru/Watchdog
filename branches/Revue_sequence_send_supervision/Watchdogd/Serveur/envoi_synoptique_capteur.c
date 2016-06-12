@@ -150,6 +150,7 @@
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
     return(liste);
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
 /* Entrée: Néant                                                                                          */
@@ -176,4 +177,5 @@
     Unref_client( client );                                           /* Déréférence la structure cliente */
     pthread_exit(EXIT_SUCCESS);
   }
+#endif
 /*--------------------------------------------------------------------------------------------------------*/
