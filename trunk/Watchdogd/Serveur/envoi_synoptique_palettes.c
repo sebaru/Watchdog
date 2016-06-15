@@ -26,7 +26,6 @@
  */
  
  #include <glib.h>
- #include <sys/prctl.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
@@ -103,20 +102,17 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
   }
-/**********************************************************************************************************/
-/* Envoyer_palette_atelier_thread_tag: Envoi les palettes au client en parametre                          */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Envoyer_palette_thread_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
+/******************************************************************************************************************************/
+/* Envoyer_palette_tag: Envoi les palettes au client en parametre                                                             */
+/* Entrée: Le client et les tags associés                                                                                     */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Envoyer_palette_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
   { struct CMD_TYPE_PALETTE *palette;
     struct CMD_ENREG nbr;
     struct DB *db;
-    gchar titre[20];
-    g_snprintf( titre, sizeof(titre), "W-PALE-%06d", client->ssrv_id );
-    prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
-    if ( ! Recuperer_paletteDB( &db, client->syn.id ) )
+    if ( ! Recuperer_paletteDB( &db, client->syn_to_send->id ) )
      { return;
      }
 
@@ -141,29 +137,4 @@
        g_free(palette);
      }
   }
-/**********************************************************************************************************/
-/* Envoyer_palette_atelier_thread: Envoi des palettes au client en mode atelier                           */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_palette_atelier_thread ( struct CLIENT *client )
-  { Envoyer_palette_thread_tag ( client, TAG_ATELIER,
-                                         SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE,
-                                         SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE_FIN );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
-    pthread_exit ( NULL );
-  }
-/**********************************************************************************************************/
-/* Envoyer_palette_supervision_thread: Envoi des palettes en mode supervision                             */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_palette_supervision_thread ( struct CLIENT *client )
-  { Envoyer_palette_thread_tag ( client, TAG_SUPERVISION,
-                                                 SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,
-                                                 SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE_FIN );
-    Client_mode( client, ENVOI_CAPTEUR_SUPERVISION );                        /* Si pas de comments ... */
-    Unref_client( client );                                           /* Déréférence la structure cliente */
-    pthread_exit ( NULL );
-  }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

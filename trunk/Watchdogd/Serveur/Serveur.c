@@ -128,14 +128,10 @@
        Fermer_connexion( client->connexion );
        pthread_mutex_destroy( &client->mutex_struct_used );
        if (client->util)            { g_free( client->util ); }
+       if (client->syn_to_send)     { g_free( client->syn_to_send ); }
        if (client->Liste_bit_syns)  { g_slist_free(client->Liste_bit_syns); }
-       if (client->bit_init_syn)    { g_list_free(client->bit_init_syn); }
        if (client->bit_capteurs)    { g_list_foreach( client->bit_capteurs, (GFunc) g_free, NULL );
                                       g_list_free(client->bit_capteurs);
-                                    }
-       if (client->bit_init_capteur)
-                                    { g_list_foreach( client->bit_init_capteur, (GFunc) g_free, NULL );
-                                      g_list_free(client->bit_init_capteur);
                                     }
        if (client->courbes)         { g_list_foreach( client->courbes, (GFunc)g_free, NULL );
                                       g_list_free(client->courbes);
@@ -173,19 +169,7 @@
        case ENVOI_SYNCHRO               : return("ENVOI_SYNCHRO");
 
        case ENVOI_GROUPE_FOR_UTIL       : return("ENVOI_GROUPE_FOR_UTIL");
-       case ENVOI_MOTIF_ATELIER         : return("ENVOI_MOTIF_ATELIER");
-       case ENVOI_COMMENT_ATELIER       : return("ENVOI_COMMENT_ATELIER");
-       case ENVOI_PASSERELLE_ATELIER    : return("ENVOI_PASSERELLE_ATELIER");
-       case ENVOI_CAPTEUR_ATELIER       : return("ENVOI_CAPTEUR_ATELIER");
-       case ENVOI_COMMENT_SUPERVISION   : return("ENVOI_COMMENT_SUPERVISION");
-       case ENVOI_MOTIF_SUPERVISION     : return("ENVOI_MOTIF_SUPERVISION");
-       case ENVOI_PASSERELLE_SUPERVISION: return("ENVOI_PASSERELLE_SUPERVISION");
-       case ENVOI_PALETTE_SUPERVISION   : return("ENVOI_PALETTE_SUPERVISION");
-       case ENVOI_CAPTEUR_SUPERVISION   : return("ENVOI_CAPTEUR_SUPERVISION");
-       case ENVOI_IXXX_SUPERVISION      : return("ENVOI_IXXX_SUPERVISION");
        case ENVOI_GROUPE_FOR_SYNOPTIQUE : return("ENVOI_GROUPE_FOR_SYNOPTIQUE");
-       case ENVOI_CAMERA_SUP_ATELIER    : return("ENVOI_CAMERA_SUP_ATELIER");
-       case ENVOI_CAMERA_SUP_SUPERVISION: return("ENVOI_CAMERA_SUP_SUPERVISION");
        case ENVOI_CLASSE_FOR_ATELIER    : return("ENVOI_CLASSE_FOR_ATELIER");
        case ENVOI_ICONE_FOR_ATELIER     : return("ENVOI_ICONE_FOR_ATELIER");
        case ENVOI_SYNOPTIQUE_FOR_ATELIER: return("ENVOI_SYNOPTIQUE_FOR_ATELIER");

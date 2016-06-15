@@ -166,12 +166,11 @@
  extern void Proto_editer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn );
 
                                                                                                      /* Dans envoi_bit_init.c */
- extern void Envoyer_bit_init_supervision_thread ( struct CLIENT *client );
+ extern void Envoyer_bit_init_supervision ( struct CLIENT *client, GSList *Liste_Bits_i, GSList *Liste_Capteurs );
  extern gint Chercher_bit_capteurs ( struct CAPTEUR *element, struct CAPTEUR *cherche );
 
                                                                                        /* Dans envoi_synoptique_passerelles.c */
- extern void *Envoyer_passerelle_atelier_thread ( struct CLIENT *client );
- extern void *Envoyer_passerelle_supervision_thread ( struct CLIENT *client );
+ extern GSList *Envoyer_passerelle_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
  extern void Proto_ajouter_passerelle_atelier ( struct CLIENT *client,
                                                 struct CMD_TYPE_PASSERELLE *rezo_pass );
  extern void Proto_valider_editer_passerelle_atelier ( struct CLIENT *client,
@@ -180,38 +179,32 @@
                                                 struct CMD_TYPE_PASSERELLE *rezo_pass );
                                                 
                                                                                           /* Dans envoi_synoptique_comments.c */
- extern void *Envoyer_comment_atelier_thread ( struct CLIENT *client );
- extern void *Envoyer_comment_supervision_thread ( struct CLIENT *client );
+ extern void Envoyer_comment_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
  extern void Proto_effacer_comment_atelier ( struct CLIENT *client, struct CMD_TYPE_COMMENT *rezo_comment );
  extern void Proto_ajouter_comment_atelier ( struct CLIENT *client, struct CMD_TYPE_COMMENT *rezo_motif );
  extern void Proto_valider_editer_comment_atelier ( struct CLIENT *client,
                                                     struct CMD_TYPE_COMMENT *rezo_comment );
 
                                                                                             /* Dans envoi_synoptique_motifs.c */
- extern void *Envoyer_motif_atelier_thread ( struct CLIENT *client );
- extern void *Envoyer_motif_supervision_thread ( struct CLIENT *client );
+ extern GSList *Envoyer_motif_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
  extern void Proto_effacer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
  extern void Proto_ajouter_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
  extern void Proto_valider_editer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
 
                                                                                             /* Dans envoi_synoptique_motifs.c */
- extern void *Envoyer_camera_sup_atelier_thread ( struct CLIENT *client );
- extern void *Envoyer_camera_sup_supervision_thread ( struct CLIENT *client );
  extern void Proto_effacer_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERA_SUP *camera_sup );
  extern void Proto_ajouter_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERA_SUP *camera_sup );
  extern void Proto_valider_editer_camera_sup_atelier ( struct CLIENT *client,
                                                        struct CMD_TYPE_CAMERA_SUP *camera_sup );
 
                                                                                           /* Dans envoi_synoptique_palettes.c */
- extern void *Envoyer_palette_atelier_thread ( struct CLIENT *client );
- extern void *Envoyer_palette_supervision_thread ( struct CLIENT *client );
+ extern void Envoyer_palette_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
  extern void Proto_effacer_palette_atelier ( struct CLIENT *client, struct CMD_TYPE_PALETTE *rezo_palette );
  extern void Proto_ajouter_palette_atelier ( struct CLIENT *client, struct CMD_TYPE_PALETTE *rezo_palette );
  extern void Proto_valider_editer_palette_atelier ( struct CLIENT *client, struct CMD_TYPE_PALETTE *rezo_palette );
 
                                                                                            /* Dans envoi_synoptique_capteur.c */
- extern void *Envoyer_capteur_atelier_thread ( struct CLIENT *client );
- extern void *Envoyer_capteur_supervision_thread ( struct CLIENT *client );
+ GSList *Envoyer_capteur_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
  extern void Proto_effacer_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur );
  extern void Proto_ajouter_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur );
  extern void Proto_valider_editer_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur );

@@ -52,18 +52,6 @@
     VALIDE,
 
     ENVOI_GROUPE_FOR_UTIL,
-    ENVOI_MOTIF_ATELIER,                                                         /* Envoi des motifs associés à un synoptique */
-    ENVOI_COMMENT_ATELIER,                                                     /* Envoi des comments associés à un synoptique */
-    ENVOI_PASSERELLE_ATELIER,                                                  /* Envoi des passerelles dans l'atelier client */
-    ENVOI_CAPTEUR_ATELIER,                                                         /* Envoi des capteur dans l'atelier client */
-    ENVOI_CAMERA_SUP_ATELIER,                                                   /* Envoi des camera_sup dans l'atelier client */
-    ENVOI_MOTIF_SUPERVISION,                                                             /* Envoi des motifs a la supervision */
-    ENVOI_COMMENT_SUPERVISION,                                                         /* Envoi des comments à la supervision */
-    ENVOI_PASSERELLE_SUPERVISION,                                             /* Envoi des infos passerelles à la supervision */
-    ENVOI_PALETTE_SUPERVISION,                                                   /* Envoi des infos palettes à la supervision */
-    ENVOI_CAPTEUR_SUPERVISION,                                                         /* Envoi des capteurs à la supervision */
-    ENVOI_CAMERA_SUP_SUPERVISION,                                                    /* Envoi des camera_sup à la supervision */
-    ENVOI_IXXX_SUPERVISION,
     ENVOI_GROUPE_FOR_SYNOPTIQUE,
     ENVOI_GROUPE_FOR_PROPRIETE_SYNOPTIQUE,                          /* Envoi des groupes pour la fenetre propriete synoptique */
     ENVOI_ICONE_FOR_ATELIER,
@@ -93,7 +81,6 @@
 /* Affichage initial */
     GSList *Liste_new_motif;                               /* Liste des changements de motifs a traiter et envoyer aux client */
     GSList *Liste_bit_syns;                                /* Ensemble des bits CTRL utilisés pour les synoptiques visualisés */
-    GList *bit_init_syn;                           /* Ensemble des bits CTRL utilisés par le syn supervision en cours d'envoi */
 
     GList *bit_capteurs;                                   /* Ensemble des bits EAxx utilisés pour les synoptiques visualisés */
     GList *bit_init_capteur;                       /* Ensemble des bits CTRL utilisés par le syn supervision en cours d'envoi */
@@ -118,7 +105,7 @@
     struct CMD_CRITERE_HISTO_MSGS requete;                                       /* Pour la sauvegarde de la requete en cours */
     struct CMD_TYPE_SOURCE_DLS dls;                                         /* Pour la sauvegarde et compilation dls en cours */
 
-    struct CMD_TYPE_SYNOPTIQUE syn;                      /* Structure du synoptique en cours d'envoi (atelier ou supervision) */
+    struct CMD_TYPE_SYNOPTIQUE *syn_to_send;             /* Structure du synoptique en cours d'envoi (atelier ou supervision) */
 
     struct CMD_HISTO_COURBE histo_courbe;                            /* Structure pour travailler sur les historiques courbes */
   };     

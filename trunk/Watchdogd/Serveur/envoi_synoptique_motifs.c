@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Serveur/envoi_synoptique_motifs.c        Envoi des motifs à l'atelier et supervision         */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 22 mai 2005 17:25:01 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Serveur/envoi_synoptique_motifs.c        Envoi des motifs à l'atelier et supervision                             */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          dim 22 mai 2005 17:25:01 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * envoi_synoptique_motifs.c
  * This file is part of Watchdog
@@ -26,19 +26,18 @@
  */
  
  #include <glib.h>
- #include <sys/prctl.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
 
-/******************************************** Prototypes de fonctions *************************************/
+/****************************************************** Prototypes de fonctions ***********************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
-/**********************************************************************************************************/
-/* Proto_effacer_syn: Retrait du syn en parametre                                                         */
-/* Entrée: le client demandeur et le syn en question                                                      */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_effacer_syn: Retrait du syn en parametre                                                                             */
+/* Entrée: le client demandeur et le syn en question                                                                          */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_effacer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif )
   { gboolean retour;
 
@@ -56,16 +55,16 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
   }
-/**********************************************************************************************************/
-/* Proto_ajouter_motif_atelier: Ajout d'un motif dans un synoptique                                       */
-/* Entrée: le client demandeur et le syn en question                                                      */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_ajouter_motif_atelier: Ajout d'un motif dans un synoptique                                                           */
+/* Entrée: le client demandeur et le syn en question                                                                          */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_ajouter_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif )
   { struct CMD_TYPE_MOTIF *result;
     gint id;
 
-    rezo_motif->gid = GID_TOUTLEMONDE;               /* Par défaut, tout le monde peut acceder a ce motif */
+    rezo_motif->gid = GID_TOUTLEMONDE;                                   /* Par défaut, tout le monde peut acceder a ce motif */
     id = Ajouter_motifDB ( rezo_motif );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
@@ -89,11 +88,11 @@
             }
          }
   }
-/**********************************************************************************************************/
-/* Proto_editer_syn: Le client desire editer un syn                                                       */
-/* Entrée: le client demandeur et le syn en question                                                      */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_editer_syn: Le client desire editer un syn                                                                           */
+/* Entrée: le client demandeur et le syn en question                                                                          */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_valider_editer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif )
   { gboolean retour;
 
@@ -106,26 +105,18 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
   }
-/**********************************************************************************************************/
-/* Envoyer_motif_tag: Envoi des syns au client selon les tags retenus                                     */
-/* Entrée: Le client destinataire et les tags de connexion                                                */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Envoyer_motif_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
-  { struct CMD_TYPE_MOTIFS *motifs;
+/******************************************************************************************************************************/
+/* Envoyer_motif_tag: Envoi des syns au client selon les tags retenus                                                         */
+/* Entrée: Le client destinataire et les tags de connexion                                                                    */
+/* Sortie: La liste des bit d'init syn lié au synoptique                                                                      */
+/******************************************************************************************************************************/
+ GSList *Envoyer_motif_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
+  { GSList *liste_bit_init = NULL;
+    struct CMD_TYPE_MOTIFS *motifs;
     struct CMD_TYPE_MOTIF *motif;
     struct CMD_ENREG nbr;
-    gchar titre[20];
-    gint max_enreg;                                /* Nombre maximum d'enregistrement dans un bloc reseau */
+    gint max_enreg;                                                    /* Nombre maximum d'enregistrement dans un bloc reseau */
     struct DB *db;
-
-    g_snprintf( titre, sizeof(titre), "W-MOTI-%06d", client->ssrv_id );
-    prctl(PR_SET_NAME, "W-EnvoiMotif", 0, 0, 0 );
-
-    if (client->bit_init_syn)
-     { g_list_free( client->bit_init_syn );
-       client->bit_init_syn = NULL;
-     }
 
     max_enreg = (Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_MOTIFS)) / sizeof(struct CMD_TYPE_MOTIF);
     motifs = (struct CMD_TYPE_MOTIFS *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );    
@@ -136,13 +127,13 @@
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-       return;
+       return(NULL);
      }
 
-    if ( ! Recuperer_motifDB( &db, client->syn.id ) )                       /* Si pas de motifs a envoyer */
+    if ( ! Recuperer_motifDB( &db, client->syn_to_send->id ) )                                  /* Si pas de motifs a envoyer */ 
      { g_free(motifs);
-       return;
-     }                                                                           /* Si pas de histos (??) */
+       return(NULL);
+     }
 
     nbr.num = db->nbr_result;
     if (nbr.num)
@@ -151,60 +142,35 @@
                       (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
 
-    motifs->nbr_motifs = 0;                                 /* Valeurs par defaut si pas d'enregistrement */
+    motifs->nbr_motifs = 0;                                                     /* Valeurs par defaut si pas d'enregistrement */
 
     do
-     { motif = Recuperer_motifDB_suite( &db );                        /* Récupération du motif dans la DB */
-       if (motif)                                              /* Si enregegistrement, alors on le pousse */
+     { motif = Recuperer_motifDB_suite( &db );                                            /* Récupération du motif dans la DB */
+       if (motif)                                                                  /* Si enregegistrement, alors on le pousse */
         { memcpy ( &motifs->motif[motifs->nbr_motifs], motif, sizeof(struct CMD_TYPE_MOTIF) );
-          motifs->nbr_motifs++;          /* Nous avons 1 enregistrement de plus dans la structure d'envoi */
+          motifs->nbr_motifs++;                              /* Nous avons 1 enregistrement de plus dans la structure d'envoi */
           g_free(motif);
         }
 
-       if ( motif && (! g_list_find(client->bit_init_syn, GINT_TO_POINTER(motif->bit_controle) ) ) &&
+       if ( tag == TAG_SUPERVISION && motif && (! g_slist_find(liste_bit_init, GINT_TO_POINTER(motif->bit_controle) ) ) &&
             motif->type_gestion != 0 /* TYPE_INERTE */
           )
-        { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(motif->bit_controle) );
+        { liste_bit_init = g_slist_prepend( liste_bit_init, GINT_TO_POINTER(motif->bit_controle) );
           Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                   "liste des bit_init_syn %d", motif->bit_controle );
+                   "liste des bit_init_syn adding bit i %d", motif->bit_controle );
         }
 
-       if ( (motif == NULL) || motifs->nbr_motifs == max_enreg )/* Si depassement de tampon ou plus d'enreg */
+       if ( (motif == NULL) || motifs->nbr_motifs == max_enreg )                  /* Si depassement de tampon ou plus d'enreg */
         { Envoi_client ( client, tag, sstag, (gchar *)motifs,
                          sizeof(struct CMD_TYPE_MOTIFS) + motifs->nbr_motifs * sizeof(struct CMD_TYPE_MOTIF)
                        );
           motifs->nbr_motifs = 0;
         }
      }
-    while (motif);                                            /* Tant que l'on a des messages e envoyer ! */
+    while (motif);                                                                /* Tant que l'on a des messages e envoyer ! */
     g_free(motifs);                                                  /* Libération du tampon multi-motifs */
 
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
+    return(liste_bit_init);
   }
-/**********************************************************************************************************/
-/* Envoyer_motif_atelier_thread: Envoi des syns au client en mode atelier                                 */
-/* Entrée: Le client destinaire                                                                           */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_motif_atelier_thread ( struct CLIENT *client )
-  { Envoyer_motif_tag ( client, TAG_ATELIER,
-	                    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF,
-	                    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF_FIN );
-    Client_mode( client, ENVOI_COMMENT_ATELIER );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
-    pthread_exit ( NULL );
-  }
-/**********************************************************************************************************/
-/* Envoyer_motif_supervision_thread: Envoi des syns au client en mode supervision                         */
-/* Entrée: Le client destinaire                                                                           */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_motif_supervision_thread ( struct CLIENT *client )
-  { Envoyer_motif_tag ( client, TAG_SUPERVISION,
-	                    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
-	                    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN );
-    Client_mode( client, ENVOI_COMMENT_SUPERVISION );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
-    pthread_exit ( NULL );
-  }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

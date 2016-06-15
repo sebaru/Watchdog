@@ -26,7 +26,6 @@
  */
  
  #include <glib.h>
- #include <sys/prctl.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
@@ -102,21 +101,19 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
   }
-/**********************************************************************************************************/
-/* Envoyer_passerelle_tag: Envoi des passerelles au client en parametre                                   */
-/* Entrée: Le client destinataire et les tags reseaux                                                     */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Envoyer_passerelle_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
-  { struct CMD_ENREG nbr;
-    struct CMD_TYPE_PASSERELLE *pass;
+/******************************************************************************************************************************/
+/* Envoyer_passerelle_tag: Envoi des passerelles au client en parametre                                                       */
+/* Entrée: Le client destinataire et les tags reseaux                                                                         */
+/* Sortie: La Liste des bits I utilisés pour les passerelles                                                                  */
+/******************************************************************************************************************************/
+ GSList *Envoyer_passerelle_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
+  { struct CMD_TYPE_PASSERELLE *pass;
+    struct CMD_ENREG nbr;
+    GSList *Liste = NULL;
     struct DB *db;
-    gchar titre[20];
-    g_snprintf( titre, sizeof(titre), "W-PASS-%06d", client->ssrv_id );
-    prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
-    if ( ! Recuperer_passerelleDB( &db, client->syn.id ) )                        /* Si pas de passerelle */
-     { return; }
+    if ( ! Recuperer_passerelleDB( &db, client->syn_to_send->id ) )                                   /* Si pas de passerelle */
+     { return(NULL); }
      
     nbr.num = db->nbr_result;
     if (nbr.num)
@@ -125,34 +122,26 @@
                        (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
 
-    for( ; ; )
-     { pass = Recuperer_passerelleDB_suite( &db );
-       if (!pass)                                                                           /* Terminé ?? */
-        { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          return;
-        }
+    while ( (pass = Recuperer_passerelleDB_suite( &db )) )
+     { if (tag == TAG_SUPERVISION)
+        { if ( ! g_slist_find( Liste, GINT_TO_POINTER(pass->bit_controle_1) ) )
+           { Liste = g_slist_prepend( Liste, GINT_TO_POINTER(pass->bit_controle_1) );
+             Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                      "liste des bit_init_syn pass %d", pass->bit_controle_1 );
+           }
 
-       if ( ! g_list_find(client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_1) )
-          )
-        { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_1) );
-          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                   "liste des bit_init_syn pass %d", pass->bit_controle_1 );
-        }
+          if ( ! g_slist_find( Liste, GINT_TO_POINTER(pass->bit_controle_2) ) )
+           { Liste = g_slist_prepend( Liste, GINT_TO_POINTER(pass->bit_controle_2) );
+             Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                      "liste des bit_init_syn pass %d", pass->bit_controle_2 );
+           }
 
-       if ( ! g_list_find(client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_2) )
-          )
-        { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_2) );
-          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                   "liste des bit_init_syn pass %d", pass->bit_controle_2 );
-        }
-
-       if ( ! g_list_find(client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_3) )
-          )
-        { client->bit_init_syn = g_list_append( client->bit_init_syn, GINT_TO_POINTER(pass->bit_controle_3) );
-          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                   "liste des bit_init_syn pass %d", pass->bit_controle_3 );
-        }
-
+          if ( ! g_slist_find( Liste, GINT_TO_POINTER(pass->bit_controle_3) ) )
+           { Liste = g_slist_prepend( Liste, GINT_TO_POINTER(pass->bit_controle_3) );
+             Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                      "liste des bit_init_syn pass %d", pass->bit_controle_3 );
+           }
+         }
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_passerelle_tag: pass %d (%s) to client %s",
                  pass->id, pass->libelle, client->machine );
@@ -160,31 +149,8 @@
                       (gchar *)pass, sizeof(struct CMD_TYPE_PASSERELLE) );
        g_free(pass);
      }
+
+    Envoi_client ( client, tag, sstag_fin, NULL, 0 );
+    return(Liste);
   }
-/**********************************************************************************************************/
-/* Envoyer_passerelle_atelier_thread: Envoi des passerelles au client en mode atelier                     */
-/* Entrée: Le client destinaire                                                                           */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_passerelle_atelier_thread ( struct CLIENT *client )
-  { Envoyer_passerelle_tag ( client, TAG_ATELIER,
-	                         SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS,
-	                         SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS_FIN );
-    Client_mode( client, ENVOI_CAPTEUR_ATELIER );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
-    pthread_exit ( NULL );
-  }
-/**********************************************************************************************************/
-/* Envoyer_passerelle_supervision_thread: Envoi des passerelles au client en mode supervision             */
-/* Entrée: Le client destinaire                                                                           */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_passerelle_supervision_thread ( struct CLIENT *client )
-  { Envoyer_passerelle_tag ( client, TAG_SUPERVISION,
-	                         SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS,
-	                         SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN );
-    Client_mode( client, ENVOI_PALETTE_SUPERVISION );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
-    pthread_exit ( NULL );
-  }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
