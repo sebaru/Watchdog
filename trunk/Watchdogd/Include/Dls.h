@@ -33,6 +33,8 @@
 
  #define NOM_TABLE_DLS         "dls"
 
+ #define NBR_BIT_BISTABLE_RESERVED     40                      /* Nombre de bits bistables reservés pour le système B00 - B39 */
+
  struct PLUGIN_DLS
   { struct CMD_TYPE_PLUGIN_DLS plugindb;
     gchar nom_fichier[60];                                                                                  /* Nom du fichier */
