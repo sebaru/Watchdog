@@ -26,9 +26,41 @@
  */
  
  #include <glib.h>
-/******************************************** Prototypes de fonctions *************************************/
+ #include <sys/prctl.h>
+ /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
+/******************************************************************************************************************************/
+/* Proto_Envoyer_atelier_thread: Envoi du synoptique demandé par le client en mode atelier                                    */
+/* Entrée: Le client destinaire                                                                                               */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void *Proto_Envoyer_atelier_thread ( struct CLIENT *client )
+  { gchar titre[20];
+
+    g_snprintf( titre, sizeof(titre), "W-ATLR-%06d", client->ssrv_id );
+    prctl(PR_SET_NAME, titre, 0, 0, 0 );
+
+    Envoyer_motif_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF,
+	                                         SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF_FIN );
+
+    Envoyer_palette_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE,
+                                               SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE_FIN );
+
+    Envoyer_capteur_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR,
+                                               SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR_FIN );
+
+    Envoyer_passerelle_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS,
+	                                              SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS_FIN );
+
+    Envoyer_comment_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT,
+                                               SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT_FIN );
+
+    g_free(client->syn_to_send);
+    client->syn_to_send = NULL;
+    Unref_client( client );                                           /* Déréférence la structure cliente */
+    pthread_exit ( NULL );
+  }
 /**********************************************************************************************************/
 /* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
 /* Entrée: la connexion avec le serveur                                                                   */
@@ -52,14 +84,30 @@
 /********************************************* atelier ****************************************************/
        case SSTAG_CLIENT_ATELIER_SYNOPTIQUE:
              { struct CMD_TYPE_SYNOPTIQUE *syn;
-               syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;         /* Récupération du numéro du synoptique désiré */
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                         "Le client desire le synoptique numéro %d: %s", syn->id, syn->libelle );
-#ifdef bouh
-               memcpy( &client->syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
-                                                              /* Sauvegarde du syn voulu pour envoi motif */
-               Client_mode( client, ENVOI_MOTIF_ATELIER );
-#endif
+                         "Gerer_protocole_atelier: Le client desire le synoptique numéro %d: %s", syn->id, syn->libelle );
+
+               if ( client->syn_to_send )
+                { struct CMD_GTK_MESSAGE gtkmessage;
+                  g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Another Syn is sending." );
+                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                                (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
+                  return;
+                }
+
+               client->syn_to_send = Rechercher_synoptiqueDB ( syn->id );
+               if ( ! client->syn_to_send )
+                { struct CMD_GTK_MESSAGE gtkmessage;
+                  g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Synoptique inconnu..." );
+                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                                (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
+                  return;
+                }
+
+               Ref_client( client, "Send atelier" );
+               pthread_create( &tid, NULL, (void *)Proto_Envoyer_atelier_thread, client );
+               pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_ATELIER_ADD_MOTIF:

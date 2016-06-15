@@ -43,24 +43,20 @@
     prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
     liste_bits_motif = Envoyer_motif_tag ( client, TAG_SUPERVISION,
-                                          SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
-	                                      SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN );
-    /*Client_mode( client, ENVOI_COMMENT_SUPERVISION );*/
+                                                   SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
+	                                               SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN );
 
+    Envoyer_palette_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,
+                                                   SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE_FIN );
 
-    Envoyer_palette_tag ( client, TAG_SUPERVISION,
-                          SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,
-                          SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE_FIN );
-    liste_capteurs = Envoyer_capteur_tag ( client,  TAG_SUPERVISION, 
+    liste_capteurs = Envoyer_capteur_tag ( client, TAG_SUPERVISION, 
                                            SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR,
                                            SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR_FIN );
 
-    /*Client_mode( client, ENVOI_CAPTEUR_SUPERVISION );                        /* Si pas de comments ... */
-
-
     liste_bits_pass = Envoyer_passerelle_tag ( client, TAG_SUPERVISION,
-	                                              SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS,
-	                                              SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN );
+	                                                   SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS,
+	                                                   SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN );
+
     Envoyer_comment_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,
                                                    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT_FIN );
 
@@ -71,8 +67,7 @@
         { liste_bits_init = g_slist_prepend( liste_bits_init, GINT_TO_POINTER(liste_bits_pass->data) ); }
        liste_bits_pass = g_slist_remove( liste_bits_pass, GINT_TO_POINTER(liste_bits_pass->data) );
      }
-
-  
+    g_slist_free ( liste_bits_pass );
     Envoyer_bit_init_supervision ( client, liste_bits_init, liste_capteurs );
 
     g_slist_free ( liste_bits_init );
