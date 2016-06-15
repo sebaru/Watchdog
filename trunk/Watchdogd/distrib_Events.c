@@ -209,11 +209,6 @@
                      "Gerer_arrive_Event: From %s -> Mise a un du bit M%03d", request, mnemo->num );
             Envoyer_commande_dls(mnemo->num);
             break;
-       case MNEMO_ENTREE:
-            Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                     "Gerer_arrive_Event: From %s -> Mise a un du bit E%03d", request, mnemo->num );
-            Envoyer_entree_furtive_dls(mnemo->num);
-            break;
        case MNEMO_ENTREE_ANA:
             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
                      "Gerer_arrive_Event: From %s -> Positionnement de EA%03d=%f", request, mnemo->num, event->val_float );

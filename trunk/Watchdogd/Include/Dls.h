@@ -119,8 +119,6 @@
     GSList *Plugins;                                                                      /* Liste des plugins chargés de DLS */
     GSList *Set_M;                                                              /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_M;                                                      /* liste des Mxxx a désactiver à la fin du tour prg */
-    GSList *Set_E;                                                              /* liste des Exxx a activer au debut tour prg */
-    GSList *Reset_E;                                                      /* liste des Exxx a désactiver à la fin du tour prg */
     GSList *liste_plugin_reset;                                                               /* liste des plugins a resetter */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */

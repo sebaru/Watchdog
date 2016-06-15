@@ -52,11 +52,11 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.num,%s.furtif"
+                "SELECT %s.num"
                 " FROM %s"
                 " INNER JOIN %s ON %s.id_mnemo = %s.id"
                 " WHERE %s.type=%d ORDER BY %s.num",
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO_DI,
+                NOM_TABLE_MNEMO,
                 NOM_TABLE_MNEMO,                                                                  /* FROM */
                 NOM_TABLE_MNEMO_DI, NOM_TABLE_MNEMO_DI, NOM_TABLE_MNEMO,                    /* INNER JOIN */
                 NOM_TABLE_MNEMO, MNEMO_ENTREE,                                                   /* WHERE */
@@ -90,7 +90,6 @@
                              "Recuperer_digitalInputDB_suite: Erreur allocation mémoire" );
     else
      { mnemo_di->num    = atoi(db->row[0]);
-       mnemo_di->furtif = atoi(db->row[1]);
      }
     return(mnemo_di);
   }
@@ -111,11 +110,11 @@
      }
  
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.num,%s.furtif"
+                "SELECT %s.num"
                 " FROM %s"
                 " INNER JOIN %s ON %s.id_mnemo = %s.id"
                 " WHERE %s.id_mnemo=%d",
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO_DI,
+                NOM_TABLE_MNEMO,
                 NOM_TABLE_MNEMO,                                                                  /* FROM */
                 NOM_TABLE_MNEMO_DI, NOM_TABLE_MNEMO_DI, NOM_TABLE_MNEMO,                     /* LEFT JOIN */
                 NOM_TABLE_MNEMO_DI, id                                                           /* WHERE */
@@ -147,11 +146,11 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s (id_mnemo,furtif) VALUES "
-                "('%d','%d') "
-                "ON DUPLICATE KEY UPDATE "
-                "furtif=VALUES(furtif) ",
-                NOM_TABLE_MNEMO_DI, mnemo_full->mnemo_base.id, mnemo_full->mnemo_di.furtif
+                "INSERT INTO %s (id_mnemo) VALUES "
+                "('%d) "
+                /*"ON DUPLICATE KEY UPDATE "
+                "furtif=VALUES(furtif) "*/,
+                NOM_TABLE_MNEMO_DI, mnemo_full->mnemo_base.id
               );
 
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */

@@ -643,16 +643,6 @@
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /******************************************************************************************************************************/
-/* Envoyer_entree_furtive_dls: Demande a D.L.S de positionner furtivement le bit d'entrée en parametre                        */
-/* Entrée : le numéro de l'entrée                                                                                             */
-/* sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- void Envoyer_entree_furtive_dls( int num )
-  { pthread_mutex_lock( &Partage->com_dls.synchro );
-    Partage->com_dls.Set_E = g_slist_append ( Partage->com_dls.Set_E, GINT_TO_POINTER(num) );
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
-  }
-/******************************************************************************************************************************/
 /* Set_cde_exterieure: Mise à un des bits de commande exterieure                                                              */
 /* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
@@ -666,13 +656,6 @@
        Partage->com_dls.Set_M   = g_slist_remove ( Partage->com_dls.Set_M,   GINT_TO_POINTER(num) );
        Partage->com_dls.Reset_M = g_slist_append ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) ); 
        SM( num, 1 );                                                                           /* Mise a un du bit monostable */
-     }
-    while( Partage->com_dls.Set_E )                                                         /* A-t-on une entrée a allumer ?? */
-     { num = GPOINTER_TO_INT( Partage->com_dls.Set_E->data );
-       Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Set_cde_exterieure: Mise a un du bit E%03d", num );
-       Partage->com_dls.Set_E   = g_slist_remove ( Partage->com_dls.Set_E,   GINT_TO_POINTER(num) );
-       Partage->com_dls.Reset_E = g_slist_append ( Partage->com_dls.Reset_E, GINT_TO_POINTER(num) ); 
-       SE( num, 1 );                                                                                 /* Mise a un de l'entrée */
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro ); 
   }
@@ -689,12 +672,6 @@
        Info_new( Config.log, Config.log_dls, LOG_INFO, "Reset_cde_exterieure : Mise a zero du bit M%03d", num );
        Partage->com_dls.Reset_M = g_slist_remove ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) );
        SM( num, 0 );
-     }
-    while( Partage->com_dls.Reset_E )                                                           /* Reset des entrées furtives */
-     { num = GPOINTER_TO_INT(Partage->com_dls.Reset_E->data);
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "Reset_cde_exterieure : Mise a zero du bit E%03d", num );
-       Partage->com_dls.Reset_E = g_slist_remove ( Partage->com_dls.Reset_E, GINT_TO_POINTER(num) );
-       SE( num, 0 );
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }

@@ -464,6 +464,11 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
+    if (database_version < 2748)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_DigitalInput` DELETE `furtif`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
     Libere_DB_SQL(&db);
 
     sscanf ( VERSION, "%d.%d.%d", &server_major, &server_minor, &server_svnrev );
