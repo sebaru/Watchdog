@@ -118,17 +118,17 @@
        Admin_write ( connexion, chaine );
      }
   }
-/**********************************************************************************************************/
-/* Admin_process: Appellée lorsque l'admin envoie une commande 'process' dans la ligne de commande        */
-/* Entrée: La connexion connexione et la ligne de commande, et le buffer de sortie                        */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_process: Appellée lorsque l'admin envoie une commande 'process' dans la ligne de commande                            */
+/* Entrée: La connexion connexione et la ligne de commande, et le buffer de sortie                                            */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Admin_process ( struct CONNEXION *connexion, gchar *ligne )
   { struct LIBRAIRIE *lib;
     gchar commande[128];
     GSList *liste;
 
-    sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
+    sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
 
     if ( ! strcmp ( commande, "start" ) )
      { gchar thread[128];
@@ -212,29 +212,29 @@
     if ( ! strcmp ( commande, "SHUTDOWN" ) )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Admin_process : SHUTDOWN demandé" );
        Admin_write ( connexion, "SHUTDOWN in progress\n" );
-       SB( 7, TRUE );                                                     /* Message audio avant Shutdown */
+       SB_SYS( 7, TRUE );                                                                     /* Message audio avant Shutdown */
        sleep(5);
        Partage->com_msrv.Thread_run = FALSE;
-       SB( 7, FALSE );                                                    /* Message audio avant Shutdown */
+       SB_SYS( 7, FALSE );                                                                    /* Message audio avant Shutdown */
      } else
     if ( ! strcmp ( commande, "REBOOT" ) )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Admin_process : REBOOT demandé" );
        Admin_write ( connexion, "REBOOT in progress\n" );
-       SB( 8, TRUE );                                                       /* Message audio avant Reboot */
+       SB_SYS( 8, TRUE );                                                                       /* Message audio avant Reboot */
        sleep(5);
        Partage->com_msrv.Thread_reboot = TRUE;
        Partage->com_msrv.Thread_run = FALSE;
-       SB( 8, FALSE );                                                      /* Message audio avant Reboot */
+       SB_SYS( 8, FALSE );                                                                      /* Message audio avant Reboot */
      } else
     if ( ! strcmp ( commande, "CLEAR-REBOOT" ) )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Admin_process : CLEAR-REBOOT demandé" );
        Admin_write ( connexion, "CLEAR-REBOOT in progress\n" );
-       SB( 8, TRUE );                                                       /* Message audio avant Reboot */
+       SB_SYS( 8, TRUE );                                                                       /* Message audio avant Reboot */
        sleep(5);
        Partage->com_msrv.Thread_clear_reboot = TRUE;
        Partage->com_msrv.Thread_reboot = TRUE;
        Partage->com_msrv.Thread_run = FALSE;
-       SB( 8, FALSE );                                                      /* Message audio avant Reboot */
+       SB_SYS( 8, FALSE );                                                                      /* Message audio avant Reboot */
      } else
     if ( ! strcmp ( commande, "RELOAD" ) )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Admin_process : RELOAD demandé" );
@@ -260,4 +260,4 @@
        Admin_write ( connexion, chaine );
      }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
