@@ -137,31 +137,4 @@
        g_free(palette);
      }
   }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Envoyer_palette_atelier_thread: Envoi des palettes au client en mode atelier                           */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_palette_atelier_thread ( struct CLIENT *client )
-  { Envoyer_palette_thread_tag ( client, TAG_ATELIER,
-                                         SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE,
-                                         SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE_FIN );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
-    pthread_exit ( NULL );
-  }
-/**********************************************************************************************************/
-/* Envoyer_palette_supervision_thread: Envoi des palettes en mode supervision                             */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_palette_supervision_thread ( struct CLIENT *client )
-  { Envoyer_palette_thread_tag ( client, TAG_SUPERVISION,
-                                                 SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,
-                                                 SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE_FIN );
-    Client_mode( client, ENVOI_CAPTEUR_SUPERVISION );                        /* Si pas de comments ... */
-    Unref_client( client );                                           /* Déréférence la structure cliente */
-    pthread_exit ( NULL );
-  }
-#endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

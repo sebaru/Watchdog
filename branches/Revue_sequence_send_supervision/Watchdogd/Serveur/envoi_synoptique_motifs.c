@@ -173,17 +173,4 @@
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
     return(liste_bit_init);
   }
-/******************************************************************************************************************************/
-/* Envoyer_motif_atelier_thread: Envoi des syns au client en mode atelier                                                     */
-/* Entrée: Le client destinaire                                                                                               */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void *Envoyer_motif_atelier_thread ( struct CLIENT *client )
-  { Envoyer_motif_tag ( client, TAG_ATELIER,
-	                    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF,
-	                    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF_FIN );
-    Client_mode( client, ENVOI_COMMENT_ATELIER );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
-    pthread_exit ( NULL );
-  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

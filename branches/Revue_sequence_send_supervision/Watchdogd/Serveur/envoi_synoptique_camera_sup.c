@@ -173,7 +173,7 @@
     gchar titre[20];
     g_snprintf( titre, sizeof(titre), "W-CAMS-%06d", client->ssrv_id );
     prctl(PR_SET_NAME, titre, 0, 0, 0 );
-    Client_mode( client, ENVOI_IXXX_SUPERVISION );
+/*    Client_mode( client, ENVOI_IXXX_SUPERVISION );*/
     Unref_client( client );                                     /* Déréférence la structure cliente */
     pthread_exit( NULL );
 #ifdef bouh

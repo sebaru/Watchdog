@@ -133,18 +133,4 @@
      }
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
   }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_comment_atelier_thread ( struct CLIENT *client )
-  { Envoyer_comment_thread_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT,
-                                                      SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT_FIN );
-    Client_mode( client, ENVOI_PASSERELLE_ATELIER );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
-    pthread_exit(EXIT_SUCCESS);
-  }
-#endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

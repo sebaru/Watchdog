@@ -52,18 +52,6 @@
     VALIDE,
 
     ENVOI_GROUPE_FOR_UTIL,
-    ENVOI_MOTIF_ATELIER,                                                         /* Envoi des motifs associés à un synoptique */
-    ENVOI_COMMENT_ATELIER,                                                     /* Envoi des comments associés à un synoptique */
-    ENVOI_PASSERELLE_ATELIER,                                                  /* Envoi des passerelles dans l'atelier client */
-    ENVOI_CAPTEUR_ATELIER,                                                         /* Envoi des capteur dans l'atelier client */
-    ENVOI_CAMERA_SUP_ATELIER,                                                   /* Envoi des camera_sup dans l'atelier client */
-    ENVOI_MOTIF_SUPERVISION,                                                             /* Envoi des motifs a la supervision */
-    ENVOI_COMMENT_SUPERVISION,                                                         /* Envoi des comments à la supervision */
-    ENVOI_PASSERELLE_SUPERVISION,                                             /* Envoi des infos passerelles à la supervision */
-    ENVOI_PALETTE_SUPERVISION,                                                   /* Envoi des infos palettes à la supervision */
-    ENVOI_CAPTEUR_SUPERVISION,                                                         /* Envoi des capteurs à la supervision */
-    ENVOI_CAMERA_SUP_SUPERVISION,                                                    /* Envoi des camera_sup à la supervision */
-    ENVOI_IXXX_SUPERVISION,
     ENVOI_GROUPE_FOR_SYNOPTIQUE,
     ENVOI_GROUPE_FOR_PROPRIETE_SYNOPTIQUE,                          /* Envoi des groupes pour la fenetre propriete synoptique */
     ENVOI_ICONE_FOR_ATELIER,

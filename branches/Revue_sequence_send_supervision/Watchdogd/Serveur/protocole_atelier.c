@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Serveur/protocole_atelier.c    Gestion du protocole_atelier pour Watchdog                    */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     mar. 17 nov. 2009 13:47:17 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Serveur/protocole_atelier.c    Gestion du protocole_atelier pour Watchdog                                        */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                         mar. 17 nov. 2009 13:47:17 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * protocole_atelier.c
  * This file is part of Watchdog
@@ -27,7 +27,7 @@
  
  #include <glib.h>
  #include <sys/prctl.h>
- /******************************************** Prototypes de fonctions *************************************/
+ /**************************************************** Prototypes de fonctions ************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
 /******************************************************************************************************************************/
@@ -58,14 +58,14 @@
 
     g_free(client->syn_to_send);
     client->syn_to_send = NULL;
-    Unref_client( client );                                           /* Déréférence la structure cliente */
+    Unref_client( client );                                                               /* Déréférence la structure cliente */
     pthread_exit ( NULL );
   }
-/**********************************************************************************************************/
-/* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
-/* Entrée: la connexion avec le serveur                                                                   */
-/* Sortie: Kedal                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Gerer_protocole: Gestion de la communication entre le serveur et le client                                                 */
+/* Entrée: la connexion avec le serveur                                                                                       */
+/* Sortie: Kedal                                                                                                              */
+/******************************************************************************************************************************/
  void Gerer_protocole_atelier( struct CLIENT *client )
   { struct CONNEXION *connexion;
     pthread_t tid;
@@ -81,7 +81,7 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { 
-/********************************************* atelier ****************************************************/
+/******************************************************** atelier *************************************************************/
        case SSTAG_CLIENT_ATELIER_SYNOPTIQUE:
              { struct CMD_TYPE_SYNOPTIQUE *syn;
                syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;         /* Récupération du numéro du synoptique désiré */
@@ -190,7 +190,7 @@
                                                          client, mnemo );
              }
             break;
-/************************************* Gestion des commentaires synoptiques *******************************/
+/************************************************* Gestion des commentaires synoptiques ***************************************/
        case SSTAG_CLIENT_ATELIER_ADD_COMMENT: 
              { struct CMD_TYPE_COMMENT *comment;
                comment = (struct CMD_TYPE_COMMENT *)connexion->donnees;
@@ -215,7 +215,7 @@
                Proto_valider_editer_comment_atelier( client, comment );
              }
             break;
-/************************************* Gestion des cameras synoptiques ************************************/
+/************************************************ Gestion des cameras synoptiques *********************************************/
        case SSTAG_CLIENT_WANT_PAGE_CAMERA_FOR_ATELIER:
              { Ref_client( client, "Send Camera for atelier" );
                pthread_create( &tid, NULL, (void *)Envoyer_cameras_for_atelier_thread, client );
@@ -240,7 +240,7 @@
                Proto_valider_editer_camera_sup_atelier( client, camera_sup );
              }
             break;
-/************************************* Gestion des passerelle synoptiques *********************************/
+/******************************************* Gestion des passerelle synoptiques ***********************************************/
        case SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER:
              { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                          "Le client desire les syn pour atelier" );
@@ -271,14 +271,13 @@
                Proto_valider_editer_passerelle_atelier( client, pass );
              }
             break;
-/************************************* Gestion des palettes synoptiques ***********************************/
+/******************************************** Gestion des palettes synoptiques ************************************************/
        case SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER_PALETTE: 
              { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                          "Le client desire les syn pour palettes atelier" );
-#ifdef bouh
-               memcpy ( &client->syn, connexion->donnees, sizeof (struct CMD_TYPE_SYNOPTIQUE) );
-               Client_mode( client, ENVOI_SYNOPTIQUE_FOR_ATELIER_PALETTE );
-#endif
+               Ref_client( client, "Send synoptique atelier palette" );
+               pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_atelier_palette_thread, client );
+               pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_ATELIER_ADD_PALETTE:
@@ -305,7 +304,7 @@
                Proto_effacer_palette_atelier( client, palette );
              }
             break;
-/*********************************** Gestion des capteurs synoptiques *************************************/
+/************************************************* Gestion des capteurs synoptiques *******************************************/
        case SSTAG_CLIENT_ATELIER_ADD_CAPTEUR:
              { struct CMD_TYPE_CAPTEUR *capteur;
                capteur = (struct CMD_TYPE_CAPTEUR *)connexion->donnees;
@@ -332,4 +331,4 @@
             break;
      }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

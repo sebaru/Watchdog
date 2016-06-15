@@ -192,8 +192,6 @@
  extern void Proto_valider_editer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
 
                                                                                             /* Dans envoi_synoptique_motifs.c */
- extern void *Envoyer_camera_sup_atelier_thread ( struct CLIENT *client );
- extern void *Envoyer_camera_sup_supervision_thread ( struct CLIENT *client );
  extern void Proto_effacer_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERA_SUP *camera_sup );
  extern void Proto_ajouter_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERA_SUP *camera_sup );
  extern void Proto_valider_editer_camera_sup_atelier ( struct CLIENT *client,

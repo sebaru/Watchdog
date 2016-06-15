@@ -195,20 +195,6 @@
                pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_atelier_thread, client );
                pthread_detach( tid );
                break;
-          case ENVOI_SYNOPTIQUE_FOR_ATELIER_PALETTE:
-               Client_mode( client, VALIDE );                             /* Si pas de comments ... */
-               Ref_client( client, "Send synoptique atelier palette" );
-               pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_atelier_palette_thread, client );
-               pthread_detach( tid );
-               break;
-#ifdef bouh
-          case ENVOI_PALETTE_FOR_ATELIER_PALETTE:
-               Client_mode( client, VALIDE );                             /* Si pas de comments ... */
-               Ref_client( client, "Send palette atelier" );
-               pthread_create( &tid, NULL, (void *)Envoyer_palette_atelier_thread, client );
-               pthread_detach( tid );
-               break;
-#endif
         }
 /************************************************* Envoi des chaines capteurs *************************************************/
        if (client->mode == VALIDE && client->bit_capteurs && client->date_next_send_capteur < Partage->top)
