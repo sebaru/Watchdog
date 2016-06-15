@@ -33,6 +33,8 @@
 
  #define NOM_TABLE_DLS         "dls"
 
+ #define NBR_BIT_BISTABLE_RESERVED     40                      /* Nombre de bits bistables reservés pour le système B00 - B39 */
+
  struct PLUGIN_DLS
   { struct CMD_TYPE_PLUGIN_DLS plugindb;
     gchar nom_fichier[60];                                                                                  /* Nom du fichier */
@@ -149,6 +151,7 @@
  extern float EA_ech( int num );
  extern int A( int num );
  extern char *Tdetail( int num );
+ extern void SB_SYS( int num, int etat );
  extern void SE( int num, int etat );
  extern void SEA( int num, float val_avant_ech );
  extern void SEA_range( int num, int range );

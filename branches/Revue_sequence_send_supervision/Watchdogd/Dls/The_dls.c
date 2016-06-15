@@ -300,12 +300,12 @@
        Partage->ea[ num ].last_arch = Partage->top;                       /* Communications aux threads ! */
      }
   }
-/**********************************************************************************************************/
-/* SB: Positionnement d'un bistable DLS                                                                   */
-/* Entrée: numero, etat                                                                                   */
-/* Sortie: Neant                                                                                          */
-/**********************************************************************************************************/
- void SB( int num, int etat )
+/******************************************************************************************************************************/
+/* SB_SYS: Positionnement d'un bistable DLS sans controle sur le range reserved                                               */
+/* Entrée: numero, etat                                                                                                       */
+/* Sortie: Neant                                                                                                              */
+/******************************************************************************************************************************/
+ void SB_SYS( int num, int etat )
   { gint numero, bit;
     if (num<0 || num>=NBR_BIT_BISTABLE)
      { if (!(Partage->top % 600))
@@ -314,7 +314,7 @@
      }
     numero = num>>3;
     bit = 1<<(num & 0x07);
-    if (etat)                                                                       /* Mise a jour du bit */
+    if (etat)                                                                                           /* Mise a jour du bit */
      { Partage->b[numero] |= bit; 
        Partage->audit_bit_interne_per_sec++;
      }
@@ -322,6 +322,19 @@
      { Partage->b[numero] &= ~bit;
        Partage->audit_bit_interne_per_sec++;
      }
+  }
+/******************************************************************************************************************************/
+/* SB: Positionnement d'un bistable DLS avec controle sur le range reserved                                                   */
+/* Entrée: numero, etat                                                                                                       */
+/* Sortie: Neant                                                                                                              */
+/******************************************************************************************************************************/
+ void SB( int num, int etat )
+  { if (num<=NBR_BIT_BISTABLE_RESERVED || num>=NBR_BIT_BISTABLE)
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SB : num %d out of range", num ); }
+       return;
+     }
+    SB_SYS( num, etat );
   }
 /**********************************************************************************************************/
 /* SM: Positionnement d'un monostable DLS                                                                 */
@@ -620,10 +633,10 @@
        Partage->audit_bit_interne_per_sec++;
      }
   }
-/**********************************************************************************************************/
-/* Envoyer_commande_dls: Gestion des envois de commande DLS                                               */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Envoyer_commande_dls: Gestion des envois de commande DLS                                                                   */
+/* Entrée/Sortie: rien                                                                                                        */
+/******************************************************************************************************************************/
  void Envoyer_commande_dls ( int num )
   { pthread_mutex_lock( &Partage->com_dls.synchro );
     Partage->com_dls.Set_M = g_slist_append ( Partage->com_dls.Set_M, GINT_TO_POINTER(num) );
@@ -639,45 +652,45 @@
     Partage->com_dls.Set_E = g_slist_append ( Partage->com_dls.Set_E, GINT_TO_POINTER(num) );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
-/**********************************************************************************************************/
-/* Set_cde_exterieure: Mise à un des bits de commande exterieure                                          */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Set_cde_exterieure: Mise à un des bits de commande exterieure                                                              */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  static void Set_cde_exterieure ( void )
   { gint num;
     pthread_mutex_lock( &Partage->com_dls.synchro );
-    while( Partage->com_dls.Set_M )                                  /* A-t-on un monostable a allumer ?? */
+    while( Partage->com_dls.Set_M )                                                      /* A-t-on un monostable a allumer ?? */
      { num = GPOINTER_TO_INT( Partage->com_dls.Set_M->data );
        Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Set_cde_exterieure: Mise a un du bit M%03d", num );
        Partage->com_dls.Set_M   = g_slist_remove ( Partage->com_dls.Set_M,   GINT_TO_POINTER(num) );
        Partage->com_dls.Reset_M = g_slist_append ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) ); 
-       SM( num, 1 );                                                       /* Mise a un du bit monostable */
+       SM( num, 1 );                                                                           /* Mise a un du bit monostable */
      }
-    while( Partage->com_dls.Set_E )                                     /* A-t-on une entrée a allumer ?? */
+    while( Partage->com_dls.Set_E )                                                         /* A-t-on une entrée a allumer ?? */
      { num = GPOINTER_TO_INT( Partage->com_dls.Set_E->data );
        Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Set_cde_exterieure: Mise a un du bit E%03d", num );
        Partage->com_dls.Set_E   = g_slist_remove ( Partage->com_dls.Set_E,   GINT_TO_POINTER(num) );
        Partage->com_dls.Reset_E = g_slist_append ( Partage->com_dls.Reset_E, GINT_TO_POINTER(num) ); 
-       SE( num, 1 );                                                             /* Mise a un de l'entrée */
+       SE( num, 1 );                                                                                 /* Mise a un de l'entrée */
      }
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
+    pthread_mutex_unlock( &Partage->com_dls.synchro ); 
   }
-/**********************************************************************************************************/
-/* Reset_cde_exterieure: Mise à zero des bits de commande exterieure                                      */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Reset_cde_exterieure: Mise à zero des bits de commande exterieure                                                          */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  static void Reset_cde_exterieure ( void )
   { gint num;
     pthread_mutex_lock( &Partage->com_dls.synchro );
-    while( Partage->com_dls.Reset_M )                                            /* Reset des monostables */
+    while( Partage->com_dls.Reset_M )                                                                /* Reset des monostables */
      { num = GPOINTER_TO_INT(Partage->com_dls.Reset_M->data);
        Info_new( Config.log, Config.log_dls, LOG_INFO, "Reset_cde_exterieure : Mise a zero du bit M%03d", num );
        Partage->com_dls.Reset_M = g_slist_remove ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) );
        SM( num, 0 );
      }
-    while( Partage->com_dls.Reset_E )                                       /* Reset des entrées furtives */
+    while( Partage->com_dls.Reset_E )                                                           /* Reset des entrées furtives */
      { num = GPOINTER_TO_INT(Partage->com_dls.Reset_E->data);
        Info_new( Config.log, Config.log_dls, LOG_INFO, "Reset_cde_exterieure : Mise a zero du bit E%03d", num );
        Partage->com_dls.Reset_E = g_slist_remove ( Partage->com_dls.Reset_E, GINT_TO_POINTER(num) );
@@ -685,10 +698,10 @@
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
-/*--------------------------------------------------------------------------------------------------------*/
-/**********************************************************************************************************/
-/* Main: Fonction principale du DLS                                                                       */
-/**********************************************************************************************************/
+/*----------------------------------------------------------------------------------------------------------------------------*/
+/******************************************************************************************************************************/
+/* Main: Fonction principale du DLS                                                                                           */
+/******************************************************************************************************************************/
  void Run_dls ( void )
   { gint Update_heure=0;
     GSList *plugins;
@@ -696,13 +709,15 @@
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
     Info_new( Config.log, Config.log_dls, LOG_NOTICE,
               "Run_dls: Demarrage . . . TID = %p", pthread_self() );
-    Partage->com_dls.Thread_run         = TRUE;                                     /* Le thread tourne ! */
+    Partage->com_dls.Thread_run         = TRUE;                                                         /* Le thread tourne ! */
              
-    Prendre_heure();                                 /* On initialise les variables de gestion de l'heure */
-    Charger_plugins();                                                      /* Chargement des modules dls */
-    sleep(30);/* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
+    Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
+    Charger_plugins();                                                                          /* Chargement des modules dls */
+    SB_SYS(1, 0);                                                                                      /* B1 est toujours à 0 */
+    SB_SYS(2, 1);                                                                                      /* B2 est toujours à 1 */
+    sleep(30);                    /* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
 
-    while(Partage->com_dls.Thread_run == TRUE)                           /* On tourne tant que necessaire */
+    while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
      { struct timeval tv_avant, tv_apres;
 
        if (Partage->com_dls.Thread_reload)
@@ -742,23 +757,21 @@
           Reseter_un_plugin( num );
         }
 
-       Set_cde_exterieure();                        /* Mise à un des bit de commande exterieure (furtifs) */
+       Set_cde_exterieure();                                            /* Mise à un des bit de commande exterieure (furtifs) */
 
-       SB(0, !B(0));                                            /* Change d'etat tous les tours programme */
-       SB(1, 0);                                                                   /* B1 est toujours à 0 */
-       SB(2, 1);                                                                   /* B2 est toujours à 1 */
-       SI(1, 1, 255, 0, 0, 0 );                                           /* Icone toujours à 1:rouge */
+       SB_SYS(0, !B(0));                                                            /* Change d'etat tous les tours programme */
+       SI(1, 1, 255, 0, 0, 0 );                                                                   /* Icone toujours à 1:rouge */
 
        pthread_mutex_lock( &Partage->com_dls.synchro );
        plugins = Partage->com_dls.Plugins;
-       while(plugins)                                            /* On execute tous les modules un par un */
+       while(plugins)                                                                /* On execute tous les modules un par un */
         { struct PLUGIN_DLS *plugin_actuel;
           plugin_actuel = (struct PLUGIN_DLS *)plugins->data;
 
           if (plugin_actuel->plugindb.on && plugin_actuel->go)
            { gettimeofday( &tv_avant, NULL );
-             Partage->top_cdg_plugin_dls = 0;                               /* On reset le cdg plugin DLS */
-             plugin_actuel->go( plugin_actuel->starting );                          /* On appel le plugin */
+             Partage->top_cdg_plugin_dls = 0;                                                   /* On reset le cdg plugin DLS */
+             plugin_actuel->go( plugin_actuel->starting );                                              /* On appel le plugin */
              gettimeofday( &tv_apres, NULL );
              plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
              plugin_actuel->starting = 0;
@@ -766,17 +779,17 @@
           plugins = plugins->next;
         }
        pthread_mutex_unlock( &Partage->com_dls.synchro );
-       SB(3, 1);                                  /* B3 est toujours à un apres le premier tour programme */
+       SB_SYS(3, 1);                                                  /* B3 est toujours à un apres le premier tour programme */
 
-       Reset_cde_exterieure();                    /* Mise à zero des bit de commande exterieure (furtifs) */
-       Partage->audit_tour_dls_per_sec++;               /* Gestion de l'audit nbr de tour DLS par seconde */
-/************************************ Gestion des 1000 tours DLS par seconde ******************************/
+       Reset_cde_exterieure();                                        /* Mise à zero des bit de commande exterieure (furtifs) */
+       Partage->audit_tour_dls_per_sec++;                                   /* Gestion de l'audit nbr de tour DLS par seconde */
+/******************************************** Gestion des 1000 tours DLS par seconde ******************************************/
        usleep(Partage->com_dls.temps_sched);
        sched_yield();
      }
-    Decharger_plugins();                                                  /* Dechargement des modules DLS */
+    Decharger_plugins();                                                                      /* Dechargement des modules DLS */
     Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Run_dls: DLS Down (%p)", pthread_self() );
-    Partage->com_dls.TID = 0;                             /* On indique au master que le thread est mort. */
+    Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

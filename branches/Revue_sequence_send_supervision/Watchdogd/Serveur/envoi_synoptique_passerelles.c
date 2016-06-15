@@ -101,11 +101,11 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
   }
-/**********************************************************************************************************/
-/* Envoyer_passerelle_tag: Envoi des passerelles au client en parametre                                   */
-/* Entrée: Le client destinataire et les tags reseaux                                                     */
-/* Sortie: La Liste des bits I utilisés pour les passerelles                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Envoyer_passerelle_tag: Envoi des passerelles au client en parametre                                                       */
+/* Entrée: Le client destinataire et les tags reseaux                                                                         */
+/* Sortie: La Liste des bits I utilisés pour les passerelles                                                                  */
+/******************************************************************************************************************************/
  GSList *Envoyer_passerelle_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
   { struct CMD_TYPE_PASSERELLE *pass;
     struct CMD_ENREG nbr;
@@ -153,21 +153,4 @@
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
     return(Liste);
   }
-#ifdef bouh  
-/**********************************************************************************************************/
-/* Envoyer_passerelle_atelier_thread: Envoi des passerelles au client en mode atelier                     */
-/* Entrée: Le client destinaire                                                                           */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_passerelle_atelier_thread ( struct CLIENT *client )
-  { Envoyer_passerelle_tag ( client, TAG_ATELIER,
-	                         SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS,
-	                         SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS_FIN );
-    Client_mode( client, ENVOI_CAPTEUR_ATELIER );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
-    pthread_exit ( NULL );
-  }
-/**********************************************************************************************************/
-
-#endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
