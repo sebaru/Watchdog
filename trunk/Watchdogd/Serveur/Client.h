@@ -97,7 +97,8 @@
     struct CMD_TYPE_COURBE courbe;                                        /* Structure parametres Proto_ajouter_courbe_thread */
     GList *courbes;                                              /* Ensemble des entrees analogiques monitorées par le client */
 
-    gint id_creation_plugin_dls;                                                 /* ID fichier du plugin en cours de creation */
+    gchar *Source_DLS_new;                                                    /* Nouvelle source DLS en cours de récupération */
+    guint taille_Source_DLS_new;                                                     /* Taille en mémoire du buffer ci dessus */
     gint id_creation_message_mp3;                                              /* ID fichier message mp3 en cours de creation */
     gint classe_icone;                                                            /* Classe d'icone en cours de visualisation */
     gint date_next_send_capteur;                                             /* Date du prochain envoi des capteurs au client */

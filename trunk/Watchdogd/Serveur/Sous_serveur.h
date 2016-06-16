@@ -140,7 +140,8 @@
  extern void Proto_valider_source_dls( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls,
                                        gchar *buffer );
  extern void *Proto_compiler_source_dls_thread( struct CLIENT *client );
- extern void Proto_effacer_fichier_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls );
+ extern void Proto_effacer_source_dls ( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls );
+ extern void Save_source_dls_to_disk ( struct CMD_TYPE_SOURCE_DLS *edit_dls, gchar *buffer, guint taille );
  extern void Proto_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
  extern void Proto_valider_editer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
 
@@ -164,9 +165,6 @@
  extern void Proto_effacer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn );
  extern void Proto_ajouter_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn );
  extern void Proto_editer_synoptique ( struct CLIENT *client, struct CMD_TYPE_SYNOPTIQUE *rezo_syn );
-
-                                                                                                     /* Dans envoi_bit_init.c */
- extern void Envoyer_bit_init_supervision ( struct CLIENT *client, GSList *Liste_Bits_i, GSList *Liste_Capteurs );
 
                                                                                        /* Dans envoi_synoptique_passerelles.c */
  extern GSList *Envoyer_passerelle_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );

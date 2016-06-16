@@ -56,17 +56,16 @@
     Envoyer_comment_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,
                                                    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT_FIN );
 
-                                                                  /* Fusion des listes de bits I à envoyer au client à l'init */
     g_free(client->syn_to_send);
     client->syn_to_send = NULL;
-    Unref_client( client );                                           /* Déréférence la structure cliente */
+    Unref_client( client );                                                               /* Déréférence la structure cliente */
     pthread_exit ( NULL );
   }
-/**********************************************************************************************************/
-/* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
-/* Entrée: la connexion avec le serveur                                                                   */
-/* Sortie: Kedal                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Gerer_protocole: Gestion de la communication entre le serveur et le client                                                 */
+/* Entrée: la connexion avec le serveur                                                                                       */
+/* Sortie: Kedal                                                                                                              */
+/******************************************************************************************************************************/
  void Gerer_protocole_supervision( struct CLIENT *client )
   { struct CONNEXION *connexion;
     connexion = client->connexion;
@@ -134,4 +133,4 @@
             break;
      }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
