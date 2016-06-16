@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Serveur/envoi_synoptique_capteur.c     Envoi des capteurs aux clients                        */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 22 mai 2005 17:35:28 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Serveur/envoi_synoptique_capteur.c     Envoi des capteurs aux clients                                            */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          dim 22 mai 2005 17:35:28 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * envoi_synoptique_capteur.c
  * This file is part of Watchdog
@@ -30,14 +30,14 @@
  #include <string.h>
  #include <unistd.h>
 
-/******************************************** Prototypes de fonctions *************************************/
+/**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
-/**********************************************************************************************************/
-/* Proto_effacer_syn: Retrait du syn en parametre                                                         */
-/* Entrée: le client demandeur et le syn en question                                                      */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_effacer_capteur_atelier: Retrait du capteur en parametre                                                             */
+/* Entrée: le client demandeur et le capteur en question                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_effacer_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur )
   { gboolean retour;
     retour = Retirer_capteurDB( rezo_capteur );
@@ -54,11 +54,11 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
   }
-/**********************************************************************************************************/
-/* Proto_ajouter_comment_atelier: Ajout d'un commentaire dans un synoptique                               */
-/* Entrée: le client demandeur et le syn en question                                                      */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_ajouter_capteur_atelier: Ajout d'un capteur dans un synoptique                                                       */
+/* Entrée: le client demandeur et le capteur en question                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_ajouter_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur )
   { struct CMD_TYPE_CAPTEUR *result;
     gint id;
@@ -86,11 +86,11 @@
             }
          }
   }
-/**********************************************************************************************************/
-/* Proto_editer_syn: Le client desire editer un syn                                                       */
-/* Entrée: le client demandeur et le syn en question                                                      */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_valider_editer_capteur_atelier: Le client desire editer un capteur                                                   */
+/* Entrée: le client demandeur et le capteur en question                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_valider_editer_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur )
   { gboolean retour;
     retour = Modifier_capteurDB ( rezo_capteur );
@@ -102,15 +102,14 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
   }
-/**********************************************************************************************************/
-/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- GSList *Envoyer_capteur_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
-  { GSList *liste = NULL;
+/******************************************************************************************************************************/
+/* Envoyer_capteur_tag: Envoi des capteur au client en parametre                                                              */
+/* Entrée: Le client, le tag reseau et sous-tag                                                                               */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Envoyer_capteur_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
+  { struct CMD_TYPE_CAPTEUR *capteur;
     struct CMD_ENREG nbr;
-    struct CMD_TYPE_CAPTEUR *capteur;
     struct DB *db;
 
     if ( ! Recuperer_capteurDB( &db, client->syn_to_send->id ) )
@@ -123,59 +122,33 @@
                       (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
 
-    while ( capteur = Recuperer_capteurDB_suite( &db ) )
+    while ( capteur = Recuperer_capteurDB_suite( &db ) )                             /* Pour tous les capteurs de la database */
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_capteur_tag: capteur %d (%s) to client %s",
                  capteur->id, capteur->libelle, client->machine );
-       if (tag == TAG_SUPERVISION)
-        { struct CAPTEUR *capteur_new;
-          capteur_new = (struct CAPTEUR *)g_try_malloc0( sizeof(struct CAPTEUR) );
-          if (capteur_new)
-           { capteur_new->type = capteur->type;
-             capteur_new->bit_controle = capteur->bit_controle;
 
-             if ( ! g_slist_find_custom(liste, capteur_new, (GCompareFunc) Chercher_bit_capteurs ) )
-              { client->bit_init_capteur = g_list_append( client->bit_init_capteur, capteur_new );
-                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                         "liste des bit_init_capteur %d", capteur->id );
-              }
-             else g_free(capteur_new);
-           }
-        }
-
-       Envoi_client ( client, tag, sstag,
+       Envoi_client ( client, tag, sstag,                                                       /* Envoi du capteur au client */
                       (gchar *)capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
-       g_free(capteur);
+
+       if (tag == TAG_SUPERVISION)                                          /* Si mode supervision on envoit la valeur d'init */
+        { struct CMD_ETAT_BIT_CAPTEUR *init_capteur;
+
+          init_capteur = Formater_capteur(capteur);                                        /* Formatage de la chaine associée */
+          if (init_capteur)                                                               /* envoi la valeur d'init au client */
+           { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CAPTEUR,
+                           (gchar *)init_capteur, sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
+             g_free(init_capteur);                                                                    /* On libere la mémoire */
+           }
+          else { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
+                          "Envoyer_capteur_tag: Formater_capteur failed for %d (%s)", capteur->id, capteur->libelle );
+               }
+
+          if ( ! g_slist_find_custom(client->Liste_bit_capteurs, capteur, (GCompareFunc) Chercher_bit_capteurs) )
+           { client->Liste_bit_capteurs = g_slist_prepend( client->Liste_bit_capteurs, capteur ); }
+          else g_free( capteur );                                 /* si deja dans la liste, plus besoin de cette zone mémoire */
+        }
+       else g_free(capteur);                                             /* Si pas supervision, on n'a plus besoin du capteur */
      }
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-    return(liste);
   }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_capteur_atelier_thread ( struct CLIENT *client )
-  { Envoyer_capteur_thread_tag ( client,  TAG_ATELIER, 
-                                          SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR,
-                                          SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR_FIN );
-    Client_mode( client, ENVOI_CAMERA_SUP_ATELIER );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
-    pthread_exit(EXIT_SUCCESS);
-  }
-/**********************************************************************************************************/
-/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_capteur_supervision_thread ( struct CLIENT *client )
-  { Envoyer_capteur_thread_tag ( client,  TAG_SUPERVISION, 
-                                          SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR,
-                                          SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR_FIN );
-    Client_mode( client, ENVOI_CAMERA_SUP_SUPERVISION );
-    Unref_client( client );                                           /* Déréférence la structure cliente */
-    pthread_exit(EXIT_SUCCESS);
-  }
-#endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

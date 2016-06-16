@@ -197,11 +197,11 @@
                break;
         }
 /************************************************* Envoi des chaines capteurs *************************************************/
-       if (client->mode == VALIDE && client->bit_capteurs && client->date_next_send_capteur < Partage->top)
+       if (client->mode == VALIDE && client->Liste_bit_capteurs && client->date_next_send_capteur < Partage->top)
         { struct CAPTEUR *capteur;
-          GList *liste_capteur;
+          GSList *liste_capteur;
           client->date_next_send_capteur = Partage->top + TEMPS_UPDATE_CAPTEUR;
-          liste_capteur = client->bit_capteurs;
+          liste_capteur = client->Liste_bit_capteurs;
           while (liste_capteur)                                                           /* Pour tous les capteurs du client */
            { capteur = (struct CAPTEUR *)liste_capteur->data;
               if (Tester_update_capteur(capteur))                                      /* Doit-on updater le capteur client ? */
@@ -212,7 +212,7 @@
                                  (gchar *)etat, sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
                    g_free(etat);                                                                      /* On libere la mémoire */
                  }
-                else Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Not enought memory envoi capteur" );
+                else Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Not enought memory to send capteur" );
               }
              liste_capteur = liste_capteur->next;                                              /* On passe au capteur suivant */
            }

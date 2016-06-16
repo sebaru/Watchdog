@@ -82,8 +82,7 @@
     GSList *Liste_new_motif;                               /* Liste des changements de motifs a traiter et envoyer aux client */
     GSList *Liste_bit_syns;                                /* Ensemble des bits CTRL utilisés pour les synoptiques visualisés */
 
-    GList *bit_capteurs;                                   /* Ensemble des bits EAxx utilisés pour les synoptiques visualisés */
-    GList *bit_init_capteur;                       /* Ensemble des bits CTRL utilisés par le syn supervision en cours d'envoi */
+    GSList *Liste_bit_capteurs;                            /* Ensemble des bits EAxx utilisés pour les synoptiques visualisés */
 
 /* Communication des Evenements depuis SSRV vers les clients */
     GSList *Liste_events;                                                                       /* Liste des evenements recus */

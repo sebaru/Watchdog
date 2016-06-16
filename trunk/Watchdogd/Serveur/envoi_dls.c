@@ -182,24 +182,19 @@
      }
 
     lockf( fd, F_LOCK, 0 );                                                                        /* Verrouillage du fichier */
-    for ( ; ; )                                                                             /* On balance le fichier source ! */
-     { taille = read ( fd, buffer_data, taille_max_data );
-       if (taille<=0)                                                                          /* Détection de fin de fichier */
-        { close(fd);
-          break;
-        }
-    
-       source_dls->taille = taille;
+    while ( (taille = read ( fd, buffer_data, taille_max_data )) > 0 )                      /* On envoie le fichier au client */
+     { source_dls->taille = taille;
        Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_SOURCE_DLS,
                       buffer_all, taille + sizeof(struct CMD_TYPE_SOURCE_DLS) );
      }
+    close(fd);
     Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_SOURCE_DLS_END,
                    buffer_all, sizeof(struct CMD_TYPE_SOURCE_DLS) );
     g_free(buffer_all);
   }
 /******************************************************************************************************************************/
 /* Proto_valider_source_dls: Le client nous envoie un prg DLS qu'il nous faudra compiler ensuite                              */
-/* Entrée: le client demandeur et le groupe en question                                                                       */
+/* Entrée: le client demandeur et le source D.L.S a sauvgarder                                                                */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Proto_valider_source_dls( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls,

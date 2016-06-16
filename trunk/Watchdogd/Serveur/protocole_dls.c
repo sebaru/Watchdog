@@ -101,7 +101,7 @@
        case SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_FIN:
              { memcpy( &client->dls, (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees,
                        sizeof( client->dls ) );
-               Ref_client( client, "Send Compiler D.L.S" );
+               Ref_client( client, "Compiler D.L.S" );
                pthread_create( &tid, NULL, (void *)Proto_compiler_source_dls_thread, client );
                pthread_detach( tid );
              }

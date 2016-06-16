@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Serveur/envoi_bit_init.c        Envoi des bits synoptiques initiaux au client                */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       mer 01 fév 2006 18:30:05 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Serveur/envoi_bit_init.c        Envoi des bits synoptiques initiaux au client                                    */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                           mer 01 fév 2006 18:30:05 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * envoi_bit_init.c
  * This file is part of Watchdog
@@ -76,30 +76,5 @@
                      (gchar *)&init_etat, sizeof(struct CMD_ETAT_BIT_CTRL) );
        liste = liste->next;
      }
-
-    liste = Liste_Capteurs;                                                                                 /* Debut de liste */
-    while(liste)
-     { struct CAPTEUR *capteur;
-       struct CMD_ETAT_BIT_CAPTEUR *init_capteur;
-
-       if ( ! g_list_find_custom(client->bit_capteurs, liste->data, (GCompareFunc) Chercher_bit_capteurs) )
-        { capteur = (struct CAPTEUR *)g_try_malloc0( sizeof(struct CAPTEUR) );
-          if (capteur) 
-           { memcpy( capteur, liste->data, sizeof(struct CAPTEUR) );
-             client->bit_capteurs = g_list_append( client->bit_capteurs, capteur );
-           }
-        } else capteur = (struct CAPTEUR *)liste->data;
-
-       init_capteur = Formater_capteur(capteur);                                           /* Formatage de la chaine associée */
-
-       if (init_capteur)                                                                                      /* envoi client */
-        { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CAPTEUR,
-                        (gchar *)init_capteur, sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
-          g_free(init_capteur);                                                                       /* On libere la mémoire */
-        }
-       liste = liste->next;
-     }
-    g_list_foreach( client->bit_init_capteur, (GFunc) g_free, NULL );
-    g_list_free( client->bit_init_capteur );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

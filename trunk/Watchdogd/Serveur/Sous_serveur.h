@@ -204,7 +204,7 @@
  extern void Proto_valider_editer_palette_atelier ( struct CLIENT *client, struct CMD_TYPE_PALETTE *rezo_palette );
 
                                                                                            /* Dans envoi_synoptique_capteur.c */
- GSList *Envoyer_capteur_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
+ extern void Envoyer_capteur_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
  extern void Proto_effacer_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur );
  extern void Proto_ajouter_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur );
  extern void Proto_valider_editer_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur );
