@@ -36,15 +36,13 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void *Proto_Envoyer_supervision_thread ( struct CLIENT *client )
-  { GSList *liste_bits_init, *liste_bits_motif, *liste_bits_pass;
-    gchar titre[20];
+  { gchar titre[20];
 
     g_snprintf( titre, sizeof(titre), "W-SUPR-%06d", client->ssrv_id );
     prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
-    liste_bits_motif = Envoyer_motif_tag ( client, TAG_SUPERVISION,
-                                                   SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
-	                                               SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN );
+    Envoyer_motif_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
+	                                             SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN );
 
     Envoyer_palette_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,
                                                    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE_FIN );
@@ -52,25 +50,13 @@
     Envoyer_capteur_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR,
                                                    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR_FIN );
 
-    liste_bits_pass = Envoyer_passerelle_tag ( client, TAG_SUPERVISION,
-	                                                   SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS,
-	                                                   SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN );
+    Envoyer_passerelle_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS,
+	                                                  SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN );
 
     Envoyer_comment_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,
                                                    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT_FIN );
 
                                                                   /* Fusion des listes de bits I à envoyer au client à l'init */
-    liste_bits_init = liste_bits_motif;
-    while ( liste_bits_pass )
-     { if ( ! g_slist_find( liste_bits_init, GINT_TO_POINTER(liste_bits_pass->data) ) )
-        { liste_bits_init = g_slist_prepend( liste_bits_init, GINT_TO_POINTER(liste_bits_pass->data) ); }
-       liste_bits_pass = g_slist_remove( liste_bits_pass, GINT_TO_POINTER(liste_bits_pass->data) );
-     }
-    g_slist_free ( liste_bits_pass );
-    Envoyer_bit_init_supervision ( client, liste_bits_init, NULL );
-
-    g_slist_free ( liste_bits_init );
-
     g_free(client->syn_to_send);
     client->syn_to_send = NULL;
     Unref_client( client );                                           /* Déréférence la structure cliente */

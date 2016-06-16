@@ -185,7 +185,7 @@
                                                     struct CMD_TYPE_COMMENT *rezo_comment );
 
                                                                                             /* Dans envoi_synoptique_motifs.c */
- extern GSList *Envoyer_motif_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
+ extern void Envoyer_motif_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
  extern void Proto_effacer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
  extern void Proto_ajouter_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
  extern void Proto_valider_editer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
