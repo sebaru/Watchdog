@@ -103,6 +103,17 @@
      }
   }
 /******************************************************************************************************************************/
+/* Chercher_bit_capteurs: Renvoie 0 si l'element en argument est dans la liste                                                */
+/* Entrée: L'element                                                                                                          */
+/* Sortie: 0 si present, 1 sinon                                                                                              */
+/******************************************************************************************************************************/
+ static gint Chercher_bit_capteurs ( struct CAPTEUR *element, struct CAPTEUR *cherche )
+  { if (element->bit_controle == cherche->bit_controle &&
+        element->type == cherche->type)
+         return 0;
+    else return 1;
+  }
+/******************************************************************************************************************************/
 /* Envoyer_capteur_tag: Envoi des capteur au client en parametre                                                              */
 /* Entrée: Le client, le tag reseau et sous-tag                                                                               */
 /* Sortie: néant                                                                                                              */
@@ -122,7 +133,7 @@
                       (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
 
-    while ( capteur = Recuperer_capteurDB_suite( &db ) )                             /* Pour tous les capteurs de la database */
+    while ( (capteur = Recuperer_capteurDB_suite( &db )) != NULL )                   /* Pour tous les capteurs de la database */
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_capteur_tag: capteur %d (%s) to client %s",
                  capteur->id, capteur->libelle, client->machine );
@@ -132,22 +143,32 @@
 
        if (tag == TAG_SUPERVISION)                                          /* Si mode supervision on envoit la valeur d'init */
         { struct CMD_ETAT_BIT_CAPTEUR *init_capteur;
-
-          init_capteur = Formater_capteur(capteur);                                        /* Formatage de la chaine associée */
-          if (init_capteur)                                                               /* envoi la valeur d'init au client */
-           { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CAPTEUR,
-                           (gchar *)init_capteur, sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
-             g_free(init_capteur);                                                                    /* On libere la mémoire */
+          struct CAPTEUR *capteur_new;
+		  capteur_new = (struct CAPTEUR *) g_try_malloc0 ( sizeof(struct CAPTEUR) );
+		  if (!capteur_new)
+           { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
+                      "Envoyer_capteur_tag: Memory Error for %d (%s)", capteur->id, capteur->libelle );
            }
-          else { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                          "Envoyer_capteur_tag: Formater_capteur failed for %d (%s)", capteur->id, capteur->libelle );
-               }
+          else
+           { capteur_new->type         = capteur->type;
+			 capteur_new->bit_controle = capteur->bit_controle;
+			 
+             init_capteur = Formater_capteur(capteur_new);                                 /* Formatage de la chaine associée */
+             if (init_capteur)                                                            /* envoi la valeur d'init au client */
+              { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CAPTEUR,
+                              (gchar *)init_capteur, sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
+                g_free(init_capteur);                                                                 /* On libere la mémoire */
+              }
+             else { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
+                             "Envoyer_capteur_tag: Formater_capteur failed for %d (%s)", capteur->id, capteur->libelle );
+                  }
 
-          if ( ! g_slist_find_custom(client->Liste_bit_capteurs, capteur, (GCompareFunc) Chercher_bit_capteurs) )
-           { client->Liste_bit_capteurs = g_slist_prepend( client->Liste_bit_capteurs, capteur ); }
-          else g_free( capteur );                                 /* si deja dans la liste, plus besoin de cette zone mémoire */
+             if ( ! g_slist_find_custom(client->Liste_bit_capteurs, capteur_new, (GCompareFunc) Chercher_bit_capteurs) )
+              { client->Liste_bit_capteurs = g_slist_prepend( client->Liste_bit_capteurs, capteur_new ); }
+             else g_free( capteur_new );                          /* si deja dans la liste, plus besoin de cette zone mémoire */
+	      }
         }
-       else g_free(capteur);                                             /* Si pas supervision, on n'a plus besoin du capteur */
+       g_free(capteur);
      }
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
   }

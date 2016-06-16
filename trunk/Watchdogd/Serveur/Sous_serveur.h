@@ -167,7 +167,6 @@
 
                                                                                                      /* Dans envoi_bit_init.c */
  extern void Envoyer_bit_init_supervision ( struct CLIENT *client, GSList *Liste_Bits_i, GSList *Liste_Capteurs );
- extern gint Chercher_bit_capteurs ( struct CAPTEUR *element, struct CAPTEUR *cherche );
 
                                                                                        /* Dans envoi_synoptique_passerelles.c */
  extern GSList *Envoyer_passerelle_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );

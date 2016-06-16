@@ -33,17 +33,6 @@
  #include "watchdogd.h"
  #include "Sous_serveur.h"
 /******************************************************************************************************************************/
-/* Chercher_bit_capteurs: Renvoie 0 si l'element en argument est dans la liste                                                */
-/* Entrée: L'element                                                                                                          */
-/* Sortie: 0 si present, 1 sinon                                                                                              */
-/******************************************************************************************************************************/
- gint Chercher_bit_capteurs ( struct CAPTEUR *element, struct CAPTEUR *cherche )
-  { if (element->bit_controle == cherche->bit_controle &&
-        element->type == cherche->type)
-         return 0;
-    else return 1;
-  }
-/******************************************************************************************************************************/
 /* Envoyer_ixxx_supervision: Envoi des etats initiaux motifs dans la trame supervision                                        */
 /* Entrée: Le client, la liste des bits à envoyer ainsi que les capteurs                                                      */
 /* Sortie: Néant                                                                                                              */
