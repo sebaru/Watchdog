@@ -30,6 +30,7 @@
 #include <string.h>
 #include <glib.h>
 #include "Proto_traductionDLS.h"
+#include "Dls.h"
 
 extern int ligne_source_dls;                           /* Compteur du numero de ligne_source_dls en cours */
 int erreur;                                                             /* Compteur d'erreur du programme */
@@ -43,6 +44,7 @@ int erreur;                                                             /* Compt
 #define  INTERDIT_COMPARAISON        "Ligne %d: %s ne peut s'utiliser dans une comparaison\n"
 #define  INTERDIT_CALCUL             "Ligne %d: %s ne peut s'utiliser dans un calcul\n"
 #define  INTERDIT_CALCUL_RESULT      "Ligne %d: %s ne peut s'utiliser dans un résultat de calcul\n"
+#define  INTERDIT_BIT_B_RESERVED     "Ligne %d: Bistable système B%04d interdit en position droite\n"
 #define  MANQUE_COMPARAISON          "Ligne %d: %s doit s'utiliser dans une comparaison\n"
 #define  ERR_SYNTAXE                 "Ligne %d: Erreur de syntaxe -> %s\n"
 
@@ -584,7 +586,25 @@ action:         action VIRGULE une_action
                 ;
 
 une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);     }}
-                | barre BI ENTIER             {{ $$=New_action_bi($3, $1);         }}
+                | barre BI ENTIER
+                  {{ if ($3 >= NBR_BIT_BISTABLE_RESERVED)
+                       { $$=New_action_bi($3, $1); }
+                     else
+                       { char *chaine;
+                          guint taille;
+                         taille = strlen(INTERDIT_BIT_B_RESERVED) + 1;
+                         chaine = New_chaine(taille);
+                         g_snprintf( chaine, taille, INTERDIT_BIT_B_RESERVED, ligne_source_dls, $3 );
+                         Emettre_erreur(chaine); g_free(chaine);
+                         erreur++;
+
+                         $$=New_action();
+                         taille = 2;
+                         $$->alors = New_chaine( taille );
+                         g_snprintf( $$->alors, taille, " " ); 
+                         $$->sinon = NULL;
+                       }
+                  }}
                 | MONO ENTIER                 {{ $$=New_action_mono($2);           }}
                 | ICONE ENTIER liste_options
                   {{ $$=New_action_icone($2, $3);
@@ -659,7 +679,23 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                                        else $$=New_action_msg( alias->num );
                                        break;
                          case SORTIE : $$=New_action_sortie( alias->num, $1 );       break;
-                         case BI     : $$=New_action_bi( alias->num, $1 );           break;
+                         case BI     : if (alias->num >= NBR_BIT_BISTABLE_RESERVED)
+                                        { $$=New_action_bi( alias->num, $1 ); }
+                                       else
+                                        { char *chaine;
+                                           taille = strlen(INTERDIT_BIT_B_RESERVED) + 1;
+                                           chaine = New_chaine(taille);
+                                           g_snprintf( chaine, taille, INTERDIT_BIT_B_RESERVED, ligne_source_dls, alias->num );
+                                           Emettre_erreur(chaine); g_free(chaine);
+                                           erreur++;
+
+                                           $$=New_action();
+                                           taille = 2;
+                                           $$->alors = New_chaine( taille );
+                                           g_snprintf( $$->alors, taille, " " ); 
+                                           $$->sinon = NULL;
+                                        }
+                                       break;
                          case MONO   : if ($1)
                                         { char *chaine;
                                           taille = strlen(alias->nom) + strlen(INTERDIT_BARRE_DROITE) + 2;
