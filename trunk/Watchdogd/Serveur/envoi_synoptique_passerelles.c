@@ -106,14 +106,15 @@
 /* Entrée: Le client destinataire et les tags reseaux                                                                         */
 /* Sortie: La Liste des bits I utilisés pour les passerelles                                                                  */
 /******************************************************************************************************************************/
- GSList *Envoyer_passerelle_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
-  { struct CMD_TYPE_PASSERELLE *pass;
+ void Envoyer_passerelle_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
+  { struct CMD_ETAT_BIT_CTRL init_etat;
+    struct CMD_TYPE_PASSERELLE *pass;
     struct CMD_ENREG nbr;
-    GSList *Liste = NULL;
+    GSList *liste_bit_init = NULL;
     struct DB *db;
 
     if ( ! Recuperer_passerelleDB( &db, client->syn_to_send->id ) )                                   /* Si pas de passerelle */
-     { return(NULL); }
+     { return; }
      
     nbr.num = db->nbr_result;
     if (nbr.num)
@@ -124,20 +125,20 @@
 
     while ( (pass = Recuperer_passerelleDB_suite( &db )) )
      { if (tag == TAG_SUPERVISION)
-        { if ( ! g_slist_find( Liste, GINT_TO_POINTER(pass->bit_controle_1) ) )
-           { Liste = g_slist_prepend( Liste, GINT_TO_POINTER(pass->bit_controle_1) );
+        { if ( ! g_slist_find( liste_bit_init, GINT_TO_POINTER(pass->bit_controle_1) ) )
+           { liste_bit_init = g_slist_prepend( liste_bit_init, GINT_TO_POINTER(pass->bit_controle_1) );
              Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                       "liste des bit_init_syn pass %d", pass->bit_controle_1 );
            }
 
-          if ( ! g_slist_find( Liste, GINT_TO_POINTER(pass->bit_controle_2) ) )
-           { Liste = g_slist_prepend( Liste, GINT_TO_POINTER(pass->bit_controle_2) );
+          if ( ! g_slist_find( liste_bit_init, GINT_TO_POINTER(pass->bit_controle_2) ) )
+           { liste_bit_init = g_slist_prepend( liste_bit_init, GINT_TO_POINTER(pass->bit_controle_2) );
              Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                       "liste des bit_init_syn pass %d", pass->bit_controle_2 );
            }
 
-          if ( ! g_slist_find( Liste, GINT_TO_POINTER(pass->bit_controle_3) ) )
-           { Liste = g_slist_prepend( Liste, GINT_TO_POINTER(pass->bit_controle_3) );
+          if ( ! g_slist_find( liste_bit_init, GINT_TO_POINTER(pass->bit_controle_3) ) )
+           { liste_bit_init = g_slist_prepend( liste_bit_init, GINT_TO_POINTER(pass->bit_controle_3) );
              Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                       "liste des bit_init_syn pass %d", pass->bit_controle_3 );
            }
@@ -149,8 +150,31 @@
                       (gchar *)pass, sizeof(struct CMD_TYPE_PASSERELLE) );
        g_free(pass);
      }
-
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-    return(Liste);
+
+    while(liste_bit_init)                                         /* Envoi de la valeur d'initialisation des bits I au client */
+     { guint bit_controle;
+       bit_controle = GPOINTER_TO_INT( liste_bit_init->data );
+
+       if (bit_controle<NBR_BIT_CONTROLE)                                                          /* Verification des bornes */
+        { if ( ! g_slist_find(client->Liste_bit_syns, GINT_TO_POINTER(bit_controle) ) )     /* Ajout dans la liste recurrente */
+           { client->Liste_bit_syns = g_slist_prepend( client->Liste_bit_syns, GINT_TO_POINTER(bit_controle) );
+             Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                      "Envoyer_passerelle_tag: ajout du bit_syn %03d dans la liste d'envoi recurrent",
+                       bit_controle );
+           }
+
+          init_etat.num    = bit_controle;                          /* Initialisation de la structure avant envoi au client ! */
+          init_etat.etat   = Partage->i[ bit_controle ].etat;
+          init_etat.rouge  = Partage->i[ bit_controle ].rouge;
+          init_etat.vert   = Partage->i[ bit_controle ].vert;
+          init_etat.bleu   = Partage->i[ bit_controle ].bleu;
+          init_etat.cligno = Partage->i[ bit_controle ].cligno;
+          Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
+                        (gchar *)&init_etat, sizeof(struct CMD_ETAT_BIT_CTRL) );
+         }
+      liste_bit_init = g_slist_remove (liste_bit_init, liste_bit_init->data);
+     }
+    Envoi_client ( client, tag, sstag_fin, NULL, 0 );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
