@@ -465,7 +465,7 @@
      }
 
     if (database_version < 2748)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_DigitalInput` DELETE `furtif`" );
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_DigitalInput` DROP COLUMN `furtif`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
