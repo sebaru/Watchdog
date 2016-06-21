@@ -226,22 +226,6 @@
     return(modbus);
   }
 /**********************************************************************************************************/
-/* Chercher_module_by_id : Recherche dans la liste de travail e module dont l'id est en paramètre         */
-/* Entrée: l'id du module a retrouver                                                                     */
-/* Sortie: le modules trouvé ou NULL si erreur                                                            */
-/**********************************************************************************************************/
- static struct MODULE_MODBUS *Chercher_module_by_id ( gint id )
-  { GSList *liste;
-    liste = Cfg_modbus.Modules_MODBUS;
-    while ( liste )
-     { struct MODULE_MODBUS *module;
-       module = ((struct MODULE_MODBUS *)liste->data);
-       if (module->modbus.id == id) return(module);
-       liste = liste->next;
-     }
-    return(NULL);
-  }
-/**********************************************************************************************************/
 /* Charger_tous_Modbus: Requete la DB pour charger les modules et les bornes modbus                       */
 /* Entrée: rien                                                                                           */
 /* Sortie: le nombre de modules trouvé                                                                    */
