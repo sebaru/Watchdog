@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Serveur/envoi_synoptique_passerelles.c        Envoi des passerelles aux clients              */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 22 mai 2005 17:45:31 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Serveur/envoi_synoptique_passerelles.c        Envoi des passerelles aux clients                                  */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          dim 22 mai 2005 17:45:31 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * envoi_synoptique_passerelles.c
  * This file is part of Watchdog
@@ -30,14 +30,14 @@
  #include <string.h>
  #include <unistd.h>
 
-/******************************************** Prototypes de fonctions *************************************/
+/*************************************************** Prototypes de fonctions **************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
-/**********************************************************************************************************/
-/* Proto_effacer_syn: Retrait du syn en parametre                                                         */
-/* Entrée: le client demandeur et le syn en question                                                      */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_effacer_syn: Retrait du syn en parametre                                                                             */
+/* Entrée: le client demandeur et le syn en question                                                                          */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_effacer_passerelle_atelier ( struct CLIENT *client, struct CMD_TYPE_PASSERELLE *rezo_pass )
   { gboolean retour;
     retour = Retirer_passerelleDB( rezo_pass );
@@ -54,11 +54,11 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
   }
-/**********************************************************************************************************/
-/* Proto_ajouter_comment_atelier: Ajout d'un commentaire dans un synoptique                               */
-/* Entrée: le client demandeur et le syn en question                                                      */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_ajouter_comment_atelier: Ajout d'un commentaire dans un synoptique                                                   */
+/* Entrée: le client demandeur et le syn en question                                                                          */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_ajouter_passerelle_atelier ( struct CLIENT *client, struct CMD_TYPE_PASSERELLE *rezo_pass )
   { struct CMD_TYPE_PASSERELLE *result;
     gint id;
@@ -85,11 +85,11 @@
             }
          }
   }
-/**********************************************************************************************************/
-/* Proto_editer_syn: Le client desire editer un syn                                                       */
-/* Entrée: le client demandeur et le syn en question                                                      */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_editer_syn: Le client desire editer un syn                                                                           */
+/* Entrée: le client demandeur et le syn en question                                                                          */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_valider_editer_passerelle_atelier ( struct CLIENT *client, struct CMD_TYPE_PASSERELLE *rezo_pass )
   { gboolean retour;
     retour = Modifier_passerelleDB ( rezo_pass );
@@ -104,11 +104,10 @@
 /******************************************************************************************************************************/
 /* Envoyer_passerelle_tag: Envoi des passerelles au client en parametre                                                       */
 /* Entrée: Le client destinataire et les tags reseaux                                                                         */
-/* Sortie: La Liste des bits I utilisés pour les passerelles                                                                  */
+/* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  void Envoyer_passerelle_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
-  { struct CMD_ETAT_BIT_CTRL init_etat;
-    struct CMD_TYPE_PASSERELLE *pass;
+  { struct CMD_TYPE_PASSERELLE *pass;
     struct CMD_ENREG nbr;
     GSList *liste_bit_init = NULL;
     struct DB *db;
@@ -151,30 +150,6 @@
        g_free(pass);
      }
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-
-    while(liste_bit_init)                                         /* Envoi de la valeur d'initialisation des bits I au client */
-     { guint bit_controle;
-       bit_controle = GPOINTER_TO_INT( liste_bit_init->data );
-
-       if (bit_controle<NBR_BIT_CONTROLE)                                                          /* Verification des bornes */
-        { if ( ! g_slist_find(client->Liste_bit_syns, GINT_TO_POINTER(bit_controle) ) )     /* Ajout dans la liste recurrente */
-           { client->Liste_bit_syns = g_slist_prepend( client->Liste_bit_syns, GINT_TO_POINTER(bit_controle) );
-             Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                      "Envoyer_passerelle_tag: ajout du bit_syn %03d dans la liste d'envoi recurrent",
-                       bit_controle );
-           }
-
-          init_etat.num    = bit_controle;                          /* Initialisation de la structure avant envoi au client ! */
-          init_etat.etat   = Partage->i[ bit_controle ].etat;
-          init_etat.rouge  = Partage->i[ bit_controle ].rouge;
-          init_etat.vert   = Partage->i[ bit_controle ].vert;
-          init_etat.bleu   = Partage->i[ bit_controle ].bleu;
-          init_etat.cligno = Partage->i[ bit_controle ].cligno;
-          Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
-                        (gchar *)&init_etat, sizeof(struct CMD_ETAT_BIT_CTRL) );
-         }
-      liste_bit_init = g_slist_remove (liste_bit_init, liste_bit_init->data);
-     }
-    Envoi_client ( client, tag, sstag_fin, NULL, 0 );
+    Envoyer_bit_init_motif ( client, liste_bit_init );                                     /* Envoi des bits d'initialisation */
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

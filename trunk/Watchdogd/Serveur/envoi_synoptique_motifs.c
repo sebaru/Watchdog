@@ -106,13 +106,43 @@
      }
   }
 /******************************************************************************************************************************/
+/* Envoyer_bit_init_motif: Envoi le status des bits motifs dans la liste en parametre en client en parametre                  */
+/* Entrée: Le client et la liste de bits                                                                                      */
+/* Sortie: Néant. La liste est free-ée                                                                                        */
+/******************************************************************************************************************************/
+ void Envoyer_bit_init_motif ( struct CLIENT *client, GSList *liste_bit_init )
+  { struct CMD_ETAT_BIT_CTRL init_etat;
+    while(liste_bit_init)                                         /* Envoi de la valeur d'initialisation des bits I au client */
+     { guint bit_controle;
+       bit_controle = GPOINTER_TO_INT( liste_bit_init->data );
+
+       if (bit_controle<NBR_BIT_CONTROLE)                                                          /* Verification des bornes */
+        { if ( ! g_slist_find(client->Liste_bit_syns, GINT_TO_POINTER(bit_controle) ) )     /* Ajout dans la liste recurrente */
+           { client->Liste_bit_syns = g_slist_prepend( client->Liste_bit_syns, GINT_TO_POINTER(bit_controle) );
+             Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                      "Envoyer_bit_init_motif: ajout du bit_syn %03d dans la liste d'envoi recurrent",
+                       bit_controle );
+           }
+
+          init_etat.num    = bit_controle;                          /* Initialisation de la structure avant envoi au client ! */
+          init_etat.etat   = Partage->i[ bit_controle ].etat;
+          init_etat.rouge  = Partage->i[ bit_controle ].rouge;
+          init_etat.vert   = Partage->i[ bit_controle ].vert;
+          init_etat.bleu   = Partage->i[ bit_controle ].bleu;
+          init_etat.cligno = Partage->i[ bit_controle ].cligno;
+          Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
+                        (gchar *)&init_etat, sizeof(struct CMD_ETAT_BIT_CTRL) );
+         }
+      liste_bit_init = g_slist_remove (liste_bit_init, liste_bit_init->data);
+     }
+  }
+/******************************************************************************************************************************/
 /* Envoyer_motif_tag: Envoi des syns au client selon les tags retenus                                                         */
 /* Entrée: Le client destinataire et les tags de connexion                                                                    */
 /* Sortie: La liste des bit d'init syn lié au synoptique                                                                      */
 /******************************************************************************************************************************/
  void Envoyer_motif_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
-  { struct CMD_ETAT_BIT_CTRL init_etat;
-    GSList *liste_bit_init = NULL;
+  { GSList *liste_bit_init = NULL;
     struct CMD_TYPE_MOTIFS *motifs;
     struct CMD_TYPE_MOTIF *motif;
     struct CMD_ENREG nbr;
@@ -170,30 +200,7 @@
      }
     while (motif);                                                                /* Tant que l'on a des messages e envoyer ! */
     g_free(motifs);                                                                      /* Libération du tampon multi-motifs */
-
-    while(liste_bit_init)                                         /* Envoi de la valeur d'initialisation des bits I au client */
-     { guint bit_controle;
-       bit_controle = GPOINTER_TO_INT( liste_bit_init->data );
-
-       if (bit_controle<NBR_BIT_CONTROLE)                                                          /* Verification des bornes */
-        { if ( ! g_slist_find(client->Liste_bit_syns, GINT_TO_POINTER(bit_controle) ) )     /* Ajout dans la liste recurrente */
-           { client->Liste_bit_syns = g_slist_prepend( client->Liste_bit_syns, GINT_TO_POINTER(bit_controle) );
-             Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                      "Envoyer_motif_tag: ajout du bit_syn %03d dans la liste d'envoi recurrent",
-                       bit_controle );
-           }
-
-          init_etat.num    = bit_controle;                          /* Initialisation de la structure avant envoi au client ! */
-          init_etat.etat   = Partage->i[ bit_controle ].etat;
-          init_etat.rouge  = Partage->i[ bit_controle ].rouge;
-          init_etat.vert   = Partage->i[ bit_controle ].vert;
-          init_etat.bleu   = Partage->i[ bit_controle ].bleu;
-          init_etat.cligno = Partage->i[ bit_controle ].cligno;
-          Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
-                        (gchar *)&init_etat, sizeof(struct CMD_ETAT_BIT_CTRL) );
-         }
-      liste_bit_init = g_slist_remove (liste_bit_init, liste_bit_init->data);
-     }
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
+    Envoyer_bit_init_motif ( client, liste_bit_init );                                     /* Envoi des bits d'initialisation */
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

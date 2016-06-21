@@ -183,6 +183,7 @@
                                                     struct CMD_TYPE_COMMENT *rezo_comment );
 
                                                                                             /* Dans envoi_synoptique_motifs.c */
+ extern void Envoyer_bit_init_motif ( struct CLIENT *client, GSList *list_bit_init );
  extern void Envoyer_motif_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
  extern void Proto_effacer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
  extern void Proto_ajouter_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
