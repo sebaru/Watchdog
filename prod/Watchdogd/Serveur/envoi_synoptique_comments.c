@@ -26,7 +26,6 @@
  */
  
  #include <glib.h>
- #include <sys/prctl.h>
  #include <sys/time.h>
  #include <string.h>
  #include <unistd.h>
@@ -103,22 +102,18 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
   }
-/**********************************************************************************************************/
-/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Envoyer_comment_thread_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
+/******************************************************************************************************************************/
+/* Envoyer_comment_tag: Envoi des commentaires synoptiques au client en parametre                                             */
+/* Entrée: Le client et les tags reseaux                                                                                      */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Envoyer_comment_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
   { struct CMD_ENREG nbr;
     struct CMD_TYPE_COMMENT *comment;
     struct DB *db;
-    gchar titre[20];
-    g_snprintf( titre, sizeof(titre), "W-COMM-%06d", client->ssrv_id );
-    prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
-    if ( ! Recuperer_commentDB( &db, client->syn.id ) )
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       return;                                                                   /* Si pas de histos (??) */
+    if ( ! Recuperer_commentDB( &db, client->syn_to_send->id ) )
+     { return;                                                             /* Si pas de commentaires (??) */
      }
 
     nbr.num = db->nbr_result;
@@ -127,41 +122,15 @@
        Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
                       (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
-    for( ; ; )
-     { comment = Recuperer_commentDB_suite( &db );
-       if (!comment)
-        { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Unref_client( client );                                     /* Déréférence la structure cliente */
-          return;
-        } 
-       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+
+    while ( (comment = Recuperer_commentDB_suite( &db ) ) )
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_comment_atelier: envoi comment %d (%s) to client %s",
                  comment->id, comment->libelle, client->machine );
        Envoi_client ( client, tag, sstag,
                       (gchar *)comment, sizeof(struct CMD_TYPE_COMMENT) );
        g_free(comment);
      }
+    Envoi_client ( client, tag, sstag_fin, NULL, 0 );
   }
-/**********************************************************************************************************/
-/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_comment_atelier_thread ( struct CLIENT *client )
-  { Envoyer_comment_thread_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT,
-                                                      SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT_FIN );
-    Client_mode( client, ENVOI_PASSERELLE_ATELIER );
-    pthread_exit(EXIT_SUCCESS);
-  }
-/**********************************************************************************************************/
-/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                  */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void *Envoyer_comment_supervision_thread ( struct CLIENT *client )
-  { Envoyer_comment_thread_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,
-                                                          SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT_FIN );
-    Client_mode( client, ENVOI_PASSERELLE_SUPERVISION );
-    pthread_exit(EXIT_SUCCESS);
-  }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

@@ -88,7 +88,13 @@
        case SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_DEB:
              { struct CMD_TYPE_SOURCE_DLS *edit_dls;
                edit_dls = (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees;
-               Proto_effacer_fichier_plugin_dls( client, edit_dls );
+               if ( client->Source_DLS_new )
+                { struct CMD_GTK_MESSAGE gtkmessage;
+                  g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Another DLS is sending." );
+                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                                (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
+                }
+               else Proto_effacer_source_dls( client, edit_dls );
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS:
@@ -99,9 +105,14 @@
              }
             break;
        case SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_FIN:
-             { memcpy( &client->dls, (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees,
-                       sizeof( client->dls ) );
-               Ref_client( client, "Send Compiler D.L.S" );
+             { struct CMD_TYPE_SOURCE_DLS *edit_dls;
+               edit_dls = (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees;
+               memcpy( &client->dls, edit_dls, sizeof( client->dls ) );
+               Save_source_dls_to_disk ( edit_dls, client->Source_DLS_new, client->taille_Source_DLS_new );
+               g_free(client->Source_DLS_new);
+               client->Source_DLS_new = NULL;
+
+               Ref_client( client, "Compiler D.L.S" );
                pthread_create( &tid, NULL, (void *)Proto_compiler_source_dls_thread, client );
                pthread_detach( tid );
              }

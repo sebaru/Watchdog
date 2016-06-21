@@ -44,7 +44,7 @@
 /* Entrée: le client demandeur et l'id du fichier plugin                                                                      */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Proto_effacer_fichier_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls )
+ void Proto_effacer_source_dls ( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls )
   { gchar chaine[80];
     gint id_fichier;
     g_snprintf( chaine, sizeof(chaine), "Dls/%d.dls.new", edit_dls->id );
@@ -52,6 +52,29 @@
     id_fichier = open( chaine, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     close(id_fichier);
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "Proto_effacer_fichier_plugin_dls : Zeroing... %s", chaine );
+  }
+/******************************************************************************************************************************/
+/* Proto_effacer_fichier_dls: Suppression du code d'un plugin avant reception du nouveau code client                          */
+/* Entrée: le client demandeur et l'id du fichier plugin                                                                      */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Save_source_dls_to_disk ( struct CMD_TYPE_SOURCE_DLS *edit_dls, gchar *buffer, guint taille )
+  { gchar chaine[128];
+    gint id_fichier;
+    g_snprintf( chaine, sizeof(chaine), "Dls/%d.dls.new", edit_dls->id );
+    id_fichier = open( chaine, O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR );
+    if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
+                "Save_source_dls_to_disk: Open file %s for write failed for %d (%s)",
+                 chaine, edit_dls->id, strerror(errno) );
+     }
+    else
+     { if (write( id_fichier, buffer, taille )<0)
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
+                   "Save_source_dls_to_disk: Write to file %s failed for %d (%s)",
+                    chaine, edit_dls->id, strerror(errno) );
+        }
+     }
   }
 /******************************************************************************************************************************/
 /* Proto_effacer_plugin_dls: Destruction du plugin en parametre                                                               */
@@ -182,47 +205,28 @@
      }
 
     lockf( fd, F_LOCK, 0 );                                                                        /* Verrouillage du fichier */
-    for ( ; ; )                                                                             /* On balance le fichier source ! */
-     { taille = read ( fd, buffer_data, taille_max_data );
-       if (taille<=0)                                                                          /* Détection de fin de fichier */
-        { close(fd);
-          break;
-        }
-    
-       source_dls->taille = taille;
+    while ( (taille = read ( fd, buffer_data, taille_max_data )) > 0 )                      /* On envoie le fichier au client */
+     { source_dls->taille = taille;
        Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_SOURCE_DLS,
                       buffer_all, taille + sizeof(struct CMD_TYPE_SOURCE_DLS) );
      }
+    close(fd);
     Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_SOURCE_DLS_END,
                    buffer_all, sizeof(struct CMD_TYPE_SOURCE_DLS) );
     g_free(buffer_all);
   }
 /******************************************************************************************************************************/
 /* Proto_valider_source_dls: Le client nous envoie un prg DLS qu'il nous faudra compiler ensuite                              */
-/* Entrée: le client demandeur et le groupe en question                                                                       */
+/* Entrée: le client demandeur et le source D.L.S a sauvgarder                                                                */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Proto_valider_source_dls( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls,
-                                gchar *buffer )
-  { gchar chaine[80];
-    if (!client->id_creation_plugin_dls)
-     { gint id_fichier;
-       g_snprintf( chaine, sizeof(chaine), "Dls/%d.dls.new", edit_dls->id );
-       id_fichier = open( chaine, O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR );
-       if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
-        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
-                   "Proto_valider_source_dls: append failed %d (%s)", edit_dls->id, strerror(errno) );
-          return;
-        }
-       lockf( id_fichier, F_LOCK, 0 );
-       client->id_creation_plugin_dls = id_fichier;
-     }
-    
-    if (write( client->id_creation_plugin_dls, buffer, edit_dls->taille )<0)
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                "Proto_valider_source_dls: write failed %d (%s)", edit_dls->id, strerror(errno) );
-       close (client->id_creation_plugin_dls);
-     }
+ void Proto_valider_source_dls( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls, gchar *buffer )
+  { guint new_taille;
+
+    new_taille = client->taille_Source_DLS_new + edit_dls->taille;
+    client->Source_DLS_new = g_try_realloc ( client->Source_DLS_new, new_taille );               /* Nouvelle taille de buffer */
+    memcpy ( client->Source_DLS_new + client->taille_Source_DLS_new, buffer, edit_dls->taille ); /* Recopie du bout de buffer */
+    client->taille_Source_DLS_new = new_taille;
   }
 /******************************************************************************************************************************/
 /* Proto_compiler_source_dls: Compilation de la source DLS                                                                    */
@@ -231,8 +235,6 @@
 /******************************************************************************************************************************/
  void *Proto_compiler_source_dls_thread( struct CLIENT *client )
   { struct CMD_GTK_MESSAGE erreur;
-    close( client->id_creation_plugin_dls );                                                   /* Fermeture du fichier plugin */
-    client->id_creation_plugin_dls = 0;
     switch ( Compiler_source_dls ( TRUE, TRUE, client->dls.id, erreur.message, sizeof(erreur.message) ) )
      { case DLS_COMPIL_ERROR_LOAD_SOURCE:
             g_snprintf( erreur.message, sizeof(erreur.message),

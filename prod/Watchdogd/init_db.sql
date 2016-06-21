@@ -147,7 +147,6 @@ INSERT INTO `mnemos_AnalogInput` (`id_mnemo`, `type`, `min`, `max`, `unite`) VAL
 
 CREATE TABLE IF NOT EXISTS `mnemos_DigitalInput` (
   `id_mnemo` int(11) NOT NULL,
-  `furtif` int(1) NOT NULL,
   PRIMARY KEY (`id_mnemo`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -642,8 +641,38 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `num_plugin`, `acronyme`, `libelle`, 
 (74, 1,  56, 1, 'SYS_AUDIO_HP27', 'Ordre systeme Activation Haut Parleur HP27', ''),
 (75, 1,  57, 1, 'SYS_AUDIO_HP28', 'Ordre systeme Activation Haut Parleur HP28', ''),
 (76, 1,  58, 1, 'SYS_AUDIO_HP29', 'Ordre systeme Activation Haut Parleur HP29', ''),
-(77, 1,  59, 1, 'SYS_AUDIO_HP30', 'Ordre systeme Activation Haut Parleur HP30', '');
-
+(77, 1,  59, 1, 'SYS_AUDIO_HP30', 'Ordre systeme Activation Haut Parleur HP30', ''),
+(79, 0,  39, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(80, 0,  38, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(81, 0,  37, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(82, 0,  36, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(83, 0,  35, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(84, 0,  34, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(85, 0,  33, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(86, 0,  32, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(87, 0,  31, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(88, 0,  30, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(89, 0,  29, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(90, 0,  28, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(91, 0,  27, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(92, 0,  26, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(93, 0,  25, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(94, 0,  24, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(95, 0,  23, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(96, 0,  22, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(97, 0,  21, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(98, 0,  20, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(99, 0,  19, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(100, 0, 18, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(101, 0, 17, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(102, 0, 16, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(103, 0, 15, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(104, 0, 14, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(105, 0, 13, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(106, 0, 12, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(107, 0, 11, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(108, 0, 10, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(109, 0, 09, 1, 'SYS_RESERVED', 'Reserved for internal use', '');
 
 -- --------------------------------------------------------
 

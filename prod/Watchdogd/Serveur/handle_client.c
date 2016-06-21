@@ -177,79 +177,6 @@
                pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_propriete_synoptique_thread, client );
                pthread_detach( tid );
                break;
-          case ENVOI_MOTIF_ATELIER:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send motif atelier" );
-               pthread_create( &tid, NULL, (void *)Envoyer_motif_atelier_thread, client );
-               pthread_detach( tid );
-               break;
-          case ENVOI_COMMENT_ATELIER:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send comment atelier" );
-               pthread_create( &tid, NULL, (void *)Envoyer_comment_atelier_thread, client );
-               pthread_detach( tid );
-               break;
-          case ENVOI_PASSERELLE_ATELIER:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send passerelle atelier" );
-               pthread_create( &tid, NULL, (void *)Envoyer_passerelle_atelier_thread, client );
-               pthread_detach( tid );
-               break;
-          case ENVOI_CAPTEUR_ATELIER:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send capteur atelier" );
-               pthread_create( &tid, NULL, (void *)Envoyer_capteur_atelier_thread, client );
-               pthread_detach( tid );
-               break;
-          case ENVOI_CAMERA_SUP_ATELIER:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send camera sup atelier" );
-               pthread_create( &tid, NULL, (void *)Envoyer_camera_sup_atelier_thread, client );
-               pthread_detach( tid );
-               break;
-
-          case ENVOI_MOTIF_SUPERVISION:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send motif supervision" );
-               pthread_create( &tid, NULL, (void *)Envoyer_motif_supervision_thread, client );
-               pthread_detach( tid );
-               break;   
-          case ENVOI_COMMENT_SUPERVISION:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send comment supervision" );
-               pthread_create( &tid, NULL, (void *)Envoyer_comment_supervision_thread, client );
-               pthread_detach( tid );
-               break;
-          case ENVOI_PASSERELLE_SUPERVISION:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send passerelle supervision" );
-               pthread_create( &tid, NULL, (void *)Envoyer_passerelle_supervision_thread, client );
-               pthread_detach( tid );
-               break;   
-          case ENVOI_PALETTE_SUPERVISION:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send palette supervision" );
-               pthread_create( &tid, NULL, (void *)Envoyer_palette_supervision_thread, client );
-               pthread_detach( tid );
-               break;   
-          case ENVOI_CAPTEUR_SUPERVISION:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send palette supervision" );
-               pthread_create( &tid, NULL, (void *)Envoyer_capteur_supervision_thread, client );
-               pthread_detach( tid );
-               break;   
-          case ENVOI_CAMERA_SUP_SUPERVISION:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send camera sup supervision" );
-               pthread_create( &tid, NULL, (void *)Envoyer_camera_sup_supervision_thread, client );
-               pthread_detach( tid );
-               break;
-          case ENVOI_IXXX_SUPERVISION :
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send bit init supervision" );
-               pthread_create( &tid, NULL, (void *)Envoyer_bit_init_supervision_thread, client );
-               pthread_detach( tid );
-               break;   
           case ENVOI_ICONE_FOR_ATELIER:
                Client_mode( client, VALIDE );
                Ref_client( client, "Send icone atelier" );
@@ -268,25 +195,13 @@
                pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_atelier_thread, client );
                pthread_detach( tid );
                break;
-          case ENVOI_SYNOPTIQUE_FOR_ATELIER_PALETTE:
-               Client_mode( client, VALIDE );                             /* Si pas de comments ... */
-               Ref_client( client, "Send synoptique atelier palette" );
-               pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_atelier_palette_thread, client );
-               pthread_detach( tid );
-               break;
-          case ENVOI_PALETTE_FOR_ATELIER_PALETTE:
-               Client_mode( client, VALIDE );                             /* Si pas de comments ... */
-               Ref_client( client, "Send palette atelier" );
-               pthread_create( &tid, NULL, (void *)Envoyer_palette_atelier_thread, client );
-               pthread_detach( tid );
-               break;
         }
 /************************************************* Envoi des chaines capteurs *************************************************/
-       if (client->mode == VALIDE && client->bit_capteurs && client->date_next_send_capteur < Partage->top)
+       if (client->mode == VALIDE && client->Liste_bit_capteurs && client->date_next_send_capteur < Partage->top)
         { struct CAPTEUR *capteur;
-          GList *liste_capteur;
+          GSList *liste_capteur;
           client->date_next_send_capteur = Partage->top + TEMPS_UPDATE_CAPTEUR;
-          liste_capteur = client->bit_capteurs;
+          liste_capteur = client->Liste_bit_capteurs;
           while (liste_capteur)                                                           /* Pour tous les capteurs du client */
            { capteur = (struct CAPTEUR *)liste_capteur->data;
               if (Tester_update_capteur(capteur))                                      /* Doit-on updater le capteur client ? */
@@ -297,7 +212,7 @@
                                  (gchar *)etat, sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
                    g_free(etat);                                                                      /* On libere la mémoire */
                  }
-                else Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Not enought memory envoi capteur" );
+                else Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Not enought memory to send capteur" );
               }
              liste_capteur = liste_capteur->next;                                              /* On passe au capteur suivant */
            }

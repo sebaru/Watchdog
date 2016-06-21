@@ -52,18 +52,6 @@
     VALIDE,
 
     ENVOI_GROUPE_FOR_UTIL,
-    ENVOI_MOTIF_ATELIER,                                                         /* Envoi des motifs associés à un synoptique */
-    ENVOI_COMMENT_ATELIER,                                                     /* Envoi des comments associés à un synoptique */
-    ENVOI_PASSERELLE_ATELIER,                                                  /* Envoi des passerelles dans l'atelier client */
-    ENVOI_CAPTEUR_ATELIER,                                                         /* Envoi des capteur dans l'atelier client */
-    ENVOI_CAMERA_SUP_ATELIER,                                                   /* Envoi des camera_sup dans l'atelier client */
-    ENVOI_MOTIF_SUPERVISION,                                                             /* Envoi des motifs a la supervision */
-    ENVOI_COMMENT_SUPERVISION,                                                         /* Envoi des comments à la supervision */
-    ENVOI_PASSERELLE_SUPERVISION,                                             /* Envoi des infos passerelles à la supervision */
-    ENVOI_PALETTE_SUPERVISION,                                                   /* Envoi des infos palettes à la supervision */
-    ENVOI_CAPTEUR_SUPERVISION,                                                         /* Envoi des capteurs à la supervision */
-    ENVOI_CAMERA_SUP_SUPERVISION,                                                    /* Envoi des camera_sup à la supervision */
-    ENVOI_IXXX_SUPERVISION,
     ENVOI_GROUPE_FOR_SYNOPTIQUE,
     ENVOI_GROUPE_FOR_PROPRIETE_SYNOPTIQUE,                          /* Envoi des groupes pour la fenetre propriete synoptique */
     ENVOI_ICONE_FOR_ATELIER,
@@ -93,10 +81,8 @@
 /* Affichage initial */
     GSList *Liste_new_motif;                               /* Liste des changements de motifs a traiter et envoyer aux client */
     GSList *Liste_bit_syns;                                /* Ensemble des bits CTRL utilisés pour les synoptiques visualisés */
-    GList *bit_init_syn;                           /* Ensemble des bits CTRL utilisés par le syn supervision en cours d'envoi */
 
-    GList *bit_capteurs;                                   /* Ensemble des bits EAxx utilisés pour les synoptiques visualisés */
-    GList *bit_init_capteur;                       /* Ensemble des bits CTRL utilisés par le syn supervision en cours d'envoi */
+    GSList *Liste_bit_capteurs;                            /* Ensemble des bits EAxx utilisés pour les synoptiques visualisés */
 
 /* Communication des Evenements depuis SSRV vers les clients */
     GSList *Liste_events;                                                                       /* Liste des evenements recus */
@@ -111,14 +97,15 @@
     struct CMD_TYPE_COURBE courbe;                                        /* Structure parametres Proto_ajouter_courbe_thread */
     GList *courbes;                                              /* Ensemble des entrees analogiques monitorées par le client */
 
-    gint id_creation_plugin_dls;                                                 /* ID fichier du plugin en cours de creation */
+    gchar *Source_DLS_new;                                                    /* Nouvelle source DLS en cours de récupération */
+    guint taille_Source_DLS_new;                                                     /* Taille en mémoire du buffer ci dessus */
     gint id_creation_message_mp3;                                              /* ID fichier message mp3 en cours de creation */
     gint classe_icone;                                                            /* Classe d'icone en cours de visualisation */
     gint date_next_send_capteur;                                             /* Date du prochain envoi des capteurs au client */
     struct CMD_CRITERE_HISTO_MSGS requete;                                       /* Pour la sauvegarde de la requete en cours */
     struct CMD_TYPE_SOURCE_DLS dls;                                         /* Pour la sauvegarde et compilation dls en cours */
 
-    struct CMD_TYPE_SYNOPTIQUE syn;                      /* Structure du synoptique en cours d'envoi (atelier ou supervision) */
+    struct CMD_TYPE_SYNOPTIQUE *syn_to_send;             /* Structure du synoptique en cours d'envoi (atelier ou supervision) */
 
     struct CMD_HISTO_COURBE histo_courbe;                            /* Structure pour travailler sur les historiques courbes */
   };     

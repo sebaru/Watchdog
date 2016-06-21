@@ -40,13 +40,10 @@
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
  void Gerer_protocole_supervision ( struct CONNEXION *connexion )
-  { static GList *Arrivee_motif = NULL;
-    static GList *Arrivee_comment = NULL;
+  { static GList *Arrivee_comment = NULL;
     static GList *Arrivee_palette = NULL;
-    static GList *Arrivee_capteur = NULL;
-    static GList *Arrivee_pass = NULL;
     static GList *Arrivee_camera_sup = NULL;
-    static int save_id;                
+    static int save_id = 0;
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_AFFICHE_PAGE_SUP:
@@ -72,24 +69,15 @@
              { struct CMD_TYPE_MOTIFS *motifs;
                gint i;
                motifs = (struct CMD_TYPE_MOTIFS *)connexion->donnees;
-               Set_progress_plus( motifs->nbr_motifs );
                for (i=0; i<motifs->nbr_motifs; i++)
-                { struct CMD_TYPE_MOTIF *motif;
-                  motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof( struct CMD_TYPE_MOTIF ) );
-                  if (!motif) break; 
-                  memcpy( motif, &motifs->motif[i], sizeof(struct CMD_TYPE_MOTIF ) );
-                  Arrivee_motif = g_list_append( Arrivee_motif, motif );
-                  save_id = motif->syn_id;
+                { Proto_afficher_un_motif_supervision ( &motifs->motif[i] );
+                  save_id = motifs->motif[i].syn_id;
                 }
+               Set_progress_plus( motifs->nbr_motifs );
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN:
-             { g_list_foreach( Arrivee_motif, (GFunc)Proto_afficher_un_motif_supervision, NULL );
-               g_list_foreach( Arrivee_motif, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_motif );
-               Arrivee_motif = NULL;
-               Chercher_page_notebook( TYPE_PAGE_SUPERVISION, save_id, TRUE );
-             }
+             { Chercher_page_notebook( TYPE_PAGE_SUPERVISION, save_id, TRUE ); }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT:
              { struct CMD_TYPE_COMMENT *comment;
@@ -112,22 +100,14 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS:
              { struct CMD_TYPE_PASSERELLE *pass;
-               Set_progress_plus(1);
-
-               pass = (struct CMD_TYPE_PASSERELLE *)g_try_malloc0( sizeof( struct CMD_TYPE_PASSERELLE ) );
-               if (!pass) return; 
-               memcpy( pass, connexion->donnees, sizeof(struct CMD_TYPE_PASSERELLE ) );
-               Arrivee_pass = g_list_append( Arrivee_pass, pass );
+               pass = (struct CMD_TYPE_PASSERELLE *)connexion->donnees;
+               Proto_afficher_une_passerelle_supervision ( pass );
                save_id = pass->syn_id;
+               Set_progress_plus(1);
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN:
-             { g_list_foreach( Arrivee_pass, (GFunc)Proto_afficher_une_passerelle_supervision, NULL );
-               g_list_foreach( Arrivee_pass, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_pass );
-               Arrivee_pass = NULL;
-               Chercher_page_notebook( TYPE_PAGE_SUPERVISION, save_id, TRUE );
-             }
+             { Chercher_page_notebook( TYPE_PAGE_SUPERVISION, save_id, TRUE ); }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE:
              { struct CMD_TYPE_PALETTE *palette;
@@ -150,24 +130,16 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR:
              { struct CMD_TYPE_CAPTEUR *capteur;
+               capteur = (struct CMD_TYPE_CAPTEUR *)connexion->donnees;
+               Proto_afficher_un_capteur_supervision ( capteur );
                Set_progress_plus(1);
-
-               capteur = (struct CMD_TYPE_CAPTEUR *)g_try_malloc0( sizeof( struct CMD_TYPE_CAPTEUR ) );
-               if (!capteur) return; 
-               memcpy( capteur, connexion->donnees, sizeof(struct CMD_TYPE_CAPTEUR ) );
-               Arrivee_capteur = g_list_append( Arrivee_capteur, capteur );
                save_id = capteur->syn_id;
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR_FIN:
-             { g_list_foreach( Arrivee_capteur, (GFunc)Proto_afficher_un_capteur_supervision, NULL );
-               g_list_foreach( Arrivee_capteur, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_capteur );
-               Arrivee_capteur = NULL;
-               Chercher_page_notebook( TYPE_PAGE_SUPERVISION, save_id, TRUE );
-             }
+             { Chercher_page_notebook( TYPE_PAGE_SUPERVISION, save_id, TRUE ); }
             break;
-/*********************************** Reception des cameras de supervision *********************************/
+/******************************************** Reception des cameras de supervision ********************************************/
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP:
              { struct CMD_TYPE_CAMERA_SUP *camera_sup;
                Set_progress_plus(1);
@@ -187,4 +159,4 @@
             break;
      }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

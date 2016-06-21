@@ -426,6 +426,49 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
+    if (database_version < 2743)
+     { g_snprintf( requete, sizeof(requete), "INSERT INTO `mnemos` "
+                   "(`id`, `type`, `num`, `num_plugin`, `acronyme`, `libelle`, `command_text`) VALUES "
+                   "(79, 0, 39, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(80, 0, 38, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(81, 0, 37, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(82, 0, 36, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(83, 0, 35, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(84, 0, 34, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(85, 0, 33, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(86, 0, 32, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(87, 0, 31, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(88, 0, 30, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(89, 0, 29, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(90, 0, 28, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(91, 0, 27, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(92, 0, 26, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(93, 0, 25, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(94, 0, 24, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(95, 0, 23, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(96, 0, 22, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(97, 0, 21, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(98, 0, 20, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(99, 0, 19, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(100, 0, 18, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(101, 0, 17, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(102, 0, 16, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(103, 0, 15, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(104, 0, 14, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(105, 0, 13, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(106, 0, 12, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(107, 0, 11, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(108, 0, 10, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),"
+                   "(109, 0, 09, 1, 'SYS_RESERVED', 'Reserved for internal use', '');"
+                 );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 2748)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_DigitalInput` DROP COLUMN `furtif`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
     Libere_DB_SQL(&db);
 
     sscanf ( VERSION, "%d.%d.%d", &server_major, &server_minor, &server_svnrev );

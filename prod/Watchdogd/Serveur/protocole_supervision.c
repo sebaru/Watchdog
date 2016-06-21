@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Serveur/protocole_supervision.c    Gestion du protocole_supervision pour Watchdog            */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 04 avr 2009 11:17:04 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Serveur/protocole_supervision.c    Gestion du protocole_supervision pour Watchdog                                */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          sam 04 avr 2009 11:17:04 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * protocole_supervision.c
  * This file is part of Watchdog
@@ -26,14 +26,46 @@
  */
  
  #include <glib.h>
-/******************************************** Prototypes de fonctions *************************************/
+ #include <sys/prctl.h>
+/**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
-/**********************************************************************************************************/
-/* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
-/* Entrée: la connexion avec le serveur                                                                   */
-/* Sortie: Kedal                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_Envoyer_supervision_thread: Envoi du synoptique de supervision demandé par le client                                 */
+/* Entrée: Le client destinaire                                                                                               */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void *Proto_Envoyer_supervision_thread ( struct CLIENT *client )
+  { gchar titre[20];
+
+    g_snprintf( titre, sizeof(titre), "W-SUPR-%06d", client->ssrv_id );
+    prctl(PR_SET_NAME, titre, 0, 0, 0 );
+
+    Envoyer_motif_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
+	                                             SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN );
+
+    Envoyer_palette_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,
+                                                   SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE_FIN );
+
+    Envoyer_capteur_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR,
+                                                   SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR_FIN );
+
+    Envoyer_passerelle_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS,
+	                                                  SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN );
+
+    Envoyer_comment_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,
+                                                   SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT_FIN );
+
+    g_free(client->syn_to_send);
+    client->syn_to_send = NULL;
+    Unref_client( client );                                                               /* Déréférence la structure cliente */
+    pthread_exit ( NULL );
+  }
+/******************************************************************************************************************************/
+/* Gerer_protocole: Gestion de la communication entre le serveur et le client                                                 */
+/* Entrée: la connexion avec le serveur                                                                                       */
+/* Sortie: Kedal                                                                                                              */
+/******************************************************************************************************************************/
  void Gerer_protocole_supervision( struct CLIENT *client )
   { struct CONNEXION *connexion;
     connexion = client->connexion;
@@ -49,32 +81,41 @@
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_SUPERVISION:
              { struct CMD_TYPE_SYNOPTIQUE *syn;
-               syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;
-               printf("Le client desire le synoptique de supervision\n" );
+	           pthread_t tid;
+               syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;         /* Récupération du numéro du synoptique désiré */
 
-               struct CMD_TYPE_SYNOPTIQUE *syndb;
-               syndb = Rechercher_synoptiqueDB ( syn->id );
-               if ( ! syndb )
+               if ( client->syn_to_send )
+                { struct CMD_GTK_MESSAGE gtkmessage;
+                  g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Another Syn is sending." );
+                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                                (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
+                  return;
+                }
+
+               client->syn_to_send = Rechercher_synoptiqueDB ( syn->id );
+               if ( ! client->syn_to_send )
                 { struct CMD_GTK_MESSAGE gtkmessage;
                   g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Synoptique inconnu..." );
                   Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                 (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
+                  return;
                 }
-               else
-                { if ( ! Tester_groupe_util( client->util, syndb->access_groupe ) )
-                   { struct CMD_GTK_MESSAGE gtkmessage;
-                     g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied for this syn..." );
-                     Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                                   (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
-                   }
-                  else
-                   { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_AFFICHE_PAGE_SUP,
-                                   (gchar *)syndb, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
-                     memcpy( &client->syn, syndb, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
-                     Client_mode( client, ENVOI_MOTIF_SUPERVISION );
-                   }
-                  g_free(syndb);
+
+               if ( ! Tester_groupe_util( client->util, client->syn_to_send->access_groupe ) )
+                { struct CMD_GTK_MESSAGE gtkmessage;
+                  g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied for this syn..." );
+                  Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
+                                (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
+                  g_free(client->syn_to_send);
+                  client->syn_to_send = NULL;
+                  return;
                 }
+
+               Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_AFFICHE_PAGE_SUP,
+                              (gchar *)client->syn_to_send, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
+               Ref_client( client, "Send supervision" );
+               pthread_create( &tid, NULL, (void *)Proto_Envoyer_supervision_thread, client );
+               pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN:
@@ -92,4 +133,4 @@
             break;
      }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

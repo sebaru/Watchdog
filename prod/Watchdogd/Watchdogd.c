@@ -187,11 +187,11 @@
        if (!Partage->top)                         /* Si on passe par zero, on le dit (DEBUG interference) */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Traitement Signaux: Timer: Partage->top = 0 !!" ); }
        if (!(Partage->top%5))                                                              /* Cligno toutes les demi-secondes */
-        { SB(5, !B(5)); }
+        { SB_SYS(5, !B(5)); }
        if (!(Partage->top%3))                                                                 /* Cligno toutes les 3 dixièmes */
-        { SB(6, !B(6)); }
+        { SB_SYS(6, !B(6)); }
        if (!(Partage->top%10))                                                                  /* Cligno toutes les secondes */
-        { SB(4, !B(4));
+        { SB_SYS(4, !B(4));
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
           Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
           Partage->audit_bit_interne_per_sec = 0;

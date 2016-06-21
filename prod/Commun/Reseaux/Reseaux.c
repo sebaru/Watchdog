@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Commun/Reseaux/Reseaux.c:   Utilisation/Gestion du reseaux pour watchdog 2.0    par lefevre            */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       sam 16 fév 2008 19:19:49 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Commun/Reseaux/Reseaux.c:   Utilisation/Gestion du reseaux pour watchdog 2.0    par lefevre                                */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                           sam 16 fév 2008 19:19:49 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Reseaux.c
  * This file is part of Watchdog
@@ -28,7 +28,7 @@
  #include <glib.h>
  #include <openssl/ssl.h>
  #include <openssl/err.h>
- #include <sys/types.h>                                                     /* Prototypes pour read/write */
+ #include <sys/types.h>                                                                         /* Prototypes pour read/write */
  #include <sys/stat.h>
  #include <sys/time.h>
  #include <unistd.h>
@@ -42,11 +42,11 @@
  #include "Reseaux.h"
  #include "Erreur.h"
 
-/**********************************************************************************************************/
-/* Attendre_envoi_disponible: Attend que le reseau se libere pour envoi futur                             */
-/* Entrée: log, connexion                                                                                 */
-/* Sortie: Code d'erreur le cas echeant                                                                   */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Attendre_envoi_disponible: Attend que le reseau se libere pour envoi futur                                                 */
+/* Entrée: log, connexion                                                                                                     */
+/* Sortie: Code d'erreur le cas echeant                                                                                       */
+/******************************************************************************************************************************/
  gint Attendre_envoi_disponible ( struct CONNEXION *connexion )
   { gint retour, cpt;
     struct timeval tv;
@@ -74,18 +74,18 @@ one_again:
         }
        return(err);
      }
-    if (retour==0)                                   /* Traiter ensuite les signaux du genre relais brisé */
+    if (retour==0)                                                       /* Traiter ensuite les signaux du genre relais brisé */
      { Info_new( connexion->log, FALSE, LOG_DEBUG,
                 "Attendre_envoi_disponible: select timeout" );
        return(-1);
      }
     return(0);
   }
-/**********************************************************************************************************/
-/* Nouvelle_connexion: Prepare la structure CONNEXION pour pouvoir envoyer et recevoir des données        */
-/* Entrée: socket distante, l'id de l'appli hote                                                          */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Nouvelle_connexion: Prepare la structure CONNEXION pour pouvoir envoyer et recevoir des données                            */
+/* Entrée: socket distante, l'id de l'appli hote                                                                              */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  struct CONNEXION *Nouvelle_connexion ( struct LOG *Log, gint socket, gint taille_bloc )
   { struct CONNEXION *connexion;
 
@@ -97,14 +97,14 @@ one_again:
     fcntl( socket, F_SETFL, O_NONBLOCK );
     connexion->index_entete  = 0;
     connexion->index_donnees = 0;
-    connexion->socket        = socket;                   /* Sauvegarde de la socket pour ecoute prochaine */
+    connexion->socket        = socket;                                       /* Sauvegarde de la socket pour ecoute prochaine */
     connexion->taille_bloc   = taille_bloc;
     connexion->ssl           = NULL;
     connexion->log           = Log;
     connexion->last_use = time(NULL);
 
-    pthread_mutex_init( &connexion->mutex_write, NULL );                  /* Init mutex d'ecriture reseau */
-    if (taille_bloc != -1)           /* taille != -1 pour le cote serveur Watchdog, -1 pour les clients ! */
+    pthread_mutex_init( &connexion->mutex_write, NULL );                                      /* Init mutex d'ecriture reseau */
+    if (taille_bloc != -1)                               /* taille != -1 pour le cote serveur Watchdog, -1 pour les clients ! */
      { connexion->donnees = g_try_malloc0( taille_bloc );
        if (!connexion->donnees)
         { Info_new( Log, FALSE, LOG_ERR, "Nouvelle_connexion: not enought memory (buffer)" );
@@ -116,11 +116,11 @@ one_again:
     return(connexion);
   }
 
-/**********************************************************************************************************/
-/* Fermer_connexion: Libere la mémoire et ferme la socket associé à une connexion                         */
-/* Entrée: le connexion de reference                                                                      */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Fermer_connexion: Libere la mémoire et ferme la socket associé à une connexion                                             */
+/* Entrée: le connexion de reference                                                                                          */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Fermer_connexion ( struct CONNEXION *connexion )
   { 
     if (!connexion) return;
@@ -133,17 +133,17 @@ one_again:
     close ( connexion->socket );
     g_free(connexion);
   }
-/**********************************************************************************************************/
-/* Recevoir_reseau: Ecoute la connexion en parametre et essai de reunir un bloc entier de donnees         */
-/* Entrée: la connexion                                                                                   */
-/* Sortie: -1 si erreur, 0 si kedal, le code de controle sinon                                            */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Recevoir_reseau: Ecoute la connexion en parametre et essai de reunir un bloc entier de donnees                             */
+/* Entrée: la connexion                                                                                                       */
+/* Sortie: -1 si erreur, 0 si kedal, le code de controle sinon                                                                */
+/******************************************************************************************************************************/
  gint Recevoir_reseau( struct CONNEXION *connexion )
   { int taille_recue, err;
 
     if (!connexion) return( RECU_ERREUR );
 
-    if ( connexion->index_entete != sizeof(struct ENTETE_CONNEXION) )               /* Entete complete ?? */
+    if ( connexion->index_entete != sizeof(struct ENTETE_CONNEXION) )                                   /* Entete complete ?? */
      { if (connexion->ssl)
         { taille_recue = SSL_read( connexion->ssl,
                                    ((unsigned char *)&connexion->entete ) + connexion->index_entete,
@@ -163,15 +163,15 @@ one_again:
         { switch (err)
            { case EPIPE     :
              case ECONNRESET: return( RECU_ERREUR_CONNRESET );
-             case ESPIPE    : return( RECU_ERREUR );                                  /* Reperage illegal */
-             case EAGAIN    : return( RECU_RIEN );               /* Ressource temporairement indisponible */
+             case ESPIPE    : return( RECU_ERREUR );                                                      /* Reperage illegal */
+             case EAGAIN    : return( RECU_RIEN );                                   /* Ressource temporairement indisponible */
            }
           printf( "recv_rezo, socket %d Errno=%d %s taille %d\n", 
                   connexion->socket, err, strerror(err), taille_recue );
           return(RECU_RIEN);
         }
 
-       connexion->index_entete += taille_recue;                                 /* Indexage pour la suite */
+       connexion->index_entete += taille_recue;                                                     /* Indexage pour la suite */
 
        if (connexion->index_entete >= sizeof(struct ENTETE_CONNEXION))
         { Info_new( connexion->log, FALSE, LOG_DEBUG,
@@ -187,7 +187,7 @@ one_again:
            }
         }
      }
-    else if (connexion->entete.tag == TAG_INTERNAL)                    /* S'agit-il d'un paquet interne ? */
+    else if (connexion->entete.tag == TAG_INTERNAL)                                        /* S'agit-il d'un paquet interne ? */
      { if (connexion->entete.ss_tag == SSTAG_INTERNAL_PAQUETSIZE && connexion->taille_bloc == -1)
         { connexion->donnees = g_try_malloc0( connexion->entete.taille_donnees );
           if (!connexion->donnees)
@@ -217,13 +217,13 @@ one_again:
                    "Recevoir_reseau: recue TAG_INTERNAL, but SSTAG (%d) not known or forbidden",
                     connexion->entete.ss_tag );
         }
-       connexion->index_entete  = 0;                        /* Raz des indexs (ie le paquet est traité !) */
+       connexion->index_entete  = 0;                                            /* Raz des indexs (ie le paquet est traité !) */
        connexion->index_donnees = 0;
        return(RECU_OK);
      }
-    else                                    /* Ok, on a l'entete parfaite, maintenant fo voir les donnees */
+    else                                                        /* Ok, on a l'entete parfaite, maintenant fo voir les donnees */
      { if ( connexion->index_donnees == connexion->entete.taille_donnees )
-        { connexion->index_entete  = 0;                                                 /* Raz des indexs */
+        { connexion->index_entete  = 0;                                                                     /* Raz des indexs */
           connexion->index_donnees = 0;
           Info_new( connexion->log, FALSE, LOG_DEBUG,
                    "Recevoir_reseau: recue %d donnees tag=%d sstag=%d",
@@ -257,15 +257,15 @@ one_again:
                   err, EAGAIN, EINTR, ESPIPE, connexion->entete.taille_donnees, connexion->index_donnees );
           return(RECU_ERREUR);
         }
-       connexion->index_donnees += taille_recue;                                /* Indexage pour la suite */
+       connexion->index_donnees += taille_recue;                                                    /* Indexage pour la suite */
      }
     return( RECU_EN_COURS );
   }
-/**********************************************************************************************************/
-/* Envoi_paquet: Transmet un paquet reseau au client id                                                   */
-/* Entrée: la socket, l'entete, le buffer                                                                 */
-/* Sortie: non nul si pb                                                                                  */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Envoi_paquet: Transmet un paquet reseau au client id                                                                       */
+/* Entrée: la socket, l'entete, le buffer                                                                                     */
+/* Sortie: non nul si pb                                                                                                      */
+/******************************************************************************************************************************/
  gint Envoyer_reseau( struct CONNEXION *connexion, gint tag, gint ss_tag,
                       gchar *buffer, gint taille_buffer )
   { struct ENTETE_CONNEXION Entete;
@@ -294,61 +294,65 @@ one_again:
 
     Info_new( connexion->log, FALSE, LOG_DEBUG,
              "Envoyer_reseau: Sending to %d (ssl=%s), tag=%d, ss_tag=%d, taille_buffer=%d",
-             connexion->socket, (connexion->ssl ? "yes" : "no" ), tag, ss_tag, taille_buffer );
+              connexion->socket, (connexion->ssl ? "yes" : "no" ), tag, ss_tag, taille_buffer );
 
     cpt = sizeof(struct ENTETE_CONNEXION);
     pthread_mutex_lock( &connexion->mutex_write );
     while(cpt)
      {
-encore_entete:
        if (connexion->ssl)
-        { retour = SSL_write( connexion->ssl, &Entete, cpt ); }                      /* Envoi de l'entete */
-       else retour = write( connexion->socket, &Entete, cpt );                       /* Envoi de l'entete */
+        { retour = SSL_write( connexion->ssl, &Entete, cpt ); }                                          /* Envoi de l'entete */
+       else retour = write( connexion->socket, &Entete, cpt );                                           /* Envoi de l'entete */
 
        if (retour < 0)
         { err = errno;
-          Info_new( connexion->log, FALSE, LOG_ERR,
-                   "Envoyer_reseau: error %d (%s)", err, strerror(err) );
           if (connexion->ssl)
            { gint ssl_err;
              ssl_err = SSL_get_error( connexion->ssl, retour );
              Info_new( connexion->log, FALSE, LOG_ERR,
-                      "Envoyer_reseau: retour SSL %s",
-                       ERR_error_string( ssl_err, NULL ) );
+                      "Envoyer_reseau: Entete SSL error %d -> %s",
+                       ssl_err, ERR_error_string( ssl_err, NULL ) );
            }
-          /* Disabled le 12/11/14 if (err == EAGAIN) goto encore_entete; */
-          break;                                                                    /* Si erreur, on sort */
+          else
+           { Info_new( connexion->log, FALSE, LOG_ERR,
+                      "Envoyer_reseau: Entete error %d -> %s", err, strerror(err) );
+           }
+          break;                                                                                        /* Si erreur, on sort */
         }          
        cpt -= retour;
      }
 
-    if (retour && buffer && (tag != TAG_INTERNAL))                    /* Preparation de l'envoi du buffer */
+    if (retour>0 && buffer && (tag != TAG_INTERNAL))                                      /* Preparation de l'envoi du buffer */
      { cpt = 0;
        while(cpt < Entete.taille_donnees)
         {
-encore_buffer:
           if ( (retour=Attendre_envoi_disponible(connexion)) )
            { Info_new( connexion->log, FALSE, LOG_WARNING,
-                "Envoyer_reseau: timeout depassé (ou erreur) sur %d, retour=%d",
-                 connexion->socket, retour );
+                      "Envoyer_reseau: timeout depassé (ou erreur) sur %d, retour=%d",
+                       connexion->socket, retour );
              break;
            }
 
           if (connexion->ssl)
-           { retour = SSL_write( connexion->ssl, buffer + cpt, Entete.taille_donnees-cpt ); }/* Envoi du buffer */
+           { retour = SSL_write( connexion->ssl, buffer + cpt, Entete.taille_donnees-cpt ); }              /* Envoi du buffer */
           else retour = write( connexion->socket, buffer + cpt, Entete.taille_donnees-cpt );
           
           err = errno;
           if (retour<=0)
-           { Info_new( connexion->log, FALSE, LOG_ERR,
-                      "Envoyer_reseau: error %s", strerror(err) );
-             if (connexion->ssl)
-              { Info_new( connexion->log, FALSE, LOG_ERR,
-                         "Envoyer_reseau: retour SSL %s",
-                          ERR_error_string( SSL_get_error( connexion->ssl, retour ), NULL ) );
+           { if (connexion->ssl)
+              { gint ssl_err;
+                ssl_err = SSL_get_error( connexion->ssl, retour );
+                Info_new( connexion->log, FALSE, LOG_ERR,
+                         "Envoyer_reseau: SSL error %d -> %s",
+                          ssl_err, ERR_error_string( ssl_err, NULL ) );
+                if (ssl_err == SSL_ERROR_WANT_READ || ssl_err == SSL_ERROR_WANT_WRITE) continue;                     /* Retry */
               }
-             if (err == EAGAIN) goto encore_buffer;
-             break;                                                                    /* Si erreur, on sort */
+             else
+              { Info_new( connexion->log, FALSE, LOG_ERR,
+                         "Envoyer_reseau: error %d -> %s", err, strerror(err) );
+                if (err == EAGAIN) continue;                                                                         /* Retry */
+              }
+             break;                                                                                     /* Si erreur, on sort */
            } 
           cpt += retour;
         }
@@ -358,20 +362,20 @@ encore_buffer:
     if (retour<0) return(err);
     else          return(0);
   }
-/**********************************************************************************************************/
-/* Reseau_tag: Renvoi le numero de tag correspondant au paquet recu                                       */
-/* Entrée: la connexion                                                                                   */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Reseau_tag: Renvoi le numero de tag correspondant au paquet recu                                                           */
+/* Entrée: la connexion                                                                                                       */
+/******************************************************************************************************************************/
  gint Reseau_tag( struct CONNEXION *connexion )
   { if (!connexion) return(0);
     return( connexion->entete.tag );
   }
-/**********************************************************************************************************/
-/* Reseau_ss_tag: Renvoi le numero de ss_tag correspondant au paquet recu                                 */
-/* Entrée: la connexion                                                                                   */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Reseau_ss_tag: Renvoi le numero de ss_tag correspondant au paquet recu                                                     */
+/* Entrée: la connexion                                                                                                       */
+/******************************************************************************************************************************/
  gint Reseau_ss_tag( struct CONNEXION *connexion )
   { if (!connexion) return(0);
-    return( connexion->entete.ss_tag );                                 /* On teste le buffer avec le tag */
+    return( connexion->entete.ss_tag );                                                     /* On teste le buffer avec le tag */
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
