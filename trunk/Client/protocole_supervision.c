@@ -42,7 +42,6 @@
  void Gerer_protocole_supervision ( struct CONNEXION *connexion )
   { static GList *Arrivee_comment = NULL;
     static GList *Arrivee_palette = NULL;
-    static GList *Arrivee_capteur = NULL;
     static GList *Arrivee_camera_sup = NULL;
     static int save_id = 0;
 
@@ -131,24 +130,16 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR:
              { struct CMD_TYPE_CAPTEUR *capteur;
+               capteur = (struct CMD_TYPE_CAPTEUR *)connexion->donnees;
+               Proto_afficher_un_capteur_supervision ( capteur );
                Set_progress_plus(1);
-
-               capteur = (struct CMD_TYPE_CAPTEUR *)g_try_malloc0( sizeof( struct CMD_TYPE_CAPTEUR ) );
-               if (!capteur) return; 
-               memcpy( capteur, connexion->donnees, sizeof(struct CMD_TYPE_CAPTEUR ) );
-               Arrivee_capteur = g_list_append( Arrivee_capteur, capteur );
                save_id = capteur->syn_id;
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR_FIN:
-             { g_list_foreach( Arrivee_capteur, (GFunc)Proto_afficher_un_capteur_supervision, NULL );
-               g_list_foreach( Arrivee_capteur, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_capteur );
-               Arrivee_capteur = NULL;
-               Chercher_page_notebook( TYPE_PAGE_SUPERVISION, save_id, TRUE );
-             }
+             { Chercher_page_notebook( TYPE_PAGE_SUPERVISION, save_id, TRUE ); }
             break;
-/*********************************** Reception des cameras de supervision *********************************/
+/******************************************** Reception des cameras de supervision ********************************************/
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP:
              { struct CMD_TYPE_CAMERA_SUP *camera_sup;
                Set_progress_plus(1);
@@ -168,4 +159,4 @@
             break;
      }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
