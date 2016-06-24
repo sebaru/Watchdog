@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Serveur/envoi_histo.c        Envoi de l'ihstorique à la connexion client                    */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       sam 13 mar 2004 18:41:14 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Serveur/envoi_histo.c        Envoi de l'ihstorique à la connexion client                                         */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                           sam 13 mar 2004 18:41:14 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * envoi_histo.c
  * This file is part of Watchdog
@@ -30,21 +30,21 @@
  #include <string.h>
  #include <pthread.h>
 
-/******************************************** Prototypes de fonctions *************************************/
+/***************************************************** Prototypes de fonctions ************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
-/**********************************************************************************************************/
-/* Proto_acquitter_histo: le client demande l'acquittement d'un histo                                     */
-/* Entrée: le client demandeur et le histo en question                                                    */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_acquitter_histo: le client demande l'acquittement d'un histo                                                         */
+/* Entrée: le client demandeur et le histo en question                                                                        */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_acquitter_histo ( struct CLIENT *client, struct CMD_TYPE_HISTO *rezo_histo )
   { struct CMD_TYPE_HISTO *result;
     gboolean retour;
 
     if (!rezo_histo) return;
     time( (time_t *)&rezo_histo->date_fixe );
-    rezo_histo->alive = TRUE;                                      /* Le message est toujours d'actualité */
+    rezo_histo->alive = TRUE;                                                          /* Le message est toujours d'actualité */
     g_snprintf( rezo_histo->nom_ack, sizeof(rezo_histo->nom_ack), "%s", client->util->nom );
 
     retour = Modifier_histo_msgsDB ( rezo_histo );
@@ -70,24 +70,26 @@
             }
          }
   }
-/**********************************************************************************************************/
-/* Envoyer_histos: Envoi des histos au client GID_USERS                                                   */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Envoyer_histos: Envoi des histos au client GID_USERS                                                                       */
+/* Entrée: Néant                                                                                                              */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void *Proto_envoyer_histo_msgs_thread ( struct CLIENT *client )
   { struct CMD_RESPONSE_HISTO_MSGS rezo_histo;
     struct CMD_CRITERE_HISTO_MSGS requete;
     struct CMD_TYPE_HISTO *histo;
     struct CMD_ENREG nbr;
+    gchar titre[20];
     struct DB *db;
 
-    memcpy ( &requete, &client->requete, sizeof( requete ) );                  /* Recopie en local thread */
+    memcpy ( &requete, &client->requete, sizeof( requete ) );                                      /* Recopie en local thread */
 
-    prctl(PR_SET_NAME, "W-EnvoiHISTOMSGS", 0, 0, 0 );
+    g_snprintf( titre, sizeof(titre), "W-HMSG-%06d", client->ssrv_id );
+    prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
     if ( ! Recuperer_histo_msgsDB( &db, &requete ) )
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
+     { Unref_client( client );                                                            /* Déréférence la structure cliente */
        pthread_exit( NULL );
      }
 
@@ -96,38 +98,40 @@
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
-    rezo_histo.page_id = requete.page_id;  /* Prepare le numéro de page d'accueil sur l'interface cliente */
+    rezo_histo.page_id = requete.page_id;                      /* Prepare le numéro de page d'accueil sur l'interface cliente */
     for ( ; ; )
      { histo = Recuperer_histo_msgsDB_suite( &db );
        if (!histo)
         { Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS_FIN, NULL, 0 );
-          Unref_client( client );                                     /* Déréférence la structure cliente */
+          Unref_client( client );                                                         /* Déréférence la structure cliente */
           pthread_exit ( NULL );
         }
 
-       memcpy ( &rezo_histo.histo, histo, sizeof(struct CMD_TYPE_HISTO) );          /* Prepare la reponse */
+       memcpy ( &rezo_histo.histo, histo, sizeof(struct CMD_TYPE_HISTO) );                              /* Prepare la reponse */
        g_free(histo);
        Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_REQUETE_HISTO_MSGS,
                       (gchar *)&rezo_histo, sizeof(struct CMD_RESPONSE_HISTO_MSGS) );
      }
   }
-/**********************************************************************************************************/
-/* Envoyer_histos: Envoi des histos au client GID_USERS                                                   */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Envoyer_histos: Envoi des histos au client GID_USERS                                                                       */
+/* Entrée: Néant                                                                                                              */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void *Envoyer_histo_thread ( struct CLIENT *client )
   { struct CMD_TYPE_HISTO *histo;
     struct CMD_ENREG nbr;
     struct DB *db;
+    gchar titre[20];
+    
+    g_snprintf( titre, sizeof(titre), "W-HIST-%06d", client->ssrv_id );
+    prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
-    prctl(PR_SET_NAME, "W-EnvoiHISTO", 0, 0, 0 );
-
-    if ( ! Recuperer_histo_msgsDB_alive( &db ) )                                 /* Si pas de histos (??) */
-     { Client_mode( client, VALIDE );         /* Le client est maintenant valide aux yeux du sous-serveur */
-       Unref_client( client );                                        /* Déréférence la structure cliente */
+    if ( ! Recuperer_histo_msgsDB_alive( &db ) )                                                     /* Si pas de histos (??) */
+     { Client_mode( client, VALIDE );                             /* Le client est maintenant valide aux yeux du sous-serveur */
+       Unref_client( client );                                                            /* Déréférence la structure cliente */
        pthread_exit( NULL );
-     }                                                                           /* Si pas de histos (??) */
+     }                                                                                               /* Si pas de histos (??) */
 
     nbr.num = db->nbr_result;
     g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d histo", nbr.num );
@@ -138,8 +142,8 @@
      { histo = Recuperer_histo_msgsDB_suite( &db );
        if (!histo)
         { Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_HISTO_FIN, NULL, 0 );
-          Client_mode( client, VALIDE );      /* Le client est maintenant valide aux yeux du sous-serveur */
-          Unref_client( client );                                     /* Déréférence la structure cliente */
+          Client_mode( client, VALIDE );                          /* Le client est maintenant valide aux yeux du sous-serveur */
+          Unref_client( client );                                                         /* Déréférence la structure cliente */
           pthread_exit( NULL );
         }
 
@@ -147,4 +151,4 @@
                      (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
      }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
