@@ -115,7 +115,7 @@
   }
 /******************************************************************************************************************************/
 /* Envoyer_histos: Envoi des histos au client GID_USERS                                                                       */
-/* Entrée: Néant                                                                                                              */
+/* Entrée: Le client                                                                                                          */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  void *Envoyer_histo_thread ( struct CLIENT *client )
@@ -138,17 +138,13 @@
     Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
                    (gchar *)&nbr, sizeof(struct CMD_ENREG) );
 
-    for( ; ; )
-     { histo = Recuperer_histo_msgsDB_suite( &db );
-       if (!histo)
-        { Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_HISTO_FIN, NULL, 0 );
-          Client_mode( client, VALIDE );                          /* Le client est maintenant valide aux yeux du sous-serveur */
-          Unref_client( client );                                                         /* Déréférence la structure cliente */
-          pthread_exit( NULL );
-        }
-
-       Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_HISTO,
+    while ( (histo = Recuperer_histo_msgsDB_suite( &db )) != NULL)
+     { Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_HISTO,
                      (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
      }
+    Envoi_client ( client, TAG_HISTO, SSTAG_SERVEUR_ADDPROGRESS_HISTO_FIN, NULL, 0 );
+    Client_mode( client, VALIDE );                                /* Le client est maintenant valide aux yeux du sous-serveur */
+    Unref_client( client );                                                               /* Déréférence la structure cliente */
+    pthread_exit( NULL );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
