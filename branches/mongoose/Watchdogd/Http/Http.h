@@ -38,11 +38,26 @@
  #define HTTP_DEFAUT_PORT_HTTP         5560
  #define HTTP_DEFAUT_PORT_HTTPS        5561
 
+ enum WS_PROTO
+  {	/* always first */
+	   WS_PROTO_HTTP = 0,
+
+	   WS_PROTO_STATUS,
+	
+	   /* always last */
+	   WS_NBR_PROTO
+  };
+
+
  #define RESPONSE_INTERNAL_ERROR        "<html><body>An internal server error has occured!..</body></html>"    
  #define RESPONSE_AUTHENTICATION_NEEDED "<html><body>Authentication Needed !</body></html>"    
  struct HTTP_CONFIG
   { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
+
+    struct lws_context_creation_info ws_info;                                             /* Paramétrage du context WebSocket */
+    struct lws_context *ws_context;                                                                      /* Context WebSocket */
+    
     gint nbr_max_connexion;
     gboolean http_enable;                         /* True si la config indique que le thread doit tourner */
     gint http_port;

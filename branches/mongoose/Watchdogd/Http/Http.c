@@ -55,7 +55,7 @@
 
     Cfg_http.lib->Thread_debug = FALSE;                                     /* Settings default parameters */
     Cfg_http.http_enable       = FALSE; 
-    Cfg_http.http_port         = HTTP_DEFAUT_PORT_HTTP;
+    Cfg_http.ws_info.http_port         = HTTP_DEFAUT_PORT_HTTP;
     Cfg_http.https_enable      = FALSE; 
     Cfg_http.https_port        = HTTP_DEFAUT_PORT_HTTPS;
     Cfg_http.authenticate      = TRUE; 
@@ -64,6 +64,47 @@
     g_snprintf( Cfg_http.https_file_cert, sizeof(Cfg_http.https_file_cert), "%s", HTTP_DEFAUT_FILE_CERT );
     g_snprintf( Cfg_http.https_file_key,  sizeof(Cfg_http.https_file_key),  "%s", HTTP_DEFAUT_FILE_KEY );
     g_snprintf( Cfg_http.https_file_ca,   sizeof(Cfg_http.https_file_ca),   "%s", HTTP_DEFAUT_FILE_CA  );
+
+
+opts |= LWS_SERVER_OPTION_REQUIRE_VALID_OPENSSL_CLIENT_CERT;
+
+lws_set_log_level(debug_level, lwsl_emit_syslog);
+info.iface = iface;
+	info.protocols = protocols;
+	info.ssl_cert_filepath = NULL;
+ info.ssl_private_key_filepath = NULL;
+
+	info.ssl_cert_filepath = cert_path;
+		info.ssl_private_key_filepath = key_path;
+		if (ca_path[0])
+info.ssl_ca_filepath = ca_path;
+
+	info.gid = gid;
+	info.uid = uid;
+	info.max_http_header_pool = 16;
+	info.options = opts | LWS_SERVER_OPTION_VALIDATE_UTF8 LWS_SERVER_OPTION_STS 
+	info.extensions = exts;
+	info.timeout_secs = 5;
+	info.ssl_cipher_list = "ECDHE-ECDSA-AES256-GCM-SHA384:"
+			       "ECDHE-RSA-AES256-GCM-SHA384:"
+			       "DHE-RSA-AES256-GCM-SHA384:"
+			       "ECDHE-RSA-AES256-SHA384:"
+			       "HIGH:!aNULL:!eNULL:!EXPORT:"
+			       "!DES:!MD5:!PSK:!RC4:!HMAC_SHA1:"
+			       "!SHA1:!DHE-RSA-AES128-GCM-SHA256:"
+			       "!DHE-RSA-AES128-SHA256:"
+			       "!AES128-GCM-SHA256:"
+			       "!AES128-SHA256:"
+			       "!DHE-RSA-AES256-SHA256:"
+			       "!AES256-GCM-SHA384:"
+			       "!AES256-SHA256";
+
+	if (use_ssl)
+		/* redirect guys coming on http */
+		info.options |= LWS_SERVER_OPTION_REDIRECT_HTTP_TO_HTTPS;
+
+
+
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                     /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
@@ -680,7 +721,22 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
+  { struct lws_protocols WS_PROTOS[] =
+     {	/* first protocol must always be HTTP handler */
+     	 {	"http-only",		/* name */
+		       callback_http,		/* callback */
+		       0, /*sizeof (struct per_session_data__http),	/* per_session_data_size */
+		       0,			/* max frame size / rx buffer */
+	      },
+	      { "ws_proto_status",
+  		     callback_dumb_increment,
+		       0, /*sizeof(struct per_session_data__dumb_increment),*/
+		       10, /* rx buf size must be >= permessage-deflate rx size */
+	      }
+	      { NULL, NULL, 0, 0 } /* terminator */
+     };
+
+    prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                   /* Mise a zero de la structure de travail */
     Cfg_http.lib = lib;                        /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_http.lib->TID = pthread_self();                                 /* Sauvegarde du TID pour le pere */
@@ -689,8 +745,8 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Demarrage . . . TID = %p", pthread_self() );
 
-    g_snprintf( Cfg_http.lib->admin_prompt, sizeof(Cfg_http.lib->admin_prompt), "http" );
-    g_snprintf( Cfg_http.lib->admin_help,   sizeof(Cfg_http.lib->admin_help),   "Manage communications with Http Devices" );
+    g_snprintf( Cfg_http.lib->admin_prompt, sizeof(Cfg_http.lib->admin_prompt), NOM_THREAD );
+    g_snprintf( Cfg_http.lib->admin_help,   sizeof(Cfg_http.lib->admin_help),   "Manage Web Services with external Devices" );
 
     if (!Cfg_http.http_enable && !Cfg_http.https_enable)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
@@ -698,7 +754,9 @@
        goto end;
      }
 
-    if (Cfg_http.http_enable)
+	   Cfg_http.ws_context = lws_create_context(&Cfg_http.ws_info);
+ 
+    if (Cfg_http.ws_context)
      { Cfg_http.http_server = MHD_start_daemon ( MHD_USE_THREAD_PER_CONNECTION | MHD_USE_DEBUG,
                                                  Cfg_http.http_port, NULL, NULL, 
                                                 &Http_request_CB, NULL,
@@ -745,6 +803,7 @@
      }
 
     if (!Cfg_http.http_server && !Cfg_http.https_server) goto end;             /* si erreur de chargement */
+
 #ifdef bouh
     Abonner_distribution_message ( Http_Gerer_message );   /* Abonnement à la diffusion des messages */
     Abonner_distribution_sortie  ( Http_Gerer_sortie );     /* Abonnement à la diffusion des sorties */
@@ -766,13 +825,19 @@
           Cfg_http.lib->Thread_sigusr1 = FALSE;
         }
 
-       if ( last_top + 300 <= Partage->top )                                    /* Toutes les 30 secondes */
+	       n = lws_service(context, 1000);
+
+        if ( last_top + 300 <= Partage->top )                                    /* Toutes les 30 secondes */
         { Http_Check_sessions ();
           last_top = Partage->top;
         }
      }
 
     if (Cfg_http.http_server)  MHD_stop_daemon (Cfg_http.http_server);          /* Arret des serveurs MHD */
+
+    lws_context_destroy(context);
+
+
     if (Cfg_http.https_server)
      { MHD_stop_daemon (Cfg_http.https_server);
        Liberer_certificat();
@@ -786,6 +851,7 @@
        Http_Liberer_session ( session );
      }
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
+
 end:
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
              "Run_thread: Down . . . TID = %p", pthread_self() );
