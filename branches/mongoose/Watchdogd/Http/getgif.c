@@ -41,7 +41,9 @@
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
  gint Http_Traiter_request_getgif ( struct MHD_Connection *connection )
-  { const gchar *id_char, *mode_char;
+  {
+#ifdef bouh
+ const gchar *id_char, *mode_char;
     struct MHD_Response *response;
     gchar nom_fichier[80];
     gint id, mode, fd;
@@ -81,5 +83,6 @@
     MHD_queue_response (connection, MHD_HTTP_OK, response);
     MHD_destroy_response (response);
     return(MHD_YES);
+#endif
   }
 /*--------------------------------------------------------------------------------------------------------*/

@@ -41,7 +41,9 @@
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
  gint Http_Traiter_request_getslash ( struct HTTP_SESSION *session, struct MHD_Connection *connection )
-  { struct MHD_Response *response;
+  {
+#ifdef bouh
+	  struct MHD_Response *response;
     gchar nom_fichier[80];
     gint fd;
     struct stat sbuf;
@@ -78,5 +80,6 @@
     MHD_queue_response (connection, MHD_HTTP_OK, response);
     MHD_destroy_response (response);
     return(MHD_YES);
+#endif
   }
 /*--------------------------------------------------------------------------------------------------------*/

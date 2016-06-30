@@ -28,6 +28,7 @@
  #include <unistd.h>                                                                  /* Pour gethostname */
  #include "watchdogd.h"
  #include "Http.h"
+#ifdef bouh
 
 /**********************************************************************************************************/
 /* Admin_http_status: Print le statut du thread HTTP                                                      */
@@ -71,6 +72,7 @@
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
     Admin_write( connexion, " -\n" );
   }
+#endif
 /**********************************************************************************************************/
 /* Admin_command: Gere une commande liée au thread HTTP depuis une connexion admin                        */
 /* Entrée: le client et la ligne de commande                                                              */
@@ -79,6 +81,7 @@
  void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128], chaine[128];
 
+#ifdef bouh
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "list" ) )
      { Admin_http_list ( connexion ); }
@@ -103,5 +106,6 @@
      { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
        Admin_write ( connexion, chaine );
      }
+#endif
   }
 /*--------------------------------------------------------------------------------------------------------*/

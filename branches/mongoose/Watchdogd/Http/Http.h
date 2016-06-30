@@ -27,60 +27,40 @@
  
 #ifndef _HTTP_H_
  #define _HTTP_H_
- #include <microhttpd.h>
+ #include <libwebsockets.h>
 
  #define NOM_THREAD                    "http"
  #define HTTP_DEFAUT_FILE_CA           "http_cacert.pem"
  #define HTTP_DEFAUT_FILE_CERT         "http_serveursigne.pem"
  #define HTTP_DEFAUT_FILE_KEY          "http_serveurkey.pem"
- #define HTTP_DEFAUT_HTTPS_CIPHER      "NORMAL"
- #define HTTP_DEFAUT_MAX_CONNEXION     100
- #define HTTP_DEFAUT_PORT_HTTP         5560
- #define HTTP_DEFAUT_PORT_HTTPS        5561
+ #define HTTP_DEFAUT_SSL_CIPHER        "HIGH:NORMAL"
+ #define HTTP_DEFAUT_MAX_CONNEXION     16
+ #define HTTP_DEFAUT_TCP_PORT          5560
 
  enum WS_PROTO
   {	/* always first */
-	   WS_PROTO_HTTP = 0,
-
-	   WS_PROTO_STATUS,
-	
-	   /* always last */
-	   WS_NBR_PROTO
+    WS_PROTO_HTTP = 0,
+    WS_PROTO_STATUS,
+    /* always last */
+    WS_NBR_PROTO
   };
 
-
- #define RESPONSE_INTERNAL_ERROR        "<html><body>An internal server error has occured!..</body></html>"    
- #define RESPONSE_AUTHENTICATION_NEEDED "<html><body>Authentication Needed !</body></html>"    
  struct HTTP_CONFIG
   { struct LIBRAIRIE *lib;
-    gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
+    gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
 
     struct lws_context_creation_info ws_info;                                             /* Paramétrage du context WebSocket */
     struct lws_context *ws_context;                                                                      /* Context WebSocket */
     
-    gint nbr_max_connexion;
-    gboolean http_enable;                         /* True si la config indique que le thread doit tourner */
-    gint http_port;
-    gboolean https_enable;                        /* True si la config indique que le thread doit tourner */
-    gint https_port;
-    gchar https_cipher[80];
-    gchar https_file_cert[80];
-    gchar *ssl_cert;
-    gchar https_file_key[80];
-    gchar *ssl_key;
-    gchar https_file_ca[80];
-    gchar *ssl_ca;
-    gboolean authenticate;                       /* TRUE si les requetes HTTPS doivent etre authentifiées */
-    struct MHD_Daemon *http_server;
-    struct MHD_Daemon *https_server;
-    GSList *Liste_sessions;                                               /* Listes des sessions en cours */
+    gint nbr_max_connexion;                                           /* Nombre maximum de connexion autorisées simultanément */
+    gint tcp_port;                                           /* Port d'écoute TCP (HTTP ou HTTPS, selon le paramètre suivant) */
+    gboolean ssl_enable;                                                                             /* TRUE si connexion SSL */
+    gchar ssl_cipher_list[128];
+    gchar ssl_cert_filepath[80];
+    gchar ssl_private_key_filepath[80];
+    gchar ssl_ca_filepath[80];
+    gboolean authenticate;
  } Cfg_http;
-
- enum HTTP_SESSION_TYPE
-  { SESSION_INIT,
-    SESSION_TO_BE_CLEANED,
-    SESSION_AUTH
-  };
 
  struct HTTP_SESSION
   { gint     type;
@@ -97,7 +77,7 @@
 
 /*************************************** Définitions des prototypes ***************************************/
  extern gboolean Http_Lire_config ( void );
- extern gboolean Http_Traiter_request_getsyn ( struct HTTP_SESSION *session, struct MHD_Connection *connection );
+/* extern gboolean Http_Traiter_request_getsyn ( struct HTTP_SESSION *session, struct MHD_Connection *connection );
  extern gint Http_Traiter_request_getstatus ( struct MHD_Connection *connection );
  extern gint Http_Traiter_request_getslash ( struct HTTP_SESSION *session, struct MHD_Connection *connection );
  extern gint Http_Traiter_request_getgif ( struct MHD_Connection *connection );
@@ -105,6 +85,6 @@
  extern void Http_Add_response_header ( struct MHD_Response *response );
  extern void Http_free_liste_satellites ( void );
  extern void Http_Check_satellites_states ( void );
- extern void Http_Traiter_XML_set_internal ( struct HTTP_SESSION *session );
+ extern void Http_Traiter_XML_set_internal ( struct HTTP_SESSION *session );*/
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

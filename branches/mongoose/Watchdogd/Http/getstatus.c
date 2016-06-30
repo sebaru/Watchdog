@@ -39,7 +39,9 @@
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
  gint Http_Traiter_request_getstatus ( struct MHD_Connection *connection )
-  { struct MHD_Response *response;
+  {
+#ifdef bouh
+	   struct MHD_Response *response;
     xmlTextWriterPtr writer;
     xmlBufferPtr buf;
     gint retour, num;
@@ -174,5 +176,6 @@
     MHD_queue_response (connection, MHD_HTTP_OK, response);
     MHD_destroy_response (response);
     return(MHD_YES);
+#endif
   }
 /*--------------------------------------------------------------------------------------------------------*/
