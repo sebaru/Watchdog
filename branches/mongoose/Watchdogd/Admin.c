@@ -78,25 +78,27 @@
     g_snprintf( local.sun_path, sizeof(local.sun_path), NOM_SOCKET );
     if (bind( ecoute, (struct sockaddr *)&local, sizeof(local)) == -1)
      { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
-                 "Activer_ecoute_admin: Bind Failure...:%s", strerror(errno) );
+                 "Activer_ecoute_admin: Bind Failure for '%s' : %s", NOM_SOCKET, strerror(errno) );
        close(ecoute);
        return(-1);
      }
 
-    if (listen(ecoute, 1) == -1)                                       /* On demande d'écouter aux portes */
+    if (listen(ecoute, 1) == -1)                                                           /* On demande d'écouter aux portes */
      { Info_new( Config.log, Config.log_msrv, LOG_CRIT,
-                 "Activer_ecoute_admin: Listen failure...:%s", strerror(errno) );
+                 "Activer_ecoute_admin: Listen failure for '%s' : %s", NOM_SOCKET, strerror(errno) );
        close(ecoute);
        return(-1);
      }
-    fcntl( ecoute, F_SETFL, O_NONBLOCK );                                            /* Mode non bloquant */
+    Info_new( Config.log, Config.log_msrv, LOG_INFO,
+              "Activer_ecoute_admin: Listen success for %s", NOM_SOCKET );
+    fcntl( ecoute, F_SETFL, O_NONBLOCK );                                                                /* Mode non bloquant */
     return( ecoute );
   }
-/**********************************************************************************************************/
-/* Desactiver_ecoute_admin: Ferme la socker fifo d'administration                                         */
-/* Entrée: Néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Desactiver_ecoute_admin: Ferme la socker fifo d'administration                                                             */
+/* Entrée: Néant                                                                                                              */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Desactiver_ecoute_admin ( void )
   { close (Fd_ecoute);
     Fd_ecoute = 0;
