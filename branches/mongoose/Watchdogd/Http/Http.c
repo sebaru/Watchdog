@@ -53,7 +53,7 @@
     struct DB *db;
 
     Cfg_http.lib->Thread_debug = FALSE;                                                        /* Settings default parameters */
-    Cfg_http.ws_info.port      = HTTP_DEFAUT_TCP_PORT;
+    Cfg_http.tcp_port          = HTTP_DEFAUT_TCP_PORT;
     Cfg_http.ssl_enable        = FALSE; 
     Cfg_http.authenticate      = TRUE; 
     Cfg_http.nbr_max_connexion = HTTP_DEFAUT_MAX_CONNEXION;
@@ -82,7 +82,7 @@
        else if ( ! g_ascii_strcasecmp ( nom, "ssl" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.ssl_enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "tcp_port" ) )
-        { Cfg_http.ws_info.port = atoi(valeur);  }
+        { Cfg_http.tcp_port = atoi(valeur);  }
        else if ( ! g_ascii_strcasecmp ( nom, "authenticate" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "false" ) ) Cfg_http.authenticate = FALSE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
@@ -249,25 +249,26 @@
     /*lws_set_log_level(debug_level, lwsl_emit_syslog);*/
 
     Cfg_http.ws_info.iface = NULL;                                                      /* Configuration du serveur Websocket */
-	Cfg_http.ws_info.protocols = WS_PROTOS;
-	Cfg_http.ws_info.gid = -1;
-	Cfg_http.ws_info.uid = -1;
-	Cfg_http.ws_info.max_http_header_pool = Cfg_http.nbr_max_connexion;
-	Cfg_http.ws_info.options |= LWS_SERVER_OPTION_VALIDATE_UTF8;
-	Cfg_http.ws_info.extensions = NULL;
-	Cfg_http.ws_info.timeout_secs = 30;
+	   Cfg_http.ws_info.protocols = WS_PROTOS;
+    Cfg_http.ws_info.port = Cfg_http.tcp_port;
+	   Cfg_http.ws_info.gid = -1;
+	   Cfg_http.ws_info.uid = -1;
+	   Cfg_http.ws_info.max_http_header_pool = Cfg_http.nbr_max_connexion;
+	   Cfg_http.ws_info.options |= LWS_SERVER_OPTION_VALIDATE_UTF8;
+	   Cfg_http.ws_info.extensions = NULL;
+	   Cfg_http.ws_info.timeout_secs = 30;
 
     if (Cfg_http.ssl_enable)                                                                           /* Configuration SSL ? */
      { Cfg_http.ws_info.ssl_cipher_list          = Cfg_http.ws_info.ssl_cipher_list;
-	   Cfg_http.ws_info.ssl_cert_filepath        = Cfg_http.ssl_cert_filepath;
-	   Cfg_http.ws_info.ssl_ca_filepath          = Cfg_http.ssl_ca_filepath;
-	   Cfg_http.ws_info.ssl_private_key_filepath = Cfg_http.ssl_private_key_filepath;
+	      Cfg_http.ws_info.ssl_cert_filepath        = Cfg_http.ssl_cert_filepath;
+	      Cfg_http.ws_info.ssl_ca_filepath          = Cfg_http.ssl_ca_filepath;
+   	   Cfg_http.ws_info.ssl_private_key_filepath = Cfg_http.ssl_private_key_filepath;
        Cfg_http.ws_info.options |= LWS_SERVER_OPTION_PEER_CERT_NOT_REQUIRED;
        /*Cfg_http.ws_info.options |= LWS_SERVER_OPTION_REDIRECT_HTTP_TO_HTTPS;*/
        /*Cfg_http.ws_info.options |= LWS_SERVER_OPTION_REQUIRE_VALID_OPENSSL_CLIENT_CERT;*/
      }
 
-	Cfg_http.ws_context = lws_create_context(&Cfg_http.ws_info);
+	   Cfg_http.ws_context = lws_create_context(&Cfg_http.ws_info);
  
     if (!Cfg_http.ws_context)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
@@ -298,7 +299,7 @@
           Cfg_http.lib->Thread_sigusr1 = FALSE;
         }
 
-	   lws_service( Cfg_http.ws_context, 1000);                                 /* On lance l'écoute des connexions websocket */
+   	   lws_service( Cfg_http.ws_context, 1000);                                 /* On lance l'écoute des connexions websocket */
 
 #ifdef bouh
         if ( last_top + 300 <= Partage->top )                                    /* Toutes les 30 secondes */
