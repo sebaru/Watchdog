@@ -176,49 +176,65 @@
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
 /******************************************************************************************************************************/
  static gint CB_http ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
-  { 
- /*   Http_Log_request(connection, url, method, version, upload_data_size, con_cls);*/
+  { gchar remote_name[80], remote_ip[80];
 
+ /*   Http_Log_request(connection, url, method, version, upload_data_size, con_cls);*/
     switch (tag)
      { case LWS_CALLBACK_ESTABLISHED:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                       "CB_http: connexion established" );
-		    break;
+		          break;
        case LWS_CALLBACK_CLOSED_HTTP:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                      "CB_http: connexion closed" );
-		    break;
+                         "CB_http: connexion closed for %s(%s)" );
+		          break;
        case LWS_CALLBACK_PROTOCOL_INIT:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                      "CB_http: Init protocol" );
-		    break;
+                      "CB_http: Protocol initialized !" );
+            break;
        case LWS_CALLBACK_PROTOCOL_DESTROY:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                       "CB_http: Destroy protocol" );
-		    break;
+		          break;
        case LWS_CALLBACK_OPENSSL_CONTEXT_REQUIRES_PRIVATE_KEY:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                       "CB_http: Need SSL Private key" );
-		    break;
+		          break;
        case LWS_CALLBACK_RECEIVE:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                       "CB_http: data received" );
-		    break;
+		          break;
        case LWS_CALLBACK_HTTP:
-            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                      "CB_http: request HTTP to handle" );
-                      /* data is requested uri */
-            return(1); /* Close connexion */
-		    break;
+             { gchar *url = (gchar *)data;
+               gint retour;
+               lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
+                                        (char *)&remote_name, sizeof(remote_name),
+                                        (char *)&remote_ip, sizeof(remote_ip) );
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "CB_http: HTTP request from %s(%s): %s",
+                         remote_name, remote_ip, url );
+               if ( ! strcasecmp ( url, "/favicon.ico" ) )
+                { retour = lws_serve_http_file ( wsi, "WEB/favicon.gif", "image/gif", NULL, 0);
+                  if (retour != 0) return(1);                             /* Si erreur (<0) ou si ok (>0), on ferme la socket */
+                  return(0);                    /* si besoin de plus de temps, on laisse la ws http ouverte pour libwebsocket */
+                }
+               else if ( ! strcasecmp ( url, "/status" ) )
+                { Http_Traiter_request_getstatus ( wsi ); }
+               return(1);                                                                    /* Par défaut, on clos la socket */
+             }
+		          break;
        case LWS_CALLBACK_HTTP_FILE_COMPLETION:
-            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                      "CB_http: file sent" );
-		    break;
+             { lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
+                                        (char *)&remote_name, sizeof(remote_name),
+                                        (char *)&remote_ip, sizeof(remote_ip) );
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                         "CB_http: file sent for %s(%s)", remote_name, remote_ip );
+             }
+            break;
        case LWS_CALLBACK_OPENSSL_PERFORM_CLIENT_CERT_VERIFICATION:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                       "CB_http: need to verifi Client SSL Certs" );
-		    break;
-	   default: return(0);                                                    /* Par défaut, on laisse la connexion continuer */
+		          break;
+	      default: return(0);                                                    /* Par défaut, on laisse la connexion continuer */
      }
    return(0);                                                                                           /* Continue connexion */
   }
