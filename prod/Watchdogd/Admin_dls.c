@@ -71,7 +71,7 @@
 /**********************************************************************************************************/
  static void Admin_dls_gcc ( struct CONNEXION *connexion, gint id )
   { GSList *liste_dls;
-    gchar chaine[128], buffer[128];
+    gchar chaine[128], buffer[1024];
 
     g_snprintf( chaine, sizeof(chaine), " -- Compilation des plugins D.L.S\n" );
     Admin_write ( connexion, chaine );
@@ -197,6 +197,11 @@
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Admin_dls_stop ( connexion, num );
      }
+    else if ( ! strcmp ( commande, "reset" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       Reseter_un_plugin ( num );
+     }
     else if ( ! strcmp ( commande, "list" ) )
      { Admin_dls_list ( connexion );
      }
@@ -205,10 +210,11 @@
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'D.L.S'\n" );
-       Admin_write ( connexion, "  start id                               - Demarre le module id\n" );
-       Admin_write ( connexion, "  stop id                                - Stop le module id\n" );
+       Admin_write ( connexion, "  start $id                              - Demarre le module $id\n" );
+       Admin_write ( connexion, "  stop $id                               - Stop le module $id\n" );
+       Admin_write ( connexion, "  reset $id                              - Stop/Unload/Load/Start module $id\n" );
        Admin_write ( connexion, "  list                                   - D.L.S. Status\n" );
-       Admin_write ( connexion, "  gcc id                                 - Compile le plugin id (-1 for all)\n" );
+       Admin_write ( connexion, "  gcc $id                                - Compile le plugin $id (-1 for all)\n" );
        Admin_write ( connexion, "  reload                                 - Recharge la configuration\n" );
      }
     else
