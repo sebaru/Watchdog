@@ -46,11 +46,8 @@
 /******************************************************************************************************************************/
  void Proto_effacer_source_dls ( struct CLIENT *client, struct CMD_TYPE_SOURCE_DLS *edit_dls )
   { gchar chaine[80];
-    gint id_fichier;
     g_snprintf( chaine, sizeof(chaine), "Dls/%d.dls.new", edit_dls->id );
     unlink ( chaine );
-    id_fichier = open( chaine, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-    close(id_fichier);
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "Proto_effacer_fichier_plugin_dls : Zeroing... %s", chaine );
   }
 /******************************************************************************************************************************/
@@ -62,7 +59,7 @@
   { gchar chaine[128];
     gint id_fichier;
     g_snprintf( chaine, sizeof(chaine), "Dls/%d.dls.new", edit_dls->id );
-    id_fichier = open( chaine, O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR );
+    id_fichier = open( chaine, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
                 "Save_source_dls_to_disk: Open file %s for write failed for %d (%s)",
