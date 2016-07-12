@@ -74,6 +74,12 @@
                    "Save_source_dls_to_disk: Write to file %s failed for %d (%s)",
                     chaine, edit_dls->id, strerror(errno) );
         }
+       else
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
+                   "Save_source_dls_to_disk: Write to file %s OK for %d",
+                    chaine, edit_dls->id );
+          close(id_fichier);
+        }
      }
   }
 /******************************************************************************************************************************/
