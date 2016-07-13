@@ -250,14 +250,14 @@
     if (buffer) memset (buffer, 0, taille_buffer);                                                 /* RAZ du buffer de sortie */
 
     Info_new( Config.log, Config.log_dls, LOG_NOTICE,
-             "THRCompil: Compiler_source_dls: Compilation module DLS %d", id );
+             "Compiler_source_dls: Compilation module DLS %d", id );
     retour = Traduire_DLS( new, id );
     Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-             "THRCompil: Compiler_source_dls: fin traduction %d", retour );
+             "Compiler_source_dls: fin traduction %d", retour );
 
     if (retour == TRAD_DLS_ERROR_FILE)                                                /* Retour de la traduction D.L.S vers C */
      { Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-               "THRCompil: Compiler_source_dls: envoi erreur file Traduction D.L.S %d", id );
+               "Compiler_source_dls: envoi erreur file Traduction D.L.S %d", id );
       Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_LOAD_SOURCE );
       return( DLS_COMPIL_ERROR_LOAD_SOURCE );
      }
@@ -267,7 +267,7 @@
        gchar log[20];
 
        Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-                "THRCompil: Compiler_source_dls: Chargement du fichier de log D.L.S %d", id );
+                "Compiler_source_dls: Chargement du fichier de log D.L.S %d", id );
        g_snprintf( log, sizeof(log), "Dls/%d.log", id );
 
        id_fichier = open( log, O_RDONLY, 0 );                /* Ouverture du fichier log et chargement du contenu dans buffer */
@@ -294,7 +294,7 @@
        pidgcc = fork();
        if (pidgcc<0)
         { Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                   "THRCompilFils: Compiler_source_dls: envoi erreur Fork GCC %d", id );
+                   "Compiler_source_dls_Fils: envoi erreur Fork GCC %d", id );
           Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_FORK_GCC );
           return(DLS_COMPIL_ERROR_FORK_GCC);
         }
@@ -303,19 +303,19 @@
           g_snprintf( source, sizeof(source), "Dls/%d.c", id );
           g_snprintf( cible,  sizeof(cible),  "Dls/libdls%d.so", id );
           Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-                   "THRCompilFils: Proto_compiler_source_dls: GCC start (pid %d) source %s cible %s!",
+                   "Compiler_source_dls_Fils: GCC start (pid %d) source %s cible %s!",
                     pidgcc, source, cible );
           execlp( "gcc", "gcc", "-I", REP_INCLUDE_GLIB, "-shared", "-o3",
                   "-Wall", "-lwatchdog-dls", source, "-fPIC", "-o", cible, NULL );
-          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "THRCompilFils: Proto_compiler_source_dls: lancement GCC failed" );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "Compiler_source_dls_Fils: lancement GCC failed" );
           _exit(0);
         }
 
        Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-               "THRCompil: Proto_compiler_source_dls: Waiting for gcc to finish pid %d", pidgcc );
+               "Compiler_source_dls: Waiting for gcc to finish pid %d", pidgcc );
        wait4(pidgcc, NULL, 0, NULL );
        Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-               "THRCompil: Proto_compiler_source_dls: gcc is down, OK %d", pidgcc );
+               "Compiler_source_dls: gcc is down, OK %d", pidgcc );
 
        if (reset)
         { pthread_mutex_lock( &Partage->com_dls.synchro );                              /* Demande le reset du plugin à D.L.S */
@@ -324,7 +324,7 @@
           pthread_mutex_unlock( &Partage->com_dls.synchro );
         }
 
-       Info_new( Config.log, Config.log_dls, LOG_DEBUG, "THRCompil: Compiler_source_dls: end of %d", id );
+       Info_new( Config.log, Config.log_dls, LOG_DEBUG, "Compiler_source_dls: end of %d", id );
      }
 
     if (retour == TRAD_DLS_WARNING)
