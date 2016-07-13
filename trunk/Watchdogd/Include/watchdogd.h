@@ -110,6 +110,7 @@
   { gint  taille_partage;
     gint  shmid;
     gchar version[16];
+    time_t start_time;                                                                         /* Date de start de l'instance */
     guint top;                                                                         /* Gestion des contraintes temporelles */
     guint top_cdg_plugin_dls;                                                        /* Top de chien de garde des plugins DLS */
     guint audit_bit_interne_per_sec;     
