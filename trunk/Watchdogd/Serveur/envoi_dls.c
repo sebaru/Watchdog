@@ -238,6 +238,7 @@
 /******************************************************************************************************************************/
  void *Proto_compiler_source_dls_thread( struct CLIENT *client )
   { struct CMD_GTK_MESSAGE erreur;
+    prctl(PR_SET_NAME, "W-Trad.DLS", 0, 0, 0 );
     switch ( Compiler_source_dls ( TRUE, TRUE, client->dls.id, erreur.message, sizeof(erreur.message) ) )
      { case DLS_COMPIL_ERROR_LOAD_SOURCE:
             g_snprintf( erreur.message, sizeof(erreur.message),
