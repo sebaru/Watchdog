@@ -588,8 +588,8 @@
        setitimer( ITIMER_REAL, &timer, NULL );                                         /* Active le timer */
 
        pthread_join( TID, NULL );                                   /* Attente fin de la boucle pere MSRV */
+       Decharger_librairies();                            /* Déchargement de toutes les librairies filles */
        Stopper_fils(TRUE);                                             /* Arret de tous les fils watchdog */
-       Decharger_librairies();
      }
 
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
