@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Audio/Audio.c  Gestion des messages audio de Watchdog 2.0                                    */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     sam. 09 nov. 2013 13:49:53 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Audio/Audio.c  Gestion des messages audio de Watchdog 2.0                                                        */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                         sam. 09 nov. 2013 13:49:53 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Archive.c
  * This file is part of Watchdog
@@ -33,28 +33,28 @@
  #include <sys/wait.h>
  #include <fcntl.h>
 
- #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
+ #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Audio.h"
-/**********************************************************************************************************/
-/* Audio_Lire_config : Lit la config Watchdog et rempli la structure mémoire                              */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Audio_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  gboolean Audio_Lire_config ( void )
   { gchar *nom, *valeur;
     struct DB *db;
 
-    Cfg_audio.lib->Thread_debug = FALSE;                                   /* Settings default parameters */
+    Cfg_audio.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
     Cfg_audio.enable            = FALSE; 
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                      /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
                 "Audio_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,                         /* Print Config */
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,                                           /* Print Config */
                 "Audio_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_audio.enable = TRUE;  }
@@ -98,32 +98,39 @@
     Cfg_audio.Liste_histos = g_slist_append( Cfg_audio.Liste_histos, histo );
     pthread_mutex_unlock( &Cfg_audio.lib->synchro );
   }
-/**********************************************************************************************************/
-/* Jouer_wav: Jouer un fichier wav dont le nom est en paramètre                                           */
-/* Entrée : le nom du fichier wav                                                                         */
-/* Sortie : Néant                                                                                         */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Jouer_wav: Jouer un fichier wav dont le nom est en paramètre                                                               */
+/* Entrée : le nom du fichier wav                                                                                             */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
  static void Jouer_wav ( gchar *fichier )
   { gint pid;
 
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "Jouer_wav: Envoi d'un wav %s", fichier );
     pid = fork();
     if (pid<0)
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "Jouer_wav: APLAY fork failed pid=%d", pid ); }
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
+                "Jouer_wav: APLAY '%s' fork failed pid=%d", fichier, pid );
+     }
     else if (!pid)
      { execlp( "aplay", "aplay", "-R", "1", fichier, NULL );
-       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "Jouer_wav: Lancement APLAY failed pid=%d", pid );
+       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
+                "Jouer_wav: APLAY '%s' exec failed pid=%d", fichier, pid );
        _exit(0);
      }
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_wav: waiting for APLAY to finish pid=%d", pid );
-    waitpid(pid, NULL, 0 );
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_wav: APLAY finished pid=%d", pid );
+    else
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+                "Jouer_wav: APLAY '%s' waiting to finish pid=%d (%s)", fichier, pid, strerror(errno) );
+       waitpid(pid, NULL, 0 );
+     }
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+             "Jouer_wav: APLAY '%s' finished pid=%d", fichier, pid );
   }
-/**********************************************************************************************************/
-/* Jouer_mp3 : Joue un fichier mp3 et attend la fin de la diffusion                                       */
-/* Entrée : le message à jouer                                                                            */
-/* Sortie : True si OK, False sinon                                                                       */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Jouer_mp3 : Joue un fichier mp3 et attend la fin de la diffusion                                                           */
+/* Entrée : le message à jouer                                                                                                */
+/* Sortie : True si OK, False sinon                                                                                           */
+/******************************************************************************************************************************/
  gboolean Jouer_mp3 ( struct CMD_TYPE_MESSAGE *msg )
   { gchar nom_fichier[128];
     gint fd_cible, pid;
@@ -131,49 +138,54 @@
     g_snprintf( nom_fichier, sizeof(nom_fichier), "Son/%d.mp3", msg->num );
     fd_cible = open ( nom_fichier, O_RDONLY, 0 );
     if (fd_cible < 0) { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                                  "Jouer_mp3: fichier %s non trouve", nom_fichier );
+                                  "Jouer_mp3: '%s' not found", nom_fichier );
                         return(FALSE);
                       }
     else close (fd_cible);
 
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "Jouer_mp3: Envoi du mp3 %s", nom_fichier );
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "Jouer_mp3: Send '%s'", nom_fichier );
     pid = fork();
     if (pid<0)
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                 "Jouer_mp3: MPG123 fork failed pid=%d (%s)", pid, strerror(errno) );
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
+                 "Jouer_mp3: MPG123 '%s' fork failed pid=%d (%s)", nom_fichier, pid, strerror(errno) );
      }
     else if (!pid)
      { execlp( "mpg123", "mpg123", "-vvvv", nom_fichier, NULL );
-       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                "Jouer_mp3: Lancement MPG123 failed (%s)", strerror( errno ) );
+       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
+                "Jouer_mp3: MPG123 '%s' exec failed pid=%d (%s)", nom_fichier, pid, strerror( errno ) );
        _exit(0);
      }
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_mp3: waiting for MPG123 to finish pid=%d", pid );
-    waitpid(pid, NULL, 0 );
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_mp3: MPG123 finished pid=%d", pid );
+    else
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+                "Jouer_mp3: '%s' waiting to finish pid=%d", nom_fichier, pid );
+       waitpid(pid, NULL, 0 );
+     }
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_mp3: MPG123 '%s' finished pid=%d", nom_fichier, pid );
 
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Jouer_espeak : Joue un message via synthèse vocale et attend la fin de la diffusion                    */
-/* Entrée : le message à jouer                                                                            */
-/* Sortie : Néant                                                                                         */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Jouer_espeak : Joue un message via synthèse vocale et attend la fin de la diffusion                                        */
+/* Entrée : le message à jouer                                                                                                */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
  void Jouer_espeak ( struct CMD_TYPE_MESSAGE *msg )
   { gchar nom_fichier[128], cible[128];
     gint fd_cible, pid, num;
 
     g_snprintf( nom_fichier, sizeof(nom_fichier), "Son/%d.pho", msg->num );
-    unlink( nom_fichier );                                            /* Destruction des anciens fichiers */
+    unlink( nom_fichier );                                                                /* Destruction des anciens fichiers */
     g_snprintf( cible,       sizeof(cible),       "Son/%d.au",  msg->num );
-    unlink( cible );                                                  /* Destruction des anciens fichiers */
+    unlink( cible );                                                                      /* Destruction des anciens fichiers */
 /***************************************** Création du PHO ************************************************/
-    num = msg->num;                                /* Attention, on fork donc plus de mémoire partagée !! */
+    num = msg->num;                                                    /* Attention, on fork donc plus de mémoire partagée !! */
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "Lancement de ESPEAK %d", num );
     pid = fork();
     if (pid<0)
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "Fork Fabrication .pho failed pid=%d", pid ); }
-    else if (!pid)                                                 /* Création du .au en passant par .pho */
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
+                "Jouer_espeak: Fork Fabrication '%s' failed pid=%d", nom_fichier, pid );
+     }
+    else if (!pid)                                                                     /* Création du .au en passant par .pho */
      { gchar texte[80], chaine[30], chaine2[30];
        switch (msg->type_voc)
         { case 0: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr1" ); break;
@@ -187,18 +199,24 @@
        dup2( fd_cible, 1 );
        g_snprintf( texte, sizeof(texte), "%s", msg->libelle_audio );
        execlp( "espeak", "espeak", "-q", "-s", chaine2, "-v", chaine, texte, NULL );
-       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "Lancement espeak failed pid=%d", pid );
+       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
+                "Jouer_espeak: Lancement espeak '%s' failed pid=%d", nom_fichier, pid );
        _exit(0);
      }
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "waiting for espeak to finish pid=%d", pid );
-    waitpid(pid, NULL, 0 );
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "espeak finished pid=%d", pid );
+    else
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+                "Jouer_espeak: waiting for espeak '%s' to finish pid=%d", nom_fichier, pid );
+       waitpid(pid, NULL, 0 );
+     }
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+             "Jouer_espeak: espeak '%s' finished pid=%d", nom_fichier, pid );
 
-/****************************************** Création du AU ************************************************/
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "Lancement de MBROLA %d", num );
+/****************************************************** Création du AU ********************************************************/
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "Jouer_espeak: Lancement de MBROLA '%s'", cible );
     pid = fork();
     if (pid<0)
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "Fabrication .au failed pid=%d", pid ); }
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
+                "Jouer_espeak: Fabrication '%s' failed pid=%d", cible, pid ); }
     else if (!pid)                                                 /* Création du .au en passant par .pho */
      { gchar chaine[30];
        switch (msg->type_voc)
@@ -209,31 +227,35 @@
           case 3: g_snprintf( chaine, sizeof(chaine), "fr4" ); break;
         }
        execlp( "mbrola-linux-i386", "mbrola-linux-i386", chaine, nom_fichier, cible, NULL );
-       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "Lancement mbrola failed pid=%d", pid );
+       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
+                "Jouer_espeak: Lancement mbrola '%s' failed pid=%d (%s)", cible, pid, strerror(errno) );
        _exit(0);
      }
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "waiting for mbrola to finish pid", pid );
-    waitpid(pid, NULL, 0 );
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "mbrola finished pid", pid );
-/****************************************** Lancement de l'audio ******************************************/
+    else
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+                "Jouer_espeak: waiting for mbrola '%s' to finish pid=%d", cible, pid );
+       waitpid(pid, NULL, 0 );
+     }
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "mbrola '%s' finished pid=%d", cible, pid );
+/**************************************************** Lancement de l'audio ****************************************************/
     Jouer_wav(cible);
   }
-/**********************************************************************************************************/
-/* Main: Fonction principale du RS485                                                                     */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Main: Fonction principale du Thread Audio                                                                                  */
+/******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct CMD_TYPE_HISTO *histo;
     static gboolean audio_stop = TRUE;
 
     prctl(PR_SET_NAME, "W-Audio", 0, 0, 0 );
-    memset( &Cfg_audio, 0, sizeof(Cfg_audio) );                 /* Mise a zero de la structure de travail */
-    Cfg_audio.lib = lib;                       /* Sauvegarde de la structure pointant sur cette librairie */
-    Cfg_audio.lib->TID = pthread_self();                                /* Sauvegarde du TID pour le pere */
-    Audio_Lire_config ();                               /* Lecture de la configuration logiciel du thread */
+    memset( &Cfg_audio, 0, sizeof(Cfg_audio) );                                     /* Mise a zero de la structure de travail */
+    Cfg_audio.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
+    Cfg_audio.lib->TID = pthread_self();                                                    /* Sauvegarde du TID pour le pere */
+    Audio_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Demarrage . . . TID = %p", pthread_self() );
-    Cfg_audio.lib->Thread_run = TRUE;                                               /* Le thread tourne ! */
+    Cfg_audio.lib->Thread_run = TRUE;                                                                   /* Le thread tourne ! */
 
     g_snprintf( Cfg_audio.lib->admin_prompt, sizeof(Cfg_audio.lib->admin_prompt), "audio" );
     g_snprintf( Cfg_audio.lib->admin_help,   sizeof(Cfg_audio.lib->admin_help),   "Manage Audio system" );
@@ -245,12 +267,12 @@
        goto end;
      }
 
-    Abonner_distribution_histo ( Audio_Gerer_histo );          /* Abonnement de la diffusion des messages */
-    while(Cfg_audio.lib->Thread_run == TRUE)                             /* On tourne tant que necessaire */
+    Abonner_distribution_histo ( Audio_Gerer_histo );                              /* Abonnement de la diffusion des messages */
+    while(Cfg_audio.lib->Thread_run == TRUE)                                                 /* On tourne tant que necessaire */
      {
-       if (Cfg_audio.lib->Thread_sigusr1)                                         /* On a recu sigusr1 ?? */
+       if (Cfg_audio.lib->Thread_sigusr1)                                                             /* On a recu sigusr1 ?? */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "Run_audio: SIGUSR1" );
-          pthread_mutex_lock( &Cfg_audio.lib->synchro );                                 /* lockage futex */
+          pthread_mutex_lock( &Cfg_audio.lib->synchro );                                                     /* lockage futex */
           Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,
                     "Run_audio: Reste %03d a traiter",
                     g_slist_length(Cfg_audio.Liste_histos) );
@@ -258,11 +280,11 @@
           Cfg_audio.lib->Thread_sigusr1 = FALSE;
         }
 
-       if (!Cfg_audio.Liste_histos)                                        /* Si pas de message, on tourne */
-        { if (Cfg_audio.last_audio + 100 < Partage->top)         /* Au bout de 10 secondes sans diffusion */
-           { if (audio_stop == TRUE)        /* Avons-nous deja envoyé une commande de STOP AUDIO a DLS ?? */
-              { audio_stop = FALSE;
-                Envoyer_commande_dls( NUM_BIT_M_AUDIO_END );/* Positionné quand il n'y a plus de diffusion audio*/
+       if (!Cfg_audio.Liste_histos)                                                           /* Si pas de message, on tourne */
+        { if (Cfg_audio.last_audio + 100 < Partage->top)                             /* Au bout de 10 secondes sans diffusion */
+           { if (audio_stop == TRUE)                             /* Avons-nous deja envoyé une commande de STOP AUDIO a DLS ? */
+              { audio_stop = FALSE;                                      /* Positionné quand il n'y a plus de diffusion audio */
+                if (Config.instance_is_master) Envoyer_commande_dls( NUM_BIT_M_AUDIO_END );
               }
            } else audio_stop = TRUE;
           sched_yield();
@@ -270,38 +292,40 @@
           continue;
         }
 
-       pthread_mutex_lock( &Cfg_audio.lib->synchro );                                    /* lockage futex */
-       histo = Cfg_audio.Liste_histos->data;                                     /* Recuperation du audio */
+       pthread_mutex_lock( &Cfg_audio.lib->synchro );                                                        /* lockage futex */
+       histo = Cfg_audio.Liste_histos->data;                                                         /* Recuperation du audio */
        Cfg_audio.Liste_histos = g_slist_remove ( Cfg_audio.Liste_histos, histo );
        pthread_mutex_unlock( &Cfg_audio.lib->synchro );
 
-       if ( histo->alive == 1 &&                                                /* Si le message apparait */
+       if ( histo->alive == 1 &&                                                                    /* Si le message apparait */
             (M(NUM_BIT_M_AUDIO_INHIB) == 0 || histo->msg.type == MSG_ALERTE
                                            || histo->msg.type == MSG_DANGER 
                                            || histo->msg.type == MSG_ALARME
             )
-          )                                                 /* Bit positionné quand arret diffusion audio */
+          )                                                                     /* Bit positionné quand arret diffusion audio */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
                    "Run_thread : Envoi du message audio %d", histo->msg.num );
 
-          Envoyer_commande_dls( histo->msg.bit_voc );    /* Positionnement du profil audio via monostable */
-          Envoyer_commande_dls( NUM_BIT_M_AUDIO_START ); /* Positionné quand on envoi une diffusion audio */
+          if (Config.instance_is_master)
+           { Envoyer_commande_dls( histo->msg.bit_voc );                     /* Positionnement du profil audio via monostable */
+             Envoyer_commande_dls( NUM_BIT_M_AUDIO_START );                  /* Positionné quand on envoi une diffusion audio */
+           }
 
-          if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)          /* Si Pas de message depuis xx */
-           { Jouer_wav("Son/jingle.wav"); }                                     /* On balance le jingle ! */
+          if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)                              /* Si Pas de message depuis xx */
+           { Jouer_wav("Son/jingle.wav"); }                                                         /* On balance le jingle ! */
           Cfg_audio.last_audio = Partage->top;
 
-          if ( ! Jouer_mp3 ( &histo->msg ) )       /* Par priorité : mp3 d'abord, synthèse vocale ensuite */
+          if ( ! Jouer_mp3 ( &histo->msg ) )                           /* Par priorité : mp3 d'abord, synthèse vocale ensuite */
            { Jouer_espeak ( &histo->msg ); }
         }
        g_free(histo);
      }
-    Desabonner_distribution_histo ( Audio_Gerer_histo );    /* Desabonnement de la diffusion des messages */
+    Desabonner_distribution_histo ( Audio_Gerer_histo );                        /* Desabonnement de la diffusion des messages */
 
 end:
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
-    Cfg_audio.lib->Thread_run = FALSE;                                      /* Le thread ne tourne plus ! */
-    Cfg_audio.lib->TID = 0;                               /* On indique au master que le thread est mort. */
+    Cfg_audio.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */
+    Cfg_audio.lib->TID = 0;                                                   /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

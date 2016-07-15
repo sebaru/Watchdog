@@ -171,30 +171,30 @@
                        (gchar *)&admin, sizeof(struct CMD_TYPE_ADMIN) );
      }
   }
-/**********************************************************************************************************/
-/* Main: Fonction principale de l'outil d'admin Watchdog                                                  */
-/* Entrée: argc, argv                                                                                     */
-/* Sortie: -1 si erreur, 0 si ok                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Main: Fonction principale de l'outil d'admin Watchdog                                                                      */
+/* Entrée: argc, argv                                                                                                         */
+/* Sortie: -1 si erreur, 0 si ok                                                                                              */
+/******************************************************************************************************************************/
  int main ( int argc, char *argv[] )
   { struct timeval tv;
     fd_set fd;
     gint retour, recu;
     struct sigaction sig;
 
-    g_snprintf( Socket_file, sizeof(Socket_file), "%s/socket.wdg", g_get_home_dir() );      /* Par défaut */
-    Lire_ligne_commande( argc, argv );                        /* Lecture du fichier conf et des arguments */
+    g_snprintf( Socket_file, sizeof(Socket_file), "socket.wdg" );                                               /* Par défaut */
+    Lire_ligne_commande( argc, argv );                                            /* Lecture du fichier conf et des arguments */
 
     if (Log_level == LOG_DEBUG) Log = Info_init( argv[0], Log_level );
-    sig.sa_handler = Traitement_signaux;                        /* Gestionnaire de traitement des signaux */
-    sig.sa_flags = SA_RESTART;        /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
-    sigaction( SIGIO,   &sig, NULL );                               /* Accrochage du signal a son handler */
-    sigaction( SIGALRM, &sig, NULL );                               /* Accrochage du signal a son handler */
-    sigaction( SIGUSR1, &sig, NULL );                               /* Accrochage du signal a son handler */
+    sig.sa_handler = Traitement_signaux;                                            /* Gestionnaire de traitement des signaux */
+    sig.sa_flags = SA_RESTART;                            /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
+    sigaction( SIGIO,   &sig, NULL );                                                   /* Accrochage du signal a son handler */
+    sigaction( SIGALRM, &sig, NULL );                                                   /* Accrochage du signal a son handler */
+    sigaction( SIGUSR1, &sig, NULL );                                                   /* Accrochage du signal a son handler */
     sigaction( SIGPIPE, &sig, NULL );
     sigaction( SIGINT,  &sig, NULL );
     sigaction( SIGTERM, &sig, NULL );
-    sigfillset (&sig.sa_mask);                             /* Par défaut tous les signaux sont bloqués */
+    sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
     sigdelset ( &sig.sa_mask, SIGIO   );
     sigdelset ( &sig.sa_mask, SIGINT  );
     sigdelset ( &sig.sa_mask, SIGALRM );
@@ -203,7 +203,7 @@
     sigdelset ( &sig.sa_mask, SIGPIPE );
     sigprocmask(SIG_SETMASK, &sig.sa_mask, NULL);
 
-    read_history ( NULL );                           /* Lecture de l'historique des commandes précédentes */
+    read_history ( NULL );                                               /* Lecture de l'historique des commandes précédentes */
 
     printf("  --  WatchdogdAdmin  v%s ('quit' to end session).\n", VERSION );
     if ( Connecter_au_serveur () == FALSE ) _exit(-1); 
@@ -222,10 +222,10 @@
         }
 
        if (retour==1 && FD_ISSET(0, &fd))
-        { rl_callback_read_char(); }                                 /* Lecture du character qui est pret */
+        { rl_callback_read_char(); }                                                     /* Lecture du character qui est pret */
 
 ecoute_encore:
-       recu = Recevoir_reseau( Connexion );                            /* Ecoute de ce que dit le serveur */
+       recu = Recevoir_reseau( Connexion );                                                /* Ecoute de ce que dit le serveur */
        if (recu==RECU_OK)
         { if ( Reseau_tag(Connexion) == TAG_INTERNAL )
            { }
@@ -234,7 +234,7 @@ ecoute_encore:
              Arret=TRUE;
              break;
            }
-          else if ( Reseau_tag(Connexion) == TAG_ADMIN )               /* Il s'agit donc d'un TAG_ADMIN ! */
+          else if ( Reseau_tag(Connexion) == TAG_ADMIN )                                   /* Il s'agit donc d'un TAG_ADMIN ! */
            { struct CMD_TYPE_ADMIN *admin;
              admin = (struct CMD_TYPE_ADMIN *)Connexion->donnees;
              switch ( Reseau_ss_tag (Connexion) )
@@ -247,7 +247,7 @@ ecoute_encore:
            }
           goto ecoute_encore;
         }
-       else if (recu>=RECU_ERREUR)                                             /* Erreur reseau->deconnexion */
+       else if (recu>=RECU_ERREUR)                                                              /* Erreur reseau->deconnexion */
         { switch( recu )
            { case RECU_ERREUR_CONNRESET: printf ( "Ecouter_admin: Reset connexion\n" );
                                          break;
@@ -260,7 +260,7 @@ ecoute_encore:
     Deconnecter_admin ();
     rl_callback_handler_remove();
     printf("\n");
-    write_history ( NULL );                         /* Ecriture de l'historique des commandes précédentes */
+    write_history ( NULL );                                             /* Ecriture de l'historique des commandes précédentes */
     return(0);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

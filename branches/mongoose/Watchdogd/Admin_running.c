@@ -105,8 +105,14 @@
        Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "audit" ) )
-     { gint num;
-       g_snprintf( chaine, sizeof(chaine), " -- Audit de performance\n" );
+     { struct tm *temps;
+       gchar date[128];
+       gint num;
+       temps = localtime( (time_t *)&Partage->start_time );
+       if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
+       else       { g_snprintf( date, sizeof(date), "Erreur" ); }
+
+       g_snprintf( chaine, sizeof(chaine), " -- Audit de performance -- Instance started on %s\n", date );
        Admin_write ( connexion, chaine );
 
        g_snprintf( chaine, sizeof(chaine), " Bit/s                : %d\n", Partage->audit_bit_interne_per_sec_hold );
