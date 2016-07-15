@@ -186,7 +186,7 @@
 		          break;
        case LWS_CALLBACK_CLOSED_HTTP:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                         "CB_http: connexion closed for %s(%s)" );
+                      "CB_http: connexion closed for %s(%s)" );
 		          break;
        case LWS_CALLBACK_PROTOCOL_INIT:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
@@ -210,7 +210,7 @@
                lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
                                         (char *)&remote_name, sizeof(remote_name),
                                         (char *)&remote_ip, sizeof(remote_ip) );
-               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "CB_http: HTTP request from %s(%s): %s",
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: HTTP request from %s(%s): %s",
                          remote_name, remote_ip, url );
                if ( ! strcasecmp ( url, "/favicon.ico" ) )
                 { retour = lws_serve_http_file ( wsi, "WEB/favicon.gif", "image/gif", NULL, 0);
@@ -219,6 +219,8 @@
                 }
                else if ( ! strcasecmp ( url, "/status" ) )
                 { Http_Traiter_request_getstatus ( wsi ); }
+               else if ( ! strcasecmp ( url, "/gif/" ) )
+                { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+5 ) ); }
                return(1);                                                                    /* Par défaut, on clos la socket */
              }
 		          break;

@@ -90,6 +90,7 @@
     xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Host",     "%s", host);
     xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Version",  "%s", VERSION);
     xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Instance", "%s", Config.instance_id);
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Start_time","%d", (int)Partage->start_time);
     xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Licence",  "GPLv2 or newer");
     xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Authors",
                                     "Sébastien LEFEVRE - sebastien.lefevre@abls-habitat.fr");
