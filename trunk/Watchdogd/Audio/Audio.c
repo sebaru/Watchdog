@@ -67,16 +67,16 @@
      }
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Ajouter_audio: Ajoute un message audio a prononcer                                                     */
-/* Entrées: le numéro du message a prononcer                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Ajouter_audio: Ajoute un message audio a prononcer                                                                         */
+/* Entrées: le numéro du message a prononcer                                                                                  */
+/******************************************************************************************************************************/
  void Audio_Gerer_histo( struct CMD_TYPE_HISTO *histo )
   { gint taille;
 
-    if ( ! histo->msg.bit_voc ) { g_free(histo); return; }               /* Si flag = 0; on return direct */
+    if ( ! histo->msg.bit_voc ) { g_free(histo); return; }                                   /* Si flag = 0; on return direct */
 
-    pthread_mutex_lock( &Cfg_audio.lib->synchro );              /* Ajout dans la liste de audio a traiter */
+    pthread_mutex_lock( &Cfg_audio.lib->synchro );                                  /* Ajout dans la liste de audio a traiter */
     taille = g_slist_length( Cfg_audio.Liste_histos );
     pthread_mutex_unlock( &Cfg_audio.lib->synchro );
 
@@ -94,7 +94,7 @@
        return;
      }
 
-    pthread_mutex_lock( &Cfg_audio.lib->synchro );           /* Ajout dans la liste de audio a traiter */
+    pthread_mutex_lock( &Cfg_audio.lib->synchro );                                  /* Ajout dans la liste de audio a traiter */
     Cfg_audio.Liste_histos = g_slist_append( Cfg_audio.Liste_histos, histo );
     pthread_mutex_unlock( &Cfg_audio.lib->synchro );
   }
