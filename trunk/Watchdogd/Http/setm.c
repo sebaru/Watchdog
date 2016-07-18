@@ -37,7 +37,9 @@
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
  gboolean Http_Traiter_request_setm ( struct HTTP_SESSION *session, struct MHD_Connection *connection )
-  { const char *Setm_response = "<html><body>OK</body></html>";
+  {
+#ifdef bouh
+	   const char *Setm_response = "<html><body>OK</body></html>";
     struct MHD_Response *response;
     const gchar *m_num_char;
     gint m_num;
@@ -59,5 +61,6 @@
     MHD_destroy_response (response);
 
     return(TRUE);
+#endif
   }
 /*--------------------------------------------------------------------------------------------------------*/

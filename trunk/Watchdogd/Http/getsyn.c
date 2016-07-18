@@ -39,7 +39,10 @@
 /* Sortie : néant                                                                                         */
 /**********************************************************************************************************/
  gboolean Http_Traiter_request_getsyn ( struct HTTP_SESSION *session, struct MHD_Connection *connection )
-  { struct CMD_TYPE_SYNOPTIQUE *syndb;
+  {
+
+	  #ifdef bouh
+	  struct CMD_TYPE_SYNOPTIQUE *syndb;
     struct MHD_Response *response;
     const gchar *syn_id_char;
     xmlTextWriterPtr writer;
@@ -195,5 +198,6 @@
     MHD_queue_response (connection, MHD_HTTP_OK, response);
     MHD_destroy_response (response);
     return(TRUE);
+#endif
   }
 /*--------------------------------------------------------------------------------------------------------*/
