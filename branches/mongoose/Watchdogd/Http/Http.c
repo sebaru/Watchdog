@@ -219,7 +219,7 @@
                 }
                else if ( ! strcasecmp ( url, "/status" ) )
                 { Http_Traiter_request_getstatus ( wsi ); }
-               else if ( ! strcasecmp ( url, "/gif/" ) )
+               else if ( ! strncasecmp ( url, "/gif/", 5 ) )
                 { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+5 ) ); }
                return(1);                                                                    /* Par défaut, on clos la socket */
              }
