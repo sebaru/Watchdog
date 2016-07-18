@@ -28,7 +28,6 @@
  #include <unistd.h>                                                                  /* Pour gethostname */
  #include "watchdogd.h"
  #include "Http.h"
-#ifdef bouh
 
 /**********************************************************************************************************/
 /* Admin_http_status: Print le statut du thread HTTP                                                      */
@@ -38,12 +37,7 @@
  static void Admin_http_status ( struct CONNEXION *connexion )
   { gchar chaine[128];
     g_snprintf( chaine, sizeof(chaine), " HTTP  Server : port %d %s\n",
-                Cfg_http.http_port, (Cfg_http.http_server ? "Running" : "Stopped" ) );
-    Admin_write ( connexion, chaine );
-    g_snprintf( chaine, sizeof(chaine), " HTTPS Server : port %d %s\n",
-                Cfg_http.https_port, (Cfg_http.https_server ? "Running" : "Stopped" ) );
-    Admin_write ( connexion, chaine );
-    g_snprintf( chaine, sizeof(chaine), " HTTPS Cipher : %s\n", Cfg_http.https_cipher );
+                Cfg_http.tcp_port, (Cfg_http.ws_context ? "Running" : "Stopped" ) );
     Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/
@@ -55,6 +49,7 @@
   { struct HTTP_SESSION *session = NULL;
     gchar chaine[128];
     GSList *liste;
+#ifdef bouh
     pthread_mutex_lock( &Cfg_http.lib->synchro );                        /* Ajout dans la liste a traiter */
     liste = Cfg_http.Liste_sessions;
     while ( liste )
@@ -70,25 +65,25 @@
        liste = liste->next;
      }
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
+#endif
     Admin_write( connexion, " -\n" );
   }
-#endif
-/**********************************************************************************************************/
-/* Admin_command: Gere une commande liée au thread HTTP depuis une connexion admin                        */
-/* Entrée: le client et la ligne de commande                                                              */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+
+/******************************************************************************************************************************/
+/* Admin_command: Gere une commande liée au thread HTTP depuis une connexion admin                                            */
+/* Entrée: le client et la ligne de commande                                                                                  */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128], chaine[128];
 
-#ifdef bouh
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "list" ) )
      { Admin_http_list ( connexion ); }
     else if ( ! strcmp ( commande, "status" ) )
      { Admin_http_status ( connexion ); }
-    else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)   /* Si changement de parametre */
+    else if ( ! strcmp ( commande, "dbcfg" ) )                /* Appelle de la fonction dédiée à la gestion des parametres DB */
+     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)                       /* Si changement de parametre */
         { gboolean retour;
           retour = Http_Lire_config();
           g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s\n",
@@ -106,6 +101,5 @@
      { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
        Admin_write ( connexion, chaine );
      }
-#endif
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

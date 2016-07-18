@@ -327,7 +327,8 @@
 #endif
      }
 
-    lws_context_destroy( Cfg_http.ws_context);                                                  /* Arret du serveur WebSocket */
+    lws_context_destroy(Cfg_http.ws_context);                                                   /* Arret du serveur WebSocket */
+    Cfg_http.ws_context = NULL;
 
 end:
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
