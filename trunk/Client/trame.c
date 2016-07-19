@@ -489,13 +489,12 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
 
     curl = curl_easy_init();                                            /* Preparation de la requete CURL */
     if (!curl)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                "Download_gif: cURL init failed" );
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "Download_gif: cURL init failed" );
        return(FALSE);
      }
 
     g_snprintf( url, sizeof(url), "%s:%d/gif/%d/%d", Client.host, Config_cli.port_http, id, mode );
-printf("Try to get %s\n", url );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "Trying to get %s", url );
     curl_easy_setopt(curl, CURLOPT_URL, url );
        /*curl_easy_setopt(curl, CURLOPT_POST, 1 );
        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (void *)buf->content);
@@ -516,8 +515,7 @@ printf("Try to get %s\n", url );
 
     res = curl_easy_perform(curl);
     if (res)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
-                "Download_gif : Error : Could not connect" );
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "Download_gif : Error : Could not connect" );
        if (Gif_received_buffer) { g_free(Gif_received_buffer); }
        return(FALSE);
      }
@@ -527,7 +525,7 @@ printf("Try to get %s\n", url );
 
     if (http_response != 200)                                                                /* HTTP 200 OK ? */
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
-                "Download_gif : Gif not received (HTTP_CODE = %d)!", http_response );
+                "Download_gif : Gif %s not received (HTTP_CODE = %d)!", url, http_response );
        if (Gif_received_buffer) { g_free(Gif_received_buffer); }
        return(FALSE);
      }
@@ -537,7 +535,7 @@ printf("Try to get %s\n", url );
        if (mode) g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif.%02d", id, mode );
             else g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif", id );
        Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
-                "Download_gif : Saving GIF id %d, mode %d, size %d", id, mode, Gif_received_size );
+                "Download_gif : Saving GIF id %d, mode %d, size %d -> %s", id, mode, Gif_received_size, nom_fichier );
        unlink(nom_fichier);
        fd = open( nom_fichier, O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR );
        if (fd>0)
@@ -554,11 +552,11 @@ printf("Try to get %s\n", url );
      }
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Add_single_icone_to_item : Chargement d'un icone (ID+Mode) dans l'item en parametre                    */
-/* Entrée: L'item, l'icone_id et le mode attendu                                                          */
-/* Sortie: reussite                                                                                       */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Add_single_icone_to_item : Chargement d'un icone (ID+Mode) dans l'item en parametre                                        */
+/* Entrée: L'item, l'icone_id et le mode attendu                                                                              */
+/* Sortie: reussite                                                                                                           */
+/******************************************************************************************************************************/
  static gboolean Add_single_icone_to_item ( struct TRAME_ITEM_MOTIF *trame_item, guint icone_id, guint mode )
   { gchar nom_fichier[80];
     GdkPixbuf *pixbuf;
@@ -574,36 +572,27 @@ printf("Try to get %s\n", url );
     trame_item->nbr_images++;
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Charger_pixbuf: Tente de charger un ensemble de pixbuf representant un icone                           */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference         */
-/* Sortie: reussite                                                                                       */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Charger_pixbuf: Tente de charger un ensemble de pixbuf representant un icone                                               */
+/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* Sortie: reussite                                                                                                           */
+/******************************************************************************************************************************/
  static void Charger_pixbuf_id ( struct TRAME_ITEM_MOTIF *trame_item, guint icone_id )
-  { gboolean downloaded;
-    guint i;
+  { gboolean local_found;
 
     trame_item->image  = NULL;
     trame_item->images = NULL;
-    trame_item->nbr_images = 0;
-
+    trame_item->nbr_images  = 0;
     trame_item->gif_largeur = 0;
     trame_item->gif_hauteur = 0;
 
-    downloaded = FALSE;
-encore:
-    if (Add_single_icone_to_item(trame_item, icone_id, 0) == FALSE)
-     { if (downloaded == TRUE) return;              /* Avons-nous deja tenté de le recuperer du serveur ? */
-       downloaded = TRUE;
-       for (i=0; ;i++)
-        { if (!Download_gif ( icone_id, i )) goto encore;       /* Fin de telechargement des %i ou erreur */
-          if (Add_single_icone_to_item(trame_item, icone_id, i) == FALSE) return;            /* Si erreur */
-        }
-       goto encore;
+    local_found = Add_single_icone_to_item(trame_item, icone_id, 0);                       /* Tentatives de chargement locale */
+    if ( local_found == FALSE )                                        /* Si non, tentative de récupération auprès du serveur */
+     { while ( Download_gif ( icone_id, trame_item->nbr_images ) == TRUE )                              /* Trying to download */
+        { Add_single_icone_to_item(trame_item, icone_id, trame_item->nbr_images); }
      }
-
-    for (i=1; ;i++)
-     { if (Add_single_icone_to_item(trame_item, icone_id, i) == FALSE) break; }
+                                                                  /* Chargement des frames restantes (downloadées ou locales) */
+    while ( Add_single_icone_to_item(trame_item, icone_id, trame_item->nbr_images) == TRUE );
   }
 /**********************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                       */
