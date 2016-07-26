@@ -349,11 +349,11 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: fin boucle sans fin" );
     pthread_exit( NULL );
   }
-/**********************************************************************************************************/
-/* Lire_ligne_commande: Parse la ligne de commande pour d'eventuels parametres                            */
-/* Entrée: argc, argv                                                                                     */
-/* Sortie: -1 si erreur, 0 si ok                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Lire_ligne_commande: Parse la ligne de commande pour d'eventuels parametres                                                */
+/* Entrée: argc, argv                                                                                                         */
+/* Sortie: -1 si erreur, 0 si ok                                                                                              */
+/******************************************************************************************************************************/
  static gboolean Lire_ligne_commande( int argc, char *argv[] )
   { gint help = 0, log_level = -1, fg = 0, single = 0, compil = 0, version = 0;
     gchar *home = NULL, *file= NULL, *run_as = NULL;
@@ -383,7 +383,7 @@
     int rc;
 
     context = poptGetContext( NULL, argc, (const char **)argv, Options, POPT_CONTEXT_ARG_OPTS );
-    while ( (rc = poptGetNextOpt( context )) != -1)                      /* Parse de la ligne de commande */
+    while ( (rc = poptGetNextOpt( context )) != -1)                                          /* Parse de la ligne de commande */
      { switch (rc)
         { case POPT_ERROR_BADOPT: printf( "Option %s is unknown\n", poptBadOption(context, 0) );
                                   help=1; break;
@@ -391,23 +391,23 @@
         }
      }
 
-    if (help)                                                             /* Affichage de l'aide en ligne */
+    if (help)                                                                                 /* Affichage de l'aide en ligne */
      { poptPrintHelp(context, stdout, 0);
        poptFreeContext(context);
        exit(EXIT_OK);
      }
-    poptFreeContext( context );                                                     /* Liberation memoire */
+    poptFreeContext( context );                                                                         /* Liberation memoire */
 
-    if (version)                                                        /* Affichage du numéro de version */
+    if (version)                                                                            /* Affichage du numéro de version */
      { printf(" Watchdogd - Version %s\n", VERSION );
        exit(EXIT_OK);
      }
 
-    Lire_config( file );                                    /* Lecture sur le fichier /etc/watchdogd.conf */
+    Lire_config( file );                                                        /* Lecture sur le fichier /etc/watchdogd.conf */
 
-    if (single)          Config.single      = TRUE;                        /* Demarrage en mode single ?? */
+    if (single)          Config.single      = TRUE;                                            /* Demarrage en mode single ?? */
     if (log_level!=-1)   Config.log_level   = log_level;
-    if (compil)          Config.compil      = 1;               /* Compilation de tous les plugins D.L.S ? */
+    if (compil)          Config.compil      = 1;                                   /* Compilation de tous les plugins D.L.S ? */
     if (home)            g_snprintf( Config.home,   sizeof(Config.home),   "%s", home );
     if (run_as)          g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", run_as );
 
@@ -426,39 +426,39 @@
        exit(EXIT_ERREUR);
      }
     
-    if (old->pw_uid != pwd->pw_uid)                                  /* Besoin de changer d'utilisateur ? */
+    if (old->pw_uid != pwd->pw_uid)                                                      /* Besoin de changer d'utilisateur ? */
      { printf("Dropping privileges '%s' (%d) -> '%s' (%d).\n", old->pw_name, old->pw_uid, pwd->pw_name, pwd->pw_uid );
-       if (initgroups ( Config.run_as, pwd->pw_gid )==-1)                       /* On drop les privilèges */
+       if (initgroups ( Config.run_as, pwd->pw_gid )==-1)                                           /* On drop les privilèges */
         { printf("Error, cannot Initgroups for user '%s' (%s)\n",
                  Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
         }
 
-       if (setgid ( pwd->pw_gid )==-1)                                          /* On drop les privilèges */
+       if (setgid ( pwd->pw_gid )==-1)                                                              /* On drop les privilèges */
         { printf("Error, cannot setGID for user '%s' (%s)\n",
                  Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
         }
 
-       if (setuid ( pwd->pw_uid )==-1)                                          /* On drop les privilèges */
+       if (setuid ( pwd->pw_uid )==-1)                                                              /* On drop les privilèges */
         { printf("Error, cannot setUID for user '%s' (%s)\n",
                  Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
         }
      }
        
-    if (chdir(Config.home))                                         /* Positionnement à la racine du home */
+    if (chdir(Config.home))                                                             /* Positionnement à la racine du home */
      { printf( "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
     else
      { printf( "Chdir %s successfull. PID=%d\n", Config.home, getpid() ); }
 
     return(fg);
   }
-/**********************************************************************************************************/
-/* Main: Fonction principale du serveur watchdog                                                          */
-/* Entrée: argc, argv                                                                                     */
-/* Sortie: -1 si erreur, 0 si ok                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Main: Fonction principale du serveur watchdog                                                                              */
+/* Entrée: argc, argv                                                                                                         */
+/* Sortie: -1 si erreur, 0 si ok                                                                                              */
+/******************************************************************************************************************************/
  int main ( int argc, char *argv[], char *envp[] )
   { struct itimerval timer;
     struct sigaction sig;

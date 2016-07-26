@@ -48,6 +48,8 @@
                     else fichier = fichier_config;
     printf("Using config file %s\n", fichier );
     gkf = g_key_file_new();
+     /* By default */
+    
 
     if (g_key_file_load_from_file(gkf, fichier, G_KEY_FILE_NONE, &error))
      {
@@ -57,7 +59,7 @@
        if (chaine)
         { g_snprintf( Config.home, sizeof(Config.home), "%s", chaine ); g_free(chaine); }
        else
-        { g_snprintf( Config.home, sizeof(Config.home), "%s", DEFAUT_HOME  ); }
+        { g_snprintf( Config.home, sizeof(Config.home), "%s", g_get_home_dir() ); }
 
        chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "instance_id", NULL );
        if (chaine)
@@ -69,7 +71,7 @@
        if (chaine)
         { g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", chaine ); g_free(chaine); }
        else
-        { g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", DEFAUT_RUN_AS   ); }
+        { g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", g_get_user_name() ); }
 
        chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "library_dir", NULL );
        if (chaine)
