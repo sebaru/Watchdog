@@ -167,7 +167,6 @@
        case ENVOI_INTERNAL              : return("ENVOI_INTERNAL");
        case WAIT_FOR_IDENT              : return("WAIT_FOR_IDENT");
        case WAIT_FOR_NEWPWD             : return("WAIT_FOR_NEWPWD");
-       case ENVOI_SYNCHRO               : return("ENVOI_SYNCHRO");
 
        case ENVOI_GROUPE_FOR_UTIL       : return("ENVOI_GROUPE_FOR_UTIL");
        case ENVOI_GROUPE_FOR_SYNOPTIQUE : return("ENVOI_GROUPE_FOR_SYNOPTIQUE");
@@ -179,7 +178,6 @@
        case ENVOI_PALETTE_FOR_ATELIER_PALETTE
                                         : return("ENVOI_PALETTE_FOR_ATELIER_PALETTE");
 
-       case VALIDE_NON_ROOT             : return("VALIDE_NON_ROOT");
        case VALIDE                      : return("VALIDE");
        case DECONNECTE                  : return("DECONNECTE");
      }
@@ -197,8 +195,6 @@
        return;
      }
 
-    if (client->mode == VALIDE_NON_ROOT && mode == VALIDE)                                        /* Nous prevenons le client */
-     { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CLI_VALIDE, NULL, 0 ); }
     client->mode = mode;
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
                 "Client_mode: client %s (SSRV%06d) en mode %s",

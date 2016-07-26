@@ -237,8 +237,6 @@
  extern void Proto_ajouter_icone_deb_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone );
  extern void Proto_ajouter_icone_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone,
                                        gint taille, gchar *buffer );
- extern void Proto_ajouter_icone_fin_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone );
- extern void Envoyer_synchro_directory_thread ( struct CLIENT *client );
  
  extern void *Proto_envoyer_histo_msgs_thread ( struct CLIENT *client );                           /* Dans envoi_histo_hard.c */
 

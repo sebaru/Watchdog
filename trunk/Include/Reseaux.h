@@ -46,7 +46,6 @@
  #include "Reseaux_atelier.h"
  #include "Reseaux_courbe.h"
  #include "Reseaux_histo_courbe.h"
- #include "Reseaux_fichier.h"
  #include "Reseaux_admin.h"
  #include "Reseaux_satellite.h"
 
@@ -85,7 +84,6 @@
  enum
   { TAG_INTERNAL,                                                                         /* Gestion interne librairie Reseau */
     TAG_GTK_MESSAGE,                                                                                  /* Envoi de message GTK */
-    TAG_FICHIER,                                                               /* Echange de fichiers entre serveur et client */
     TAG_CONNEXION,                                                                                  /* Gestion des connexions */
     TAG_ICONE,                                                                                          /* Gestion des icones */
     TAG_DLS,                                                                        /* Gestion des plugins et des sources DLS */
