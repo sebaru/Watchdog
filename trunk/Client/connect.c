@@ -164,7 +164,6 @@ one_again:
 /**********************************************************************************************************/
  void Envoyer_authentification ( void )
   { g_snprintf( Client.ident.version, sizeof(Client.ident.version), "%s", VERSION );
-    Client.ident.icone_version = Get_icone_version();
     if (!Client.cli_certif)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
                 "Envoyer_identification: sending login(%s)/password(XX) and version number(%s)",

@@ -89,7 +89,6 @@
       case TAG_HISTO_COURBE: Gerer_protocole_histo_courbe ( connexion ); break;
       case TAG_CAMERA      : Gerer_protocole_camera       ( connexion ); break;
       case TAG_ADMIN       : Gerer_protocole_admin        ( connexion ); break;
-      case TAG_FICHIER     : Gerer_protocole_fichier_connecte ( connexion ); break;
       case TAG_CONNEXION   : Gerer_protocole_connexion    ( connexion ); break;
       default : printf("Gerer_protocole : protocole inconnu %d\n", Reseau_tag(connexion) );
     }
