@@ -6,6 +6,8 @@ dnf install -y glib2-devel bison flex readline-devel giflib-devel libgcrypt-deve
 dnf install -y libcurl-devel nut-devel mysql-devel gnokii-devel libmicrohttpd-devel 
 dnf install -y lirc-devel loudmouth-devel libxml2-devel libgnomeui-devel popt-devel 
 dnf install -y gtksourceview2-devel goocanvas-devel gtkdatabox-devel libgnomeui-devel  
+dnf install pulseaudio alsa-utils alsa-firmware mpg123
+usermod -a -G audio watchdog
 
 echo "Creating systemd service"
 cp Watchdogd.service /lib/systemd/system/
