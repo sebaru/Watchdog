@@ -45,10 +45,6 @@
     WAIT_FOR_IDENT,                                                    /* Permet de demander l'identification du client lourd */
     WAIT_FOR_NEWPWD,                                                        /* Si l'utilisateur doit changer son mot de passe */
 
-    ENVOI_SYNCHRO,
-
-    VALIDE_NON_ROOT,
-
     VALIDE,
 
     ENVOI_GROUPE_FOR_UTIL,

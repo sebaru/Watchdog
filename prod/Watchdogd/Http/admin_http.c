@@ -36,8 +36,19 @@
 /**********************************************************************************************************/
  static void Admin_http_status ( struct CONNEXION *connexion )
   { gchar chaine[128];
-    g_snprintf( chaine, sizeof(chaine), " HTTP  Server : port %d %s\n",
-                Cfg_http.tcp_port, (Cfg_http.ws_context ? "Running" : "Stopped" ) );
+    g_snprintf( chaine, sizeof(chaine), " | HTTP Server : port %d %s with SSL=%d\n",
+                Cfg_http.tcp_port, (Cfg_http.ws_context ? "Running" : "Stopped" ), Cfg_http.ssl_enable );
+    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " | ssl_cert_filepath = %s\n", Cfg_http.ssl_cert_filepath );
+    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " | ssl_file_key      = %s\n", Cfg_http.ssl_private_key_filepath );
+    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " | ssl_file_ca       = %s\n", Cfg_http.ssl_ca_filepath );
+    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " | ssl_cipher        = %s\n", Cfg_http.ssl_cipher_list );
+    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " -\n");
+         
     Admin_write ( connexion, chaine );
   }
 /**********************************************************************************************************/

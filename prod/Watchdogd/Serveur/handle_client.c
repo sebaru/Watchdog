@@ -148,17 +148,6 @@
           case ATTENTE_CONNEXION_SSL:
                Connecter_ssl ( client );                                                  /* Tentative de connexion securisée */
                break;
-          case ENVOI_SYNCHRO      :
-               Client_mode( client, VALIDE_NON_ROOT );
-               Ref_client( client, "Synchro Histo" );
-               pthread_create( &tid, NULL, (void *)Envoyer_histo_thread, client );
-               pthread_detach( tid );
-               Ref_client( client, "Synchro Directory" );
-               pthread_create( &tid, NULL, (void *)Envoyer_synchro_directory_thread, client );
-               pthread_detach( tid );
-               break;
-          case VALIDE_NON_ROOT    : Client_mode(client, VALIDE);                                          /* Etat transitoire */
-               break;
           case ENVOI_GROUPE_FOR_UTIL:
                Client_mode( client, VALIDE );
                Ref_client( client, "Send groupe util" );

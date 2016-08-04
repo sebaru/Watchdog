@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/print.c        Configuration des impressions de Watchdog v2.0                                   */
-/* Projet WatchDog version 2.0       Gestion d'habitat                    jeu. 28 août 2014 09:04:16 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/print.c        Configuration des impressions de Watchdog v2.0                                                       */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                        jeu. 28 août 2014 09:04:16 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * print.c
  * This file is part of Watchdog
@@ -27,16 +27,16 @@
 
  #include <gnome.h>
 
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
+ extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
 
-/********************************* Définitions des prototypes programme ***********************************/
+/******************************************* Définitions des prototypes programme *********************************************/
  #include "protocli.h"
 
-/**********************************************************************************************************/
-/* draw_page: CB de dessin de la page nbr_page                                                            */
-/* Entrée: le composeur                                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* draw_page: CB de dessin de la page nbr_page                                                                                */
+/* Entrée: le composeur                                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Print_draw_page ( GtkPrintOperation *operation,
                   GtkPrintContext   *context,
                   gint               page_nr,
@@ -45,11 +45,11 @@
     compositor = GTK_SOURCE_PRINT_COMPOSITOR (user_data);
     gtk_source_print_compositor_draw_page ( compositor, context, page_nr );
   }
-/**********************************************************************************************************/
-/* begin_print: Prepare la pagination                                                                     */
-/* Entrée: Prepare la pagination avec le composeur                                                        */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* begin_print: Prepare la pagination                                                                                         */
+/* Entrée: Prepare la pagination avec le composeur                                                                            */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  gboolean Print_paginate ( GtkPrintOperation *operation,
                               GtkPrintContext   *context,
                               gpointer           user_data ) 
@@ -64,11 +64,11 @@ printf("Print_paginate -> number page = %d\n", n_pages);
      }
     return FALSE;
   }
-/**********************************************************************************************************/
-/* New_print_job: Creer un job pour imprimer                                                              */
-/* Entrée: Le nom du job                                                                                  */
-/* Sortie: Le job                                                                                         */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* New_print_job: Creer un job pour imprimer                                                                                  */
+/* Entrée: Le nom du job                                                                                                      */
+/* Sortie: Le job                                                                                                             */
+/******************************************************************************************************************************/
  GtkPrintOperation *New_print_job ( gchar *nom )
   { GtkPrintOperation *print;
     GtkPageSetup *default_page_setup;
@@ -90,4 +90,4 @@ printf("Print_paginate -> number page = %d\n", n_pages);
 
     return( print );
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

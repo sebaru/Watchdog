@@ -147,12 +147,12 @@
     pid = fork();
     if (pid<0)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                 "Jouer_mp3: MPG123 '%s' fork failed pid=%d (%s)", nom_fichier, pid, strerror(errno) );
+                 "Jouer_mp3: '%s' fork failed pid=%d (%s)", nom_fichier, pid, strerror(errno) );
      }
     else if (!pid)
      { execlp( "mpg123", "mpg123", "-vvvv", nom_fichier, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "Jouer_mp3: MPG123 '%s' exec failed pid=%d (%s)", nom_fichier, pid, strerror( errno ) );
+                "Jouer_mp3: '%s' exec failed pid=%d (%s)", nom_fichier, pid, strerror( errno ) );
        _exit(0);
      }
     else
@@ -200,16 +200,16 @@
        g_snprintf( texte, sizeof(texte), "%s", msg->libelle_audio );
        execlp( "espeak", "espeak", "-q", "-s", chaine2, "-v", chaine, texte, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "Jouer_espeak: Lancement espeak '%s' failed pid=%d", nom_fichier, pid );
+                "Jouer_espeak: '%s' exec failed pid=%d", nom_fichier, pid );
        _exit(0);
      }
     else
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                "Jouer_espeak: waiting for espeak '%s' to finish pid=%d", nom_fichier, pid );
+                "Jouer_espeak: '%s' waiting to finish pid=%d", nom_fichier, pid );
        waitpid(pid, NULL, 0 );
      }
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-             "Jouer_espeak: espeak '%s' finished pid=%d", nom_fichier, pid );
+             "Jouer_espeak: '%s' finished pid=%d", nom_fichier, pid );
 
 /****************************************************** Création du AU ********************************************************/
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "Jouer_espeak: Lancement de MBROLA '%s'", cible );
