@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/atelier.c        Edition d'un synoptique de Watchdog v2.0                                       */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 29 mar 2009 09:54:12 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/atelier.c        Edition d'un synoptique de Watchdog v2.0                                                           */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          dim 29 mar 2009 09:54:12 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * atelier.c
  * This file is part of Watchdog
@@ -32,12 +32,12 @@
  #include "Config_cli.h"
  #include "trame.h"
 
- extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
- extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
+ extern GList *Liste_pages;                                                       /* Liste des pages ouvertes sur le notebook */  
+ extern GtkWidget *Notebook;                                                             /* Le Notebook de controle du client */
+ extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
+ extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
 
-/********************************* Définitions des prototypes programme ***********************************/
+/****************************************** Définitions des prototypes programme **********************************************/
  #include "protocli.h"
 
  static void Menu_effacer_motif ( void );
@@ -47,11 +47,11 @@
  static void Menu_ajouter_capteur ( struct TYPE_INFO_ATELIER *infos );
  static void Menu_enregistrer_synoptique( struct TYPE_INFO_ATELIER *infos );
   
-/**********************************************************************************************************/
-/* Id_vers_trame_motif: Conversion d'un id motif en sa reference TRAME                                    */
-/* Entrée: Un id motif                                                                                    */
-/* sortie: un struct TRAME_ITEM_MOTIF                                                                     */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Id_vers_trame_motif: Conversion d'un id motif en sa reference TRAME                                                        */
+/* Entrée: Un id motif                                                                                                        */
+/* sortie: un struct TRAME_ITEM_MOTIF                                                                                         */
+/******************************************************************************************************************************/
  struct TRAME_ITEM_MOTIF *Id_vers_trame_motif ( struct TYPE_INFO_ATELIER *infos, gint id )
   { GList *liste;
     liste = infos->Trame_atelier->trame_items;
@@ -66,11 +66,11 @@
      }
     return( (struct TRAME_ITEM_MOTIF *)(liste->data) );
   }
-/**********************************************************************************************************/
-/* Rechercher_infos_atelier_par_id_syn: Recherche une page synoptique par son numéro                      */
-/* Entrée: Un numéro de synoptique                                                                        */
-/* Sortie: Une référence sur les champs d'information de la page en question                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Rechercher_infos_atelier_par_id_syn: Recherche une page synoptique par son numéro                                          */
+/* Entrée: Un numéro de synoptique                                                                                            */
+/* Sortie: Une référence sur les champs d'information de la page en question                                                  */
+/******************************************************************************************************************************/
  struct TYPE_INFO_ATELIER *Rechercher_infos_atelier_par_id_syn ( gint syn_id )
   { struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
@@ -79,79 +79,79 @@
     infos = NULL;
     while( liste )
      { page = (struct PAGE_NOTEBOOK *)liste->data;
-       if ( page->type == TYPE_PAGE_ATELIER )                        /* Est-ce bien une page d'atelier ?? */
+       if ( page->type == TYPE_PAGE_ATELIER )                                            /* Est-ce bien une page d'atelier ?? */
         { infos = (struct TYPE_INFO_ATELIER *)page->infos;
-          if (infos->syn.id == syn_id) break;                              /* Nous avons trouvé le syn !! */
+          if (infos->syn.id == syn_id) break;                                                  /* Nous avons trouvé le syn !! */
         }
-       liste = liste->next;                                                        /* On passe au suivant */
+       liste = liste->next;                                                                            /* On passe au suivant */
      }
     return(infos);
   }
-/**********************************************************************************************************/
-/* Detruire_page_atelier: Destruction d'une page atelier                                                  */
-/* Entrée: la page en question                                                                            */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Detruire_page_atelier: Destruction d'une page atelier                                                                      */
+/* Entrée: la page en question                                                                                                */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Detruire_page_atelier ( struct PAGE_NOTEBOOK *page )
   { struct TYPE_INFO_ATELIER *infos;
 printf("Detruire page atelier\n");
     infos = (struct TYPE_INFO_ATELIER *)page->infos;
 printf("milieu Detruire page atelier\n");
-    if ( Nbr_page_type( TYPE_PAGE_ATELIER ) == 1 )          /* S'il ne reste qu'1 page, c'est la derniere */
+    if ( Nbr_page_type( TYPE_PAGE_ATELIER ) == 1 )                              /* S'il ne reste qu'1 page, c'est la derniere */
      { Detruire_fenetre_ajout_motif ();
        Detruire_fenetre_propriete_TOR ();
      }
 printf("fin Detruire page atelier\n");
   }
-/**********************************************************************************************************/
-/* Menu_ajouter_message: Ajout d'un message                                                               */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_ajouter_message: Ajout d'un message                                                                                   */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static void Menu_grille_magnetique ( struct TYPE_INFO_ATELIER *infos )
   { printf("Menu grille magnetique: %d\n", GTK_TOGGLE_BUTTON(infos->Check_grid)->active );
     gtk_widget_set_sensitive( infos->Spin_grid, GTK_TOGGLE_BUTTON(infos->Check_grid)->active );
   }
-/**********************************************************************************************************/
-/* Menu_ajouter_motif: Ajout d'un motif                                                                   */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_ajouter_motif: Ajout d'un motif                                                                                       */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static void Menu_ajouter_motif ( struct TYPE_INFO_ATELIER *infos )
   { Choisir_motif_a_ajouter (); }
-/**********************************************************************************************************/
-/* Menu_ajouter_commentaire: Ajout d'un commentaire                                                       */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_ajouter_commentaire: Ajout d'un commentaire                                                                           */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static void Menu_ajouter_commentaire ( struct TYPE_INFO_ATELIER *infos )
   { Creer_fenetre_ajout_commentaire (); }
-/**********************************************************************************************************/
-/* Menu_ajouter_capteur: Ajout d'un capteur                                                               */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_ajouter_capteur: Ajout d'un capteur                                                                                   */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static void Menu_ajouter_capteur ( struct TYPE_INFO_ATELIER *infos )
   { Menu_ajouter_editer_capteur ( NULL ); }
-/**********************************************************************************************************/
-/* Menu_ajouter_passerelle: Ajout d'une passerelle                                                        */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_ajouter_passerelle: Ajout d'une passerelle                                                                            */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static void Menu_ajouter_passerelle ( struct TYPE_INFO_ATELIER *infos )
   { Creer_fenetre_ajout_passerelle (); }
-/**********************************************************************************************************/
-/* Menu_effacer_message: Retrait des messages selectionnés                                                */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_effacer_message: Retrait des messages selectionnés                                                                    */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static void Menu_effacer_motif ( void )
   { Effacer_selection(); }
-/**********************************************************************************************************/
-/* Menu_enregistrer_synoptique: Envoi des données au serveur                                              */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_enregistrer_synoptique: Envoi des données au serveur                                                                  */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static void Menu_enregistrer_synoptique ( struct TYPE_INFO_ATELIER *infos )
   { struct TRAME_ITEM_MOTIF *trame_motif;
     struct TRAME_ITEM_COMMENT *trame_comment;
@@ -200,21 +200,21 @@ printf("fin Detruire page atelier\n");
        objet=objet->next;
      }
   }
-/**********************************************************************************************************/
-/* Changer_option_zoom: Change le niveau de zoom du canvas                                                */
-/* Entrée: la page en question                                                                            */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Changer_option_zoom: Change le niveau de zoom du canvas                                                                    */
+/* Entrée: la page en question                                                                                                */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  static void Changer_option_zoom (GtkRange *range, struct TYPE_INFO_ATELIER *infos )
   { GtkAdjustment *adj;
     g_object_get( infos->Option_zoom, "adjustment", &adj, NULL );
     goo_canvas_set_scale ( GOO_CANVAS(infos->Trame_atelier->trame_widget), gtk_adjustment_get_value(adj) );
   }
-/**********************************************************************************************************/
-/* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                    */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Creer_page_atelier( gint syn_id, gchar *libelle_syn )
   { GtkWidget *separateur, *frame, *bouton, *boite, *hboite, *table, *label;
     GtkWidget *vboite, *capteur, *spin, *boite1, *scroll;
@@ -240,15 +240,15 @@ printf("fin Detruire page atelier\n");
     hboite = gtk_hbox_new( FALSE, 6 );
     page->child = hboite;
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
-/***************************************** L'atelier ******************************************************/
+/******************************************************* L'atelier ************************************************************/
     vboite = gtk_vbox_new( FALSE, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), vboite, TRUE, TRUE, 0 );
-    table = gtk_table_new( 2, 5, TRUE );                                       /* Barre de controle trame */
+    table = gtk_table_new( 2, 5, TRUE );                                                           /* Barre de controle trame */
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(vboite), table, FALSE, FALSE, 0 );
     
-    capteur = gtk_label_new( _("Position X/Y") );                                 /* Affichage des abcisses */
+    capteur = gtk_label_new( _("Position X/Y") );                                                   /* Affichage des abcisses */
     gtk_table_attach_defaults( GTK_TABLE(table), capteur, 0, 1, 0, 1 );
     infos->Entry_posxy = gtk_entry_new();
     gtk_entry_set_editable( GTK_ENTRY(infos->Entry_posxy), FALSE );
@@ -268,11 +268,11 @@ printf("fin Detruire page atelier\n");
     gtk_table_attach_defaults( GTK_TABLE(table), infos->Entry_libelle, 1, 5, 1, 2 );
     gtk_entry_set_editable ( GTK_ENTRY(infos->Entry_libelle), FALSE );
     
-/**************************************** Trame proprement dite *******************************************/
+/*************************************************** Trame proprement dite ****************************************************/
 
-    boite1 = gtk_hbox_new( TRUE, 6 );                                         /* Barre de controle trame */
+    boite1 = gtk_hbox_new( TRUE, 6 );                                                              /* Barre de controle trame */
     gtk_box_pack_start( GTK_BOX(vboite), boite1, TRUE, TRUE, 0 );
-    boite = gtk_vbox_new( TRUE, 6 );                                          /* Barre de controle trame */
+    boite = gtk_vbox_new( TRUE, 6 );                                                               /* Barre de controle trame */
     gtk_box_pack_start( GTK_BOX(boite1), boite, TRUE, TRUE, 0 );
 
     scroll = gtk_scrolled_window_new( NULL, NULL );
@@ -284,7 +284,7 @@ printf("fin Detruire page atelier\n");
 
   /*  g_signal_connect_swapped( G_OBJECT(infos->Trame_atelier->fond), "event",
                               G_CALLBACK(Clic_sur_fond), infos );*/
-/**************************************** Boutons de controle *********************************************/
+/*************************************************** Boutons de controle ******************************************************/
     boite = gtk_vbox_new( FALSE, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
 
@@ -301,7 +301,7 @@ printf("fin Detruire page atelier\n");
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_enregistrer_synoptique), infos );
 
-/*********************************************** Zoom *****************************************************/
+/******************************************************** Zoom ****************************************************************/
     frame = gtk_frame_new ( _("Zoom/Grille") );
     gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
     gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
@@ -328,7 +328,7 @@ printf("fin Detruire page atelier\n");
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(infos->Spin_grid), 10.0 );
     Menu_grille_magnetique( infos );
 
-/******************************************* Ajout de motifs **********************************************/
+/***************************************************** Ajout de motifs ********************************************************/
     frame = gtk_frame_new ( _("Menu") );
     gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
     gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
@@ -341,7 +341,7 @@ printf("fin Detruire page atelier\n");
     gtk_menu_bar_set_pack_direction (GTK_MENU_BAR(menu_bar), GTK_PACK_DIRECTION_TTB );
     gtk_box_pack_start( GTK_BOX(vboite), menu_bar, TRUE, TRUE, 0 );
 
-/******************************************** Sous menu motif *********************************************/
+/******************************************************* Sous menu motif ******************************************************/
     menu_main = gtk_image_menu_item_new_with_label ( _("Ajouter un item") );
     gtk_menu_shell_append ( GTK_MENU_SHELL(menu_bar), menu_main );
 
@@ -372,7 +372,7 @@ printf("fin Detruire page atelier\n");
     gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
 
     gtk_menu_item_set_submenu (GTK_MENU_ITEM(menu_main), ssmenu );
-/******************************************** Sous menu palette *******************************************/
+/****************************************************** Sous menu palette *****************************************************/
     menu_main = gtk_image_menu_item_new_with_label ( _("Gerer les palettes") );
     gtk_menu_shell_append ( GTK_MENU_SHELL(menu_bar), menu_main );
     ssmenu = gtk_menu_new();
@@ -382,13 +382,13 @@ printf("fin Detruire page atelier\n");
     gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
     gtk_menu_item_set_submenu (GTK_MENU_ITEM(menu_main), ssmenu );
 
-/******************************************** Menu remove *************************************************/
+/**************************************************** Menu remove *************************************************************/
     menu_main = gtk_image_menu_item_new_with_label ( _("Retirer les items") );
     g_signal_connect_swapped( G_OBJECT(menu_main), "activate",
                               G_CALLBACK(Menu_effacer_motif), infos );
     gtk_menu_shell_append ( GTK_MENU_SHELL(menu_bar), menu_main );
 
-/************************************************* fin ****************************************************/
+/******************************************************** fin *****************************************************************/
     gtk_widget_show_all( page->child );
     g_snprintf( libelle, sizeof(libelle), "Atelier/%s", libelle_syn );
 
@@ -401,11 +401,11 @@ printf("fin Detruire page atelier\n");
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), page->child, label );
     Creer_fenetre_propriete_TOR ( infos );
   }
-/**********************************************************************************************************/
-/* Afficher_un_message: Ajoute un message dans la liste des messages                                      */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Afficher_un_message: Ajoute un message dans la liste des messages                                                          */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Proto_afficher_un_motif_atelier( struct CMD_TYPE_MOTIF *rezo_motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
     struct TYPE_INFO_ATELIER *infos;
@@ -421,8 +421,8 @@ printf("fin Detruire page atelier\n");
     memcpy( motif, rezo_motif, sizeof(struct CMD_TYPE_MOTIF) );
 
     trame_motif = Trame_ajout_motif ( TRUE, infos->Trame_atelier, motif );
-    if (!trame_motif) { g_free(motif); return; }                                           /* Si probleme */
-    trame_motif->groupe_dpl = Nouveau_groupe();                   /* Numéro de groupe pour le deplacement */
+    if (!trame_motif) { g_free(motif); return; }                                                               /* Si probleme */
+    trame_motif->groupe_dpl = Nouveau_groupe();                                       /* Numéro de groupe pour le deplacement */
 
     g_signal_connect( G_OBJECT(trame_motif->item), "button-press-event",
                       G_CALLBACK(Clic_sur_motif), trame_motif );
@@ -463,11 +463,11 @@ printf("fin Detruire page atelier\n");
     g_signal_connect( G_OBJECT(trame_motif->select_bd), "motion-notify-event",
                       G_CALLBACK(Agrandir_bd), trame_motif );
   }
-/**********************************************************************************************************/
-/* Cacher_un_message: Enleve un message de la liste des messages                                          */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Cacher_un_message: Enleve un message de la liste des messages                                                              */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Proto_cacher_un_motif_atelier( struct CMD_TYPE_MOTIF *motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
     struct TYPE_INFO_ATELIER *infos;
@@ -475,10 +475,10 @@ printf("fin Detruire page atelier\n");
     infos = Rechercher_infos_atelier_par_id_syn ( motif->syn_id );
     trame_motif = Id_vers_trame_motif( infos, motif->id );
     if (!trame_motif) return;
-    Deselectionner( infos, (struct TRAME_ITEM *)trame_motif );  /* Au cas ou il aurait été selectionné... */
+    Deselectionner( infos, (struct TRAME_ITEM *)trame_motif );                      /* Au cas ou il aurait été selectionné... */
     Trame_del_item( trame_motif );
     infos->Trame_atelier->trame_items = g_list_remove( infos->Trame_atelier->trame_items, trame_motif );
     g_free(trame_motif);
     printf("Proto_cacher_un_motif_atelier fin..\n");
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

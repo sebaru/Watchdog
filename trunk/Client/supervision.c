@@ -72,35 +72,35 @@
     /*g_timeout_remove( infos->timer_id );*/
     Trame_detruire_trame( infos->Trame );
   }
-/**********************************************************************************************************/
-/* Detruire_page_supervision: L'utilisateur veut fermer la page de supervision                            */
-/* Entrée: la page en question                                                                            */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Detruire_page_supervision: L'utilisateur veut fermer la page de supervision                                                */
+/* Entrée: la page en question                                                                                                */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  static void Changer_option_zoom (GtkRange *range, struct TYPE_INFO_SUPERVISION *infos )
   { GtkAdjustment *adj;
     g_object_get( infos->Option_zoom, "adjustment", &adj, NULL );
     goo_canvas_set_scale ( GOO_CANVAS(infos->Trame->trame_widget), gtk_adjustment_get_value(adj) );
   }
-/**********************************************************************************************************/
-/* draw_page: Dessine une page pour l'envoyer sur l'imprimante                                            */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* draw_page: Dessine une page pour l'envoyer sur l'imprimante                                                                */
+/* Entrée: néant                                                                                                              */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  static void draw_page (GtkPrintOperation *operation,
                         GtkPrintContext   *context,
                         gint               page_nr,
                         struct TYPE_INFO_SUPERVISION *infos)
   { cairo_t *cr;
     cr = gtk_print_context_get_cairo_context (context);
-    cairo_scale ( cr, 0.85, 0.85 );
+    cairo_scale ( cr, 800/TAILLE_SYNOPTIQUE_X, 800/TAILLE_SYNOPTIQUE_X );
     goo_canvas_render ( GOO_CANVAS( infos->Trame->trame_widget ), cr, NULL, 1.0 );
   }
-/**********************************************************************************************************/
-/* Menu_exporter_message: Exportation de la base dans un fichier texte                                    */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_exporter_message: Exportation de la base dans un fichier texte                                                        */
+/* Entrée: néant                                                                                                              */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Menu_exporter_synoptique( struct TYPE_INFO_SUPERVISION *infos )
   { GtkPrintOperation *print;
     GError *error;
