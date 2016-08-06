@@ -45,7 +45,7 @@
     liste = Cfg_ssrv.Clients;
     while ( liste )                              /* Parcours de la liste des ssrv (et donc de clients) */
      { client = (struct CLIENT *)liste->data;
-       if ( (! strcmp ( client->util->nom, name ) ) || (! strcmp ( client->util->nom, "all" )) )
+       if ( (! strcmp ( client->util->nom, name ) ) || (! strcmp ( name, "all" )) )
         { Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_WARNING,
                        (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
           g_snprintf( chaine, sizeof(chaine), " | - SSRV%06d - %s@%s\n", client->ssrv_id,
@@ -188,7 +188,7 @@
     if ( ! strcmp ( commande, "msg" ) )
      { gchar name[80];
        sscanf ( ligne, "%s %s", commande, name );                                        /* Découpage de la ligne de commande */
-        Admin_ssrv_msgs ( connexion, ligne + 6 + strlen(name), name );
+        Admin_ssrv_msgs ( connexion, ligne + 5 + strlen(name), name );
      } else
     if ( ! strcmp ( commande, "kill" ) )
      { gchar name[80];
