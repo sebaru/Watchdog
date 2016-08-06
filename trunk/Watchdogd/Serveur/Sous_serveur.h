@@ -110,7 +110,7 @@
  extern struct CMD_ETAT_BIT_CAPTEUR *Formater_capteur( struct CAPTEUR *capteur );
 
                                                                                                               /* Dans ident.c */
- extern void Tester_autorisation ( struct CLIENT *client, struct REZO_CLI_IDENT *ident );
+ extern gboolean Tester_autorisation ( struct CLIENT *client, struct REZO_CLI_IDENT *ident );
  extern void Proto_set_password ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *util );
 
  extern void Client_mode ( struct CLIENT *client, gint mode );                                              /* Dans Serveur.c */

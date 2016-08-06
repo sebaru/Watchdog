@@ -65,7 +65,7 @@
 /* Tester_autorisation: envoi de l'autorisation ou non au client                                                              */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- void Tester_autorisation ( struct CLIENT *client, struct REZO_CLI_IDENT *ident )
+ gboolean Tester_autorisation ( struct CLIENT *client, struct REZO_CLI_IDENT *ident )
   { int client_major, client_minor, client_micro;
     int server_major, server_minor, server_micro;
     struct CMD_GTK_MESSAGE gtkmessage;
@@ -87,7 +87,7 @@
                     (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, gtkmessage.message );
        Client_mode ( client, DECONNECTE );
-       return;
+       return(FALSE);
      }
 
     if (client->certif) nom = Nom_certif(client->certif);                                       /* Recherche par certificat ? */
@@ -99,7 +99,7 @@
                      (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, gtkmessage.message );
        Client_mode ( client, DECONNECTE );
-       return;
+       return(FALSE);
      }
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
@@ -112,7 +112,7 @@
                 "Tester_autorisation: Account disabled for %s(id=%d)", client->util->nom, client->util->id );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_ACCOUNT_DISABLED, NULL, 0 );
        Client_mode (client, DECONNECTE);
-       return;
+       return(FALSE);
      }
 
     if (client->util->expire && client->util->date_expire<time(NULL) )                       /* Expiration temporel du compte */
@@ -120,7 +120,7 @@
                 "Tester_autorisation: Account expired for %s(id=%d)", client->util->nom, client->util->id );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_ACCOUNT_EXPIRED, NULL, 0 );
        Client_mode (client, DECONNECTE);
-       return;
+       return(FALSE);
      }
 
 /*********************************************** Authentification du client par login mot de passe ****************************/
@@ -131,7 +131,7 @@
           Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
           Ajouter_one_login_failed( client->util->id, Config.max_login_failed );                                 /* Dommage ! */
           Client_mode (client, DECONNECTE);
-          return;
+          return(FALSE);
         }
      }
 
@@ -141,7 +141,7 @@
                  client->util->nom, client->util->id );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_NEEDCHANGEPWD, NULL, 0 );
        Client_mode (client, WAIT_FOR_NEWPWD);
-       return;
+       return(FALSE);
      }
 
     Autoriser_client ( client );
@@ -151,5 +151,6 @@
     if (client->util->ssrv_bit_presence) SB(client->util->ssrv_bit_presence, 1);
     Client_mode (client, VALIDE);
     Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CLI_VALIDE, NULL, 0 );                     /* Nous prévenons le client */
+    return(TRUE);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
