@@ -40,7 +40,7 @@
 /* Sortie : code de retour pour libwebsocket                                                                                  */
 /******************************************************************************************************************************/
  gint Http_Traiter_request_getui ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url )
-  { gchar *mime_type;
+  { gchar *mime_type, fichier[128];
     gint taille, retour;
 
     if ( strstr( url, ".." ) )
@@ -64,7 +64,9 @@
    	if (!strcmp(&url[taille - 5], ".html")) mime_type = "text/html";
    	if (!strcmp(&url[taille - 4], ".css")) mime_type = "text/css";
 
-    retour = lws_serve_http_file ( wsi, url, mime_type, NULL, 0);
+    g_snprintf( fichier, sizeof(fichier), "WEB/%s", url );
+
+    retour = lws_serve_http_file ( wsi, fichier, mime_type, NULL, 0);
     if (retour != 0) return(1);                                           /* Si erreur (<0) ou si ok (>0), on ferme la socket */
     return(0);
   }
