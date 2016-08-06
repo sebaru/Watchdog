@@ -75,9 +75,17 @@
     if ( ! strcmp ( commande, "ident" ) )
      { char nom[128];
        gethostname( nom, sizeof(nom) );
-       g_snprintf( chaine, sizeof(chaine), " Watchdogd %s Instance %s (%s) on %s (PID=%d)\n",
-                   (Config.instance_is_master ? "Master" : "Slave"),
-                   Config.instance_id, VERSION, nom, getpid() );
+       g_snprintf( chaine, sizeof(chaine),
+                   " | - Watchdogd %s Instance '%s' (PID=%d)\n"
+                   " | - Version (%s) running on %s\n"
+                   " | - run as '%s' (uid=%d)\n"
+                   " | - home = '%s'\n"
+                   " -\n",
+                   (Config.instance_is_master ? "Master" : "Slave"), Config.instance_id, getpid(),
+                   VERSION, nom, 
+                   Config.run_as, getuid(),
+                   Config.home );
+                   
        Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "dbcfg" ) )

@@ -84,7 +84,12 @@
           { struct REZO_CLI_IDENT *ident;
 
             ident = (struct REZO_CLI_IDENT *)connexion->donnees;
-            Tester_autorisation ( client, ident );       /* Test l'authent cliente (login/code ou certif) */
+            if (Tester_autorisation ( client, ident ) == TRUE)               /* Test l'authent cliente (login/code ou certif) */
+             { pthread_t tid;
+               Ref_client( client, "Send Histo" );
+               pthread_create( &tid, NULL, (void *)Envoyer_histo_thread, client );
+               pthread_detach( tid );
+             }
           }
 /************************************** Client en attente nouveau password ********************************/
     else if ( client->mode == WAIT_FOR_NEWPWD && Reseau_tag(connexion)    == TAG_CONNEXION
