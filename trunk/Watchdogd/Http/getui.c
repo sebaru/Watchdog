@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Http/getgif.c       Gestion des request getgif pour le thread HTTP de watchdog                                   */
+/* Watchdogd/Http/getui.c       Gestion des request User Interface pour le thread HTTP de watchdog                            */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                         dim. 05 mai 2013 16:33:43 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * getgif.c
+ * getui.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -35,27 +35,36 @@
  #include "watchdogd.h"
  #include "Http.h"
 /******************************************************************************************************************************/
-/* Http_Traiter_request_getgif: Traite une requete sur l'URI getgif                                                           */
-/* Entrées: la connexion MHD                                                                                                  */
-/* Sortie : néant                                                                                                             */
+/* Http_Traiter_request_getui: Traite une requete sur le fichier URI                                                          */
+/* Entrées: la connexion WebSocket, les remote name/ip et l'URL                                                               */
+/* Sortie : code de retour pour libwebsocket                                                                                  */
 /******************************************************************************************************************************/
- gint Http_Traiter_request_getgif ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url )
-  { gchar nom_fichier[80];
-    gint id, mode, retour;
+ gint Http_Traiter_request_getui ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url )
+  { gchar *mime_type;
+    gint taille, retour;
 
-    if ( sscanf ( url, "%d/%d", &id, &mode ) != 2)
+    if ( strstr( url, ".." ) )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Http_Traiter_request_getgif : URL Parsing Error (%s) on file %s" );
+                "Http_Traiter_request_getui : Wrong URL containing '..' (%s)", url );
        return(1);
      }
 
-    if (mode) { g_snprintf( nom_fichier, sizeof(nom_fichier), "Gif/%d.gif.%02d", id, mode ); }
-         else { g_snprintf( nom_fichier, sizeof(nom_fichier), "Gif/%d.gif", id ); }
-
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "Http_Traiter_request_getgif : URL Parsing id=%d mode=%d file=%s", id, mode, nom_fichier );
+             "Http_Traiter_request_getui : URL Parsing filename=%s", url );
+    taille = strlen(url);
 
-    retour = lws_serve_http_file ( wsi, nom_fichier, "image/gif", NULL, 0);
+	   if (taille < 5)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Http_Traiter_request_getui : Wrong URL without suffix (%s)", url );
+       return(1);
+     }
+    mime_type = "text/plain";                                                                                   /* Par défaut */
+   	if (!strcmp(&url[taille - 4], ".ico")) mime_type = "image/x-icon";
+   	if (!strcmp(&url[taille - 4], ".png")) mime_type = "image/png";
+   	if (!strcmp(&url[taille - 5], ".html")) mime_type = "text/html";
+   	if (!strcmp(&url[taille - 4], ".css")) mime_type = "text/css";
+
+    retour = lws_serve_http_file ( wsi, url, mime_type, NULL, 0);
     if (retour != 0) return(1);                                           /* Si erreur (<0) ou si ok (>0), on ferme la socket */
     return(0);
   }
