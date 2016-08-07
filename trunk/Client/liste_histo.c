@@ -75,6 +75,8 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
  
+ extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
+
  static void Menu_acquitter_histo ( void );
  static void Menu_go_to_syn ( void );
 
@@ -84,6 +86,32 @@
     GNOMEUIINFO_END
   };
 
+/******************************************************************************************************************************/
+/* Jouer_remote_mp3 : Joue un fichier mp3 du serveur                                                                          */
+/* Entrée : le message à jouer au format file, ou id si file=NULL                                                             */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Jouer_remote_mp3 ( gchar *file, gint id )
+  { gchar url[256];
+    gint pid;
+
+    if (file)
+     { g_snprintf( url, sizeof(url), "http://%s:%d/audio/%s", Config_cli.host, Config_cli.port_http, file ); }
+    else
+     { g_snprintf( url, sizeof(url), "http://%s:%d/audio/%d", Config_cli.host, Config_cli.port_http, id ); }
+
+    pid = fork();
+    if (pid<0)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
+                 "Jouer_remote_mp3: '%s' fork failed pid=%d (%s)", url, id, pid, strerror(errno) );
+     }
+    else if (!pid)
+     { execlp( "mpg123", "mpg123", "-v", url, NULL );
+       Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
+                "Jouer_remote_mp3: '%s' exec failed pid=%d (%s)", url, pid, strerror( errno ) );
+       _exit(0);
+     }
+  }
 /**********************************************************************************************************/
 /* Menu_acquitter_histo: Acquittement d'un des messages histo                                             */
 /* Entrée: rien                                                                                           */
