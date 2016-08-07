@@ -118,7 +118,7 @@
 		          break;
        case LWS_CALLBACK_CLOSED_HTTP:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                      "CB_http: connexion closed for %s(%s)" );
+                      "CB_http: connexion closed" );
 		          break;
        case LWS_CALLBACK_PROTOCOL_INIT:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
