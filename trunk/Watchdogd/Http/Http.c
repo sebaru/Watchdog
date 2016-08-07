@@ -187,6 +187,7 @@
        { "ws-status", CB_ws_status, 0, 0 },
        { NULL, NULL, 0, 0 } /* terminator */
      };
+    struct stat sbuf;
 
     prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */
@@ -213,13 +214,39 @@
 	   Cfg_http.ws_info.timeout_secs = 30;
 
     if (Cfg_http.ssl_enable)                                                                           /* Configuration SSL ? */
-     { Cfg_http.ws_info.ssl_cipher_list          = Cfg_http.ws_info.ssl_cipher_list;
-	      Cfg_http.ws_info.ssl_cert_filepath        = Cfg_http.ssl_cert_filepath;
-	      Cfg_http.ws_info.ssl_ca_filepath          = Cfg_http.ssl_ca_filepath;
-   	   Cfg_http.ws_info.ssl_private_key_filepath = Cfg_http.ssl_private_key_filepath;
-       Cfg_http.ws_info.options |= LWS_SERVER_OPTION_PEER_CERT_NOT_REQUIRED;
-       /*Cfg_http.ws_info.options |= LWS_SERVER_OPTION_REDIRECT_HTTP_TO_HTTPS;*/
-       /*Cfg_http.ws_info.options |= LWS_SERVER_OPTION_REQUIRE_VALID_OPENSSL_CLIENT_CERT;*/
+     { if ( stat ( Cfg_http.ssl_cert_filepath, &sbuf ) == -1)                                     /* Test présence du fichier */
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                   "Run_thread: unable to load '%s' (error '%s'). Setting ssl=FALSE",
+                    Cfg_http.ssl_cert_filepath, strerror(errno) );
+          Cfg_http.ssl_enable=FALSE;
+        }
+       else if ( stat ( Cfg_http.ssl_private_key_filepath, &sbuf ) == -1)                         /* Test présence du fichier */
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                   "Run_thread: unable to load '%s' (error '%s'). Setting ssl=FALSE",
+                    Cfg_http.ssl_private_key_filepath, strerror(errno) );
+          Cfg_http.ssl_enable=FALSE;
+        }
+       else if ( stat ( Cfg_http.ssl_ca_filepath, &sbuf ) == -1)                                  /* Test présence du fichier */
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                   "Run_thread: unable to load '%s' (error '%s'). Setting ssl=FALSE",
+                    Cfg_http.ssl_ca_filepath, strerror(errno) );
+          Cfg_http.ssl_enable=FALSE;
+        }
+       else
+        { Cfg_http.ws_info.ssl_cipher_list          = Cfg_http.ws_info.ssl_cipher_list;
+   	      Cfg_http.ws_info.ssl_cert_filepath        = Cfg_http.ssl_cert_filepath;
+	         Cfg_http.ws_info.ssl_ca_filepath          = Cfg_http.ssl_ca_filepath;
+   	      Cfg_http.ws_info.ssl_private_key_filepath = Cfg_http.ssl_private_key_filepath;
+          Cfg_http.ws_info.options |= LWS_SERVER_OPTION_PEER_CERT_NOT_REQUIRED;
+          /*Cfg_http.ws_info.options |= LWS_SERVER_OPTION_REDIRECT_HTTP_TO_HTTPS;*/
+          /*Cfg_http.ws_info.options |= LWS_SERVER_OPTION_REQUIRE_VALID_OPENSSL_CLIENT_CERT;*/
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                   "Run_thread: Stat '%s' OK", Cfg_http.ws_info.ssl_cert_filepath );
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                   "Run_thread: Stat '%s' OK", Cfg_http.ws_info.ssl_private_key_filepath );
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                   "Run_thread: Stat '%s' OK", Cfg_http.ws_info.ssl_ca_filepath );
+        }
      }
 
 	   Cfg_http.ws_context = lws_create_context(&Cfg_http.ws_info);
