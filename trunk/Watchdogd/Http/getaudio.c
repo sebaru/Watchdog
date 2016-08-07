@@ -54,7 +54,7 @@
 
     g_snprintf( fichier, sizeof(fichier), "Son/%s", url );
 
-    retour = lws_serve_http_file ( wsi, fichier, "audio/mp3", NULL, 0);
+    retour = lws_serve_http_file ( wsi, fichier, "audio/mpeg", NULL, 0);
     if (retour != 0) return(1);                                           /* Si erreur (<0) ou si ok (>0), on ferme la socket */
     return(0);
   }
