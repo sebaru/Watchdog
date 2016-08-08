@@ -94,74 +94,6 @@
      }
     return(TRUE);
   }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Get_client_cert : Recupere le certificat client depuis la session TLS                                  */
-/* Entrées : la session TLS                                                                               */
-/* Sortie  : TRUE si OK, FALSE si erreur                                                                  */
-/**********************************************************************************************************/
- static void Http_Log_request ( struct MHD_Connection *connection, const char *url, 
-                                const char *method, const char *version, size_t *upload_data_size,
-                                void **con_cls )
-  { const union MHD_ConnectionInfo *info;
-    struct HTTP_SESSION session;
-    struct sockaddr *client_addr;
-    void *tls_session;
-    gint retour, size;
-
-    client_addr = MHD_get_connection_info (connection, MHD_CONNECTION_INFO_CLIENT_ADDRESS)->client_addr;
-    if (client_addr->sa_family == AF_INET)  size = sizeof(struct sockaddr_in);
-    else
-    if (client_addr->sa_family == AF_INET6) size = sizeof(struct sockaddr_in6);
-    else
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Http_Log_request :  MHD_CONNECTION_INFO_CLIENT_ADDRESS failed, wrong family" );
-       return;
-     }
-
-    retour = getnameinfo( client_addr, size,
-                          session.client_host,    sizeof(session.client_host),
-                          session.client_service, sizeof(session.client_service),
-                          NI_NUMERICHOST | NI_NUMERICSERV );
-    if (retour) 
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Http_Log_request : GetName failed : %s", gai_strerror(retour) );
-       return;
-     }
-
-    info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_GNUTLS_SESSION );
-    if ( info ) { tls_session = info->tls_session; }
-           else { tls_session = NULL; }
-
-    g_snprintf( session.user_agent, sizeof(session.user_agent), "%s",
-                MHD_lookup_connection_value (connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT) );
-
-    g_snprintf( session.origine,    sizeof(session.origine),    "%s",
-                MHD_lookup_connection_value (connection, MHD_HEADER_KIND, "Origin") );
-
-    if (tls_session)
-     { info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_CIPHER_ALGO );
-       if ( info ) { session.ssl_algo = info->cipher_algorithm; }
-
-       info = MHD_get_connection_info ( connection, MHD_CONNECTION_INFO_PROTOCOL );
-       if ( info ) { session.ssl_proto = info->protocol; }
-
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                 "Http_Log_request : New HTTPS %s %s %s request (Payload size %d) from Host=%s/Service=%s"
-                 " (Cipher=%s/Proto=%s). User-Agent=%s. Origin=%s",
-                  method, url, version, (upload_data_size ? *upload_data_size : 0),
-                  session.client_host, session.client_service,
-                  gnutls_cipher_get_name (session.ssl_algo), gnutls_protocol_get_name (session.ssl_proto),
-                  session.user_agent, session.origine
-                );
-     }
-    else Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                  "Http_Log_request : New HTTP  %s %s %s request (Payload size %d) from Host=%s/Service=%s. User-Agent=%s. Origin=%s",
-                   method, url, version, *upload_data_size,
-                   session.client_host, session.client_service, session.user_agent, session.origine
-                 );
-  }
-#endif
 /******************************************************************************************************************************/
 /* CB_ws_status : Gere le protocole WS status (appellée par libwebsockets)                                                    */
 /* Entrées : le contexte, le message, l'URL                                                                                   */
@@ -186,7 +118,7 @@
 		          break;
        case LWS_CALLBACK_CLOSED_HTTP:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                      "CB_http: connexion closed for %s(%s)" );
+                      "CB_http: connexion closed" );
 		          break;
        case LWS_CALLBACK_PROTOCOL_INIT:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
@@ -217,10 +149,14 @@
                   if (retour != 0) return(1);                             /* Si erreur (<0) ou si ok (>0), on ferme la socket */
                   return(0);                    /* si besoin de plus de temps, on laisse la ws http ouverte pour libwebsocket */
                 }
+               else if ( ! strncasecmp ( url, "/ui/", 4 ) )
+                { return( Http_Traiter_request_getui ( wsi, remote_name, remote_ip, url+4 ) ); }
                else if ( ! strcasecmp ( url, "/status" ) )
                 { Http_Traiter_request_getstatus ( wsi ); }
                else if ( ! strncasecmp ( url, "/gif/", 5 ) )
                 { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+5 ) ); }
+               else if ( ! strncasecmp ( url, "/audio/", 7 ) )
+                { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+7 ) ); }
                return(1);                                                                    /* Par défaut, on clos la socket */
              }
 		          break;
@@ -251,6 +187,7 @@
        { "ws-status", CB_ws_status, 0, 0 },
        { NULL, NULL, 0, 0 } /* terminator */
      };
+    struct stat sbuf;
 
     prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */
@@ -277,13 +214,39 @@
 	   Cfg_http.ws_info.timeout_secs = 30;
 
     if (Cfg_http.ssl_enable)                                                                           /* Configuration SSL ? */
-     { Cfg_http.ws_info.ssl_cipher_list          = Cfg_http.ws_info.ssl_cipher_list;
-	      Cfg_http.ws_info.ssl_cert_filepath        = Cfg_http.ssl_cert_filepath;
-	      Cfg_http.ws_info.ssl_ca_filepath          = Cfg_http.ssl_ca_filepath;
-   	   Cfg_http.ws_info.ssl_private_key_filepath = Cfg_http.ssl_private_key_filepath;
-       Cfg_http.ws_info.options |= LWS_SERVER_OPTION_PEER_CERT_NOT_REQUIRED;
-       /*Cfg_http.ws_info.options |= LWS_SERVER_OPTION_REDIRECT_HTTP_TO_HTTPS;*/
-       /*Cfg_http.ws_info.options |= LWS_SERVER_OPTION_REQUIRE_VALID_OPENSSL_CLIENT_CERT;*/
+     { if ( stat ( Cfg_http.ssl_cert_filepath, &sbuf ) == -1)                                     /* Test présence du fichier */
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                   "Run_thread: unable to load '%s' (error '%s'). Setting ssl=FALSE",
+                    Cfg_http.ssl_cert_filepath, strerror(errno) );
+          Cfg_http.ssl_enable=FALSE;
+        }
+       else if ( stat ( Cfg_http.ssl_private_key_filepath, &sbuf ) == -1)                         /* Test présence du fichier */
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                   "Run_thread: unable to load '%s' (error '%s'). Setting ssl=FALSE",
+                    Cfg_http.ssl_private_key_filepath, strerror(errno) );
+          Cfg_http.ssl_enable=FALSE;
+        }
+       else if ( stat ( Cfg_http.ssl_ca_filepath, &sbuf ) == -1)                                  /* Test présence du fichier */
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                   "Run_thread: unable to load '%s' (error '%s'). Setting ssl=FALSE",
+                    Cfg_http.ssl_ca_filepath, strerror(errno) );
+          Cfg_http.ssl_enable=FALSE;
+        }
+       else
+        { Cfg_http.ws_info.ssl_cipher_list          = Cfg_http.ws_info.ssl_cipher_list;
+   	      Cfg_http.ws_info.ssl_cert_filepath        = Cfg_http.ssl_cert_filepath;
+	         Cfg_http.ws_info.ssl_ca_filepath          = Cfg_http.ssl_ca_filepath;
+   	      Cfg_http.ws_info.ssl_private_key_filepath = Cfg_http.ssl_private_key_filepath;
+          Cfg_http.ws_info.options |= LWS_SERVER_OPTION_PEER_CERT_NOT_REQUIRED;
+          /*Cfg_http.ws_info.options |= LWS_SERVER_OPTION_REDIRECT_HTTP_TO_HTTPS;*/
+          /*Cfg_http.ws_info.options |= LWS_SERVER_OPTION_REQUIRE_VALID_OPENSSL_CLIENT_CERT;*/
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                   "Run_thread: Stat '%s' OK", Cfg_http.ws_info.ssl_cert_filepath );
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                   "Run_thread: Stat '%s' OK", Cfg_http.ws_info.ssl_private_key_filepath );
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                   "Run_thread: Stat '%s' OK", Cfg_http.ws_info.ssl_ca_filepath );
+        }
      }
 
 	   Cfg_http.ws_context = lws_create_context(&Cfg_http.ws_info);

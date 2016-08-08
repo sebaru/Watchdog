@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Http/getgif.c       Gestion des request getgif pour le thread HTTP de watchdog                                   */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                         dim. 05 mai 2013 16:33:43 CEST */
+/* Watchdogd/Http/getaudio.c       Gestion des request Audio (MP3) pour le thread HTTP de watchdog                            */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                                    07.08.2016 04:43:06 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * getgif.c
+ * getaudio.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -35,27 +35,26 @@
  #include "watchdogd.h"
  #include "Http.h"
 /******************************************************************************************************************************/
-/* Http_Traiter_request_getgif: Traite une requete sur l'URI getgif                                                           */
-/* Entrées: la connexion MHD                                                                                                  */
-/* Sortie : néant                                                                                                             */
+/* Http_Traiter_request_getaudio: Traite une requete sur le fichier audio URI                                                 */
+/* Entrées: la connexion WebSocket, les remote name/ip et l'URL                                                               */
+/* Sortie : code de retour pour libwebsocket                                                                                  */
 /******************************************************************************************************************************/
- gint Http_Traiter_request_getgif ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url )
-  { gchar nom_fichier[80];
-    gint id, mode, retour;
+ gint Http_Traiter_request_getaudio ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url )
+  { gchar fichier[128];
+    gint retour;
 
-    if ( sscanf ( url, "%d/%d", &id, &mode ) != 2)
+    if ( strstr( url, ".." ) )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Http_Traiter_request_getgif : URL Parsing Error (%s) on file %s" );
+                "Http_Traiter_request_getaudio : Wrong URL containing '..' (%s)", url );
        return(1);
      }
 
-    if (mode) { g_snprintf( nom_fichier, sizeof(nom_fichier), "Gif/%d.gif.%02d", id, mode ); }
-         else { g_snprintf( nom_fichier, sizeof(nom_fichier), "Gif/%d.gif", id ); }
-
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "Http_Traiter_request_getgif : URL Parsing id=%d mode=%d file=%s", id, mode, nom_fichier );
+             "Http_Traiter_request_getaudio : URL Parsing filename=%s", url );
 
-    retour = lws_serve_http_file ( wsi, nom_fichier, "image/gif", NULL, 0);
+    g_snprintf( fichier, sizeof(fichier), "Son/%s.mp3", url );
+
+    retour = lws_serve_http_file ( wsi, fichier, "audio/mpeg", NULL, 0);
     if (retour != 0) return(1);                                           /* Si erreur (<0) ou si ok (>0), on ferme la socket */
     return(0);
   }
