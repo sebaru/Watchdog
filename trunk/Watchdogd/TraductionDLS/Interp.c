@@ -374,15 +374,13 @@
     g_snprintf( log,       sizeof(log),       "Dls/%d.log", id );
     unlink ( cible );
     unlink ( log );
-    Info_new( Config.log, Config.log_dls, LOG_INFO, "Traduire_DLS: source=%s", (new ? source : source_ok) );
-
-    pthread_mutex_lock( &Partage->com_dls.synchro_traduction );                           /* Attente unicité de la traduction */
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "Traduire_DLS: new=%d, id=%d, source=%s, source_ok=%s cible=%s, log=%s",
+              new, id, source, source_ok, cible, log );
 
     Id_cible = open( cible, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (Id_cible<0)
      { Info_new( Config.log, Config.log_dls, LOG_WARNING,
                 "Traduire_DLS: Target creation failed %s (%s)", cible, strerror(errno) ); 
-       pthread_mutex_unlock( &Partage->com_dls.synchro_traduction );                                      /* Libération Mutex */
        return(TRAD_DLS_ERROR_FILE);
      }
 
@@ -391,9 +389,10 @@
      { Info_new( Config.log, Config.log_dls, LOG_WARNING,
                 "Traduire_DLS: Log creation failed %s (%s)", cible, strerror(errno) ); 
        close(Id_cible);
-       pthread_mutex_unlock( &Partage->com_dls.synchro_traduction );                                      /* Libération Mutex */
        return(TRAD_DLS_ERROR_FILE);
      }
+
+    pthread_mutex_lock( &Partage->com_dls.synchro_traduction );                           /* Attente unicité de la traduction */
 
     Alias = NULL;                                                                                  /* Par défaut, pas d'alias */
     nbr_erreur = 0;                                                                   /* Au départ, nous n'avons pas d'erreur */
@@ -419,8 +418,10 @@
     close(Id_log);
     Liberer_memoire();
 
-    if (new)
-     { unlink ( source_ok );                                                   /* Recopie sur le fichier "officiel" du plugin */
+    if (retour != TRAD_DLS_ERROR && new)
+     { Info_new( Config.log, Config.log_dls, LOG_DEBUG,
+                "Traduire_DLS: Renaming '%s' to '%s'", source, source_ok );
+       unlink ( source_ok );                                                   /* Recopie sur le fichier "officiel" du plugin */
        rename( source, source_ok );
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro_traduction );                                         /* Libération Mutex */
