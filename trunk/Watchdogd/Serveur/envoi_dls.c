@@ -62,18 +62,18 @@
     id_fichier = open( chaine, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
-                "Save_source_dls_to_disk: Open file %s for write failed for %d (%s)",
+                "Save_source_dls_to_disk: Open file '%s' for write failed for %d (%s)",
                  chaine, edit_dls->id, strerror(errno) );
      }
     else
      { if (write( id_fichier, buffer, taille )<0)
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                   "Save_source_dls_to_disk: Write to file %s failed for %d (%s)",
+                   "Save_source_dls_to_disk: Write to file '%s' failed for %d (%s)",
                     chaine, edit_dls->id, strerror(errno) );
         }
        else
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-                   "Save_source_dls_to_disk: Write to file %s OK for %d",
+                   "Save_source_dls_to_disk: Write to file '%s' OK for %d",
                     chaine, edit_dls->id );
           close(id_fichier);
         }
