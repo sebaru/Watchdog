@@ -49,6 +49,8 @@
     g_snprintf( chaine, sizeof(chaine), "Dls/%d.dls.new", edit_dls->id );
     unlink ( chaine );
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "Proto_effacer_fichier_plugin_dls : Zeroing... %s", chaine );
+    client->Source_DLS_new = NULL;                             /* On prépare les tampons a la reception du nouveau source DLS */
+    client->taille_Source_DLS_new = 0;
   }
 /******************************************************************************************************************************/
 /* Proto_effacer_fichier_dls: Suppression du code d'un plugin avant reception du nouveau code client                          */
@@ -68,13 +70,13 @@
     else
      { if (write( id_fichier, buffer, taille )<0)
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                   "Save_source_dls_to_disk: Write to file '%s' failed for %d (%s)",
-                    chaine, edit_dls->id, strerror(errno) );
+                   "Save_source_dls_to_disk: Write %d bytes to file '%s' failed for %d (%s)",
+                    taille, chaine, edit_dls->id, strerror(errno) );
         }
        else
-        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-                   "Save_source_dls_to_disk: Write to file '%s' OK for %d",
-                    chaine, edit_dls->id );
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                   "Save_source_dls_to_disk: Write %d bytes to file '%s' OK for %d",
+                    taille, chaine, edit_dls->id );
           close(id_fichier);
         }
      }
@@ -200,10 +202,11 @@
     fd = open( chaine, O_RDONLY );
     if (fd < 0)
      { struct CMD_GTK_MESSAGE erreur;
-       g_snprintf( erreur.message, sizeof(erreur.message), "Unable to open %s", chaine );
+       g_snprintf( erreur.message, sizeof(erreur.message), "Unable to open %s (%s)", chaine, strerror(errno) );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
        g_free(buffer_all);
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, erreur.message );
        return;
      }
 
@@ -216,6 +219,8 @@
     close(fd);
     Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_SOURCE_DLS_END,
                    buffer_all, sizeof(struct CMD_TYPE_SOURCE_DLS) );
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                "Proto_editer_source_dls: Source DLS %05d - '%s' sent", rezo_dls->id, chaine );
     g_free(buffer_all);
   }
 /******************************************************************************************************************************/
@@ -230,6 +235,9 @@
     client->Source_DLS_new = g_try_realloc ( client->Source_DLS_new, new_taille );               /* Nouvelle taille de buffer */
     memcpy ( client->Source_DLS_new + client->taille_Source_DLS_new, buffer, edit_dls->taille ); /* Recopie du bout de buffer */
     client->taille_Source_DLS_new = new_taille;
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+             "Proto_valider_source_dls: %d bytes received for plugin id=%d. New length=%d bytes",
+              edit_dls->taille, edit_dls->id, client->taille_Source_DLS_new );
   }
 /******************************************************************************************************************************/
 /* Proto_compiler_source_dls: Compilation de la source DLS                                                                    */
