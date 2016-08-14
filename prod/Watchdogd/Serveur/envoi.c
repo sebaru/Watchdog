@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/envoi.c        Procedures d'envoi de données au(x) client(s) connecté(s)                     */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       ven 04 mar 2005 10:16:04 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/envoi.c        Procedures d'envoi de données au(x) client(s) connecté(s)                                         */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                           ven 04 mar 2005 10:16:04 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * envoi.c
  * This file is part of Watchdog
@@ -32,52 +32,54 @@
  #include <sys/unistd.h>
 
  #define DEFAUT_MAX 3
-/******************************************** Prototypes de fonctions *************************************/
+/****************************************************** Prototypes de fonctions ***********************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
 
-/**********************************************************************************************************/
-/* Envoi_client: Envoi le buffer au client id                                                             */
-/* Entrée: structure identifiant le client, et le buffer à envoyer                                        */
-/* Sortie: code d'erreur                                                                                  */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Envoi_client: Envoi le buffer au client id                                                                                 */
+/* Entrée: structure identifiant le client, et le buffer à envoyer                                                            */
+/* Sortie: code d'erreur                                                                                                      */
+/******************************************************************************************************************************/
  gint Envoi_client( struct CLIENT *client, gint tag, gint ss_tag, gchar *buffer, gint taille )
   { gint retour;
 
     if ( !client ) return(0);
     if ( client->mode >= DECONNECTE )
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoi_client : envoi interdit to %d", client->connexion->socket);
+                "Envoi_client : SSRV%06d, envoi interdit to %d", client->ssrv_id, client->connexion->socket);
        return(0);
      }
 
     if ( Attendre_envoi_disponible( client->connexion ) )
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-                "Envoi_client: Deconnexion client sur défaut d'attente envoi disponible" );
+                "Envoi_client: SSRV%06d, Deconnexion client sur défaut d'attente envoi disponible", client->ssrv_id );
        Client_mode ( client, DECONNECTE );
        return(0);
      }
-                                                     /* Attente de la possibilité d'envoyer sur le reseau */
+                                                                         /* Attente de la possibilité d'envoyer sur le reseau */
           
     retour = Envoyer_reseau( client->connexion, tag, ss_tag, buffer, taille );
     if (retour)
      { client->defaut++;
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
-                "Envoi_client: Failed sending to id=%d (%s), error %d",
-                client->connexion->socket, client->machine, retour);
+                "Envoi_client: SSRV%06d, Failed sending to id=%d (%s), error %d",
+                client->ssrv_id, client->connexion->socket, client->machine, retour);
 
        if (client->defaut>=DEFAUT_MAX)
-        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Envoi_client: Deconnexion client sur défaut" );
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
+                   "Envoi_client: SSRV%06d, Deconnexion client sur défaut", client->ssrv_id );
           Client_mode ( client, DECONNECTE );
         }
        else switch(retour)
         { case EPIPE:
-          case ECONNRESET: Client_mode ( client, DECONNECTE );          /* Connection resettée par le clt */
-                           Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "decision: deconnexion client" );
+          case ECONNRESET: Client_mode ( client, DECONNECTE );                              /* Connection resettée par le clt */
+                           Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
+                                    "SSRV%06d, decision: deconnexion client", client->ssrv_id );
                            break;
         }
      }
-    else client->defaut=0;                                                    /* Ok, pas de defaut client */
+    else client->defaut=0;                                                                        /* Ok, pas de defaut client */
     return(retour);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

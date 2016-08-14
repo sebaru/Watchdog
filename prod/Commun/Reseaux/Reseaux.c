@@ -304,14 +304,14 @@ one_again:
         { retour = SSL_write( connexion->ssl, &Entete, cpt ); }                                          /* Envoi de l'entete */
        else retour = write( connexion->socket, &Entete, cpt );                                           /* Envoi de l'entete */
 
-       if (retour < 0)
+       if (retour <= 0)
         { err = errno;
           if (connexion->ssl)
            { gint ssl_err;
              ssl_err = SSL_get_error( connexion->ssl, retour );
              Info_new( connexion->log, FALSE, LOG_ERR,
-                      "Envoyer_reseau: Entete SSL error %d -> %s",
-                       ssl_err, ERR_error_string( ssl_err, NULL ) );
+                      "Envoyer_reseau: Entete SSL error %d (retour=%d) -> %s",
+                       ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
            }
           else
            { Info_new( connexion->log, FALSE, LOG_ERR,
@@ -343,8 +343,8 @@ one_again:
               { gint ssl_err;
                 ssl_err = SSL_get_error( connexion->ssl, retour );
                 Info_new( connexion->log, FALSE, LOG_ERR,
-                         "Envoyer_reseau: SSL error %d -> %s",
-                          ssl_err, ERR_error_string( ssl_err, NULL ) );
+                         "Envoyer_reseau: SSL error %d (retour=%d)-> %s",
+                          ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
                 if (ssl_err == SSL_ERROR_WANT_READ || ssl_err == SSL_ERROR_WANT_WRITE) continue;                     /* Retry */
               }
              else
