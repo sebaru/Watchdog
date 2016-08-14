@@ -145,10 +145,12 @@ one_again:
 
     if ( connexion->index_entete != sizeof(struct ENTETE_CONNEXION) )                                   /* Entete complete ?? */
      { if (connexion->ssl)
-        { taille_recue = SSL_read( connexion->ssl,
+        { pthread_mutex_lock( &connexion->mutex_write ); /* test */
+          taille_recue = SSL_read( connexion->ssl,
                                    ((unsigned char *)&connexion->entete ) + connexion->index_entete,
                                    sizeof(struct ENTETE_CONNEXION)-connexion->index_entete
                                  );
+          pthread_mutex_unlock( &connexion->mutex_write ); /* test */
         }
        else
         { taille_recue = read( connexion->socket,
@@ -232,10 +234,12 @@ one_again:
           return(RECU_OK);
         }
        if (connexion->ssl)
-        { taille_recue = SSL_read( connexion->ssl,
+        { pthread_mutex_lock( &connexion->mutex_write ); /* test */
+          taille_recue = SSL_read( connexion->ssl,
                                    ((unsigned char *)connexion->donnees ) + connexion->index_donnees,
                                    connexion->entete.taille_donnees-connexion->index_donnees
                                  );
+          pthread_mutex_unlock( &connexion->mutex_write ); /* test */
         }
        else
         { taille_recue = read( connexion->socket,
