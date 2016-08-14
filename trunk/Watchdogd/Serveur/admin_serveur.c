@@ -101,10 +101,10 @@
 
     pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
     liste = Cfg_ssrv.Clients;
-    while ( liste )                              /* Parcours de la liste des ssrv (et donc de clients) */
+    while ( liste )                                                     /* Parcours de la liste des ssrv (et donc de clients) */
      { client = (struct CLIENT *)liste->data;
        if ( ! strcmp ( client->util->nom, name ) )
-        { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );
+        { Client_mode ( client, DECONNECTE );
           g_snprintf( chaine, sizeof(chaine), " | - Killed session : SSRV%06d - %s@%s\n", client->ssrv_id,
                       (client->util ? client->util->nom : "unknown"), client->machine );
           Admin_write ( connexion, chaine );
@@ -129,10 +129,10 @@
 
     pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
     liste = Cfg_ssrv.Clients;
-    while ( liste )                              /* Parcours de la liste des ssrv (et donc de clients) */
+    while ( liste )                                                     /* Parcours de la liste des ssrv (et donc de clients) */
      { client = (struct CLIENT *)liste->data;
        if ( client->ssrv_id == id )
-        { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );
+        { Client_mode ( client, DECONNECTE );
           g_snprintf( chaine, sizeof(chaine), " | - Killed session : SSRV%06d - %s@%s\n", client->ssrv_id,
                       (client->util ? client->util->nom : "unknown"), client->machine );
           Admin_write ( connexion, chaine );

@@ -148,7 +148,7 @@ try_again:
     if (retour <= 0)
      { ssl_err = SSL_get_error( connexion->ssl, retour );
        if (ssl_err == SSL_ERROR_WANT_READ || ssl_err == SSL_ERROR_WANT_WRITE)
-        { Info_new( connexion->log, FALSE, LOG_ERR,
+        { Info_new( connexion->log, FALSE, LOG_WARNING,
                    "Recevoir_reseau_with_ssl: SSL error %d (retour=%d) -> %s - Retrying !",
                     ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
           goto try_again;
@@ -159,6 +159,8 @@ try_again:
                  ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
        return(-1);
      }
+    Info_new( connexion->log, FALSE, LOG_DEBUG,
+                   "Recevoir_reseau_with_ssl: Read %d bytes", retour );
     return(retour);
   }
 /******************************************************************************************************************************/
@@ -176,7 +178,7 @@ try_again:
        if (connexion->ssl)
         { pthread_mutex_lock( &connexion->mutex_network_rw );                              /* Verrouillage read/write network */
           taille_recue = Recevoir_reseau_with_ssl( connexion,
-                                                 ((unsigned char *)&connexion->entete ) + connexion->index_entete,
+                                                 ((gchar *)&connexion->entete ) + connexion->index_entete,
                                                    sizeof(struct ENTETE_CONNEXION)-connexion->index_entete
                                                  );
           pthread_mutex_unlock( &connexion->mutex_network_rw );
@@ -265,7 +267,7 @@ try_again:
         }
        if (connexion->ssl)
         { pthread_mutex_lock( &connexion->mutex_network_rw );
-          taille_recue = Recevoir_reseau_with_ssl( connexion, ((unsigned char *)connexion->donnees ) + connexion->index_donnees,
+          taille_recue = Recevoir_reseau_with_ssl( connexion, ((gchar *)connexion->donnees ) + connexion->index_donnees,
                                                    connexion->entete.taille_donnees-connexion->index_donnees
                                                  );
           pthread_mutex_unlock( &connexion->mutex_network_rw );
@@ -319,6 +321,8 @@ try_again:
                  ssl_err, retour, taille_buffer, ERR_error_string( ssl_err, NULL ) );
        return(-1);
      }
+    Info_new( connexion->log, FALSE, LOG_DEBUG,
+                   "Envoyer_reseau_with_ssl: Write %d bytes", taille_buffer );
     return(taille_buffer);
   }          
 /******************************************************************************************************************************/
