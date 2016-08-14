@@ -133,6 +133,15 @@
 /* Entrées: val, max                                                                                      */
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
+ void Raz_progress_pulse( void )
+  { gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (Barre_progress), 1.0 );
+    gtk_progress_bar_set_text( GTK_PROGRESS_BAR (Barre_progress), "100%" );
+  }
+/**********************************************************************************************************/
+/* Set_progress: Positionne la barre de progression de la fenetre                                         */
+/* Entrées: val, max                                                                                      */
+/* Sortie: Kedal                                                                                          */
+/**********************************************************************************************************/
  void Set_progress_plus( gint plus )
   { gdouble fraction;
     gchar chaine[20];

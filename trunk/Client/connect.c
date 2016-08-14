@@ -200,6 +200,7 @@ one_again:
     int connexion;
 
     Log( _("Trying to connect") );
+    Raz_progress_pulse();
 
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
