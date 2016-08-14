@@ -103,7 +103,7 @@
      { recu = Recevoir_reseau( Cfg_satellite.Connexion );
        if (recu==RECU_OK)
         { Satellite_Gerer_protocole( Cfg_satellite.Connexion ); }
-     } while ( recu == RECU_EN_COURS || recu == RECU_OK );
+     } while ( recu == RECU_OK );
 
     if (recu>=RECU_ERREUR)                                                                      /* Erreur reseau->deconnexion */
      { printf("Recu erreur %d\n", recu);

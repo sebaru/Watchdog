@@ -105,7 +105,7 @@
      { recu = Recevoir_reseau( Client.connexion );
        if (recu==RECU_OK)
         { Gerer_protocole( Client.connexion ); }
-     } while ( recu == RECU_EN_COURS || recu == RECU_OK );
+     } while ( recu == RECU_OK );
 
     if (recu>=RECU_ERREUR)                                             /* Erreur reseau->deconnexion */
      { printf("Recu erreur %d\n", recu);

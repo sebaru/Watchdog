@@ -103,7 +103,7 @@ one_again:
     connexion->log           = Log;
     connexion->last_use = time(NULL);
 
-    pthread_mutex_init( &connexion->mutex_write, NULL );                                      /* Init mutex d'ecriture reseau */
+    pthread_mutex_init( &connexion->mutex_network_rw, NULL );                                 /* Init mutex d'ecriture reseau */
     if (taille_bloc != -1)                               /* taille != -1 pour le cote serveur Watchdog, -1 pour les clients ! */
      { connexion->donnees = g_try_malloc0( taille_bloc );
        if (!connexion->donnees)
@@ -129,9 +129,37 @@ one_again:
     if (connexion->ssl) { SSL_shutdown( connexion->ssl );
                           SSL_free( connexion->ssl );
                         }
-    pthread_mutex_destroy( &connexion->mutex_write );
+    pthread_mutex_destroy( &connexion->mutex_network_rw );
     close ( connexion->socket );
     g_free(connexion);
+  }
+/******************************************************************************************************************************/
+/* Recevoir_reseau_with_ssl: Fonction bas niveau de reception sur le reseau, en mode SSL                                      */
+/* Entrée: la connexion, le buffer, et la taille max admissible                                                               */
+/* Sortie: nb de caractere lu, -1 si pb                                                                                       */
+/******************************************************************************************************************************/
+ static gint Recevoir_reseau_with_ssl ( struct CONNEXION *connexion, gchar *buffer, gint taille_buffer )
+  { gint retour, ssl_err;
+
+    if (SSL_pending ( connexion->ssl ) == 0) return(0);
+
+try_again:
+    retour = SSL_read( connexion->ssl, buffer, taille_buffer );                                            /* Envoi du buffer */
+    if (retour <= 0)
+     { ssl_err = SSL_get_error( connexion->ssl, retour );
+       if (ssl_err == SSL_ERROR_WANT_READ || ssl_err == SSL_ERROR_WANT_WRITE)
+        { Info_new( connexion->log, FALSE, LOG_ERR,
+                   "Recevoir_reseau_with_ssl: SSL error %d (retour=%d) -> %s - Retrying !",
+                    ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
+          goto try_again;
+        }
+
+       Info_new( connexion->log, FALSE, LOG_ERR,
+                "Recevoir_reseau_with_ssl: SSL error %d (retour=%d) -> %s",
+                 ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
+       return(-1);
+     }
+    return(retour);
   }
 /******************************************************************************************************************************/
 /* Recevoir_reseau: Ecoute la connexion en parametre et essai de reunir un bloc entier de donnees                             */
@@ -144,33 +172,36 @@ one_again:
     if (!connexion) return( RECU_ERREUR );
 
     if ( connexion->index_entete != sizeof(struct ENTETE_CONNEXION) )                                   /* Entete complete ?? */
-     { if (connexion->ssl)
-        { pthread_mutex_lock( &connexion->mutex_write ); /* test */
-          taille_recue = SSL_read( connexion->ssl,
-                                   ((unsigned char *)&connexion->entete ) + connexion->index_entete,
-                                   sizeof(struct ENTETE_CONNEXION)-connexion->index_entete
-                                 );
-          pthread_mutex_unlock( &connexion->mutex_write ); /* test */
+     { 
+       if (connexion->ssl)
+        { pthread_mutex_lock( &connexion->mutex_network_rw );                              /* Verrouillage read/write network */
+          taille_recue = Recevoir_reseau_with_ssl( connexion,
+                                                 ((unsigned char *)&connexion->entete ) + connexion->index_entete,
+                                                   sizeof(struct ENTETE_CONNEXION)-connexion->index_entete
+                                                 );
+          pthread_mutex_unlock( &connexion->mutex_network_rw );
+          if (taille_recue==0) return(RECU_RIEN);
+          if (taille_recue< 0) return(RECU_ERREUR);
         }
        else
         { taille_recue = read( connexion->socket,
                                ((unsigned char *)&connexion->entete ) + connexion->index_entete,
                                sizeof(struct ENTETE_CONNEXION)-connexion->index_entete
                              );
-        }
-       err=errno;
-
-       if (taille_recue==0) return(RECU_RIEN);
-       if (taille_recue<0)
-        { switch (err)
-           { case EPIPE     :
-             case ECONNRESET: return( RECU_ERREUR_CONNRESET );
-             case ESPIPE    : return( RECU_ERREUR );                                                      /* Reperage illegal */
-             case EAGAIN    : return( RECU_RIEN );                                   /* Ressource temporairement indisponible */
+          err=errno;
+          if (taille_recue==0) return(RECU_RIEN);
+          if (taille_recue<0)
+           { Info_new( connexion->log, FALSE, LOG_DEBUG,
+                      "Recevoir_reseau-1, socket %d Errno=%d %s taille %d", 
+                       connexion->socket, err, strerror(err), taille_recue );
+             switch (err)
+              { case EPIPE     :
+                case ECONNRESET: return( RECU_ERREUR_CONNRESET );
+                case ESPIPE    : return( RECU_ERREUR );                                                   /* Reperage illegal */
+                case EAGAIN    : return( RECU_RIEN );                                /* Ressource temporairement indisponible */
+              }
+             return(RECU_ERREUR);
            }
-          printf( "recv_rezo, socket %d Errno=%d %s taille %d\n", 
-                  connexion->socket, err, strerror(err), taille_recue );
-          return(RECU_RIEN);
         }
 
        connexion->index_entete += taille_recue;                                                     /* Indexage pour la suite */
@@ -199,8 +230,7 @@ one_again:
            }
           connexion->taille_bloc = connexion->entete.taille_donnees;
           Info_new( connexion->log, FALSE, LOG_NOTICE,
-                   "Recevoir_reseau: Setting PaquetSize to %d",
-                    connexion->taille_bloc );
+                   "Recevoir_reseau: Setting PaquetSize to %d", connexion->taille_bloc );
         }
        else if (connexion->entete.ss_tag == SSTAG_INTERNAL_SSLNEEDED)
         { Info_new( connexion->log, FALSE, LOG_DEBUG,
@@ -224,46 +254,46 @@ one_again:
        return(RECU_OK);
      }
     else                                                        /* Ok, on a l'entete parfaite, maintenant fo voir les donnees */
-     { if ( connexion->index_donnees == connexion->entete.taille_donnees )
+     { if ( connexion->index_donnees == connexion->entete.taille_donnees )                                 /* Paquet entier ? */
         { connexion->index_entete  = 0;                                                                     /* Raz des indexs */
           connexion->index_donnees = 0;
           Info_new( connexion->log, FALSE, LOG_DEBUG,
                    "Recevoir_reseau: recue %d donnees tag=%d sstag=%d",
                     connexion->entete.taille_donnees, connexion->entete.tag, connexion->entete.ss_tag );
           connexion->last_use = time(NULL);
-          return(RECU_OK);
+          return(RECU_OK);                               /* On indique a l'appli que le paquet est disponible pour traitement */
         }
        if (connexion->ssl)
-        { pthread_mutex_lock( &connexion->mutex_write ); /* test */
-          taille_recue = SSL_read( connexion->ssl,
-                                   ((unsigned char *)connexion->donnees ) + connexion->index_donnees,
-                                   connexion->entete.taille_donnees-connexion->index_donnees
-                                 );
-          pthread_mutex_unlock( &connexion->mutex_write ); /* test */
+        { pthread_mutex_lock( &connexion->mutex_network_rw );
+          taille_recue = Recevoir_reseau_with_ssl( connexion, ((unsigned char *)connexion->donnees ) + connexion->index_donnees,
+                                                   connexion->entete.taille_donnees-connexion->index_donnees
+                                                 );
+          pthread_mutex_unlock( &connexion->mutex_network_rw );
+          if (taille_recue< 0) return(RECU_ERREUR);
         }
        else
         { taille_recue = read( connexion->socket,
                                ((unsigned char *)connexion->donnees ) + connexion->index_donnees,
                                connexion->entete.taille_donnees-connexion->index_donnees
                              );
+          if (taille_recue<0)
+           { int err;
+             err=errno;
+             Info_new( connexion->log, FALSE, LOG_DEBUG,
+                         "Recevoir_reseau-2, socket %d Errno=%d %s taille %d", 
+                          connexion->socket, err, strerror(err), taille_recue );
+             switch (err)
+              { case ECONNRESET: return( RECU_ERREUR_CONNRESET );
+                case ESPIPE    : return( RECU_ERREUR );                                                   /* Reperage illegal */
+                case EAGAIN    : return( RECU_RIEN );                                /* Ressource temporairement indisponible */
+              }
+             return(RECU_ERREUR);
+           }
         }
 
-       if (taille_recue<0)
-        { int err;
-          err=errno;
-          switch (err)
-           { case ECONNRESET: return( RECU_ERREUR_CONNRESET );
-             case ESPIPE    : return( RECU_ERREUR );                                  /* Reperage illegal */
-             case EAGAIN    : return( RECU_RIEN );               /* Ressource temporairement indisponible */
-           }
-          perror("recevoir_reseau (taille=-1 donnees)");
-          printf("Errno=%d  EAGAIN=%d EINTR=%d ESPIPE=%d entete.taille_donnes=%d index_donnees=%d\n",
-                  err, EAGAIN, EINTR, ESPIPE, connexion->entete.taille_donnees, connexion->index_donnees );
-          return(RECU_ERREUR);
-        }
        connexion->index_donnees += taille_recue;                                                    /* Indexage pour la suite */
      }
-    return( RECU_EN_COURS );
+    return( RECU_RIEN );
   }
 /******************************************************************************************************************************/
 /* Envoyer_reseau_with_ssl: Fonction bas niveau d'envoi sur le reseau, en mode SSL                                            */
@@ -334,9 +364,9 @@ try_again:
        return(retour);
      }
 
-    pthread_mutex_lock( &connexion->mutex_write );
+    pthread_mutex_lock( &connexion->mutex_network_rw );                                  /* Un seul paquet envoyé à la fois ! */
 
-    Entete.tag            = tag;
+    Entete.tag            = tag;                                                                   /* Préparation de l'entete */
     Entete.ss_tag         = ss_tag;
     Entete.taille_donnees = taille_buffer;
 
@@ -372,7 +402,7 @@ try_again:
           cpt += retour;
         }
      }
-    pthread_mutex_unlock( &connexion->mutex_write );
+    pthread_mutex_unlock( &connexion->mutex_network_rw );
 
     if (retour<0) return(retour);
     else          return(0);
