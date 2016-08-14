@@ -330,6 +330,8 @@ try_again:
        return(retour);
      }
 
+    pthread_mutex_lock( &connexion->mutex_write );
+
     Entete.tag            = tag;
     Entete.ss_tag         = ss_tag;
     Entete.taille_donnees = taille_buffer;
@@ -339,7 +341,6 @@ try_again:
               connexion->socket, (connexion->ssl ? "yes" : "no" ), tag, ss_tag, taille_buffer );
 
     cpt = sizeof(struct ENTETE_CONNEXION);                                              /* Preparation de l'envoi de l'entete */
-    pthread_mutex_lock( &connexion->mutex_write );
     while(cpt)
      { if (connexion->ssl)
           { retour = Envoyer_reseau_with_ssl( connexion, (gchar *)&Entete, cpt ); }                      /* Envoi de l'entete */
