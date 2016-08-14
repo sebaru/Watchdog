@@ -262,6 +262,43 @@ one_again:
     return( RECU_EN_COURS );
   }
 /******************************************************************************************************************************/
+/* Envoyer_reseau_with_ssl: Fonction bas niveau d'envoi sur le reseau, en mode SSL                                            */
+/* Entrée: la connexion, le buffer, sa taille                                                                                 */
+/* Sortie: nb de caractere ecrit, -1 si pb                                                                                    */
+/******************************************************************************************************************************/
+ static gint Envoyer_reseau_with_ssl ( struct CONNEXION *connexion, gchar *buffer, gint taille_buffer )
+  { gint retour, ssl_err;
+
+try_again:
+    retour = SSL_write( connexion->ssl, buffer, taille_buffer );                                           /* Envoi du buffer */
+    if (retour <= 0)
+     { ssl_err = SSL_get_error( connexion->ssl, retour );
+       if (ssl_err == SSL_ERROR_WANT_READ || ssl_err == SSL_ERROR_WANT_WRITE) goto try_again;
+
+       Info_new( connexion->log, FALSE, LOG_ERR,
+                "Envoyer_reseau_with_ssl: SSL error %d (retour=%d) -> %s",
+                 ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
+       return(-1);
+     }
+    return(taille_buffer);
+  }          
+/******************************************************************************************************************************/
+/* Envoyer_reseau_without_ssl: Fonction bas niveau d'envoi sur le reseau, en mode non SSL                                     */
+/* Entrée: la connexion, le buffer, sa taille                                                                                 */
+/* Sortie: nb de caractere ecrit, -1 si pb                                                                                    */
+/******************************************************************************************************************************/
+ static gint Envoyer_reseau_without_ssl ( struct CONNEXION *connexion, gchar *buffer, gint taille_buffer )
+  { gint retour;
+
+    retour = write( connexion->socket, buffer, taille_buffer );                                            /* Envoi du buffer */
+    if (retour <= 0)
+     { Info_new( connexion->log, FALSE, LOG_ERR,
+                 "Envoyer_reseau_without_ssl: error %d -> %s", errno, strerror(errno) );
+       return(-1);
+     }
+    return(retour);
+  }          
+/******************************************************************************************************************************/
 /* Envoi_paquet: Transmet un paquet reseau au client id                                                                       */
 /* Entrée: la socket, l'entete, le buffer                                                                                     */
 /* Sortie: non nul si pb                                                                                                      */
@@ -269,7 +306,7 @@ one_again:
  gint Envoyer_reseau( struct CONNEXION *connexion, gint tag, gint ss_tag,
                       gchar *buffer, gint taille_buffer )
   { struct ENTETE_CONNEXION Entete;
-    gint err = 0, retour, cpt;
+    gint retour, cpt;
 
     if (!connexion) return(-1);
 
@@ -296,37 +333,21 @@ one_again:
              "Envoyer_reseau: Sending to %d (ssl=%s), tag=%d, ss_tag=%d, taille_buffer=%d",
               connexion->socket, (connexion->ssl ? "yes" : "no" ), tag, ss_tag, taille_buffer );
 
-    cpt = sizeof(struct ENTETE_CONNEXION);
+    cpt = sizeof(struct ENTETE_CONNEXION);                                              /* Preparation de l'envoi de l'entete */
     pthread_mutex_lock( &connexion->mutex_write );
     while(cpt)
-     {
-       if (connexion->ssl)
-        { retour = SSL_write( connexion->ssl, &Entete, cpt ); }                                          /* Envoi de l'entete */
-       else retour = write( connexion->socket, &Entete, cpt );                                           /* Envoi de l'entete */
+     { if (connexion->ssl)
+          { retour = Envoyer_reseau_with_ssl( connexion, (gchar *)&Entete, cpt ); }                      /* Envoi de l'entete */
+       else retour = Envoyer_reseau_without_ssl( connexion, (gchar *)&Entete, cpt );                     /* Envoi de l'entete */
 
-       if (retour <= 0)
-        { err = errno;
-          if (connexion->ssl)
-           { gint ssl_err;
-             ssl_err = SSL_get_error( connexion->ssl, retour );
-             Info_new( connexion->log, FALSE, LOG_ERR,
-                      "Envoyer_reseau: Entete SSL error %d (retour=%d) -> %s",
-                       ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
-           }
-          else
-           { Info_new( connexion->log, FALSE, LOG_ERR,
-                      "Envoyer_reseau: Entete error %d -> %s", err, strerror(err) );
-           }
-          break;                                                                                        /* Si erreur, on sort */
-        }          
+       if (retour <= 0) break;
        cpt -= retour;
      }
 
     if (retour>0 && buffer && (tag != TAG_INTERNAL))                                      /* Preparation de l'envoi du buffer */
      { cpt = 0;
        while(cpt < Entete.taille_donnees)
-        {
-          if ( (retour=Attendre_envoi_disponible(connexion)) )
+        { if ( (retour=Attendre_envoi_disponible(connexion)) )
            { Info_new( connexion->log, FALSE, LOG_WARNING,
                       "Envoyer_reseau: timeout depassé (ou erreur) sur %d, retour=%d",
                        connexion->socket, retour );
@@ -334,32 +355,16 @@ one_again:
            }
 
           if (connexion->ssl)
-           { retour = SSL_write( connexion->ssl, buffer + cpt, Entete.taille_donnees-cpt ); }              /* Envoi du buffer */
-          else retour = write( connexion->socket, buffer + cpt, Entete.taille_donnees-cpt );
-          
-          err = errno;
-          if (retour<=0)
-           { if (connexion->ssl)
-              { gint ssl_err;
-                ssl_err = SSL_get_error( connexion->ssl, retour );
-                Info_new( connexion->log, FALSE, LOG_ERR,
-                         "Envoyer_reseau: SSL error %d (retour=%d)-> %s",
-                          ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
-                if (ssl_err == SSL_ERROR_WANT_READ || ssl_err == SSL_ERROR_WANT_WRITE) continue;                     /* Retry */
-              }
-             else
-              { Info_new( connexion->log, FALSE, LOG_ERR,
-                         "Envoyer_reseau: error %d -> %s", err, strerror(err) );
-                if (err == EAGAIN) continue;                                                                         /* Retry */
-              }
-             break;                                                                                     /* Si erreur, on sort */
-           } 
+             { retour = Envoyer_reseau_with_ssl( connexion, buffer + cpt, Entete.taille_donnees-cpt ); }
+          else retour = Envoyer_reseau_without_ssl( connexion, buffer + cpt, Entete.taille_donnees-cpt );
+
+          if (retour <= 0) break;
           cpt += retour;
         }
      }
     pthread_mutex_unlock( &connexion->mutex_write );
 
-    if (retour<0) return(err);
+    if (retour<0) return(retour);
     else          return(0);
   }
 /******************************************************************************************************************************/
