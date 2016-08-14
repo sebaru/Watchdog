@@ -149,18 +149,18 @@ try_again:
      { ssl_err = SSL_get_error( connexion->ssl, retour );
        if (ssl_err == SSL_ERROR_WANT_READ || ssl_err == SSL_ERROR_WANT_WRITE)
         { Info_new( connexion->log, FALSE, LOG_WARNING,
-                   "Recevoir_reseau_with_ssl: SSL error %d (retour=%d) -> %s - Retrying !",
-                    ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
+                   "Recevoir_reseau_with_ssl: Socket %d, SSL error %d (retour=%d) -> %s - Retrying !",
+                    connexion->socket,ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
           goto try_again;
         }
 
        Info_new( connexion->log, FALSE, LOG_ERR,
-                "Recevoir_reseau_with_ssl: SSL error %d (retour=%d) -> %s",
-                 ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
+                "Recevoir_reseau_with_ssl: Socket %d, SSL error %d (retour=%d) -> %s",
+                 connexion->socket,ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
        return(-1);
      }
     Info_new( connexion->log, FALSE, LOG_DEBUG,
-                   "Recevoir_reseau_with_ssl: Read %d bytes", retour );
+                   "Recevoir_reseau_with_ssl: Socket %d, Read %d bytes", connexion->socket, retour );
     return(retour);
   }
 /******************************************************************************************************************************/
@@ -195,7 +195,7 @@ try_again:
           if (taille_recue<0)
            { if (err == EAGAIN) return( RECU_RIEN );
              Info_new( connexion->log, FALSE, LOG_DEBUG,
-                      "Recevoir_reseau-1, socket %d Errno=%d %s taille %d", 
+                      "Recevoir_reseau-1: Socket %d Errno=%d %s taille %d", 
                        connexion->socket, err, strerror(err), taille_recue );
              switch (err)
               { case EPIPE     :
@@ -205,11 +205,13 @@ try_again:
            }
         }
 
+       Info_new( connexion->log, FALSE, LOG_DEBUG,
+                "Recevoir_reseau: Socket %d, %d bytes received", connexion->socket, taille_recue );
        connexion->index_entete += taille_recue;                                                     /* Indexage pour la suite */
 
        if (connexion->index_entete >= sizeof(struct ENTETE_CONNEXION))
         { Info_new( connexion->log, FALSE, LOG_DEBUG,
-                   "Recevoir_reseau: From %d (ssl=%s), tag=%d, sstag=%d, taille=%d",
+                   "Recevoir_reseau: Header Socket %d (ssl=%s), tag=%d, sstag=%d, taille=%d",
                     connexion->socket, (connexion->ssl ? "yes" : "no"), connexion->entete.tag,
                     connexion->entete.ss_tag, connexion->entete.taille_donnees );
 
@@ -259,8 +261,9 @@ try_again:
         { connexion->index_entete  = 0;                                                                     /* Raz des indexs */
           connexion->index_donnees = 0;
           Info_new( connexion->log, FALSE, LOG_DEBUG,
-                   "Recevoir_reseau: recue %d donnees tag=%d sstag=%d",
-                    connexion->entete.taille_donnees, connexion->entete.tag, connexion->entete.ss_tag );
+                   "Recevoir_reseau: Header+Data Socket %d (ssl=%s), tag=%d, sstag=%d, taille=%d",
+                    connexion->socket, (connexion->ssl ? "yes" : "no"), connexion->entete.tag,
+                    connexion->entete.ss_tag, connexion->entete.taille_donnees );
           connexion->last_use = time(NULL);
           return(RECU_OK);                               /* On indique a l'appli que le paquet est disponible pour traitement */
         }
@@ -281,7 +284,7 @@ try_again:
           if (taille_recue<0)
            { if (err == EAGAIN) return( RECU_RIEN );
              Info_new( connexion->log, FALSE, LOG_DEBUG,
-                      "Recevoir_reseau-2, socket %d Errno=%d %s taille %d", 
+                      "Recevoir_reseau-2: Socket %d Errno=%d %s taille %d", 
                        connexion->socket, err, strerror(err), taille_recue );
              switch (err)
               { case EPIPE     :
@@ -309,18 +312,18 @@ try_again:
      { ssl_err = SSL_get_error( connexion->ssl, retour );
        if (ssl_err == SSL_ERROR_WANT_READ || ssl_err == SSL_ERROR_WANT_WRITE)
         { Info_new( connexion->log, FALSE, LOG_ERR,
-                   "Envoyer_reseau_with_ssl: SSL error %d (retour=%d) writing %d bytes -> %s - Retrying !",
-                    ssl_err, retour, taille_buffer, ERR_error_string( ssl_err, NULL ) );
+                   "Envoyer_reseau_with_ssl: Socket %d, SSL error %d (retour=%d) writing %d bytes -> %s - Retrying !",
+                    connexion->socket, ssl_err, retour, taille_buffer, ERR_error_string( ssl_err, NULL ) );
           goto try_again;
         }
 
        Info_new( connexion->log, FALSE, LOG_ERR,
-                "Envoyer_reseau_with_ssl: SSL error %d (retour=%d) writing %d bytes -> %s",
-                 ssl_err, retour, taille_buffer, ERR_error_string( ssl_err, NULL ) );
+                "Envoyer_reseau_with_ssl: Socket %d, SSL error %d (retour=%d) writing %d bytes -> %s",
+                 connexion->socket, ssl_err, retour, taille_buffer, ERR_error_string( ssl_err, NULL ) );
        return(-1);
      }
     Info_new( connexion->log, FALSE, LOG_DEBUG,
-                   "Envoyer_reseau_with_ssl: Write %d bytes", taille_buffer );
+             "Envoyer_reseau_with_ssl: Socket %d, Write %d bytes", connexion->socket, taille_buffer );
     return(taille_buffer);
   }          
 /******************************************************************************************************************************/
@@ -334,9 +337,11 @@ try_again:
     retour = write( connexion->socket, buffer, taille_buffer );                                            /* Envoi du buffer */
     if (retour <= 0)
      { Info_new( connexion->log, FALSE, LOG_ERR,
-                 "Envoyer_reseau_without_ssl: error %d -> %s", errno, strerror(errno) );
+                 "Envoyer_reseau_without_ssl: To %d, Error %d -> %s", connexion->socket, errno, strerror(errno) );
        return(-1);
      }
+    Info_new( connexion->log, FALSE, LOG_DEBUG,
+             "Envoyer_reseau_without_ssl: To %d, Write %d bytes", connexion->socket, retour );
     return(retour);
   }          
 /******************************************************************************************************************************/
