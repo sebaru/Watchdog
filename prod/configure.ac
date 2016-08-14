@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 dnl define([gittag], esyscmd([sh -c "git describe --always  | tr -d '\n'"]))
 define([SVNVERSION], esyscmd([sh -c "svnversion -n | sed s/M//g"]))
-AC_INIT([Watchdog], [2.10.SVNVERSION], [project.watchdog@gmail.com], [Watchdog], [https://wiki.connect4all.fr] )
+AC_INIT([Watchdog], [2.11.SVNVERSION], [project.watchdog@gmail.com], [Watchdog], [https://wiki.connect4all.fr] )
 AC_CANONICAL_TARGET
 AC_CONFIG_SRCDIR([Watchdogd/Watchdogd.c])
 AM_INIT_AUTOMAKE
@@ -62,8 +62,8 @@ dnl parametres par defaut
 CFLAGS="-Wall -O -pipe -g -ggdb"
 YACC="$YACC -d -t -v"
 
-LIBW_MAJOR_VERSION=3
-LIBW_MINOR_VERSION=8
+LIBW_MAJOR_VERSION=4
+LIBW_MINOR_VERSION=0
 LIBW_MICRO_VERSION=0
 
 AC_SUBST(LIBW_MAJOR_VERSION)
@@ -71,7 +71,7 @@ AC_SUBST(LIBW_MINOR_VERSION)
 AC_SUBST(LIBW_MICRO_VERSION)
 
 LIBDLS_MAJOR_VERSION=4
-LIBDLS_MINOR_VERSION=2
+LIBDLS_MINOR_VERSION=3
 LIBDLS_MICRO_VERSION=0
 
 AC_SUBST(LIBDLS_MAJOR_VERSION)
