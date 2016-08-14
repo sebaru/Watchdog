@@ -273,7 +273,12 @@ try_again:
     retour = SSL_write( connexion->ssl, buffer, taille_buffer );                                           /* Envoi du buffer */
     if (retour <= 0)
      { ssl_err = SSL_get_error( connexion->ssl, retour );
-       if (ssl_err == SSL_ERROR_WANT_READ || ssl_err == SSL_ERROR_WANT_WRITE) goto try_again;
+       if (ssl_err == SSL_ERROR_WANT_READ || ssl_err == SSL_ERROR_WANT_WRITE)
+        { Info_new( connexion->log, FALSE, LOG_ERR,
+                   "Envoyer_reseau_with_ssl: SSL error %d (retour=%d) -> %s - Retrying !",
+                    ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
+          goto try_again;
+        }
 
        Info_new( connexion->log, FALSE, LOG_ERR,
                 "Envoyer_reseau_with_ssl: SSL error %d (retour=%d) -> %s",
