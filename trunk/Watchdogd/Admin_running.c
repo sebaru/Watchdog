@@ -73,7 +73,7 @@
        Admin_write ( connexion, "  help                  - This help\n" );
      } else
     if ( ! strcmp ( commande, "ident" ) )
-     { char nom[128];
+     { char nom[256];
        gethostname( nom, sizeof(nom) );
        g_snprintf( chaine, sizeof(chaine),
                    " | - Watchdogd %s Instance '%s' (PID=%d)\n"
@@ -85,7 +85,6 @@
                    VERSION, nom, 
                    Config.run_as, getuid(),
                    Config.home );
-                   
        Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "dbcfg" ) )
