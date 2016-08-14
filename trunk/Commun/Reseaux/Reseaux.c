@@ -193,14 +193,13 @@ try_again:
           err=errno;
           if (taille_recue==0) return(RECU_RIEN);
           if (taille_recue<0)
-           { Info_new( connexion->log, FALSE, LOG_DEBUG,
+           { if (err == EAGAIN) return( RECU_RIEN );
+             Info_new( connexion->log, FALSE, LOG_DEBUG,
                       "Recevoir_reseau-1, socket %d Errno=%d %s taille %d", 
                        connexion->socket, err, strerror(err), taille_recue );
              switch (err)
               { case EPIPE     :
                 case ECONNRESET: return( RECU_ERREUR_CONNRESET );
-                case ESPIPE    : return( RECU_ERREUR );                                                   /* Reperage illegal */
-                case EAGAIN    : return( RECU_RIEN );                                /* Ressource temporairement indisponible */
               }
              return(RECU_ERREUR);
            }
@@ -278,16 +277,15 @@ try_again:
                                ((unsigned char *)connexion->donnees ) + connexion->index_donnees,
                                connexion->entete.taille_donnees-connexion->index_donnees
                              );
+          err=errno;
           if (taille_recue<0)
-           { int err;
-             err=errno;
+           { if (err == EAGAIN) return( RECU_RIEN );
              Info_new( connexion->log, FALSE, LOG_DEBUG,
-                         "Recevoir_reseau-2, socket %d Errno=%d %s taille %d", 
-                          connexion->socket, err, strerror(err), taille_recue );
+                      "Recevoir_reseau-2, socket %d Errno=%d %s taille %d", 
+                       connexion->socket, err, strerror(err), taille_recue );
              switch (err)
-              { case ECONNRESET: return( RECU_ERREUR_CONNRESET );
-                case ESPIPE    : return( RECU_ERREUR );                                                   /* Reperage illegal */
-                case EAGAIN    : return( RECU_RIEN );                                /* Ressource temporairement indisponible */
+              { case EPIPE     :
+                case ECONNRESET: return( RECU_ERREUR_CONNRESET );
               }
              return(RECU_ERREUR);
            }
