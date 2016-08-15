@@ -141,27 +141,28 @@ one_again:
  static gint Recevoir_reseau_with_ssl ( struct CONNEXION *connexion, gchar *buffer, gint taille_buffer )
   { gint retour, ssl_err;
 
-    if (SSL_pending ( connexion->ssl ) == 0) return(0);
-
 try_again:
     retour = SSL_read( connexion->ssl, buffer, taille_buffer );                                            /* Envoi du buffer */
-    if (retour <= 0)
-     { ssl_err = SSL_get_error( connexion->ssl, retour );
-       if (ssl_err == SSL_ERROR_WANT_READ || ssl_err == SSL_ERROR_WANT_WRITE)
+    if (retour > 0)
+     { Info_new( connexion->log, FALSE, LOG_DEBUG,
+                "Recevoir_reseau_with_ssl: Socket %d, Read %d bytes", connexion->socket, retour );
+       return(retour);
+     }
+
+    switch ( ssl_err = SSL_get_error( connexion->ssl, retour ) )
+     { case SSL_ERROR_NONE: return(0);
+       case SSL_ERROR_WANT_READ:
+       case SSL_ERROR_WANT_WRITE:
         { Info_new( connexion->log, FALSE, LOG_WARNING,
                    "Recevoir_reseau_with_ssl: Socket %d, SSL error %d (retour=%d) -> %s - Retrying !",
                     connexion->socket,ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
           goto try_again;
         }
-
-       Info_new( connexion->log, FALSE, LOG_ERR,
-                "Recevoir_reseau_with_ssl: Socket %d, SSL error %d (retour=%d) -> %s",
-                 connexion->socket,ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
-       return(-1);
      }
-    Info_new( connexion->log, FALSE, LOG_DEBUG,
-                   "Recevoir_reseau_with_ssl: Socket %d, Read %d bytes", connexion->socket, retour );
-    return(retour);
+    Info_new( connexion->log, FALSE, LOG_ERR,
+             "Recevoir_reseau_with_ssl: Socket %d, SSL error %d (retour=%d) -> %s",
+              connexion->socket,ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
+    return(-1);
   }
 /******************************************************************************************************************************/
 /* Recevoir_reseau: Ecoute la connexion en parametre et essai de reunir un bloc entier de donnees                             */
@@ -308,23 +309,27 @@ try_again:
 
 try_again:
     retour = SSL_write( connexion->ssl, buffer, taille_buffer );                                           /* Envoi du buffer */
-    if (retour <= 0)
-     { ssl_err = SSL_get_error( connexion->ssl, retour );
-       if (ssl_err == SSL_ERROR_WANT_READ || ssl_err == SSL_ERROR_WANT_WRITE)
+    if (retour > 0)
+     { Info_new( connexion->log, FALSE, LOG_DEBUG,
+                "Envoyer_reseau_with_ssl: Socket %d, Write %d bytes", connexion->socket, taille_buffer );
+       return(taille_buffer);
+     }
+    
+    switch ( ssl_err = SSL_get_error( connexion->ssl, retour ) )
+     { case SSL_ERROR_WANT_READ:
+       case SSL_ERROR_WANT_WRITE:
         { Info_new( connexion->log, FALSE, LOG_ERR,
                    "Envoyer_reseau_with_ssl: Socket %d, SSL error %d (retour=%d) writing %d bytes -> %s - Retrying !",
                     connexion->socket, ssl_err, retour, taille_buffer, ERR_error_string( ssl_err, NULL ) );
           goto try_again;
         }
 
-       Info_new( connexion->log, FALSE, LOG_ERR,
-                "Envoyer_reseau_with_ssl: Socket %d, SSL error %d (retour=%d) writing %d bytes -> %s",
-                 connexion->socket, ssl_err, retour, taille_buffer, ERR_error_string( ssl_err, NULL ) );
-       return(-1);
      }
-    Info_new( connexion->log, FALSE, LOG_DEBUG,
-             "Envoyer_reseau_with_ssl: Socket %d, Write %d bytes", connexion->socket, taille_buffer );
-    return(taille_buffer);
+
+    Info_new( connexion->log, FALSE, LOG_ERR,
+             "Envoyer_reseau_with_ssl: Socket %d, SSL error %d (retour=%d) writing %d bytes -> %s",
+              connexion->socket, ssl_err, retour, taille_buffer, ERR_error_string( ssl_err, NULL ) );
+    return(-1);
   }          
 /******************************************************************************************************************************/
 /* Envoyer_reseau_without_ssl: Fonction bas niveau d'envoi sur le reseau, en mode non SSL                                     */
