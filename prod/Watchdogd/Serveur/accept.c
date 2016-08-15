@@ -57,16 +57,13 @@
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
                 "Connecter_ssl: set_accept_state %d", client->connexion->socket );
      }
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "Connecter_ssl: accept en cours 1 = %d", client->connexion->socket );
+
     retour = SSL_accept( connexion->ssl );
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "Connecter_ssl: accept en cours 2 = %d", retour );
     if (retour<=0)
      { retour = SSL_get_error( connexion->ssl, retour );
        if (retour == SSL_ERROR_WANT_READ || retour == SSL_ERROR_WANT_WRITE)
-        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                   "Connecter_ssl: need more data", client->connexion->socket );
+        { /*Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                   "Connecter_ssl: need more data", client->connexion->socket );*/
           return;
         }
        

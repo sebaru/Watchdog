@@ -59,9 +59,8 @@
 
  #define  RECU_RIEN                0
  #define  RECU_OK                  1
- #define  RECU_EN_COURS            2
- #define  RECU_ERREUR              3
- #define  RECU_ERREUR_CONNRESET    4
+ #define  RECU_ERREUR              2
+ #define  RECU_ERREUR_CONNRESET    3
 
  struct CONNEXION
   { struct ENTETE_CONNEXION entete;
@@ -70,7 +69,7 @@
     gint32  index_donnees;
     gint32  taille_bloc;
     gint32  socket;
-    pthread_mutex_t mutex_write;                                  /* Zone critique: envoi des données au client par le reseau */
+    pthread_mutex_t mutex_network_rw;                             /* Zone critique: envoi des données au client par le reseau */
     time_t last_use;
     SSL    *ssl;
     struct LOG *log;

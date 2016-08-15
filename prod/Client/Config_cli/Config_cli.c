@@ -96,7 +96,7 @@
           g_free(chaine);
         }
 
-       config_cli->log_override = g_key_file_get_boolean ( gkf, "DEBUG", "log_all", NULL );
+       config_cli->log_override = g_key_file_get_boolean ( gkf, "LOG", "log_all", NULL );
 
 /********************************************* Partie GUI *************************************************/
        config_cli->gui_tech = g_key_file_get_boolean ( gkf, "GUI", "technical", NULL );
@@ -126,7 +126,7 @@
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
               "Config passwd ----------- %s", config_cli->passwd );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
-              "Config ssl_file_ca ----------- %s", config_cli->ssl_file_ca );
+              "Config ssl_file_ca ------ %s", config_cli->ssl_file_ca );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
               "Config log_level -------- %d", config_cli->log_level );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,

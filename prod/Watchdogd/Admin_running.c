@@ -37,7 +37,7 @@
  void Admin_running ( struct CONNEXION *connexion, gchar *ligne )
   { struct LIBRAIRIE *lib;
     GSList *liste;
-    gchar commande[128], chaine[128];
+    gchar commande[128], chaine[256];
 
     sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
@@ -73,7 +73,7 @@
        Admin_write ( connexion, "  help                  - This help\n" );
      } else
     if ( ! strcmp ( commande, "ident" ) )
-     { char nom[256];
+     { char nom[128];
        gethostname( nom, sizeof(nom) );
        g_snprintf( chaine, sizeof(chaine),
                    " | - Watchdogd %s Instance '%s' (PID=%d)\n"

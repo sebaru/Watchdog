@@ -199,8 +199,8 @@
        dup2( fd_cible, 1 );
        g_snprintf( texte, sizeof(texte), "%s", msg->libelle_audio );
        execlp( "espeak", "espeak", "-q", "-s", chaine2, "-v", chaine, texte, NULL );
-       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "Jouer_espeak: '%s' exec failed pid=%d", nom_fichier, pid );
+/*       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
+                "Jouer_espeak: '%s' exec failed pid=%d", nom_fichier, pid );*/
        _exit(0);
      }
     else
@@ -227,8 +227,8 @@
           case 3: g_snprintf( chaine, sizeof(chaine), "fr4" ); break;
         }
        execlp( "mbrola-linux-i386", "mbrola-linux-i386", chaine, nom_fichier, cible, NULL );
-       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "Jouer_espeak: Lancement mbrola '%s' failed pid=%d (%s)", cible, pid, strerror(errno) );
+       /*Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
+                "Jouer_espeak: Lancement mbrola '%s' failed pid=%d (%s)", cible, pid, strerror(errno) );*/
        _exit(0);
      }
     else

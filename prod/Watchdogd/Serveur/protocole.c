@@ -119,7 +119,7 @@
     else if (recu>=RECU_ERREUR)                                             /* Erreur reseau->deconnexion */
      { switch( recu )
         { case RECU_ERREUR_CONNRESET: Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                                            "Ecouter_client: Reset connexion" );
+                                               "Ecouter_client: Reset connexion" );
                                       break;
         }
        Client_mode ( client, DECONNECTE );
