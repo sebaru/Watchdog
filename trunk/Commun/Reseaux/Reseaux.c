@@ -155,12 +155,12 @@ try_again:
      { case SSL_ERROR_NONE: return(0);
        case SSL_ERROR_WANT_READ:
        case SSL_ERROR_WANT_WRITE:
-        { cpt ++;
+        { /*cpt ++;
           if ( !(cpt % 200))
            { Info_new( connexion->log, FALSE, LOG_WARNING,
                    "Recevoir_reseau_with_ssl: Socket %d, SSL error %d (retour=%d) -> %s - Retrying !",
                     connexion->socket,ssl_err, retour, ERR_error_string( ssl_err, NULL ) );
-           }
+           }*/
           goto try_again;
         }
      }
