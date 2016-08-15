@@ -100,8 +100,7 @@
   };
 
  struct CMD_TYPE_MNEMO_CPT_IMP
-  { guint  num;                                                                     /* Numero du compteur */
-    gfloat valeur;                                                                  /* Valeur du compteur */
+  { gfloat valeur;                                                                  /* Valeur du compteur */
     guint  type;                                                                /* Totalisateur/Moyenneur */
     gfloat multi;                                                                       /* Multiplicateur */
     gchar  unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                      /* Km, h, ° ... */
