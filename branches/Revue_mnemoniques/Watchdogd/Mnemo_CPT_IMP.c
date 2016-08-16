@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Mnemo_CPT_IMP.c      Déclaration des fonctions pour la gestion des cpt_imp                                       */
+/* Watchdogd/Mnemo_CPT_IMP.c      Déclaration des fonctions pour la gestion des compteurs d'impulsions                        */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                         mar. 07 déc. 2010 17:26:52 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -73,7 +73,7 @@
      }
 
     cpt_imp = (struct CMD_TYPE_MNEMO_CPT_IMP *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_CPT_IMP) );
-    if (!cpt_imp) Info_new( Config.log, FALSE, LOG_WARNING, "Recuperer_mnemo_cptimpDB_suite: Erreur allocation mémoire" );
+    if (!cpt_imp) Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Recuperer_mnemo_cptimpDB_suite: Erreur allocation mémoire" );
     else
      { cpt_imp->valeur   = atof(db->row[0]);
        cpt_imp->type     = atoi(db->row[1]);
@@ -94,7 +94,7 @@
 
     unite = Normaliser_chaine ( mnemo_full->mnemo_cptimp.unite );                            /* Formatage correct des chaines */
     if (!unite)
-     { Info_new( Config.log, FALSE, LOG_WARNING, "Modifier_mnemo_cptimpDB: Normalisation unite impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_mnemo_cptimpDB: Normalisation unite impossible" );
        return(FALSE);
      }
 
@@ -130,7 +130,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT num,val,type_ci,multi,unite_string"
                 " FROM %s"
-                " INNER JOIN %s ON %s.id_mnemo = %s.id",
+                " INNER JOIN %s ON %s.id_mnemo = %s.id ORDER BY num",
                 NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO_CPTIMP );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
@@ -148,9 +148,12 @@
           Partage->ci[num].confDB.multi  = atoi( db->row[3] );
           g_snprintf( Partage->ci[num].confDB.unite, sizeof(Partage->ci[num].confDB.unite), "%s", db->row[4] );
           Partage->ci[num].val_en_cours2 = Partage->ci[num].confDB.valeur;                                            /* Init */
+          Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+                    "Charger_cpt_imp: Chargement config CI[%04d]", num );
         }
        else
-        { Info_new( Config.log, FALSE, LOG_WARNING, "Charger_cpt_imp: num (%d) out of range", num ); }
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+			       "Charger_cpt_imp: num (%d) out of range (max=%d)", num, NBR_COMPTEUR_IMP ); }
        Recuperer_ligne_SQL(db);                                                            /* Chargement d'une ligne resultat */
      }
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Charger_cpt_imp: DB reloaded" );

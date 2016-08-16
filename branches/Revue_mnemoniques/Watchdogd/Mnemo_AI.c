@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Mnemo_AI.c        Déclaration des fonctions pour la gestion des Analog Input                 */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 18 avr 2009 13:30:10 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Mnemo_AI.c        Déclaration des fonctions pour la gestion des Analog Input                                     */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          sam 18 avr 2009 13:30:10 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Mnemo_AI.c
  * This file is part of Watchdog
@@ -177,30 +177,41 @@
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Charger_analogInput ( void )
-  { struct DB *db;
+  { gchar requete[512];
+    struct DB *db;
 
-    if (!Recuperer_analogInputDB( &db ))
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Charger_analogInput: DB Connexion Failed" );
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT num,min,max,%s.type,%s.unite"
+                " FROM %s"
+                " INNER JOIN %s ON %s.id_mnemo = %s.id ORDER BY num",
+                NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI,
+                NOM_TABLE_MNEMO,                                                                                      /* FROM */
+                NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO,                                        /* INNER JOIN */
+              );
+
+    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
+     { Libere_DB_SQL (&db);
        return;
-     }                                                                         /* Si pas d'enregistrement */
+     }
 
-    for( ; ; )
-     { struct CMD_TYPE_MNEMO_AI *entree;
-       entree = Recuperer_analogInputDB_suite( &db );
-       if (!entree) break;
-
-       if (entree->num < NBR_ENTRE_ANA)
-        { memcpy( &Partage->ea[entree->num].confDB, entree, sizeof(struct CMD_TYPE_MNEMO_AI) );
-          Partage->ea[entree->num].last_arch = 0; /* Mise à zero du champ de la derniere date d'archivage */
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    while ( db->row )
+     { gint num;
+       num = atoi( db->row[0] );
+       if (num < NBR_ENTRE_ANA)
+        { Partage->ea[num].confDB.min  = atof(db->row[1]);
+          Partage->ea[num].confDB.max      = atof(db->row[2]);
+          Partage->ea[num].confDB.type     = atoi(db->row[3]);
+          g_snprintf( Partage->ea[num].confDB.unite, sizeof(Partage->ea[num].confDB.unite), "%s", db->row[4] );
+          Partage->ea[num].last_arch = 0;                             /* Mise à zero du champ de la derniere date d'archivage */
+          Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+                   "Charger_analogInput: Chargement config EA[%d04]=%d", num );
         }
        else
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                   "Charger_analogInput: entree->num (%d) out of range (max=%d)",
-                    entree->num, NBR_ENTRE_ANA );
-        }
-       g_free(entree);
+			       "Charger_analogInput: num (%d) out of range (max=%d)", num, NBR_ENTRE_ANA ); }
+       Recuperer_ligne_SQL(db);                                                            /* Chargement d'une ligne resultat */
      }
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Charger_analogInput: DB reloaded" );
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
