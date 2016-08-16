@@ -721,7 +721,7 @@
        case MNEMO_ENTREE_ANA:
             g_snprintf( description, sizeof(description), "%s%04d - %s (%8.2f/%8.2f)",
                         Type_bit_interne_court(new_courbe->mnemo.mnemo_base.type),
-                        new_courbe->mnemo.mnemo_ai.num,
+                        new_courbe->mnemo.mnemo_base.num,
                         new_courbe->mnemo.mnemo_base.libelle,
                         new_courbe->mnemo.mnemo_ai.min, new_courbe->mnemo.mnemo_ai.max );
             break;

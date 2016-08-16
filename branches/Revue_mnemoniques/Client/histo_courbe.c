@@ -119,7 +119,7 @@
        g_free(libelle);
        switch( new_courbe->mnemo.mnemo_base.type )
         { case MNEMO_ENTREE_ANA:
-               new_courbe->mnemo.mnemo_ai.num = rezo_courbe.num;
+               new_courbe->mnemo.mnemo_base.num = rezo_courbe.num;
                gtk_tree_model_get( store, &iter, COLONNE_TYPE_EA, &new_courbe->mnemo.mnemo_ai.type, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_MIN, &new_courbe->mnemo.mnemo_ai.min, -1 );
                gtk_tree_model_get( store, &iter, COLONNE_MAX, &new_courbe->mnemo.mnemo_ai.max, -1 );
