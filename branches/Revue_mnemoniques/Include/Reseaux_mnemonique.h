@@ -112,8 +112,7 @@
 
 /******************************************************* Pour les temporisations **********************************************/
  struct CMD_TYPE_MNEMO_TEMPO
-  { guint  num;                                                                                         /* Numero de la tempo */
-    guint delai_on;                                                     /* delai avant mise à un (fixé par option mnémonique) */
+  { guint delai_on;                                                     /* delai avant mise à un (fixé par option mnémonique) */
     guint delai_off;                                                  /* delai avant mise à zero (fixé par option mnémonique) */
     guint min_on;                            /* Durée minimale pendant laquelle la tempo sera ON (fixé par option mnémonique) */
     guint max_on;                            /* Durée maximale pendant laquelle la tempo sera ON (fixé par option mnémonique) */

@@ -151,7 +151,7 @@
           g_snprintf( Partage->ea[num].confDB.unite, sizeof(Partage->ea[num].confDB.unite), "%s", db->row[4] );
           Partage->ea[num].last_arch = 0;                             /* Mise à zero du champ de la derniere date d'archivage */
           Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                   "Charger_analogInput: Chargement config EA[%d04]=%d", num );
+                   "Charger_analogInput: Chargement config EA[%04d]=%d", num );
         }
        else
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
