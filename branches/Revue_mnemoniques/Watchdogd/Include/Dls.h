@@ -63,8 +63,7 @@
   };
 
  struct DIGITAL_INPUT
-  { struct CMD_TYPE_MNEMO_DI confDB;
-    gboolean etat;
+  { gboolean etat;
   };
 
  struct ANALOG_INPUT

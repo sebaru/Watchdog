@@ -66,12 +66,6 @@
     gchar  tableau[ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
   };
 
-/**************************************************** AddOns pour les Digital Input *******************************************/
- struct CMD_TYPE_MNEMO_DI
-  { gint num; 
-    gboolean furtif;
-  };
-
 /**************************************************** AddOns pour les Analog Input ********************************************/
  #define COURBE_TEMPS_TOP             5                                         /* 1 point = 5 secondes sur la grille courbes */
  enum
@@ -131,8 +125,7 @@
 
  struct CMD_TYPE_MNEMO_FULL
   { struct CMD_TYPE_MNEMO_BASE mnemo_base;
-    union { struct CMD_TYPE_MNEMO_DI mnemo_di;
-            struct CMD_TYPE_MNEMO_AI mnemo_ai;
+    union { struct CMD_TYPE_MNEMO_AI mnemo_ai;
             struct CMD_TYPE_MNEMO_CPT_IMP mnemo_cptimp;
             struct CMD_TYPE_MNEMO_TEMPO mnemo_tempo;
           };

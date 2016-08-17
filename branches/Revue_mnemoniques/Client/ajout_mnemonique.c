@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/ajout_mnemonique.c        Addition/Edition d'un mnemonique Watchdog2.0                          */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       dim 05 déc 2004 14:21:22 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/ajout_mnemonique.c        Addition/Edition d'un mnemonique Watchdog2.0                                              */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                           dim 05 déc 2004 14:21:22 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * ajout_mnemonique.c
  * This file is part of Watchdog
@@ -29,31 +29,30 @@
  
  #include "Reseaux.h"
  
-/********************************* Définitions des prototypes programme ***********************************/
+/********************************************* Définitions des prototypes programme *******************************************/
  #include "protocli.h"
 
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG Config;                                          /* Configuration generale watchdog */
+ extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
+ extern struct CONFIG Config;                                                              /* Configuration generale watchdog */
 
- static GtkWidget *F_ajout;                                            /* Widget de l'interface graphique */
- static GtkWidget *Option_type;         /* Pour le choix d'appartenance du mnemonique à tel ou tel groupe */
+ static GtkWidget *F_ajout;                                                                /* Widget de l'interface graphique */
+ static GtkWidget *Option_type;                             /* Pour le choix d'appartenance du mnemonique à tel ou tel groupe */
  static GtkWidget *Spin_num;
- static GtkWidget *Entry_lib;                                                    /* Libelle du mnemonique */
- static GtkWidget *Entry_acro;                                                  /* Acronyme du mnemonique */
- static GtkWidget *Entry_command;                                          /* Commande_text du mnemonique */
- static GtkWidget *Entry_tableau;                                 /* Tableau d'affichage pour les courbes */
- static GtkWidget *Combo_dls;                                                       /* Synoptique associé */
- static struct CMD_TYPE_MNEMO_FULL Option_mnemo;                         /* Mnemonique en cours d'édition */
+ static GtkWidget *Entry_lib;                                                                        /* Libelle du mnemonique */
+ static GtkWidget *Entry_acro;                                                                      /* Acronyme du mnemonique */
+ static GtkWidget *Entry_command;                                                              /* Commande_text du mnemonique */
+ static GtkWidget *Entry_tableau;                                                     /* Tableau d'affichage pour les courbes */
+ static GtkWidget *Combo_dls;                                                                           /* Synoptique associé */
+ static struct CMD_TYPE_MNEMO_FULL Option_mnemo;                                             /* Mnemonique en cours d'édition */
  static GList *Liste_index_dls;
- static GtkWidget *Table_options_DI;                     /* Table des options associées aux Digital Input */
- static GtkWidget *Table_options_AI;                      /* Table des options associées aux Analog Input */
- static GtkWidget *Table_options_CPTIMP;        /* Table des options associées aux compteurs d'impulsions */
- static GtkWidget *Table_options_Tempo;                  /* Table des options associées aux temporisation */
-/**********************************************************************************************************/
-/* CB_ajouter_editer_mnemonique: Fonction appelée qd on appuie sur un des boutons de l'interface          */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
-/* sortie: TRUE                                                                                           */
-/**********************************************************************************************************/
+ static GtkWidget *Table_options_AI;                                          /* Table des options associées aux Analog Input */
+ static GtkWidget *Table_options_CPTIMP;                            /* Table des options associées aux compteurs d'impulsions */
+ static GtkWidget *Table_options_Tempo;                                      /* Table des options associées aux temporisation */
+/******************************************************************************************************************************/
+/* CB_ajouter_editer_mnemonique: Fonction appelée qd on appuie sur un des boutons de l'interface                              */
+/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
+/* sortie: TRUE                                                                                                               */
+/******************************************************************************************************************************/
  static gboolean CB_ajouter_editer_mnemonique ( GtkDialog *dialog, gint reponse, gboolean edition )
   { gint index;
     g_snprintf( Option_mnemo.mnemo_base.libelle, sizeof(Option_mnemo.mnemo_base.libelle),
@@ -70,8 +69,7 @@
     Option_mnemo.mnemo_base.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
 
     switch ( Option_mnemo.mnemo_base.type )
-     { case MNEMO_ENTREE    : Get_options_DI     ( &Option_mnemo ); break;
-       case MNEMO_ENTREE_ANA: Get_options_AI     ( &Option_mnemo ); break;
+     { case MNEMO_ENTREE_ANA: Get_options_AI     ( &Option_mnemo ); break;
        case MNEMO_CPT_IMP   : Get_options_CPTIMP ( &Option_mnemo ); break;
        case MNEMO_TEMPO     : Get_options_Tempo  ( &Option_mnemo ); break;
      }
@@ -94,11 +92,11 @@
     gtk_widget_destroy(F_ajout);
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Proto_afficher_un_groupe_existant: ajoute un groupe dans la liste des groupes existants                */
-/* Entrée: rien                                                                                           */
-/* sortie: kedal                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_afficher_un_groupe_existant: ajoute un groupe dans la liste des groupes existants                                    */
+/* Entrée: rien                                                                                                               */
+/* sortie: kedal                                                                                                              */
+/******************************************************************************************************************************/
  void Proto_afficher_un_dls_for_mnemonique ( struct CMD_TYPE_PLUGIN_DLS *dls )
   { gchar chaine[512];
     g_snprintf( chaine, sizeof(chaine), "%s/%s/%s", dls->groupe, dls->page, dls->nom );
@@ -110,37 +108,35 @@
                                 );
      }
   }
-/**********************************************************************************************************/
-/* CB_Valider: Simule l'appui sur le bouton OK                                                            */
-/* Entrée: rien                                                                                           */
-/* sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* CB_Valider: Simule l'appui sur le bouton OK                                                                                */
+/* Entrée: rien                                                                                                               */
+/* sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  static void CB_valider ( void )
   { gtk_dialog_response( GTK_DIALOG(F_ajout), GTK_RESPONSE_OK ); } 
-/**********************************************************************************************************/
-/* Rafraichir_sensibilite_options: Cache ou montre la bonne table d'options en fonction du type           */
-/* Entrée : Rien                                                                                          */
-/* Sortie : Rien                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Rafraichir_sensibilite_options: Cache ou montre la bonne table d'options en fonction du type                               */
+/* Entrée : Rien                                                                                                              */
+/* Sortie : Rien                                                                                                              */
+/******************************************************************************************************************************/
  static void Rafraichir_sensibilite_options ( void )
   { gint type;
     type = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
-    gtk_widget_hide ( Table_options_DI );
     gtk_widget_hide ( Table_options_AI );
     gtk_widget_hide ( Table_options_CPTIMP );
     gtk_widget_hide ( Table_options_Tempo );
     switch(type)
      { case MNEMO_ENTREE_ANA: gtk_widget_show_all ( Table_options_AI ); break;
-       case MNEMO_ENTREE    : gtk_widget_show_all ( Table_options_DI ); break;
        case MNEMO_CPT_IMP   : gtk_widget_show_all ( Table_options_CPTIMP ); break;
        case MNEMO_TEMPO     : gtk_widget_show_all ( Table_options_Tempo ); break;
      }
   }
-/**********************************************************************************************************/
-/* Type_changed: Met a jour la range Spinbutton selon le type de mnemonique                               */
-/* Entrée : Rien                                                                                          */
-/* Sortie : Rien                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Type_changed: Met a jour la range Spinbutton selon le type de mnemonique                                                   */
+/* Entrée : Rien                                                                                                              */
+/* Sortie : Rien                                                                                                              */
+/******************************************************************************************************************************/
  static void Type_changed ( void )
   { switch ( gtk_combo_box_get_active ( GTK_COMBO_BOX(Option_type) ) )
      { case MNEMO_BISTABLE:
@@ -179,18 +175,18 @@
      }
     Rafraichir_sensibilite_options();
   }
-/**********************************************************************************************************/
-/* Ajouter_mnemonique: Ajoute un mnemonique au systeme                                                    */
-/* Entrée: rien                                                                                           */
-/* sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Ajouter_mnemonique: Ajoute un mnemonique au systeme                                                                        */
+/* Entrée: rien                                                                                                               */
+/* sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Menu_ajouter_editer_mnemonique ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { GtkWidget *table, *texte, *hboite, *notebook;
     int cpt, i;
 
-    if (mnemo_full)                                                       /* Save pour utilisation future */
+    if (mnemo_full)                                                                           /* Save pour utilisation future */
        { memcpy( &Option_mnemo, mnemo_full, sizeof(struct CMD_TYPE_MNEMO_FULL) ); }
-    else memset (&Option_mnemo, 0, sizeof(struct CMD_TYPE_MNEMO_FULL) );           /* Sinon RAZ structure */
+    else memset (&Option_mnemo, 0, sizeof(struct CMD_TYPE_MNEMO_FULL) );                               /* Sinon RAZ structure */
 
     if (mnemo_full)
      { F_ajout = gtk_dialog_new_with_buttons( _("Edit a mnemonic"),
@@ -218,7 +214,7 @@
     gtk_container_set_border_width( GTK_CONTAINER(notebook), 6 );
     gtk_notebook_set_scrollable (GTK_NOTEBOOK(notebook), TRUE );
 
-/************************************* Premiere page : les paramètres communs *****************************/
+/********************************************** Premiere page : les paramètres communs ****************************************/
     hboite = gtk_hbox_new( FALSE, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_notebook_append_page( GTK_NOTEBOOK(notebook), hboite, gtk_label_new ( _("Common Settings") ) );
@@ -229,7 +225,7 @@
     gtk_box_pack_start( GTK_BOX(hboite), table, FALSE, FALSE, 0 );
 
     i=0;
-    texte = gtk_label_new( _("Type") );  /* Création de l'option menu pour le choix du type de mnemonique */
+    texte = gtk_label_new( _("Type") );                      /* Création de l'option menu pour le choix du type de mnemonique */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Option_type = gtk_combo_box_new_text();
     for ( cpt=0; cpt<NBR_TYPE_MNEMO; cpt++ )
@@ -280,38 +276,33 @@
     Type_changed();
     g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(CB_valider), NULL );
 
-/************************************** Seconde page : les options ****************************************/
+/************************************************* Seconde page : les options *************************************************/
     hboite = gtk_hbox_new( FALSE, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_notebook_append_page( GTK_NOTEBOOK(notebook), hboite, gtk_label_new ( _("Specific Options") ) );
 
     gtk_widget_show_all( F_ajout );
-/************************************** Seconde page : spéciale Digital Input *****************************/
-    Table_options_DI = Get_options_DI_gtktable();
-    gtk_table_set_row_spacings( GTK_TABLE(Table_options_DI), 5 );
-    gtk_table_set_col_spacings( GTK_TABLE(Table_options_DI), 5 );
-    gtk_box_pack_start( GTK_BOX(hboite), Table_options_DI, TRUE, TRUE, 0 );
-
-/************************************** Seconde page : spéciale analog Input ******************************/
+	
+/*********************************************** Seconde page : spéciale analog Input *****************************************/
     Table_options_AI = Get_options_AI_gtktable();
     gtk_table_set_row_spacings( GTK_TABLE(Table_options_AI), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(Table_options_AI), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), Table_options_AI, TRUE, TRUE, 0 );
 
-/************************************** Seconde page : spéciale compteur impulsion ************************/
+/*********************************************** Seconde page : spéciale compteur impulsion ***********************************/
     Table_options_CPTIMP = Get_options_CPTIMP_gtktable();
     gtk_table_set_row_spacings( GTK_TABLE(Table_options_CPTIMP), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(Table_options_CPTIMP), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), Table_options_CPTIMP, TRUE, TRUE, 0 );
 
-/************************************** Seconde page : spéciale temporisations ****************************/
+/*********************************************** Seconde page : spéciale temporisations ***************************************/
     Table_options_Tempo = Get_options_Tempo_gtktable();
     gtk_table_set_row_spacings( GTK_TABLE(Table_options_Tempo), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(Table_options_Tempo), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), Table_options_Tempo, TRUE, TRUE, 0 );
 
-/**************************************** Positionnement des infos d'edition ******************************/
-    if (mnemo_full)                                                         /* Si edition d'un mnemonique */
+/************************************************* Positionnement des infos d'edition *****************************************/
+    if (mnemo_full)                                                                             /* Si edition d'un mnemonique */
      { gtk_entry_set_text( GTK_ENTRY(Entry_lib),     mnemo_full->mnemo_base.libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_acro),    mnemo_full->mnemo_base.acronyme );
        gtk_entry_set_text( GTK_ENTRY(Entry_command), mnemo_full->mnemo_base.command_text );
@@ -319,8 +310,7 @@
        gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type), mnemo_full->mnemo_base.type );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), (double)mnemo_full->mnemo_base.num );
 
-/****************************************** Spécifique Options ********************************************/
-       Set_options_DI ( mnemo_full );
+/***************************************************** Spécifique Options *****************************************************/
        Set_options_AI ( mnemo_full );
        Set_options_CPTIMP ( mnemo_full );
        Set_options_Tempo ( mnemo_full );
@@ -329,4 +319,4 @@
     gtk_widget_grab_focus( Entry_lib );
     Rafraichir_sensibilite_options();
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
