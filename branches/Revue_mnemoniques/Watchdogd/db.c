@@ -473,7 +473,12 @@
      { g_snprintf( requete, sizeof(requete), "RENAME TABLE dls_cpth TO mnemos_CptHoraire" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
-    database_version=2847;
+
+    if (database_version < 2850)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_CptHoraire` CHANGE `val` `valeur` INT(11) NOT NULL" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }    database_version=2850;
+
     Libere_DB_SQL(&db);
 
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
