@@ -93,7 +93,7 @@ INSERT INTO `dls` (`id`, `type`, `num_syn`, `name`, `actif`, `compil_date`, `com
 -- --------------------------------------------------------
 
 --
--- Structure de la table `dls_cpth`
+-- Structure de la table `mnemos_CptHoraire`
 --
 
 CREATE TABLE IF NOT EXISTS `dls_cpth` (

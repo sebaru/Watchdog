@@ -34,6 +34,7 @@
 
  #define NOM_TABLE_MNEMO        "mnemos"
  #define NOM_TABLE_MNEMO_AI     "mnemos_AnalogInput"
+ #define NOM_TABLE_MNEMO_CPTH   "mnemos_CptHoraire"
  #define NOM_TABLE_MNEMO_CPTIMP "mnemos_CptImp"
  #define NOM_TABLE_MNEMO_TEMPO  "mnemos_Tempo"
 
@@ -56,9 +57,14 @@
 
 
  extern void Updater_cpt_impDB ( void );                                                              /* Dans Mnemo_CPT_IMP.c */
+ extern void Charger_cpt_imp ( void );
  extern struct CMD_TYPE_MNEMO_CPT_IMP *Rechercher_mnemo_cptimpDB ( guint id );
  extern gboolean Modifier_mnemo_cptimpDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
- extern void Charger_cpt_imp ( void );
+
+ extern void Updater_cpthDB ( void );                                                                   /* Dans Mnemo_CPT_H.c */
+ extern void Charger_cpth ( void );
+ extern struct CMD_TYPE_MNEMO_CPT_H *Rechercher_mnemo_cpthDB ( guint id );
+ extern gboolean Modifier_mnemo_cpthDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
 
  extern void Charger_tempo ( void );                                                                    /* Dans Mnemo_tempo.c */
  extern struct CMD_TYPE_MNEMO_TEMPO *Rechercher_mnemo_tempoDB ( guint id );

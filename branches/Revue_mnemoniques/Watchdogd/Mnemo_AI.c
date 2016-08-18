@@ -126,7 +126,13 @@
   { gchar requete[512];
     struct DB *db;
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_analogInput: Connexion DB impossible" );
+       return;
+     }
+
+     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT num,min,max,%s.type,%s.unite"
                 " FROM %s"
                 " INNER JOIN %s ON %s.id_mnemo = %s.id ORDER BY num",

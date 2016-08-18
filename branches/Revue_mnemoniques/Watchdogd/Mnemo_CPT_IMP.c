@@ -127,7 +127,12 @@
   { gchar requete[512];
     struct DB *db;
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_cpt_impDB: Connexion DB impossible" );
+       return;
+     }
+         g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT num,val,type_ci,multi,unite_string"
                 " FROM %s"
                 " INNER JOIN %s ON %s.id_mnemo = %s.id ORDER BY num",
@@ -160,8 +165,8 @@
   }
 /******************************************************************************************************************************/
 /* Ajouter_cpt_impDB: Ajout ou edition d'un entreeANA                                                                         */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure cpt_imp                                           */
-/* Sortie: false si probleme                                                                                                  */
+/* Entrée: néant                                                                                                              */
+/* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Updater_cpt_impDB ( void )
   { struct CMD_TYPE_MNEMO_CPT_IMP *cpt_imp;

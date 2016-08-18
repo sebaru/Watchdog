@@ -84,7 +84,7 @@
   };
 
  struct CPT_HORAIRE
-  { struct CPTH_DB cpthdb;
+  { struct CMD_TYPE_MNEMO_CPT_H confDB;
     guint last_arch;                                 /* Date de dernier enregistrement en base de données */
     guint old_top;                                                     /* Date de debut du comptage du CH */
     gboolean actif;

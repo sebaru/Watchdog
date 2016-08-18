@@ -121,6 +121,11 @@
   { gchar requete[512];
     struct DB *db;
 
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_tempo: Connexion DB impossible" );
+       return;
+     }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT num, %s.delai_on,%s.min_on,%s.max_on,%s.delai_off"

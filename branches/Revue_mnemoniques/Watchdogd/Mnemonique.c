@@ -69,7 +69,7 @@
                break;
           case MNEMO_CPTH:
                g_snprintf( requete, sizeof(requete),                                                           /* Requete SQL */
-               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_CPTH, mnemo_a_virer->id );
+               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_MNEMO_CPTH, mnemo_a_virer->id );
                Lancer_requete_SQL ( db, requete );
                break;
           case MNEMO_TEMPO:
@@ -161,6 +161,7 @@
   { switch (mnemo_full->mnemo_base.type)
      { case MNEMO_ENTREE_ANA: return( Modifier_mnemo_aiDB     ( mnemo_full ) );
        case MNEMO_CPT_IMP   : return( Modifier_mnemo_cptimpDB ( mnemo_full ) );
+       case MNEMO_CPTH      : return( Modifier_mnemo_cpthDB   ( mnemo_full ) );
        case MNEMO_TEMPO     : return( Modifier_mnemo_tempoDB  ( mnemo_full ) );
        default : return(TRUE);
      }
