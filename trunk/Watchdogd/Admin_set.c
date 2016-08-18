@@ -54,7 +54,7 @@
      { int num, val, actif;
        sscanf ( ligne, "%s %d %d %d", commande, &num, &val, &actif );                    /* Découpage de la ligne de commande */
        if (num<NBR_COMPTEUR_H)
-        { Partage->ch[num].cpthdb.valeur = val;
+        { Partage->ch[num].confDB.valeur = val;
           Partage->ch[num].actif = actif;
           g_snprintf( chaine, sizeof(chaine), " CH%03d = %d\n", num, val );
         } else

@@ -170,8 +170,7 @@
 /* Entrée: néant                                                                                          */
 /**********************************************************************************************************/
  void Charger_config_bit_interne( void )
-  { Charger_digitalInput();
-    Charger_analogInput();
+  { Charger_analogInput();
     Charger_cpth();
     Charger_cpt_imp();
     Charger_tempo();

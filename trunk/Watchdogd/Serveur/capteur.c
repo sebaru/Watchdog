@@ -46,7 +46,7 @@
        case MNEMO_ENTREE_ANA:
             return( TRUE );
        case MNEMO_CPTH:
-            return( capteur->val_ech != Partage->ch[capteur->bit_controle].cpthdb.valeur );
+            return( capteur->val_ech != Partage->ch[capteur->bit_controle].confDB.valeur );
        case MNEMO_CPT_IMP:
             return( capteur->val_ech != Partage->ci[capteur->bit_controle].confDB.valeur );
        default: return(FALSE);
@@ -105,11 +105,11 @@
             return(etat_capteur);
        case MNEMO_CPTH:
              { time_t valeur;
-               valeur = (time_t)Partage->ch[capteur->bit_controle].cpthdb.valeur / 60;
+               valeur = (time_t)Partage->ch[capteur->bit_controle].confDB.valeur / 60;
                g_snprintf( etat_capteur->libelle, sizeof(etat_capteur->libelle),
                            "%05dh", (int)valeur
                          );
-               capteur->val_ech = Partage->ch[capteur->bit_controle].cpthdb.valeur;
+               capteur->val_ech = Partage->ch[capteur->bit_controle].confDB.valeur;
              }
             break;
        case MNEMO_CPT_IMP:

@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdog/db.c          Gestion des connexions à la base de données                                     */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 18 avr 2009 00:44:37 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdog/db.c          Gestion des connexions à la base de données                                                         */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          sam 18 avr 2009 00:44:37 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * db.c
  * This file is part of Watchdog
@@ -28,21 +28,21 @@
  #include <glib.h>
  #include <string.h>
 
-/******************************************** Chargement des prototypes ***********************************/
+/**************************************************** Chargement des prototypes ***********************************************/
  #include "watchdogd.h"
 
-/**********************************************************************************************************/
-/* Normaliser_chaine: Normalise les chaines ( remplace ' par \', " par "" )                               */
-/* Entrées: un commentaire (gchar *)                                                                      */
-/* Sortie: boolean false si probleme                                                                      */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Normaliser_chaine: Normalise les chaines ( remplace ' par \', " par "" )                                                   */
+/* Entrées: un commentaire (gchar *)                                                                                          */
+/* Sortie: boolean false si probleme                                                                                          */
+/******************************************************************************************************************************/
  gchar *Normaliser_chaine( gchar *pre_comment )
   { gchar *comment, *source, *cible;
     gunichar car;
 
-    g_utf8_validate( pre_comment, -1, NULL );                                       /* Validate la chaine */
-    comment = g_try_malloc0( (2*g_utf8_strlen(pre_comment, -1))*6 + 1 );  /* Au pire, ts les car sont doublés */
-                                                                                  /* *6 pour gerer l'utf8 */
+    g_utf8_validate( pre_comment, -1, NULL );                                                           /* Validate la chaine */
+    comment = g_try_malloc0( (2*g_utf8_strlen(pre_comment, -1))*6 + 1 );                  /* Au pire, ts les car sont doublés */
+                                                                                                      /* *6 pour gerer l'utf8 */
     if (!comment)
      { Info_new( Config.log, Config.log_db, LOG_WARNING, "Normaliser_chaine: memory error %s", pre_comment );
        return(NULL);
@@ -51,11 +51,11 @@
     cible  = comment;
     
     while( (car = g_utf8_get_char( source )) )
-     { if ( car == '\'' )                                                 /* Dédoublage de la simple cote */
+     { if ( car == '\'' )                                                                     /* Dédoublage de la simple cote */
         { g_utf8_strncpy( cible, "\'", 1 ); cible = g_utf8_next_char( cible );
           g_utf8_strncpy( cible, "\'", 1 ); cible = g_utf8_next_char( cible );
         }
-       else if (car =='\\')                                                    /* Dédoublage du backspace */
+       else if (car =='\\')                                                                        /* Dédoublage du backspace */
         { g_utf8_strncpy( cible, "\\", 1 ); cible = g_utf8_next_char( cible );
           g_utf8_strncpy( cible, "\\", 1 ); cible = g_utf8_next_char( cible );
         }
@@ -66,18 +66,18 @@
      }
     return(comment);
   }
-/**********************************************************************************************************/
-/* Init_DB_SQL: essai de connexion à la DataBase db                                                       */
-/* Entrée: toutes les infos necessaires a la connexion                                                    */
-/* Sortie: une structure DB de référence                                                                  */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Init_DB_SQL: essai de connexion à la DataBase db                                                                           */
+/* Entrée: toutes les infos necessaires a la connexion                                                                        */
+/* Sortie: une structure DB de référence                                                                                      */
+/******************************************************************************************************************************/
  struct DB *Init_DB_SQL ( void )
   { static gint id = 1, taille;
     struct DB *db;
     my_bool reconnect;
 
     db = (struct DB *)g_try_malloc0( sizeof(struct DB) );
-    if (!db)                                                          /* Si probleme d'allocation mémoire */
+    if (!db)                                                                              /* Si probleme d'allocation mémoire */
      { Info_new( Config.log, Config.log_db, LOG_ERR, "Init_DB_SQL: Memory error" );
        return(NULL);
      }
@@ -112,10 +112,10 @@
                Config.db_username, Config.db_host, Config.db_port, Config.db_database, db->id, taille );
     return(db);
   }
-/**********************************************************************************************************/
-/* Libere_DB_SQL : Se deconnecte d'une base de données en parametre                                       */
-/* Entrée: La DB                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Libere_DB_SQL : Se deconnecte d'une base de données en parametre                                                           */
+/* Entrée: La DB                                                                                                              */
+/******************************************************************************************************************************/
  void Libere_DB_SQL( struct DB **adr_db )
   { struct DB *db, *db_en_cours;
     gboolean found;
@@ -123,7 +123,7 @@
     gint taille;
     if ( (!adr_db) || !(*adr_db) ) return;
 
-    db = *adr_db;                                                   /* Récupération de l'adresse de la db */
+    db = *adr_db;                                                                       /* Récupération de l'adresse de la db */
     found = FALSE;
     pthread_mutex_lock ( &Partage->com_db.synchro );
     liste = Partage->com_db.Liste;
@@ -155,13 +155,13 @@
              "Libere_DB_SQL: Deconnexion effective (id=%05d), Nbr_requete_en_cours=%d", db->id, taille );
     g_free( db );
     *adr_db = NULL;
-    SEA ( NUM_EA_SYS_DBREQUEST_SIMULT, taille );                        /* Enregistrement pour historique */
+    SEA ( NUM_EA_SYS_DBREQUEST_SIMULT, taille );                                            /* Enregistrement pour historique */
   }
-/**********************************************************************************************************/
-/* Lancer_requete_SQL : lance une requete en parametre, sur la structure de reférence                     */
-/* Entrée: La DB, la requete                                                                              */
-/* Sortie: TRUE si pas de souci                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Lancer_requete_SQL : lance une requete en parametre, sur la structure de reférence                                         */
+/* Entrée: La DB, la requete                                                                                                  */
+/* Sortie: TRUE si pas de souci                                                                                               */
+/******************************************************************************************************************************/
  gboolean Lancer_requete_SQL ( struct DB *db, gchar *requete )
   { if (!db) return(FALSE);
 
@@ -170,7 +170,7 @@
                 "Lancer_requete_SQL (id=%05d): Reste un result a FREEer!", db->id );
      }
 
-    g_snprintf( db->requete, sizeof(db->requete), "%s", requete );                  /* Save for later use */
+    g_snprintf( db->requete, sizeof(db->requete), "%s", requete );                                      /* Save for later use */
     Info_new( Config.log, Config.log_db, LOG_DEBUG,
              "Lancer_requete_SQL (id=%05d): NEW    (%s)", db->id, requete );
     if ( mysql_query ( db->mysql, requete ) )
@@ -198,11 +198,11 @@
              "Lancer_requete_SQL (id=%05d): OK     (%s)", db->id, requete );
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Liberer_resultat_SQL: Libere la mémoire affectée au resultat SQL                                       */
-/* Entrée: la DB                                                                                          */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Liberer_resultat_SQL: Libere la mémoire affectée au resultat SQL                                                           */
+/* Entrée: la DB                                                                                                              */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Liberer_resultat_SQL ( struct DB *db )
   { if (db)
      { while( db->row ) Recuperer_ligne_SQL ( db );
@@ -212,30 +212,30 @@
       /*Info( Config.log, DEBUG_DB, "Liberer_resultat_SQL: free OK" );*/
      }
   }
-/**********************************************************************************************************/
-/* Recuperer_ligne_SQL: Renvoie les lignes resultat, une par une                                          */
-/* Entrée: la DB                                                                                          */
-/* Sortie: La ligne ou NULL si il n'y en en plus                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Recuperer_ligne_SQL: Renvoie les lignes resultat, une par une                                                              */
+/* Entrée: la DB                                                                                                              */
+/* Sortie: La ligne ou NULL si il n'y en en plus                                                                              */
+/******************************************************************************************************************************/
  MYSQL_ROW Recuperer_ligne_SQL ( struct DB *db )
   { if (!db) return(NULL);
     db->row = mysql_fetch_row(db->result);
     return( db->row );
   }
-/**********************************************************************************************************/
-/* Recuperer_last_ID_SQL: Renvoie le dernier ID inséré                                                    */
-/* Entrée: la DB                                                                                          */
-/* Sortie: Le dernier ID                                                                                  */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Recuperer_last_ID_SQL: Renvoie le dernier ID inséré                                                                        */
+/* Entrée: la DB                                                                                                              */
+/* Sortie: Le dernier ID                                                                                                      */
+/******************************************************************************************************************************/
  guint Recuperer_last_ID_SQL ( struct DB *db )
   { if (!db) return(0);
     return ( mysql_insert_id(db->mysql) );
   }
-/**********************************************************************************************************/
-/* Print_SQL_status : permet de logguer le statut SQL                                                     */
-/* Entrée: néant                                                                                          */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Print_SQL_status : permet de logguer le statut SQL                                                                         */
+/* Entrée: néant                                                                                                              */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  void Print_SQL_status ( void )
   { GSList *liste;
     pthread_mutex_lock ( &Partage->com_db.synchro );
@@ -260,8 +260,8 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Update_database_schema ( void )
-  { gint database_version, server_major, server_minor, server_svnrev;
-    gchar chaine[32], requete[4096];
+  { gchar chaine[32], requete[4096];
+    gint database_version;
     gchar *nom, *valeur;
     struct DB *db;
 
@@ -469,18 +469,27 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
+    if (database_version < 2847)
+     { g_snprintf( requete, sizeof(requete), "RENAME TABLE dls_cpth TO mnemos_CptHoraire" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 2850)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_CptHoraire` CHANGE `val` `valeur` INT(11) NOT NULL" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+    database_version=2850;
+
     Libere_DB_SQL(&db);
 
-    sscanf ( VERSION, "%d.%d.%d", &server_major, &server_minor, &server_svnrev );
-    g_snprintf( chaine, sizeof(chaine), "%d", server_svnrev );
+    g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
-                "Update_database_schema: updating Database_version to %d OK", server_svnrev );
+                "Update_database_schema: updating Database_version to %s OK", chaine );
      }
     else
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
-                "Update_database_schema: updating Database_version to %d FAILED", server_svnrev );
+                "Update_database_schema: updating Database_version to %s FAILED", chaine );
      }
-
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

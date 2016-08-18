@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Mnemo_CPT_IMP.c      Déclaration des fonctions pour la gestion des cpt_imp                                       */
+/* Watchdogd/Mnemo_CPT_IMP.c      Déclaration des fonctions pour la gestion des compteurs d'impulsions                        */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                         mar. 07 déc. 2010 17:26:52 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -36,70 +36,9 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Recuperer_liste_id_entreeanaDB: Recupération de la liste des ids des entreeANAs                                            */
-/* Entrée: un log et une database                                                                                             */
-/* Sortie: une GList                                                                                                          */
-/******************************************************************************************************************************/
- static gboolean Recuperer_mnemo_cptimpDB ( struct DB **db_retour )
-  { gchar requete[512];
-    gboolean retour;
-    struct DB *db;
-
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_mnemo_cptimpDB: Connexion DB impossible" );
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT num,val,type_ci,multi,unite_string"
-                " FROM %s"
-                " INNER JOIN %s ON %s.id_mnemo = %s.id"
-                " WHERE %s.type=%d ORDER BY %s.num",
-                NOM_TABLE_MNEMO,                                                                                      /* From */
-                NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO,                                /* INNER JOIN */
-                NOM_TABLE_MNEMO, MNEMO_CPT_IMP,                                                                      /* WHERE */
-                NOM_TABLE_MNEMO                                                                                   /* Order by */
-              );
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    if (retour == FALSE) Libere_DB_SQL (&db);
-    *db_retour = db;
-    return ( retour );
-  }
-/******************************************************************************************************************************/
-/* Recuperer_liste_id_entreeanaDB: Recupération de la liste des ids des entreeANAs                                            */
-/* Entrée: un log et une database                                                                                             */
-/* Sortie: une GList                                                                                                          */
-/******************************************************************************************************************************/
- static struct CMD_TYPE_MNEMO_CPT_IMP *Recuperer_mnemo_cptimpDB_suite( struct DB **db_orig )
-  { struct CMD_TYPE_MNEMO_CPT_IMP *cpt_imp;
-
-    struct DB *db;
-
-    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       return(NULL);
-     }
-
-    cpt_imp = (struct CMD_TYPE_MNEMO_CPT_IMP *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_CPT_IMP) );
-    if (!cpt_imp) Info_new( Config.log, FALSE, LOG_WARNING, "Recuperer_mnemo_cptimpDB_suite: Erreur allocation mémoire" );
-    else
-     { cpt_imp->num      = atoi(db->row[0]);
-       cpt_imp->valeur   = atof(db->row[1]);
-       cpt_imp->type     = atoi(db->row[2]);
-       cpt_imp->multi    = atof(db->row[3]);
-       g_snprintf( cpt_imp->unite, sizeof(cpt_imp->unite), "%s", db->row[4] );
-     }
-    return(cpt_imp);
-  }
-/******************************************************************************************************************************/
-/* Recuperer_liste_id_cpt_impDB: Recupération de la liste des ids des entreeANAs                                              */
-/* Entrée: un log et une database                                                                                             */
-/* Sortie: une GList                                                                                                          */
+/* Rechercher_mnemocpt_impDB: Recherche les valeurs en DB du compteurs d'impulsion dont l'id est en parametre                 */
+/* Entrée: un id_mnemo                                                                                                        */
+/* Sortie: les valeurs en base du compteur                                                                                    */
 /******************************************************************************************************************************/
  struct CMD_TYPE_MNEMO_CPT_IMP *Rechercher_mnemo_cptimpDB ( guint id )
   { struct CMD_TYPE_MNEMO_CPT_IMP *cpt_imp;
@@ -113,13 +52,13 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT num,val,type_ci,multi,unite_string"
+                "SELECT val,type_ci,multi,unite_string"
                 " FROM %s"
-                " INNER JOIN %s ON %s.id_mnemo = %s.id"
-                " WHERE %s.id=%d",
-                NOM_TABLE_MNEMO,                                                                                      /* From */
-                NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO,                                /* INNER JOIN */
-                NOM_TABLE_MNEMO, id
+                " INNER JOIN %s ON id_mnemo = id"
+                " WHERE id=%d LIMIT 1",
+                NOM_TABLE_MNEMO_CPTIMP,                                                                               /* From */
+                NOM_TABLE_MNEMO,                                                                                /* INNER JOIN */
+                id
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
@@ -127,8 +66,20 @@
        return(NULL);
      }
 
-    cpt_imp = Recuperer_mnemo_cptimpDB_suite( &db );
-    if (cpt_imp) Libere_DB_SQL( &db );
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
+
+    cpt_imp = (struct CMD_TYPE_MNEMO_CPT_IMP *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_CPT_IMP) );
+    if (!cpt_imp) Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Recuperer_mnemo_cptimpDB_suite: Erreur allocation mémoire" );
+    else
+     { cpt_imp->valeur   = atof(db->row[0]);
+       cpt_imp->type     = atoi(db->row[1]);
+       cpt_imp->multi    = atof(db->row[2]);
+       g_snprintf( cpt_imp->unite, sizeof(cpt_imp->unite), "%s", db->row[3] );
+     }
     return(cpt_imp);
   }
 /******************************************************************************************************************************/
@@ -143,7 +94,7 @@
 
     unite = Normaliser_chaine ( mnemo_full->mnemo_cptimp.unite );                            /* Formatage correct des chaines */
     if (!unite)
-     { Info_new( Config.log, FALSE, LOG_WARNING, "Modifier_mnemo_cptimpDB: Normalisation unite impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_mnemo_cptimpDB: Normalisation unite impossible" );
        return(FALSE);
      }
 
@@ -173,26 +124,50 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Charger_cpt_imp ( void )
-  { struct CMD_TYPE_MNEMO_CPT_IMP *cpt_imp;
+  { gchar requete[512];
     struct DB *db;
 
-    if (!Recuperer_mnemo_cptimpDB( &db )) return;
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_cpt_impDB: Connexion DB impossible" );
+       return;
+     }
 
-    while ( cpt_imp = Recuperer_mnemo_cptimpDB_suite( &db ) )
-     { if (cpt_imp->num < NBR_COMPTEUR_IMP)
-        { memcpy ( &Partage->ci[cpt_imp->num].confDB, cpt_imp, sizeof(struct CMD_TYPE_MNEMO_CPT_IMP) );
-          Partage->ci[cpt_imp->num].val_en_cours2 = Partage->ci[cpt_imp->num].confDB.valeur;      /* Init */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT num,val,type_ci,multi,unite_string"
+                " FROM %s"
+                " INNER JOIN %s ON id_mnemo = id ORDER BY num",
+                NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO );
+
+    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
+     { Libere_DB_SQL (&db);
+       return;
+     }
+
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    while ( db->row )
+     { gint num;
+       num = atoi( db->row[0] );
+       if (num < NBR_COMPTEUR_IMP)
+        { Partage->ci[num].confDB.valeur = atof( db->row[1] );
+          Partage->ci[num].confDB.type   = atoi( db->row[2] );
+          Partage->ci[num].confDB.multi  = atoi( db->row[3] );
+          g_snprintf( Partage->ci[num].confDB.unite, sizeof(Partage->ci[num].confDB.unite), "%s", db->row[4] );
+          Partage->ci[num].val_en_cours2 = Partage->ci[num].confDB.valeur;                                            /* Init */
+          Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+                    "Charger_cpt_imp: Chargement config CI[%04d]", num );
         }
        else
-        { Info_new( Config.log, FALSE, LOG_WARNING, "Charger_cpt_imp: cpt_imp->num (%d) out of range", cpt_imp->num ); }
-       g_free(cpt_imp);
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+			       "Charger_cpt_imp: num (%d) out of range (max=%d)", num, NBR_COMPTEUR_IMP ); }
+       Recuperer_ligne_SQL(db);                                                            /* Chargement d'une ligne resultat */
      }
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Charger_cpt_imp: DB reloaded" );
   }
 /******************************************************************************************************************************/
 /* Ajouter_cpt_impDB: Ajout ou edition d'un entreeANA                                                                         */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure cpt_imp                                           */
-/* Sortie: false si probleme                                                                                                  */
+/* Entrée: néant                                                                                                              */
+/* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Updater_cpt_impDB ( void )
   { struct CMD_TYPE_MNEMO_CPT_IMP *cpt_imp;
@@ -211,7 +186,7 @@
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "UPDATE %s JOIN %s ON id_mnemo=id SET val='%f' WHERE num='%d';",
                    NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO,
-                   cpt_imp->valeur, cpt_imp->num );
+                   cpt_imp->valeur, cpt );
        Lancer_requete_SQL ( db, requete );
      }
     Libere_DB_SQL( &db );

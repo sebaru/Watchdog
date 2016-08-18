@@ -63,8 +63,7 @@
   };
 
  struct DIGITAL_INPUT
-  { struct CMD_TYPE_MNEMO_DI confDB;
-    gboolean etat;
+  { gboolean etat;
   };
 
  struct ANALOG_INPUT
@@ -82,6 +81,13 @@
     gfloat val_en_cours2;                                         /* valeur en cours avant interprétation selon le type de CI */
     time_t last_update;                                                   /* date de derniere update de la valeur du compteur */
     guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
+  };
+
+ struct CPT_HORAIRE
+  { struct CMD_TYPE_MNEMO_CPT_H confDB;
+    guint last_arch;                                 /* Date de dernier enregistrement en base de données */
+    guint old_top;                                                     /* Date de debut du comptage du CH */
+    gboolean actif;
   };
 
  struct SORTIE_TOR                                                                             /* Définition d'une sortie TOR */
