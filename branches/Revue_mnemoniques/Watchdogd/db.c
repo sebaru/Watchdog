@@ -477,7 +477,8 @@
     if (database_version < 2850)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_CptHoraire` CHANGE `val` `valeur` INT(11) NOT NULL" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
-     }    database_version=2850;
+     }
+    database_version=2850;
 
     Libere_DB_SQL(&db);
 

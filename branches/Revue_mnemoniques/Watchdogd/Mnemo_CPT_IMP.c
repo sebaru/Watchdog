@@ -54,11 +54,11 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT val,type_ci,multi,unite_string"
                 " FROM %s"
-                " INNER JOIN %s ON %s.id_mnemo = %s.id"
-                " WHERE %s.id=%d LIMIT 1",
-                NOM_TABLE_MNEMO,                                                                                      /* From */
-                NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO,                                /* INNER JOIN */
-                NOM_TABLE_MNEMO, id
+                " INNER JOIN %s ON id_mnemo = id"
+                " WHERE id=%d LIMIT 1",
+                NOM_TABLE_MNEMO_CPTIMP,                                                                               /* From */
+                NOM_TABLE_MNEMO,                                                                                /* INNER JOIN */
+                id
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
@@ -132,11 +132,12 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_cpt_impDB: Connexion DB impossible" );
        return;
      }
-         g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT num,val,type_ci,multi,unite_string"
                 " FROM %s"
-                " INNER JOIN %s ON %s.id_mnemo = %s.id ORDER BY num",
-                NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO_CPTIMP );
+                " INNER JOIN %s ON id_mnemo = id ORDER BY num",
+                NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
      { Libere_DB_SQL (&db);

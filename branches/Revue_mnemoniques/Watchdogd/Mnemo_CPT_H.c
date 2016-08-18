@@ -54,12 +54,12 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT %s.valeur"
                 " FROM %s"
-                " INNER JOIN %s ON %s.id_mnemo = %s.id"
-                " WHERE %s.id_mnemo=%d LIMIT 1",
+                " INNER JOIN %s ON id_mnemo = id"
+                " WHERE id_mnemo=%d LIMIT 1",
                 NOM_TABLE_MNEMO_CPTH,
                 NOM_TABLE_MNEMO,                                                                                      /* FROM */
-                NOM_TABLE_MNEMO_CPTH, NOM_TABLE_MNEMO_CPTH, NOM_TABLE_MNEMO,                                  /* INNER JOIN */
-                NOM_TABLE_MNEMO_CPTH, id                                                                            /* WHERE */
+                NOM_TABLE_MNEMO_CPTH,                                                                           /* INNER JOIN */
+                id                                                                                                   /* WHERE */
               );
 
    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
@@ -129,10 +129,10 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT num, %s.valeur"
                 " FROM %s"
-                " INNER JOIN %s ON %s.id_mnemo = %s.id ORDER BY num",
+                " INNER JOIN %s ON id_mnemo = id ORDER BY num",
                 NOM_TABLE_MNEMO_CPTH,
                 NOM_TABLE_MNEMO,                                                                                      /* FROM */
-                NOM_TABLE_MNEMO_CPTH, NOM_TABLE_MNEMO_CPTH, NOM_TABLE_MNEMO                                     /* INNER JOIN */
+                NOM_TABLE_MNEMO_CPTH                                                                            /* INNER JOIN */
               );
 
 

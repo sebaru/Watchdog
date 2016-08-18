@@ -54,12 +54,12 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT %s.min,%s.max,%s.type,%s.unite"
                 " FROM %s"
-                " INNER JOIN %s ON %s.id_mnemo = %s.id"
-                " WHERE %s.id_mnemo=%d LIMIT 1",
+                " INNER JOIN %s ON id_mnemo = id"
+                " WHERE id_mnemo=%d LIMIT 1",
                 NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI,
-                NOM_TABLE_MNEMO,                                                                                      /* FROM */
-                NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO,                                        /* INNER JOIN */
-                NOM_TABLE_MNEMO_AI, id                                                                               /* WHERE */
+                NOM_TABLE_MNEMO_AI,                                                                                   /* FROM */
+                NOM_TABLE_MNEMO,                                                                                /* INNER JOIN */
+                id                                                                                                   /* WHERE */
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
@@ -138,13 +138,13 @@
        return;
      }
 
-     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT num,min,max,%s.type,%s.unite"
                 " FROM %s"
-                " INNER JOIN %s ON %s.id_mnemo = %s.id ORDER BY num",
+                " INNER JOIN %s ON id_mnemo = id ORDER BY num",
                 NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI,
                 NOM_TABLE_MNEMO,                                                                                      /* FROM */
-                NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO                                         /* INNER JOIN */
+                NOM_TABLE_MNEMO_AI                                                                              /* INNER JOIN */
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
