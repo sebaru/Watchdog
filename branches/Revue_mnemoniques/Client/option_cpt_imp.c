@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/option_cpt_imp.c        Gestion des options des compteurs d'impulsions Watchdog2.0              */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     mer. 15 déc. 2010 11:38:05 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/option_cpt_imp.c        Gestion des options des compteurs d'impulsions Watchdog2.0                                  */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                         mer. 15 déc. 2010 11:38:05 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * option_cpt_imp.c
  * This file is part of Watchdog
@@ -28,7 +28,7 @@
  #include <gnome.h>
  
  #include "Reseaux.h"
-/********************************* Définitions des prototypes programme ***********************************/
+/******************************************** Définitions des prototypes programme ********************************************/
  #include "protocli.h"
 
  gchar *TYPE_CI[NBR_TYPE_CI] =
@@ -37,24 +37,25 @@
     "Moyenneur (min)"
   };
 
- static GtkWidget *Entry_unite;                                    /* Unite correspondante à l'entrée ana */
- static GtkWidget *Spin_multi;                                              /* Multiplicateur d'affichage */
- static GtkWidget *Option_type;                            /* Type de capteur (totalisateur/moyenneur/..) */
+ static GtkWidget *Entry_unite;                                                           /* Unite correspondante au compteur */
+ static GtkWidget *Spin_multi;                                                                  /* Multiplicateur d'affichage */
+ static GtkWidget *Entry_valeur;                                                          /* Valeur actuelle du compteur (RO) */
+ static GtkWidget *Option_type;                                                /* Type de capteur (totalisateur/moyenneur/..) */
 
-/**********************************************************************************************************/
-/* Type_ci_vers_string: renvoie le type d'ea sous forme de chaine de caractere                            */
-/* Entrée: numéro du type de CI                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Type_ci_vers_string: renvoie le type d'ea sous forme de chaine de caractere                                                */
+/* Entrée: numéro du type de CI                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static gchar *Type_ci_vers_string ( guint type )
   { if (type<NBR_TYPE_CI) return( TYPE_CI[type] );
                      else return ( "Unknown" );
   }
-/**********************************************************************************************************/
-/* CB_ajouter_editer_cpt_imp: Fonction appelée qd on appuie sur un des boutons de l'interface             */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
-/* sortie: TRUE                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* CB_ajouter_editer_cpt_imp: Fonction appelée qd on appuie sur un des boutons de l'interface                                 */
+/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
+/* sortie: TRUE                                                                                                               */
+/******************************************************************************************************************************/
  void Get_options_CPTIMP ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { struct CMD_TYPE_MNEMO_CPT_IMP *mnemo;
     mnemo = &mnemo_full->mnemo_cptimp;
@@ -64,23 +65,23 @@
     mnemo->type  = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type ) );
     mnemo->multi = gtk_spin_button_get_value( GTK_SPIN_BUTTON(Spin_multi) );
   }
-/**********************************************************************************************************/
-/* Ajouter_cpt_imp: Ajoute un cpt_imp au systeme                                                          */
-/* Entrée: rien                                                                                           */
-/* sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Ajouter_cpt_imp: Ajoute un cpt_imp au systeme                                                                              */
+/* Entrée: rien                                                                                                               */
+/* sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  GtkWidget *Get_options_CPTIMP_gtktable ( void )
   { GtkWidget *table, *texte;
     gint cpt, i;
 
-    table = gtk_table_new( 5, 4, TRUE );
+    table = gtk_table_new( 5, 5, TRUE );
 
     i=0;
     texte = gtk_label_new( _("Options for Count Impulse") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 4, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Type") );                                              /* Unite du compteur */
+    texte = gtk_label_new( _("Type") );                                                                  /* Unite du compteur */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Option_type = gtk_combo_box_new_text();
     for ( cpt=0; cpt<NBR_TYPE_CI; cpt++ )
@@ -89,31 +90,41 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Option_type, 1, 4, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Unit") );                                              /* Unite du compteur */
+    texte = gtk_label_new( _("Unit") );                                                                  /* Unite du compteur */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_unite = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_unite), NBR_CARAC_UNITE_MNEMONIQUE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_unite, 1, 4, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Multi") );                                              /* Unite du compteur */
+    texte = gtk_label_new( _("Multi") );                                                        /* Multiplicateur du compteur */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Spin_multi = gtk_spin_button_new_with_range( 0.001, 1000.0, 0.001 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_multi, 1, 4, i, i+1 );
 
+    i++;
+    texte = gtk_label_new( _("Valeur actuelle") );                                           /* Valeur au moment de l'édition */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Entry_valeur = gtk_entry_new();
+    gtk_entry_set_editable( GTK_ENTRY(Entry_valeur), FALSE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_valeur, 1, 4, i, i+1 );
+
     gtk_widget_grab_focus( Entry_unite );
     return(table);
   }
-/**********************************************************************************************************/
-/* Set_options_AI: positionne dans l'IHM les différents champs de l'AnalogInput en parametre              */
-/* Entrée : une structure representant l'AnalogInput                                                      */
-/* Sortie : néant                                                                                         */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Set_options_xx: positionne dans l'IHM les différents champs du capteur en parametre                                        */
+/* Entrée : une structure representant le capteur                                                                             */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
  void Set_options_CPTIMP ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { struct CMD_TYPE_MNEMO_CPT_IMP *mnemo;
+    gchar chaine[32];
     mnemo = &mnemo_full->mnemo_cptimp;
 
     gtk_entry_set_text( GTK_ENTRY(Entry_unite), mnemo->unite );
+    g_snprintf( chaine, sizeof(chaine), "%06.1f", mnemo->valeur );
+    gtk_entry_set_text( GTK_ENTRY(Entry_valeur), chaine );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_multi), mnemo->multi );
     gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type),  mnemo->type  );
   }
