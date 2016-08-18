@@ -55,7 +55,7 @@
                 "SELECT val,type_ci,multi,unite_string"
                 " FROM %s"
                 " INNER JOIN %s ON %s.id_mnemo = %s.id"
-                " WHERE %s.id=%d",
+                " WHERE %s.id=%d LIMIT 1",
                 NOM_TABLE_MNEMO,                                                                                      /* From */
                 NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO,                                /* INNER JOIN */
                 NOM_TABLE_MNEMO, id

@@ -55,7 +55,7 @@
                 "SELECT %s.min,%s.max,%s.type,%s.unite"
                 " FROM %s"
                 " INNER JOIN %s ON %s.id_mnemo = %s.id"
-                " WHERE %s.id_mnemo=%d",
+                " WHERE %s.id_mnemo=%d LIMIT 1",
                 NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI,
                 NOM_TABLE_MNEMO,                                                                                      /* FROM */
                 NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO,                                        /* INNER JOIN */
@@ -64,6 +64,12 @@
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
      { Libere_DB_SQL (&db);
+       return(NULL);
+     }
+
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Libere_DB_SQL( &db );
        return(NULL);
      }
 

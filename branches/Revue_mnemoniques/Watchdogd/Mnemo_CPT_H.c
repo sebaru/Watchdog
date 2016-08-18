@@ -55,7 +55,7 @@
                 "SELECT %s.valeur"
                 " FROM %s"
                 " INNER JOIN %s ON %s.id_mnemo = %s.id"
-                " WHERE %s.id_mnemo=%d",
+                " WHERE %s.id_mnemo=%d LIMIT 1",
                 NOM_TABLE_MNEMO_CPTH,
                 NOM_TABLE_MNEMO,                                                                                      /* FROM */
                 NOM_TABLE_MNEMO_CPTH, NOM_TABLE_MNEMO_CPTH, NOM_TABLE_MNEMO,                                  /* INNER JOIN */
@@ -64,6 +64,12 @@
 
    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
      { Libere_DB_SQL (&db);
+       return(NULL);
+     }
+
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Libere_DB_SQL( &db );
        return(NULL);
      }
 
@@ -104,25 +110,6 @@
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return(retour);
-  }
-/******************************************************************************************************************************/
-/* Recuperer_cpthDB: Recupération de la liste des compteurs horaires                                      */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- gboolean Recuperer_cpthDB ( struct LOG *log, struct DB *db )
-  { gchar requete[512];
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id_mnemo,val,num"
-                " FROM %s,%s WHERE %s.id=%s.id_mnemo AND %s.type=%d ORDER BY %s.num",
-                NOM_TABLE_MNEMO_CPTH, NOM_TABLE_MNEMO, /* From */
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO_CPTH, /* WHERE */
-                NOM_TABLE_MNEMO, MNEMO_CPTH,
-                NOM_TABLE_MNEMO /* Order by */
-              );
-
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
   }
 /******************************************************************************************************************************/
 /* Charger_cpth: Chargement des infos sur les compteurs horaires depuis la DB                                                 */

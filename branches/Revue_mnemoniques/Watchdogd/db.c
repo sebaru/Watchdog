@@ -479,11 +479,11 @@
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
-                "Update_database_schema: updating Database_version to %s OK", database_version );
+                "Update_database_schema: updating Database_version to %s OK", chaine );
      }
     else
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
-                "Update_database_schema: updating Database_version to %s FAILED", database_version );
+                "Update_database_schema: updating Database_version to %s FAILED", chaine );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
