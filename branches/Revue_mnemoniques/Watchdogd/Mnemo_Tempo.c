@@ -130,7 +130,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT num, %s.delai_on,%s.min_on,%s.max_on,%s.delai_off"
                 " FROM %s"
-                " INNER JOIN %s ON %s.id_mnemo = %s.id ORBER BY num",
+                " INNER JOIN %s ON %s.id_mnemo = %s.id ORDER BY num",
                 NOM_TABLE_MNEMO_TEMPO,
                 NOM_TABLE_MNEMO_TEMPO, NOM_TABLE_MNEMO_TEMPO, NOM_TABLE_MNEMO_TEMPO,
                 NOM_TABLE_MNEMO,                                                                                      /* FROM */

@@ -129,7 +129,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT num, %s.valeur"
                 " FROM %s"
-                " INNER JOIN %s ON %s.id_mnemo = %s.id ORBER BY num",
+                " INNER JOIN %s ON %s.id_mnemo = %s.id ORDER BY num",
                 NOM_TABLE_MNEMO_CPTH,
                 NOM_TABLE_MNEMO,                                                                                      /* FROM */
                 NOM_TABLE_MNEMO_CPTH, NOM_TABLE_MNEMO_CPTH, NOM_TABLE_MNEMO                                     /* INNER JOIN */
