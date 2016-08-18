@@ -311,10 +311,10 @@
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), (double)mnemo_full->mnemo_base.num );
 
 /***************************************************** Spécifique Options *****************************************************/
-       Set_options_AI ( mnemo_full );
-       Set_options_CPTIMP ( mnemo_full );
-       Set_options_Tempo ( mnemo_full );
      }
+    Set_options_AI ( mnemo_full );
+    Set_options_CPTIMP ( mnemo_full );
+    Set_options_Tempo ( mnemo_full );
 
     gtk_widget_grab_focus( Entry_lib );
     Rafraichir_sensibilite_options();

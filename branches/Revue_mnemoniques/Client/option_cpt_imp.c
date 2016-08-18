@@ -60,8 +60,7 @@
   { struct CMD_TYPE_MNEMO_CPT_IMP *mnemo;
     mnemo = &mnemo_full->mnemo_cptimp;
 
-    g_snprintf( mnemo->unite, sizeof(mnemo->unite),
-                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_unite) ) );
+    g_snprintf( mnemo->unite, sizeof(mnemo->unite), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_unite) ) );
     mnemo->type  = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type ) );
     mnemo->multi = gtk_spin_button_get_value( GTK_SPIN_BUTTON(Spin_multi) );
   }
@@ -74,7 +73,7 @@
   { GtkWidget *table, *texte;
     gint cpt, i;
 
-    table = gtk_table_new( 5, 5, TRUE );
+    table = gtk_table_new( 5, 4, TRUE );
 
     i=0;
     texte = gtk_label_new( _("Options for Count Impulse") );
@@ -120,12 +119,20 @@
  void Set_options_CPTIMP ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { struct CMD_TYPE_MNEMO_CPT_IMP *mnemo;
     gchar chaine[32];
-    mnemo = &mnemo_full->mnemo_cptimp;
 
-    gtk_entry_set_text( GTK_ENTRY(Entry_unite), mnemo->unite );
-    g_snprintf( chaine, sizeof(chaine), "%06.1f", mnemo->valeur );
-    gtk_entry_set_text( GTK_ENTRY(Entry_valeur), chaine );
-    gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_multi), mnemo->multi );
-    gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type),  mnemo->type  );
+    if (mnemo_full)
+     { mnemo = &mnemo_full->mnemo_cptimp;
+       gtk_entry_set_text( GTK_ENTRY(Entry_unite), mnemo->unite );
+       g_snprintf( chaine, sizeof(chaine), "%06.1f", mnemo->valeur );
+       gtk_entry_set_text( GTK_ENTRY(Entry_valeur), chaine );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_multi), mnemo->multi );
+       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type),  mnemo->type  );
+     }
+    else
+     { gtk_entry_set_text( GTK_ENTRY(Entry_unite), "tics" );
+       gtk_entry_set_text( GTK_ENTRY(Entry_valeur), "none" );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_multi), 1.0 );
+       gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type),  0 );
+     }
   }
 /*--------------------------------------------------------------------------------------------------------*/

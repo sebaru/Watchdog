@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/option_tempo.c        Addition/Edition d'un tempo Watchdog2.0                                   */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     mer. 13 mars 2013 18:41:47 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/option_tempo.c        Addition/Edition d'un tempo Watchdog2.0                                                       */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                         mer. 13 mars 2013 18:41:47 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * option_tempo.c
  * This file is part of Watchdog
@@ -29,22 +29,22 @@
  
  #include "Reseaux.h"
 
-/********************************* Définitions des prototypes programme ***********************************/
+/********************************************* Définitions des prototypes programme *******************************************/
  #include "protocli.h"
 
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG Config;                                          /* Configuration generale watchdog */
+ extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
+ extern struct CONFIG Config;                                                              /* Configuration generale watchdog */
 
- static GtkWidget *Spin_delai_on;                                   /* Delai avant activation de la tempo */
- static GtkWidget *Spin_delai_off;                               /* Delai avant desactivation de la tempo */
- static GtkWidget *Spin_min_on;                                            /* Duree minimale d'activation */
- static GtkWidget *Spin_max_on;                          /* Duree maximale de l'activation (0 = illimité) */
+ static GtkWidget *Spin_delai_on;                                                       /* Delai avant activation de la tempo */
+ static GtkWidget *Spin_delai_off;                                                   /* Delai avant desactivation de la tempo */
+ static GtkWidget *Spin_min_on;                                                                /* Duree minimale d'activation */
+ static GtkWidget *Spin_max_on;                                              /* Duree maximale de l'activation (0 = illimité) */
 
-/**********************************************************************************************************/
-/* Get_options_Tempo: Rempli une structure mnemo depuis les informations de l'ihm                         */
-/* Entrée: le mnemonique a remplir                                                                        */
-/* sortie: TRUE                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Get_options_Tempo: Rempli une structure mnemo depuis les informations de l'ihm                                             */
+/* Entrée: le mnemonique a remplir                                                                                            */
+/* sortie: TRUE                                                                                                               */
+/******************************************************************************************************************************/
  void Get_options_Tempo ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { struct CMD_TYPE_MNEMO_TEMPO *mnemo;
     mnemo = &mnemo_full->mnemo_tempo;
@@ -53,11 +53,11 @@
     mnemo->delai_on  = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON(Spin_delai_on ) );
     mnemo->delai_off = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON(Spin_delai_off) );
   }
-/**********************************************************************************************************/
-/* Get_options_Tempo_gtktable: Renvoie le widget lié à l'édition de la temporisation                      */
-/* Entrée: rien                                                                                           */
-/* sortie: le widget table                                                                                */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Get_options_Tempo_gtktable: Renvoie le widget lié à l'édition de la temporisation                                          */
+/* Entrée: rien                                                                                                               */
+/* sortie: le widget table                                                                                                    */
+/******************************************************************************************************************************/
  GtkWidget *Get_options_Tempo_gtktable ( void )
   { GtkWidget *table, *texte;
     gint i;
@@ -93,17 +93,25 @@
 
     return(table);
   }
-/**********************************************************************************************************/
-/* Set_options_Tempo: Rempli l'ihm depuis une structure mnemo                                             */
-/* Entrée : une structure representant l'AnalogInput                                                      */
-/* Sortie : néant                                                                                         */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Set_options_Tempo: Rempli l'ihm depuis une structure mnemo                                                                 */
+/* Entrée : une structure representant l'AnalogInput                                                                          */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
  void Set_options_Tempo ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { struct CMD_TYPE_MNEMO_TEMPO *mnemo;
-    mnemo = &mnemo_full->mnemo_tempo;
-    gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_min_on),    mnemo->min_on );
-    gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_max_on),    mnemo->max_on );
-    gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_delai_on),  mnemo->delai_on );
-    gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_delai_off), mnemo->delai_off );
+    if (mnemo_full)
+     { mnemo = &mnemo_full->mnemo_tempo;
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_min_on),    mnemo->min_on );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_max_on),    mnemo->max_on );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_delai_on),  mnemo->delai_on );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_delai_off), mnemo->delai_off );
+     }
+    else
+     { gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_min_on),   10 );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_max_on),    0 );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_delai_on),  0 );
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_delai_off), 0 );
+     }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
