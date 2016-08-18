@@ -83,6 +83,13 @@
     guint last_arch;                                                     /* Date de dernier enregistrement en base de données */
   };
 
+ struct CPT_HORAIRE
+  { struct CPTH_DB cpthdb;
+    guint last_arch;                                 /* Date de dernier enregistrement en base de données */
+    guint old_top;                                                     /* Date de debut du comptage du CH */
+    gboolean actif;
+  };
+
  struct SORTIE_TOR                                                                             /* Définition d'une sortie TOR */
   { gchar etat;                                                                                   /* Etat de la sortie 0 ou 1 */
     gint last_change;                                                                    /* Date du dernier changement d'etat */
