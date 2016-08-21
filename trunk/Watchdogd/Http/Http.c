@@ -149,14 +149,14 @@
                   if (retour != 0) return(1);                             /* Si erreur (<0) ou si ok (>0), on ferme la socket */
                   return(0);                    /* si besoin de plus de temps, on laisse la ws http ouverte pour libwebsocket */
                 }
-               else if ( ! strncasecmp ( url, "/ui/", 4 ) )
-                { return( Http_Traiter_request_getui ( wsi, remote_name, remote_ip, url+4 ) ); }
                else if ( ! strcasecmp ( url, "/status" ) )
                 { Http_Traiter_request_getstatus ( wsi ); }
                else if ( ! strncasecmp ( url, "/gif/", 5 ) )
                 { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+5 ) ); }
                else if ( ! strncasecmp ( url, "/audio/", 7 ) )
                 { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+7 ) ); }
+               else                                                                                             /* Par défaut */
+                { return( Http_Traiter_request_getui ( wsi, remote_name, remote_ip, url+1 ) ); }
                return(1);                                                                    /* Par défaut, on clos la socket */
              }
 		          break;
