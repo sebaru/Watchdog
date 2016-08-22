@@ -919,6 +919,13 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                       -1, GTK_ANCHOR_CENTER,
                                                       "font", "arial italic 12",
                                                       NULL);
+
+    trame_capteur->item_acro_syn = goo_canvas_text_new ( trame_capteur->item_groupe,
+                                                        "XXXXXXXXXXXX", 0.0, 50.0, -1, GTK_ANCHOR_CENTER,
+                                                        "font", "arial", "fill_color_rgba", "yellow",
+                                                         NULL );
+
+
     if ( flag )
      { trame_capteur->select_mi = goo_canvas_rect_new (trame_capteur->item_groupe,
                                                        -2.5, -2.5, 7.5, 7.5,

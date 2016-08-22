@@ -160,6 +160,7 @@
     GooCanvasItem *item_groupe;
     GooCanvasItem *item_carre;
     GooCanvasItem *item_entry;
+    GooCanvasItem *item_acro_syn;
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
     struct CMD_TYPE_CAPTEUR *capteur;

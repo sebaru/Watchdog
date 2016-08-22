@@ -89,14 +89,15 @@
         { switch( *((gint *)liste_capteurs->data) )
            { case TYPE_CAPTEUR    : cpt++;                          /* Nous updatons un capteur de plus ! */ 
                                     trame_capteur = (struct TRAME_ITEM_CAPTEUR *)liste_capteurs->data;
-printf("recu %d/%d, capteur=%d/%d\n", etat_capteur->type, etat_capteur->bit_controle,
-       trame_capteur->capteur->type, trame_capteur->capteur->bit_controle );
+
                                     if (etat_capteur->bit_controle == trame_capteur->capteur->bit_controle &&
                                         etat_capteur->type == trame_capteur->capteur->type
                                        )
                                      { printf("Proto_changer_etat_capteur: change %s\n", etat_capteur->libelle );
                                        g_object_set( trame_capteur->item_entry,
                                                      "text", etat_capteur->libelle, NULL );
+                                       g_object_set( trame_capteur->item_acro_syn,
+                                                     "text", etat_capteur->acro_syn, NULL );
                                      }
                                     break;
              case TYPE_MOTIF:

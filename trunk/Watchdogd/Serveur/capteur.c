@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Serveur/capteur.c                Formatage des capteurs Watchdog                             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     ven. 10 déc. 2010 17:13:43 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Serveur/capteur.c                Formatage des capteurs Watchdog                                                 */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                         ven. 10 déc. 2010 17:13:43 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * capteur.c
  * This file is part of Watchdog
@@ -26,16 +26,15 @@
  */
  
  #include <glib.h>
- #include "Module_dls.h"                                                                /* Acces à E et B */
 
-/******************************************** Prototypes de fonctions *************************************/
+/************************************************ Prototypes de fonctions *****************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
-/**********************************************************************************************************/
-/* Tester_update_capteur renvoie TRUE si le capteur doit etre updaté sur le client                        */
-/* Entrée: un capteur                                                                                     */
-/* Sortie: une structure prete à l'envoie                                                                 */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Tester_update_capteur renvoie TRUE si le capteur doit etre updaté sur le client                                            */
+/* Entrée: un capteur                                                                                                         */
+/* Sortie: une structure prete à l'envoie                                                                                     */
+/******************************************************************************************************************************/
  gboolean Tester_update_capteur( struct CAPTEUR *capteur )
   { if (!capteur) return(FALSE);
     switch(capteur->type)
@@ -52,11 +51,11 @@
        default: return(FALSE);
      }
   }
-/**********************************************************************************************************/
-/* Formater_capteur: Formate la structure dédiée capteur pour envoi au client                             */
-/* Entrée: un capteur                                                                                     */
-/* Sortie: une structure prete à l'envoie                                                                 */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Formater_capteur: Formate la structure dédiée capteur pour envoi au client                                                 */
+/* Entrée: un capteur                                                                                                         */
+/* Sortie: une structure prete à l'envoie                                                                                     */
+/******************************************************************************************************************************/
  struct CMD_ETAT_BIT_CAPTEUR *Formater_capteur( struct CAPTEUR *capteur )
   { struct CMD_ETAT_BIT_CAPTEUR *etat_capteur;
 
@@ -67,6 +66,7 @@
 
     etat_capteur->type         = capteur->type;
     etat_capteur->bit_controle = capteur->bit_controle;
+    /**g_snprintf( etat_capteur->acro_syn, sizeof(etat_capteur->acro_syn), "%s", capteur->acro_syn );*/
 
     switch(capteur->type)
      { case MNEMO_BISTABLE:
@@ -116,7 +116,7 @@
              { gfloat valeur;
                gchar *format;
                valeur = Partage->ci[capteur->bit_controle].confDB.valeur;
-               valeur = valeur * (gfloat)Partage->ci[capteur->bit_controle].confDB.multi;      /* Multiplication ! */
+               valeur = valeur * (gfloat)Partage->ci[capteur->bit_controle].confDB.multi;                 /* Multiplication ! */
                switch (Partage->ci[capteur->bit_controle].confDB.type)
                 { case CI_TOTALISATEUR: format = "%8.0f %s"; break;
                   default:              format = "%8.2f %s"; break;
@@ -136,4 +136,4 @@
       }
      return(etat_capteur);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
