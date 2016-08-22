@@ -64,6 +64,7 @@
     gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
     gchar  command_text[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
     gchar  tableau[ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
+    gchar  acro_syn[ 25 ];                               /* Libelle de l'acronyme présenté sur le synoptique, en mode capteur */
   };
 
 /**************************************************** AddOns pour les Analog Input ********************************************/

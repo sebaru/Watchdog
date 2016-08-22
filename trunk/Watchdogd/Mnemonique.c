@@ -96,7 +96,7 @@
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
  static gint Ajouter_Modifier_mnemo_baseDB ( struct CMD_TYPE_MNEMO_BASE *mnemo, gboolean ajout )
-  { gchar *libelle, *acro, *command_text, *tableau;
+  { gchar *libelle, *acro, *command_text, *tableau, *acro_syn;
     gchar requete[1024];
     gboolean retour;
     struct DB *db;
@@ -106,33 +106,37 @@
     acro         = Normaliser_chaine ( mnemo->acronyme );                                    /* Formatage correct des chaines */
     command_text = Normaliser_chaine ( mnemo->command_text );                                /* Formatage correct des chaines */
     tableau      = Normaliser_chaine ( mnemo->tableau );                                     /* Formatage correct des chaines */
-    if ( !(libelle && acro && command_text && tableau) )
+    acro_syn     = Normaliser_chaine ( mnemo->acro_syn );                                    /* Formatage correct des chaines */
+    if ( !(libelle && acro && command_text && tableau && acro_syn) )
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Ajouter_Modifier_mnemo_baseDB: Normalisation impossible. Mnemo NOT added nor modified." );
        if (libelle)      g_free(libelle);
        if (acro)         g_free(acro);
        if (command_text) g_free(command_text);
        if (tableau)      g_free(tableau);
+       if (acro_syn)     g_free(acro_syn);
        return(-1);
      }
 
     if (ajout == TRUE)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "INSERT INTO %s(type,num,num_plugin,acronyme,libelle,command_text,tableau) VALUES "
-                   "(%d,%d,%d,'%s','%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
-                   mnemo->num, mnemo->num_plugin, acro, libelle, command_text, tableau );
+                   "INSERT INTO %s(type,num,num_plugin,acronyme,libelle,command_text,tableau,acro_syn) VALUES "
+                   "(%d,%d,%d,'%s','%s','%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
+                   mnemo->num, mnemo->num_plugin, acro, libelle, command_text, tableau, acro_syn );
      } else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "UPDATE %s SET "             
-                   "type=%d,libelle='%s',acronyme='%s',command_text='%s',num_plugin=%d,num=%d,tableau='%s' "
+                   "type=%d,libelle='%s',acronyme='%s',command_text='%s',num_plugin=%d,num=%d,tableau='%s',"
+                   "acro_syn='%s' "
                    "WHERE id=%d",
                    NOM_TABLE_MNEMO, mnemo->type, libelle, acro, command_text, 
-                   mnemo->num_plugin, mnemo->num, tableau, mnemo->id );
+                   mnemo->num_plugin, mnemo->num, tableau, acro_syn, mnemo->id );
      }
     g_free(libelle);
     g_free(acro);
     g_free(command_text);
     g_free(tableau);
+    g_free(acro_syn);
 
     db = Init_DB_SQL();       
     if (!db)
@@ -205,12 +209,12 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,"
-                "%s.name, %s.tableau"
+                "%s.name, %s.tableau, %s.acro_syn"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_DLS, NOM_TABLE_MNEMO,
+                NOM_TABLE_DLS, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS
@@ -243,13 +247,13 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,"
-                "%s.name, %s.tableau"
+                "%s.name, %s.tableau,%s.acro_syn"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " ORDER BY groupe,page,name,type,num",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_DLS, NOM_TABLE_MNEMO,
+                NOM_TABLE_DLS, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS
@@ -294,6 +298,7 @@
        g_snprintf( mnemo->page,         sizeof(mnemo->page),         "%s", db->row[8] );
        g_snprintf( mnemo->plugin_dls,   sizeof(mnemo->plugin_dls),   "%s", db->row[9] );
        g_snprintf( mnemo->tableau,      sizeof(mnemo->tableau),      "%s", db->row[10] );
+       g_snprintf( mnemo->acro_syn,     sizeof(mnemo->acro_syn),     "%s", db->row[11] );
        mnemo->id          = atoi(db->row[0]);
        mnemo->type        = atoi(db->row[1]);
        mnemo->num         = atoi(db->row[2]);
@@ -313,13 +318,13 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,"
-                "%s.name, %s.tableau"
+                "%s.name, %s.tableau,%s.acro_syn"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " AND %s.id = %d",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_DLS, NOM_TABLE_MNEMO,
+                NOM_TABLE_DLS, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS,
@@ -353,13 +358,13 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,"
-                "%s.name, %s.tableau"
+                "%s.name, %s.tableau,%s.acro_syn"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " AND %s.type = %d AND %s.num = %d",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_DLS, NOM_TABLE_MNEMO,
+                NOM_TABLE_DLS, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS,
@@ -393,14 +398,14 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,"
-                "%s.name, %s.tableau"
+                "%s.name, %s.tableau,%s.acro_syn"
                 " FROM %s,%s,%s"
                 " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
                 " AND (%s.type=%d OR %s.type=%d OR %s.type=%d OR %s.type=%d)"
                 " ORDER BY groupe,page,name,type,num",
                 NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_DLS, NOM_TABLE_MNEMO,
+                NOM_TABLE_DLS, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
                 NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS,
