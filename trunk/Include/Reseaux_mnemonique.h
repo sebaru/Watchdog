@@ -37,6 +37,9 @@
  #define NBR_CARAC_UNITE_MNEMONIQUE          8
  #define NBR_CARAC_UNITE_MNEMONIQUE_UTF8     (2*NBR_CARAC_UNITE_MNEMONIQUE)
 
+ #define NBR_CARAC_ACRO_SYN_MNEMONIQUE       20
+ #define NBR_CARAC_ACRO_SYN_MNEMONIQUE_UTF8  (2*NBR_CARAC_ACRO_SYN_MNEMONIQUE)
+
  enum
   { MNEMO_BISTABLE,                                                                   /* Definitions des types de mnemoniques */
     MNEMO_MONOSTABLE,
@@ -64,7 +67,7 @@
     gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
     gchar  command_text[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
     gchar  tableau[ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
-    gchar  acro_syn[ 25 ];                               /* Libelle de l'acronyme présenté sur le synoptique, en mode capteur */
+    gchar  acro_syn[ NBR_CARAC_ACRO_SYN_MNEMONIQUE_UTF8 + 1 ];        /* Acronyme présenté sur le synoptique, en mode capteur */
   };
 
 /**************************************************** AddOns pour les Analog Input ********************************************/

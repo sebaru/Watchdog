@@ -480,7 +480,7 @@
      }
 
     if (database_version < 2857)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos` ADD `acro_syn` varchar(25) NOT NULL AFTER `tableau`" );
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos` ADD `acro_syn` text NOT NULL AFTER `tableau`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
