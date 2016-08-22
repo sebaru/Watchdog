@@ -248,18 +248,11 @@
     gtk_entry_set_max_length( GTK_ENTRY(Entry_acro), NBR_CARAC_ACRONYME_MNEMONIQUE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_acro, 1, 2, i, i+1 );
 
-    i++;
     texte = gtk_label_new( _("Acronyme visuel") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
     Entry_acro_syn = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_acro_syn), NBR_CARAC_ACRO_SYN_MNEMONIQUE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_acro_syn, 1, 2, i, i+1 );
-
-    texte = gtk_label_new( _("Event") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
-    Entry_command = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_command), NBR_CARAC_LIBELLE_MNEMONIQUE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_command, 3, 4, i, i+1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_acro_syn, 3, 4, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("Module D.L.S") );
@@ -282,6 +275,13 @@
     Entry_tableau = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_tableau), NBR_CARAC_LIBELLE_MNEMONIQUE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_tableau, 1, 4, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("Event") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Entry_command = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_command), NBR_CARAC_LIBELLE_MNEMONIQUE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_command, 1, 4, i, i+1 );
 
     Type_changed();
     g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(CB_valider), NULL );
