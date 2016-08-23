@@ -921,8 +921,8 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                       NULL);
 
     trame_capteur->item_acro_syn = goo_canvas_text_new ( trame_capteur->item_groupe,
-                                                        "XXXXXXXXXXXX", 0.0, 50.0, -1, GTK_ANCHOR_CENTER,
-                                                        "font", "arial", "fill_color_rgba", "yellow",
+                                                         capteur->acro_syn, 0.0, 30.0, -1, GTK_ANCHOR_CENTER,
+                                                        "font", "arial", "fill_color", "yellow",
                                                          NULL );
 
 

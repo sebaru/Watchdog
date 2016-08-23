@@ -46,7 +46,6 @@
  struct CMD_ETAT_BIT_CAPTEUR
   { guint   bit_controle;
     guint   type;
-    gchar   acro_syn [ NBR_CARAC_ACRO_SYN_MNEMONIQUE_UTF8 + 1 ];                                /* Visuel Acronyme du capteur */
     gchar   libelle[25];
   };
 

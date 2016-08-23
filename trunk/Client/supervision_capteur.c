@@ -56,7 +56,6 @@
     if (!capteur)
      { return;
      }
-
     memcpy ( capteur, rezo_capteur, sizeof( struct CMD_TYPE_CAPTEUR ) );
 
     trame_capteur = Trame_ajout_capteur ( FALSE, infos->Trame, capteur );
@@ -96,8 +95,6 @@
                                      { printf("Proto_changer_etat_capteur: change %s\n", etat_capteur->libelle );
                                        g_object_set( trame_capteur->item_entry,
                                                      "text", etat_capteur->libelle, NULL );
-                                       g_object_set( trame_capteur->item_acro_syn,
-                                                     "text", etat_capteur->acro_syn, NULL );
                                      }
                                     break;
              case TYPE_MOTIF:
