@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/atelier_ajout_capteur.c     Gestion des capteurs synoptiques pour Watchdog                          */
-/* Projet WatchDog version 1.5     Gestion d'habitat                         dim 29 jan 2006 16:59:01 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/atelier_ajout_capteur.c     Gestion des capteurs synoptiques pour Watchdog                                          */
+/* Projet WatchDog version 1.5     Gestion d'habitat                                             dim 29 jan 2006 16:59:01 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * atelier_ajout_capteur.c
  * This file is part of Watchdog
@@ -33,22 +33,22 @@
  #include "trame.h"
  #include "Config_cli.h"
 
-/********************************* Définitions des prototypes programme ***********************************/
+/********************************************* Définitions des prototypes programme *******************************************/
  #include "protocli.h"
 
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
+ extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
+ extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
 
- static GtkWidget *F_ajout_capteur = NULL;                         /* Fenetre graphique de choix de capteur */
- static GtkWidget *Entry_bitctrl;                                               /* Libelle proprement dit */
+ static GtkWidget *F_ajout_capteur = NULL;                                           /* Fenetre graphique de choix de capteur */
+ static GtkWidget *Entry_bitctrl;                                                                   /* Libelle proprement dit */
  static GtkWidget *Spin_bitctrl;
  static GtkWidget *Combo_type;
 
-/**********************************************************************************************************/
-/* Id_vers_trame_motif: Conversion d'un id motif en sa reference TRAME                                    */
-/* Entrée: Un id motif                                                                                    */
-/* sortie: un struct TRAME_ITEM_MOTIF                                                                     */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Id_vers_trame_motif: Conversion d'un id motif en sa reference TRAME                                                        */
+/* Entrée: Un id motif                                                                                                        */
+/* sortie: un struct TRAME_ITEM_MOTIF                                                                                         */
+/******************************************************************************************************************************/
  struct TRAME_ITEM_CAPTEUR *Id_vers_trame_capteur ( struct TYPE_INFO_ATELIER *infos, gint id )
   { GList *liste;
     liste = infos->Trame_atelier->trame_items;
@@ -63,22 +63,22 @@
      }
     return( (struct TRAME_ITEM_CAPTEUR *)(liste->data) );
   }
-/**********************************************************************************************************/
-/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
-/* Entre: widget, data.                                                                                   */
-/* Sortie: void                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Afficher_mnemo: Changement du mnemonique et affichage                                                                      */
+/* Entre: widget, data.                                                                                                       */
+/* Sortie: void                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_afficher_mnemo_capteur_atelier ( struct CMD_TYPE_MNEMO_BASE *mnemo )
   { gchar chaine[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+10];
     snprintf( chaine, sizeof(chaine), "%s%04d  %s",
-              Type_bit_interne_court(mnemo->type), mnemo->num, mnemo->libelle );             /* Formatage */
+              Type_bit_interne_court(mnemo->type), mnemo->num, mnemo->libelle );                                 /* Formatage */
     gtk_entry_set_text( GTK_ENTRY(Entry_bitctrl), chaine );
   }
-/**********************************************************************************************************/
-/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
-/* Entre: widget, data.                                                                                   */
-/* Sortie: void                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Afficher_mnemo: Changement du mnemonique et affichage                                                                      */
+/* Entre: widget, data.                                                                                                       */
+/* Sortie: void                                                                                                               */
+/******************************************************************************************************************************/
  static void Afficher_mnemo_capteur_ctrl ( void )
   { struct CMD_TYPE_NUM_MNEMONIQUE mnemo;
     gchar *type_char;
@@ -92,24 +92,24 @@
     Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_TYPE_NUM_MNEMONIQUE_EA,
                    (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
   }
-/**********************************************************************************************************/
-/* CB_editier_propriete_TOR: Fonction appelée qd on appuie sur un des boutons de l'interface              */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
-/* sortie: TRUE                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* CB_editier_propriete_TOR: Fonction appelée qd on appuie sur un des boutons de l'interface                                  */
+/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
+/* sortie: TRUE                                                                                                               */
+/******************************************************************************************************************************/
  static gboolean CB_ajouter_editer_capteur ( GtkDialog *dialog, gint reponse,
-                                           struct TRAME_ITEM_CAPTEUR *trame_capteur )
+                                             struct TRAME_ITEM_CAPTEUR *trame_capteur )
   { struct CMD_TYPE_CAPTEUR add_capteur;
     struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
     gchar *type;
 
-    page = Page_actuelle();                                               /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return(TRUE);         /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
+    page = Page_actuelle();                                                                   /* On recupere la page actuelle */
+    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return(TRUE);                             /* Verification des contraintes */
+    infos = (struct TYPE_INFO_ATELIER *)page->infos;                             /* Pointeur sur les infos de la page atelier */
 
     switch(reponse)
-     { case GTK_RESPONSE_OK: if (!trame_capteur)                                        /* Ajout d'un capteur */
+     { case GTK_RESPONSE_OK: if (!trame_capteur)                                                        /* Ajout d'un capteur */
                               { gchar *type;
                                 add_capteur.position_x = TAILLE_SYNOPTIQUE_X/2;
                                 add_capteur.position_y = TAILLE_SYNOPTIQUE_Y/2;                            
@@ -122,10 +122,10 @@
 
                                 Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CAPTEUR,
                                                (gchar *)&add_capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
-                                printf("Requete d'ajout de capteuraire envoyée au serveur....\n");
-                                return(TRUE);                             /* On laisse la fenetre ouverte */
+                                printf("Requete d'ajout de capteur envoyée au serveur....\n");
+                                return(TRUE);                                                 /* On laisse la fenetre ouverte */
                               }
-                             else                                                          /* Mise a jour */
+                             else                                                                              /* Mise a jour */
                               { type = gtk_combo_box_get_active_text( GTK_COMBO_BOX(Combo_type) );
                                 trame_capteur->capteur->type = Type_bit_interne_int( type );
                                 g_free(type);
@@ -139,11 +139,11 @@
     F_ajout_capteur = NULL;
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Commenter: Met en route le processus permettant de capteurer un synoptique                             */
-/* Entrée: widget/data                                                                                    */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Commenter: Met en route le processus permettant de capteurer un synoptique                                                 */
+/* Entrée: widget/data                                                                                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Menu_ajouter_editer_capteur ( struct TRAME_ITEM_CAPTEUR *trame_capteur )
   { GtkWidget *hboite, *table, *label;
     GtkObject *adj;
@@ -166,7 +166,7 @@
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
 
-/************************************* Entrys de commande *************************************************/
+/**************************************************** Entrys de commande ******************************************************/
     label = gtk_label_new( _("Type Control bit") );
     gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 2, 0, 1 );
     Combo_type = gtk_combo_box_new_text();
@@ -205,14 +205,14 @@
         }
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bitctrl), trame_capteur->capteur->bit_controle );
      }
-    Afficher_mnemo_capteur_ctrl();                              /* Pour mettre a jour le mnemonique associé */
+    Afficher_mnemo_capteur_ctrl();                                                /* Pour mettre a jour le mnemonique associé */
     gtk_widget_show_all( F_ajout_capteur );
   }
-/**********************************************************************************************************/
-/* Afficher_un_message: Ajoute un message dans la liste des messages                                      */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Afficher_un_message: Ajoute un message dans la liste des messages                                                          */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Proto_afficher_un_capteur_atelier( struct CMD_TYPE_CAPTEUR *rezo_capteur )
   { struct TRAME_ITEM_CAPTEUR *trame_capteur;
     struct TYPE_INFO_ATELIER *infos;
@@ -227,7 +227,7 @@
     memcpy ( capteur, rezo_capteur, sizeof( struct CMD_TYPE_CAPTEUR ) );
 
     trame_capteur = Trame_ajout_capteur ( TRUE, infos->Trame_atelier, capteur );
-    trame_capteur->groupe_dpl = Nouveau_groupe();                 /* Numéro de groupe pour le deplacement */
+    trame_capteur->groupe_dpl = Nouveau_groupe();                                     /* Numéro de groupe pour le deplacement */
 
     g_signal_connect( G_OBJECT(trame_capteur->item_groupe), "button-press-event",
                       G_CALLBACK(Clic_sur_capteur), trame_capteur );
@@ -240,11 +240,11 @@
     g_signal_connect( G_OBJECT(trame_capteur->item_groupe), "motion-notify-event",
                       G_CALLBACK(Clic_sur_capteur), trame_capteur );
   }
-/**********************************************************************************************************/
-/* Cacher_un_message: Enleve un message de la liste des messages                                          */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Cacher_un_message: Enleve un message de la liste des messages                                                              */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Proto_cacher_un_capteur_atelier( struct CMD_TYPE_CAPTEUR *capteur )
   { struct TRAME_ITEM_CAPTEUR *trame_capteur;
     struct TYPE_INFO_ATELIER *infos;
@@ -259,4 +259,4 @@
     infos->Trame_atelier->trame_items = g_list_remove( infos->Trame_atelier->trame_items, trame_capteur );
     printf("Proto_cacher_un_capteur_atelier fin..\n");
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

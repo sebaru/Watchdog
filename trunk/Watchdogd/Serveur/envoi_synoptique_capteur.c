@@ -75,7 +75,7 @@
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate capteur %s", rezo_capteur->libelle );
+                          "Unable to locate capteur %d", id );
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
