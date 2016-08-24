@@ -68,6 +68,12 @@
        return(NULL);
      }
 
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
+
     tempo = (struct CMD_TYPE_MNEMO_TEMPO *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_TEMPO) );
     if (!tempo) Info_new( Config.log, Config.log_msrv, LOG_ERR,
                              "Recuperer_tempoDB_suite: Erreur allocation mémoire" );
