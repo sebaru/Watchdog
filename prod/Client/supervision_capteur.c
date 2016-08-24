@@ -56,7 +56,6 @@
     if (!capteur)
      { return;
      }
-
     memcpy ( capteur, rezo_capteur, sizeof( struct CMD_TYPE_CAPTEUR ) );
 
     trame_capteur = Trame_ajout_capteur ( FALSE, infos->Trame, capteur );
@@ -89,8 +88,7 @@
         { switch( *((gint *)liste_capteurs->data) )
            { case TYPE_CAPTEUR    : cpt++;                          /* Nous updatons un capteur de plus ! */ 
                                     trame_capteur = (struct TRAME_ITEM_CAPTEUR *)liste_capteurs->data;
-printf("recu %d/%d, capteur=%d/%d\n", etat_capteur->type, etat_capteur->bit_controle,
-       trame_capteur->capteur->type, trame_capteur->capteur->bit_controle );
+
                                     if (etat_capteur->bit_controle == trame_capteur->capteur->bit_controle &&
                                         etat_capteur->type == trame_capteur->capteur->type
                                        )

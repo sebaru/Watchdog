@@ -106,6 +106,7 @@
   { gint    id;
     gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
     gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                       /* Libelle du synoptique cible */
+    gchar   acro_syn [ NBR_CARAC_ACRO_SYN_MNEMONIQUE_UTF8 + 1 ];            /* Visuel Acronyme du capteur */
     gint    type;                                                              /* type du bit de controle */
     gint    bit_controle;                                                                   /* Ixxx, Cxxx */
     guint   position_x;                                                      /* en abscisses et ordonnées */

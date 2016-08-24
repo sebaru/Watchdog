@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Config/Config.c        Lecture du fichier de configuration Watchdog                          */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     mer. 15 déc. 2010 13:30:12 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Config/Config.c        Lecture du fichier de configuration Watchdog                                              */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                         mer. 15 déc. 2010 13:30:12 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Config.c
  * This file is part of Watchdog
@@ -32,13 +32,13 @@
  #include <unistd.h>
  #include <string.h>
 
- #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
+ #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
 
-/**********************************************************************************************************/
-/* Lire_config : Lit la config Watchdog et rempli la structure mémoire                                    */
-/* Entrée: le nom de fichier à lire                                                                       */
-/* Sortie: La structure mémoire est à jour                                                                */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                        */
+/* Entrée: le nom de fichier à lire                                                                                           */
+/* Sortie: La structure mémoire est à jour                                                                                    */
+/******************************************************************************************************************************/
  void Lire_config ( char *fichier_config )
   { gchar *chaine, *fichier;
     GError *error = NULL;
@@ -48,13 +48,11 @@
                     else fichier = fichier_config;
     printf("Using config file %s\n", fichier );
     gkf = g_key_file_new();
-     /* By default */
-    
 
     if (g_key_file_load_from_file(gkf, fichier, G_KEY_FILE_NONE, &error))
      {
        g_snprintf( Config.config_file, sizeof(Config.config_file), "%s", fichier );
-/********************************************** Partie GLOBAL *********************************************/
+/******************************************************* Partie GLOBAL ********************************************************/
        chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "home", NULL );
        if (chaine)
         { g_snprintf( Config.home, sizeof(Config.home), "%s", chaine ); g_free(chaine); }
@@ -81,7 +79,7 @@
 
        Config.instance_is_master = g_key_file_get_boolean ( gkf, "GLOBAL", "instance_is_master", NULL );
 
-/********************************************** Partie DATABASE *******************************************/
+/******************************************************** Partie DATABASE *****************************************************/
        Config.log_db             = g_key_file_get_boolean ( gkf, "DATABASE", "debug", NULL );
        Config.db_port            = g_key_file_get_integer ( gkf, "DATABASE", "port", NULL );
        if (!Config.db_port) Config.db_port = DEFAUT_DB_PORT;
@@ -110,7 +108,7 @@
        else
         { g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", DEFAUT_DB_USERNAME  ); }
 
-/********************************************* Partie LOG *************************************************/
+/******************************************************** Partie LOG **********************************************************/
        Config.log_level = LOG_NOTICE;
        chaine = g_key_file_get_string ( gkf, "LOG", "log_level", NULL );
        if (chaine)
@@ -132,10 +130,10 @@
         }
     g_key_file_free(gkf);
   }
-/**********************************************************************************************************/
-/* Print_config: Affichage (enfin log) la config actuelle en parametre                                    */
-/* Entrée: une config !! -> le champ log doit etre initialisé via la librairie Erreur                     */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Print_config: Affichage (enfin log) la config actuelle en parametre                                                        */
+/* Entrée: une config !! -> le champ log doit etre initialisé via la librairie Erreur                                         */
+/******************************************************************************************************************************/
  void Print_config ( void )
   { 
     if (!Config.log) return;
@@ -154,17 +152,17 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config compil               %d", Config.compil );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
   }
-/**********************************************************************************************************/
-/* Retirer_configDB: Elimination d'un parametre de configuration                                          */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Retirer_configDB: Elimination d'un parametre de configuration                                                              */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
  gboolean Retirer_configDB ( gchar *nom_thread, gchar *nom )
   { gchar requete[512];
     gboolean retour;
     struct DB *db;
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "DELETE FROM %s WHERE instance_id = '%s' AND nom_thread='%s' AND nom = '%s'",
                  NOM_TABLE_CONFIG, Config.instance_id, nom_thread, nom );
 
@@ -174,15 +172,15 @@
        return(FALSE);
      }
 
-    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return(retour);
   }
-/**********************************************************************************************************/
-/* Ajouter_configDB: Ajout ou edition d'un message                                                        */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Ajouter_configDB: Ajout ou edition d'un message                                                                            */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                                               */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
  gboolean Modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur )
   { gchar requete[2048];
     gboolean retour;
@@ -194,28 +192,28 @@
        return(FALSE);
      }
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                "INSERT INTO %s(instance_id,nom_thread,nom,valeur) VALUES "
                "('%s','%s','%s','%s') ON DUPLICATE KEY UPDATE valeur='%s';",
                NOM_TABLE_CONFIG, Config.instance_id,
                nom_thread, nom, valeur, valeur
               );
 
-    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return(retour);
   }
-/**********************************************************************************************************/
-/* Recuperer_configDB : Récupration de la configuration en base pour une instance_id donnée               */
-/* Entrée: une database de retour et le nom de l'instance_id                                              */
-/* Sortie: FALSE si erreur                                                                                */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Recuperer_configDB : Récupration de la configuration en base pour une instance_id donnée                                   */
+/* Entrée: une database de retour et le nom de l'instance_id                                                                  */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
  gboolean Recuperer_configDB ( struct DB **db_retour, gchar *nom_thread )
   { gchar requete[512];
     gboolean retour;
     struct DB *db;
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT nom,valeur"
                 " FROM %s"
                 " WHERE instance_id = '%s' AND nom_thread='%s' ORDER BY nom,valeur",
@@ -228,21 +226,21 @@
        return(FALSE);
      }
 
-    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if (retour == FALSE) Libere_DB_SQL (&db);
     *db_retour = db;
     return ( retour );
   }
-/**********************************************************************************************************/
-/* Recuperer_configDB_suite: Continue la récupération des paramètres de configuration dans la base        */
-/* Entrée: une database                                                                                   */
-/* Sortie: FALSE si plus d'enregistrement                                                                 */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Recuperer_configDB_suite: Continue la récupération des paramètres de configuration dans la base                            */
+/* Entrée: une database                                                                                                       */
+/* Sortie: FALSE si plus d'enregistrement                                                                                     */
+/******************************************************************************************************************************/
  gboolean Recuperer_configDB_suite( struct DB **db_orig, gchar **nom, gchar **valeur )
   { struct DB *db;
 
-    db = *db_orig;                      /* Récupération du pointeur initialisé par la fonction précédente */
-    Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
+    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
@@ -253,4 +251,4 @@
     *valeur = db->row[1];
     return(TRUE);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

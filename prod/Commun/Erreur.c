@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Commun/Erreur.c        Gestion des logs systemes                                                       */
-/* Projet WatchDog version 1.7       Gestion d'habitat                      jeu 09 avr 2009 22:08:19 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Commun/Erreur.c        Gestion des logs systemes                                                                           */
+/* Projet WatchDog version 1.7       Gestion d'habitat                                          jeu 09 avr 2009 22:08:19 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Erreur.c
  * This file is part of Watchdog
@@ -37,20 +37,20 @@
 
  #include "Erreur.h"
 
-/**********************************************************************************************************/
-/* Info_init: Initialisation du traitement d'erreur                                                       */
-/* Entrée: Le niveau de debuggage, l'entete, et le fichier log                                            */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Info_init: Initialisation du traitement d'erreur                                                                           */
+/* Entrée: Le niveau de debuggage, l'entete, et le fichier log                                                                */
+/******************************************************************************************************************************/
  static void Info_stop( int code_retour, void *log )
   {
     Info_new( log, TRUE, LOG_NOTICE, "End of logs" );
     g_free(log);
   }
 
-/**********************************************************************************************************/
-/* Info_init: Initialisation du traitement d'erreur                                                       */
-/* Entrée: Le niveau de debuggage, l'entete, et le fichier log                                            */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Info_init: Initialisation du traitement d'erreur                                                                           */
+/* Entrée: Le niveau de debuggage, l'entete, et le fichier log                                                                */
+/******************************************************************************************************************************/
  struct LOG *Info_init( gchar *entete, guint debug )
   { struct LOG *log;
 
@@ -64,24 +64,35 @@
     openlog( log->entete, LOG_CONS | LOG_PID, LOG_USER );
     return(log);
   }
-/**********************************************************************************************************/
-/* Info_init: Initialisation du traitement d'erreur                                                       */
-/* Entrée: Le niveau de debuggage, l'entete, et le fichier log                                            */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Info_init: Initialisation du traitement d'erreur                                                                           */
+/* Entrée: Le niveau de debuggage, l'entete, et le fichier log                                                                */
+/******************************************************************************************************************************/
  void Info_change_log_level( struct LOG *log, guint new_log_level )
   { if (log) log->log_level = new_log_level;
   }
-/**********************************************************************************************************/
-/* Info_new: on informe le sous systeme syslog en affichant un nombre aléatoire de paramètres             */
-/* Entrée: le niveau, le texte, et la chaine à afficher                                                   */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Info_new: on informe le sous systeme syslog en affichant un nombre aléatoire de paramètres                                 */
+/* Entrée: le niveau, le texte, et la chaine à afficher                                                                       */
+/******************************************************************************************************************************/
  void Info_new( struct LOG *log, gboolean override, guint priority, gchar *format, ... )
-  { gchar chaine[512], nom_thread[32];
+  { gchar chaine[512], nom_thread[32], *prio_string;
     va_list ap;
 
+    switch (priority)
+     { case LOG_EMERG   : prio_string="EMER"; break;
+       case LOG_ALERT   : prio_string="ALRT"; break;
+       case LOG_CRIT    : prio_string="CRIT"; break;
+       case LOG_ERR     : prio_string="EROR"; break;
+       case LOG_WARNING : prio_string="WARN"; break;
+       case LOG_NOTICE  : prio_string="NOTE"; break;
+       default:
+       case LOG_INFO    : prio_string="INFO"; break;
+       case LOG_DEBUG   : prio_string="DBUG"; break;
+     } 
     if ( log != NULL && (override == TRUE || (priority <= log->log_level)) )                      /* LOG_EMERG = 0, DEBUG = 7 */
      { prctl( PR_GET_NAME, &nom_thread, 0, 0, 0);
-       g_snprintf( chaine, sizeof(chaine), "%s -> %s", nom_thread, format );
+       g_snprintf( chaine, sizeof(chaine), "[%s] %s : %s", prio_string, nom_thread, format );
 
        va_start( ap, format );
        vsyslog ( priority, chaine, ap );

@@ -145,7 +145,7 @@
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        if (num<NBR_COMPTEUR_H)
         { g_snprintf( chaine, sizeof(chaine), " CH%03d = %6d, actif=%d\n",
-                      num, Partage->ch[num].cpthdb.valeur, Partage->ch[num].actif
+                      num, Partage->ch[num].confDB.valeur, Partage->ch[num].actif
                     );
         } else
         { g_snprintf( chaine, sizeof(chaine), " CH -> num '%d' out of range\n", num ); }

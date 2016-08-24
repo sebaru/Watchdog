@@ -529,9 +529,9 @@
           new_top = Partage->top;
           delta = new_top - Partage->ch[num].old_top;
           if (delta > 600)                                           /* On compte +1 toutes les minutes ! */
-           { Partage->ch[num].cpthdb.valeur ++;
+           { Partage->ch[num].confDB.valeur ++;
              Partage->ch[num].old_top = new_top;
-             Ajouter_arch( MNEMO_CPTH, num, 1.0*Partage->ch[num].cpthdb.valeur );
+             Ajouter_arch( MNEMO_CPTH, num, 1.0*Partage->ch[num].confDB.valeur );
            }
         }
      }

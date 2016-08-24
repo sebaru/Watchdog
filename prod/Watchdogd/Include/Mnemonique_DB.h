@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Include/Mnemonique.h        Déclaration structure internes des mnemoniques watchdog          */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       mer 21 jan 2004 18:45:59 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Include/Mnemonique.h        Déclaration structure internes des mnemoniques watchdog                              */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                           mer 21 jan 2004 18:45:59 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Mnemonique_DB.h
  * This file is part of Watchdog
@@ -33,12 +33,12 @@
  #include "Db.h"
 
  #define NOM_TABLE_MNEMO        "mnemos"
- #define NOM_TABLE_MNEMO_DI     "mnemos_DigitalInput"
  #define NOM_TABLE_MNEMO_AI     "mnemos_AnalogInput"
+ #define NOM_TABLE_MNEMO_CPTH   "mnemos_CptHoraire"
  #define NOM_TABLE_MNEMO_CPTIMP "mnemos_CptImp"
  #define NOM_TABLE_MNEMO_TEMPO  "mnemos_Tempo"
 
-/*************************************** Définitions des prototypes ***************************************/
+/***************************************************** Définitions des prototypes *********************************************/
  extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB ( guint id );
  extern gboolean Recuperer_mnemo_baseDB ( struct DB **db );
  extern gboolean Recuperer_mnemo_baseDB_for_courbe ( struct DB **db );
@@ -51,23 +51,24 @@
  extern struct CMD_TYPE_MNEMO_FULL *Rechercher_mnemo_fullDB ( guint id );
  extern gboolean Modifier_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
 
- extern void Charger_digitalInput ( void );                                            /* Dans Mnemo_DI.c */
- extern struct CMD_TYPE_MNEMO_DI *Rechercher_mnemo_diDB ( guint id );
- extern gboolean Modifier_mnemo_diDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
-
- extern void Charger_analogInput ( void );                                             /* Dans Mnemo_AI.c */
+ extern void Charger_analogInput ( void );                                                                 /* Dans Mnemo_AI.c */
  extern struct CMD_TYPE_MNEMO_AI *Rechercher_mnemo_aiDB ( guint id );
  extern gboolean Modifier_mnemo_aiDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
 
 
- extern void Updater_cpt_impDB ( void );                                          /* Dans Mnemo_CPT_IMP.c */
+ extern void Updater_cpt_impDB ( void );                                                              /* Dans Mnemo_CPT_IMP.c */
+ extern void Charger_cpt_imp ( void );
  extern struct CMD_TYPE_MNEMO_CPT_IMP *Rechercher_mnemo_cptimpDB ( guint id );
  extern gboolean Modifier_mnemo_cptimpDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
- extern void Charger_cpt_imp ( void );
 
- extern void Charger_tempo ( void );                                                /* Dans Mnemo_tempo.c */
+ extern void Updater_cpthDB ( void );                                                                   /* Dans Mnemo_CPT_H.c */
+ extern void Charger_cpth ( void );
+ extern struct CMD_TYPE_MNEMO_CPT_H *Rechercher_mnemo_cpthDB ( guint id );
+ extern gboolean Modifier_mnemo_cpthDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
+
+ extern void Charger_tempo ( void );                                                                    /* Dans Mnemo_tempo.c */
  extern struct CMD_TYPE_MNEMO_TEMPO *Rechercher_mnemo_tempoDB ( guint id );
  extern gboolean Modifier_mnemo_tempoDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
 
 #endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

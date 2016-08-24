@@ -93,12 +93,12 @@ INSERT INTO `dls` (`id`, `type`, `num_syn`, `name`, `actif`, `compil_date`, `com
 -- --------------------------------------------------------
 
 --
--- Structure de la table `dls_cpth`
+-- Structure de la table `mnemos_CptHoraire`
 --
 
 CREATE TABLE IF NOT EXISTS `dls_cpth` (
   `id_mnemo` int(11) NOT NULL DEFAULT '0',
-  `val` int(11) NOT NULL DEFAULT '0',
+  `valeur` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id_mnemo`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -561,6 +561,7 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `command_text` text COLLATE utf8_unicode_ci NOT NULL,
   `tableau` text COLLATE utf8_unicode_ci NOT NULL,
+  `acro_syn` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`), FULLTEXT(`command_text`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
