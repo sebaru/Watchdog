@@ -177,7 +177,7 @@
     for( cpt=0; cpt<NBR_COMPTEUR_H; cpt++)
      { cpth = &Partage->ch[cpt].confDB;
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE %s JOIN %s ON id_mnemo=id SET val='%d' WHERE num='%d';",
+                   "UPDATE %s JOIN %s ON id_mnemo=id SET valeur='%d' WHERE num='%d';",
                    NOM_TABLE_MNEMO_CPTH, NOM_TABLE_MNEMO,
                    cpth->valeur, cpt );
        Lancer_requete_SQL ( db, requete );

@@ -175,8 +175,8 @@
              "Lancer_requete_SQL (id=%05d): NEW    (%s)", db->id, requete );
     if ( mysql_query ( db->mysql, requete ) )
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
-                "Lancer_requete_SQL (id=%05d): FAILED (%s)",
-                 db->id, (char *)mysql_error(db->mysql) );
+                "Lancer_requete_SQL (id=%05d): FAILED (%s) for '%s'",
+                 db->id, (char *)mysql_error(db->mysql), requete );
        return(FALSE);
      }
 
