@@ -38,10 +38,12 @@
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
  gboolean Http_Traiter_request_getstatus ( struct lws *wsi )
-  { xmlTextWriterPtr writer;
+  { unsigned char header[256], *header_cur, *header_end;
+	const char *content_type = "application/xml";
+    xmlTextWriterPtr writer;
     xmlBufferPtr buf;
     gint retour, num;
-    gchar host[128];
+	gchar host[128];
 
     buf = xmlBufferCreate();                                                                        /* Creation du buffer xml */
     if (buf == NULL)
@@ -127,6 +129,16 @@
      }
 
     xmlFreeTextWriter(writer);                                                                    /* Libération du writer XML */
+
+    header_cur = header;
+    header_end = header + sizeof(header);
+    
+    lws_add_http_header_status( wsi, 200, &header_cur, header_end );
+    lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, (const unsigned char *)content_type, strlen( content_type),
+                                  &header_cur, header_end );
+    lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );
+    *header_cur='\0';                                                                               /* Caractere null d'arret */
+    lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
     lws_write ( wsi, buf->content, buf->use, LWS_WRITE_HTTP);                                               /* Send to client */
     xmlBufferFree(buf);                                               /* Libération du buffer dont nous n'avons plus besoin ! */
     return(TRUE);
