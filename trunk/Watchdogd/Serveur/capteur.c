@@ -66,7 +66,6 @@
 
     etat_capteur->type         = capteur->type;
     etat_capteur->bit_controle = capteur->bit_controle;
-    /**g_snprintf( etat_capteur->acro_syn, sizeof(etat_capteur->acro_syn), "%s", capteur->acro_syn );*/
 
     switch(capteur->type)
      { case MNEMO_BISTABLE:
