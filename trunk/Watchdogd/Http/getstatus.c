@@ -86,9 +86,9 @@
     xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Instance", "%s", Config.instance_id);
     xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Start_time","%d", (int)Partage->start_time);
     xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Licence",  "GPLv2 or newer");
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Authors (name)",
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Author_Name", "%s",
                                     "Sébastien LEFEVRE");
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Authors (email)",
+    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Author_Email", "%s",
                                     "sebastien.lefevre@abls-habitat.fr");
 /*------------------------------------------------------- Dumping Running config ---------------------------------------------*/
     xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Top",
