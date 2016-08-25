@@ -52,7 +52,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT val,type_ci,multi,unite_string"
+                "SELECT valeur,type_ci,multi,unite_string"
                 " FROM %s"
                 " INNER JOIN %s ON id_mnemo = id"
                 " WHERE id=%d LIMIT 1",
@@ -134,7 +134,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT num,val,type_ci,multi,unite_string"
+                "SELECT num,valeur,type_ci,multi,unite_string"
                 " FROM %s"
                 " INNER JOIN %s ON id_mnemo = id ORDER BY num",
                 NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO );
@@ -151,7 +151,7 @@
        if (num < NBR_COMPTEUR_IMP)
         { Partage->ci[num].confDB.valeur = atof( db->row[1] );
           Partage->ci[num].confDB.type   = atoi( db->row[2] );
-          Partage->ci[num].confDB.multi  = atoi( db->row[3] );
+          Partage->ci[num].confDB.multi  = atof( db->row[3] );
           g_snprintf( Partage->ci[num].confDB.unite, sizeof(Partage->ci[num].confDB.unite), "%s", db->row[4] );
           Partage->ci[num].val_en_cours2 = Partage->ci[num].confDB.valeur;                                            /* Init */
           Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
