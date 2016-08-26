@@ -161,7 +161,7 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Combo_type, 1, 3, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Groupe/Page/Syn") );                                   /* Choix du synoptique cible du messages */
+    texte = gtk_label_new( _("Synoptique Name") );                                   /* Choix du synoptique cible du messages */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Combo_syn = gtk_combo_box_new_text();
     gtk_table_attach_defaults( GTK_TABLE(table), Combo_syn, 1, 3, i, i+1 );
@@ -169,7 +169,7 @@
     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_WANT_SYN_FOR_PLUGIN_DLS, NULL, 0 );
 
     i++;
-    texte = gtk_label_new( _("Module D.L.S") );
+    texte = gtk_label_new( _("D.L.S Name") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_nom = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_nom), NBR_CARAC_PLUGIN_DLS );
