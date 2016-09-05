@@ -134,7 +134,7 @@
     header_end = header + sizeof(header);
     
     lws_add_http_header_status( wsi, 200, &header_cur, header_end );
-    lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, (const unsigned char *)content_type, strlen( content_type),
+    lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, (const unsigned char *)content_type, strlen(content_type),
                                   &header_cur, header_end );
     lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );
     lws_finalize_http_header ( wsi, &header_cur, header_end );

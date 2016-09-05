@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Http/Http.c        Gestion des connexions HTTPMobile de watchdog */
-/* Projet WatchDog version 2.0       Gestion d'habitat                   mer. 24 avril 2013 18:48:19 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Http/Http.c        Gestion des connexions HTTP WebService de watchdog                                            */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                       mer. 24 avril 2013 18:48:19 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Http.c
  * This file is part of Watchdog
@@ -149,6 +149,8 @@
                   if (retour != 0) return(1);                             /* Si erreur (<0) ou si ok (>0), on ferme la socket */
                   return(0);                    /* si besoin de plus de temps, on laisse la ws http ouverte pour libwebsocket */
                 }
+               else if ( ! strcasecmp ( url, "/login.ws" ) )
+                { Http_Traiter_request_login ( wsi, remote_name, remote_ip ); }
                else if ( ! strcasecmp ( url, "/status" ) )
                 { Http_Traiter_request_getstatus ( wsi ); }
                else if ( ! strncasecmp ( url, "/gif/", 5 ) )

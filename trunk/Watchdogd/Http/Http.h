@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/HttpMobile/HttpMobile.h        Déclaration structure internes des HttpMobile                 */
-/* Projet WatchDog version 2.0       Gestion d'habitat                   mer. 24 avril 2013 18:48:19 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/HttpMobile/HttpMobile.h        Déclaration structure internes des WebServices                                    */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                       mer. 24 avril 2013 18:48:19 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * httpmobile.h
  * This file is part of Watchdog
@@ -75,13 +75,14 @@
     gint     last_top;                                                                         /* Date de la derniere requete */
   };
 
-/*************************************** Définitions des prototypes ***************************************/
+/*************************************************** Définitions des prototypes ***********************************************/
  extern gboolean Http_Lire_config ( void );
 /* extern gboolean Http_Traiter_request_getsyn ( struct HTTP_SESSION *session, struct MHD_Connection *connection );*/
  extern gboolean Http_Traiter_request_getstatus ( struct lws *wsi );
  extern gint Http_Traiter_request_getgif ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gint Http_Traiter_request_getui ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gint Http_Traiter_request_getaudio ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
+ extern gboolean Http_Traiter_request_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
  /* extern gint Http_Traiter_request_getslash ( struct HTTP_SESSION *session, struct MHD_Connection *connection );
  extern gint Http_Traiter_request_getgif ( struct MHD_Connection *connection );
  extern gboolean Http_Traiter_request_setm ( struct HTTP_SESSION *session, struct MHD_Connection *connection );
