@@ -37,21 +37,28 @@
 /******************************************************************************************************************************/
  gboolean Http_Traiter_request_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip )
   { unsigned char header[256], *header_cur, *header_end;
-	gboolean retour = FALSE;
-	const guchar *token;
-	gchar buffer[256];
-    gint num;
+   	gboolean retour = FALSE;
+	   gchar buffer[4096];
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
              "Http_Traiter_request_login: HTTP request from %s(%s)",
               remote_name, remote_ip );
-    num=0;
-    while ( (token=lws_token_to_string(num)) )
-     { lws_hdr_copy( wsi, buffer, sizeof(buffer), num );                                /* Récupération de la valeur du token */
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "Http_Traiter_request_login: HTTP request from %s(%s): HDR %d -> %s=%s",
-              remote_name, remote_ip, num, token, buffer );
-       num++;
+
+    buffer[0] = '\0';
+    if ( lws_hdr_copy( wsi, buffer, sizeof(buffer), WSI_TOKEN_HTTP_COOKIE ) != -1 )     /* Récupération de la valeur du token */
+     { gchar *cookies, *cookie, *savecookies;
+       gchar *cookie_name, *cookie_value, *savecookie;
+       cookies = buffer;
+       while ( (cookie=strtok_r( cookies, ";", &savecookies)) != NULL )
+        { cookies=NULL;
+          cookie_name=strtok_r( cookie, "=", &savecookie);
+          if (cookie_name)
+           { cookie_value = strtok_r ( NULL, "=", &savecookie );
+             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                "Http_Traiter_request_login: HTTP cookie found for %s(%s): %s=%s",
+                 remote_name, remote_ip, cookie_name, cookie_value );
+           }
+        }       
      }
 
     header_cur = header;
