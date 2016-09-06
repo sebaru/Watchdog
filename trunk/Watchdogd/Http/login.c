@@ -65,7 +65,7 @@
         { g_snprintf( &cookie[2*cpt], 3, "%02X", (guchar)cookie_bin[cpt] ); }
 
        lws_add_http_header_status( wsi, 200, &header_cur, header_end );
-       lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_COOKIE, (const unsigned char *)cookie, strlen(cookie),
+       lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_SET_COOKIE, (const unsigned char *)cookie, strlen(cookie),
                                      &header_cur, header_end );
        /*lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );*/
        retour=TRUE;

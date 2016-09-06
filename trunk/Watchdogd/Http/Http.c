@@ -95,11 +95,11 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* CB_ws_status : Gere le protocole WS status (appellée par libwebsockets)                                                    */
+/* CB_ws_login : Gere le protocole WS status (appellée par libwebsockets)                                                    */
 /* Entrées : le contexte, le message, l'URL                                                                                   */
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
 /******************************************************************************************************************************/
- static gint CB_ws_status ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
+ static gint CB_ws_login ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
   { return(1);
   }
 /******************************************************************************************************************************/
@@ -155,6 +155,8 @@
                 { Http_Traiter_request_getstatus ( wsi ); }
                else if ( ! strncasecmp ( url, "/gif/", 5 ) )
                 { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+5 ) ); }
+               else if ( ! strcasecmp ( url, "/login.ws" ) )
+                { return( Http_Traiter_request_login ( wsi, remote_name, remote_ip ) ); }
                else if ( ! strncasecmp ( url, "/audio/", 7 ) )
                 { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+7 ) ); }
                else                                                                                             /* Par défaut */
@@ -186,7 +188,7 @@
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct lws_protocols WS_PROTOS[] =
      { { "http-only", CB_http, 0, 0 }, 	                                        /* first protocol must always be HTTP handler */
-       { "ws-status", CB_ws_status, 0, 0 },
+       { "ws-login", CB_ws_login, 0, 0 },
        { NULL, NULL, 0, 0 } /* terminator */
      };
     struct stat sbuf;
