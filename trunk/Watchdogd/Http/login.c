@@ -58,12 +58,13 @@
     header_end = header + sizeof(header);
     
     if (TRUE)
-     { gchar cookie_bin[EVP_MAX_MD_SIZE], cookie[2*EVP_MAX_MD_SIZE+1];
+     { gchar cookie_bin[EVP_MAX_MD_SIZE], cookie_hex[2*EVP_MAX_MD_SIZE+1], cookie[256];
        gint cpt;
        RAND_pseudo_bytes( (guchar *)cookie_bin, sizeof(cookie_bin) );                     /* Récupération d'un nouveau COOKIE */
        for (cpt=0; cpt<sizeof(cookie_bin); cpt++)                                              /* Mise en forme au format HEX */
-        { g_snprintf( &cookie[2*cpt], 3, "%02X", (guchar)cookie_bin[cpt] ); }
-
+        { g_snprintf( &cookie_hex[2*cpt], 3, "%02X", (guchar)cookie_bin[cpt] ); }
+       g_snprintf( cookie, sizeof(cookie), "sessionid=%s; Max-Age=%d; ", cookie_hex, 60*60*12 );
+       
        lws_add_http_header_status( wsi, 200, &header_cur, header_end );
        lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_SET_COOKIE, (const unsigned char *)cookie, strlen(cookie),
                                      &header_cur, header_end );
