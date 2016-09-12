@@ -60,17 +60,16 @@
     gchar ssl_private_key_filepath[80];
     gchar ssl_ca_filepath[80];
     gboolean authenticate;
+    GSList *Liste_sessions;
  } Cfg_http;
 
  struct HTTP_SESSION
-  { gint     type;
-    gchar    sid[65];
-    gchar    client_host[80];
-    gchar    client_service[20];
-    gchar    user_agent[120], origine[80];
-    gint     ssl_algo, ssl_proto;
-    gchar    *buffer;                                                      /* Le buffer recu dans le corps de la requete HTTP */
-    guchar   buffer_size;                                                                        /* La taille utile du buffer */
+  { /*gint     type;*/
+    gchar    sid[2*EVP_MAX_MD_SIZE+1];
+    gchar    remote_name[80];
+    gchar    remote_ip[20];
+    gchar    user_agent[120];
+    gint     is_ssl;
     struct   CMD_TYPE_UTILISATEUR *util;                                               /* Utilisateur authentifié (via HTTPS) */
     gint     last_top;                                                                         /* Date de la derniere requete */
   };
@@ -83,7 +82,11 @@
  extern gint Http_Traiter_request_getgif ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gint Http_Traiter_request_getui ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gint Http_Traiter_request_getaudio ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
+
+ extern struct HTTP_SESSION *Http_get_session ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
+ extern void Http_Liberer_session ( struct HTTP_SESSION *session );
  extern gboolean Http_Traiter_request_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
+
  /* extern gint Http_Traiter_request_getslash ( struct HTTP_SESSION *session, struct MHD_Connection *connection );
  extern gint Http_Traiter_request_getgif ( struct MHD_Connection *connection );
  extern gboolean Http_Traiter_request_setm ( struct HTTP_SESSION *session, struct MHD_Connection *connection );

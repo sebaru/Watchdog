@@ -31,52 +31,175 @@
  #include "watchdogd.h"
  #include "Http.h"
 /******************************************************************************************************************************/
-/* Http_Traiter_request_login: Traite une requete de login                                                                    */
-/* Entrées: la connexion MHD                                                                                                  */
-/* Sortie : néant                                                                                                             */
+/* Http_get_session : Vérifie le numéro de session en parametre                                                               */
+/* Entrées: le SID a tester                                                                                                   */
+/* Sortie : la session, ou NULL si non trouvée                                                                                */
 /******************************************************************************************************************************/
- gboolean Http_Traiter_request_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip )
-  { unsigned char header[256], *header_cur, *header_end;
-   	gboolean retour = FALSE;
-	   gchar buffer[4096];
-
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-             "Http_Traiter_request_login: HTTP request from %s(%s)",
-              remote_name, remote_ip );
+ struct HTTP_SESSION *Http_get_session ( struct lws *wsi, gchar *remote_name, gchar *remote_ip )
+  { struct HTTP_SESSION *session = NULL;
+	   gchar buffer[4096], *sid = NULL;
+    GSList *liste;
 
     buffer[0] = '\0';
     if ( lws_hdr_copy( wsi, buffer, sizeof(buffer), WSI_TOKEN_HTTP_COOKIE ) != -1 )     /* Récupération de la valeur du token */
      { gchar *cookies, *cookie, *savecookies;
        gchar *cookie_name, *cookie_value, *savecookie;
        cookies = buffer;
-       while ( (cookie=strtok_r( cookies, ";", &savecookies)) != NULL )
+       while ( (cookie=strtok_r( cookies, ";", &savecookies)) != NULL )                                  /* Découpage par ';' */
         { cookies=NULL;
-          cookie_name=strtok_r( cookie, "=", &savecookie);
+          cookie_name=strtok_r( cookie, "=", &savecookie);                                               /* Découpage par "=" */
           if (cookie_name)
            { cookie_value = strtok_r ( NULL, "=", &savecookie );
              Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                 "Http_Traiter_request_login: HTTP cookie found for %s(%s): %s=%s",
                  remote_name, remote_ip, cookie_name, cookie_value );
+
+             if ( ! strcmp( cookie_name, "sid" ) )
+              { sid = cookie_value;
+                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "Http_get_session : Searching for sid %s", sid );
+                pthread_mutex_lock( &Cfg_http.lib->synchro );                         /* Recherche dans la liste des sessions */
+                liste = Cfg_http.Liste_sessions;
+                while ( liste )
+                 { session = (struct HTTP_SESSION *)liste->data;
+                   if ( ! g_strcmp0 ( session->sid, sid ) ) break;
+                   liste = liste->next;
+                 }
+                pthread_mutex_unlock( &Cfg_http.lib->synchro );
+                if (liste) return(session);
+                return(NULL);
+              }
            }
         }       
      }
+    return(NULL);                                                                          /* il n'y a pas de session trouvée */
+  }
+/******************************************************************************************************************************/
+/* Http Liberer_session : Libere la mémoire réservée par la structure session                                                 */
+/* Entrées : la session à libérer                                                                                             */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_Liberer_session ( struct HTTP_SESSION *session )
+  { /*if (session->buffer) g_free(session->buffer);
+    if (session->util)   g_free(session->util);*/
+    pthread_mutex_lock( &Cfg_http.lib->synchro );                                     /* Recherche dans la liste des sessions */
+    Cfg_http.Liste_sessions = g_slist_remove ( Cfg_http.Liste_sessions, session );
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+             "Http_Liberer_session : session close for SID %s", session->sid );
+    g_free(session);                                                                     /* Libération mémoire le cas échéant */
+  }
+/******************************************************************************************************************************/
+/* Http_new_session : Création d'une nouvelle session pour la requete reçue                                                   */
+/* Entrées : la session WSI                                                                                                   */
+/* Sortie  : NULL si erreur                                                                                                   */
+/******************************************************************************************************************************/
+ static struct HTTP_SESSION *Http_new_session( struct lws *wsi, gchar *remote_name, gchar *remote_ip )
+  { gchar cookie_bin[EVP_MAX_MD_SIZE], cookie_hex[2*EVP_MAX_MD_SIZE+1], cookie[256];
+    struct HTTP_SESSION *session;
+    gchar buffer[4096];
+    gint cpt;
+
+    session = (struct HTTP_SESSION *) g_try_malloc0 ( sizeof( struct HTTP_SESSION ) );
+    if (!session)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Http_New_session: Memory Alloc ERROR session" );
+       return(NULL);
+     }
+    session->last_top = Partage->top;
+    session->is_ssl = lws_is_ssl ( wsi );
+
+    if ( lws_hdr_copy( wsi, buffer, sizeof(buffer), WSI_TOKEN_HTTP_USER_AGENT ) != -1 ) /* Récupération de la valeur du token */
+     { g_snprintf( session->user_agent, sizeof(session->user_agent), "%s", buffer ); }
+
+    g_snprintf( session->remote_name, sizeof(session->remote_name), "%s", remote_name );
+    g_snprintf( session->remote_ip,   sizeof(session->remote_ip),   "%s", remote_ip   );
+
+    RAND_pseudo_bytes( (guchar *)cookie_bin, sizeof(cookie_bin) );                        /* Récupération d'un nouveau COOKIE */
+    for (cpt=0; cpt<sizeof(cookie_bin); cpt++)                                                 /* Mise en forme au format HEX */
+     { g_snprintf( &session->sid[2*cpt], 3, "%02X", (guchar)cookie_bin[cpt] ); }
+
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+             "Http_New_session : Creation session '%s' for %s/%s", session->sid, session->remote_name, session->remote_ip );
+
+    pthread_mutex_lock( &Cfg_http.lib->synchro );                                         /* Ajout dans la liste des sessions */
+    Cfg_http.Liste_sessions = g_slist_prepend( Cfg_http.Liste_sessions, session );
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+    return(session);
+  }
+#ifdef bouh
+/**********************************************************************************************************/
+/* Http_Check_sessions : Fait tomber les sessions sur timeout                                             */
+/* Entrées: néant                                                                                         */
+/* Sortie : néant                                                                                         */
+/**********************************************************************************************************/
+ static void Http_Check_sessions ( void )
+  { struct HTTP_SESSION *session = NULL;
+    GSList *liste;
+    pthread_mutex_lock( &Cfg_http.lib->synchro );                        /* Ajout dans la liste a traiter */
+    liste = Cfg_http.Liste_sessions;
+    while ( liste )
+     { session = (struct HTTP_SESSION *)liste->data;
+       if ( (session->last_top && Partage->top - session->last_top >= 6000) ||
+            session->type == SESSION_TO_BE_CLEANED )
+        { Cfg_http.Liste_sessions = g_slist_remove( Cfg_http.Liste_sessions, session );
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+                   "Http_Check_sessions : closing SID %s", session->sid );
+          Http_Liberer_session(session);
+          liste = Cfg_http.Liste_sessions;
+        }
+       else liste = liste->next;
+     }
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+  }
+#endif
+/******************************************************************************************************************************/
+/* Http_Traiter_request_login: Traite une requete de login                                                                    */
+/* Entrées: la connexion MHD                                                                                                  */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ gboolean Http_Traiter_request_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip )
+  { struct HTTP_SESSION *session;
+    unsigned char header[256], *header_cur, *header_end;
+   	gboolean retour = FALSE;
+	   gchar buffer[4096];
+    gint taille;
+
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+             "Http_Traiter_request_login: HTTP request from %s(%s)",
+              remote_name, remote_ip );
 
     header_cur = header;
     header_end = header + sizeof(header);
-    
-    if (TRUE)
-     { gchar cookie_bin[EVP_MAX_MD_SIZE], cookie_hex[2*EVP_MAX_MD_SIZE+1], cookie[256];
-       gint cpt;
-       RAND_pseudo_bytes( (guchar *)cookie_bin, sizeof(cookie_bin) );                     /* Récupération d'un nouveau COOKIE */
-       for (cpt=0; cpt<sizeof(cookie_bin); cpt++)                                              /* Mise en forme au format HEX */
-        { g_snprintf( &cookie_hex[2*cpt], 3, "%02X", (guchar)cookie_bin[cpt] ); }
-       g_snprintf( cookie, sizeof(cookie), "sessionid=%s; Max-Age=%d; ", cookie_hex, 60*60*12 );
-       
+    session = Http_get_session ( wsi, remote_name, remote_ip );
+    if (session)                                       /* Si une session est deja trouvée, pas la peine de se re-authentifier */
+     { g_snprintf( buffer, sizeof(buffer), "Already login with name xxx" );
+       taille = strlen(buffer);
        lws_add_http_header_status( wsi, 200, &header_cur, header_end );
-       lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_SET_COOKIE, (const unsigned char *)cookie, strlen(cookie),
-                                     &header_cur, header_end );
-       /*lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );*/
-       retour=TRUE;
+       lws_add_http_header_content_length ( wsi, taille, &header_cur, header_end );
+       lws_finalize_http_header ( wsi, &header_cur, header_end );
+       *header_cur='\0';                                                                            /* Caractere null d'arret */
+       lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
+       lws_write ( wsi, buffer, taille, LWS_WRITE_HTTP);                                                    /* Send to client */
+       return(TRUE);
+     }
+
+    if (TRUE)
+     { struct HTTP_SESSION *session;
+       session = Http_new_session ( wsi, remote_name, remote_ip );
+       if (!session)
+        { lws_add_http_header_status( wsi, 501, &header_cur, header_end ); }
+       else
+        { gchar cookie[512];
+          g_snprintf ( cookie, sizeof(cookie), "sid=%s; Max-Age=%d; ", session->sid, 60*60*12 );
+          lws_add_http_header_status( wsi, 200, &header_cur, header_end );
+          lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_SET_COOKIE, (const unsigned char *)cookie, strlen(cookie),
+                                        &header_cur, header_end );
+          /*lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );*/
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+                   "Http_Traiter_request_login: New Session Cookie for %s(%s): %s",
+                    remote_name, remote_ip, cookie );
+          retour=TRUE;
+        }
      }
     else
      { lws_add_http_header_status( wsi, 401, &header_cur, header_end ); }                                     /* Unauthorized */

@@ -294,6 +294,8 @@
 #endif
      }
 
+    while ( Cfg_http.Liste_sessions ) Http_Liberer_session ( Cfg_http.Liste_sessions->data );           /* Libérations des sessions */
+    
     lws_context_destroy(Cfg_http.ws_context);                                                   /* Arret du serveur WebSocket */
     Cfg_http.ws_context = NULL;
 
