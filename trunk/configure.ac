@@ -59,7 +59,7 @@ then
 fi
 
 dnl parametres par defaut
-CFLAGS="-Wall -O -pipe -g -ggdb"
+CFLAGS="-O -pipe -g -ggdb"
 YACC="$YACC -d -t -v"
 
 LIBW_MAJOR_VERSION=4
