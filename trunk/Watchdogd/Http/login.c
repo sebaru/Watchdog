@@ -158,10 +158,10 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  gboolean Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip )
-  { unsigned char header[256], *header_cur, *header_end;
+  { gchar buffer[4096], username[80], password[80], **splited, **couple;
+    unsigned char header[256], *header_cur, *header_end;
     struct CMD_TYPE_UTILISATEUR *util;
     struct HTTP_SESSION *new_session;
-    gchar buffer[4096];
     gint taille;
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
@@ -170,6 +170,7 @@
 
     header_cur = header;
     header_end = header + sizeof(header);
+
     if (session)                                       /* Si une session est deja trouvée, pas la peine de se re-authentifier */
      { g_snprintf( buffer, sizeof(buffer), "Already logged-in for %s/%s", session->remote_name, session->remote_ip );
        taille = strlen(buffer);
@@ -182,6 +183,39 @@
        return(TRUE);
      }
 
+    if ( lws_hdr_copy( wsi, buffer, sizeof(buffer), WSI_TOKEN_POST_URI ) != -1 )        /* Récupération de la valeur du token */
+     { g_snprintf( buffer, sizeof(buffer), "Server Error" );
+       taille = strlen(buffer);
+       lws_add_http_header_status( wsi, 501, &header_cur, header_end );
+       lws_add_http_header_content_length ( wsi, taille, &header_cur, header_end );
+       lws_finalize_http_header ( wsi, &header_cur, header_end );
+       *header_cur='\0';                                                                            /* Caractere null d'arret */
+       lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
+       lws_write ( wsi, buffer, taille, LWS_WRITE_HTTP);                                                    /* Send to client */
+       return(FALSE);
+     }
+
+    splited = g_strsplit( buffer, "&", 2 );                                                         /* Découpage du body POST */
+    if (splited[0])
+     { gchar *new_string;
+       couple = g_strsplit( splited[0], "=", 2 );
+       if ( couple[0] && strcmp( couple[0], "username" )==0 )
+        { new_string = g_uri_unescape_string ( couple[1], NULL );
+          g_snprintf( username , sizeof(username), "%s", new_string );
+          g_free(new_string);
+        }
+       g_strfreev( couple );
+       couple = g_strsplit( splited[1], "=", 2 );
+       if ( couple[0] && strcmp( couple[0], "password" )==0 )
+        { new_string = g_uri_unescape_string ( couple[1], NULL );
+          g_snprintf( password , sizeof(password), "%s", new_string );
+          g_free(new_string);
+        }
+       g_strfreev( couple );
+     }
+    g_strfreev( splited );
+
+       
     util = Rechercher_utilisateurDB_by_name( username );
     if (util && Check_utilisateur_password( util, password ) == TRUE )
      { session = Http_new_session ( wsi, remote_name, remote_ip );
