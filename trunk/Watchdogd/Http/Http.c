@@ -137,26 +137,27 @@
                       "CB_http: data received" );
 		          break;
        case LWS_CALLBACK_HTTP:
-             { gchar *url = (gchar *)data;
+             { struct HTTP_SESSION *session;
+               gchar *url = (gchar *)data;
                gint retour;
                lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
                                         (char *)&remote_name, sizeof(remote_name),
                                         (char *)&remote_ip, sizeof(remote_ip) );
-               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: HTTP request from %s(%s): %s",
-                         remote_name, remote_ip, url );
+               session = Http_get_session ( wsi, remote_name, remote_ip );
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: HTTP request from %s/%s (sid %12c): %s",
+                         remote_name, remote_ip, (session ? session->sid : "----"), url );
                if ( ! strcasecmp ( url, "/favicon.ico" ) )
                 { retour = lws_serve_http_file ( wsi, "WEB/favicon.gif", "image/gif", NULL, 0);
                   if (retour != 0) return(1);                             /* Si erreur (<0) ou si ok (>0), on ferme la socket */
                   return(0);                    /* si besoin de plus de temps, on laisse la ws http ouverte pour libwebsocket */
                 }
+
                else if ( ! strcasecmp ( url, "/login.ws" ) )
-                { Http_Traiter_request_login ( wsi, remote_name, remote_ip ); }
+                { Http_Traiter_request_login ( session, wsi, remote_name, remote_ip ); }
                else if ( ! strcasecmp ( url, "/status" ) )
                 { Http_Traiter_request_getstatus ( wsi ); }
                else if ( ! strncasecmp ( url, "/gif/", 5 ) )
                 { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+5 ) ); }
-               else if ( ! strcasecmp ( url, "/login.ws" ) )
-                { return( Http_Traiter_request_login ( wsi, remote_name, remote_ip ) ); }
                else if ( ! strncasecmp ( url, "/audio/", 7 ) )
                 { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+7 ) ); }
                else                                                                                             /* Par défaut */

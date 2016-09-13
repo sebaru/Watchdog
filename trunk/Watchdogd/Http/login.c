@@ -157,11 +157,11 @@
 /* Entrées: la connexion MHD                                                                                                  */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- gboolean Http_Traiter_request_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip )
-  { struct HTTP_SESSION *session;
-    unsigned char header[256], *header_cur, *header_end;
-   	gboolean retour = FALSE;
-	   gchar buffer[4096];
+ gboolean Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip )
+  { unsigned char header[256], *header_cur, *header_end;
+    struct CMD_TYPE_UTILISATEUR *util;
+    struct HTTP_SESSION *new_session;
+    gchar buffer[4096];
     gint taille;
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
@@ -170,9 +170,8 @@
 
     header_cur = header;
     header_end = header + sizeof(header);
-    session = Http_get_session ( wsi, remote_name, remote_ip );
     if (session)                                       /* Si une session est deja trouvée, pas la peine de se re-authentifier */
-     { g_snprintf( buffer, sizeof(buffer), "Already login with name xxx" );
+     { g_snprintf( buffer, sizeof(buffer), "Already logged-in for %s/%s", session->remote_name, session->remote_ip );
        taille = strlen(buffer);
        lws_add_http_header_status( wsi, 200, &header_cur, header_end );
        lws_add_http_header_content_length ( wsi, taille, &header_cur, header_end );
@@ -183,30 +182,32 @@
        return(TRUE);
      }
 
-    if (TRUE)
-     { struct HTTP_SESSION *session;
-       session = Http_new_session ( wsi, remote_name, remote_ip );
+    util = Rechercher_utilisateurDB_by_name( username );
+    if (util && Check_utilisateur_password( util, password ) == TRUE )
+     { session = Http_new_session ( wsi, remote_name, remote_ip );
        if (!session)
-        { lws_add_http_header_status( wsi, 501, &header_cur, header_end ); }
+        { g_free(util); }
        else
         { gchar cookie[512];
+          session->util = util;
           g_snprintf ( cookie, sizeof(cookie), "sid=%s; Max-Age=%d; ", session->sid, 60*60*12 );
           lws_add_http_header_status( wsi, 200, &header_cur, header_end );
           lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_SET_COOKIE, (const unsigned char *)cookie, strlen(cookie),
                                         &header_cur, header_end );
           /*lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );*/
           Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                   "Http_Traiter_request_login: New Session Cookie for %s(%s): %s",
-                    remote_name, remote_ip, cookie );
-          retour=TRUE;
+                   "Http_Traiter_request_login: SID%12c, New Session Cookie for %s(%s)",
+                    cookie, remote_name, remote_ip, cookie );
+          return(TRUE);
         }
      }
-    else
-     { lws_add_http_header_status( wsi, 401, &header_cur, header_end ); }                                     /* Unauthorized */
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+             "Http_Traiter_request_login: Wrong Util/Credential for user %s", username );
 
+    lws_add_http_header_status( wsi, 401, &header_cur, header_end );                                          /* Unauthorized */
     lws_finalize_http_header ( wsi, &header_cur, header_end );
     *header_cur='\0';                                                                               /* Caractere null d'arret */
     lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-    return(retour);
+    return(FALSE);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

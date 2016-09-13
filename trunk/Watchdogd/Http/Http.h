@@ -76,7 +76,6 @@
 
 /*************************************************** Définitions des prototypes ***********************************************/
  extern gboolean Http_Lire_config ( void );
- extern gboolean Http_Traiter_request_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
 /* extern gboolean Http_Traiter_request_getsyn ( struct HTTP_SESSION *session, struct MHD_Connection *connection );*/
  extern gboolean Http_Traiter_request_getstatus ( struct lws *wsi );
  extern gint Http_Traiter_request_getgif ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
@@ -85,7 +84,7 @@
 
  extern struct HTTP_SESSION *Http_get_session ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
  extern void Http_Liberer_session ( struct HTTP_SESSION *session );
- extern gboolean Http_Traiter_request_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
+ extern gboolean Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip );
 
  /* extern gint Http_Traiter_request_getslash ( struct HTTP_SESSION *session, struct MHD_Connection *connection );
  extern gint Http_Traiter_request_getgif ( struct MHD_Connection *connection );
