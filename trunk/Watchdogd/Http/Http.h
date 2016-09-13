@@ -63,6 +63,10 @@
     GSList *Liste_sessions;
  } Cfg_http;
 
+ struct HTTP_PER_SESSION_DATA
+  { struct lws_spa *spa;
+  };
+
  struct HTTP_SESSION
   { /*gint     type;*/
     gchar    sid[2*EVP_MAX_MD_SIZE+1];
@@ -84,7 +88,7 @@
 
  extern struct HTTP_SESSION *Http_get_session ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
  extern void Http_Liberer_session ( struct HTTP_SESSION *session );
- extern gboolean Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip );
+ extern gint Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip );
 
  /* extern gint Http_Traiter_request_getslash ( struct HTTP_SESSION *session, struct MHD_Connection *connection );
  extern gint Http_Traiter_request_getgif ( struct MHD_Connection *connection );

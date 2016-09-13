@@ -109,6 +109,7 @@
 /******************************************************************************************************************************/
  static gint CB_http ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
   { gchar remote_name[80], remote_ip[80];
+    struct HTTP_PER_SESSION_DATA *pss = (struct HTTP_PER_SESSION_DATA *)user;
 
  /*   Http_Log_request(connection, url, method, version, upload_data_size, con_cls);*/
     switch (tag)
@@ -136,6 +137,33 @@
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                       "CB_http: data received" );
 		          break;
+       case LWS_CALLBACK_HTTP_DROP_PROTOCOL:                      	/* called when our wsi user_space is going to be destroyed */
+            if (pss->spa)
+             {	lws_spa_destroy(pss->spa);
+               pss->spa = NULL;
+             }
+            break;
+       case LWS_CALLBACK_HTTP_BODY:
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                      "CB_http: http body %s", url );
+            if ( ! strcasecmp ( url, "/login.ws" ) )                                       /* si OK, on poursuit la connexion */
+             { if (!pss->spa)
+                {	pss->spa = lws_spa_create(wsi, param_names, ARRAY_SIZE(param_names), 1024,	file_upload_cb, pss);
+			               if (!pss->spa)	return -1;
+                }
+               if (lws_spa_process(pss->spa, data, taille)) return -1;
+             }
+            break;
+       case LWS_CALLBACK_HTTP_BODY_COMPLETION:
+            lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
+                                        (char *)&remote_name, sizeof(remote_name),
+                                        (char *)&remote_ip, sizeof(remote_ip) );
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                      "CB_http: http body completion %s", url );
+            if ( ! strcasecmp ( url, "/login.ws" ) )                                       /* si OK, on poursuit la connexion */
+             { return( Http_Traiter_request_body_login ( wsi, remote_name, remote_ip ) );
+             }
+            break;
        case LWS_CALLBACK_HTTP:
              { struct HTTP_SESSION *session;
                gchar *url = (gchar *)data;
@@ -144,7 +172,7 @@
                                         (char *)&remote_name, sizeof(remote_name),
                                         (char *)&remote_ip, sizeof(remote_ip) );
                session = Http_get_session ( wsi, remote_name, remote_ip );
-               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: HTTP request from %s/%s (sid %12c): %s",
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: Request from %s/%s (sid %12s): %s",
                          remote_name, remote_ip, (session ? session->sid : "----"), url );
                if ( ! strcasecmp ( url, "/favicon.ico" ) )
                 { retour = lws_serve_http_file ( wsi, "WEB/favicon.gif", "image/gif", NULL, 0);
@@ -152,8 +180,8 @@
                   return(0);                    /* si besoin de plus de temps, on laisse la ws http ouverte pour libwebsocket */
                 }
 
-               else if ( ! strcasecmp ( url, "/login.ws" ) )
-                { Http_Traiter_request_login ( session, wsi, remote_name, remote_ip ); }
+               else if ( ! strcasecmp ( url, "/login.ws" ) )                               /* si OK, on poursuit la connexion */
+                { return( Http_Traiter_request_login ( session, wsi, remote_name, remote_ip ) ); }
                else if ( ! strcasecmp ( url, "/status" ) )
                 { Http_Traiter_request_getstatus ( wsi ); }
                else if ( ! strncasecmp ( url, "/gif/", 5 ) )
@@ -175,7 +203,7 @@
             break;
        case LWS_CALLBACK_OPENSSL_PERFORM_CLIENT_CERT_VERIFICATION:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                      "CB_http: need to verifi Client SSL Certs" );
+                      "CB_http: need to verify Client SSL Certs" );
 		          break;
 	      default: return(0);                                                    /* Par défaut, on laisse la connexion continuer */
      }
@@ -188,7 +216,7 @@
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct lws_protocols WS_PROTOS[] =
-     { { "http-only", CB_http, 0, 0 }, 	                                        /* first protocol must always be HTTP handler */
+     { { "http-only", CB_http, sizeof(struct HTTP_PER_SESSION_DATA), 0 },       /* first protocol must always be HTTP handler */
        { "ws-login", CB_ws_login, 0, 0 },
        { NULL, NULL, 0, 0 } /* terminator */
      };
@@ -295,7 +323,7 @@
 #endif
      }
 
-    while ( Cfg_http.Liste_sessions ) Http_Liberer_session ( Cfg_http.Liste_sessions->data );           /* Libérations des sessions */
+    while ( Cfg_http.Liste_sessions ) Http_Liberer_session ( Cfg_http.Liste_sessions->data );     /* Libérations des sessions */
     
     lws_context_destroy(Cfg_http.ws_context);                                                   /* Arret du serveur WebSocket */
     Cfg_http.ws_context = NULL;

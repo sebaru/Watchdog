@@ -157,7 +157,7 @@
 /* Entrées: la connexion MHD                                                                                                  */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- gboolean Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip )
+ gint Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip )
   { gchar buffer[4096], username[80], password[80], **splited, **couple;
     unsigned char header[256], *header_cur, *header_end;
     struct CMD_TYPE_UTILISATEUR *util;
@@ -180,9 +180,30 @@
        *header_cur='\0';                                                                            /* Caractere null d'arret */
        lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
        lws_write ( wsi, buffer, taille, LWS_WRITE_HTTP);                                                    /* Send to client */
-       return(TRUE);
+       return(1);
      }
+    return(0);
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_request_login: Traite une requete de login                                                                    */
+/* Entrées: la connexion MHD                                                                                                  */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ gint Http_Traiter_request_body_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip )
+  { gchar buffer[4096], username[80], password[80], **splited, **couple;
+    unsigned char header[256], *header_cur, *header_end;
+    struct CMD_TYPE_UTILISATEUR *util;
+    struct HTTP_SESSION *session;
+    gint taille;
 
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+             "Http_Traiter_request_body_login: HTTP request from %s(%s)",
+              remote_name, remote_ip );
+
+    header_cur = header;
+    header_end = header + sizeof(header);
+
+return(TRUE);
     if ( lws_hdr_copy( wsi, buffer, sizeof(buffer), WSI_TOKEN_POST_URI ) != -1 )        /* Récupération de la valeur du token */
      { g_snprintf( buffer, sizeof(buffer), "Server Error" );
        taille = strlen(buffer);
