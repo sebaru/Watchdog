@@ -175,14 +175,15 @@
 
     if (!session)
      { pss = lws_wsi_user ( wsi );
-       g_snprintf( pss->url, sizeof(pss->url), "/login.ws" );
+       g_snprintf( pss->url, sizeof(pss->url), "/ws/login" );
        return(0);                                                     /* si pas de session, on continue de traiter la request */
      }
     
     header_cur = header;
     header_end = header + sizeof(header);
 
-    g_snprintf( buffer, sizeof(buffer), "Already logged-in for %s/%s", session->remote_name, session->remote_ip );
+    g_snprintf( buffer, sizeof(buffer), "<html><body>Already logged-in for %s/%s</body></html>",
+                session->remote_name, session->remote_ip );
     taille = strlen(buffer);
     lws_add_http_header_status( wsi, 200, &header_cur, header_end );
     lws_add_http_header_content_length ( wsi, taille, &header_cur, header_end );
@@ -240,36 +241,50 @@
 
     util = Rechercher_utilisateurDB_by_name( username );
     if (!util)
-     { lws_add_http_header_status( wsi, 401, &header_cur, header_end );                                          /* Unauthorized */
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
                 "Http_Traiter_request_login: Username '%s' not found", username );
+       lws_add_http_header_status( wsi, 401, &header_cur, header_end );                                       /* Unauthorized */
+       lws_finalize_http_header ( wsi, &header_cur, header_end );
+       *header_cur='\0';                                                                            /* Caractere null d'arret */
+       lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
      }
     else if ( Check_utilisateur_password( util, password ) == FALSE )
-     { lws_add_http_header_status( wsi, 401, &header_cur, header_end );                                          /* Unauthorized */
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
                 "Http_Traiter_request_login: Wrong Password for user '%s'", username );
+       lws_add_http_header_status( wsi, 401, &header_cur, header_end );                                       /* Unauthorized */
+       lws_finalize_http_header ( wsi, &header_cur, header_end );
+       *header_cur='\0';                                                                            /* Caractere null d'arret */
+       lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
      }
     else
      { session = Http_new_session ( wsi, remote_name, remote_ip );
        if (!session)
-        { g_free(util); }
+        { g_free(util);
+          lws_add_http_header_status( wsi, 501, &header_cur, header_end );                                    /* Server Error */
+          lws_finalize_http_header ( wsi, &header_cur, header_end );
+          *header_cur='\0';                                                                         /* Caractere null d'arret */
+          lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
+        }
        else
-        { gchar cookie[512];
+        { gchar cookie[512], *response="<html><body>OK</body></html>", *content="text/html";
+          gint taille_response = strlen(response);
           session->util = util;
           g_snprintf ( cookie, sizeof(cookie), "sid=%s; Max-Age=%d; ", session->sid, 60*60*12 );
           lws_add_http_header_status( wsi, 200, &header_cur, header_end );
           lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_SET_COOKIE, (const unsigned char *)cookie, strlen(cookie),
                                         &header_cur, header_end );
-          /*lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );*/
+          lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, content, strlen(content),
+                                        &header_cur, header_end );
+          lws_add_http_header_content_length ( wsi, strlen(response), &header_cur, header_end );
+          lws_finalize_http_header ( wsi, &header_cur, header_end );
+          *header_cur='\0';                                                                         /* Caractere null d'arret */
+          lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
+          lws_write ( wsi, response, taille_response, LWS_WRITE_HTTP);                                      /* Send to client */
           Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
                    "Http_Traiter_request_login: (sid %.12s), New Session Cookie for %s(%s)",
                     session->sid, remote_name, remote_ip );
         }
      }
-
-    lws_finalize_http_header ( wsi, &header_cur, header_end );
-    *header_cur='\0';                                                                               /* Caractere null d'arret */
-    lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
     return(1);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

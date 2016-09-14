@@ -152,7 +152,7 @@
                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                          "CB_http: http body completion for %s!", pss->url );
                pss->post_data[pss->post_data_length] = 0;                                            /* Caractere nul d'arret */
-               if ( ! strcasecmp ( pss->url, "/login.ws" ) )                               /* si OK, on poursuit la connexion */
+               if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
                 { return( Http_Traiter_request_body_completion_login ( wsi, remote_name, remote_ip ) ); }
               }
             break;
@@ -174,14 +174,16 @@
                   return(0);                    /* si besoin de plus de temps, on laisse la ws http ouverte pour libwebsocket */
                 }
 
-               else if ( ! strcasecmp ( url, "/login.ws" ) )                               /* si OK, on poursuit la connexion */
+               else if ( ! strcasecmp ( url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
                 { return( Http_Traiter_request_login ( session, wsi, remote_name, remote_ip ) ); }
-               else if ( ! strcasecmp ( url, "/status" ) )
+               else if ( ! strcasecmp ( url, "/ws/logoff" ) )
+                { if (session) Http_Liberer_session ( session ); }
+               else if ( ! strcasecmp ( url, "/ws/status" ) )
                 { Http_Traiter_request_getstatus ( wsi ); }
-               else if ( ! strncasecmp ( url, "/gif/", 5 ) )
-                { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+5 ) ); }
-               else if ( ! strncasecmp ( url, "/audio/", 7 ) )
-                { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+7 ) ); }
+               else if ( ! strncasecmp ( url, "/ws/gif/", 8 ) )
+                { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+8 ) ); }
+               else if ( ! strncasecmp ( url, "/ws/audio/", 7 ) )
+                { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
                else                                                                                             /* Par défaut */
                 { return( Http_Traiter_request_getui ( wsi, remote_name, remote_ip, url+1 ) ); }
                return(1);                                                                    /* Par défaut, on clos la socket */
