@@ -28,7 +28,8 @@
 #ifndef _HTTP_H_
  #define _HTTP_H_
  #include <libwebsockets.h>
-
+ #include <libxml/xmlwriter.h>
+ 
  #define NOM_THREAD                    "http"
  #define HTTP_DEFAUT_FILE_CA           "http_cacert.pem"
  #define HTTP_DEFAUT_FILE_CERT         "http_serveursigne.pem"

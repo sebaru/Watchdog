@@ -39,11 +39,11 @@
 /******************************************************************************************************************************/
  gboolean Http_Traiter_request_getstatus ( struct lws *wsi )
   { unsigned char header[256], *header_cur, *header_end;
-	const char *content_type = "application/xml";
+   	const char *content_type = "application/xml";
     xmlTextWriterPtr writer;
     xmlBufferPtr buf;
     gint retour, num;
-	gchar host[128];
+	   gchar host[128];
 
     buf = xmlBufferCreate();                                                                        /* Creation du buffer xml */
     if (buf == NULL)

@@ -36,8 +36,63 @@
  enum
   { PARAM_LOGIN_USERNAME,
     PARAM_LOGIN_PASSWORD,
-    NBR_PARAM_LOGIN };
+    NBR_PARAM_LOGIN
+  };
 
+/******************************************************************************************************************************/
+/* Groups_to_xml: Renvoi la liste des groupes de l'utilisateur, au format XML                                                 */
+/* Entrée : l'utilisateur                                                                                                     */
+/* Sortie : xmlBuffer, ou NULL si erreur                                                                                      */
+/******************************************************************************************************************************/
+ xmlBufferPtr Groups_to_xml ( struct CMD_TYPE_UTILISATEUR *util )
+  { xmlTextWriterPtr writer;
+    xmlBufferPtr buf;
+    gint cpt;
+
+    buf = xmlBufferCreate();                                                                        /* Creation du buffer xml */
+    if (buf == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                 "Groups_to_xml: XML Buffer creation failed" );
+       return(NULL);
+     }
+
+    if ( (writer = xmlNewTextWriterMemory(buf, 0)) == NULL )                                         /* Creation du write XML */
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Groups_to_xml : XML Writer creation failed" );
+       xmlBufferFree(buf);
+       return(NULL);
+     }
+
+    if ( xmlTextWriterStartDocument(writer, NULL, "UTF-8", "yes" ) < 0 )                              /* Creation du document */
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Groups_to_xml : XML Start document failed" );
+       xmlBufferFree(buf);
+       return(NULL);
+     }
+
+    if (xmlTextWriterStartElement(writer, (const unsigned char *) "Groups") < 0)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Groups_to_xml : XML Failed to Start element Groups" );
+       xmlBufferFree(buf);
+       return(NULL);
+     }
+
+    cpt=0;
+    while ( util->gids[cpt] )
+     { xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"group", "%06d", util->gids[cpt] );
+       cpt++;
+     }
+
+    if (xmlTextWriterEndDocument(writer)<0)                                                                   /* End document */
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                 "Http_Traiter_request_getstatus : Failed to end Document" );
+       xmlBufferFree(buf);
+       return(NULL);
+     }
+
+    xmlFreeTextWriter(writer);                                                                    /* Libération du writer XML */
+    return(buf);
+  }
 /******************************************************************************************************************************/
 /* Http_get_session : Vérifie le numéro de session en parametre                                                               */
 /* Entrées: le SID a tester                                                                                                   */
@@ -243,7 +298,7 @@ search_again:
     util = Rechercher_utilisateurDB_by_name( username );
     if (!util)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                "Http_Traiter_request_login: Username '%s' not found", username );
+                "Http_Traiter_request_body_completion_login: Username '%s' not found", username );
        lws_add_http_header_status( wsi, 401, &header_cur, header_end );                                       /* Unauthorized */
        lws_finalize_http_header ( wsi, &header_cur, header_end );
        *header_cur='\0';                                                                            /* Caractere null d'arret */
@@ -251,15 +306,16 @@ search_again:
      }
     else if ( Check_utilisateur_password( util, password ) == FALSE )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                "Http_Traiter_request_login: Wrong Password for user '%s'", username );
+                "Http_Traiter_request_body_completion_login: Wrong Password for user '%s'", username );
        lws_add_http_header_status( wsi, 401, &header_cur, header_end );                                       /* Unauthorized */
        lws_finalize_http_header ( wsi, &header_cur, header_end );
        *header_cur='\0';                                                                            /* Caractere null d'arret */
        lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
      }
     else
-     { session = Http_new_session ( wsi, remote_name, remote_ip );
-       if (!session)
+     { xmlBufferPtr buf;
+       buf = Groups_to_xml ( util );
+       if (!buf)
         { g_free(util);
           lws_add_http_header_status( wsi, 501, &header_cur, header_end );                                    /* Server Error */
           lws_finalize_http_header ( wsi, &header_cur, header_end );
@@ -267,23 +323,37 @@ search_again:
           lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
         }
        else
-        { gchar cookie[512], *response="<html><body>OK</body></html>", *content="text/html";
-          gint taille_response = strlen(response);
-          session->util = util;
-          g_snprintf ( cookie, sizeof(cookie), "sid=%s; Max-Age=%d; ", session->sid, 60*60*12 );
-          lws_add_http_header_status( wsi, 200, &header_cur, header_end );
-          lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_SET_COOKIE, (const unsigned char *)cookie, strlen(cookie),
-                                        &header_cur, header_end );
-          lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, content, strlen(content),
-                                        &header_cur, header_end );
-          lws_add_http_header_content_length ( wsi, strlen(response), &header_cur, header_end );
-          lws_finalize_http_header ( wsi, &header_cur, header_end );
-          *header_cur='\0';                                                                         /* Caractere null d'arret */
-          lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-          lws_write ( wsi, response, taille_response, LWS_WRITE_HTTP);                                      /* Send to client */
-          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                   "Http_Traiter_request_login: (sid %.12s), New Session Cookie for %s(%s)",
-                    session->sid, remote_name, remote_ip );
+        { session = Http_new_session ( wsi, remote_name, remote_ip );
+          if (!session)
+           { xmlBufferFree(buf);
+             g_free(util);
+             lws_add_http_header_status( wsi, 501, &header_cur, header_end );                                 /* Server Error */
+             lws_finalize_http_header ( wsi, &header_cur, header_end );
+             *header_cur='\0';                                                                      /* Caractere null d'arret */
+             lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
+           }
+          else                                                          /* Checking OK, create session and send habilitations */
+           { const char *content_type = "application/xml";
+             gchar cookie[512];
+
+             session->util = util;                                                  /* Sauvegarde de la structure utilisateur */
+          
+             g_snprintf ( cookie, sizeof(cookie), "sid=%s; Max-Age=%d; ", session->sid, 60*60*12 );
+             lws_add_http_header_status( wsi, 200, &header_cur, header_end );
+             lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_SET_COOKIE, (const unsigned char *)cookie, strlen(cookie),
+                                           &header_cur, header_end );
+             lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, content_type, strlen(content_type),
+                                           &header_cur, header_end );
+             lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );
+             lws_finalize_http_header ( wsi, &header_cur, header_end );
+             *header_cur='\0';                                                                      /* Caractere null d'arret */
+             lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
+             lws_write ( wsi, buf->content, buf->use, LWS_WRITE_HTTP);                                      /* Send to client */
+             xmlBufferFree(buf);                                      /* Libération du buffer dont nous n'avons plus besoin ! */
+             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+                      "Http_Traiter_request_login: (sid %.12s), New Session Cookie for %s(%s)",
+                       session->sid, remote_name, remote_ip );
+          }
         }
      }
     return(1);
