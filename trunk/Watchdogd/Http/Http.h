@@ -64,7 +64,9 @@
  } Cfg_http;
 
  struct HTTP_PER_SESSION_DATA
-  { struct lws_spa *spa;
+  { gchar url[80];
+    gchar *post_data;
+    gint post_data_length;
   };
 
  struct HTTP_SESSION
@@ -88,8 +90,10 @@
 
  extern struct HTTP_SESSION *Http_get_session ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
  extern void Http_Liberer_session ( struct HTTP_SESSION *session );
- extern gint Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip );
 
+ extern gint Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip );
+ extern gint Http_Traiter_request_body_completion_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
+ 
  /* extern gint Http_Traiter_request_getslash ( struct HTTP_SESSION *session, struct MHD_Connection *connection );
  extern gint Http_Traiter_request_getgif ( struct MHD_Connection *connection );
  extern gboolean Http_Traiter_request_setm ( struct HTTP_SESSION *session, struct MHD_Connection *connection );

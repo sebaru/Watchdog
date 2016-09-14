@@ -120,7 +120,7 @@
        case LWS_CALLBACK_CLOSED_HTTP:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                       "CB_http: connexion closed" );
-		          break;
+            break;
        case LWS_CALLBACK_PROTOCOL_INIT:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                       "CB_http: Protocol initialized !" );
@@ -137,32 +137,24 @@
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                       "CB_http: data received" );
 		          break;
-       case LWS_CALLBACK_HTTP_DROP_PROTOCOL:                      	/* called when our wsi user_space is going to be destroyed */
-            if (pss->spa)
-             {	lws_spa_destroy(pss->spa);
-               pss->spa = NULL;
-             }
-            break;
        case LWS_CALLBACK_HTTP_BODY:
-            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                      "CB_http: http body %s", url );
-            if ( ! strcasecmp ( url, "/login.ws" ) )                                       /* si OK, on poursuit la connexion */
-             { if (!pss->spa)
-                {	pss->spa = lws_spa_create(wsi, param_names, ARRAY_SIZE(param_names), 1024,	file_upload_cb, pss);
-			               if (!pss->spa)	return -1;
-                }
-               if (lws_spa_process(pss->spa, data, taille)) return -1;
+             { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                         "CB_http: http body : receive %d bytes", taille );
+               pss->post_data = g_try_realloc ( pss->post_data, pss->post_data_length + taille );
+               memcpy ( pss->post_data + pss->post_data_length, data, taille );
+               pss->post_data_length += taille;
              }
             break;
        case LWS_CALLBACK_HTTP_BODY_COMPLETION:
-            lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
-                                        (char *)&remote_name, sizeof(remote_name),
-                                        (char *)&remote_ip, sizeof(remote_ip) );
-            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                      "CB_http: http body completion %s", url );
-            if ( ! strcasecmp ( url, "/login.ws" ) )                                       /* si OK, on poursuit la connexion */
-             { return( Http_Traiter_request_body_login ( wsi, remote_name, remote_ip ) );
-             }
+             { lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
+                                           (char *)&remote_name, sizeof(remote_name),
+                                           (char *)&remote_ip, sizeof(remote_ip) );
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                         "CB_http: http body completion for %s!", pss->url );
+               pss->post_data[pss->post_data_length] = 0;                                            /* Caractere nul d'arret */
+               if ( ! strcasecmp ( pss->url, "/login.ws" ) )                               /* si OK, on poursuit la connexion */
+                { return( Http_Traiter_request_body_completion_login ( wsi, remote_name, remote_ip ) ); }
+              }
             break;
        case LWS_CALLBACK_HTTP:
              { struct HTTP_SESSION *session;
@@ -172,8 +164,8 @@
                                         (char *)&remote_name, sizeof(remote_name),
                                         (char *)&remote_ip, sizeof(remote_ip) );
                session = Http_get_session ( wsi, remote_name, remote_ip );
-               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: Request from %s/%s (sid %12s): %s",
-                         remote_name, remote_ip, (session ? session->sid : "----"), url );
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: Request from %s/%s (sid %8s): %s",
+                         remote_name, remote_ip, (session ? session->sid : "--------"), url );
                if ( ! strcasecmp ( url, "/favicon.ico" ) )
                 { retour = lws_serve_http_file ( wsi, "WEB/favicon.gif", "image/gif", NULL, 0);
                   if (retour != 0) return(1);                             /* Si erreur (<0) ou si ok (>0), on ferme la socket */

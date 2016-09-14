@@ -26,10 +26,18 @@
  */
  
  #include <openssl/rand.h>
- 
+
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Http.h"
+
+ static const char * PARAM_LOGIN[] =
+  { "username", "password" };
+ enum
+  { PARAM_LOGIN_USERNAME,
+    PARAM_LOGIN_PASSWORD,
+    NBR_PARAM_LOGIN };
+
 /******************************************************************************************************************************/
 /* Http_get_session : Vérifie le numéro de session en parametre                                                               */
 /* Entrées: le SID a tester                                                                                                   */
@@ -50,13 +58,9 @@
           cookie_name=strtok_r( cookie, "=", &savecookie);                                               /* Découpage par "=" */
           if (cookie_name)
            { cookie_value = strtok_r ( NULL, "=", &savecookie );
-             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "Http_Traiter_request_login: HTTP cookie found for %s(%s): %s=%s",
-                 remote_name, remote_ip, cookie_name, cookie_value );
-
              if ( ! strcmp( cookie_name, "sid" ) )
               { sid = cookie_value;
-                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "Http_get_session : Searching for sid %s", sid );
+                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "Http_get_session : Searching for sid %.12s", sid );
                 pthread_mutex_lock( &Cfg_http.lib->synchro );                         /* Recherche dans la liste des sessions */
                 liste = Cfg_http.Liste_sessions;
                 while ( liste )
@@ -68,6 +72,9 @@
                 if (liste) return(session);
                 return(NULL);
               }
+             else Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                           "Http_get_session: Cookie found for %s(%s): %s=%s",
+                            remote_name, remote_ip, cookie_name, cookie_value );
            }
         }       
      }
@@ -119,7 +126,7 @@
      { g_snprintf( &session->sid[2*cpt], 3, "%02X", (guchar)cookie_bin[cpt] ); }
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "Http_New_session : Creation session '%s' for %s/%s", session->sid, session->remote_name, session->remote_ip );
+             "Http_New_session : Creation session '%.12s' for %s/%s", session->sid, session->remote_name, session->remote_ip );
 
     pthread_mutex_lock( &Cfg_http.lib->synchro );                                         /* Ajout dans la liste des sessions */
     Cfg_http.Liste_sessions = g_slist_prepend( Cfg_http.Liste_sessions, session );
@@ -158,65 +165,58 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  gint Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip )
-  { gchar buffer[4096], username[80], password[80], **splited, **couple;
-    unsigned char header[256], *header_cur, *header_end;
-    struct CMD_TYPE_UTILISATEUR *util;
-    struct HTTP_SESSION *new_session;
+  { unsigned char header[256], *header_cur, *header_end;
+    struct HTTP_PER_SESSION_DATA *pss;
+    gchar buffer[4096];
     gint taille;
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
              "Http_Traiter_request_login: HTTP request from %s(%s)",
               remote_name, remote_ip );
 
+    if (!session)
+     { pss = lws_wsi_user ( wsi );
+       g_snprintf( pss->url, sizeof(pss->url), "/login.ws" );
+       return(0);                                                     /* si pas de session, on continue de traiter la request */
+     }
+    
     header_cur = header;
     header_end = header + sizeof(header);
 
-    if (session)                                       /* Si une session est deja trouvée, pas la peine de se re-authentifier */
-     { g_snprintf( buffer, sizeof(buffer), "Already logged-in for %s/%s", session->remote_name, session->remote_ip );
-       taille = strlen(buffer);
-       lws_add_http_header_status( wsi, 200, &header_cur, header_end );
-       lws_add_http_header_content_length ( wsi, taille, &header_cur, header_end );
-       lws_finalize_http_header ( wsi, &header_cur, header_end );
-       *header_cur='\0';                                                                            /* Caractere null d'arret */
-       lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-       lws_write ( wsi, buffer, taille, LWS_WRITE_HTTP);                                                    /* Send to client */
-       return(1);
-     }
-    return(0);
+    g_snprintf( buffer, sizeof(buffer), "Already logged-in for %s/%s", session->remote_name, session->remote_ip );
+    taille = strlen(buffer);
+    lws_add_http_header_status( wsi, 200, &header_cur, header_end );
+    lws_add_http_header_content_length ( wsi, taille, &header_cur, header_end );
+    lws_finalize_http_header ( wsi, &header_cur, header_end );
+    *header_cur='\0';                                                                               /* Caractere null d'arret */
+    lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
+    lws_write ( wsi, buffer, taille, LWS_WRITE_HTTP);                                                       /* Send to client */
+    return(1);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_login: Traite une requete de login                                                                    */
 /* Entrées: la connexion MHD                                                                                                  */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- gint Http_Traiter_request_body_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip )
+ gint Http_Traiter_request_body_completion_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip )
   { gchar buffer[4096], username[80], password[80], **splited, **couple;
     unsigned char header[256], *header_cur, *header_end;
+    struct HTTP_PER_SESSION_DATA *pss;
     struct CMD_TYPE_UTILISATEUR *util;
     struct HTTP_SESSION *session;
     gint taille;
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-             "Http_Traiter_request_body_login: HTTP request from %s(%s)",
+             "Http_Traiter_request_body_completion_login: HTTP request from %s(%s)",
               remote_name, remote_ip );
 
+    pss = lws_wsi_user ( wsi );
+    g_snprintf( username, sizeof(username), "nouser" );
+    g_snprintf( password, sizeof(password), "nopassword" );
     header_cur = header;
     header_end = header + sizeof(header);
 
-return(TRUE);
-    if ( lws_hdr_copy( wsi, buffer, sizeof(buffer), WSI_TOKEN_POST_URI ) != -1 )        /* Récupération de la valeur du token */
-     { g_snprintf( buffer, sizeof(buffer), "Server Error" );
-       taille = strlen(buffer);
-       lws_add_http_header_status( wsi, 501, &header_cur, header_end );
-       lws_add_http_header_content_length ( wsi, taille, &header_cur, header_end );
-       lws_finalize_http_header ( wsi, &header_cur, header_end );
-       *header_cur='\0';                                                                            /* Caractere null d'arret */
-       lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-       lws_write ( wsi, buffer, taille, LWS_WRITE_HTTP);                                                    /* Send to client */
-       return(FALSE);
-     }
-
-    splited = g_strsplit( buffer, "&", 2 );                                                         /* Découpage du body POST */
+    splited = g_strsplit( pss->post_data, "&", 2 );                                                 /* Découpage du body POST */
     if (splited[0])
      { gchar *new_string;
        couple = g_strsplit( splited[0], "=", 2 );
@@ -226,6 +226,9 @@ return(TRUE);
           g_free(new_string);
         }
        g_strfreev( couple );
+     }
+    if (splited[1])
+     { gchar *new_string;
        couple = g_strsplit( splited[1], "=", 2 );
        if ( couple[0] && strcmp( couple[0], "password" )==0 )
         { new_string = g_uri_unescape_string ( couple[1], NULL );
@@ -236,9 +239,18 @@ return(TRUE);
      }
     g_strfreev( splited );
 
-       
     util = Rechercher_utilisateurDB_by_name( username );
-    if (util && Check_utilisateur_password( util, password ) == TRUE )
+    if (!util)
+     { lws_add_http_header_status( wsi, 401, &header_cur, header_end );                                          /* Unauthorized */
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+                "Http_Traiter_request_login: Username '%s' not found", username );
+     }
+    else if ( Check_utilisateur_password( util, password ) == FALSE )
+     { lws_add_http_header_status( wsi, 401, &header_cur, header_end );                                          /* Unauthorized */
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+                "Http_Traiter_request_login: Wrong Password for user '%s'", username );
+     }
+    else
      { session = Http_new_session ( wsi, remote_name, remote_ip );
        if (!session)
         { g_free(util); }
@@ -251,18 +263,14 @@ return(TRUE);
                                         &header_cur, header_end );
           /*lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );*/
           Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                   "Http_Traiter_request_login: SID%12c, New Session Cookie for %s(%s)",
-                    cookie, remote_name, remote_ip, cookie );
-          return(TRUE);
+                   "Http_Traiter_request_login: (sid %.12s), New Session Cookie for %s(%s)",
+                    session->sid, remote_name, remote_ip );
         }
      }
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-             "Http_Traiter_request_login: Wrong Util/Credential for user %s", username );
 
-    lws_add_http_header_status( wsi, 401, &header_cur, header_end );                                          /* Unauthorized */
     lws_finalize_http_header ( wsi, &header_cur, header_end );
     *header_cur='\0';                                                                               /* Caractere null d'arret */
     lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-    return(FALSE);
+    return(1);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
