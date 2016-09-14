@@ -1,10 +1,10 @@
-/**********************************************************************************************************/
-/* Watchdogd/HttpMobile/admin_httpmobile.c  Gestion des connexions Admin du thrd "HttpMobile" de watchdog */
-/* Projet WatchDog version 2.0       Gestion d'habitat                   mer. 24 avril 2013 18:48:19 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/HttpMobile/admin_http.c  Gestion des connexions Admin du thread "Http" de watchdog                               */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                       mer. 24 avril 2013 18:48:19 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
- * admin_httpmobile.c
+ * admin_http.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -25,15 +25,15 @@
  * Boston, MA  02110-1301  USA
  */
  
- #include <unistd.h>                                                                  /* Pour gethostname */
+ #include <unistd.h>                                                                                      /* Pour gethostname */
  #include "watchdogd.h"
  #include "Http.h"
 
-/**********************************************************************************************************/
-/* Admin_http_status: Print le statut du thread HTTP                                                      */
-/* Entrée: la connexion pour sortiee client et la ligne de commande                                       */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_http_status: Print le statut du thread HTTP                                                                          */
+/* Entrée: la connexion pour sortiee client et la ligne de commande                                                           */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Admin_http_status ( struct CONNEXION *connexion )
   { gchar chaine[128];
     g_snprintf( chaine, sizeof(chaine), " | HTTP Server : port %d %s with SSL=%d\n",
@@ -51,35 +51,67 @@
          
     Admin_write ( connexion, chaine );
   }
-/**********************************************************************************************************/
-/* Admin_http_list: List les sessions actives du thread HTTP                                              */
-/* Entrée: la connexion pour sortiee client et la ligne de commande                                       */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_http_list: List les sessions actives du thread HTTP                                                                  */
+/* Entrée: la connexion pour sortiee client et la ligne de commande                                                           */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Admin_http_list ( struct CONNEXION *connexion )
   { struct HTTP_SESSION *session = NULL;
     gchar chaine[128];
     GSList *liste;
-#ifdef bouh
+
     pthread_mutex_lock( &Cfg_http.lib->synchro );                        /* Ajout dans la liste a traiter */
     liste = Cfg_http.Liste_sessions;
     while ( liste )
      { session = (struct HTTP_SESSION *)liste->data;
-       g_snprintf( chaine, sizeof(chaine), " | ----------- ID %s\n", session->sid );
+       g_snprintf( chaine, sizeof(chaine), " | ------------ ID = %s\n", (session->util ? session->util->nom : "Unknown") );
        Admin_write( connexion, chaine );
-       g_snprintf( chaine, sizeof(chaine), " | - type     = %03d\n", session->type );
+       g_snprintf( chaine, sizeof(chaine), " | - session_id    = %.12s\n", session->sid );
        Admin_write( connexion, chaine );
-       g_snprintf( chaine, sizeof(chaine), " | - username = %s\n", (session->util ? session->util->nom : "Unknown") );
+       g_snprintf( chaine, sizeof(chaine), " | - remote dns/ip = %s/%s\n", session->remote_name, session->remote_ip );
        Admin_write( connexion, chaine );
-       g_snprintf( chaine, sizeof(chaine), " | - last_top = %.1fs\n", (Partage->top - session->last_top)/10.0 );
+       g_snprintf( chaine, sizeof(chaine), " | - user_agent    = %s\n", session->user_agent );
+       Admin_write( connexion, chaine );
+       g_snprintf( chaine, sizeof(chaine), " | - is_ssl        = %s\n", (session->is_ssl ? "yes" : "NO") );
+       Admin_write( connexion, chaine );
+       g_snprintf( chaine, sizeof(chaine), " | - last_top      = %.1fs ago\n", (Partage->top - session->last_top)/10.0 );
        Admin_write( connexion, chaine );
        liste = liste->next;
      }
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
-#endif
     Admin_write( connexion, " -\n" );
   }
+/******************************************************************************************************************************/
+/* Admin_http_kill: Kill la session en parametre en se basant sur le username ou l'ID de session                              */
+/* Entrée: la connexion et l'id (name ou sid)                                                                                 */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Admin_http_kill ( struct CONNEXION *connexion, gchar *id )
+  { struct HTTP_SESSION *session;
+    gchar chaine[128];
+    GSList *liste;
 
+search_again:
+    session = NULL;
+    pthread_mutex_lock( &Cfg_http.lib->synchro );                                            /* Ajout dans la liste a traiter */
+    liste = Cfg_http.Liste_sessions;
+    while ( liste )
+     { session = (struct HTTP_SESSION *)liste->data;
+       if ( ! strncmp ( session->sid, id, strlen(id) ) ) break;
+       if ( session->util && ( ! strcmp ( session->util->nom, id ) ) ) break;
+       liste = liste->next;
+     }
+    pthread_mutex_unlock( &Cfg_http.lib->synchro );
+    if (liste)
+     { g_snprintf( chaine, sizeof(chaine), " | - Session %.12sl(%s) from %s/%s killed\n",
+                   session->sid, (session->util ? session->util->nom : "nouser"), session->remote_name, session->remote_ip );
+       Admin_write( connexion, chaine );
+       Http_Liberer_session ( session );
+       goto search_again;
+     }
+    Admin_write( connexion, " -\n" );
+  }
 /******************************************************************************************************************************/
 /* Admin_command: Gere une commande liée au thread HTTP depuis une connexion admin                                            */
 /* Entrée: le client et la ligne de commande                                                                                  */
@@ -88,11 +120,16 @@
  void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
   { gchar commande[128], chaine[128];
 
-    sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
+    sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "list" ) )
      { Admin_http_list ( connexion ); }
     else if ( ! strcmp ( commande, "status" ) )
      { Admin_http_status ( connexion ); }
+    else if ( ! strcmp ( commande, "kill" ) )
+     { gchar name[80];
+       sscanf ( ligne, "%s %s", commande, name );                                        /* Découpage de la ligne de commande */
+       Admin_http_kill ( connexion, name );
+     }
     else if ( ! strcmp ( commande, "dbcfg" ) )                /* Appelle de la fonction dédiée à la gestion des parametres DB */
      { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)                       /* Si changement de parametre */
         { gboolean retour;
@@ -107,6 +144,7 @@
        Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
        Admin_write ( connexion, "  status                                 - Get Status of HTTP Thread\n");
        Admin_write ( connexion, "  list                                   - Get Sessions list\n");
+       Admin_write ( connexion, "  kill $id                               - Kill session(s) with id $id (name or sid)\n");
      }
     else
      { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );

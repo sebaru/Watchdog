@@ -86,13 +86,12 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Http_Liberer_session ( struct HTTP_SESSION *session )
-  { /*if (session->buffer) g_free(session->buffer);
-    if (session->util)   g_free(session->util);*/
+  { if (session->util) g_free(session->util);
     pthread_mutex_lock( &Cfg_http.lib->synchro );                                     /* Recherche dans la liste des sessions */
     Cfg_http.Liste_sessions = g_slist_remove ( Cfg_http.Liste_sessions, session );
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-             "Http_Liberer_session : session close for SID %s", session->sid );
+             "Http_Liberer_session : session close for SID %.12s", session->sid );
     g_free(session);                                                                     /* Libération mémoire le cas échéant */
   }
 /******************************************************************************************************************************/

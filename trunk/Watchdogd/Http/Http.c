@@ -166,6 +166,8 @@
                session = Http_get_session ( wsi, remote_name, remote_ip );
                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: Request from %s/%s (sid %8s): %s",
                          remote_name, remote_ip, (session ? session->sid : "--------"), url );
+               if (session) session->last_top = Partage->top;                                             /* Tagging temporel */
+
                if ( ! strcasecmp ( url, "/favicon.ico" ) )
                 { retour = lws_serve_http_file ( wsi, "WEB/favicon.gif", "image/gif", NULL, 0);
                   if (retour != 0) return(1);                             /* Si erreur (<0) ou si ok (>0), on ferme la socket */
