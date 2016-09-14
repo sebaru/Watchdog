@@ -297,7 +297,7 @@
 #endif
     Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
     while(Cfg_http.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */
-     { /*static gint last_top = 0;*/
+     { static gint last_top = 0;
        usleep(10000);
        sched_yield();
 
@@ -311,12 +311,10 @@
 
    	   lws_service( Cfg_http.ws_context, 1000);                                 /* On lance l'écoute des connexions websocket */
 
-#ifdef bouh
-        if ( last_top + 300 <= Partage->top )                                    /* Toutes les 30 secondes */
+       if ( last_top + 600 <= Partage->top )                                                            /* Toutes les minutes */
         { Http_Check_sessions ();
           last_top = Partage->top;
         }
-#endif
      }
 
     while ( Cfg_http.Liste_sessions ) Http_Liberer_session ( Cfg_http.Liste_sessions->data );     /* Libérations des sessions */

@@ -132,32 +132,33 @@
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
     return(session);
   }
-#ifdef bouh
-/**********************************************************************************************************/
-/* Http_Check_sessions : Fait tomber les sessions sur timeout                                             */
-/* Entrées: néant                                                                                         */
-/* Sortie : néant                                                                                         */
-/**********************************************************************************************************/
- static void Http_Check_sessions ( void )
+/******************************************************************************************************************************/
+/* Http_Check_sessions : Fait tomber les sessions sur timeout                                                                 */
+/* Entrées: néant                                                                                                             */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_Check_sessions ( void )
   { struct HTTP_SESSION *session = NULL;
     GSList *liste;
-    pthread_mutex_lock( &Cfg_http.lib->synchro );                        /* Ajout dans la liste a traiter */
+
+search_again:
+    pthread_mutex_lock( &Cfg_http.lib->synchro );                                            /* Ajout dans la liste a traiter */
     liste = Cfg_http.Liste_sessions;
     while ( liste )
      { session = (struct HTTP_SESSION *)liste->data;
-       if ( (session->last_top && Partage->top - session->last_top >= 6000) ||
-            session->type == SESSION_TO_BE_CLEANED )
-        { Cfg_http.Liste_sessions = g_slist_remove( Cfg_http.Liste_sessions, session );
-          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                   "Http_Check_sessions : closing SID %s", session->sid );
-          Http_Liberer_session(session);
-          liste = Cfg_http.Liste_sessions;
+       if (session->last_top && Partage->top - session->last_top >= 864000 )
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+                   "Http_Check_sessions : closing timeout for SID %.12s", session->sid );
         }
-       else liste = liste->next;
+       liste = liste->next;
      }
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
+    if (liste)
+     { Http_Liberer_session(session);
+       goto search_again;
+     }
   }
-#endif
+
 /******************************************************************************************************************************/
 /* Http_Traiter_request_login: Traite une requete de login                                                                    */
 /* Entrées: la connexion MHD                                                                                                  */
