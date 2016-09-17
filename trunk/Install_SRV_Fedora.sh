@@ -13,3 +13,8 @@ echo "Creating systemd service"
 cp Watchdogd.service /lib/systemd/system/
 systemctl enable Watchdogd.service
 echo "done."
+
+echo "Creating Httpd conf file"
+cp watchdogd-httpd.conf /etc/httpd/conf.d/
+echo "done."
+
