@@ -493,7 +493,7 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
        return(FALSE);
      }
 
-    g_snprintf( url, sizeof(url), "%s:%d/gif/%d/%d", Client.host, Config_cli.port_http, id, mode );
+    g_snprintf( url, sizeof(url), "%s:%d/ws/gif/%d/%d", Client.host, Config_cli.port_http, id, mode );
     Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "Trying to get %s", url );
     curl_easy_setopt(curl, CURLOPT_URL, url );
        /*curl_easy_setopt(curl, CURLOPT_POST, 1 );

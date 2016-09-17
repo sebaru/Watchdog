@@ -459,7 +459,7 @@
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
 
     renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de mnemonique */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe/Page/Module DLS"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe/Page/D.L.S Name"), renderer,
                                                          "text", COLONNE_GROUPE_PAGE_DLS,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_GROUPE_PAGE_DLS);        /* On peut la trier */

@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Http/Http.c        Gestion des connexions HTTPMobile de watchdog */
-/* Projet WatchDog version 2.0       Gestion d'habitat                   mer. 24 avril 2013 18:48:19 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Http/Http.c        Gestion des connexions HTTP WebService de watchdog                                            */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                       mer. 24 avril 2013 18:48:19 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Http.c
  * This file is part of Watchdog
@@ -95,11 +95,11 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* CB_ws_status : Gere le protocole WS status (appellée par libwebsockets)                                                    */
+/* CB_ws_login : Gere le protocole WS status (appellée par libwebsockets)                                                    */
 /* Entrées : le contexte, le message, l'URL                                                                                   */
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
 /******************************************************************************************************************************/
- static gint CB_ws_status ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
+ static gint CB_ws_login ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
   { return(1);
   }
 /******************************************************************************************************************************/
@@ -109,6 +109,7 @@
 /******************************************************************************************************************************/
  static gint CB_http ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
   { gchar remote_name[80], remote_ip[80];
+    struct HTTP_PER_SESSION_DATA *pss = (struct HTTP_PER_SESSION_DATA *)user;
 
  /*   Http_Log_request(connection, url, method, version, upload_data_size, con_cls);*/
     switch (tag)
@@ -119,7 +120,7 @@
        case LWS_CALLBACK_CLOSED_HTTP:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                       "CB_http: connexion closed" );
-		          break;
+            break;
        case LWS_CALLBACK_PROTOCOL_INIT:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                       "CB_http: Protocol initialized !" );
@@ -136,25 +137,53 @@
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                       "CB_http: data received" );
 		          break;
+       case LWS_CALLBACK_HTTP_BODY:
+             { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                         "CB_http: http body : receive %d bytes", taille );
+               pss->post_data = g_try_realloc ( pss->post_data, pss->post_data_length + taille );
+               memcpy ( pss->post_data + pss->post_data_length, data, taille );
+               pss->post_data_length += taille;
+             }
+            break;
+       case LWS_CALLBACK_HTTP_BODY_COMPLETION:
+             { lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
+                                           (char *)&remote_name, sizeof(remote_name),
+                                           (char *)&remote_ip, sizeof(remote_ip) );
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                         "CB_http: http body completion for %s!", pss->url );
+               pss->post_data[pss->post_data_length] = 0;                                            /* Caractere nul d'arret */
+               if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
+                { return( Http_Traiter_request_body_completion_login ( wsi, remote_name, remote_ip ) ); }
+              }
+            break;
        case LWS_CALLBACK_HTTP:
-             { gchar *url = (gchar *)data;
+             { struct HTTP_SESSION *session;
+               gchar *url = (gchar *)data;
                gint retour;
                lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
                                         (char *)&remote_name, sizeof(remote_name),
                                         (char *)&remote_ip, sizeof(remote_ip) );
-               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: HTTP request from %s(%s): %s",
-                         remote_name, remote_ip, url );
+               session = Http_get_session ( wsi, remote_name, remote_ip );
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: Request from %s/%s (sid %8s): %s",
+                         remote_name, remote_ip, (session ? session->sid : "--------"), url );
+               if (session) session->last_top = Partage->top;                                             /* Tagging temporel */
+
                if ( ! strcasecmp ( url, "/favicon.ico" ) )
                 { retour = lws_serve_http_file ( wsi, "WEB/favicon.gif", "image/gif", NULL, 0);
                   if (retour != 0) return(1);                             /* Si erreur (<0) ou si ok (>0), on ferme la socket */
                   return(0);                    /* si besoin de plus de temps, on laisse la ws http ouverte pour libwebsocket */
                 }
-               else if ( ! strcasecmp ( url, "/status" ) )
+
+               else if ( ! strcasecmp ( url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
+                { return( Http_Traiter_request_login ( session, wsi, remote_name, remote_ip ) ); }
+               else if ( ! strcasecmp ( url, "/ws/logoff" ) )
+                { if (session) Http_Liberer_session ( session ); }
+               else if ( ! strcasecmp ( url, "/ws/status" ) )
                 { Http_Traiter_request_getstatus ( wsi ); }
-               else if ( ! strncasecmp ( url, "/gif/", 5 ) )
-                { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+5 ) ); }
-               else if ( ! strncasecmp ( url, "/audio/", 7 ) )
-                { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+7 ) ); }
+               else if ( ! strncasecmp ( url, "/ws/gif/", 8 ) )
+                { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+8 ) ); }
+               else if ( ! strncasecmp ( url, "/ws/audio/", 7 ) )
+                { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
                else                                                                                             /* Par défaut */
                 { return( Http_Traiter_request_getui ( wsi, remote_name, remote_ip, url+1 ) ); }
                return(1);                                                                    /* Par défaut, on clos la socket */
@@ -170,7 +199,7 @@
             break;
        case LWS_CALLBACK_OPENSSL_PERFORM_CLIENT_CERT_VERIFICATION:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                      "CB_http: need to verifi Client SSL Certs" );
+                      "CB_http: need to verify Client SSL Certs" );
 		          break;
 	      default: return(0);                                                    /* Par défaut, on laisse la connexion continuer */
      }
@@ -183,8 +212,8 @@
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct lws_protocols WS_PROTOS[] =
-     { { "http-only", CB_http, 0, 0 }, 	                                        /* first protocol must always be HTTP handler */
-       { "ws-status", CB_ws_status, 0, 0 },
+     { { "http-only", CB_http, sizeof(struct HTTP_PER_SESSION_DATA), 0 },       /* first protocol must always be HTTP handler */
+       { "ws-login", CB_ws_login, 0, 0 },
        { NULL, NULL, 0, 0 } /* terminator */
      };
     struct stat sbuf;
@@ -268,7 +297,7 @@
 #endif
     Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
     while(Cfg_http.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */
-     { /*static gint last_top = 0;*/
+     { static gint last_top = 0;
        usleep(10000);
        sched_yield();
 
@@ -282,14 +311,14 @@
 
    	   lws_service( Cfg_http.ws_context, 1000);                                 /* On lance l'écoute des connexions websocket */
 
-#ifdef bouh
-        if ( last_top + 300 <= Partage->top )                                    /* Toutes les 30 secondes */
+       if ( last_top + 600 <= Partage->top )                                                            /* Toutes les minutes */
         { Http_Check_sessions ();
           last_top = Partage->top;
         }
-#endif
      }
 
+    while ( Cfg_http.Liste_sessions ) Http_Liberer_session ( Cfg_http.Liste_sessions->data );     /* Libérations des sessions */
+    
     lws_context_destroy(Cfg_http.ws_context);                                                   /* Arret du serveur WebSocket */
     Cfg_http.ws_context = NULL;
 

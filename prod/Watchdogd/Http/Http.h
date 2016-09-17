@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/HttpMobile/HttpMobile.h        Déclaration structure internes des HttpMobile                 */
-/* Projet WatchDog version 2.0       Gestion d'habitat                   mer. 24 avril 2013 18:48:19 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/HttpMobile/HttpMobile.h        Déclaration structure internes des WebServices                                    */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                       mer. 24 avril 2013 18:48:19 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * httpmobile.h
  * This file is part of Watchdog
@@ -28,7 +28,8 @@
 #ifndef _HTTP_H_
  #define _HTTP_H_
  #include <libwebsockets.h>
-
+ #include <libxml/xmlwriter.h>
+ 
  #define NOM_THREAD                    "http"
  #define HTTP_DEFAUT_FILE_CA           "http_cacert.pem"
  #define HTTP_DEFAUT_FILE_CERT         "http_serveursigne.pem"
@@ -60,28 +61,41 @@
     gchar ssl_private_key_filepath[80];
     gchar ssl_ca_filepath[80];
     gboolean authenticate;
+    GSList *Liste_sessions;
  } Cfg_http;
 
+ struct HTTP_PER_SESSION_DATA
+  { gchar url[80];
+    gchar *post_data;
+    gint post_data_length;
+  };
+
  struct HTTP_SESSION
-  { gint     type;
-    gchar    sid[65];
-    gchar    client_host[80];
-    gchar    client_service[20];
-    gchar    user_agent[120], origine[80];
-    gint     ssl_algo, ssl_proto;
-    gchar    *buffer;                                                      /* Le buffer recu dans le corps de la requete HTTP */
-    guchar   buffer_size;                                                                        /* La taille utile du buffer */
+  { /*gint     type;*/
+    gchar    sid[2*EVP_MAX_MD_SIZE+1];
+    gchar    remote_name[80];
+    gchar    remote_ip[20];
+    gchar    user_agent[120];
+    gint     is_ssl;
     struct   CMD_TYPE_UTILISATEUR *util;                                               /* Utilisateur authentifié (via HTTPS) */
     gint     last_top;                                                                         /* Date de la derniere requete */
   };
 
-/*************************************** Définitions des prototypes ***************************************/
+/*************************************************** Définitions des prototypes ***********************************************/
  extern gboolean Http_Lire_config ( void );
 /* extern gboolean Http_Traiter_request_getsyn ( struct HTTP_SESSION *session, struct MHD_Connection *connection );*/
  extern gboolean Http_Traiter_request_getstatus ( struct lws *wsi );
  extern gint Http_Traiter_request_getgif ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gint Http_Traiter_request_getui ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gint Http_Traiter_request_getaudio ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
+
+ extern struct HTTP_SESSION *Http_get_session ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
+ extern void Http_Check_sessions ( void );
+ extern void Http_Liberer_session ( struct HTTP_SESSION *session );
+
+ extern gint Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip );
+ extern gint Http_Traiter_request_body_completion_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
+ 
  /* extern gint Http_Traiter_request_getslash ( struct HTTP_SESSION *session, struct MHD_Connection *connection );
  extern gint Http_Traiter_request_getgif ( struct MHD_Connection *connection );
  extern gboolean Http_Traiter_request_setm ( struct HTTP_SESSION *session, struct MHD_Connection *connection );
