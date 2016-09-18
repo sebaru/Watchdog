@@ -96,9 +96,9 @@
     gint pid;
 
     if (file)
-     { g_snprintf( url, sizeof(url), "http://%s:%d/ws/audio/%s", Config_cli.host, Config_cli.port_http, file ); }
+     { g_snprintf( url, sizeof(url), "http://%s/ws/audio/%s", Config_cli.host, file ); }
     else
-     { g_snprintf( url, sizeof(url), "http://%s:%d/ws/audio/%d", Config_cli.host, Config_cli.port_http, id ); }
+     { g_snprintf( url, sizeof(url), "http://%s/ws/audio/%d", Config_cli.host, id ); }
 
     pid = fork();
     if (pid<0)
