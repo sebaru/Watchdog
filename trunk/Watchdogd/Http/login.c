@@ -103,7 +103,6 @@
 	   gchar buffer[4096], *sid = NULL;
     GSList *liste;
 
-    buffer[0] = '\0';
     if ( lws_hdr_copy( wsi, buffer, sizeof(buffer), WSI_TOKEN_HTTP_COOKIE ) != -1 )     /* Récupération de la valeur du token */
      { gchar *cookies, *cookie, *savecookies;
        gchar *cookie_name, *cookie_value, *savecookie;

@@ -124,6 +124,7 @@
     if (retour < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getstatus : Failed to end Document" );
+       xmlFreeTextWriter(writer);                                                                 /* Libération du writer XML */
        xmlBufferFree(buf);
        return(FALSE);
      }
