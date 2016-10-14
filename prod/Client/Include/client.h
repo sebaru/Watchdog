@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/Include/client.h      Déclarations générale watchdog client                                     */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      mar 03 jun 2003 10:39:28 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/Include/client.h      Déclarations générale watchdog client                                                         */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          mar 03 jun 2003 10:39:28 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * client.h
  * This file is part of Watchdog
@@ -34,11 +34,11 @@
 
  #define PROGRAMME          "Watchdog-client"
 
- #define EXIT_ERREUR       -1                                               /* Sortie sur erreur inconnue */
- #define EXIT_OK           0                                                            /* Sortie normale */
- #define EXIT_INACTIF      1                                             /* Un fils est mort d'inactivité */
+ #define EXIT_ERREUR       -1                                                                   /* Sortie sur erreur inconnue */
+ #define EXIT_OK           0                                                                                /* Sortie normale */
+ #define EXIT_INACTIF      1                                                                 /* Un fils est mort d'inactivité */
 
- #define REPERTOIR_CONF    ".watchdog"         /* Repertoire ou sont stocké les fichiers de configuration */
+ #define REPERTOIR_CONF    ".watchdog"                             /* Repertoire ou sont stocké les fichiers de configuration */
  #define FICHIER_VERSION   "icone_version.dat"
  
  enum
@@ -47,7 +47,6 @@
     ATTENTE_AUTORISATION,
     CONNECTE,
     VALIDE,
-    /*ENVOI_GIF*/
   };
 
  struct CLIENT
@@ -60,15 +59,10 @@
     X509 *cli_certif;
     gboolean ssl_needed;
     gboolean ssl_needed_with_cert;
-    gchar host[TAILLE_NOM_SERVEUR+1];                           /* Nom du serveur sur lequel se connecter */
+    gchar host[TAILLE_NOM_SERVEUR+1];                                               /* Nom du serveur sur lequel se connecter */
     struct CMD_TYPE_UTILISATEUR util;
-    gchar password[NBR_CARAC_LOGIN_UTF8+1];               /* sauvegarde du mot de passe pour la connexion */
-#ifdef bouh
-    struct
-     { gint32 id_fichier_gif;                /* Identificateur de fichier gif en cours d'envoi au serveur */
-       gchar *buffer;                                        /* Doit contenir aussi l'entete CMD_ID_ICONE */
-     } transfert;
-#endif
+    gchar password[NBR_CARAC_LOGIN_UTF8+1];                                   /* sauvegarde du mot de passe pour la connexion */
+
   };
  #endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

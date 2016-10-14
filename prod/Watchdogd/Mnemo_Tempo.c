@@ -111,7 +111,7 @@
                 "delai_off=VALUES(delai_off), max_on=VALUES(max_on) ",
                 NOM_TABLE_MNEMO_TEMPO, mnemo_full->mnemo_base.id,
                 mnemo_full->mnemo_tempo.delai_on,  mnemo_full->mnemo_tempo.min_on, 
-                mnemo_full->mnemo_tempo.delai_off, mnemo_full->mnemo_tempo.max_on
+                mnemo_full->mnemo_tempo.max_on, mnemo_full->mnemo_tempo.delai_off
               );
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */

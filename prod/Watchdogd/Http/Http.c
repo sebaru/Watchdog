@@ -180,6 +180,8 @@
                 { if (session) Http_Liberer_session ( session ); }
                else if ( ! strcasecmp ( url, "/ws/status" ) )
                 { Http_Traiter_request_getstatus ( wsi ); }
+               else if ( ! strncasecmp ( url, "/ws/message", 11 ) )
+                { return( Http_Traiter_request_getmessage ( wsi ) ); }
                else if ( ! strncasecmp ( url, "/ws/gif/", 8 ) )
                 { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+8 ) ); }
                else if ( ! strncasecmp ( url, "/ws/audio/", 7 ) )
