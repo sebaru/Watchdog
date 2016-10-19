@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/liste_message.c        Gestion de la page d'affichage des messages au fil de l'eau              */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      mer 20 aoû 2003 18:19:00 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/liste_message.c        Gestion de la page d'affichage des messages au fil de l'eau                                  */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          mer 20 aoû 2003 18:19:00 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * liste_histo.c
  * This file is part of Watchdog
@@ -31,15 +31,12 @@
  #include "Config_cli.h"
  #include "Reseaux.h"
  
- GtkWidget *Liste_histo;                             /* GtkTreeView pour la gestion des messages Watchdog */
-
- extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
- extern gint Nbr_message;                                                /* Nombre de message de Watchdog */
- extern GtkWidget *Label_message;                                  /* Pour afficher le nombre de messages */
-
- extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG Config;                                          /* Configuration generale watchdog */
+ GtkWidget *Liste_histo;                                                 /* GtkTreeView pour la gestion des messages Watchdog */
+ extern GList *Liste_pages;                                                       /* Liste des pages ouvertes sur le notebook */  
+ extern GtkWidget *Notebook;                                                             /* Le Notebook de controle du client */
+ extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
+ extern struct CONFIG Config;                                                              /* Configuration generale watchdog */
+ extern struct CLIENT Client;                                                        /* Identifiant de l'utilisateur en cours */
 
  enum
   { COLONNE_ID,
@@ -72,9 +69,11 @@
     { 0x0, 0x0,    0x0,    0x0    }, /* Attente */
     { 0x0, 0xFFFF, 0xFFFF, 0xFFFF }  /* Danger */
   };
-/********************************* Définitions des prototypes programme ***********************************/
+/**************************************** Définitions des prototypes programme ************************************************/
  #include "protocli.h"
+ #include "client.h"
  
+ extern struct CLIENT Client;                                                        /* Identifiant de l'utilisateur en cours */
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
 
  static void Menu_acquitter_histo ( void );
@@ -96,9 +95,9 @@
     gint pid;
 
     if (file)
-     { g_snprintf( url, sizeof(url), "http://%s/ws/audio/%s", Config_cli.host, file ); }
+     { g_snprintf( url, sizeof(url), "http://%s/ws/audio/%s", Client.host, file ); }
     else
-     { g_snprintf( url, sizeof(url), "http://%s/ws/audio/%d", Config_cli.host, id ); }
+     { g_snprintf( url, sizeof(url), "http://%s/ws/audio/%d", Client.host, id ); }
 
     pid = fork();
     if (pid<0)
