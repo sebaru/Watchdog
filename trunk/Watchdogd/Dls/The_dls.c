@@ -196,27 +196,6 @@
     return(0);
   }
 /**********************************************************************************************************/
-/* Renvoie la valeur d'une tempo retard                                                                   */
-/**********************************************************************************************************/
- char *Tdetail( int num )
-  {  static char chaine[90];
-    if (num>=0 && num<NBR_TEMPO)
-     { snprintf( chaine, sizeof(chaine), "T%04d  = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", num,
-                 Partage->Tempo_R[num].state, Partage->Tempo_R[num].status,
-                 Partage->Tempo_R[num].date_on,
-                (Partage->Tempo_R[num].date_on > Partage->top ? (Partage->Tempo_R[num].date_on - Partage->top)/10.0 : 0.0),
-                 Partage->Tempo_R[num].date_off,
-                (Partage->Tempo_R[num].date_off > Partage->top ? (Partage->Tempo_R[num].date_off - Partage->top)/10.0 : 0.0)
-               );
-     }
-    else
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "Tdetail : num %d out of range", num ); }
-       snprintf( chaine, sizeof(chaine), "%04d out of range", num );
-     }
-    return( chaine );
-  }
-/**********************************************************************************************************/
 /* Met à jour l'entrée analogique num    val_avant_ech sur 12 bits !!                                     */
 /**********************************************************************************************************/
  void SEA_range( int num, int range )
