@@ -51,11 +51,11 @@
     struct DB *db;
     gint retour;
 
-    type_s   = lws_get_urlarg_by_name	( wsi, "type",   token_type,   sizeof(token_type) );
+    type_s   = "0"; //lws_get_urlarg_by_name	( wsi, "type",   token_type,   sizeof(token_type) );
     if (type_s)   { type   = atoi ( type_s );   } else { type   = -1; }
-    start_s  = lws_get_urlarg_by_name	( wsi, "start",  token_start,  sizeof(token_start) );
+    start_s  = "0"; //lws_get_urlarg_by_name	( wsi, "start",  token_start,  sizeof(token_start) );
     if (start_s)  { start  = atoi ( start_s );  } else { start  = -1; }
-    length_s = lws_get_urlarg_by_name	( wsi, "length", token_length, sizeof(token_length) );
+    length_s = "100";//lws_get_urlarg_by_name	( wsi, "length", token_length, sizeof(token_length) );
     if (length_s) { length = atoi ( length_s ); } else { length = -1; }
 
     memset( requete, 0, sizeof(requete) );                                                   /* Critere de choix des messages */
