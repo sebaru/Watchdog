@@ -109,7 +109,7 @@
        return(-1);
      }
 
-    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if ( retour == FALSE )
      { Libere_DB_SQL(&db); 
        return(-1);
@@ -118,24 +118,24 @@
     Libere_DB_SQL(&db);
     return(id);
   }
-/**********************************************************************************************************/
-/* Recuperer_liste_id_messageDB: Recupération de la liste des ids des messages                                */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- gboolean Recuperer_messageDB ( struct DB **db_retour )
+/******************************************************************************************************************************/
+/* Recuperer_messageDB_with_conditions: Recupération de la liste des ids des messages avec conidtions en paramètre            */
+/* Entrée: une database et des conditions                                                                                     */
+/* Sortie: FALSE si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ gboolean Recuperer_messageDB_with_conditions ( struct DB **db_retour, gchar *conditions )
   { gchar requete[256];
     gboolean retour;
     struct DB *db;
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT %s.id,num,%s.libelle,type,id_syn,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
                 "type_voc,vitesse_voc,time_repeat"
                 " FROM %s,%s"
-                " WHERE %s.id_syn = %s.id"
+                " WHERE %s.id_syn = %s.id AND %s"
                 " ORDER BY groupe,page,num",
                 NOM_TABLE_MSG, NOM_TABLE_MSG,
-                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, /* From */
+                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, (conditions ? conditions : "1=1"), /* From */
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE /* Where */
               );
 
@@ -145,16 +145,23 @@
        return(FALSE);
      }
 
-    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if (retour == FALSE) Libere_DB_SQL (&db);
     *db_retour = db;
     return ( retour );
   }
-/**********************************************************************************************************/
-/* Recuperer_liste_id_messageDB: Recupération de la liste des ids des messages                                */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Recuperer_liste_id_messageDB: Recupération de la liste des ids des messages                                                */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: une GList                                                                                                          */
+/******************************************************************************************************************************/
+ gboolean Recuperer_messageDB ( struct DB **db_retour )
+  { return( Recuperer_messageDB_with_conditions ( db_retour, NULL ) ); }
+/******************************************************************************************************************************/
+/* Recuperer_liste_id_messageDB: Recupération de la liste des ids des messages                                                */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: une GList                                                                                                          */
+/******************************************************************************************************************************/
  struct CMD_TYPE_MESSAGE *Recuperer_messageDB_suite( struct DB **db_orig )
   { struct CMD_TYPE_MESSAGE *msg;
     struct DB *db;
@@ -188,11 +195,11 @@
      }
     return(msg);
   }
-/**********************************************************************************************************/
-/* Rechercher_messageDB: Recupération du message dont le num est en parametre                                 */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Rechercher_messageDB: Recupération du message dont le num est en parametre                                                 */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: une GList                                                                                                          */
+/******************************************************************************************************************************/
  struct CMD_TYPE_MESSAGE *Rechercher_messageDB ( guint num )
   { struct CMD_TYPE_MESSAGE *message;
     gchar requete[512];
