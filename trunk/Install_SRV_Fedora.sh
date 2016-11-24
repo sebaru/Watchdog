@@ -16,5 +16,6 @@ echo "done."
 
 echo "Creating Httpd conf file"
 cp watchdogd-httpd.conf /etc/httpd/conf.d/
+systemctl daemon-reload
 echo "done."
 

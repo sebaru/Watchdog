@@ -37,6 +37,7 @@
  extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB ( guint num );
  extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_id ( guint id );
  extern gboolean Recuperer_messageDB ( struct DB **db );
+ extern gboolean Recuperer_messageDB_with_conditions ( struct DB **db_retour, gchar *condition );
  extern struct CMD_TYPE_MESSAGE *Recuperer_messageDB_suite( struct DB **db );
  extern gint Ajouter_messageDB ( struct CMD_TYPE_MESSAGE *msg );
  extern gboolean Recuperer_messageDB_with_conditions ( struct DB **db_retour, gchar *conditions );
