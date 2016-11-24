@@ -123,8 +123,8 @@
 /* Entrée: une database et des conditions                                                                                     */
 /* Sortie: FALSE si probleme                                                                                                  */
 /******************************************************************************************************************************/
- gboolean Recuperer_messageDB_with_conditions ( struct DB **db_retour, gchar *conditions )
-  { gchar requete[256];
+ gboolean Recuperer_messageDB_with_conditions ( struct DB **db_retour, gchar *conditions, gint start, gint length )
+  { gchar requete[512], critere[80];
     gboolean retour;
     struct DB *db;
 
@@ -133,11 +133,20 @@
                 "type_voc,vitesse_voc,time_repeat"
                 " FROM %s,%s"
                 " WHERE %s.id_syn = %s.id AND %s"
-                " ORDER BY groupe,page,num",
+                " ORDER BY groupe,page,num ",
                 NOM_TABLE_MSG, NOM_TABLE_MSG,
-                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, (conditions ? conditions : "1=1"), /* From */
-                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE /* Where */
+                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, /* From */
+                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, (conditions ? conditions : "1=1") /* Where */
               );
+
+    if (start != -1 && length != -1)                                                 /* Critere d'affichage (offset et count) */
+     { g_snprintf( critere, sizeof(critere), " LIMIT %d,%d", start, length );
+       g_strlcat( requete, critere, sizeof(requete) );
+     }
+    else if (length!=-1)
+     { g_snprintf( critere, sizeof(critere), " LIMIT %d", length );
+       g_strlcat( requete, critere, sizeof(requete) );
+     }
 
     db = Init_DB_SQL();       
     if (!db)
@@ -156,7 +165,7 @@
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
  gboolean Recuperer_messageDB ( struct DB **db_retour )
-  { return( Recuperer_messageDB_with_conditions ( db_retour, NULL ) ); }
+  { return( Recuperer_messageDB_with_conditions ( db_retour, NULL, -1, -1 ) ); }
 /******************************************************************************************************************************/
 /* Recuperer_liste_id_messageDB: Recupération de la liste des ids des messages                                                */
 /* Entrée: un log et une database                                                                                             */

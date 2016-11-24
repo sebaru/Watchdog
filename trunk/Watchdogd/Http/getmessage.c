@@ -60,19 +60,7 @@
 
     memset( requete, 0, sizeof(requete) );                                                   /* Critere de choix des messages */
     if (type != -1)
-     { g_snprintf( critere, sizeof(critere), " AND msg.type=%d", type );
-       g_strlcat( requete, critere, sizeof(requete) );
-     }
-
-    if (start != -1 && length != -1)                                                 /* Critere d'affichage (offset et count) */
-     { g_snprintf( critere, sizeof(critere), " LIMIT %d, %d", start, length );
-       g_strlcat( requete, critere, sizeof(requete) );
-     } else
-    if (length!=-1)
-     { g_snprintf( critere, sizeof(critere), " LIMIT %d", length );
-       g_strlcat( requete, critere, sizeof(requete) );
-     } else
-     { g_snprintf( critere, sizeof(critere), " LIMIT 100" );
+     { g_snprintf( critere, sizeof(critere), " %s.type=%d", NOM_TABLE_MSG, type );
        g_strlcat( requete, critere, sizeof(requete) );
      }
 
@@ -99,8 +87,8 @@
        xmlBufferFree(buf);
        return(FALSE);
      }
-
-    if ( ! Recuperer_messageDB_with_conditions( &db, requete ) )      /* Lancement de la requete de recuperation des messages */
+                                                                      /* Lancement de la requete de recuperation des messages */
+    if ( ! Recuperer_messageDB_with_conditions( &db, requete, start, length ) )
      { xmlFreeTextWriter(writer);                                                                 /* Libération du writer XML */
        xmlBufferFree(buf);                                            /* Libération du buffer dont nous n'avons plus besoin ! */
        return(FALSE);
@@ -112,9 +100,25 @@
      { xmlTextWriterStartElement(writer, (const unsigned char *) "Message");
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"ID", "%d", msg->id );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"num", "%d", msg->num );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"type", "%d", msg->type );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"enable", "%d", msg->enable );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"type", "%d", msg->type );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"sms", "%d", msg->sms );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"id_syn", "%d", msg->id_syn );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"bit_voc", "%d", msg->bit_voc );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"vitesse_voc", "%d", msg->vitesse_voc );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"type_voc", "%d", msg->type_voc );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"time_repeat", "%d", msg->time_repeat );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"libelle", "%s", msg->libelle );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"libelle_audio", "%s", msg->libelle_audio );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"libelle_sms", "%s", msg->libelle_sms );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"groupe", "%s", msg->groupe );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"page", "%s", msg->page );
        xmlTextWriterEndElement(writer);                                                                        /* End message */
+       g_free(msg);
      }
     xmlTextWriterEndElement(writer);                                                                          /* End messages */
+    xmlTextWriterWriteComment(writer, (const unsigned char *)"Dumping messages done !");
     retour = xmlTextWriterEndDocument(writer);                                                                /* End document */
     if (retour < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
