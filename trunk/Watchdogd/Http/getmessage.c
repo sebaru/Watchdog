@@ -33,11 +33,11 @@
  #include "watchdogd.h"
  #include "Http.h"
 /******************************************************************************************************************************/
-/* Http_Traiter_request_getmessage: Traite une requete sur l'URI message                                                        */
+/* Http_Traiter_request_getmessage: Traite une requete sur l'URI message                                                      */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- gboolean Http_Traiter_request_getmessage ( struct lws *wsi )
+ gboolean Http_Traiter_request_getmessage ( struct lws *wsi, struct HTTP_SESSION *session )
   { unsigned char header[256], *header_cur, *header_end;
    	const char *content_type = "application/xml";
     gchar requete[256], critere[128];

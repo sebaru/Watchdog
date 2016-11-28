@@ -140,13 +140,30 @@
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  void Http_Liberer_session ( struct HTTP_SESSION *session )
-  { if (session->util) g_free(session->util);
-    pthread_mutex_lock( &Cfg_http.lib->synchro );                                     /* Recherche dans la liste des sessions */
+  { pthread_mutex_lock( &Cfg_http.lib->synchro );                                     /* Recherche dans la liste des sessions */
     Cfg_http.Liste_sessions = g_slist_remove ( Cfg_http.Liste_sessions, session );
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
+    if (session->util) g_free(session->util);
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
              "Http_Liberer_session : session close for SID %.12s", session->sid );
     g_free(session);                                                                     /* Libération mémoire le cas échéant */
+  }
+/******************************************************************************************************************************/
+/* Http Close_session : Termine une session sur demande terminal final                                                        */
+/* Entrées : la session à libérer                                                                                             */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_Close_session ( struct lws *wsi, struct HTTP_SESSION *session )
+  { unsigned char header[256], *header_cur, *header_end;
+    if (session)
+     { header_cur = header;
+       header_end = header + sizeof(header);
+       lws_add_http_header_status( wsi, 200, &header_cur, header_end );
+       lws_finalize_http_header ( wsi, &header_cur, header_end );
+       *header_cur='\0';                                                                            /* Caractere null d'arret */
+       lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );                               /* Send to client */
+       Http_Liberer_session ( session );
+     }
   }
 /******************************************************************************************************************************/
 /* Http_new_session : Création d'une nouvelle session pour la requete reçue                                                   */

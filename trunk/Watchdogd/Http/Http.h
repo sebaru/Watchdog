@@ -87,12 +87,13 @@
  extern gboolean Http_Traiter_request_getstatus ( struct lws *wsi );
  extern gint Http_Traiter_request_getgif ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gint Http_Traiter_request_getaudio ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
- extern gint Http_Traiter_request_getmessage ( struct lws *wsi );
+ extern gint Http_Traiter_request_getmessage ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_getui ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
 
  extern struct HTTP_SESSION *Http_get_session ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
  extern void Http_Check_sessions ( void );
  extern void Http_Liberer_session ( struct HTTP_SESSION *session );
+ extern void Http_Close_session ( struct lws *wsi, struct HTTP_SESSION *session );
 
  extern gint Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip );
  extern gint Http_Traiter_request_body_completion_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
