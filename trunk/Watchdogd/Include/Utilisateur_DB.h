@@ -62,7 +62,6 @@
  extern gboolean Recuperer_groupesDB( struct DB **db );                                  /* Dans groupe.c */
  extern struct CMD_TYPE_GROUPE *Recuperer_groupesDB_suite( struct DB **db );
  extern gboolean Tester_groupe_util( struct CMD_TYPE_UTILISATEUR *util, guint id_groupe );
- extern gchar *Nom_groupe_reserve( gint id );
  extern gboolean Retirer_groupeDB( struct CMD_TYPE_GROUPE *groupe );
  extern gint Ajouter_groupeDB ( struct CMD_TYPE_GROUPE *groupe );
  extern struct CMD_TYPE_GROUPE *Rechercher_groupeDB( gint id );
