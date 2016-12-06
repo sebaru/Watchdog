@@ -149,12 +149,12 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, msg.id_syn,"
+                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.id_syn,"
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
                 "histo.date_fixe,histo.date_fin"
-                " FROM %s as histo,%s as syn, %s as msg"
-                " WHERE msg.id_syn = syn.id AND histo.id_msg = msg.id",
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG /* From */
+                " FROM %s as histo,%s as syn, %s as msg, %s as dls"
+                " WHERE dls.id_syn = syn.id AND histo.id_msg = msg.id",
+                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, NOM_TABLE_DLS /* From */
               );
 
     memset( critereSQL, 0, sizeof(critereSQL) );
@@ -229,13 +229,13 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, msg.id_syn,"
+                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.id_syn,"
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
                 "histo.date_fixe,histo.date_fin"
-                " FROM %s as histo,%s as syn, %s as msg"
-                " WHERE msg.id_syn = syn.id AND histo.id_msg = msg.id"
+                " FROM %s as histo,%s as syn, %s as msg, %s as dls"
+                " WHERE dls.id_syn = syn.id AND histo.id_msg = msg.id"
                 " AND alive = 1 ORDER BY histo.date_create_sec, histo.date_create_usec",
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG /* From */
+                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, NOM_TABLE_DLS /* From */
               );
  
     db = Init_DB_SQL();       
@@ -263,10 +263,10 @@
                 "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, "
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
                 "histo.date_fixe,histo.date_fin"
-                " FROM %s as histo,%s as syn, %s as msg"
-                " WHERE msg.id_syn = syn.id AND histo.id_msg = msg.id"
+                " FROM %s as histo,%s as syn, %s as msg, %s as dls"
+                " WHERE dls.id_syn = syn.id AND histo.id_msg = msg.id"
                 " AND histo.id = %d",
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, /* From */
+                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, NOM_TABLE_DLS, /* From */
                 id
               );
  

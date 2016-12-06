@@ -129,7 +129,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT msg.id,num,msg.libelle,type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
+                "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
                 "type_voc,vitesse_voc,time_repeat,id_plugin_dls,dls.shortname,syn.id"
                 " FROM %s as msg, %s as syn, %s as dls"
                 " WHERE dls.id_syn = syn.id AND msg.id_plugin_dls=dls.id AND %s"
@@ -217,7 +217,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT msg.id,num,msg.libelle,type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
+                "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
                 "type_voc,vitesse_voc,time_repeat,id_plugin_dls,dls.shortname,syn.id"
                 " FROM %s as msg, %s as syn, %s as dls"
                 " WHERE dls.id_syn = syn.id AND msg.id_plugin_dls=dls.id AND num=%d LIMIT 1",
@@ -257,7 +257,7 @@
      }
    
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT msg.id,num,msg.libelle,type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
+                "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
                 "type_voc,vitesse_voc,time_repeat,id_plugin_dls,dls.shortname,syn.id"
                 " FROM %s as msg, %s as syn, %s as dls"
                 " WHERE dls.id_syn = syn.id AND msg.id_plugin_dls=dls.id AND msg.id=%d LIMIT 1",

@@ -53,7 +53,7 @@
     gchar shortname[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
     gchar groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
     gchar page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
-    guint num_syn;                                          /* Numéro du fichier syn correspondant(pas l'index dans la table) */
+    guint syn_id;                                           /* Numéro du fichier syn correspondant(pas l'index dans la table) */
     guint id;
     guint on;
     guint type;                                                                           /* Module, Sous groupe, groupe, ... */

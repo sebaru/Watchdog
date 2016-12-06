@@ -80,7 +80,7 @@ INSERT INTO `class` (`id`, `libelle`) VALUES
 CREATE TABLE IF NOT EXISTS `dls` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type` int(11) NOT NULL,
-  `num_syn` int(11) NOT NULL DEFAULT '0',
+  `syn_id` int(11) NOT NULL DEFAULT '0',
   `name` text COLLATE utf8_unicode_ci NOT NULL,
   `shortname` text COLLATE utf8_unicode_ci NOT NULL,
   `actif` tinyint(1) NOT NULL DEFAULT '0',

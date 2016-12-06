@@ -101,15 +101,15 @@
     if (ajout)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "INSERT INTO %s"             
-                   "(name,shortname,actif,type,num_syn,compil_date,compil_status)"
+                   "(name,shortname,actif,type,syn_id,compil_date,compil_status)"
                    "VALUES ('%s','%s','%s','%d',%d,0,0);",
-                   NOM_TABLE_DLS, nom, shortname, (dls->on ? "true" : "false"), dls->type, dls->num_syn );
+                   NOM_TABLE_DLS, nom, shortname, (dls->on ? "true" : "false"), dls->type, dls->syn_id );
      }
     else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                   "UPDATE %s SET "             
-                  "name='%s',shortname='%s',actif='%d',type='%d',num_syn=%d WHERE id=%d",
-                   NOM_TABLE_DLS, nom, shortname, dls->on, dls->type, dls->num_syn, dls->id );
+                  "name='%s',shortname='%s',actif='%d',type='%d',syn_id=%d WHERE id=%d",
+                   NOM_TABLE_DLS, nom, shortname, dls->on, dls->type, dls->syn_id, dls->id );
      }
 
     g_free(nom);
@@ -170,9 +170,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT %s.id,%s.name,%s.shortname,actif,type,num_syn,groupe,page,compil_date,compil_status"
+                "SELECT %s.id,%s.name,%s.shortname,actif,type,syn_id,groupe,page,compil_date,compil_status"
                 " FROM %s,%s"
-                " WHERE %s.num_syn = %s.id"
+                " WHERE %s.syn_id = %s.id"
                 " ORDER BY groupe,page,name",
                 NOM_TABLE_DLS, NOM_TABLE_DLS, NOM_TABLE_DLS,
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, /* From */
@@ -211,7 +211,7 @@
        dls->id            = atoi(db->row[0]);
        dls->on            = atoi(db->row[3]);
        dls->type          = atoi(db->row[4]);
-       dls->num_syn       = atoi(db->row[5]);
+       dls->syn_id        = atoi(db->row[5]);
        dls->compil_date   = atoi(db->row[8]);
        dls->compil_status = atoi(db->row[9]);
      }
@@ -234,9 +234,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.name,%s.shortname,actif,type,num_syn,groupe,page,compil_date,compil_status"
+                "SELECT %s.id,%s.name,%s.shortname,actif,type,syn_id,groupe,page,compil_date,compil_status"
                 " FROM %s,%s"
-                " WHERE %s.num_syn = %s.id AND %s.id = %d",
+                " WHERE %s.syn_id = %s.id AND %s.id = %d",
                 NOM_TABLE_DLS, NOM_TABLE_DLS, NOM_TABLE_DLS,
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, /* From */
                 NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* Where */

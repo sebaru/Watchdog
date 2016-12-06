@@ -504,11 +504,16 @@
      }
 
     if (database_version < 2912)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs DROP `id_syn`" );
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs DROP COLUMN `id_syn`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=2912;
+    if (database_version < 2913)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls CHANGE COLUMN `num_syn` TO `syn_id`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    database_version=2913;
 
     Libere_DB_SQL(&db);
 
