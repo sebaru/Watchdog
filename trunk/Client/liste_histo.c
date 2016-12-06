@@ -43,7 +43,7 @@
     COLONNE_NUM,
     COLONNE_GROUPE_PAGE,
     COLONNE_TYPE,
-    COLONNE_ID_SYN,
+    COLONNE_SYN_ID,
     COLONNE_DATE_CREATE,
     COLONNE_ACK,
     COLONNE_LIBELLE,
@@ -157,7 +157,7 @@
     while ( lignes )
      { guint id_syn;
        gtk_tree_model_get_iter( store, &iter, lignes->data );          /* Recuperation ligne selectionnée */
-       gtk_tree_model_get( store, &iter, COLONNE_ID_SYN, &id_syn, -1 );                  /* Recup du id */
+       gtk_tree_model_get( store, &iter, COLONNE_SYN_ID, &id_syn, -1 );                  /* Recup du id */
 
        Changer_vue_directe ( id_syn );
 
@@ -224,7 +224,7 @@
     g_snprintf( date, sizeof(date), "%s.%03d", date_create, ((int)histo->date_create_usec/1000) );
     g_free( date_create );
 
-    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", histo->msg.groupe, histo->msg.page );
+    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", histo->msg.syn_groupe, histo->msg.syn_page );
 
     if (histo->date_fixe)
      { gchar *date_fixe;
@@ -245,7 +245,7 @@
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, histo->id,
                          COLONNE_NUM, histo->msg.num,
-                         COLONNE_ID_SYN, histo->msg.id_syn,
+                         COLONNE_SYN_ID, histo->msg.syn_id,
                          COLONNE_GROUPE_PAGE, groupe_page,
                          COLONNE_TYPE, Type_vers_string(histo->msg.type),
                          COLONNE_DATE_CREATE, date,

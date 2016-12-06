@@ -545,7 +545,7 @@
     else
      { g_snprintf( audio, sizeof(audio), "- no -"); }
 
-    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", message->groupe, message->page );
+    g_snprintf( groupe_page, sizeof(groupe_page), "%s", message->dls_shortname );
 
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ACTIVE, message->enable,

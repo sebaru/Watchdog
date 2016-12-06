@@ -503,7 +503,12 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=2911;
+    if (database_version < 2912)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs DROP `id_syn`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    database_version=2912;
 
     Libere_DB_SQL(&db);
 

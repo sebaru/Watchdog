@@ -725,7 +725,6 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `libelle_audio` text COLLATE utf8_unicode_ci NOT NULL,
   `libelle_sms` text COLLATE utf8_unicode_ci NOT NULL,
   `type` int(11) NOT NULL DEFAULT '0',
-  `id_syn` int(11) NOT NULL DEFAULT '0',
   `bit_voc` int(11) DEFAULT NULL,
   `enable` tinyint(1) NOT NULL DEFAULT '0',
   `sms` int(11) NOT NULL DEFAULT '0',

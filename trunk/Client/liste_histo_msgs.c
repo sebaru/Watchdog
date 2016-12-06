@@ -355,7 +355,7 @@ printf("Proto_afficher_histo_msgs 1\n");
               temps->tm_hour, temps->tm_min, temps->tm_sec );
     duree = g_strdup( chaine );
 
-    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", response->histo.msg.groupe, response->histo.msg.page );
+    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", response->histo.msg.syn_groupe, response->histo.msg.syn_page );
 
     gtk_list_store_set ( store, &iter,
                          COLONNE_ID, response->histo.id,

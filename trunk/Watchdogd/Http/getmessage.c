@@ -104,7 +104,6 @@
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"enable", "%d", msg->enable );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"type", "%d", msg->type );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"sms", "%d", msg->sms );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"id_syn", "%d", msg->id_syn );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"bit_voc", "%d", msg->bit_voc );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"vitesse_voc", "%d", msg->vitesse_voc );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"type_voc", "%d", msg->type_voc );
@@ -112,8 +111,9 @@
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"libelle", "%s", msg->libelle );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"libelle_audio", "%s", msg->libelle_audio );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"libelle_sms", "%s", msg->libelle_sms );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"groupe", "%s", msg->groupe );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"page", "%s", msg->page );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_groupe", "%s", msg->syn_groupe );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_page", "%s", msg->syn_page );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_libelle", "%s", msg->syn_libelle );
        xmlTextWriterEndElement(writer);                                                                        /* End message */
        g_free(msg);
      }

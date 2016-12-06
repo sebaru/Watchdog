@@ -187,8 +187,8 @@
     Msg.sms        = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_sms) );
     Msg.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
     index               = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
-    Msg.id_syn    = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
-    if (Msg.id_syn == 0) Msg.id_syn = 1;                /* Par défaut, pointe sur le premier synoptique */
+/*    Msg.id_syn    = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );*/
+/*    if (Msg.id_syn == 0) Msg.id_syn = 1;                /* Par défaut, pointe sur le premier synoptique */
     Msg.bit_voc    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_voc) );
     Msg.vitesse_voc= gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_vitesse_voc) );
     Msg.type_voc   = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type_voc) );
@@ -228,14 +228,14 @@
     g_snprintf( chaine, sizeof(chaine), "%s/%s/%s", syn->groupe, syn->page, syn->libelle );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_syn), chaine );
     Liste_index_syn = g_list_append( Liste_index_syn, GINT_TO_POINTER(syn->id) );
-    if (Msg.id_syn == syn->id)
+/*    if (Msg.id_syn == syn->id)
      { gtk_combo_box_set_active ( GTK_COMBO_BOX (Combo_syn),
                                   g_list_index(Liste_index_syn, GINT_TO_POINTER(syn->id))
                                 );
      }
     else if (Msg.id_syn == 0)
      { gtk_combo_box_set_active ( GTK_COMBO_BOX (Combo_syn), 0 );
-     }
+     }*/
   }
 /**********************************************************************************************************/
 /* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
