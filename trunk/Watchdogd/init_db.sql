@@ -82,13 +82,14 @@ CREATE TABLE IF NOT EXISTS `dls` (
   `type` int(11) NOT NULL,
   `num_syn` int(11) NOT NULL DEFAULT '0',
   `name` text COLLATE utf8_unicode_ci NOT NULL,
+  `shortname` text COLLATE utf8_unicode_ci NOT NULL,
   `actif` tinyint(1) NOT NULL DEFAULT '0',
   `compil_date` int(11) NOT NULL,
   `compil_status` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-INSERT INTO `dls` (`id`, `type`, `num_syn`, `name`, `actif`, `compil_date`, `compil_status` ) VALUES
-(1, 0, 1, 'Systeme', FALSE, 0, 0);
+INSERT INTO `dls` (`id`, `type`, `num_syn`, `name`, `shortname`, `actif`, `compil_date`, `compil_status` ) VALUES
+(1, 0, 1, 'Systeme', 'Systeme', FALSE, 0, 0);
 
 -- --------------------------------------------------------
 
