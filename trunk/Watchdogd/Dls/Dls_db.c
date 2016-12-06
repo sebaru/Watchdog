@@ -108,8 +108,8 @@
     else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                   "UPDATE %s SET "             
-                  "name='%s',actif='%d',type='%d',num_syn=%d WHERE id=%d",
-                   NOM_TABLE_DLS, nom, dls->on, dls->type, dls->num_syn, dls->id );
+                  "name='%s',shortname='%s',actif='%d',type='%d',num_syn=%d WHERE id=%d",
+                   NOM_TABLE_DLS, nom, shortname, dls->on, dls->type, dls->num_syn, dls->id );
      }
 
     g_free(nom);
