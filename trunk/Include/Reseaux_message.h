@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Include/Reseaux_message.h:   Sous_tag de message pour watchdog 2.0 par lefevre Sebastien               */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       mar 21 fév 2006 13:46:48 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Include/Reseaux_message.h:   Sous_tag de message pour watchdog 2.0 par lefevre Sebastien                                   */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                           mar 21 fév 2006 13:46:48 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Reseaux_message.h
  * This file is part of Watchdog
@@ -52,7 +52,9 @@
 
  struct CMD_TYPE_MESSAGE
   { guint  id;
-    guint  num;                                                    /* Numero du message dans la structure */
+    guint  num;                                                                        /* Numero du message dans la structure */
+    guint  id_plugin_dls;                                                    /* Numéro ID du plugin D.L.S rattaché au message */
+    gchar  dls_shortname[NBR_CARAC_PLUGIN_DLS_UTF8+1];
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  libelle_audio[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  libelle_sms[NBR_CARAC_LIBELLE_MSG_UTF8+1];

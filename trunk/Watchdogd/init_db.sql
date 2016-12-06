@@ -720,6 +720,7 @@ CREATE TABLE IF NOT EXISTS `config` (
 CREATE TABLE IF NOT EXISTS `msgs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `num` int(11) NOT NULL DEFAULT '0',
+  `id_plugin_dls` int(11) NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `libelle_audio` text COLLATE utf8_unicode_ci NOT NULL,
   `libelle_sms` text COLLATE utf8_unicode_ci NOT NULL,
@@ -734,9 +735,9 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
-INSERT INTO `msgs` (`id`, `num`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `id_syn`, `bit_voc`, `enable`, `sms`, `type_voc`, `vitesse_voc`, `time_repeat`) VALUES
-(1, 0, 'Warning, system is halting', 'Warning, system is halting', 'Warning, system is halting', 0, 1, 1, TRUE, FALSE, 1, 150, 0),
-(2, 1, 'Warning, system is rebooting', 'Warning, system is rebooting', 'Warning, system is rebooting', 0, 1, 1, TRUE, FALSE, 1, 150, 0);
+INSERT INTO `msgs` (`id`, `num`, `id_plugin_dls`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `id_syn`, `bit_voc`, `enable`, `sms`, `type_voc`, `vitesse_voc`, `time_repeat`) VALUES
+(1, 0, 1, 'Warning, system is halting', 'Warning, system is halting', 'Warning, system is halting', 0, 1, 1, TRUE, FALSE, 1, 150, 0),
+(2, 1, 1, 'Warning, system is rebooting', 'Warning, system is rebooting', 'Warning, system is rebooting', 0, 1, 1, TRUE, FALSE, 1, 150, 0);
 
 -- --------------------------------------------------------
 
