@@ -504,7 +504,9 @@
      }
 
     if (database_version < 2912)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs DROP COLUMN `id_syn`" );
+     { g_snprintf( requete, sizeof(requete), "UPDATE msgs LEFT JOIN syns ON msgs.id_syn=syns.id LEFT JOIN dls ON dls.num_syn=syns.id SET msgs.id_plugin_dls=dls.id;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs DROP COLUMN `id_syn`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
