@@ -130,7 +130,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "type_voc,vitesse_voc,time_repeat,dls_id,dls.shortname,syn.id"
+                "type_voc,vitesse_voc,time_repeat,dls.id,dls.shortname,syn.id"
                 " FROM %s as msg, %s as syn, %s as dls"
                 " WHERE dls.syn_id = syn.id AND msg.dls_id=dls.id AND %s"
                 " ORDER BY groupe,page,num ",
@@ -201,7 +201,7 @@
        msg->type_voc    = atoi(db->row[12]);
        msg->vitesse_voc = atoi(db->row[13]);
        msg->time_repeat = atoi(db->row[14]);
-       msg->dls_id = atoi(db->row[15]);
+       msg->dls_id      = atoi(db->row[15]);
        msg->syn_id      = atoi(db->row[17]);
      }
     return(msg);
@@ -218,7 +218,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "type_voc,vitesse_voc,time_repeat,dls_id,dls.shortname,syn.id"
+                "type_voc,vitesse_voc,time_repeat,dls.id,dls.shortname,syn.id"
                 " FROM %s as msg, %s as syn, %s as dls"
                 " WHERE dls.syn_id = syn.id AND msg.dls_id=dls.id AND num=%d LIMIT 1",
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,    /* From */

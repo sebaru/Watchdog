@@ -513,7 +513,12 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=2914;
+    if (database_version < 2915)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs CHANGE `id_plugin_dls` `dls_id` int(11) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    database_version=2915;
 
     Libere_DB_SQL(&db);
 

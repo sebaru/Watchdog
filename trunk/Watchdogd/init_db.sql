@@ -720,7 +720,7 @@ CREATE TABLE IF NOT EXISTS `config` (
 CREATE TABLE IF NOT EXISTS `msgs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `num` int(11) NOT NULL DEFAULT '0',
-  `id_plugin_dls` int(11) NOT NULL DEFAULT '0',
+  `dls_id` int(11) NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `libelle_audio` text COLLATE utf8_unicode_ci NOT NULL,
   `libelle_sms` text COLLATE utf8_unicode_ci NOT NULL,
