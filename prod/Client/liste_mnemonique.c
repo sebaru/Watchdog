@@ -266,7 +266,7 @@
     gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
     gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_mnemonique.id, -1 );               /* Recup du id */
     gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
-
+printf("id=%d\n", rezo_mnemonique.id);
     memcpy( &rezo_mnemonique.libelle, libelle, sizeof(rezo_mnemonique.libelle) );
     g_free( libelle );
 

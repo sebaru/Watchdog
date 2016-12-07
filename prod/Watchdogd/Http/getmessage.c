@@ -38,12 +38,11 @@
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
  gboolean Http_Traiter_request_getmessage ( struct lws *wsi, struct HTTP_SESSION *session )
-  { unsigned char header[256], *header_cur, *header_end;
-   	const char *content_type = "application/xml";
+  { gchar token_length[12], token_start[12], token_type[12];
+    unsigned char header[256], *header_cur, *header_end;
+   	const gchar *length_s, *start_s, *type_s;
+    const char *content_type = "application/xml";
     gchar requete[256], critere[128];
-    gchar token_length[12], *length_s;
-    gchar token_start[12], *start_s;
-    gchar token_type[12], *type_s;
     struct CMD_TYPE_MESSAGE *msg;
     gint type, start, length;
     xmlTextWriterPtr writer;
@@ -51,16 +50,16 @@
     struct DB *db;
     gint retour;
 
-    type_s   = "0"; //lws_get_urlarg_by_name	( wsi, "type",   token_type,   sizeof(token_type) );
+    type_s   = lws_get_urlarg_by_name	( wsi, "type=",   token_type,   sizeof(token_type) );
     if (type_s)   { type   = atoi ( type_s );   } else { type   = -1; }
-    start_s  = "0"; //lws_get_urlarg_by_name	( wsi, "start",  token_start,  sizeof(token_start) );
+    start_s  = lws_get_urlarg_by_name	( wsi, "start=",  token_start,  sizeof(token_start) );
     if (start_s)  { start  = atoi ( start_s );  } else { start  = -1; }
-    length_s = "100";//lws_get_urlarg_by_name	( wsi, "length", token_length, sizeof(token_length) );
+    length_s = lws_get_urlarg_by_name	( wsi, "length=", token_length, sizeof(token_length) );
     if (length_s) { length = atoi ( length_s ); } else { length = -1; }
 
-    memset( requete, 0, sizeof(requete) );                                                   /* Critere de choix des messages */
+    g_snprintf( requete, sizeof(requete), "1=1" );
     if (type != -1)
-     { g_snprintf( critere, sizeof(critere), " %s.type=%d", NOM_TABLE_MSG, type );
+     { g_snprintf( critere, sizeof(critere), " AND msg.type=%d", type );
        g_strlcat( requete, critere, sizeof(requete) );
      }
 
@@ -133,11 +132,11 @@
     header_cur = header;
     header_end = header + sizeof(header);
     
-    lws_add_http_header_status( wsi, 200, &header_cur, header_end );
-    lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, (const unsigned char *)content_type, strlen(content_type),
-                                  &header_cur, header_end );
-    lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );
-    lws_finalize_http_header ( wsi, &header_cur, header_end );
+    retour = lws_add_http_header_status( wsi, 200, &header_cur, header_end );
+    retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, (const unsigned char *)content_type, strlen(content_type),
+                                           &header_cur, header_end );
+    retour = lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );
+    retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
     *header_cur='\0';                                                                               /* Caractere null d'arret */
     lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
     lws_write ( wsi, buf->content, buf->use, LWS_WRITE_HTTP);                                               /* Send to client */
