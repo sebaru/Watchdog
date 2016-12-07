@@ -313,17 +313,18 @@
                               "Recuperer_histo_msgsDB_suite: Erreur allocation mémoire" );
     else                                                                     /* Recopie dans la structure */
      { g_snprintf( histo_msgs->msg.libelle, sizeof(histo_msgs->msg.libelle), "%s", db->row[3] );
-       g_snprintf( histo_msgs->msg.syn_groupe,  sizeof(histo_msgs->msg.syn_groupe),  "%s", db->row[5] );
-       g_snprintf( histo_msgs->msg.syn_page,    sizeof(histo_msgs->msg.syn_page),    "%s", db->row[6] );
-       g_snprintf( histo_msgs->nom_ack,     sizeof(histo_msgs->nom_ack),     "%s", db->row[7] );
+       g_snprintf( histo_msgs->msg.syn_groupe,  sizeof(histo_msgs->msg.syn_groupe),  "%s", db->row[6] );
+       g_snprintf( histo_msgs->msg.syn_page,    sizeof(histo_msgs->msg.syn_page),    "%s", db->row[7] );
+       g_snprintf( histo_msgs->nom_ack,     sizeof(histo_msgs->nom_ack),     "%s", db->row[8] );
        histo_msgs->id               = atoi(db->row[0]);
        histo_msgs->alive            = atoi(db->row[1]);
        histo_msgs->msg.num          = atoi(db->row[2]);
        histo_msgs->msg.type         = atoi(db->row[4]);
-       histo_msgs->date_create_sec  = atoi(db->row[8]);
-       histo_msgs->date_create_usec = atoi(db->row[9]);
-       histo_msgs->date_fixe        = atoi(db->row[10]);
-       histo_msgs->date_fin         = atoi(db->row[11]);
+       histo_msgs->msg.syn_id       = atoi(db->row[5]);
+       histo_msgs->date_create_sec  = atoi(db->row[9]);
+       histo_msgs->date_create_usec = atoi(db->row[10]);
+       histo_msgs->date_fixe        = atoi(db->row[11]);
+       histo_msgs->date_fin         = atoi(db->row[12]);
      }
     return(histo_msgs);
   }
