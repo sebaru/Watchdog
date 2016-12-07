@@ -210,7 +210,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
                 "dls.name, mnemo.tableau, mnemo.acro_syn"
-                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON mnemo.num_syn = syn.id",
+                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON dls.syn_id = syn.id",
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE
               );
 
@@ -242,7 +242,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
                 "dls.name, mnemo.tableau, mnemo.acro_syn"
-                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON mnemo.num_syn = syn.id"
+                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON dls.syn_id = syn.id"
                 " ORDER BY groupe,page,name,type,num",
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE
               );                                                                                    /* order by test 25/01/06 */
@@ -307,7 +307,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
                 "dls.name, mnemo.tableau, mnemo.acro_syn"
-                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON mnemo.num_syn = syn.id"
+                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON dls.syn_id = syn.id"
                 " AND %s.id = %d", NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, id
               );
 
@@ -339,7 +339,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
                 "dls.name, mnemo.tableau, mnemo.acro_syn"
-                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON mnemo.num_syn = syn.id"
+                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON dls.syn_id = syn.id"
                 " AND mnemo.type = %d AND mnemo.num = %d",
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, critere->type, critere->num
               );
@@ -372,7 +372,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
                 "dls.name, mnemo.tableau, mnemo.acro_syn"
-                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON mnemo.num_syn = syn.id"
+                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON dls.syn_id = syn.id"
                 " AND (mnemo.type=%d OR mnemo.type=%d OR mnemo.type=%d OR mnemo.type=%d)"
                 " ORDER BY groupe,page,name,type,num",
                 MNEMO_ENTREE, MNEMO_ENTREE_ANA, MNEMO_SORTIE, MNEMO_SORTIE_ANA
