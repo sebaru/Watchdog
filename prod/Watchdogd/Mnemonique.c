@@ -210,7 +210,8 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
                 "dls.name, mnemo.tableau, mnemo.acro_syn"
-                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON mnemo.num_syn = syn.id"
+                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON mnemo.num_syn = syn.id",
+                NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE
               );
 
     g_snprintf( critere, sizeof(critere), " AND %s.command_text = '%s'",
@@ -234,7 +235,7 @@
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Recuperer_mnemo_baseDB ( struct DB **db_retour )
-  { gchar requete[512];
+  { gchar requete[1024];
     gboolean retour;
     struct DB *db;
 
@@ -242,7 +243,8 @@
                 "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
                 "dls.name, mnemo.tableau, mnemo.acro_syn"
                 " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON mnemo.num_syn = syn.id"
-                " ORDER BY groupe,page,name,type,num"
+                " ORDER BY groupe,page,name,type,num",
+                NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE
               );                                                                                    /* order by test 25/01/06 */
 
     db = Init_DB_SQL();       
@@ -299,14 +301,14 @@
 /******************************************************************************************************************************/
  struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB ( guint id )
   { struct CMD_TYPE_MNEMO_BASE *mnemo;
-    gchar requete[512];
+    gchar requete[1024];
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
                 "dls.name, mnemo.tableau, mnemo.acro_syn"
                 " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON mnemo.num_syn = syn.id"
-                " AND %s.id = %d", id
+                " AND %s.id = %d", NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, id
               );
 
     db = Init_DB_SQL();       
@@ -331,7 +333,7 @@
 /******************************************************************************************************************************/
  struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB_type_num ( struct CMD_TYPE_NUM_MNEMONIQUE *critere )
   { struct CMD_TYPE_MNEMO_BASE *mnemo;
-    gchar requete[512];
+    gchar requete[1024];
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
@@ -339,7 +341,7 @@
                 "dls.name, mnemo.tableau, mnemo.acro_syn"
                 " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON mnemo.num_syn = syn.id"
                 " AND mnemo.type = %d AND mnemo.num = %d",
-                critere->type, critere->num
+                NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, critere->type, critere->num
               );
 
     db = Init_DB_SQL();       
