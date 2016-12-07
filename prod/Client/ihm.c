@@ -136,6 +136,8 @@
  void Raz_progress_pulse( void )
   { gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (Barre_progress), 1.0 );
     gtk_progress_bar_set_text( GTK_PROGRESS_BAR (Barre_progress), "100%" );
+    nbr_enreg = 0;
+    nbr_enreg_max = 0;
   }
 /**********************************************************************************************************/
 /* Set_progress: Positionne la barre de progression de la fenetre                                         */
@@ -148,10 +150,7 @@
 
     nbr_enreg += plus;
     if (nbr_enreg >= nbr_enreg_max)
-     { nbr_enreg=0; nbr_enreg_max=0;
-       gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (Barre_progress), 1.0 );
-       gtk_progress_bar_set_text( GTK_PROGRESS_BAR (Barre_progress), "100%" );
-     }
+     { Raz_progress_pulse(); }
     else
      { fraction = 1.0*nbr_enreg/nbr_enreg_max;
        gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (Barre_progress), fraction );
