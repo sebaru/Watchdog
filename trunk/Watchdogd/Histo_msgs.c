@@ -152,9 +152,11 @@
                 "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
                 "histo.date_fixe,histo.date_fin"
-                " FROM %s as histo,%s as syn, %s as msg, %s as dls"
-                " WHERE dls.syn_id = syn.id AND histo.id_msg = msg.id",
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, NOM_TABLE_DLS /* From */
+                " FROM %s as histo"
+                " LEFT JOIN %s as msg ON msg.id = histo.id_msg"
+                " LEFT JOIN %s as dls ON dls.id = msg.dls_id"
+                " LEFT JOIN %s as syn ON syn.id = dls.syn_id",
+                NOM_TABLE_HISTO_MSGS, NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE /* From */
               );
 
     memset( critereSQL, 0, sizeof(critereSQL) );
@@ -228,14 +230,16 @@
     gboolean retour;
     struct DB *db;
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
                 "histo.date_fixe,histo.date_fin"
-                " FROM %s as histo,%s as syn, %s as msg, %s as dls"
-                " WHERE dls.syn_id = syn.id AND histo.id_msg = msg.id"
-                " AND alive = 1 ORDER BY histo.date_create_sec, histo.date_create_usec",
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, NOM_TABLE_DLS /* From */
+                " FROM %s as histo"
+                " LEFT JOIN %s as msg ON msg.id = histo.id_msg"
+                " LEFT JOIN %s as dls ON dls.id = msg.dls_id"
+                " LEFT JOIN %s as syn ON syn.id = dls.syn_id"
+                " WHERE alive = 1 ORDER BY histo.date_create_sec, histo.date_create_usec",
+                NOM_TABLE_HISTO_MSGS, NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE /* From */
               );
  
     db = Init_DB_SQL();       
@@ -260,13 +264,15 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, "
+                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
                 "histo.date_fixe,histo.date_fin"
-                " FROM %s as histo,%s as syn, %s as msg, %s as dls"
-                " WHERE dls.syn_id = syn.id AND histo.id_msg = msg.id"
-                " AND histo.id = %d",
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, NOM_TABLE_DLS, /* From */
+                " FROM %s as histo"
+                " LEFT JOIN %s as msg ON msg.id = histo.id_msg"
+                " LEFT JOIN %s as dls ON dls.id = msg.dls_id"
+                " LEFT JOIN %s as syn ON syn.id = dls.syn_id"
+                " WHERE histo.id = %d",
+                NOM_TABLE_HISTO_MSGS, NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, /* From */
                 id
               );
  
