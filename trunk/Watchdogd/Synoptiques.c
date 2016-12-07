@@ -101,9 +101,9 @@
          { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Retirer_synoptiqueDB: elimination passerelle failed %s", requete ); }
     else { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "Retirer_synoptiqueDB: elimination passerelle ok" ); }
 
-/******************************** Re-affectation des modules D.L.S ****************************************/
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET num_syn=1 WHERE num_syn=%d", NOM_TABLE_DLS, syn->id );
+/******************************************** Re-affectation des modules D.L.S ************************************************/
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "UPDATE %s SET syn_id=1 WHERE syn_id=%d", NOM_TABLE_DLS, syn->id );
 
     if ( ! Lancer_requete_SQL ( db, requete ) )
          { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Retirer_synoptiqueDB: re-affectation plugin D.L.S failed %s", requete ); }
