@@ -208,16 +208,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,"
-                "%s.name, %s.tableau, %s.acro_syn"
-                " FROM %s,%s,%s"
-                " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id",
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
-                NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_DLS, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
-                NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
-                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
-                NOM_TABLE_MNEMO, NOM_TABLE_DLS
+                "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
+                "dls.name, mnemo.tableau, mnemo.acro_syn"
+                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON mnemo.num_syn = syn.id"
               );
 
     g_snprintf( critere, sizeof(critere), " AND %s.command_text = '%s'",
@@ -246,17 +239,10 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,"
-                "%s.name, %s.tableau,%s.acro_syn"
-                " FROM %s,%s,%s"
-                " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
-                " ORDER BY groupe,page,name,type,num",
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
-                NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_DLS, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
-                NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
-                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
-                NOM_TABLE_MNEMO, NOM_TABLE_DLS
+                "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
+                "dls.name, mnemo.tableau, mnemo.acro_syn"
+                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON mnemo.num_syn = syn.id"
+                " ORDER BY groupe,page,name,type,num"
               );                                                                                    /* order by test 25/01/06 */
 
     db = Init_DB_SQL();       
@@ -317,18 +303,10 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,"
-                "%s.name, %s.tableau,%s.acro_syn"
-                " FROM %s,%s,%s"
-                " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
-                " AND %s.id = %d",
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
-                NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_DLS, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
-                NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
-                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
-                NOM_TABLE_MNEMO, NOM_TABLE_DLS,
-                NOM_TABLE_MNEMO, id
+                "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
+                "dls.name, mnemo.tableau, mnemo.acro_syn"
+                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON mnemo.num_syn = syn.id"
+                " AND %s.id = %d", id
               );
 
     db = Init_DB_SQL();       
@@ -357,18 +335,11 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,"
-                "%s.name, %s.tableau,%s.acro_syn"
-                " FROM %s,%s,%s"
-                " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
-                " AND %s.type = %d AND %s.num = %d",
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
-                NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_DLS, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
-                NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
-                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
-                NOM_TABLE_MNEMO, NOM_TABLE_DLS,
-                NOM_TABLE_MNEMO, critere->type, NOM_TABLE_MNEMO, critere->num
+                "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
+                "dls.name, mnemo.tableau, mnemo.acro_syn"
+                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON mnemo.num_syn = syn.id"
+                " AND mnemo.type = %d AND mnemo.num = %d",
+                critere->type, critere->num
               );
 
     db = Init_DB_SQL();       
@@ -397,22 +368,12 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT %s.id,%s.type,num,num_plugin,acronyme,%s.libelle,%s.command_text,%s.groupe,%s.page,"
-                "%s.name, %s.tableau,%s.acro_syn"
-                " FROM %s,%s,%s"
-                " WHERE %s.num_syn = %s.id AND %s.num_plugin = %s.id"
-                " AND (%s.type=%d OR %s.type=%d OR %s.type=%d OR %s.type=%d)"
+                "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
+                "dls.name, mnemo.tableau, mnemo.acro_syn"
+                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON mnemo.num_syn = syn.id"
+                " AND (mnemo.type=%d OR mnemo.type=%d OR mnemo.type=%d OR mnemo.type=%d)"
                 " ORDER BY groupe,page,name,type,num",
-                NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO, 
-                NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
-                NOM_TABLE_DLS, NOM_TABLE_MNEMO, NOM_TABLE_MNEMO,
-                NOM_TABLE_MNEMO, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* FROM */
-                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* WHERE */
-                NOM_TABLE_MNEMO, NOM_TABLE_DLS,
-                NOM_TABLE_MNEMO, MNEMO_ENTREE,
-                NOM_TABLE_MNEMO, MNEMO_ENTREE_ANA,
-                NOM_TABLE_MNEMO, MNEMO_SORTIE,
-                NOM_TABLE_MNEMO, MNEMO_SORTIE_ANA
+                MNEMO_ENTREE, MNEMO_ENTREE_ANA, MNEMO_SORTIE, MNEMO_SORTIE_ANA
               );                                                                                    /* order by test 25/01/06 */
 
     db = Init_DB_SQL();       

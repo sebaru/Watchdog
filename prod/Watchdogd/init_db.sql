@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `dls` (
   `compil_status` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-INSERT INTO `dls` (`id`, `type`, `num_syn`, `name`, `shortname`, `actif`, `compil_date`, `compil_status` ) VALUES
+INSERT INTO `dls` (`id`, `type`, `syn_id`, `name`, `shortname`, `actif`, `compil_date`, `compil_status` ) VALUES
 (1, 0, 1, 'Systeme', 'Systeme', FALSE, 0, 0);
 
 -- --------------------------------------------------------
