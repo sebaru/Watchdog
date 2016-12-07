@@ -53,7 +53,7 @@
  struct CMD_TYPE_MESSAGE
   { guint  id;
     guint  num;                                                                        /* Numero du message dans la structure */
-    guint  id_plugin_dls;                                                    /* Numéro ID du plugin D.L.S rattaché au message */
+    guint  dls_id;                                                    /* Numéro ID du plugin D.L.S rattaché au message */
     gchar  dls_shortname[NBR_CARAC_PLUGIN_DLS_UTF8+1];
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  libelle_audio[NBR_CARAC_LIBELLE_MSG_UTF8+1];
@@ -98,9 +98,9 @@
     SSTAG_CLIENT_VALIDE_EDIT_MESSAGE,                            /* Le client renvoie les données editées */
     SSTAG_SERVEUR_VALIDE_EDIT_MESSAGE_OK,                      /* Le serveur valide les nouvelles données */
 
-    SSTAG_CLIENT_WANT_SYN_FOR_MESSAGE,                         /* Envoi des synoptiques pour les messages */
-    SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE,
-    SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE_FIN,
+    SSTAG_CLIENT_WANT_DLS_FOR_MESSAGE,                         /* Envoi des synoptiques pour les messages */
+    SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MESSAGE,
+    SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MESSAGE_FIN,
 
     SSTAG_CLIENT_TYPE_NUM_MNEMO_VOC,
     SSTAG_SERVEUR_TYPE_NUM_MNEMO_VOC,

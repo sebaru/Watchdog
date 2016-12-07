@@ -149,11 +149,11 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.id_syn,"
+                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
                 "histo.date_fixe,histo.date_fin"
                 " FROM %s as histo,%s as syn, %s as msg, %s as dls"
-                " WHERE dls.id_syn = syn.id AND histo.id_msg = msg.id",
+                " WHERE dls.syn_id = syn.id AND histo.id_msg = msg.id",
                 NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, NOM_TABLE_DLS /* From */
               );
 
@@ -229,11 +229,11 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.id_syn,"
+                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
                 "histo.date_fixe,histo.date_fin"
                 " FROM %s as histo,%s as syn, %s as msg, %s as dls"
-                " WHERE dls.id_syn = syn.id AND histo.id_msg = msg.id"
+                " WHERE dls.syn_id = syn.id AND histo.id_num = msg.id"
                 " AND alive = 1 ORDER BY histo.date_create_sec, histo.date_create_usec",
                 NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, NOM_TABLE_DLS /* From */
               );
@@ -264,7 +264,7 @@
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
                 "histo.date_fixe,histo.date_fin"
                 " FROM %s as histo,%s as syn, %s as msg, %s as dls"
-                " WHERE dls.id_syn = syn.id AND histo.id_msg = msg.id"
+                " WHERE dls.syn_id = syn.id AND histo.id_num = msg.id"
                 " AND histo.id = %d",
                 NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, NOM_TABLE_DLS, /* From */
                 id

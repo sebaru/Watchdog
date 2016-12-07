@@ -80,9 +80,9 @@
                Proto_effacer_message( client, msg );
              }
             break;
-       case SSTAG_CLIENT_WANT_SYN_FOR_MESSAGE:
-             { Ref_client( client, "Send Synoptique for message" );
-               pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_message_thread, client );
+       case SSTAG_CLIENT_WANT_DLS_FOR_MESSAGE:
+             { Ref_client( client, "Send DLS for message" );
+               pthread_create( &tid, NULL, (void *)Envoyer_plugins_dls_pour_message_thread, client );
                pthread_detach( tid );
              }
             break;

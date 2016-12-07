@@ -393,4 +393,15 @@
     Unref_client( client );                                                               /* Déréférence la structure cliente */
     pthread_exit ( NULL );
   }
+/******************************************************************************************************************************/
+/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                                      */
+/* Entrée: Néant                                                                                                              */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void *Envoyer_plugins_dls_pour_message_thread ( struct CLIENT *client )
+  { Envoyer_plugins_dls_thread_tag( client, TAG_MESSAGE, SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MESSAGE,
+                                                         SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MESSAGE_FIN );
+    Unref_client( client );                                           /* Déréférence la structure cliente */
+    pthread_exit( NULL );
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -278,7 +278,7 @@
 
  extern void Menu_ajouter_editer_message ( struct CMD_TYPE_MESSAGE *edit_msg );   /* Dans ajout_message.c */
  extern void Proto_afficher_mnemo_voc_message ( struct CMD_TYPE_MNEMO_BASE *mnemo );
- extern void Proto_afficher_un_syn_for_message ( struct CMD_TYPE_SYNOPTIQUE *syn );
+ extern void Proto_afficher_un_dls_for_message ( struct CMD_TYPE_PLUGIN_DLS *dls );
 
  extern void Proto_cacher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );/* Dans liste_synoptique.c*/
  extern void Proto_afficher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );

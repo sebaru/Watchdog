@@ -206,8 +206,8 @@
     else
      { memcpy( &dls->nom,      db->row[1], sizeof(dls->nom       ) );                            /* Recopie dans la structure */
        memcpy( &dls->shortname,db->row[2], sizeof(dls->shortname ) );                            /* Recopie dans la structure */
-       memcpy( &dls->groupe,   db->row[6], sizeof(dls->groupe    ) );
-       memcpy( &dls->page,     db->row[7], sizeof(dls->page      ) );
+       memcpy( &dls->syn_groupe,db->row[6], sizeof(dls->syn_groupe ) );
+       memcpy( &dls->syn_page,  db->row[7], sizeof(dls->syn_page   ) );
        dls->id            = atoi(db->row[0]);
        dls->on            = atoi(db->row[3]);
        dls->type          = atoi(db->row[4]);

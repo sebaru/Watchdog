@@ -93,11 +93,11 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s(num,libelle,libelle_audio,libelle_sms,"
-                "type,bit_voc,enable,sms,type_voc,vitesse_voc,time_repeat,id_plugin_dls) VALUES "
+                "type,bit_voc,enable,sms,type_voc,vitesse_voc,time_repeat,dls_id) VALUES "
                 "(%d,'%s','%s','%s',%d,%d,%d,%s,%d,%d,%d,%d)", NOM_TABLE_MSG, msg->num,
                 libelle, libelle_audio, libelle_sms, msg->type,
                 msg->bit_voc, (msg->enable ? "true" : "false"),
-                msg->sms, msg->type_voc, msg->vitesse_voc, msg->time_repeat, msg->id_plugin_dls
+                msg->sms, msg->type_voc, msg->vitesse_voc, msg->time_repeat, msg->dls_id
               );
     g_free(libelle);
     g_free(libelle_audio);
@@ -130,9 +130,9 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "type_voc,vitesse_voc,time_repeat,id_plugin_dls,dls.shortname,syn.id"
+                "type_voc,vitesse_voc,time_repeat,dls_id,dls.shortname,syn.id"
                 " FROM %s as msg, %s as syn, %s as dls"
-                " WHERE dls.id_syn = syn.id AND msg.id_plugin_dls=dls.id AND %s"
+                " WHERE dls.syn_id = syn.id AND msg.dls_id=dls.id AND %s"
                 " ORDER BY groupe,page,num ",
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* From */
                 (conditions ? conditions : "1=1") /* Where */
@@ -201,7 +201,7 @@
        msg->type_voc    = atoi(db->row[12]);
        msg->vitesse_voc = atoi(db->row[13]);
        msg->time_repeat = atoi(db->row[14]);
-       msg->id_plugin_dls = atoi(db->row[15]);
+       msg->dls_id = atoi(db->row[15]);
        msg->syn_id      = atoi(db->row[17]);
      }
     return(msg);
@@ -218,9 +218,9 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "type_voc,vitesse_voc,time_repeat,id_plugin_dls,dls.shortname,syn.id"
+                "type_voc,vitesse_voc,time_repeat,dls_id,dls.shortname,syn.id"
                 " FROM %s as msg, %s as syn, %s as dls"
-                " WHERE dls.id_syn = syn.id AND msg.id_plugin_dls=dls.id AND num=%d LIMIT 1",
+                " WHERE dls.syn_id = syn.id AND msg.dls_id=dls.id AND num=%d LIMIT 1",
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,    /* From */
                 num /* Where */
               );
@@ -258,9 +258,9 @@
    
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "type_voc,vitesse_voc,time_repeat,id_plugin_dls,dls.shortname,syn.id"
+                "type_voc,vitesse_voc,time_repeat,dls_id,dls.shortname,syn.id"
                 " FROM %s as msg, %s as syn, %s as dls"
-                " WHERE dls.id_syn = syn.id AND msg.id_plugin_dls=dls.id AND msg.id=%d LIMIT 1",
+                " WHERE dls.syn_id = syn.id AND msg.dls_id=dls.id AND msg.id=%d LIMIT 1",
                 NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,    /* From */
                 id /* Where */
               );
@@ -306,12 +306,12 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "num=%d,libelle='%s',type=%d,bit_voc=%d,enable=%s,sms=%d,"
-                "libelle_audio='%s',libelle_sms='%s',type_voc=%d,vitesse_voc=%d,time_repeat=%d,id_plugin_dls=%d "
+                "libelle_audio='%s',libelle_sms='%s',type_voc=%d,vitesse_voc=%d,time_repeat=%d,dls_id=%d "
                 "WHERE id=%d",
                 NOM_TABLE_MSG, msg->num, libelle, msg->type, msg->bit_voc,
                                (msg->enable ? "true" : "false"), msg->sms,
                                libelle_audio, libelle_sms, msg->type_voc, msg->vitesse_voc,
-                               msg->time_repeat, msg->id_plugin_dls,
+                               msg->time_repeat, msg->dls_id,
                 msg->id );
     g_free(libelle);
     g_free(libelle_audio);

@@ -40,8 +40,8 @@
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
  void Gerer_protocole_message ( struct CONNEXION *connexion )
-  { static GList *Arrivee_message = NULL;
-    static GList *Arrivee_syn     = NULL;
+  { static GSList *Arrivee_message = NULL;
+    static GSList *Arrivee_dls     = NULL;
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_MESSAGE_OK:
@@ -82,34 +82,34 @@
                   msg = (struct CMD_TYPE_MESSAGE *)g_try_malloc0( sizeof( struct CMD_TYPE_MESSAGE ) );
                   if (!msg) break; 
                   memcpy( msg, &msgs->msg[i], sizeof(struct CMD_TYPE_MESSAGE ) );
-                  Arrivee_message = g_list_append( Arrivee_message, msg );
+                  Arrivee_message = g_slist_append( Arrivee_message, msg );
                 }
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_MESSAGE_FIN:
              { 
-               g_list_foreach( Arrivee_message, (GFunc)Proto_afficher_un_message, NULL );
-               g_list_foreach( Arrivee_message, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_message );
+               g_slist_foreach( Arrivee_message, (GFunc)Proto_afficher_un_message, NULL );
+               g_slist_foreach( Arrivee_message, (GFunc)g_free, NULL );
+               g_slist_free( Arrivee_message );
                Arrivee_message = NULL;
                Chercher_page_notebook( TYPE_PAGE_MESSAGE, 0, TRUE );
              }
             break;
-       case SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE:
-             { struct CMD_TYPE_SYNOPTIQUE *syn;
+       case SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MESSAGE:
+             { struct CMD_TYPE_PLUGIN_DLS *dls;
                Set_progress_plus(1);
-               syn = (struct CMD_TYPE_SYNOPTIQUE *)g_try_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
-               if (!syn) return; 
+               dls = (struct CMD_TYPE_PLUGIN_DLS *)g_try_malloc0( sizeof( struct CMD_TYPE_PLUGIN_DLS ) );
+               if (!dls) return; 
 
-               memcpy( syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE ) );
-               Arrivee_syn = g_list_append( Arrivee_syn, syn );
+               memcpy( dls, connexion->donnees, sizeof(struct CMD_TYPE_PLUGIN_DLS ) );
+               Arrivee_dls = g_slist_append( Arrivee_dls, dls );
              }
             break;
-       case SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE_FIN:
-             { g_list_foreach( Arrivee_syn, (GFunc)Proto_afficher_un_syn_for_message, NULL );
-               g_list_foreach( Arrivee_syn, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_syn );
-               Arrivee_syn = NULL;
+       case SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MESSAGE_FIN:
+             { g_slist_foreach( Arrivee_dls, (GFunc)Proto_afficher_un_dls_for_message, NULL );
+               g_slist_foreach( Arrivee_dls, (GFunc)g_free, NULL );
+               g_slist_free( Arrivee_dls );
+               Arrivee_dls = NULL;
              }
             break;
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_VOC:
