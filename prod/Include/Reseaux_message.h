@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Include/Reseaux_message.h:   Sous_tag de message pour watchdog 2.0 par lefevre Sebastien               */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       mar 21 fév 2006 13:46:48 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Include/Reseaux_message.h:   Sous_tag de message pour watchdog 2.0 par lefevre Sebastien                                   */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                           mar 21 fév 2006 13:46:48 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Reseaux_message.h
  * This file is part of Watchdog
@@ -52,16 +52,19 @@
 
  struct CMD_TYPE_MESSAGE
   { guint  id;
-    guint  num;                                                    /* Numero du message dans la structure */
+    guint  num;                                                                        /* Numero du message dans la structure */
+    guint  dls_id;                                                    /* Numéro ID du plugin D.L.S rattaché au message */
+    gchar  dls_shortname[NBR_CARAC_PLUGIN_DLS_UTF8+1];
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  libelle_audio[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  libelle_sms[NBR_CARAC_LIBELLE_MSG_UTF8+1];
-    gchar  groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
-    gchar  page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
+    guint  syn_id;                                                             /* Numéro ID du synoptique rattaché au message */
+    gchar  syn_groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
+    gchar  syn_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
+    gchar  syn_libelle[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
     guchar type;                                                       /* Etat, prealarme, defaut, alarme */
     gboolean enable;                              /* Flag pour la gestion par exemple de l'inhibition ... */
     guint  sms;                                                                         /* Envoi de sms ? */
-    guint  id_syn;                                         /* Numéro ID du synoptique rattaché au message */
     guint  bit_voc;                                       /* Numéro du Monostable associé au profil vocal */
     guint  vitesse_voc;                                              /* Vitesse de restitution de la voix */
     guint  type_voc;                                                          /* Type de voix a restituer */
@@ -95,9 +98,9 @@
     SSTAG_CLIENT_VALIDE_EDIT_MESSAGE,                            /* Le client renvoie les données editées */
     SSTAG_SERVEUR_VALIDE_EDIT_MESSAGE_OK,                      /* Le serveur valide les nouvelles données */
 
-    SSTAG_CLIENT_WANT_SYN_FOR_MESSAGE,                         /* Envoi des synoptiques pour les messages */
-    SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE,
-    SSTAG_SERVEUR_ADDPROGRESS_SYN_FOR_MESSAGE_FIN,
+    SSTAG_CLIENT_WANT_DLS_FOR_MESSAGE,                         /* Envoi des synoptiques pour les messages */
+    SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MESSAGE,
+    SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MESSAGE_FIN,
 
     SSTAG_CLIENT_TYPE_NUM_MNEMO_VOC,
     SSTAG_SERVEUR_TYPE_NUM_MNEMO_VOC,

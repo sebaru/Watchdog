@@ -177,11 +177,11 @@
                else if ( ! strcasecmp ( url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
                 { return( Http_Traiter_request_login ( session, wsi, remote_name, remote_ip ) ); }
                else if ( ! strcasecmp ( url, "/ws/logoff" ) )
-                { if (session) Http_Liberer_session ( session ); }
+                { if (session) Http_Close_session ( wsi, session ); }
                else if ( ! strcasecmp ( url, "/ws/status" ) )
                 { Http_Traiter_request_getstatus ( wsi ); }
                else if ( ! strncasecmp ( url, "/ws/message", 11 ) )
-                { return( Http_Traiter_request_getmessage ( wsi ) ); }
+                { return( Http_Traiter_request_getmessage ( wsi, session ) ); }
                else if ( ! strncasecmp ( url, "/ws/gif/", 8 ) )
                 { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+8 ) ); }
                else if ( ! strncasecmp ( url, "/ws/audio/", 7 ) )

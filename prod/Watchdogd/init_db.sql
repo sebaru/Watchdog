@@ -80,15 +80,16 @@ INSERT INTO `class` (`id`, `libelle`) VALUES
 CREATE TABLE IF NOT EXISTS `dls` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type` int(11) NOT NULL,
-  `num_syn` int(11) NOT NULL DEFAULT '0',
+  `syn_id` int(11) NOT NULL DEFAULT '0',
   `name` text COLLATE utf8_unicode_ci NOT NULL,
+  `shortname` text COLLATE utf8_unicode_ci NOT NULL,
   `actif` tinyint(1) NOT NULL DEFAULT '0',
   `compil_date` int(11) NOT NULL,
   `compil_status` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-INSERT INTO `dls` (`id`, `type`, `num_syn`, `name`, `actif`, `compil_date`, `compil_status` ) VALUES
-(1, 0, 1, 'Systeme', FALSE, 0, 0);
+INSERT INTO `dls` (`id`, `type`, `num_syn`, `name`, `shortname`, `actif`, `compil_date`, `compil_status` ) VALUES
+(1, 0, 1, 'Systeme', 'Systeme', FALSE, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -719,11 +720,11 @@ CREATE TABLE IF NOT EXISTS `config` (
 CREATE TABLE IF NOT EXISTS `msgs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `num` int(11) NOT NULL DEFAULT '0',
+  `dls_id` int(11) NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `libelle_audio` text COLLATE utf8_unicode_ci NOT NULL,
   `libelle_sms` text COLLATE utf8_unicode_ci NOT NULL,
   `type` int(11) NOT NULL DEFAULT '0',
-  `id_syn` int(11) NOT NULL DEFAULT '0',
   `bit_voc` int(11) DEFAULT NULL,
   `enable` tinyint(1) NOT NULL DEFAULT '0',
   `sms` int(11) NOT NULL DEFAULT '0',
@@ -733,9 +734,9 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
-INSERT INTO `msgs` (`id`, `num`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `id_syn`, `bit_voc`, `enable`, `sms`, `type_voc`, `vitesse_voc`, `time_repeat`) VALUES
-(1, 0, 'Warning, system is halting', 'Warning, system is halting', 'Warning, system is halting', 0, 1, 1, TRUE, FALSE, 1, 150, 0),
-(2, 1, 'Warning, system is rebooting', 'Warning, system is rebooting', 'Warning, system is rebooting', 0, 1, 1, TRUE, FALSE, 1, 150, 0);
+INSERT INTO `msgs` (`id`, `num`, `id_plugin_dls`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `id_syn`, `bit_voc`, `enable`, `sms`, `type_voc`, `vitesse_voc`, `time_repeat`) VALUES
+(1, 0, 1, 'Warning, system is halting', 'Warning, system is halting', 'Warning, system is halting', 0, 1, 1, TRUE, FALSE, 1, 150, 0),
+(2, 1, 1, 'Warning, system is rebooting', 'Warning, system is rebooting', 'Warning, system is rebooting', 0, 1, 1, TRUE, FALSE, 1, 150, 0);
 
 -- --------------------------------------------------------
 

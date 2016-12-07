@@ -36,6 +36,7 @@
 
  static GtkWidget *F_ajout;                                   /* Widget de reference sur la fenetre d'ajout/edition du plugin */
  static GtkWidget *Entry_nom;                                                 /* Le nom en clair du plugin en cours d'edition */
+ static GtkWidget *Entry_shortname;                                           /* Le nom en clair du plugin en cours d'edition */
  static GtkWidget *Entry_id;                                                        /* Le numéro de plugin en cours d'edition */
  static GtkWidget *Combo_syn;                                                                           /* Synoptique associé */
  static GtkWidget *Combo_type;                                                      /* Type du plugin (module, ssgrpupe, ...) */
@@ -66,10 +67,10 @@
                                                 gboolean edition )
   { gint index;
 
-    g_snprintf( Edit_dls.nom, sizeof(Edit_dls.nom),
-                "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
+    g_snprintf( Edit_dls.nom, sizeof(Edit_dls.nom), "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
+    g_snprintf( Edit_dls.shortname, sizeof(Edit_dls.shortname), "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_shortname) ) );
     index             = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
-    Edit_dls.num_syn  = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
+    Edit_dls.syn_id   = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
     Edit_dls.on       = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
     Edit_dls.type     = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) );
 
@@ -97,7 +98,7 @@
     g_snprintf( chaine, sizeof(chaine), "%s/%s/%s", syn->groupe, syn->page, syn->libelle );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_syn), chaine );
     Liste_index_syn = g_list_append( Liste_index_syn, GINT_TO_POINTER(syn->id) );
-    if (Edit_dls.num_syn == syn->id)
+    if (Edit_dls.syn_id == syn->id)
      { gtk_combo_box_set_active ( GTK_COMBO_BOX (Combo_syn),
                                   g_list_index(Liste_index_syn, GINT_TO_POINTER(syn->id))
                                 );
@@ -136,7 +137,7 @@
     gtk_container_add( GTK_CONTAINER(frame), vboite );
 
 /************************************************** Paramètres du plugin_dls **************************************************/
-    table = gtk_table_new( 4, 3, TRUE );
+    table = gtk_table_new( 5, 3, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(vboite), table, FALSE, FALSE, 0 );
@@ -175,11 +176,19 @@
     gtk_entry_set_max_length( GTK_ENTRY(Entry_nom), NBR_CARAC_PLUGIN_DLS );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_nom, 1, 3, i, i+1 );
 
+    i++;
+    texte = gtk_label_new( _("Shortname") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Entry_shortname = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_shortname), NBR_CARAC_PLUGIN_DLS );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_shortname, 1, 3, i, i+1 );
+
     if (edit_dls)                                                     /* Si edition d'un message on pre-positionne les champs */
      { gchar id[32];
        g_snprintf( id, sizeof(id), "%04d", edit_dls->id );
        gtk_entry_set_text( GTK_ENTRY(Entry_id), id );
        gtk_entry_set_text( GTK_ENTRY(Entry_nom), edit_dls->nom );
+       gtk_entry_set_text( GTK_ENTRY(Entry_shortname), edit_dls->shortname );
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type), edit_dls->type );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_actif), edit_dls->on );
      }

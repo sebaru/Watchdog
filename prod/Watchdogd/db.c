@@ -489,7 +489,38 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=2871;
+    if (database_version < 2909)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls ADD `shortname` text NOT NULL AFTER `name`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "UPDATE dls SET shortname='Systeme' WHERE id=1" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 2911)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs ADD `id_plugin_dls` INT(11) NOT NULL AFTER `num`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "UPDATE msgs SET id_plugin_dls=1" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 2912)
+     { g_snprintf( requete, sizeof(requete), "UPDATE msgs LEFT JOIN syns ON msgs.id_syn=syns.id LEFT JOIN dls ON dls.num_syn=syns.id SET msgs.id_plugin_dls=dls.id;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs DROP COLUMN `id_syn`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 2914)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls CHANGE `num_syn` `syn_id` int(11) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 2915)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs CHANGE `id_plugin_dls` `dls_id` int(11) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    database_version=2915;
 
     Libere_DB_SQL(&db);
 

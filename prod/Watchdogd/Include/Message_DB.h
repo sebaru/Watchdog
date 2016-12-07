@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Include/Message.h        Déclaration structure internes des messages watchdog                */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      mar 10 jun 2003 12:12:38 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Include/Message.h        Déclaration structure internes des messages watchdog                                    */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          mar 10 jun 2003 12:12:38 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Message.h
  * This file is part of Watchdog
@@ -33,14 +33,15 @@
 
  #define NOM_TABLE_MSG       "msgs"
 
-/*************************************** Définitions des prototypes ***************************************/
+/******************************************** Définitions des prototypes ******************************************************/
  extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB ( guint num );
  extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_id ( guint id );
  extern gboolean Recuperer_messageDB ( struct DB **db );
+ extern gboolean Recuperer_messageDB_with_conditions ( struct DB **db_retour, gchar *conditions, gint start, gint length );
  extern struct CMD_TYPE_MESSAGE *Recuperer_messageDB_suite( struct DB **db );
  extern gint Ajouter_messageDB ( struct CMD_TYPE_MESSAGE *msg );
  extern gboolean Retirer_messageDB ( struct CMD_TYPE_MESSAGE *msg );
  extern gboolean Modifier_messageDB( struct CMD_TYPE_MESSAGE *msg );
 
 #endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

@@ -149,12 +149,12 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, msg.id_syn,"
+                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
                 "histo.date_fixe,histo.date_fin"
-                " FROM %s as histo,%s as syn, %s as msg"
-                " WHERE msg.id_syn = syn.id AND histo.id_msg = msg.id",
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG /* From */
+                " FROM %s as histo,%s as syn, %s as msg, %s as dls"
+                " WHERE dls.syn_id = syn.id AND histo.id_msg = msg.id",
+                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, NOM_TABLE_DLS /* From */
               );
 
     memset( critereSQL, 0, sizeof(critereSQL) );
@@ -229,13 +229,13 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, msg.id_syn,"
+                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
                 "histo.date_fixe,histo.date_fin"
-                " FROM %s as histo,%s as syn, %s as msg"
-                " WHERE msg.id_syn = syn.id AND histo.id_msg = msg.id"
+                " FROM %s as histo,%s as syn, %s as msg, %s as dls"
+                " WHERE dls.syn_id = syn.id AND histo.id_num = msg.id"
                 " AND alive = 1 ORDER BY histo.date_create_sec, histo.date_create_usec",
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG /* From */
+                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, NOM_TABLE_DLS /* From */
               );
  
     db = Init_DB_SQL();       
@@ -260,13 +260,13 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, msg.id_syn,"
+                "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, "
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
                 "histo.date_fixe,histo.date_fin"
-                " FROM %s as histo,%s as syn, %s as msg"
-                " WHERE msg.id_syn = syn.id AND histo.id_msg = msg.id"
+                " FROM %s as histo,%s as syn, %s as msg, %s as dls"
+                " WHERE dls.syn_id = syn.id AND histo.id_num = msg.id"
                 " AND histo.id = %d",
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, /* From */
+                NOM_TABLE_HISTO_MSGS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, NOM_TABLE_DLS, /* From */
                 id
               );
  
@@ -307,18 +307,17 @@
                               "Recuperer_histo_msgsDB_suite: Erreur allocation mémoire" );
     else                                                                     /* Recopie dans la structure */
      { g_snprintf( histo_msgs->msg.libelle, sizeof(histo_msgs->msg.libelle), "%s", db->row[3] );
-       g_snprintf( histo_msgs->msg.groupe,  sizeof(histo_msgs->msg.groupe),  "%s", db->row[6] );
-       g_snprintf( histo_msgs->msg.page,    sizeof(histo_msgs->msg.page),    "%s", db->row[7] );
-       g_snprintf( histo_msgs->nom_ack,     sizeof(histo_msgs->nom_ack),     "%s", db->row[8] );
+       g_snprintf( histo_msgs->msg.syn_groupe,  sizeof(histo_msgs->msg.syn_groupe),  "%s", db->row[5] );
+       g_snprintf( histo_msgs->msg.syn_page,    sizeof(histo_msgs->msg.syn_page),    "%s", db->row[6] );
+       g_snprintf( histo_msgs->nom_ack,     sizeof(histo_msgs->nom_ack),     "%s", db->row[7] );
        histo_msgs->id               = atoi(db->row[0]);
        histo_msgs->alive            = atoi(db->row[1]);
        histo_msgs->msg.num          = atoi(db->row[2]);
        histo_msgs->msg.type         = atoi(db->row[4]);
-       histo_msgs->msg.id_syn      = atoi(db->row[5]);
-       histo_msgs->date_create_sec  = atoi(db->row[9]);
-       histo_msgs->date_create_usec = atoi(db->row[10]);
-       histo_msgs->date_fixe        = atoi(db->row[11]);
-       histo_msgs->date_fin         = atoi(db->row[12]);
+       histo_msgs->date_create_sec  = atoi(db->row[8]);
+       histo_msgs->date_create_usec = atoi(db->row[9]);
+       histo_msgs->date_fixe        = atoi(db->row[10]);
+       histo_msgs->date_fin         = atoi(db->row[11]);
      }
     return(histo_msgs);
   }

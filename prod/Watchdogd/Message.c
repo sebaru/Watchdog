@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Message/Message.c        Déclaration des fonctions pour la gestion des message               */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     jeu. 29 déc. 2011 14:55:42 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Message/Message.c        Déclaration des fonctions pour la gestion des message                                   */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                         jeu. 29 déc. 2011 14:55:42 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Message.c
  * This file is part of Watchdog
@@ -35,11 +35,11 @@
 
  #include "watchdogd.h"
 
-/**********************************************************************************************************/
-/* Retirer_messageDB: Elimination d'un message                                                            */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Retirer_messageDB: Elimination d'un message                                                                                */
+/* Entrée: une structure identifiant le message a retirer                                                                     */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
  gboolean Retirer_messageDB ( struct CMD_TYPE_MESSAGE *msg )
   { gchar requete[200];
     gboolean retour;
@@ -47,7 +47,7 @@
 
     if (msg->id < 10000) return(FALSE);
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MSG, msg->id );
 
     db = Init_DB_SQL();       
@@ -56,15 +56,15 @@
        return(FALSE);
      }
 
-    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return(retour);
   }
-/**********************************************************************************************************/
-/* Ajouter_messageDB: Ajout ou edition d'un message                                                       */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Ajouter_messageDB: Ajout ou edition d'un message                                                                           */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                                               */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
  gint Ajouter_messageDB ( struct CMD_TYPE_MESSAGE *msg )
   { gchar *libelle, *libelle_audio, *libelle_sms;
     gchar requete[2048];
@@ -72,18 +72,18 @@
     struct DB *db;
     gint id;
 
-    libelle = Normaliser_chaine ( msg->libelle );                   /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( msg->libelle );                                            /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_messageDB: Normalisation libelle impossible" );
        return(-1);
      }
-    libelle_audio = Normaliser_chaine ( msg->libelle_audio );       /* Formatage correct des chaines */
+    libelle_audio = Normaliser_chaine ( msg->libelle_audio );                                /* Formatage correct des chaines */
     if (!libelle_audio)
      { g_free(libelle);
        Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_messageDB: Normalisation libelle_audio impossible" );
        return(-1);
      }
-    libelle_sms = Normaliser_chaine ( msg->libelle_sms );           /* Formatage correct des chaines */
+    libelle_sms = Normaliser_chaine ( msg->libelle_sms );                                    /* Formatage correct des chaines */
     if (!libelle_sms)
      { g_free(libelle);
        g_free(libelle_audio);
@@ -91,13 +91,13 @@
        return(-1);
      }
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s(num,libelle,libelle_audio,libelle_sms,"
-                "type,id_syn,bit_voc,enable,sms,type_voc,vitesse_voc,time_repeat) VALUES "
+                "type,bit_voc,enable,sms,type_voc,vitesse_voc,time_repeat,dls_id) VALUES "
                 "(%d,'%s','%s','%s',%d,%d,%d,%s,%d,%d,%d,%d)", NOM_TABLE_MSG, msg->num,
                 libelle, libelle_audio, libelle_sms, msg->type,
-                msg->id_syn, msg->bit_voc, (msg->enable ? "true" : "false"),
-                msg->sms, msg->type_voc, msg->vitesse_voc, msg->time_repeat
+                msg->bit_voc, (msg->enable ? "true" : "false"),
+                msg->sms, msg->type_voc, msg->vitesse_voc, msg->time_repeat, msg->dls_id
               );
     g_free(libelle);
     g_free(libelle_audio);
@@ -109,7 +109,7 @@
        return(-1);
      }
 
-    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if ( retour == FALSE )
      { Libere_DB_SQL(&db); 
        return(-1);
@@ -118,26 +118,34 @@
     Libere_DB_SQL(&db);
     return(id);
   }
-/**********************************************************************************************************/
-/* Recuperer_liste_id_messageDB: Recupération de la liste des ids des messages                                */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- gboolean Recuperer_messageDB ( struct DB **db_retour )
-  { gchar requete[256];
+/******************************************************************************************************************************/
+/* Recuperer_messageDB_with_conditions: Recupération de la liste des ids des messages avec conditions en paramètre            */
+/* Entrée: une database et des conditions                                                                                     */
+/* Sortie: FALSE si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ gboolean Recuperer_messageDB_with_conditions ( struct DB **db_retour, gchar *conditions, gint start, gint length )
+  { gchar requete[512], critere[80];
     gboolean retour;
     struct DB *db;
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,num,%s.libelle,type,id_syn,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "type_voc,vitesse_voc,time_repeat"
-                " FROM %s,%s"
-                " WHERE %s.id_syn = %s.id"
-                " ORDER BY groupe,page,num",
-                NOM_TABLE_MSG, NOM_TABLE_MSG,
-                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, /* From */
-                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE /* Where */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
+                "type_voc,vitesse_voc,time_repeat,dls.id,dls.shortname,syn.id"
+                " FROM %s as msg, %s as syn, %s as dls"
+                " WHERE dls.syn_id = syn.id AND msg.dls_id=dls.id AND %s"
+                " ORDER BY groupe,page,num ",
+                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* From */
+                (conditions ? conditions : "1=1") /* Where */
               );
+
+    if (start != -1 && length != -1)                                                 /* Critere d'affichage (offset et count) */
+     { g_snprintf( critere, sizeof(critere), " LIMIT %d,%d", start, length );
+       g_strlcat( requete, critere, sizeof(requete) );
+     }
+    else if (length!=-1)
+     { g_snprintf( critere, sizeof(critere), " LIMIT %d", length );
+       g_strlcat( requete, critere, sizeof(requete) );
+     }
 
     db = Init_DB_SQL();       
     if (!db)
@@ -145,16 +153,23 @@
        return(FALSE);
      }
 
-    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if (retour == FALSE) Libere_DB_SQL (&db);
     *db_retour = db;
     return ( retour );
   }
-/**********************************************************************************************************/
-/* Recuperer_liste_id_messageDB: Recupération de la liste des ids des messages                                */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Recuperer_liste_id_messageDB: Recupération de la liste des ids des messages                                                */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: une GList                                                                                                          */
+/******************************************************************************************************************************/
+ gboolean Recuperer_messageDB ( struct DB **db_retour )
+  { return( Recuperer_messageDB_with_conditions ( db_retour, NULL, -1, -1 ) ); }
+/******************************************************************************************************************************/
+/* Recuperer_liste_id_messageDB: Recupération de la liste des ids des messages                                                */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: une GList                                                                                                          */
+/******************************************************************************************************************************/
  struct CMD_TYPE_MESSAGE *Recuperer_messageDB_suite( struct DB **db_orig )
   { struct CMD_TYPE_MESSAGE *msg;
     struct DB *db;
@@ -171,41 +186,43 @@
     if (!msg) Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_messageDB_suite: Erreur allocation mémoire" );
     else
      { memcpy( &msg->libelle,       db->row[2],  sizeof(msg->libelle ) );    /* Recopie dans la structure */
-       memcpy( &msg->groupe,        db->row[7],  sizeof(msg->groupe  ) );
-       memcpy( &msg->page,          db->row[8],  sizeof(msg->page    ) );
+       memcpy( &msg->syn_libelle,   db->row[4],  sizeof(msg->syn_libelle) );
+       memcpy( &msg->syn_groupe,    db->row[7],  sizeof(msg->syn_groupe  ) );
+       memcpy( &msg->syn_page,      db->row[8],  sizeof(msg->syn_page    ) );
        memcpy( &msg->libelle_audio, db->row[10], sizeof(msg->libelle_audio) );
-       memcpy( &msg->libelle_sms,   db->row[11], sizeof(msg->libelle_sms) );
+       memcpy( &msg->libelle_sms,   db->row[11], sizeof(msg->libelle_sms  ) );
+       memcpy( &msg->dls_shortname, db->row[16], sizeof(msg->dls_shortname) );
        msg->id          = atoi(db->row[0]);
        msg->num         = atoi(db->row[1]);
        msg->type        = atoi(db->row[3]);
-       msg->id_syn     = atoi(db->row[4]);
        msg->bit_voc     = atoi(db->row[5]);
        msg->enable      = atoi(db->row[6]);
        msg->sms         = atoi(db->row[9]);
        msg->type_voc    = atoi(db->row[12]);
        msg->vitesse_voc = atoi(db->row[13]);
        msg->time_repeat = atoi(db->row[14]);
+       msg->dls_id      = atoi(db->row[15]);
+       msg->syn_id      = atoi(db->row[17]);
      }
     return(msg);
   }
-/**********************************************************************************************************/
-/* Rechercher_messageDB: Recupération du message dont le num est en parametre                                 */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Rechercher_messageDB: Recupération du message dont le num est en parametre                                                 */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: une GList                                                                                                          */
+/******************************************************************************************************************************/
  struct CMD_TYPE_MESSAGE *Rechercher_messageDB ( guint num )
   { struct CMD_TYPE_MESSAGE *message;
     gchar requete[512];
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,num,%s.libelle,type,id_syn,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "type_voc,vitesse_voc,time_repeat"
-                " FROM %s,%s"
-                " WHERE %s.id_syn = %s.id AND num=%d LIMIT 1",
-                NOM_TABLE_MSG, NOM_TABLE_MSG,
-                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE,     /* From */
-                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, num /* Where */
+                "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
+                "type_voc,vitesse_voc,time_repeat,dls.id,dls.shortname,syn.id"
+                " FROM %s as msg, %s as syn, %s as dls"
+                " WHERE dls.syn_id = syn.id AND msg.dls_id=dls.id AND num=%d LIMIT 1",
+                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,    /* From */
+                num /* Where */
               );
 
     db = Init_DB_SQL();       
@@ -223,11 +240,11 @@
     Libere_DB_SQL ( &db );
     return(message);
   }
-/**********************************************************************************************************/
-/* Rechercher_messageDB_par_id: Recupération du message dont l'id est en parametre                        */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Rechercher_messageDB_par_id: Recupération du message dont l'id est en parametre                                            */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: une GList                                                                                                          */
+/******************************************************************************************************************************/
  struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_id ( guint id )
   { struct CMD_TYPE_MESSAGE *message;
     gchar requete[512];
@@ -240,13 +257,12 @@
      }
    
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,num,%s.libelle,type,id_syn,bit_voc,enable,groupe,page,sms,libelle_audio,"
-                "libelle_sms,type_voc,vitesse_voc,time_repeat"
-                " FROM %s,%s"
-                " WHERE %s.id_syn = %s.id AND %s.id=%d LIMIT 1",
-                NOM_TABLE_MSG, NOM_TABLE_MSG,
-                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE,     /* From */
-                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_MSG, id /* Where */
+                "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
+                "type_voc,vitesse_voc,time_repeat,dls_id,dls.shortname,syn.id"
+                " FROM %s as msg, %s as syn, %s as dls"
+                " WHERE dls.syn_id = syn.id AND msg.dls_id=dls.id AND msg.id=%d LIMIT 1",
+                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,    /* From */
+                id /* Where */
               );
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { Libere_DB_SQL( &db );
@@ -257,11 +273,11 @@
     if (message) Libere_DB_SQL ( &db );
     return(message);
   }
-/**********************************************************************************************************/
-/* Modifier_messageDB: Modification d'un message Watchdog                                                 */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
-/* Sortie: -1 si pb, id sinon                                                                             */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Modifier_messageDB: Modification d'un message Watchdog                                                                     */
+/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                                                */
+/* Sortie: -1 si pb, id sinon                                                                                                 */
+/******************************************************************************************************************************/
  gboolean Modifier_messageDB( struct CMD_TYPE_MESSAGE *msg )
   { gchar *libelle, *libelle_audio, *libelle_sms;
     gchar requete[2048];
@@ -289,13 +305,13 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "num=%d,libelle='%s',type=%d,id_syn=%d,bit_voc=%d,enable=%s,sms=%d,"
-                "libelle_audio='%s',libelle_sms='%s',type_voc=%d,vitesse_voc=%d,time_repeat=%d "
+                "num=%d,libelle='%s',type=%d,bit_voc=%d,enable=%s,sms=%d,"
+                "libelle_audio='%s',libelle_sms='%s',type_voc=%d,vitesse_voc=%d,time_repeat=%d,dls_id=%d "
                 "WHERE id=%d",
-                NOM_TABLE_MSG, msg->num, libelle, msg->type, msg->id_syn, msg->bit_voc,
+                NOM_TABLE_MSG, msg->num, libelle, msg->type, msg->bit_voc,
                                (msg->enable ? "true" : "false"), msg->sms,
                                libelle_audio, libelle_sms, msg->type_voc, msg->vitesse_voc,
-                               msg->time_repeat,
+                               msg->time_repeat, msg->dls_id,
                 msg->id );
     g_free(libelle);
     g_free(libelle_audio);
@@ -307,8 +323,8 @@
        return(FALSE);
      }
 
-    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return(retour);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

@@ -51,7 +51,7 @@
  static GtkWidget *Entry_lib_sms;                                               /* Libelle sms du message */
  static GtkWidget *Entry_mp3;                                                       /* nom de fichier mp3 */
  static GtkWidget *Combo_type;                                                  /* Type actuel du message */
- static GtkWidget *Combo_syn;                                                       /* Synoptique associé */
+ static GtkWidget *Combo_dls;                                                       /* Synoptique associé */
  static GtkWidget *Check_enable;                                  /* Le message est-il actif ou inhibe ?? */
  static GtkWidget *Combo_sms;                                 /* Le message doit-il etre envoyé par sms ? */
  static GtkWidget *Spin_bit_voc;                                                   /* Numéro du bit vocal */
@@ -59,7 +59,7 @@
  static GtkWidget *Spin_vitesse_voc;                                 /* Vitesse de restitution de la voix */
  static GtkWidget *Spin_time_repeat;                                          /* Intervalle de repetition */
  static GtkWidget *Combo_type_voc;                               /* Type actuel de la voix de restitution */
- static GList *Liste_index_syn;
+ static GList *Liste_index_dls;
  static struct CMD_TYPE_MESSAGE Msg;                                        /* Message en cours d'édition */
 
 /**********************************************************************************************************/
@@ -186,9 +186,9 @@
     Msg.enable     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_enable) );
     Msg.sms        = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_sms) );
     Msg.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
-    index               = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
-    Msg.id_syn    = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
-    if (Msg.id_syn == 0) Msg.id_syn = 1;                /* Par défaut, pointe sur le premier synoptique */
+    index               = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls) );
+    Msg.dls_id   = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, index ) );
+    if (Msg.dls_id == 0) Msg.dls_id = 1;                                           /* Par défaut, pointe sur le premier D.L.S */
     Msg.bit_voc    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_voc) );
     Msg.vitesse_voc= gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_vitesse_voc) );
     Msg.type_voc   = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type_voc) );
@@ -214,7 +214,7 @@
        case GTK_RESPONSE_CANCEL:
        default:              break;
      }
-    g_list_free( Liste_index_syn );
+    g_list_free( Liste_index_dls );
     gtk_widget_destroy(F_ajout);
     return(TRUE);
   }
@@ -223,18 +223,18 @@
 /* Entrée: rien                                                                                           */
 /* sortie: kedal                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_syn_for_message ( struct CMD_TYPE_SYNOPTIQUE *syn )
+ void Proto_afficher_un_dls_for_message ( struct CMD_TYPE_PLUGIN_DLS *dls )
   { gchar chaine[512];
-    g_snprintf( chaine, sizeof(chaine), "%s/%s/%s", syn->groupe, syn->page, syn->libelle );
-    gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_syn), chaine );
-    Liste_index_syn = g_list_append( Liste_index_syn, GINT_TO_POINTER(syn->id) );
-    if (Msg.id_syn == syn->id)
-     { gtk_combo_box_set_active ( GTK_COMBO_BOX (Combo_syn),
-                                  g_list_index(Liste_index_syn, GINT_TO_POINTER(syn->id))
+    g_snprintf( chaine, sizeof(chaine), "%s/%s/%s", dls->syn_groupe, dls->syn_page, dls->shortname );
+    gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_dls), chaine );
+    Liste_index_dls = g_list_append( Liste_index_dls, GINT_TO_POINTER(dls->id) );
+    if (Msg.dls_id == dls->id)
+     { gtk_combo_box_set_active ( GTK_COMBO_BOX (Combo_dls),
+                                  g_list_index(Liste_index_dls, GINT_TO_POINTER(dls->id))
                                 );
      }
-    else if (Msg.id_syn == 0)
-     { gtk_combo_box_set_active ( GTK_COMBO_BOX (Combo_syn), 0 );
+    else if (Msg.dls_id == 0)
+     { gtk_combo_box_set_active ( GTK_COMBO_BOX (Combo_dls), 0 );
      }
   }
 /**********************************************************************************************************/
@@ -331,12 +331,12 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib, 1, 4, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Groupe/Page/Syn") );               /* Choix du synoptique cible du messages */
+    texte = gtk_label_new( _("Groupe/Page/DLS") );                                           /* Choix du DLS cible du message */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Combo_syn = gtk_combo_box_new_text();
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_syn, 1, 4, i, i+1 );
-    Liste_index_syn = NULL;
-    Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_WANT_SYN_FOR_MESSAGE, NULL, 0 );
+    Combo_dls = gtk_combo_box_new_text();
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_dls, 1, 4, i, i+1 );
+    Liste_index_dls = NULL;
+    Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_WANT_DLS_FOR_MESSAGE, NULL, 0 );
 
 /******************************************************** Paragraphe Voix *****************************************************/
     i++;

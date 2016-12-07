@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 dnl define([gittag], esyscmd([sh -c "git describe --always  | tr -d '\n'"]))
 define([SVNVERSION], esyscmd([sh -c "svnversion -n | sed s/M//g"]))
-AC_INIT([Watchdog], [2.11.SVNVERSION], [project.watchdog@gmail.com], [Watchdog], [https://wiki.connect4all.fr] )
+AC_INIT([Watchdog], [2.11.SVNVERSION], [sebastien.lefevreabls-habitat.fr], [Watchdog], [https://wiki.abls-habitat.fr] )
 AC_CANONICAL_TARGET
 AC_CONFIG_SRCDIR([Watchdogd/Watchdogd.c])
 AM_INIT_AUTOMAKE

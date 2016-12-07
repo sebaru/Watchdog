@@ -33,11 +33,11 @@
  #include "watchdogd.h"
  #include "Http.h"
 /******************************************************************************************************************************/
-/* Http_Traiter_request_getmessage: Traite une requete sur l'URI message                                                        */
+/* Http_Traiter_request_getmessage: Traite une requete sur l'URI message                                                      */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- gboolean Http_Traiter_request_getmessage ( struct lws *wsi )
+ gboolean Http_Traiter_request_getmessage ( struct lws *wsi, struct HTTP_SESSION *session )
   { unsigned char header[256], *header_cur, *header_end;
    	const char *content_type = "application/xml";
     gchar requete[256], critere[128];
@@ -51,28 +51,16 @@
     struct DB *db;
     gint retour;
 
-    type_s   = lws_get_urlarg_by_name	( wsi, "type",   token_type,   sizeof(token_type) );
+    type_s   = "0"; //lws_get_urlarg_by_name	( wsi, "type",   token_type,   sizeof(token_type) );
     if (type_s)   { type   = atoi ( type_s );   } else { type   = -1; }
-    start_s  = lws_get_urlarg_by_name	( wsi, "start",  token_start,  sizeof(token_start) );
+    start_s  = "0"; //lws_get_urlarg_by_name	( wsi, "start",  token_start,  sizeof(token_start) );
     if (start_s)  { start  = atoi ( start_s );  } else { start  = -1; }
-    length_s = lws_get_urlarg_by_name	( wsi, "length", token_length, sizeof(token_length) );
+    length_s = "100";//lws_get_urlarg_by_name	( wsi, "length", token_length, sizeof(token_length) );
     if (length_s) { length = atoi ( length_s ); } else { length = -1; }
 
     memset( requete, 0, sizeof(requete) );                                                   /* Critere de choix des messages */
     if (type != -1)
-     { g_snprintf( critere, sizeof(critere), " AND msg.type=%d", type );
-       g_strlcat( requete, critere, sizeof(requete) );
-     }
-
-    if (start != -1 && length != -1)                                                 /* Critere d'affichage (offset et count) */
-     { g_snprintf( critere, sizeof(critere), " LIMIT %d, %d", start, length );
-       g_strlcat( requete, critere, sizeof(requete) );
-     } else
-    if (length!=-1)
-     { g_snprintf( critere, sizeof(critere), " LIMIT %d", length );
-       g_strlcat( requete, critere, sizeof(requete) );
-     } else
-     { g_snprintf( critere, sizeof(critere), " LIMIT 100" );
+     { g_snprintf( critere, sizeof(critere), " %s.type=%d", NOM_TABLE_MSG, type );
        g_strlcat( requete, critere, sizeof(requete) );
      }
 
@@ -99,8 +87,8 @@
        xmlBufferFree(buf);
        return(FALSE);
      }
-
-    if ( ! Recuperer_messageDB_with_conditions( &db, requete ) )      /* Lancement de la requete de recuperation des messages */
+                                                                      /* Lancement de la requete de recuperation des messages */
+    if ( ! Recuperer_messageDB_with_conditions( &db, requete, start, length ) )
      { xmlFreeTextWriter(writer);                                                                 /* Libération du writer XML */
        xmlBufferFree(buf);                                            /* Libération du buffer dont nous n'avons plus besoin ! */
        return(FALSE);
@@ -112,9 +100,25 @@
      { xmlTextWriterStartElement(writer, (const unsigned char *) "Message");
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"ID", "%d", msg->id );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"num", "%d", msg->num );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"type", "%d", msg->type );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"enable", "%d", msg->enable );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"type", "%d", msg->type );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"sms", "%d", msg->sms );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"bit_voc", "%d", msg->bit_voc );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"vitesse_voc", "%d", msg->vitesse_voc );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"type_voc", "%d", msg->type_voc );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"time_repeat", "%d", msg->time_repeat );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"libelle", "%s", msg->libelle );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"libelle_audio", "%s", msg->libelle_audio );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"libelle_sms", "%s", msg->libelle_sms );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_groupe", "%s", msg->syn_groupe );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_page", "%s", msg->syn_page );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_libelle", "%s", msg->syn_libelle );
        xmlTextWriterEndElement(writer);                                                                        /* End message */
+       g_free(msg);
      }
     xmlTextWriterEndElement(writer);                                                                          /* End messages */
+    xmlTextWriterWriteComment(writer, (const unsigned char *)"Dumping messages done !");
     retour = xmlTextWriterEndDocument(writer);                                                                /* End document */
     if (retour < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
