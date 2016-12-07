@@ -307,8 +307,10 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
                 "dls.name, mnemo.tableau, mnemo.acro_syn"
-                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON dls.syn_id = syn.id"
-                " AND %s.id = %d", NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, id
+                " FROM %s as mnemo"
+                " LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id"
+                " LEFT JOIN %s as syn ON dls.syn_id = syn.id"
+                " AND mnemo.id = %d", NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, id
               );
 
     db = Init_DB_SQL();       

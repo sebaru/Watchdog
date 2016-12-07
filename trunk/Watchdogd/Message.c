@@ -131,10 +131,12 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
                 "type_voc,vitesse_voc,time_repeat,dls.id,dls.shortname,syn.id"
-                " FROM %s as msg, %s as syn, %s as dls"
-                " WHERE dls.syn_id = syn.id AND msg.dls_id=dls.id AND %s"
+                " FROM %s as msg"
+                " LEFT JOIN %s as dls ON msg.dls_id=dls.id"
+                " LEFT JOIN %s as syn ON dls.syn_id=syn.id"
+                " WHERE %s"
                 " ORDER BY groupe,page,num ",
-                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,/* From */
+                NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,/* From */
                 (conditions ? conditions : "1=1") /* Where */
               );
 
@@ -219,9 +221,11 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
                 "type_voc,vitesse_voc,time_repeat,dls.id,dls.shortname,syn.id"
-                " FROM %s as msg, %s as syn, %s as dls"
-                " WHERE dls.syn_id = syn.id AND msg.dls_id=dls.id AND num=%d LIMIT 1",
-                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,    /* From */
+                " FROM %s as msg"
+                " LEFT JOIN %s as dls ON msg.dls_id=dls.id"
+                " LEFT JOIN %s as syn ON dls.syn_id=syn.id"
+                " WHERE num=%d LIMIT 1",
+                NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,    /* From */
                 num /* Where */
               );
 
@@ -258,10 +262,12 @@
    
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "type_voc,vitesse_voc,time_repeat,dls_id,dls.shortname,syn.id"
-                " FROM %s as msg, %s as syn, %s as dls"
-                " WHERE dls.syn_id = syn.id AND msg.dls_id=dls.id AND msg.id=%d LIMIT 1",
-                NOM_TABLE_MSG, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_DLS,    /* From */
+                "type_voc,vitesse_voc,time_repeat,dls.id,dls.shortname,syn.id"
+                " FROM %s as msg"
+                " LEFT JOIN %s as dls ON msg.dls_id=dls.id"
+                " LEFT JOIN %s as syn ON dls.syn_id=syn.id"
+                " WHERE msg.id=%d LIMIT 1",
+                NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,    /* From */
                 id /* Where */
               );
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
