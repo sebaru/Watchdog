@@ -213,7 +213,7 @@ CREATE TABLE IF NOT EXISTS `histo_bit` (
 
 CREATE TABLE IF NOT EXISTS `histo_msgs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_num` int(11) NOT NULL DEFAULT '0',
+  `id_msg` int(11) NOT NULL DEFAULT '0',
   `alive` tinyint(1) NOT NULL,
   `nom_ack` varchar(97) COLLATE utf8_unicode_ci DEFAULT NULL,
   `date_create_sec` int(11) NOT NULL DEFAULT '0',
