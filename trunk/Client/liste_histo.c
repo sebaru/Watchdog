@@ -45,6 +45,7 @@
     COLONNE_TYPE,
     COLONNE_SYN_ID,
     COLONNE_DATE_CREATE,
+    COLONNE_DLS_SHORTNAME,
     COLONNE_ACK,
     COLONNE_LIBELLE,
     COLONNE_COULEUR_FOND,
@@ -249,6 +250,7 @@
                          COLONNE_GROUPE_PAGE, groupe_page,
                          COLONNE_TYPE, Type_vers_string(histo->msg.type),
                          COLONNE_DATE_CREATE, date,
+                         COLONNE_DLS_SHORTNAME, histo->msg.dls_shortname,
                          COLONNE_ACK, ack,
                          COLONNE_LIBELLE, histo->msg.libelle,
                          COLONNE_COULEUR_FOND, &COULEUR_FOND[histo->msg.type],
@@ -368,6 +370,7 @@
                                               G_TYPE_STRING,                               /* Groupe page */
                                               G_TYPE_UINT,                                     /* Num_syn */
                                               G_TYPE_STRING,
+                                              G_TYPE_STRING,                             /* DLS Shortname */
                                               G_TYPE_STRING,
                                               G_TYPE_STRING,
                                               GDK_TYPE_COLOR,      /* Couleur de fond de l'enregistrement */
@@ -413,7 +416,15 @@
 
     renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
     g_object_set( renderer, "xalign", 0.5, NULL );
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Acknowledge"), renderer,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("DLS Shortname"), renderer,
+                                                         "text", COLONNE_DLS_SHORTNAME,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_DLS_SHORTNAME);
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_histo), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                                     /* Colonne du synoptique */
+    g_object_set( renderer, "xalign", 0.5, NULL );
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Ack"), renderer,
                                                          "text", COLONNE_ACK,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_ACK);
