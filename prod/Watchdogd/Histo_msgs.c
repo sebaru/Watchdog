@@ -151,7 +151,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
-                "histo.date_fixe,histo.date_fin"
+                "histo.date_fixe,histo.date_fin,dls.shortname"
                 " FROM %s as histo"
                 " LEFT JOIN %s as msg ON msg.id = histo.id_msg"
                 " LEFT JOIN %s as dls ON dls.id = msg.dls_id"
@@ -233,7 +233,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
-                "histo.date_fixe,histo.date_fin"
+                "histo.date_fixe,histo.date_fin,dls.shortname"
                 " FROM %s as histo"
                 " LEFT JOIN %s as msg ON msg.id = histo.id_msg"
                 " LEFT JOIN %s as dls ON dls.id = msg.dls_id"
