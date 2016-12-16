@@ -752,19 +752,20 @@
 /**********************************************************************************************************/
  static void Interroger_sortie_tor( struct MODULE_MODBUS *module )
   { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
-    gint cpt_a, cpt_poid, cpt_byte, cpt, taille;
+    gint cpt_a, cpt_poid, cpt_byte, cpt, taille, nbr_data;
 
     memset(&requete, 0, sizeof(requete) );                           /* Mise a zero globale de la requete */
+    nbr_data = ((module->nbr_sortie_tor-1)/8)+1;
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
     requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
-    taille                 = 0x0006 + (module->nbr_sortie_tor/8 + 1);
+    taille                 = 0x0007 + nbr_data;
     requete.taille         = htons( taille );                                                   /* taille */
     requete.unit_id        = 0x00;                                                                /* 0xFF */
     requete.fct            = MBUS_WRITE_MULTIPLE_COIL;
     requete.adresse        = 0x00;
     requete.nbr            = htons( module->nbr_sortie_tor );                                /* bit count */
-    requete.data[2]        = (module->nbr_sortie_tor/8);                                    /* Byte count */
+    requete.data[2]        = nbr_data;                                                      /* Byte count */
     cpt_a = module->modbus.map_A;
     for ( cpt_poid = 1, cpt_byte = 3, cpt = 0; cpt<module->nbr_sortie_tor; cpt++)
       { if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }

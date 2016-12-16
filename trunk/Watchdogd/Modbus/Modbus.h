@@ -69,8 +69,8 @@
  struct TRAME_MODBUS_REQUETE                                                                 /* Definition d'une trame MODBUS */
   { guint16 transaction_id;
     guint16 proto_id; /* -> 0 = MOBUS */
-    guint16 taille; /* taille, en comptant le unit_id */
-    guint8 unit_id; /* 0xFF */
+    guint16 taille;   /* taille, à partir du unit_id */
+    guint8 unit_id;   /* 0xFF */
     guint8 fct;
     guint16 adresse;
     union { guint16 nbr;
