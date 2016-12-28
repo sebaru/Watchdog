@@ -97,11 +97,10 @@
 /*------------------------------------------------------- Dumping message ----------------------------------------------------*/
     while ( (msg=Recuperer_messageDB_suite( &db )) != NULL )                     /* Mise en forme avant envoi au client léger */
      { xmlTextWriterStartElement(writer, (const unsigned char *) "Message");
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"ID", "%d", msg->id );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"id", "%d", msg->id );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"num", "%d", msg->num );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"type", "%d", msg->type );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"enable", "%d", msg->enable );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"type", "%d", msg->type );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"sms", "%d", msg->sms );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"bit_voc", "%d", msg->bit_voc );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"vitesse_voc", "%d", msg->vitesse_voc );

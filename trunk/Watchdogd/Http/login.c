@@ -236,34 +236,16 @@ search_again:
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  gint Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip )
-  { unsigned char header[256], *header_cur, *header_end;
-    struct HTTP_PER_SESSION_DATA *pss;
-    gchar buffer[4096];
-    gint taille;
+  { struct HTTP_PER_SESSION_DATA *pss;
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
              "Http_Traiter_request_login: HTTP request from %s(%s)",
               remote_name, remote_ip );
 
-    if (!session)
-     { pss = lws_wsi_user ( wsi );
-       g_snprintf( pss->url, sizeof(pss->url), "/ws/login" );
-       return(0);                                                     /* si pas de session, on continue de traiter la request */
-     }
-    
-    header_cur = header;
-    header_end = header + sizeof(header);
-
-    g_snprintf( buffer, sizeof(buffer), "<html><body>Already logged-in for %s/%s</body></html>",
-                session->remote_name, session->remote_ip );
-    taille = strlen(buffer);
-    lws_add_http_header_status( wsi, 200, &header_cur, header_end );
-    lws_add_http_header_content_length ( wsi, taille, &header_cur, header_end );
-    lws_finalize_http_header ( wsi, &header_cur, header_end );
-    *header_cur='\0';                                                                               /* Caractere null d'arret */
-    lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-    lws_write ( wsi, buffer, taille, LWS_WRITE_HTTP);                                                       /* Send to client */
-    return(1);
+    if (session) Http_Liberer_session ( session );                                     /* si session existante, on la termine */
+    pss = lws_wsi_user ( wsi );
+    g_snprintf( pss->url, sizeof(pss->url), "/ws/login" );
+    return(0);                                                        /* si pas de session, on continue de traiter la request */
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_login: Traite une requete de login                                                                    */
