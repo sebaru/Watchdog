@@ -272,7 +272,7 @@ search_again:
 /******************************************************************************************************************************/
  gint Http_Traiter_request_body_completion_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip )
   { gchar buffer[4096], username[80], password[80], **splited, **couple;
-    unsigned char header[256], *header_cur, *header_end;
+    unsigned char header[512], *header_cur, *header_end;
     struct HTTP_PER_SESSION_DATA *pss;
     struct CMD_TYPE_UTILISATEUR *util;
     struct HTTP_SESSION *session;
