@@ -863,10 +863,10 @@
                           else SEA_range( cpt_e, 0 );
                           break;
                      case ENTREEANA_WAGO_750461:
-                           { int reponse;
+                           { gint16 reponse;
                              reponse  = module->response.data[ 2*cpt + 1 ] << 8;
                              reponse |= module->response.data[ 2*cpt + 2 ];
-                             SEA ( cpt_e, (gfloat)reponse );
+                             SEA ( cpt_e, 1.0*reponse );
                            }
                           break;
                      default : SEA_range( cpt_e, 0 );
