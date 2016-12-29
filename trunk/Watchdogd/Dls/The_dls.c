@@ -263,8 +263,21 @@
                Partage->ea[ num ].inrange = 1;
                break;
           case ENTREEANA_WAGO_750461:
-               Partage->ea[ num ].val_ech = (gfloat)(val_avant_ech/10.0);           /* Valeur à l'echelle */ 
-               Partage->ea[ num ].inrange = 1;
+               if (val_avant_ech >= 0)
+                { if (val_avant_ech < 8500.0)
+                   { Partage->ea[ num ].val_ech = (gfloat)(val_avant_ech/10.0);           /* Valeur à l'echelle */ 
+                     Partage->ea[ num ].inrange = 1;
+                   }
+                  else Partage->ea[ num ].inrange = 0;
+                }
+               else if (val_avant_ech == -32767) Partage->ea[ num ].inrange = 0;
+               else
+                { gfloat cpl;
+                  cpl = ~(gint)val_avant_ech + 1;
+                   { Partage->ea[ num ].val_ech = (gfloat)(-cpl/10.0);           /* Valeur à l'echelle */ 
+                     Partage->ea[ num ].inrange = 1;
+                   }
+                }
                break;
           default:
                Partage->ea[ num ].val_ech = 0.0;
