@@ -866,9 +866,18 @@
                            { int reponse;
                              reponse  = module->response.data[ 2*cpt + 1 ] << 8;
                              reponse |= module->response.data[ 2*cpt + 2 ];
-                             if (reponse < -2000.0 || reponse >= 8500.0) { SEA_range( cpt_e, 0 ); }
-                             else { SEA( cpt_e, reponse );
-                                  }
+                             if (reponse > 0)
+                              { if (reponse < 0x2134)
+                                     { SEA( cpt_e, reponse );
+                                       SEA_range ( cpt_e, 0 );
+                                     }
+                              }
+                             else if (reponse == 0x8001) { SEA_range ( cpt_e, 0 ); }
+                             else
+                              { int cpl;
+                                cpl = ~reponse + 1;
+                                SEA ( cpt_e, -cpl );
+                              }
                            }
                           break;
                      default : SEA_range( cpt_e, 0 );
