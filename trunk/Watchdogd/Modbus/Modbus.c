@@ -862,7 +862,7 @@
                            }
                           else SEA_range( cpt_e, 0 );
                           break;
-                     case ENTREEANA_WAGO_750461:
+                     case ENTREEANA_WAGO_750461:                                                               /* Borne PT100 */
                            { gint16 reponse;
                              reponse  = module->response.data[ 2*cpt + 1 ] << 8;
                              reponse |= module->response.data[ 2*cpt + 2 ];
