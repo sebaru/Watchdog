@@ -201,8 +201,9 @@ CREATE TABLE IF NOT EXISTS `histo_bit` (
   `num` int(11) NOT NULL DEFAULT '0',
   `date_sec` int(11) NOT NULL DEFAULT '0',
   `date_usec` int(11) NOT NULL DEFAULT '0',
+  `date_time` DATETIME(3) NOT NULL DEFAULT '0',
   `valeur` float NOT NULL DEFAULT '0.0',
-  KEY `test` (`type`,`num`,`date_sec`)
+  KEY `test` (`type`,`num`,`date_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
