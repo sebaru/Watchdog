@@ -36,12 +36,12 @@
  void Ajouter_archDB ( struct DB *db, struct ARCHDB *arch )
   { gchar requete[512];
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "INSERT INTO %s(date_sec,date_usec,type,num,valeur) VALUES "
-                "(%d,%d,%d,%d,'%f')", NOM_TABLE_ARCH, arch->date_sec, arch->date_usec,
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "INSERT INTO %s(date_time,type,num,valeur) VALUES "
+                "(FROM_UNIXTIME(%d.%d),%d,%d,'%f')", NOM_TABLE_ARCH, arch->date_sec, arch->date_usec,
                 arch->type, arch->num, arch->valeur );
 
-    Lancer_requete_SQL ( db, requete );                               /* Execution de la requete SQL */
+    Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
   }
 /**********************************************************************************************************/
 /* Recuperer_archDB: Initialise la récupération des archives bases de données                             */
