@@ -41,7 +41,6 @@
 /***************************************************** Définitions des prototypes *********************************************/
  extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB ( guint id );
  extern gboolean Recuperer_mnemo_baseDB ( struct DB **db );
- extern gboolean Recuperer_mnemo_baseDB_for_courbe ( struct DB **db );
  extern gboolean Recuperer_mnemo_baseDB_by_command_text ( struct DB **db_retour, gchar *commande_pure );
   
  extern struct CMD_TYPE_MNEMO_BASE *Recuperer_mnemo_baseDB_suite( struct DB **db );

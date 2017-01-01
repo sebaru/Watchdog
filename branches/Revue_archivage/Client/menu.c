@@ -115,24 +115,6 @@
   { Creer_page_liste_histo_msgs();
   }
 /**********************************************************************************************************/
-/* Menu_want_courbe: l'utilisateur desire voir l'historique par courbes                                   */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
- void Menu_want_courbe ( void )
-  { if (Chercher_page_notebook( TYPE_PAGE_COURBE, 0, TRUE )) return;
-    Creer_page_courbe ( "Courbes" );
-    Chercher_page_notebook( TYPE_PAGE_COURBE, 0, TRUE );                          /* Affichage de la page */
-  }
-/**********************************************************************************************************/
-/* Menu_want_histo_hard: l'utilisateur desire voir l'historique                                           */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
- void Menu_want_histo_courbe ( void )
-  { if (Chercher_page_notebook( TYPE_PAGE_HISTO_COURBE, 0, TRUE )) return;
-    Creer_page_histo_courbe( "Histo Courbes" );
-    Chercher_page_notebook( TYPE_PAGE_HISTO_COURBE, 0, TRUE );                    /* Affichage de la page */
-  }
-/**********************************************************************************************************/
 /* Menu_want_supervision: l'utilisateur desire voir le synoptique supervision                             */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/

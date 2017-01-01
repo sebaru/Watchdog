@@ -206,44 +206,6 @@
              liste_capteur = liste_capteur->next;                                              /* On passe au capteur suivant */
            }
         }
-/************************************************** Envoi des courbes analogiques *********************************************/
-       if (client->mode == VALIDE && client->courbes)
-        { static gint update;
-          struct CMD_TYPE_COURBE *courbe;
-          GList *liste_courbe;
-          if (update < Partage->top)
-           { struct CMD_APPEND_COURBE envoi_courbe;
-             update = Partage->top + COURBE_TEMPS_TOP*10;                          /* Refresh toutes les 5 secondes au client */
-             envoi_courbe.date = time(NULL);
-             liste_courbe = client->courbes;
-             while (liste_courbe)
-              { courbe = (struct CMD_TYPE_COURBE *)liste_courbe->data;
-
-                envoi_courbe.slot_id = courbe->slot_id;
-                envoi_courbe.type    = courbe->type;
-                              
-                switch (courbe->type)
-                 { case MNEMO_SORTIE:
-                        envoi_courbe.val_ech = 1.0*A(courbe->num);
-                        Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
-                                      (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
-                        break;
-                   case MNEMO_ENTREE:
-                        envoi_courbe.val_ech = 1.0*E(courbe->num);
-                        Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
-                                      (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
-                        break;
-                   case MNEMO_ENTREE_ANA:
-                        envoi_courbe.val_ech = Partage->ea[courbe->num].val_ech;
-                        Envoi_client( client, TAG_COURBE, SSTAG_SERVEUR_APPEND_COURBE,
-                                      (gchar *)&envoi_courbe, sizeof(struct CMD_APPEND_COURBE) );
-                        break;
-                   default: printf("type courbe inconnu\n");
-                 }
-                liste_courbe = liste_courbe->next;
-              }
-           }
-        }
 /********************************************** Envoi des histos et des motifs ************************************************/
        if (client->mode == VALIDE)                                                /* Envoi au suppression des histo au client */
         { Envoyer_histo_au_client (client);
