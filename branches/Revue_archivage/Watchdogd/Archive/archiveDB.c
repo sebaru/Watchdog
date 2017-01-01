@@ -43,47 +43,4 @@
 
     Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
   }
-/**********************************************************************************************************/
-/* Recuperer_archDB: Initialise la récupération des archives bases de données                             */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- gboolean Recuperer_archDB ( struct LOG *log, struct DB *db, guint type, guint num,
-                             time_t date_deb, time_t date_fin )
-  { gchar requete[1024];
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT `type`,`num`,`date_sec`,`date_usec`,`valeur`"
-                " FROM %s WHERE `type`=%d AND `num`=%d AND `date_sec`>=%d AND `date_sec`<=%d"
-                " ORDER BY `date_sec`,`date_usec` ASC",
-                NOM_TABLE_ARCH, type, num, (gint)date_deb, (gint)date_fin );
-
-   return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
-  }
-/**********************************************************************************************************/
-/* Recuperer_archDB_suite: Envoi un nouvel enregistrement archivé dans la Base de données                 */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- struct ARCHDB *Recuperer_archDB_suite( struct LOG *log, struct DB *db )
-  { struct ARCHDB *arch;
-
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       return(NULL);
-     }
-
-    arch = (struct ARCHDB *)g_try_malloc0( sizeof(struct ARCHDB) );
-    if (!arch) Info_new( Config.log, Config.log_arch, LOG_ERR,
-                        "Recuperer_archDB_suite: Memory error" );
-    else
-     { arch->date_sec  = atoi(db->row[2]);
-       arch->date_usec = atoi(db->row[3]);
-       arch->type      = atoi(db->row[0]);
-       arch->num       = atoi(db->row[1]);
-       arch->valeur    = atof(db->row[4]);
-     }
-    return(arch);
-  }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

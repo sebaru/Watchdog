@@ -56,11 +56,8 @@
 /*************************************** Définitions des prototypes ***************************************/
  extern void Run_arch ( void );                                                         /* Dans Archive.c */
  extern gint Arch_Clear_list ( void );
-  extern void Ajouter_arch( gint type, gint num, gfloat valeur );
+ extern void Ajouter_arch( gint type, gint num, gfloat valeur );
  extern void Ajouter_archDB ( struct DB *db, struct ARCHDB *arch );
- extern gboolean Recuperer_archDB ( struct LOG *log, struct DB *db, guint type, guint num,
-                                    time_t date_deb, time_t date_fin );
- extern struct ARCHDB *Recuperer_archDB_suite( struct LOG *log, struct DB *db );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
