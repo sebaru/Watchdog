@@ -6,6 +6,9 @@
 
 noinst_LTLIBRARIES   = libtradDLS.la
 libtradDLS_la_SOURCES = lignes.y mots.l Interp.c
+
+.NOTPARALLEL:
+
 AM_LFLAGS = -PDls_ -olex.yy.c
 AM_YFLAGS = -p Dls_
 
