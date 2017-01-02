@@ -61,7 +61,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "ALTER TABLE %s REORGANIZE PARTITION p_MAX INTO "
-                "(PARTITION p%04d,%02d VALUES LESS THAN %04d%02d"
+                "(PARTITION p%04d%02d VALUES LESS THAN '%04d-%02d-01'"
                 " PARTITION p_MAX VALUES LESS THEN MAXVALUE);",
                 NOM_TABLE_ARCH, annee, mois, annee, mois );
 
