@@ -205,7 +205,10 @@ CREATE TABLE IF NOT EXISTS `histo_bit` (
   `valeur` float NOT NULL DEFAULT '0.0',
   KEY `test` (`type`,`num`,`date_time`)  
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
-  PARTITION BY HASH (MONTH(date_time)) PARTITIONS 12;
+  PARTITION BY RANGE ( YEAR(date_time) * 100 + MONTH(date_time)) PARTITIONS 2
+   ( PARTITION p0 VALUES LESS THAN (201601) ENGINE = InnoDB,
+     PARTITION p_MAX VALUES LESS THAN MAXVALUE
+   );
 
 -- --------------------------------------------------------
 

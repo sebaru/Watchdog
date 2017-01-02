@@ -105,7 +105,10 @@
 /* Main: Fonction principale du thread                                                                                        */
 /******************************************************************************************************************************/
  void Run_arch ( void )
-  { struct DB *db;
+  { gint mois_actuel = 0;
+    time_t date;
+    struct tm tm;
+    struct DB *db;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
@@ -134,9 +137,16 @@
           Partage->com_arch.Thread_sigusr1 = FALSE;
         }
 
+       time(&date);
+       localtime_r( &date, &tm );
+       if (tm.tm_mday == 1 & tm.tm_mon != mois_actuel)                                        /* Est-on le premier du mois ?? */
+        { mois_actuel = tm.tm_mon;                                                                              /* Sauvegarde */
+          Arch_Update_SQL_Partitions( tm.tm_year, tm.tm_mon );
+        }
+        
        if (!Partage->com_arch.liste_arch)                                                     /* Si pas de message, on tourne */
         { sched_yield();
-          usleep(10000);
+          sleep(5);
           continue;
         }
 

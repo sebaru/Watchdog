@@ -43,4 +43,29 @@
 
     Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
   }
+/******************************************************************************************************************************/
+/* Arch_Update_SQL_Partitions: Ajout d'une partition dans la table histo_bit                                                  */
+/* Entrée: la date de la nouvelle partition                                                                                   */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ void Arch_Update_SQL_Partitions ( guint annee, guint mois )
+  { gchar requete[512];
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_arch, LOG_ERR, 
+                "Arch_Update_SQL_Partitions: Unable to open database %s", Config.db_database );
+       return;
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "ALTER TABLE %s REORGANIZE PARTITION p_MAX INTO "
+                "(PARTITION p%04d,%02d VALUES LESS THAN %04d%02d"
+                " PARTITION p_MAX VALUES LESS THEN MAXVALUE);",
+                NOM_TABLE_ARCH, annee, mois, annee, mois );
+
+    Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
+    Libere_DB_SQL( &db );
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

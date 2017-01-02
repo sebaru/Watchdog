@@ -58,6 +58,6 @@
  extern gint Arch_Clear_list ( void );
  extern void Ajouter_arch( gint type, gint num, gfloat valeur );
  extern void Ajouter_archDB ( struct DB *db, struct ARCHDB *arch );
-
+ extern void Arch_Update_SQL_Partitions ( guint annee, guint mois );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
