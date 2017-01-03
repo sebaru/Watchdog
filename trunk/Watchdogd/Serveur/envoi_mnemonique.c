@@ -241,69 +241,9 @@
 /* Entrée: Néant                                                                                                              */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Envoyer_mnemoniques_for_courbe_tag ( struct CLIENT *client, guint tag, gint sstag, gint sstag_fin )
-  { struct CMD_TYPE_MNEMO_BASE *mnemo_base;
-    struct CMD_TYPE_MNEMO_FULL *mnemo_full;
-    struct CMD_ENREG nbr;
-    struct DB *db;
-
-    prctl(PR_SET_NAME, "W-MnemoCourbe", 0, 0, 0 );
-
-    if ( ! Recuperer_mnemo_baseDB_for_courbe( &db ) )
-     { Unref_client( client );                                                            /* Déréférence la structure cliente */
-       return;
-     }                                                                                               /* Si pas de histos (??) */
-
-    nbr.num = db->nbr_result;
-    g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d mnemos", nbr.num );
-    Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
-
-    for( ; ; )
-     { mnemo_base = Recuperer_mnemo_baseDB_suite( &db );
-       if (!mnemo_base)
-        { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Unref_client( client );                                                         /* Déréférence la structure cliente */
-          return;
-        }
-
-       mnemo_full = Rechercher_mnemo_fullDB ( mnemo_base->id );
-       if (mnemo_full)
-        { Envoi_client ( client, tag, sstag, (gchar *)mnemo_full, sizeof(struct CMD_TYPE_MNEMO_FULL) );
-          g_free(mnemo_full);
-        }
-
-       g_free(mnemo_base);
-     }
-  }
-/******************************************************************************************************************************/
-/* Envoyer_mnemoniques: Envoi des mnemos au client GID_MNEMONIQUE                                                             */
-/* Entrée: Néant                                                                                                              */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
  void *Envoyer_mnemoniques_thread ( struct CLIENT *client )
   { Envoyer_mnemoniques_tag( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE,
                                                      SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE_FIN );   
-    pthread_exit ( NULL );
-  }
-/******************************************************************************************************************************/
-/* Envoyer_mnemoniques: Envoi des mnemos au client GID_MNEMONIQUE                                                             */
-/* Entrée: Néant                                                                                                              */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void *Envoyer_mnemoniques_for_courbe_thread ( struct CLIENT *client )
-  { Envoyer_mnemoniques_for_courbe_tag( client, TAG_COURBE, SSTAG_SERVEUR_ADDPROGRESS_MNEMO_FOR_COURBE,
-                                                            SSTAG_SERVEUR_ADDPROGRESS_MNEMO_FOR_COURBE_FIN );
-    pthread_exit ( NULL );
-  }
-/******************************************************************************************************************************/
-/* Envoyer_mnemoniques: Envoi des mnemos au client GID_MNEMONIQUE                                                             */
-/* Entrée: Néant                                                                                                              */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void *Envoyer_mnemoniques_for_histo_courbe_thread ( struct CLIENT *client )
-  { Envoyer_mnemoniques_for_courbe_tag( client, TAG_HISTO_COURBE,
-                                        SSTAG_SERVEUR_ADDPROGRESS_MNEMO_FOR_HISTO_COURBE,
-                                        SSTAG_SERVEUR_ADDPROGRESS_MNEMO_FOR_HISTO_COURBE_FIN );
     pthread_exit ( NULL );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

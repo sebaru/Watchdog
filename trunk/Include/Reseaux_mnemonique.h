@@ -71,7 +71,6 @@
   };
 
 /**************************************************** AddOns pour les Analog Input ********************************************/
- #define COURBE_TEMPS_TOP             5                                         /* 1 point = 5 secondes sur la grille courbes */
  enum
   { ENTREEANA_NON_INTERP,
     ENTREEANA_4_20_MA_12BITS,

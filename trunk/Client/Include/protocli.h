@@ -60,8 +60,6 @@
     TYPE_PAGE_HISTO_MSGS,                                                     /* Parcours de l'historique */
     TYPE_PAGE_ATELIER,                                               /* Il s'agit d'un atelier synoptique */
     TYPE_PAGE_SUPERVISION,                                            /* Supervision graphique synoptique */
-    TYPE_PAGE_COURBE,                                              /* Affichage des courbes en temps reel */
-    TYPE_PAGE_HISTO_COURBE,
     TYPE_PAGE_CAMERA,                                                               /* Gestion des camera */
     TYPE_PAGE_ONDULEUR,                                        /* Page affichant la liste des onduleurs ! */
     TYPE_PAGE_RS485,                                                  /* Page affichant les modules RS485 */
@@ -93,39 +91,6 @@
      COL_CAM_LIBELLE,
      COL_CAM_LOCATION,
      NBR_COL_CAM
-  };
-
- struct COURBE
-  { gboolean actif;
-    GtkDataboxGraph *marker_select;                                   /* Index retourné par le gtkdatabox */
-    gfloat marker_select_x;
-    gfloat marker_select_y;
-    GtkDataboxGraph *marker_last;                                     /* Index retourné par le gtkdatabox */
-    gfloat marker_last_x;
-    gfloat marker_last_y;
-    GdkColor couleur;                                                             /* Couleur de la courbe */
-    GtkDataboxGraph *index;                                           /* Index retourné par le gtkdatabox */
-    guint taille_donnees;                         /* Taille (en nombre de gfloat) des tableaux ci dessous */
-    gfloat *X;                                                              /* Coordonnées X de la courbe */
-    gfloat *Y;                                                              /* Coordonnées Y de la courbe */
-    struct CMD_TYPE_MNEMO_FULL mnemo;
-  };
-
- #define NBR_MAX_COURBES   6                             /* Nombre maximum de courbes affichées a l'écran */
- #define MAX_RESOLUTION    4096
- #define ENTREAXE_Y_TOR    (MAX_RESOLUTION/NBR_MAX_COURBES)         /* Axe Y pour chacune des courbes TOR */
- #define HAUTEUR_Y_TOR     ((MAX_RESOLUTION/NBR_MAX_COURBES) * 0.75)/* Hauteur pour chacune des coubes TOR*/
-
- struct TYPE_INFO_COURBE
-  { guint slot_id;                                                   /* Numero du slot en cours d'edition */
-    GtkWidget *Databox;
-    GtkWidget *Entry[NBR_MAX_COURBES];                           /* Zone de capteur pour description Eana */
-    GtkWidget *Check_rescale;
-    struct COURBE Courbes[NBR_MAX_COURBES];
-    GtkDataboxGraph *index_grille;                       /* Index de la grille retourné par le gtkdatabox */
-    GtkWidget *Date_debut;
-    GtkWidget *Date_fin;
-    GtkWidget *Entry_date_select;                                 /* Affichage de la date actuelle select */
   };
 
  struct TYPE_INFO_SOURCE_DLS
@@ -221,10 +186,8 @@
  extern void Gerer_protocole_supervision ( struct CONNEXION *connexion );
  extern void Gerer_protocole_histo ( struct CONNEXION *connexion );
  extern void Gerer_protocole_atelier ( struct CONNEXION *connexion );
- extern void Gerer_protocole_courbe ( struct CONNEXION *connexion );
  extern void Gerer_protocole_fichier_connecte ( struct CONNEXION *connexion );
  extern void Gerer_protocole_connexion ( struct CONNEXION *connexion );
- extern void Gerer_protocole_histo_courbe ( struct CONNEXION *connexion );
  extern void Gerer_protocole_camera ( struct CONNEXION *connexion );
  extern void Gerer_protocole_admin ( struct CONNEXION *connexion );
  extern gint Get_icone_version( void );
@@ -324,8 +287,6 @@
  extern void Menu_want_camera ( void );
  extern void Menu_want_histo_msgs ( void );
  extern void Menu_want_supervision( void );
- extern void Menu_want_courbe ( void );
- extern void Menu_want_histo_courbe ( void );
  extern void Menu_want_page_admin ( void );
 
 
@@ -482,27 +443,7 @@
  extern gboolean Print_paginate ( GtkPrintOperation *operation,
                                   GtkPrintContext   *context,
                                   gpointer           user_data );
-                                                                                         /* Dans courbe.c */
- extern void Proto_afficher_une_source_for_courbe( struct CMD_TYPE_MNEMO_FULL *mnemo );
- extern void Creer_page_courbe ( gchar *libelle );
- extern void Detruire_page_courbe( struct PAGE_NOTEBOOK *page );
- extern gboolean CB_deplacement_databox ( struct TYPE_INFO_COURBE *infos, GdkEvent *event, gpointer data );
- extern gboolean CB_sortir_databox ( struct TYPE_INFO_COURBE *infos, GdkEvent *event, gpointer data );
- extern void Ajouter_courbe( struct CMD_TYPE_COURBE *courbe, struct TYPE_INFO_COURBE *infos, gboolean marker_last );
- extern void Proto_ajouter_courbe( struct CMD_TYPE_COURBE *courbe );
- extern void Proto_append_courbe( struct CMD_APPEND_COURBE *append_courbe );
- extern void Afficher_courbe( struct CMD_START_COURBE *courbe, struct TYPE_INFO_COURBE *infos );
- extern void Proto_start_courbe( struct CMD_START_COURBE *courbe );
-                                                                                   /* Dans histo_courbe.c */
- extern void Proto_afficher_une_source_EA_for_histo_courbe( struct CMD_TYPE_MNEMO_FULL *entreeANA );
- extern void Proto_afficher_une_source_for_histo_courbe( struct CMD_TYPE_MNEMO_BASE *mnemo );
- extern void Creer_page_histo_courbe ( gchar *libelle );
- extern void Detruire_page_histo_courbe( struct PAGE_NOTEBOOK *page );
- extern gboolean Append_courbe ( struct TYPE_INFO_COURBE *infos, struct COURBE *courbe,
-                                 struct CMD_APPEND_COURBE *append_courbe );
- extern void Proto_ajouter_histo_courbe( struct CMD_TYPE_COURBE *courbe );
- extern void Proto_start_histo_courbe( struct CMD_START_COURBE *start_courbe );
- 
+
  extern void Proto_afficher_un_camera( struct CMD_TYPE_CAMERA *camera );           /* Dans liste_camera.c */
  extern void Proto_cacher_un_camera( struct CMD_TYPE_CAMERA *camera );
  extern void Proto_rafraichir_un_camera( struct CMD_TYPE_CAMERA *camera );

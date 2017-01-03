@@ -528,8 +528,6 @@
     if (database_version < 2951)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE histo_bit ADD `date_time` DATETIME(3) AFTER `date_usec`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
-       g_snprintf( requete, sizeof(requete), "UPDATE histo_bit SET date_time = FROM_UNIXTIME(date_sec + date_usec/100000)" );
-       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
     database_version=2951;
