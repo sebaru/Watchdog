@@ -53,12 +53,6 @@
           case TYPE_PAGE_SUPERVISION:
                Detruire_page_supervision( page_a_virer );
                break;
-          case TYPE_PAGE_COURBE:
-               Detruire_page_courbe( page_a_virer );
-               break;
-          case TYPE_PAGE_HISTO_COURBE:
-               Detruire_page_histo_courbe( page_a_virer );
-               break;
         }
        gtk_notebook_remove_page( GTK_NOTEBOOK(Notebook), num );
        Liste_pages = g_list_remove( Liste_pages, page_a_virer );
@@ -189,10 +183,6 @@
            { case TYPE_PAGE_ATELIER:
                   if ( ((struct TYPE_INFO_ATELIER *)page->infos)->syn.id != id )
                    { liste = liste->next; continue; }
-                  break;
-             case TYPE_PAGE_COURBE:
-                  break;
-             case TYPE_PAGE_HISTO_COURBE:
                   break;
              case TYPE_PAGE_HISTO_MSGS:
                   if ( ((struct TYPE_INFO_HISTO_MSGS *)page->infos)->page_id != id )

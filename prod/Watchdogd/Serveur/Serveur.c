@@ -134,9 +134,6 @@
                                     { g_slist_foreach( client->Liste_bit_capteurs, (GFunc) g_free, NULL );
                                       g_slist_free(client->Liste_bit_capteurs);
                                     }
-       if (client->courbes)         { g_list_foreach( client->courbes, (GFunc)g_free, NULL );
-                                      g_list_free(client->courbes);
-                                    }
        if (client->Liste_histo)     { g_slist_foreach( client->Liste_histo, (GFunc) g_free, NULL );
                                       g_slist_free ( client->Liste_histo );
                                     }
@@ -459,7 +456,6 @@
                  }
        time( &client->date_connexion );                                    /* Enregistrement de la date de debut de connexion */
        client->pulse = Partage->top;
-       client->courbe.num = -1;                                               /* Init: pas de courbe a envoyer pour le moment */
        pthread_mutex_init( &client->mutex_struct_used, NULL );
        client->struct_used = 1;                        /* Par défaut, la structure est utilisée par le thread de surveillance */
 

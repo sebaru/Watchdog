@@ -362,36 +362,6 @@
     return( mnemo );
   }
 /******************************************************************************************************************************/
-/* Recuperer_mnemoDB_for_courbe: Recupération de la liste des ids des mnemos pour les courbes                                 */
-/* Entrée: un pointeur sur la nouvelle connexion base de données                                                              */
-/* Sortie: FALSE si erreur                                                                                                    */
-/******************************************************************************************************************************/
- gboolean Recuperer_mnemo_baseDB_for_courbe ( struct DB **db_retour )
-  { gchar requete[512];
-    gboolean retour;
-    struct DB *db;
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
-                "dls.name, mnemo.tableau, mnemo.acro_syn"
-                " FROM %s as mnemo LEFT JOIN %s as dls ON mnemo.num_plugin=dls.id LEFT JOIN %s as syn ON dls.syn_id = syn.id"
-                " WHERE (mnemo.type=%d OR mnemo.type=%d OR mnemo.type=%d OR mnemo.type=%d)"
-                " ORDER BY groupe,page,name,type,num",
-                MNEMO_ENTREE, MNEMO_ENTREE_ANA, MNEMO_SORTIE, MNEMO_SORTIE_ANA
-              );                                                                                    /* order by test 25/01/06 */
-
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_mnemo_baseDB_for_courbe: DB connexion failed" );
-       return(FALSE);
-     }
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    if (retour == FALSE) Libere_DB_SQL (&db);
-    *db_retour = db;
-    return ( retour );
-  }
-/******************************************************************************************************************************/
 /* Rechercher_mnemo_fullDB: Recupération de l'ensemble du mnemo et de sa conf spécifique                                      */
 /* Entrée: l'id du mnemonique a récupérer                                                                                     */
 /* Sortie: la structure representant le mnemonique de base                                                                    */

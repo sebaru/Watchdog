@@ -256,15 +256,18 @@
                   Partage->ea[ num ].inrange = 1;
                 }
                break;
-          case ENTREEANA_WAGO_750455:
+          case ENTREEANA_WAGO_750455:                                                                              /* 4/20 mA */
                Partage->ea[ num ].val_ech = (gfloat)
                   (val_avant_ech*(Partage->ea[num].confDB.max - Partage->ea[num].confDB.min))/4095.0
                      + Partage->ea[num].confDB.min;                          /* Valeur à l'echelle */ 
                Partage->ea[ num ].inrange = 1;
                break;
-          case ENTREEANA_WAGO_750461:
-               Partage->ea[ num ].val_ech = (gfloat)(val_avant_ech/10.0);           /* Valeur à l'echelle */ 
-               Partage->ea[ num ].inrange = 1;
+          case ENTREEANA_WAGO_750461:                                                                          /* Borne PT100 */
+               if (val_avant_ech > -32767 && val_avant_ech < 8500)
+                { Partage->ea[ num ].val_ech = (gfloat)(val_avant_ech/10.0);                         /* Valeur à l'echelle */ 
+                  Partage->ea[ num ].inrange = 1;
+                }
+               else Partage->ea[ num ].inrange = 0;
                break;
           default:
                Partage->ea[ num ].val_ech = 0.0;

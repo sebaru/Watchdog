@@ -862,13 +862,11 @@
                            }
                           else SEA_range( cpt_e, 0 );
                           break;
-                     case ENTREEANA_WAGO_750461:
-                           { int reponse;
+                     case ENTREEANA_WAGO_750461:                                                               /* Borne PT100 */
+                           { gint16 reponse;
                              reponse  = module->response.data[ 2*cpt + 1 ] << 8;
                              reponse |= module->response.data[ 2*cpt + 2 ];
-                             if (reponse < -2000.0 || reponse >= 8500.0) { SEA_range( cpt_e, 0 ); }
-                             else { SEA( cpt_e, reponse );
-                                  }
+                             SEA ( cpt_e, 1.0*reponse );
                            }
                           break;
                      default : SEA_range( cpt_e, 0 );

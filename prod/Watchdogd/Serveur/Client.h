@@ -89,10 +89,6 @@
 /* Communication des fichiers de travail vers les clients */
     GSList *Liste_file;
 
-/* Courbes en temps réel */
-    struct CMD_TYPE_COURBE courbe;                                        /* Structure parametres Proto_ajouter_courbe_thread */
-    GList *courbes;                                              /* Ensemble des entrees analogiques monitorées par le client */
-
     gchar *Source_DLS_new;                                                    /* Nouvelle source DLS en cours de récupération */
     guint taille_Source_DLS_new;                                                     /* Taille en mémoire du buffer ci dessus */
     gint id_creation_message_mp3;                                              /* ID fichier message mp3 en cours de creation */
@@ -102,8 +98,6 @@
     struct CMD_TYPE_SOURCE_DLS dls;                                         /* Pour la sauvegarde et compilation dls en cours */
 
     struct CMD_TYPE_SYNOPTIQUE *syn_to_send;             /* Structure du synoptique en cours d'envoi (atelier ou supervision) */
-
-    struct CMD_HISTO_COURBE histo_courbe;                            /* Structure pour travailler sur les historiques courbes */
   };     
 
  #endif

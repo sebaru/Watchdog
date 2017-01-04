@@ -37,7 +37,8 @@
 
 /******************************************************************************************************************************/
 /* Arch_clear_list: efface la liste des archives a prendre en compte                                                          */
-/* Entrées: le type de bit, le numéro du bit, et sa valeur                                                                    */
+/* Entrées: néant                                                                                                             */
+/* Sortie : le nombre d'archive detruites                                                                                     */
 /******************************************************************************************************************************/
  gint Arch_Clear_list ( void )
   { struct ARCHDB *arch;
@@ -101,59 +102,13 @@
     pthread_mutex_unlock( &Partage->com_arch.synchro );
   }
 /******************************************************************************************************************************/
-/* Ajouter_archRRA: Ajout d'un enregistrement dans les fichiers RRAs                                                          */
-/* Entrée: une structure d'archivage                                                                                          */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Ajouter_archRRD ( struct ARCHDB *arch )
-  { gchar fichier[80], update[80];
-    gchar *params[11];
-    struct stat sbuf;
-    gint result;
-
-    g_snprintf( fichier, sizeof(fichier), "RRA/%02d-%04d.rrd", arch->type, arch->num );
-    params[1] = fichier;
-
-    if ( stat ( fichier, &sbuf ) == -1)                                                           /* Test présence du fichier */
-     { Info_new( Config.log, Config.log_arch, LOG_WARNING,
-                "Ajouter_archRRD: Unable to Stat file %s (%s). Trying to create RRD file", fichier, strerror(errno) );
-       params[0] = "create";
-       params[2] = "--start";
-       params[3] = "-1y";
-       params[4] = "--step";
-       params[5] = "10";
-       params[6] = "DS:val:GAUGE:1000:U:U";
-       params[7] = "RRA:MIN:0.5:3:630720"; /* 6*60*24*365 / 5 */
-       params[8] = "RRA:MAX:0.5:3:630720";
-       params[9] = "RRA:AVERAGE:0.5:3:630720";
-       params[10] = "RRA:LAST:0.5:1:630720";
-       rrd_clear_error();
-       result = rrd_create( 11, params );
-       if (result)       
-        { Info_new( Config.log, Config.log_arch, LOG_ERR,
-                    "Ajouter_archRRD: Error %d creating RRD (%s). Dropping ARCH", result, rrd_get_error() );
-        }
-       else 
-        { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                    "Ajouter_archRRD: Creation of RRD file %s OK", fichier );
-        }
-       return;
-     }
-    params[0] = "rrdupdate";
-    g_snprintf( update,  sizeof(update), "%d:%f", arch->date_sec, arch->valeur );
-    params[2] = update;
-    rrd_clear_error();
-    result = rrd_update( 3, params );
-    /*if (result)
-     { Info_new( Config.log, Config.log_arch, LOG_WARNING,
-                "Ajouter_archRRD: RRD error %d (%s)", result, rrd_get_error() );
-     }*/
-  }
-/******************************************************************************************************************************/
 /* Main: Fonction principale du thread                                                                                        */
 /******************************************************************************************************************************/
  void Run_arch ( void )
-  { struct DB *db;
+  { gint mois_actuel = 0;
+    time_t date;
+    struct tm tm;
+    struct DB *db;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
@@ -182,9 +137,16 @@
           Partage->com_arch.Thread_sigusr1 = FALSE;
         }
 
+       time(&date);
+       localtime_r( &date, &tm );
+       if (tm.tm_mday == 1 & tm.tm_mon != mois_actuel)                                        /* Est-on le premier du mois ?? */
+        { mois_actuel = tm.tm_mon;                                                                              /* Sauvegarde */
+          Arch_Update_SQL_Partitions( tm.tm_year, tm.tm_mon );
+        }
+        
        if (!Partage->com_arch.liste_arch)                                                     /* Si pas de message, on tourne */
         { sched_yield();
-          usleep(10000);
+          sleep(5);
           continue;
         }
 
@@ -203,7 +165,6 @@
           Info_new( Config.log, Config.log_arch, LOG_DEBUG,
                    "Run_arch: Reste %03d a traiter", Partage->com_arch.taille_arch );
           pthread_mutex_unlock( &Partage->com_arch.synchro );
-          Ajouter_archRRD( arch );
           Ajouter_archDB ( db, arch );
           g_free(arch);
           Info_new( Config.log, Config.log_arch, LOG_DEBUG, "Run_arch: archive saved" );

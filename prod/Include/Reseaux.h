@@ -44,8 +44,6 @@
  #include "Reseaux_camera.h"
  #include "Reseaux_histo.h"
  #include "Reseaux_atelier.h"
- #include "Reseaux_courbe.h"
- #include "Reseaux_histo_courbe.h"
  #include "Reseaux_admin.h"
  #include "Reseaux_satellite.h"
 
@@ -93,8 +91,6 @@
     TAG_SUPERVISION,                                                                     /* Gestions de la partie supervision */
     TAG_HISTO,                                                                                          /* Gestions des histo */
     TAG_ATELIER,                                                                                     /* Gestions de l'atelier */
-    TAG_COURBE,                                                                                       /* Gestions des courbes */
-    TAG_HISTO_COURBE,                                                                     /* Gestions des historiques courbes */
     TAG_CAMERA,                                                                                         /* Gestion des camera */
     TAG_ADMIN,                                                    /* Utilisation des commandes d'admin depuis le client lourd */
     TAG_SATELLITE,                                                                             /* Echange vers les satellites */

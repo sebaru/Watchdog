@@ -9,9 +9,9 @@ bin_PROGRAMS = Watchdog-client
 Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
                           protocole.c protocole_gtk_message.c protocole_icone.c \
                           protocole_dls.c protocole_utilisateur.c protocole_mnemonique.c \
-                          protocole_message.c protocole_connexion.c protocole_histo_courbe.c \
+                          protocole_message.c protocole_connexion.c \
                           protocole_supervision.c protocole_histo.c \
-                          protocole_atelier.c protocole_courbe.c \
+                          protocole_atelier.c \
 			  protocole_synoptique.c protocole_admin.c \
                           menu.c timer.c admin.c \
 			  liste_groupe.c ajout_groupe.c \
@@ -34,8 +34,7 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
                           supervision_capteur.c \
 			  supervision_camera.c \
 			  trame.c \
-			  print.c \
-                          courbe.c histo_courbe.c
+			  print.c
 
 Watchdog_client_LDADD  = $(top_builddir)/Commun/libwatchdog.la \
                          Config_cli/libconfig_cli.la

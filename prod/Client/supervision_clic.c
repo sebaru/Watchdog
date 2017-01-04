@@ -176,7 +176,7 @@ printf("release !\n");
     else if (!pid)                                             /* Lancement de la ligne de commande */
      { gchar chaine[256];
        g_snprintf( chaine, sizeof(chaine),
-                  "http://%s/watchdog/graph.php?type=%d&num=%d&period=%s",
+                  "http://%s/getgraph.php?type=%d&num=%d&period=%s",
                    Client.host, appui_capteur->capteur->type, appui_capteur->capteur->bit_controle, period );
        execlp( "firefox", "firefox", chaine, NULL );
        printf("Lancement de firefox failed\n");

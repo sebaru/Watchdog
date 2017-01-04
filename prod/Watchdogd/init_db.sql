@@ -201,9 +201,14 @@ CREATE TABLE IF NOT EXISTS `histo_bit` (
   `num` int(11) NOT NULL DEFAULT '0',
   `date_sec` int(11) NOT NULL DEFAULT '0',
   `date_usec` int(11) NOT NULL DEFAULT '0',
+  `date_time` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `valeur` float NOT NULL DEFAULT '0.0',
-  KEY `test` (`type`,`num`,`date_sec`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  PRIMARY KEY `key` (`type`,`num`,`date_time`)  
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+  PARTITION BY RANGE COLUMNS (date_time) PARTITIONS 2
+   ( PARTITION p0 VALUES LESS THAN ('2016-01-01') ENGINE = InnoDB,
+     PARTITION p_MAX VALUES LESS THAN MAXVALUE
+   );
 
 -- --------------------------------------------------------
 
@@ -734,9 +739,9 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
-INSERT INTO `msgs` (`id`, `num`, `id_plugin_dls`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `id_syn`, `bit_voc`, `enable`, `sms`, `type_voc`, `vitesse_voc`, `time_repeat`) VALUES
-(1, 0, 1, 'Warning, system is halting', 'Warning, system is halting', 'Warning, system is halting', 0, 1, 1, TRUE, FALSE, 1, 150, 0),
-(2, 1, 1, 'Warning, system is rebooting', 'Warning, system is rebooting', 'Warning, system is rebooting', 0, 1, 1, TRUE, FALSE, 1, 150, 0);
+INSERT INTO `msgs` (`id`, `num`, `dls_id`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `bit_voc`, `enable`, `sms`, `type_voc`, `vitesse_voc`, `time_repeat`) VALUES
+(1, 0, 1, 'Warning, system is halting', 'Warning, system is halting', 'Warning, system is halting', 0, 1, TRUE, FALSE, 1, 150, 0),
+(2, 1, 1, 'Warning, system is rebooting', 'Warning, system is rebooting', 'Warning, system is rebooting', 0, 1, TRUE, FALSE, 1, 150, 0);
 
 -- --------------------------------------------------------
 

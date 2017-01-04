@@ -85,8 +85,6 @@
       case TAG_SUPERVISION : Gerer_protocole_supervision  ( connexion ); break;
       case TAG_HISTO       : Gerer_protocole_histo        ( connexion ); break;
       case TAG_ATELIER     : Gerer_protocole_atelier      ( connexion ); break;
-      case TAG_COURBE      : Gerer_protocole_courbe       ( connexion ); break;
-      case TAG_HISTO_COURBE: Gerer_protocole_histo_courbe ( connexion ); break;
       case TAG_CAMERA      : Gerer_protocole_camera       ( connexion ); break;
       case TAG_ADMIN       : Gerer_protocole_admin        ( connexion ); break;
       case TAG_CONNEXION   : Gerer_protocole_connexion    ( connexion ); break;
