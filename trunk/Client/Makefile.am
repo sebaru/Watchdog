@@ -39,9 +39,9 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 Watchdog_client_LDADD  = $(top_builddir)/Commun/libwatchdog.la \
                          Config_cli/libconfig_cli.la
 
-Watchdog_client_LDFLAGS = `pkg-config --libs libgnomeui-2.0 libgnome-2.0 openssl glib-2.0 goocanvas gtksourceview-2.0 gtkdatabox libcurl` -lm
+Watchdog_client_LDFLAGS = `pkg-config --libs libgnomeui-2.0 libgnome-2.0 openssl glib-2.0 goocanvas gtksourceview-2.0 libcurl` -lm
 
-Watchdog_client_CFLAGS = `pkg-config --cflags libgnomeui-2.0 libgnome-2.0 openssl glib-2.0 goocanvas gtksourceview-2.0 gtkdatabox libcurl`
+Watchdog_client_CFLAGS = `pkg-config --cflags libgnomeui-2.0 libgnome-2.0 openssl glib-2.0 goocanvas gtksourceview-2.0 libcurl`
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/Client/Include
