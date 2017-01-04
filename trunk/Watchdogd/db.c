@@ -526,7 +526,7 @@
      }
 
     if (database_version < 2951)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE histo_bit ADD `date_time` DATETIME(3) AFTER `date_usec`" );
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE histo_bit ADD `date_time` DATETIME(6) AFTER `date_usec`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
