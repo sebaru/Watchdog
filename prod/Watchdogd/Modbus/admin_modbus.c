@@ -89,7 +89,9 @@
                 "  | - enable = %d, started = %d (bit B%04d=%d), watchdog = %03d, IP = %s\n"
                 "  | - %03d Digital Input,  map_E = E%03d(->E%03d), %03d Analog  Input,  map_EA = EA%03d(->EA%03d)\n"
                 "  | - %03d Digital Output, map_A = A%03d(->A%03d), %03d Analog  Output, map_AA = AA%03d(->AA%03d)\n"
-                "  | - transaction_id = %06d, nbr_deconnect = %02d, last_reponse = %03ds ago, date_next_eana = in %03ds\n"
+                "  | - transaction_id = %06d, nbr_deconnect = %02d\n"
+                "  | - last_reponse = %03ds ago, date_next_eana = in %03ds\n"
+                "  | - retente = in %03ds\n"
                 "  -\n",
                 module->modbus.id, module->modbus.libelle,  Modbus_mode_to_string(module),
                 module->modbus.enable, module->started, module->modbus.bit, B(module->modbus.bit),
@@ -104,7 +106,8 @@
                (module->nbr_sortie_ana ? module->modbus.map_AA + module->nbr_sortie_ana - 1 : module->modbus.map_AA),
                 module->transaction_id, module->nbr_deconnect,
                (Partage->top - module->date_last_reponse)/10,                   
-               (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1)
+               (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1),
+               (module->date_retente > Partage->top   ? (module->date_retente   - Partage->top)/10 : -1)
               );
     Admin_write ( connexion, chaine );
   }
@@ -187,7 +190,12 @@
      }
 
     if ( ! strcmp( param, "enable" ) )
-     { module->modbus.enable = (valeur ? TRUE : FALSE); }
+     { if (valeur)
+        { module->modbus.enable = TRUE;
+          module->nbr_deconnect  = 0;
+        }
+       else { module->modbus.enable = FALSE; }
+     }
     else if ( ! strcmp( param, "bit" ) )
      { module->modbus.bit = valeur; }
     else if ( ! strcmp( param, "watchdog" ) )
