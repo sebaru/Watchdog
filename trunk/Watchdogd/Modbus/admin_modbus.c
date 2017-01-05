@@ -91,7 +91,7 @@
                 "  | - %03d Digital Output, map_A = A%03d(->A%03d), %03d Analog  Output, map_AA = AA%03d(->AA%03d)\n"
                 "  | - transaction_id = %06d, nbr_deconnect = %02d\n"
                 "  | - last_reponse = %03ds ago, date_next_eana = in %03ds\n"
-                "  | - retente = in %%03ds"
+                "  | - retente = in %03ds\n"
                 "  -\n",
                 module->modbus.id, module->modbus.libelle,  Modbus_mode_to_string(module),
                 module->modbus.enable, module->started, module->modbus.bit, B(module->modbus.bit),
