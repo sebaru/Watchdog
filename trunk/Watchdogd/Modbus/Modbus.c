@@ -312,10 +312,16 @@
     hints.ai_flags = 0;
     hints.ai_protocol = 0;          /* Any protocol */
 
+
+
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
+             "Connecter_module: Trying to connect module %d to %s", module->modbus.id, module->modbus.ip );
+
     s = getaddrinfo( module->modbus.ip, "502", &hints, &result);
     if (s != 0)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                "Connecter_module: getaddrinfo Failed for %s (%s)", module->modbus.ip, gai_strerror(s) );
+                "Connecter_module: getaddrinfo Failed for module %d (%s) (%s)",
+                 module->modbus.id, module->modbus.ip, gai_strerror(s) );
        return(FALSE);
      }
 
@@ -329,7 +335,8 @@
         connexion = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
         if (connexion == -1)
          { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                    "Connecter_module: Socket creation failed" );
+                    "Connecter_module: Socket creation failed for modbus %s (%s)",
+                     module->modbus.id, module->modbus.ip );
            continue;
          }
 
@@ -337,12 +344,11 @@
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
                    "Connecter_module %d (%s) family=%d",
                     module->modbus.id, module->modbus.ip, rp->ai_family );
-          break;                  /* Success */
         }
        else
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
-                   "Connecter_module: connexion refused by module %d (%s) family=%d",
-                    module->modbus.id, module->modbus.ip, rp->ai_family );
+                   "Connecter_module: connexion refused by module %d (%s) family=%d error '%s'",
+                    module->modbus.id, module->modbus.ip, rp->ai_family, strerror(errno) );
         }
        close(connexion);                                   /* Suppression de la socket qui n'a pu aboutir */
      }
@@ -353,7 +359,6 @@
     module->connexion = connexion;                                                    /* Sauvegarde du fd */
     module->date_last_reponse = Partage->top;
     module->date_retente   = 0;
-    module->nbr_deconnect  = 0;
     module->transaction_id = 1;
     module->started = TRUE;
     module->mode = MODBUS_GET_DESCRIPTION;
@@ -481,12 +486,12 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                            /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "Init_watchdog_modbus: stop watchdog failed for %d (error %d)", module->modbus.id, retour );
+               "Init_watchdog_modbus: 'stop watchdog failed' for %d (error %d)", module->modbus.id, retour );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-               "Init_watchdog_modbus: stop watchdog OK for %d", module->modbus.id );
+               "Init_watchdog_modbus: 'stop watchdog OK' for %d", module->modbus.id );
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -511,13 +516,13 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                            /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "Init_watchdog_modbus: close modbus tcp on watchdog failed for %d (error %d)",
+               "Init_watchdog_modbus: 'close modbus tcp on watchdog' failed for %d (error %d)",
                module->modbus.id, retour );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-               "Init_watchdog_modbus: close modbus tcp on watchdog OK for %d", module->modbus.id );
+               "Init_watchdog_modbus: 'close modbus tcp on watchdog' OK for %d", module->modbus.id );
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -542,13 +547,13 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                            /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "Init_watchdog_modbus: init watchdog timer failed for %d (error %d)",
+               "Init_watchdog_modbus: 'init watchdog timer' failed for %d (error %d)",
                module->modbus.id, retour );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-               "Init_watchdog_modbus: init watchdog timer OK for %d", module->modbus.id );
+               "Init_watchdog_modbus: 'init watchdog timer' OK for %d", module->modbus.id );
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -573,13 +578,13 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                            /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                "Init_watchdog_modbus: watchdog start failed for %d (error %d)",
+                "Init_watchdog_modbus: 'watchdog start' failed for %d (error %d)",
                  module->modbus.id, retour );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-                "Init_watchdog_modbus: watchdog start OK for %d", module->modbus.id );
+                "Init_watchdog_modbus: 'watchdog start' OK for %d", module->modbus.id );
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -983,9 +988,9 @@
     struct timeval tv;
     gint retval, cpt;
 
-    if (module->date_last_reponse + 300 < Partage->top)                                      /* Detection attente trop longue */
+    if (module->date_last_reponse + 600 < Partage->top)                                      /* Detection attente trop longue */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                "Recuperer_reponse_module: Pb reponse module %d, enable=%d, started=%d, mode=%02d,"
+                "Recuperer_reponse_module: Timeout module %d, enable=%d, started=%d, mode=%02d, "
                 "transactionID=%06d, nbr_deconnect=%02d, last_reponse=%03ds ago, retente=in %03ds, date_next_eana=in %03ds",
                  module->modbus.id, module->modbus.enable, module->started, module->mode,
                  module->transaction_id, module->nbr_deconnect,
@@ -1111,7 +1116,7 @@
           if ( ! module->started )                                                               /* Communication OK ou non ? */
            { if ( ! Connecter_module( module ) )
               { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                          "Run_modbus: Module %03d DOWN. retrying in %d", module->modbus.id, MODBUS_RETRY/10 );
+                          "Run_modbus: Module %03d DOWN. retrying in %ds", module->modbus.id, MODBUS_RETRY/10 );
                 module->date_retente = Partage->top + MODBUS_RETRY;
               }
            }
