@@ -303,16 +303,18 @@
 /**********************************************************************************************************/
  static gboolean Connecter_module ( struct MODULE_MODBUS *module )
   { struct addrinfo *result, *rp;
+    struct timeval sndtimeout;
     struct addrinfo hints;
     gint connexion = 0, s;
-
+       
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
     hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
     hints.ai_flags = 0;
     hints.ai_protocol = 0;          /* Any protocol */
 
-
+    sndtimeout.tv_sec  = 10;
+    sndtimeout.tv_usec =  0;
 
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
              "Connecter_module: Trying to connect module %d to %s", module->modbus.id, module->modbus.ip );
@@ -331,15 +333,21 @@
        and) try the next address. */
 
     for (rp = result; rp != NULL; rp = rp->ai_next)
-     {
-        connexion = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-        if (connexion == -1)
-         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                    "Connecter_module: Socket creation failed for modbus %s (%s)",
-                     module->modbus.id, module->modbus.ip );
-           continue;
-         }
+     { connexion = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+       if (connexion == -1)
+        { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
+                   "Connecter_module: Socket creation failed for modbus %d (%s)",
+                    module->modbus.id, module->modbus.ip );
+          continue;
+        }
 
+       if ( setsockopt ( connexion, SOL_SOCKET, SO_SNDTIMEO, (char *)&sndtimeout, sizeof(sndtimeout)) < 0 )
+        { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
+                   "Connecter_module: Socket Set Options failed for modbus %d (%s)",
+                    module->modbus.id, module->modbus.ip );
+          continue;
+        }
+        
        if (connect(connexion, rp->ai_addr, rp->ai_addrlen) != -1)
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
                    "Connecter_module %d (%s) family=%d",
