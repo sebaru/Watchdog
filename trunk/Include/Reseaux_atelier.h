@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Include/Reseaux_atelier.h:   Sous_tag de l'atelier pour watchdog 2.0 par lefevre Sebastien             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                   dim. 13 sept. 2009 10:44:55 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Include/Reseaux_atelier.h:   Sous_tag de l'atelier pour watchdog 2.0 par Lefevre Sebastien                                 */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                       dim. 13 sept. 2009 10:44:55 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Reseaux_atelier.h
  * This file is part of Watchdog
@@ -34,34 +34,34 @@
  #define NBR_CARAC_LIBELLE_COMMENT     50                               /* taille max du libelle du motif */
  #define NBR_CARAC_LIBELLE_COMMENT_UTF8  (2*NBR_CARAC_LIBELLE_COMMENT)
 
-/************************************** Qu'est-ce qu'une camera de supervision ?? *************************/
+/********************************************* Qu'est-ce qu'une camera de supervision ?? **************************************/
  #define DEFAULT_CAMERA_LARGEUR        160
  #define DEFAULT_CAMERA_HAUTEUR        120
 
  struct CMD_TYPE_MOTIF
-  { gint    id;                                                               /* Id du motif dans la base */
-    gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
-    gint    icone_id;                                                       /* Correspond au fichier .gif */
-    gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                             /* "Vanne gaz chaudière" */
-    guint   gid;                                                 /* Nom du groupe d'appartenance du motif */
-    gint    bit_controle;                                                                   /* Ixxx, Cxxx */
-    gint    bit_clic;                         /* Bit à activer quand on clic avec le bouton gauche souris */
-    gint    bit_clic2;                        /* Bit à activer quand on clic avec le bouton gauche souris */
-    gint    rafraich;                                     /* Temps de rafraichissement du motif à l'ecran */
-    guint   position_x;                                                      /* en abscisses et ordonnées */
+  { gint    id;                                                                                   /* Id du motif dans la base */
+    gint    syn_id;                                                                    /* Numéro du synoptique ou est l'icone */
+    gint    icone_id;                                                                           /* Correspond au fichier .gif */
+    gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                                                 /* "Vanne gaz chaudière" */
+    guint   gid;                                                                     /* Nom du groupe d'appartenance du motif */
+    gint    bit_controle;                                                                                       /* Ixxx, Cxxx */
+    gint    bit_clic;                                             /* Bit à activer quand on clic avec le bouton gauche souris */
+    gint    bit_clic2;                                            /* Bit à activer quand on clic avec le bouton gauche souris */
+    gint    rafraich;                                                         /* Temps de rafraichissement du motif à l'ecran */
+    guint   position_x;                                                                          /* en abscisses et ordonnées */
     guint   position_y;
-    gfloat  largeur;                                               /* Taille de l'image sur le synoptique */
+    gfloat  largeur;                                                                   /* Taille de l'image sur le synoptique */
     gfloat  hauteur;
     gfloat  angle;
-    gchar   type_dialog;                         /* Type de la boite de dialogue pour le clic de commande */
+    gchar   type_dialog;                                             /* Type de la boite de dialogue pour le clic de commande */
     guchar  rouge0;
     guchar  vert0;
     guchar  bleu0;
-    gchar   type_gestion;                                                  /* Statique/dynamique/cyclique */
+    gchar   type_gestion;                                                                      /* Statique/dynamique/cyclique */
     gint    layer;
   };
  struct CMD_TYPE_MOTIFS
-  { guint nbr_motifs;                                     /* Nombre de structure CMD_TYPE_MOTIF suivantes */
+  { guint nbr_motifs;                                                         /* Nombre de structure CMD_TYPE_MOTIF suivantes */
     struct CMD_TYPE_MOTIF motif[];
   };
 
@@ -78,22 +78,21 @@
     guint   position_y;
     gfloat  angle;
   };
-/*********************************************** Gestion des passerelles **********************************/
+/**************************************************** Gestion des passerelles *************************************************/
  struct CMD_TYPE_PASSERELLE
   { gint    id;
-    gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
-    gint    syn_cible_id;                                                   /* Numéro du synoptique cible */
-    gchar   libelle[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];                     /* Libelle du synoptique cible */
-    gint    bit_controle;                                                        /* Ixxx, Cxxx A virer ?? */
-    guint   position_x;                                                      /* en abscisses et ordonnées */
+    gint    syn_id;                                                                    /* Numéro du synoptique ou est l'icone */
+    gint    syn_cible_id;                                                                       /* Numéro du synoptique cible */
+    gchar   libelle[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];                                         /* Libelle du synoptique cible */
+    guint   position_x;                                                                          /* en abscisses et ordonnées */
     guint   position_y;
-    guint   bit_controle_1;                                       /* Numéro Ixxx du premier bit de retour */
-    guint   bit_controle_2;                                        /* Numéro Ixxx du second bit de retour */
-    guint   bit_controle_3;                                         /* Numéro Ixxx du 3ieme bit de retour */
+    guint   vignette_activite;                                                        /* Numéro Ixxx du premier bit de retour */
+    guint   vignette_secu_bien;                                                        /* Numéro Ixxx du second bit de retour */
+    guint   vignette_secu_personne;                                                     /* Numéro Ixxx du 3ieme bit de retour */
     gfloat  angle;
   };
 
-/*********************************************** Gestion des passerelles **********************************/
+/******************************************************* Gestion des palettes *************************************************/
  struct CMD_TYPE_PALETTE
   { gint    id;
     gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */

@@ -124,22 +124,22 @@
 
     while ( (pass = Recuperer_passerelleDB_suite( &db )) )
      { if (tag == TAG_SUPERVISION)
-        { if ( ! g_slist_find( liste_bit_init, GINT_TO_POINTER(pass->bit_controle_1) ) )
-           { liste_bit_init = g_slist_prepend( liste_bit_init, GINT_TO_POINTER(pass->bit_controle_1) );
+        { if ( ! g_slist_find( liste_bit_init, GINT_TO_POINTER(pass->vignette_activite) ) )
+           { liste_bit_init = g_slist_prepend( liste_bit_init, GINT_TO_POINTER(pass->vignette_activite) );
              Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                      "liste des bit_init_syn pass %d", pass->bit_controle_1 );
+                      "liste des bit_init_syn pass %d", pass->vignette_activite );
            }
 
-          if ( ! g_slist_find( liste_bit_init, GINT_TO_POINTER(pass->bit_controle_2) ) )
-           { liste_bit_init = g_slist_prepend( liste_bit_init, GINT_TO_POINTER(pass->bit_controle_2) );
+          if ( ! g_slist_find( liste_bit_init, GINT_TO_POINTER(pass->vignette_secu_bien) ) )
+           { liste_bit_init = g_slist_prepend( liste_bit_init, GINT_TO_POINTER(pass->vignette_secu_bien) );
              Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                      "liste des bit_init_syn pass %d", pass->bit_controle_2 );
+                      "liste des bit_init_syn pass %d", pass->vignette_secu_bien );
            }
 
-          if ( ! g_slist_find( liste_bit_init, GINT_TO_POINTER(pass->bit_controle_3) ) )
-           { liste_bit_init = g_slist_prepend( liste_bit_init, GINT_TO_POINTER(pass->bit_controle_3) );
+          if ( ! g_slist_find( liste_bit_init, GINT_TO_POINTER(pass->vignette_secu_personne) ) )
+           { liste_bit_init = g_slist_prepend( liste_bit_init, GINT_TO_POINTER(pass->vignette_secu_personne) );
              Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                      "liste des bit_init_syn pass %d", pass->bit_controle_3 );
+                      "liste des bit_init_syn pass %d", pass->vignette_secu_personne );
            }
          }
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,

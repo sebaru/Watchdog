@@ -105,10 +105,6 @@
                add_pass.position_y = TAILLE_SYNOPTIQUE_Y/2;
                add_pass.syn_id = infos->syn.id;
                add_pass.syn_cible_id = id;                           /* Synoptique cible de la passerelle */
-               add_pass.bit_controle = 0;                                      /* Pour utilisation future */
-               add_pass.bit_controle_1 = 0;
-               add_pass.bit_controle_2 = 0;
-               add_pass.bit_controle_3 = 0;
                add_pass.angle          = 0.0;
 
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_PASS,

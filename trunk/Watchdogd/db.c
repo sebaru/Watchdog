@@ -530,7 +530,23 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=2951;
+    if (database_version < 2974)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns ADD `vignette_activite` INT(11) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns ADD `vignette_secu_bien` INT(11) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns ADD `vignette_secu_personne` INT(11) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "UPDATE syns_pass LEFT JOIN syns ON syns_pass.syn_cible_id = syns.id "
+                                             "SET vignette_activite=bitctrl1, vignette_secu_bien=bitctrl_2, "
+                                             "vignette_secu_personne=bitctrl3 "
+                                             "WHERE bitctrl1!=0;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_pass DROP bitctrl, DROP bitctrl1, DROP bitctrl2, DROP bitctrl3" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    database_version=2974;
 
     Libere_DB_SQL(&db);
 

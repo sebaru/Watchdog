@@ -840,6 +840,9 @@ CREATE TABLE IF NOT EXISTS `syns` (
   `groupe` text COLLATE utf8_unicode_ci NOT NULL,
   `page` text COLLATE utf8_unicode_ci NOT NULL,
   `access_groupe` int(11) NOT NULL DEFAULT '0',
+  `vignette_activite` int(11) NOT NULL DEFAULT '0',
+  `vignette_secu_bien` int(11) NOT NULL DEFAULT '0',
+  `vignette_secu_personne` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 INSERT INTO `syns` (`id`, `libelle`, `groupe`, `page`, `access_groupe` ) VALUES
@@ -952,12 +955,8 @@ CREATE TABLE IF NOT EXISTS `syns_pass` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `syn_id` int(11) NOT NULL DEFAULT '0',
   `syn_cible_id` int(11) NOT NULL DEFAULT '0',
-  `bitctrl` int(11) NOT NULL DEFAULT '0',
   `posx` int(11) NOT NULL DEFAULT '0',
   `posy` int(11) NOT NULL DEFAULT '0',
-  `bitctrl1` int(11) NOT NULL DEFAULT '0',
-  `bitctrl2` int(11) NOT NULL DEFAULT '0',
-  `bitctrl3` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
