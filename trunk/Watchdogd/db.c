@@ -538,7 +538,7 @@
        g_snprintf( requete, sizeof(requete), "ALTER TABLE syns ADD `vignette_secu_personne` INT(11) NOT NULL DEFAULT '0'" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "UPDATE syns_pass LEFT JOIN syns ON syns_pass.syn_cible_id = syns.id "
-                                             "SET vignette_activite=bitctrl1, vignette_secu_bien=bitctrl_2, "
+                                             "SET vignette_activite=bitctrl1, vignette_secu_bien=bitctrl2, "
                                              "vignette_secu_personne=bitctrl3 "
                                              "WHERE bitctrl1!=0;" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
