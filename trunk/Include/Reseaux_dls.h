@@ -43,9 +43,8 @@
  #define NBR_TEMPO             512
  #define NBR_MNEMONIQUE        NBR_BIT_DLS
  #define NBR_MESSAGE_ECRITS    NBR_BIT_DLS
- #define NBR_COMPTEUR_H        100
- #define NBR_COMPTEUR_IMP      100
- #define NBR_SCENARIO          100
+ #define NBR_COMPTEUR_H        256
+ #define NBR_COMPTEUR_IMP      256
  #define NBR_CAMERA            16
 
  struct CMD_TYPE_PLUGIN_DLS
