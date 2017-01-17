@@ -624,7 +624,7 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 2, 3 );
 
     Spin_bit_ctrl = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
-    g_signal_connect( G_OBJECT(Spin_bit_ctrl), "changed",
+    g_signal_connect( G_OBJECT(Spin_bit_ctrl), "value-changed",
                       G_CALLBACK(Afficher_mnemo_ctrl), NULL );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit_ctrl, 1, 2, 2, 3 );
 
@@ -650,7 +650,7 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 4, 5 );
 
     Spin_bit_clic = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
-    g_signal_connect( G_OBJECT(Spin_bit_clic), "changed",
+    g_signal_connect( G_OBJECT(Spin_bit_clic), "value-changed",
                       G_CALLBACK(Afficher_mnemo_clic), NULL );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit_clic, 1, 2, 4, 5 );
 
@@ -662,7 +662,7 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 5, 6 );
 
     Spin_bit_clic2 = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
-    g_signal_connect( G_OBJECT(Spin_bit_clic2), "changed",
+    g_signal_connect( G_OBJECT(Spin_bit_clic2), "value-changed",
                       G_CALLBACK(Afficher_mnemo_clic2), NULL );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit_clic2, 1, 2, 5, 6 );
 

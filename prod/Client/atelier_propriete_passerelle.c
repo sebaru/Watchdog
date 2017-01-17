@@ -138,9 +138,9 @@
 
     switch(reponse)
      { case GTK_RESPONSE_OK:
-            Trame_pass->pass->bit_controle_1 = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_ctrl_1) );
-            Trame_pass->pass->bit_controle_2 = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_ctrl_2) );
-            Trame_pass->pass->bit_controle_3 = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_ctrl_3) );
+            Trame_pass->pass->vignette_activite      = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_ctrl_1) );
+            Trame_pass->pass->vignette_secu_bien     = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_ctrl_2) );
+            Trame_pass->pass->vignette_secu_personne = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_ctrl_3) );
             break;
        case GTK_RESPONSE_CLOSE:
             break;
@@ -211,9 +211,9 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_ctrl_3, 2, 4, i, i+1 );
 
 
-    gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_ctrl_1), (gdouble) Trame_pass->pass->bit_controle_1 );
-    gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_ctrl_2), (gdouble) Trame_pass->pass->bit_controle_2 );
-    gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_ctrl_3), (gdouble) Trame_pass->pass->bit_controle_3 );
+    gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_ctrl_1), (gdouble) Trame_pass->pass->vignette_activite );
+    gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_ctrl_2), (gdouble) Trame_pass->pass->vignette_secu_bien );
+    gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_ctrl_3), (gdouble) Trame_pass->pass->vignette_secu_personne );
 
     Demander_mnemo_bit_ctrl_1();                                           /* Mise à jour des mnemoniques */
     gtk_widget_show_all( F_propriete );
