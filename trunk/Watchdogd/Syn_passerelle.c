@@ -77,7 +77,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s(syn_id,syn_cible_id,posx,posy,angle)"
-                " VALUES (%d,%d,%d,%d,%d,'%f')", NOM_TABLE_PASSERELLE,
+                " VALUES (%d,%d,%d,%d,'%f')", NOM_TABLE_PASSERELLE,
                 passerelle->syn_id, passerelle->syn_cible_id,
                 passerelle->position_x, passerelle->position_y, passerelle->angle );
 
