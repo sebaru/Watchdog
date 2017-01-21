@@ -107,7 +107,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT s.id,s.syn_id,sp.syn_cible_id,s.page,"
+                "SELECT s.id,sp.syn_id,sp.syn_cible_id,s.page,"
                 "sp.posx,sp.posy,sp.angle,s.vignette_activite,s.vignette_secu_bien,s.vignette_secu_personne"
                 " FROM %s as s LEFT JOIN %s as sp ON s.id=sp.syn_id WHERE sp.syn_id=%d",
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE, id_syn );
@@ -167,7 +167,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT s.id,s.syn_id,sp.syn_cible_id,s.page,"
+                "SELECT s.id,sp.syn_id,sp.syn_cible_id,s.page,"
                 "sp.posx,sp.posy,sp.angle,s.vignette_activite,s.vignette_secu_bien,s.vignette_secu_personne"
                 " FROM %s as s LEFT JOIN %s as sp ON s.id=sp.syn_id WHERE s.id=%d",
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE, id );
