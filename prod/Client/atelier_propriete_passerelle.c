@@ -178,7 +178,7 @@
     gtk_table_attach_defaults( GTK_TABLE(table), gtk_label_new( _("Vignette ACTIVITE") ), 0, 1, i, i+1 );
 
     Spin_ctrl_1 = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
-    g_signal_connect( G_OBJECT(Spin_ctrl_1), "changed",
+    g_signal_connect( G_OBJECT(Spin_ctrl_1), "value-changed",
                       G_CALLBACK(Demander_mnemo_bit_ctrl_1), NULL );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_ctrl_1, 1, 2, i, i+1 );
 
@@ -190,7 +190,7 @@
     gtk_table_attach_defaults( GTK_TABLE(table), gtk_label_new( _("Vignette SECURITE Bien") ), 0, 1, i, i+1 );
 
     Spin_ctrl_2 = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
-    g_signal_connect( G_OBJECT(Spin_ctrl_2), "changed",
+    g_signal_connect( G_OBJECT(Spin_ctrl_2), "value-changed",
                       G_CALLBACK(Demander_mnemo_bit_ctrl_2), NULL );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_ctrl_2, 1, 2, i, i+1 );
 
@@ -202,7 +202,7 @@
     gtk_table_attach_defaults( GTK_TABLE(table), gtk_label_new( _("Vignette SECURITE Personne") ), 0, 1, i, i+1 );
 
     Spin_ctrl_3 = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
-    g_signal_connect( G_OBJECT(Spin_ctrl_3), "changed",
+    g_signal_connect( G_OBJECT(Spin_ctrl_3), "value-changed",
                       G_CALLBACK(Demander_mnemo_bit_ctrl_3), NULL );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_ctrl_3, 1, 2, i, i+1 );
 

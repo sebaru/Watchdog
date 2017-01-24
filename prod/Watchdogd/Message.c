@@ -132,8 +132,8 @@
                 "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
                 "type_voc,vitesse_voc,time_repeat,dls.id,dls.shortname,syn.id"
                 " FROM %s as msg"
-                " LEFT JOIN %s as dls ON msg.dls_id=dls.id"
-                " LEFT JOIN %s as syn ON dls.syn_id=syn.id"
+                " INNER JOIN %s as dls ON msg.dls_id=dls.id"
+                " INNER JOIN %s as syn ON dls.syn_id=syn.id"
                 " WHERE %s"
                 " ORDER BY groupe,page,num ",
                 NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,/* From */
@@ -222,8 +222,8 @@
                 "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
                 "type_voc,vitesse_voc,time_repeat,dls.id,dls.shortname,syn.id"
                 " FROM %s as msg"
-                " LEFT JOIN %s as dls ON msg.dls_id=dls.id"
-                " LEFT JOIN %s as syn ON dls.syn_id=syn.id"
+                " INNER JOIN %s as dls ON msg.dls_id=dls.id"
+                " INNER JOIN %s as syn ON dls.syn_id=syn.id"
                 " WHERE num=%d LIMIT 1",
                 NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,    /* From */
                 num /* Where */
@@ -264,8 +264,8 @@
                 "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
                 "type_voc,vitesse_voc,time_repeat,dls.id,dls.shortname,syn.id"
                 " FROM %s as msg"
-                " LEFT JOIN %s as dls ON msg.dls_id=dls.id"
-                " LEFT JOIN %s as syn ON dls.syn_id=syn.id"
+                " INNER JOIN %s as dls ON msg.dls_id=dls.id"
+                " INNER JOIN %s as syn ON dls.syn_id=syn.id"
                 " WHERE msg.id=%d LIMIT 1",
                 NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,    /* From */
                 id /* Where */

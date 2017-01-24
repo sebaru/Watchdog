@@ -504,7 +504,7 @@
      }
 
     if (database_version < 2912)
-     { g_snprintf( requete, sizeof(requete), "UPDATE msgs LEFT JOIN syns ON msgs.id_syn=syns.id LEFT JOIN dls ON dls.num_syn=syns.id SET msgs.id_plugin_dls=dls.id;" );
+     { g_snprintf( requete, sizeof(requete), "UPDATE msgs INNER JOIN syns ON msgs.id_syn=syns.id INNER JOIN dls ON dls.num_syn=syns.id SET msgs.id_plugin_dls=dls.id;" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs DROP COLUMN `id_syn`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
@@ -537,7 +537,7 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "ALTER TABLE syns ADD `vignette_secu_personne` INT(11) NOT NULL DEFAULT '0'" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
-       g_snprintf( requete, sizeof(requete), "UPDATE syns_pass LEFT JOIN syns ON syns_pass.syn_cible_id = syns.id "
+       g_snprintf( requete, sizeof(requete), "UPDATE syns_pass INNER JOIN syns ON syns_pass.syn_cible_id = syns.id "
                                              "SET vignette_activite=bitctrl1, vignette_secu_bien=bitctrl2, "
                                              "vignette_secu_personne=bitctrl3 "
                                              "WHERE bitctrl1!=0;" );
