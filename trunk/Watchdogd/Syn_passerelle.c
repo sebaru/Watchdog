@@ -109,7 +109,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT sp.id,sp.syn_id,sp.syn_cible_id,s.page,"
                 "sp.posx,sp.posy,sp.angle,s.vignette_activite,s.vignette_secu_bien,s.vignette_secu_personne"
-                " FROM %s as s LEFT JOIN %s as sp ON s.id=sp.syn_cible_id WHERE sp.syn_id=%d",
+                " FROM %s as s INNER JOIN %s as sp ON s.id=sp.syn_cible_id WHERE sp.syn_id=%d",
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE, id_syn );
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
@@ -169,7 +169,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT sp.id,sp.syn_id,sp.syn_cible_id,s.page,"
                 "sp.posx,sp.posy,sp.angle,s.vignette_activite,s.vignette_secu_bien,s.vignette_secu_personne"
-                " FROM %s as s LEFT JOIN %s as sp ON s.id=sp.syn_cible_id WHERE sp.id=%d",
+                " FROM %s as s INNER JOIN %s as sp ON s.id=sp.syn_cible_id WHERE sp.id=%d",
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE, id );
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
@@ -198,7 +198,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "UPDATE %s as s LEFT JOIN %s as sp ON s.id=sp.syn_id SET "             
+                "UPDATE %s as s INNER JOIN %s as sp ON s.id=sp.syn_id SET "             
                 "vignette_activite=%d, vignette_secu_bien=%d, vignette_secu_personne=%d,"
                 "posx=%d,posy=%d,angle='%f'"
                 " WHERE sp.id=%d;", NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE,
