@@ -198,7 +198,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "UPDATE %s as s INNER JOIN %s as sp ON s.id=sp.syn_id SET "             
+                "UPDATE %s as s INNER JOIN %s as sp ON s.id=sp.syn_cible_id SET "             
                 "vignette_activite=%d, vignette_secu_bien=%d, vignette_secu_personne=%d,"
                 "posx=%d,posy=%d,angle='%f'"
                 " WHERE sp.id=%d;", NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE,
