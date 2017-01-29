@@ -214,8 +214,7 @@
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE
               );
 
-    g_snprintf( critere, sizeof(critere), " AND %s.command_text = '%s'",
-                NOM_TABLE_MNEMO, commande_pure );
+    g_snprintf( critere, sizeof(critere), " AND mnemo.command_text = '%s'", commande_pure );
     g_strlcat( requete, critere, sizeof(requete) );
 
     db = Init_DB_SQL();       
