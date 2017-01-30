@@ -263,26 +263,30 @@
     Libere_DB_SQL( &db );
     return(sms);
   }
-/**********************************************************************************************************/
-/* Traiter_commande_sms: Fonction appeler pour traiter la commande sms recu par le telephone              */
-/* Entrée: le message text à traiter                                                                      */
-/* Sortie : Néant                                                                                         */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Traiter_commande_sms: Fonction appeler pour traiter la commande sms recu par le telephone                                  */
+/* Entrée: le message text à traiter                                                                                          */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
  static void Traiter_commande_sms ( gchar *from, gchar *texte )
   { struct SMSDB *sms;
+    gchar chaine[160];
 
     sms = Sms_is_recipient_authorized ( from );
     if ( sms == NULL )
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
                 "Traiter_commande_sms : unknown sender %s. Dropping message %s...", from, texte );
        return;
-     } else { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
-                       "Traiter_commande_sms : Received %s from %s(%s). Processing...",
-                        texte, sms->user_name, sms->user_sms_phone );
-            }
+     }
+     
+    Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
+             "Traiter_commande_sms : Received %s from %s(%s). Processing...",
+              texte, sms->user_name, sms->user_sms_phone );
     g_free(sms);
+    g_snprintf(chaine, sizeof(chaine), "Processing: %s", texte );                           /* Envoi de l'acquit de reception */
+    Envoyer_sms_gsm_text ( chaine );
 
-    if ( ! strcasecmp( texte, "ping" ) )                                           /* Interfacage de test */
+    if ( ! strcasecmp( texte, "ping" ) )                                                               /* Interfacage de test */
      { Envoyer_sms_gsm_text ( "Pong !" );
        return;
      }
@@ -597,9 +601,9 @@
        Lire_sms_gsm();
 
 /************************************************ Envoi de SMS ********************************************/
+       sleep(5);
        if ( !Cfg_sms.Liste_histos )                                     /* Attente de demande d'envoi SMS */
-        { sleep(5);
-          sched_yield();
+        { sched_yield();
           continue;
         }
 

@@ -54,35 +54,6 @@
        return(FALSE);
      }
 
-    mnemo_a_virer = Rechercher_mnemo_baseDB ( mnemo->id );
-    if (mnemo_a_virer)
-     { switch (mnemo_a_virer->type)
-        { case MNEMO_ENTREE_ANA:
-               g_snprintf( requete, sizeof(requete),                                                           /* Requete SQL */
-               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_MNEMO_AI, mnemo_a_virer->id );
-               Lancer_requete_SQL ( db, requete );
-               break;
-          case MNEMO_CPT_IMP:
-               g_snprintf( requete, sizeof(requete),                                                           /* Requete SQL */
-               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_MNEMO_CPTIMP, mnemo_a_virer->id );
-               Lancer_requete_SQL ( db, requete );
-               break;
-          case MNEMO_CPTH:
-               g_snprintf( requete, sizeof(requete),                                                           /* Requete SQL */
-               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_MNEMO_CPTH, mnemo_a_virer->id );
-               Lancer_requete_SQL ( db, requete );
-               break;
-          case MNEMO_TEMPO:
-               g_snprintf( requete, sizeof(requete),                                                           /* Requete SQL */
-               "DELETE FROM %s WHERE id_mnemo=%d", NOM_TABLE_MNEMO_TEMPO, mnemo_a_virer->id );
-               Lancer_requete_SQL ( db, requete );
-               break;
-          default:
-               break;
-        }
-       g_free(mnemo_a_virer);
-     }
-
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MNEMO, mnemo->id );
 

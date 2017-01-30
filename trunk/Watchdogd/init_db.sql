@@ -227,7 +227,9 @@ CREATE TABLE IF NOT EXISTS `histo_msgs` (
   `date_fin` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `date_create_sec` (`date_create_sec`),
-  KEY `alive` (`alive`)
+  KEY `alive` (`alive`),
+  KEY `fk_id_msg` (`id_msg`),
+  CONSTRAINT `fk_id_msg` FOREIGN KEY (`id_msg`) REFERENCES `msgs` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -801,7 +803,8 @@ CREATE TABLE IF NOT EXISTS `mnemos_Tempo` (
   `delai_off` tinyint(1) NOT NULL DEFAULT '0',
   `min_on` int(11) NOT NULL DEFAULT '0',
   `max_on` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id_mnemo`)
+  PRIMARY KEY (`id_mnemo`),
+  CONSTRAINT `id_mnemmo` FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
