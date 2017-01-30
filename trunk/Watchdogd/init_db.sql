@@ -97,10 +97,11 @@ INSERT INTO `dls` (`id`, `type`, `syn_id`, `name`, `shortname`, `actif`, `compil
 -- Structure de la table `mnemos_CptHoraire`
 --
 
-CREATE TABLE IF NOT EXISTS `dls_cpth` (
+CREATE TABLE IF NOT EXISTS `mnemos_CptHoraire` (
   `id_mnemo` int(11) NOT NULL DEFAULT '0',
   `valeur` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id_mnemo`)
+  PRIMARY KEY (`id_mnemo`),
+  CONSTRAINT `id_mnemo` FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -115,7 +116,8 @@ CREATE TABLE IF NOT EXISTS `mnemos_CptImp` (
   `type_ci` int(11) NOT NULL,
   `multi` float NOT NULL DEFAULT '1',
   `unite_string` text COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id_mnemo`)
+  PRIMARY KEY (`id_mnemo`),
+  CONSTRAINT `id_mnemo` FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -130,7 +132,8 @@ CREATE TABLE IF NOT EXISTS `mnemos_AnalogInput` (
   `min` float NOT NULL DEFAULT '0',
   `max` float NOT NULL DEFAULT '0',
   `unite` text COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id_mnemo`)
+  PRIMARY KEY (`id_mnemo`),
+  CONSTRAINT `id_mnemo` FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 INSERT INTO `mnemos_AnalogInput` (`id_mnemo`, `type`, `min`, `max`, `unite`) VALUES
@@ -148,7 +151,8 @@ INSERT INTO `mnemos_AnalogInput` (`id_mnemo`, `type`, `min`, `max`, `unite`) VAL
 
 CREATE TABLE IF NOT EXISTS `mnemos_DigitalInput` (
   `id_mnemo` int(11) NOT NULL,
-  PRIMARY KEY (`id_mnemo`)
+  PRIMARY KEY (`id_mnemo`),
+  CONSTRAINT `id_mnemo` FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -804,7 +808,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_Tempo` (
   `min_on` int(11) NOT NULL DEFAULT '0',
   `max_on` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id_mnemo`),
-  CONSTRAINT `id_mnemmo` FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+  CONSTRAINT `id_mnemo` FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
