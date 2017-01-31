@@ -554,7 +554,37 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=2991;
+    if (database_version < 2994)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos` ENGINE = INNODB ROW_FORMAT = DYNAMIC;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_Tempo` ENGINE = INNODB ROW_FORMAT = DYNAMIC;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_Tempo ADD FOREIGN KEY fk_id_mnemo_tempo (`id_mnemo`) REFERENCES mnemos(`id`)"
+                                             " ON DELETE CASCADE ON UPDATE RESTRICT;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_DigitalInput` ENGINE = INNODB ROW_FORMAT = DYNAMIC;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_DigitalInput ADD FOREIGN KEY fk_id_mnemo_di (`id_mnemo`) REFERENCES mnemos(`id`)"
+                                             " ON DELETE CASCADE ON UPDATE RESTRICT;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_AnalogInput` ENGINE = INNODB ROW_FORMAT = DYNAMIC;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_AnalogInput ADD FOREIGN KEY fk_id_mnemo_ai (`id_mnemo`) REFERENCES mnemos(`id`)"
+                                             " ON DELETE CASCADE ON UPDATE RESTRICT;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_CptImp` ENGINE = INNODB ROW_FORMAT = DYNAMIC;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_CptImp ADD FOREIGN KEY fk_id_mnemo_ci (`id_mnemo`) REFERENCES mnemos(`id`)"
+                                             " ON DELETE CASCADE ON UPDATE RESTRICT;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos_CptHoraire` ENGINE = INNODB ROW_FORMAT = DYNAMIC;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos_CptHoraire ADD FOREIGN KEY fk_id_mnemo_ch (`id_mnemo`) REFERENCES mnemos(`id`)"
+                                             " ON DELETE CASCADE ON UPDATE RESTRICT;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    database_version=2994;
 
     Libere_DB_SQL(&db);
 
