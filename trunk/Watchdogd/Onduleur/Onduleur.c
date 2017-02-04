@@ -469,6 +469,8 @@
   { gchar buffer[80];
 
     g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->ups.ups, nom_cmd );
+    Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
+             "Onduleur_set_instcmd: Sending '%s' to %s", buffer, module->ups.ups );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                  "Onduleur_set_instcmd: Sending INSTCMD failed (%s) error %s",
@@ -483,9 +485,8 @@
        return(FALSE);
      }
     else
-     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                "Onduleur_set_instcmd: Sending INSTCMD OK",
-                 nom_cmd, buffer );
+     { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
+                "Onduleur_set_instcmd: Sending '%s' to %s OK", buffer, module->ups.ups );
      }
     return(TRUE);
   }
