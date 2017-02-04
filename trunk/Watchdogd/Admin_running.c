@@ -151,18 +151,18 @@
 
      } else
     if ( ! strcmp ( commande, "log_level" ) )
-     { gchar debug[128], chaine [80];
+     { gchar debug[128], chaine [128];
        sscanf ( ligne, "%s %s", commande, debug );
        g_snprintf( chaine, sizeof(chaine), " Log level set to %s\n", debug );
        if ( ! strcmp ( debug, "debug"    ) )
-        { Info_change_log_level ( Config.log, LOG_DEBUG   ); } else
-       if ( ! strcmp ( debug, "info"  ) )
-        { Info_change_log_level ( Config.log, LOG_INFO    ); } else
-       if ( ! strcmp ( debug, "notice"  ) )
-        { Info_change_log_level ( Config.log, LOG_NOTICE  ); } else
-       if ( ! strcmp ( debug, "warning" ) )
-        { Info_change_log_level ( Config.log, LOG_WARNING ); } else
-       if ( ! strcmp ( debug, "error"   ) )
+        { Info_change_log_level ( Config.log, LOG_DEBUG   ); }
+       else if ( ! strcmp ( debug, "info"  ) )
+        { Info_change_log_level ( Config.log, LOG_INFO    ); }
+       else if ( ! strcmp ( debug, "notice"  ) )
+        { Info_change_log_level ( Config.log, LOG_NOTICE  ); }
+       else if ( ! strcmp ( debug, "warning" ) )
+        { Info_change_log_level ( Config.log, LOG_WARNING ); }
+       else if ( ! strcmp ( debug, "error"   ) )
         { Info_change_log_level ( Config.log, LOG_ERR     ); }
        else g_snprintf( chaine, sizeof(chaine),
                        " -- Unknown log level %s. Valid level are : debug, info, notice, warning, error\n",
