@@ -90,8 +90,8 @@
     gboolean retour;
     struct DB *db;
 
-    g_snprintf( requete, sizeof(requete), "SELECT DISTINCT gids FROM %s WHERE id_util=%d OR id_util=%d ORDER BY gids DESC",
-                NOM_TABLE_GIDS, id, UID_ROOT );                                   /* Root est dans tous les groupes existants */
+    g_snprintf( requete, sizeof(requete), "SELECT DISTINCT gids FROM %s WHERE id_util=%d OR %d=%d ORDER BY gids DESC",
+                NOM_TABLE_GIDS, id, id, UID_ROOT );                               /* Root est dans tous les groupes existants */
 
     db = Init_DB_SQL();       
     if (!db)
