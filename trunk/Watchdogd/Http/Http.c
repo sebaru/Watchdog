@@ -182,6 +182,8 @@
                 { Http_Traiter_request_getstatus ( wsi ); }
                else if ( ! strncasecmp ( url, "/ws/messages", 12 ) )
                 { return( Http_Traiter_request_getmessage ( wsi, session ) ); }
+               else if ( ! strncasecmp ( url, "/ws/getmnemo/", 13 ) )
+                { return( Http_Traiter_request_getmnemo ( wsi, session, url+13 ) ); }
                else if ( ! strncasecmp ( url, "/ws/gif/", 8 ) )
                 { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+8 ) ); }
                else if ( ! strncasecmp ( url, "/ws/audio/", 7 ) )
