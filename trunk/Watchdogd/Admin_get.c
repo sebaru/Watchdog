@@ -57,11 +57,11 @@
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        if (num<NBR_TEMPO)
-        { g_snprintf( chaine, sizeof(chaine), " T%04d -> delai_on=%d min_on=%d max_on=%d delai_off=%d\n",
+        { g_snprintf( chaine, sizeof(chaine), " T%04d -> delai_on=%d min_on=%d max_on=%d delai_off=%d\n", num,
 			                   Partage->Tempo_R[num].confDB.delai_on, Partage->Tempo_R[num].confDB.min_on,
 			                   Partage->Tempo_R[num].confDB.max_on, Partage->Tempo_R[num].confDB.delai_off );
           Admin_write ( connexion, chaine );
-          g_snprintf( chaine, sizeof(chaine), "T%04d  = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", num,
+          g_snprintf( chaine, sizeof(chaine), " T%04d  = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", num,
                       Partage->Tempo_R[num].state, Partage->Tempo_R[num].status,
                       Partage->Tempo_R[num].date_on,
                      (Partage->Tempo_R[num].date_on > Partage->top ? (Partage->Tempo_R[num].date_on - Partage->top)/10.0 : 0.0),
