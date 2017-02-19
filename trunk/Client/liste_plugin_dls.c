@@ -41,8 +41,8 @@
      COLONNE_ACTIVE,
      COLONNE_TYPE,
      COLONNE_GROUPE_PAGE,
-     COLONNE_NOM,
      COLONNE_SHORTNAME,
+     COLONNE_NOM,
      COLONNE_COMPIL_DATE,
      COLONNE_COMPIL_STATUS,
      COLONNE_COLOR_FOND,
@@ -413,8 +413,8 @@
                                               G_TYPE_BOOLEAN,                                                     /* Activé ? */
                                               G_TYPE_UINT,                                                            /* Type */
                                               G_TYPE_STRING,                                                   /* Groupe/Page */
-                                              G_TYPE_STRING,                                                           /* Nom */
                                               G_TYPE_STRING,                                                     /* Shortname */
+                                              G_TYPE_STRING,                                                           /* Nom */
                                               G_TYPE_STRING,                                                   /* Compil_date */
                                               G_TYPE_STRING,                                                 /* Compil_status */
                                               GDK_TYPE_COLOR,                                                   /* Color_fond */
@@ -452,16 +452,6 @@
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("D.L.S Name"), renderer,
-                                                         "text", COLONNE_NOM,
-                                                         "background-gdk", COLONNE_COLOR_FOND,
-                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,
-                                                         NULL);
-    gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_NOM);                                        /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
-
-    renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Shortname"), renderer,
                                                          "text", COLONNE_SHORTNAME,
                                                          "background-gdk", COLONNE_COLOR_FOND,
@@ -469,6 +459,16 @@
                                                          NULL);
     gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_SHORTNAME);                                  /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("D.L.S Name"), renderer,
+                                                         "text", COLONNE_NOM,
+                                                         "background-gdk", COLONNE_COLOR_FOND,
+                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,
+                                                         NULL);
+    gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_NOM);                                        /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */

@@ -55,13 +55,13 @@
      } else
     if ( ! strcmp ( commande, "t" ) )
      { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
        if (num<NBR_TEMPO)
-        { g_snprintf( chaine, sizeof(chaine), " T%04d -> delai_on=%d min_on=%d max_on=%d delai_off=%d\n", num,
+        { g_snprintf( chaine, sizeof(chaine), " | - T%04d -> delai_on=%d min_on=%d max_on=%d delai_off=%d\n", num,
 			                   Partage->Tempo_R[num].confDB.delai_on, Partage->Tempo_R[num].confDB.min_on,
 			                   Partage->Tempo_R[num].confDB.max_on, Partage->Tempo_R[num].confDB.delai_off );
           Admin_write ( connexion, chaine );
-          g_snprintf( chaine, sizeof(chaine), " T%04d  = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", num,
+          g_snprintf( chaine, sizeof(chaine), " | - T%04d  = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)\n", num,
                       Partage->Tempo_R[num].state, Partage->Tempo_R[num].status,
                       Partage->Tempo_R[num].date_on,
                      (Partage->Tempo_R[num].date_on > Partage->top ? (Partage->Tempo_R[num].date_on - Partage->top)/10.0 : 0.0),
@@ -69,102 +69,113 @@
                      (Partage->Tempo_R[num].date_off > Partage->top ? (Partage->Tempo_R[num].date_off - Partage->top)/10.0 : 0.0) );
           Admin_write ( connexion, chaine );
         } else
-        { g_snprintf( chaine, sizeof(chaine), " T -> num '%d' out of range\n", num );
+        { g_snprintf( chaine, sizeof(chaine), " | - T -> num '%d' out of range\n", num );
           Admin_write ( connexion, chaine );
-	    }
+	       }
+       Admin_write ( connexion, "|-\n" );
      } else
     if ( ! strcmp ( commande, "i" ) )
      { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
        if (num<NBR_BIT_CONTROLE)
-        { g_snprintf( chaine, sizeof(chaine), " I%03d = etat=%d, rouge=%d, vert=%d, bleu=%d, cligno=%d, "
-                                              "changes=%d, last_change=%d, top=%d\n",
+        { g_snprintf( chaine, sizeof(chaine), " | - I%03d = etat=%d, rouge=%d, vert=%d, bleu=%d, cligno=%d,\n"
+                                              " |   changes=%d, last_change=%d, top=%d\n",
                       num, Partage->i[num].etat,
                       Partage->i[num].rouge, Partage->i[num].vert, Partage->i[num].bleu,
                       Partage->i[num].cligno, Partage->i[num].changes, Partage->i[num].last_change,
                       Partage->top );
         } else
-        { g_snprintf( chaine, sizeof(chaine), " I -> num '%d' out of range\n", num ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - I -> num '%d' out of range\n", num ); }
        Admin_write ( connexion, chaine );
+       Admin_write ( connexion, "|-\n" );
      } else
     if ( ! strcmp ( commande, "msg" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        if (num<NBR_MESSAGE_ECRITS)
-        { g_snprintf( chaine, sizeof(chaine), " MSG%03d = %d, changes = %d, last_change = %d top=%d\n",
+        { g_snprintf( chaine, sizeof(chaine), " | - MSG%03d = %d, changes = %d, last_change = %d top=%d\n",
                       num, Partage->g[num].etat, Partage->g[num].changes,
                       Partage->g[num].last_change, Partage->top );
         } else
-        { g_snprintf( chaine, sizeof(chaine), " MSG -> num '%d' out of range\n", num ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - MSG -> num '%d' out of range\n", num ); }
        Admin_write ( connexion, chaine );
+       Admin_write ( connexion, "|-\n" );
      } else
     if ( ! strcmp ( commande, "m" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       g_snprintf( chaine, sizeof(chaine), " M%03d = %d\n", num, M(num) );
+       g_snprintf( chaine, sizeof(chaine), " | - M%03d = %d\n", num, M(num) );
        Admin_write ( connexion, chaine );
+       Admin_write ( connexion, "|-\n" );
      } else
     if ( ! strcmp ( commande, "e" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       g_snprintf( chaine, sizeof(chaine), " E%03d = %d\n",
+       g_snprintf( chaine, sizeof(chaine), " | - E%03d = %d\n",
                    num, E(num) );
        Admin_write ( connexion, chaine );
+       Admin_write ( connexion, "|-\n" );
      } else
     if ( ! strcmp ( commande, "ea" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        if (num<NBR_ENTRE_ANA)
         { g_snprintf( chaine, sizeof(chaine),
-                      " EA%03d = %8.2f %s, val_avant_ech=%8.2f, inrange=%d, type=%d, last_arch=%d (%ds ago), min=%8.2f, max=%8.2f\n",
+                      " | - EA%03d = %8.2f %s, val_avant_ech=%8.2f, inrange=%d, type=%d, last_arch=%d (%ds ago), min=%8.2f, max=%8.2f\n",
                       num, EA_ech(num), Partage->ea[num].confDB.unite, Partage->ea[num].val_avant_ech, EA_inrange(num),
                       Partage->ea[num].confDB.type, Partage->ea[num].last_arch, 
                       (Partage->top - Partage->ea[num].last_arch)/10,
                       Partage->ea[num].confDB.min, Partage->ea[num].confDB.max 
                     );
         } else
-        { g_snprintf( chaine, sizeof(chaine), " EA -> num '%d' out of range (max=%d)\n", num,NBR_ENTRE_ANA ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - EA -> num '%d' out of range (max=%d)\n", num,NBR_ENTRE_ANA ); }
        Admin_write ( connexion, chaine );
+       Admin_write ( connexion, "|-\n" );
      } else
     if ( ! strcmp ( commande, "b" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       g_snprintf( chaine, sizeof(chaine), " B%03d = %d\n", num, B(num) );
+       g_snprintf( chaine, sizeof(chaine), " | - B%03d = %d\n", num, B(num) );
        Admin_write ( connexion, chaine );
+       Admin_write ( connexion, "|-\n" );
      } else
     if ( ! strcmp ( commande, "a" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       g_snprintf( chaine, sizeof(chaine), " A%03d = %d\n", num, A(num) );
+       g_snprintf( chaine, sizeof(chaine), " | - A%03d = %d\n", num, A(num) );
        Admin_write ( connexion, chaine );
+       Admin_write ( connexion, "|-\n" );
      } else
     if ( ! strcmp ( commande, "ci" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        if (num<NBR_COMPTEUR_IMP)
-        { g_snprintf( chaine, sizeof(chaine), " CI%03d = %8.2f, type=%d, actif=%d, unite=%s, multi=%8.2f, val1=%8.2f, val2=%8.2f\n",
+        { g_snprintf( chaine, sizeof(chaine), " | - CI%03d = %8.2f, type=%d, actif=%d, unite=%s, multi=%8.2f, val1=%8.2f, val2=%8.2f\n",
                       num, Partage->ci[num].val_en_cours2 * Partage->ci[num].confDB.multi,
                       Partage->ci[num].confDB.type, Partage->ci[num].actif,
                       Partage->ci[num].confDB.unite, Partage->ci[num].confDB.multi,
                       Partage->ci[num].val_en_cours1, Partage->ci[num].val_en_cours2
                     );
         } else
-        { g_snprintf( chaine, sizeof(chaine), " CI -> num '%d' out of range\n", num ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - CI -> num '%d' out of range\n", num ); }
        Admin_write ( connexion, chaine );
+       Admin_write ( connexion, "|-\n" );
      } else
     if ( ! strcmp ( commande, "ch" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        if (num<NBR_COMPTEUR_H)
-        { g_snprintf( chaine, sizeof(chaine), " CH%03d = %6d, actif=%d\n",
+        { g_snprintf( chaine, sizeof(chaine), " | - CH%03d = %6d, actif=%d\n",
                       num, Partage->ch[num].confDB.valeur, Partage->ch[num].actif
                     );
         } else
-        { g_snprintf( chaine, sizeof(chaine), " CH -> num '%d' out of range\n", num ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - CH -> num '%d' out of range\n", num ); }
        Admin_write ( connexion, chaine );
+       Admin_write ( connexion, "|-\n" );
      } else
-     { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
+     { g_snprintf( chaine, sizeof(chaine), " | - Unknown command : %s\n", ligne );
        Admin_write ( connexion, chaine );
+       Admin_write ( connexion, "|-\n" );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/
