@@ -8,14 +8,14 @@
   ACTELE_PLG         <-> _Axxxx; /* Sortie physique de pilotage du télérupteur, Ex: Legrand 412412 */
   MSD_PLG            <-> _Mxxxx; /* Mémorisation Synthèse défaut général TL */
   MSDF_PLG           <-> _Mxxxx; /* Mémorisation Synthèse défaut général TL (acquitté) */
-
-  /* Bits purement internes au module */
-  TR_DEF_TELE_PLG    <-> _Txxxx; /* Temporisation de détection de défaut après manoeuvre (x,0,0,0) */
-  TITELE_PLG         <-> _Txxxx; /* Temporisation d'impulsion pour manoeuvrer le télérupteur (0,x,x,0) */
   MDEF_REPOS_PLG     <-> _Bxxxx; /* Mémorisation du défaut repos non acquitté du TL */
   MDEF_REPOS_F_PLG   <-> _Bxxxx; /* Mémorisation du défaut repos acquitté (Fixe) du TL */
   MDEF_TRAVAIL_PLG   <-> _Bxxxx; /* Mémorisation du défaut travail non acquitté du TL */
   MDEF_TRAVAIL_F_PLG <-> _Bxxxx; /* Mémorisation du défaut travail acquitté (Fixe) du TL */
+
+  /* Bits purement internes au module */
+  TR_DEF_TELE_PLG    <-> _Txxxx; /* Temporisation de détection de défaut après manoeuvre (x,0,0,0) */
+  TITELE_PLG         <-> _Txxxx; /* Temporisation d'impulsion pour manoeuvrer le télérupteur (0,x,x,0) */
   MEACTELE_PLG       <-> _Bxxxx; /* Demande de manoeuvre du TL (changement d'état) */
  
                                     /*******************************************/
