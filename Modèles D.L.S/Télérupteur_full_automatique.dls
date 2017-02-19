@@ -30,12 +30,12 @@
  /* DEFAUTS */
   - POS_TELE_PLG . TR_DEF_TELE_PLG ./MDEF_REPOS_F_PLG
                                       -> MDEF_REPOS_PLG;            /* Détection Discordance Repos du Télérupteur */
-  - O_ACQUITDEF . MDEF_REPOS_PLG      ->/MDEF_REPOS_PLG . MDEF_REPOS_F_PLF;                   /* Acquit du défaut */
+  - O_ACQUITDEF . MDEF_REPOS_PLG      ->/MDEF_REPOS_PLG, MDEF_REPOS_F_PLF;                   /* Acquit du défaut */
   -/POS_TELE_PLG . MDEF_REPOS_F_PLG   ->/MDEF_REPOS_F_PLG;                               /* Suppression du défaut */
  
   -/POS_TELE_PLG . TR_DEF_TELE_PLG ./MDEF_TRAVAIL_F_PLG
                                       -> MDEF_TRAVAIL_PLG;        /* Détection Discordance Travail du Télérupteur */
-  - O_ACQUITDEF . MDEF_TRAVAIL_PLG    ->/MDEF_TRAVAIL_PLG . MDEF_TRAVAIL_F_PLF;               /* Acquit du défaut */
+  - O_ACQUITDEF . MDEF_TRAVAIL_PLG    ->/MDEF_TRAVAIL_PLG, MDEF_TRAVAIL_F_PLF;               /* Acquit du défaut */
   - POS_TELE_PLG . MDEF_TRAVAIL_F_PLG ->/MDEF_TRAVAIL_F_PLG;                             /* Suppression du défaut */
  
                                     /*******************************************/
@@ -43,10 +43,10 @@
                                     /*******************************************/
  /* SYNTHESES DEFAUTS ---------------------------------------------------------*/
  /* DEFAUTS */
-  - MDEF_REPOS_PLG + MDEF_TRAVAIL_PLG     -> MSD_PLG;
+  - MDEF_REPOS_PLG + MDEF_TRAVAIL_PLG     -> /MEACTELE_PLG, MSD_PLG;
  
  /* DEFAUTS FIXES */
-  - MDEF_REPOS_F_PLG + MDEF_TRAVAIL_F_PLG -> MSDF_PLG;
+  - MDEF_REPOS_F_PLG + MDEF_TRAVAIL_F_PLG -> /MEACTELE_PLG, MSDF_PLG;
  
                                     /*******************************************/
  /***********************************              FONCTIONS PILOTEES           ***********************************/
