@@ -22,7 +22,12 @@
                                     /*******************************************/
  /***********************************                 EVENEMENTS                ***********************************/
                                     /*******************************************/
- 
+ /* Start */
+
+ - _START -> /ACTELE_PLG, /MEWANTTL_PLG, /MEACTELE_PLG,
+             /MDEF_REPOS_PLG, /MDEF_REPOS_F_PLG,
+             /MDEF_TRAVAIL_PLG, /MDEF_TRAVAIL_F_PLG;
+
  /* DEFAUTS */
   - POS_TELE_PLG . TR_DEF_TELE_PLG ./MDEF_REPOS_F_PLG
                                       -> MDEF_REPOS_PLG;            /* Détection Discordance Repos du Télérupteur */
