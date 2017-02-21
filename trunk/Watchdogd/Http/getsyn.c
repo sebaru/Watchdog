@@ -157,6 +157,8 @@
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"id",     "%d", motif->id );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"icone_id","%d", motif->icone_id );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"libelle","%s", motif->libelle );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"posx","%d", motif->position_x );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"posy","%d", motif->position_y );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"type_gestion","%d", motif->type_gestion );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"bit_ctrl","%d", motif->bit_controle );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"etat",   "%d", Partage->i[motif->bit_controle].etat );
