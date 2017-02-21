@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Http/getsyn.c       Gestion des request getsyn pour le thread HTTP de watchdog               */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     dim. 05 mai 2013 16:33:43 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Http/getsyn.c       Gestion des request getsyn pour le thread HTTP de watchdog                                   */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                         dim. 05 mai 2013 16:33:43 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * getsyn.c
  * This file is part of Watchdog
@@ -30,38 +30,38 @@
  #include <microhttpd.h>
  #include <libxml/xmlwriter.h>
 
-/******************************************** Prototypes de fonctions *************************************/
+/************************************************** Prototypes de fonctions ***************************************************/
  #include "watchdogd.h"
  #include "Http.h"
-/**********************************************************************************************************/
-/* Traiter_dynxml: Traite une requete sur l'URI dynxml                                                    */
-/* Entrées: la connexion MHD                                                                              */
-/* Sortie : néant                                                                                         */
-/**********************************************************************************************************/
- gboolean Http_Traiter_request_getsyn ( struct HTTP_SESSION *session, struct MHD_Connection *connection )
-  {
-
-	  #ifdef bouh
-	  struct CMD_TYPE_SYNOPTIQUE *syndb;
-    struct MHD_Response *response;
-    const gchar *syn_id_char;
+/******************************************************************************************************************************/
+/* Traiter_dynxml: Traite une requete sur l'URI getsyn du webservice                                                          */
+/* Entrées: la connexion websocket et la session                                                                              */
+/* Sortie : FALSE si erreur                                                                                                   */
+/******************************************************************************************************************************/
+ gboolean Http_Traiter_request_getsyn ( struct lws *wsi, struct HTTP_SESSION *session )
+  { unsigned char header[256], *header_cur, *header_end;
+    const char *content_type = "application/xml";
+ 	  struct CMD_TYPE_SYNOPTIQUE *syndb;
     xmlTextWriterPtr writer;
     xmlBufferPtr buf;
-    gint retour, syn_id;
     struct DB *db;
+    gint retour;
+    const gchar *id_syn_s;
+   	gchar token_id[12];
+    gchar requete[256];
+    gint id_syn;
 
-    syn_id_char = MHD_lookup_connection_value ( connection, MHD_GET_ARGUMENT_KIND, "syn_id" );
-    if (!syn_id_char) { syn_id = 1; }
-                 else { syn_id = atoi(syn_id_char); }
+    id_syn_s   = lws_get_urlarg_by_name	( wsi, "id_syn=",   token_id,   sizeof(token_id) );
+    if (id_syn_s) { id_syn = atoi ( id_syn_s ); } else { return(FALSE); }
 
-    buf = xmlBufferCreate();                                                    /* Creation du buffer xml */
+    buf = xmlBufferCreate();                                                                        /* Creation du buffer xml */
     if (buf == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getsyn : XML Buffer creation failed" );
        return(FALSE);
      }
 
-    writer = xmlNewTextWriterMemory(buf, 0);                                     /* Creation du write XML */
+    writer = xmlNewTextWriterMemory(buf, 0);                                                         /* Creation du write XML */
     if (writer == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getsyn : XML Writer creation failed" );
@@ -69,7 +69,7 @@
        return(FALSE);
      }
 
-    retour = xmlTextWriterStartDocument(writer, NULL, "UTF-8", "yes" );           /* Creation du document */
+    retour = xmlTextWriterStartDocument(writer, NULL, "UTF-8", "yes" );                               /* Creation du document */
     if (retour < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getsyn : XML Start document failed" );
@@ -77,10 +77,10 @@
        return(FALSE);
      }
 
-    syndb = Rechercher_synoptiqueDB ( syn_id );
+    syndb = Rechercher_synoptiqueDB ( id_syn );
     if ( ! syndb )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                 "Http_Traiter_request_getsyn : Synoptique %d not found in DB", syn_id );
+                 "Http_Traiter_request_getsyn : Synoptique %d not found in DB", id_syn );
        xmlBufferFree(buf);
        return(FALSE);
      }
@@ -98,11 +98,11 @@
     xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"groupe",  "%s", syndb->groupe );
     xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"page",    "%s", syndb->page );
     xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"libelle", "%s", syndb->libelle );
-    g_free(syndb);                                           /* On a terminé avec la structure synoptique */
-
-/*------------------------------------------- Dumping Passerelle -----------------------------------------*/
+    g_free(syndb);                                                               /* On a terminé avec la structure synoptique */
+#ifdef bouh
+/*--------------------------------------------------- Dumping Passerelle -----------------------------------------------------*/
     xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping passerelles !!");
-    if ( Recuperer_passerelleDB( &db, syn_id ) )
+    if ( Recuperer_passerelleDB( &db, id_syn ) )
      { for ( ; ; )
         { struct CMD_TYPE_PASSERELLE *pass;
           pass = Recuperer_passerelleDB_suite( &db );
@@ -120,7 +120,7 @@
 
 /*------------------------------------------- Dumping capteur --------------------------------------------*/
     xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping capteurs !!");
-    if ( Recuperer_capteurDB( &db, syn_id ) )
+    if ( Recuperer_capteurDB( &db, id_syn ) )
      { for ( ; ; )
         { struct CMD_TYPE_CAPTEUR *capteur;
           gfloat valeur = 0.0;
@@ -147,33 +147,30 @@
         }
      }
     xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping capteurs !!");
-
-/*------------------------------------------- Dumping motif ----------------------------------------------*/
+#endif
+/*-------------------------------------------------------- Dumping motif -----------------------------------------------------*/
     xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping motifs !!");
-    if ( Recuperer_motifDB( &db, syn_id ) )
-     { for ( ; ; )
-        { struct CMD_TYPE_MOTIF *motif;
-          motif = Recuperer_motifDB_suite( &db );
-          if (!motif) break;                                                                /* Terminé ?? */
-
-          xmlTextWriterStartElement(writer, (const unsigned char *)"motif");               /* Start Motif */
+    if ( Recuperer_motifDB( &db, id_syn ) )
+     { struct CMD_TYPE_MOTIF *motif;
+       while( (motif = Recuperer_motifDB_suite( &db )) )
+        { xmlTextWriterStartElement(writer, (const unsigned char *)"motif");                                   /* Start Motif */
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"id",     "%d", motif->id );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"icone_id","%d", motif->icone_id );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"libelle","%s", motif->libelle );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"type_gestion","%d", motif->type_gestion );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"bit_clic","%d", motif->bit_clic );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"bit_ctrl","%d", motif->bit_controle );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"etat",   "%d", Partage->i[motif->bit_controle].etat );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"rouge",  "%d", Partage->i[motif->bit_controle].rouge );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"vert",   "%d", Partage->i[motif->bit_controle].vert );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"bleu",   "%d", Partage->i[motif->bit_controle].bleu );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"cligno", "%d", Partage->i[motif->bit_controle].cligno );
-          xmlTextWriterEndElement(writer);                                              /* End passerelle */
+          xmlTextWriterEndElement(writer);                                                                       /* End motif */
           g_free(motif);
         }
      }
     xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping motifs !!");
 
-    retour = xmlTextWriterEndElement(writer);                                           /* End synoptique */
+    retour = xmlTextWriterEndElement(writer);                                                               /* End synoptique */
     if (retour < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getsyn : Failed to end element Synoptique" );
@@ -189,15 +186,19 @@
        return(FALSE);
      }
 
-    xmlFreeTextWriter(writer);                                                /* Libération du writer XML */
-    response = MHD_create_response_from_buffer (buf->use, buf->content, MHD_RESPMEM_MUST_COPY); /* Response */
-    xmlBufferFree(buf);                           /* Libération du buffer dont nous n'avons plus besoin ! */
-    if (response == NULL) return(FALSE);       /* Si erreur de creation de la reponse, on sort une erreur */
-    MHD_add_response_header (response, "Content-Type", "application/xml");
-    Http_Add_response_header ( response );
-    MHD_queue_response (connection, MHD_HTTP_OK, response);
-    MHD_destroy_response (response);
+/*************************************************** Envoi au client **********************************************************/
+    header_cur = header;
+    header_end = header + sizeof(header);
+    
+    retour = lws_add_http_header_status( wsi, 200, &header_cur, header_end );
+    retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, (const unsigned char *)content_type, strlen(content_type),
+                                           &header_cur, header_end );
+    retour = lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );
+    retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
+    *header_cur='\0';                                                                               /* Caractere null d'arret */
+    lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
+    lws_write ( wsi, buf->content, buf->use, LWS_WRITE_HTTP);                                               /* Send to client */
+    xmlBufferFree(buf);                                               /* Libération du buffer dont nous n'avons plus besoin ! */
     return(TRUE);
-#endif
   }
 /*--------------------------------------------------------------------------------------------------------*/
