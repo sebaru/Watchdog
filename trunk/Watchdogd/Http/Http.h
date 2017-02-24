@@ -66,6 +66,7 @@
 
  struct HTTP_PER_SESSION_DATA
   { gchar url[80];
+    struct lws_spa *spa;
     gchar *post_data;
     gint post_data_length;
   };
@@ -97,6 +98,7 @@
  extern void Http_Close_session ( struct lws *wsi, struct HTTP_SESSION *session );
 
  extern gint Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip );
+ extern gint Http_Traiter_request_body_login ( struct lws *wsi, void *data, size_t taille );
  extern gint Http_Traiter_request_body_completion_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
  
  /* extern gint Http_Traiter_request_getslash ( struct HTTP_SESSION *session, struct MHD_Connection *connection );

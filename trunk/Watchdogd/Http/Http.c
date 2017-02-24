@@ -140,9 +140,12 @@
        case LWS_CALLBACK_HTTP_BODY:
              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                          "CB_http: http body : receive %d bytes", taille );
-               pss->post_data = g_try_realloc ( pss->post_data, pss->post_data_length + taille );
+               if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
+                { return( Http_Traiter_request_body_login ( wsi, data, taille ) ); }
+
+             /*pss->post_data = g_try_realloc ( pss->post_data, pss->post_data_length + taille );
                memcpy ( pss->post_data + pss->post_data_length, data, taille );
-               pss->post_data_length += taille;
+               pss->post_data_length += taille;*/
              }
             break;
        case LWS_CALLBACK_HTTP_BODY_COMPLETION:
@@ -151,7 +154,7 @@
                                            (char *)&remote_ip, sizeof(remote_ip) );
                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                          "CB_http: http body completion for %s!", pss->url );
-               pss->post_data[pss->post_data_length] = 0;                                            /* Caractere nul d'arret */
+/*               pss->post_data[pss->post_data_length] = 0;                                            /* Caractere nul d'arret */
                if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
                 { return( Http_Traiter_request_body_completion_login ( wsi, remote_name, remote_ip ) ); }
               }

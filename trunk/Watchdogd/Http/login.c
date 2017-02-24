@@ -31,7 +31,7 @@
  #include "watchdogd.h"
  #include "Http.h"
 
- static const char * PARAM_LOGIN[] =
+ static const char *PARAM_LOGIN[] =
   { "username", "password" };
  enum
   { PARAM_LOGIN_USERNAME,
@@ -155,13 +155,14 @@
 /******************************************************************************************************************************/
  void Http_Close_session ( struct lws *wsi, struct HTTP_SESSION *session )
   { unsigned char header[256], *header_cur, *header_end;
+    gint retour;
     if (session)
      { header_cur = header;
        header_end = header + sizeof(header);
-       lws_add_http_header_status( wsi, 200, &header_cur, header_end );
-       lws_finalize_http_header ( wsi, &header_cur, header_end );
+       retour = lws_add_http_header_status( wsi, 200, &header_cur, header_end );
+       retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
        *header_cur='\0';                                                                            /* Caractere null d'arret */
-       lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );                               /* Send to client */
+       lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );                      /* Send to client */
        Http_Liberer_session ( session );
      }
   }
@@ -248,65 +249,59 @@ search_again:
     return(0);                                                        /* si pas de session, on continue de traiter la request */
   }
 /******************************************************************************************************************************/
+/* Http_Traiter_request_body_login: Traite une requete de login phase 2 (reception body)                                      */
+/* Entrées: la connexion wsi, et les data recue et leur taille                                                                */
+/* Sortie : 1 si pb                                                                                                           */
+/******************************************************************************************************************************/
+ gint Http_Traiter_request_body_login ( struct lws *wsi, void *data, size_t taille )
+  { struct HTTP_PER_SESSION_DATA *pss;
+    pss = lws_wsi_user ( wsi );
+    if (!pss->spa)
+     {	pss->spa = lws_spa_create(wsi, PARAM_LOGIN, NBR_PARAM_LOGIN, 256, NULL, pss );
+    			if (!pss->spa)	return(1);
+     }
+    return(lws_spa_process(pss->spa, data, taille));
+  }
+/******************************************************************************************************************************/
 /* Http_Traiter_request_login: Traite une requete de login                                                                    */
 /* Entrées: la connexion MHD                                                                                                  */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
  gint Http_Traiter_request_body_completion_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip )
-  { gchar buffer[4096], username[80], password[80], **splited, **couple;
+  { gchar buffer[4096], username[80], password[80];
     unsigned char header[512], *header_cur, *header_end;
     struct HTTP_PER_SESSION_DATA *pss;
     struct CMD_TYPE_UTILISATEUR *util;
     struct HTTP_SESSION *session;
-    gint taille;
+    gint retour, taille;
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
              "Http_Traiter_request_body_completion_login: HTTP request from %s(%s)",
               remote_name, remote_ip );
 
     pss = lws_wsi_user ( wsi );
-    g_snprintf( username, sizeof(username), "nouser" );
-    g_snprintf( password, sizeof(password), "nopassword" );
-    header_cur = header;
-    header_end = header + sizeof(header);
+    lws_spa_finalize(pss->spa);
 
-    splited = g_strsplit( pss->post_data, "&", 2 );                                                 /* Découpage du body POST */
-    if (splited[0])
-     { gchar *new_string;
-       couple = g_strsplit( splited[0], "=", 2 );
-       if ( couple[0] && strcmp( couple[0], "username" )==0 )
-        { new_string = g_uri_unescape_string ( couple[1], NULL );
-          g_snprintf( username , sizeof(username), "%s", new_string );
-          g_free(new_string);
-        }
-       g_strfreev( couple );
-     }
-    if (splited[1])
-     { gchar *new_string;
-       couple = g_strsplit( splited[1], "=", 2 );
-       if ( couple[0] && strcmp( couple[0], "password" )==0 )
-        { new_string = g_uri_unescape_string ( couple[1], NULL );
-          g_snprintf( password , sizeof(password), "%s", new_string );
-          g_free(new_string);
-        }
-       g_strfreev( couple );
-     }
-    g_strfreev( splited );
+    g_snprintf( username, sizeof(username), lws_spa_get_string ( pss->spa, PARAM_LOGIN_USERNAME ) );
+    g_snprintf( password, sizeof(password), lws_spa_get_string ( pss->spa, PARAM_LOGIN_PASSWORD ) );
+
+    header_cur = header;                                                             /* Préparation des headers de la réponse */
+    header_end = header + sizeof(header);
 
     util = Rechercher_utilisateurDB_by_name( username );
     if (!util)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
                 "Http_Traiter_request_body_completion_login: Username '%s' not found", username );
-       lws_add_http_header_status( wsi, 401, &header_cur, header_end );                                       /* Unauthorized */
-       lws_finalize_http_header ( wsi, &header_cur, header_end );
+       retour = lws_add_http_header_status( wsi, 401, &header_cur, header_end );                              /* Unauthorized */
+       retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
        *header_cur='\0';                                                                            /* Caractere null d'arret */
        lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
      }
     else if ( Check_utilisateur_password( util, password ) == FALSE )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
                 "Http_Traiter_request_body_completion_login: Wrong Password for user '%s'", username );
-       lws_add_http_header_status( wsi, 401, &header_cur, header_end );                                       /* Unauthorized */
-       lws_finalize_http_header ( wsi, &header_cur, header_end );
+       retour = lws_add_http_header_status( wsi, 401, &header_cur, header_end );                              /* Unauthorized */
+       retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
        *header_cur='\0';                                                                            /* Caractere null d'arret */
        lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
      }
@@ -315,8 +310,8 @@ search_again:
        buf = Groups_to_xml ( util );
        if (!buf)
         { g_free(util);
-          lws_add_http_header_status( wsi, 501, &header_cur, header_end );                                    /* Server Error */
-          lws_finalize_http_header ( wsi, &header_cur, header_end );
+          retour = lws_add_http_header_status( wsi, 501, &header_cur, header_end );                           /* Server Error */
+          retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
           *header_cur='\0';                                                                         /* Caractere null d'arret */
           lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
         }
@@ -325,8 +320,8 @@ search_again:
           if (!session)
            { xmlBufferFree(buf);
              g_free(util);
-             lws_add_http_header_status( wsi, 501, &header_cur, header_end );                                 /* Server Error */
-             lws_finalize_http_header ( wsi, &header_cur, header_end );
+             retour = lws_add_http_header_status( wsi, 501, &header_cur, header_end );                        /* Server Error */
+             retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
              *header_cur='\0';                                                                      /* Caractere null d'arret */
              lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
            }
@@ -337,13 +332,13 @@ search_again:
              session->util = util;                                                  /* Sauvegarde de la structure utilisateur */
           
              g_snprintf ( cookie, sizeof(cookie), "sid=%s; Max-Age=%d; ", session->sid, 60*60*12 );
-             lws_add_http_header_status( wsi, 200, &header_cur, header_end );
-             lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_SET_COOKIE, (const unsigned char *)cookie, strlen(cookie),
-                                           &header_cur, header_end );
-             lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, content_type, strlen(content_type),
-                                           &header_cur, header_end );
-             lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );
-             lws_finalize_http_header ( wsi, &header_cur, header_end );
+             retour = lws_add_http_header_status( wsi, 200, &header_cur, header_end );
+             retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_SET_COOKIE, (const unsigned char *)cookie, strlen(cookie),
+                                                    &header_cur, header_end );
+             retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, content_type, strlen(content_type),
+                                                    &header_cur, header_end );
+             retour = lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );
+             retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
              *header_cur='\0';                                                                      /* Caractere null d'arret */
              lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
              lws_write ( wsi, buf->content, buf->use, LWS_WRITE_HTTP);                                      /* Send to client */
