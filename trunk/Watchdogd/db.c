@@ -108,7 +108,7 @@
     taille = g_slist_length ( Partage->com_db.Liste );
     pthread_mutex_unlock ( &Partage->com_db.synchro );
     Info_new( Config.log, Config.log_db, LOG_DEBUG,
-              "Init_DB_SQL: Database Connection OK with %s@%s:%d on %s (id=%05d). Nbr_requete_en_cours=%d",
+              "Init_DB_SQL: Database Connection OK with %s@%s:%d on %s (DB%07d). Nbr_requete_en_cours=%d",
                Config.db_username, Config.db_host, Config.db_port, Config.db_database, db->id, taille );
     return(db);
   }
@@ -136,14 +136,14 @@
 
     if (!found)
      { Info_new( Config.log, Config.log_db, LOG_CRIT,
-                "Libere_DB_SQL: DB Free Request not in list ! ID=%05d, request=%s",
+                "Libere_DB_SQL: DB Free Request not in list ! DB%07d, request=%s",
                  db->id, db->requete );
        return;
      }
 
     if (db->free==FALSE)
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
-                "Libere_DB_SQL: Reste un result a FREEer (id=%05d)!", db->id );
+                "Libere_DB_SQL: Reste un result a FREEer (DB%07d) -> %s !", db->id, db->requete );
        Liberer_resultat_SQL ( db );
      }
     mysql_close( db->mysql );
@@ -152,7 +152,7 @@
     taille = g_slist_length ( Partage->com_db.Liste );
     pthread_mutex_unlock ( &Partage->com_db.synchro );
     Info_new( Config.log, Config.log_db, LOG_DEBUG,
-             "Libere_DB_SQL: Deconnexion effective (id=%05d), Nbr_requete_en_cours=%d", db->id, taille );
+             "Libere_DB_SQL: Deconnexion effective (DB%07d), Nbr_requete_en_cours=%d", db->id, taille );
     g_free( db );
     *adr_db = NULL;
     SEA ( NUM_EA_SYS_DBREQUEST_SIMULT, taille );                                            /* Enregistrement pour historique */
@@ -167,15 +167,15 @@
 
     if (db->free==FALSE)
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
-                "Lancer_requete_SQL (id=%05d): Reste un result a FREEer!", db->id );
+                "Lancer_requete_SQL (DB%07d): Reste un result a FREEer!", db->id );
      }
 
     g_snprintf( db->requete, sizeof(db->requete), "%s", requete );                                      /* Save for later use */
     Info_new( Config.log, Config.log_db, LOG_DEBUG,
-             "Lancer_requete_SQL (id=%05d): NEW    (%s)", db->id, requete );
+             "Lancer_requete_SQL (DB%07d): NEW    (%s)", db->id, requete );
     if ( mysql_query ( db->mysql, requete ) )
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
-                "Lancer_requete_SQL (id=%05d): FAILED (%s) for '%s'",
+                "Lancer_requete_SQL (DB%07d): FAILED (%s) for '%s'",
                  db->id, (char *)mysql_error(db->mysql), requete );
        return(FALSE);
      }
@@ -185,7 +185,7 @@
        db->free = FALSE;
        if ( ! db->result )
         { Info_new( Config.log, Config.log_db, LOG_WARNING,
-                   "Lancer_requete_SQL (id=%05d): store_result failed (%s)",
+                   "Lancer_requete_SQL (DB%07d): store_result failed (%s)",
                     db->id, (char *) mysql_error(db->mysql) );
           db->nbr_result = 0;
         }
@@ -195,7 +195,7 @@
         }
      }
     Info_new( Config.log, Config.log_db, LOG_DEBUG,
-             "Lancer_requete_SQL (id=%05d): OK     (%s)", db->id, requete );
+             "Lancer_requete_SQL (DB%07d): OK     (%s)", db->id, requete );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -248,8 +248,8 @@
      { struct DB *db;
        db = (struct DB *)liste->data;
        Info_new( Config.log, Config.log_db, LOG_DEBUG,
-              "Print_SQL_status: Connexion %03d requete %s",
-               db->id, db->requete );
+                "Print_SQL_status: Connexion DB%07d (db->free=%d) requete %s",
+                 db->id, db->free, db->requete );
        liste = g_slist_next( liste );
      }
     pthread_mutex_unlock ( &Partage->com_db.synchro );
