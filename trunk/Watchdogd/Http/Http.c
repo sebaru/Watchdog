@@ -213,6 +213,8 @@
                 { return( Http_Traiter_request_getmnemo ( wsi, session, url+13 ) ); }
                else if ( ! strncasecmp ( url, "/ws/getsyn", 11 ) )
                 { return( Http_Traiter_request_getsyn ( wsi, session ) ); }
+               else if ( ! strcasecmp ( url, "/ws/getsvg" ) )
+                { return( Http_Traiter_request_getsvg ( wsi, session ) ); }
                else if ( ! strncasecmp ( url, "/ws/gif/", 8 ) )
                 { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+8 ) ); }
                else if ( ! strncasecmp ( url, "/ws/audio/", 10 ) )
