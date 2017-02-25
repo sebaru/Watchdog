@@ -6,5 +6,5 @@
 
 SUBDIRS=Include Commun Watchdogd Client WatchdogdAdmin
 ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST = autogen.sh RevisionNumber.txt
+EXTRA_DIST = autogen.sh
 MAINTAINERCLEANFILES = Makefile.in

@@ -38,11 +38,12 @@
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
  gboolean Http_Traiter_request_getmessage ( struct lws *wsi, struct HTTP_SESSION *session )
-  { gchar token_length[12], token_start[12], token_type[12];
+  { gchar token_length[12], token_start[12], token_type[12], token_num[12];
+    gchar token_dls[200], token_libelle[200],token_groupe[200];
+    const gchar *length_s, *start_s, *type_s, *num_s, *libelle, *groupe, *dls;
     unsigned char header[256], *header_cur, *header_end;
-   	const gchar *length_s, *start_s, *type_s;
-    const char *content_type = "application/xml";
-    gchar requete[256], critere[128];
+   	const char *content_type = "application/xml";
+    gchar requete[1024], critere[512];
     struct CMD_TYPE_MESSAGE *msg;
     gint type, start, length;
     xmlTextWriterPtr writer;
@@ -51,15 +52,38 @@
     gint retour;
 
     type_s   = lws_get_urlarg_by_name	( wsi, "type=",   token_type,   sizeof(token_type) );
-    if (type_s)   { type   = atoi ( type_s );   } else { type   = -1; }
+    num_s    = lws_get_urlarg_by_name	( wsi, "num=",    token_num,    sizeof(token_num) );
     start_s  = lws_get_urlarg_by_name	( wsi, "start=",  token_start,  sizeof(token_start) );
-    if (start_s)  { start  = atoi ( start_s );  } else { start  = -1; }
     length_s = lws_get_urlarg_by_name	( wsi, "length=", token_length, sizeof(token_length) );
-    if (length_s) { length = atoi ( length_s ); } else { length = -1; }
+
+    libelle  = lws_get_urlarg_by_name	( wsi, "libelle=", token_libelle, sizeof(token_libelle) );
+    groupe   = lws_get_urlarg_by_name	( wsi, "groupe=",  token_groupe,  sizeof(token_groupe) );
+    dls      = lws_get_urlarg_by_name	( wsi, "dls=",     token_dls,     sizeof(token_dls) );
 
     g_snprintf( requete, sizeof(requete), "1=1" );
-    if (type != -1)
-     { g_snprintf( critere, sizeof(critere), " AND msg.type=%d", type );
+    if (type_s)
+     { g_snprintf( critere, sizeof(critere), " AND msg.type=%d", atoi(type_s) );
+       g_strlcat( requete, critere, sizeof(requete) );
+     }
+
+    if (num_s)
+     { g_snprintf( critere, sizeof(critere), " AND msg.num=%d", atoi(num_s) );
+       g_strlcat( requete, critere, sizeof(requete) );
+     }
+
+    if (libelle)
+     { g_snprintf( critere, sizeof(critere), " AND msg.libelle LIKE '%s'", libelle );
+       g_strlcat( requete, critere, sizeof(requete) );
+     }
+
+    if (dls)
+     { g_snprintf( critere, sizeof(critere), " AND msg.dls_shortname LIKE '%s'", dls );
+       g_strlcat( requete, critere, sizeof(requete) );
+     }
+
+    if (groupe)
+     { g_snprintf( critere, sizeof(critere), " AND (msg.syn_groupe LIKE '%s' OR msg.syn_page LIKE '%s' OR msg.syn_libelle LIKE '%s')",
+                   groupe, groupe, groupe );
        g_strlcat( requete, critere, sizeof(requete) );
      }
 

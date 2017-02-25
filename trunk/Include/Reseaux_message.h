@@ -53,7 +53,7 @@
  struct CMD_TYPE_MESSAGE
   { guint  id;
     guint  num;                                                                        /* Numero du message dans la structure */
-    guint  dls_id;                                                    /* Numéro ID du plugin D.L.S rattaché au message */
+    guint  dls_id;                                                           /* Numéro ID du plugin D.L.S rattaché au message */
     gchar  dls_shortname[NBR_CARAC_PLUGIN_DLS_UTF8+1];
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  libelle_audio[NBR_CARAC_LIBELLE_MSG_UTF8+1];
