@@ -57,6 +57,8 @@
     Cfg_http.ssl_enable        = FALSE; 
     Cfg_http.authenticate      = TRUE; 
     Cfg_http.nbr_max_connexion = HTTP_DEFAUT_MAX_CONNEXION;
+    Cfg_http.max_upload_bytes  = HTTP_DEFAUT_MAX_UPLOAD_BYTES;
+    Cfg_http.lws_debug_level   = HTTP_DEFAUT_LWS_DEBUG_LEVEL;
     g_snprintf( Cfg_http.ssl_cert_filepath,        sizeof(Cfg_http.ssl_cert_filepath), "%s", HTTP_DEFAUT_FILE_CERT );
     g_snprintf( Cfg_http.ssl_private_key_filepath, sizeof(Cfg_http.ssl_private_key_filepath), "%s", HTTP_DEFAUT_FILE_KEY );
     g_snprintf( Cfg_http.ssl_ca_filepath,          sizeof(Cfg_http.ssl_ca_filepath), "%s", HTTP_DEFAUT_FILE_CA  );
@@ -79,6 +81,10 @@
         { g_snprintf( Cfg_http.ssl_cipher_list, sizeof(Cfg_http.ssl_cipher_list), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "max_connexion" ) )
         { Cfg_http.nbr_max_connexion = atoi(valeur);  }
+       else if ( ! g_ascii_strcasecmp ( nom, "max_upload_bytes" ) )
+        { Cfg_http.max_upload_bytes = atoi(valeur);  }
+       else if ( ! g_ascii_strcasecmp ( nom, "lws_debug_level" ) )
+        { Cfg_http.lws_debug_level = atoi(valeur);  }
        else if ( ! g_ascii_strcasecmp ( nom, "ssl" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.ssl_enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "tcp_port" ) )
@@ -103,6 +109,31 @@
   { return(1);
   }
 /******************************************************************************************************************************/
+/* Http_CB_file_upload : Récupère les data de la requete POST en cours                                                        */
+/* Entrées : le contexte, le message, l'URL                                                                                   */
+/* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
+/******************************************************************************************************************************/
+ static gint Http_CB_file_upload( struct lws *wsi, char *buffer, int taille )
+  {	struct HTTP_PER_SESSION_DATA *pss;
+    pss = lws_wsi_user ( wsi );
+    
+    if (pss->post_data_length >= Cfg_http.max_upload_bytes)                  /* Si taille de fichier trop importante, on vire */
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "Http_CB_file_upload: (sid %.12s) file too long (%d/%d), aborting",
+                 Http_get_session_id(pss->session), pss->post_data_length, Cfg_http.max_upload_bytes );
+       return(1);
+     }
+
+    pss->post_data = g_try_realloc ( pss->post_data, pss->post_data_length + taille );
+    memcpy ( pss->post_data + pss->post_data_length, buffer, taille );
+    pss->post_data_length += taille;
+
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+             "Http_CB_file_upload: (sid %.12s) received %d bytes (total length=%d, max %d)",
+              Http_get_session_id(pss->session), taille, pss->post_data_length, Cfg_http.max_upload_bytes );
+    return 0;
+  }
+/******************************************************************************************************************************/
 /* CB_http : Gere les connexion HTTP pures (appellée par libwebsockets)                                                       */
 /* Entrées : le contexte, le message, l'URL                                                                                   */
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
@@ -122,8 +153,6 @@
                       "CB_http: connexion closed" );
             break;
        case LWS_CALLBACK_PROTOCOL_INIT:
-            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                      "CB_http: Protocol initialized !" );
             break;
        case LWS_CALLBACK_PROTOCOL_DESTROY:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
@@ -138,25 +167,20 @@
                       "CB_http: data received" );
 		          break;
        case LWS_CALLBACK_HTTP_BODY:
-             { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                         "CB_http: http body : receive %d bytes", taille );
-               if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
+             { if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
                 { return( Http_Traiter_request_body_login ( wsi, data, taille ) ); }
-
-             /*pss->post_data = g_try_realloc ( pss->post_data, pss->post_data_length + taille );
-               memcpy ( pss->post_data + pss->post_data_length, data, taille );
-               pss->post_data_length += taille;*/
+               else if ( ! strcasecmp ( pss->url, "/ws/postsvg" ) )
+                { return( Http_CB_file_upload( wsi, data, taille ) ); }
              }
             break;
        case LWS_CALLBACK_HTTP_BODY_COMPLETION:
              { lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
                                            (char *)&remote_name, sizeof(remote_name),
                                            (char *)&remote_ip, sizeof(remote_ip) );
-               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                         "CB_http: http body completion for %s!", pss->url );
-/*               pss->post_data[pss->post_data_length] = 0;                                            /* Caractere nul d'arret */
                if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
                 { return( Http_Traiter_request_body_completion_login ( wsi, remote_name, remote_ip ) ); }
+               else if ( ! strcasecmp ( pss->url, "/ws/postsvg" ) )
+                { return( Http_Traiter_request_body_completion_postsvg ( wsi ) ); }
               }
             break;
        case LWS_CALLBACK_HTTP:
@@ -167,8 +191,8 @@
                                         (char *)&remote_name, sizeof(remote_name),
                                         (char *)&remote_ip, sizeof(remote_ip) );
                session = Http_get_session ( wsi, remote_name, remote_ip );
-               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: Request from %s/%s (sid %8s): %s",
-                         remote_name, remote_ip, (session ? session->sid : "--------"), url );
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Request from %s/%s (sid %8s): %s",
+                         __func__, remote_name, remote_ip, Http_get_session_id(session), url );
                if (session) session->last_top = Partage->top;                                             /* Tagging temporel */
 
                if ( ! strcasecmp ( url, "/favicon.ico" ) )
@@ -191,8 +215,10 @@
                 { return( Http_Traiter_request_getsyn ( wsi, session ) ); }
                else if ( ! strncasecmp ( url, "/ws/gif/", 8 ) )
                 { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+8 ) ); }
-               else if ( ! strncasecmp ( url, "/ws/audio/", 7 ) )
+               else if ( ! strncasecmp ( url, "/ws/audio/", 10 ) )
                 { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
+               else if ( ! strcasecmp ( url, "/ws/postsvg" ) )
+                { return( Http_Traiter_request_postsvg ( session, wsi, remote_name, remote_ip ) ); }
                else                                                                                             /* Par défaut */
                 { return( Http_Traiter_request_getui ( wsi, remote_name, remote_ip, url+1 ) ); }
                return(1);                                                                    /* Par défaut, on clos la socket */
@@ -239,7 +265,7 @@
     g_snprintf( Cfg_http.lib->admin_prompt, sizeof(Cfg_http.lib->admin_prompt), NOM_THREAD );
     g_snprintf( Cfg_http.lib->admin_help,   sizeof(Cfg_http.lib->admin_help),   "Manage Web Services with external Devices" );
 
-    /*lws_set_log_level(debug_level, lwsl_emit_syslog);*/
+    lws_set_log_level(Cfg_http.lws_debug_level, lwsl_emit_syslog);
 
     Cfg_http.ws_info.iface = NULL;                                                      /* Configuration du serveur Websocket */
 	   Cfg_http.ws_info.protocols = WS_PROTOS;

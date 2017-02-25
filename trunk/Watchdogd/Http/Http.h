@@ -37,6 +37,8 @@
  #define HTTP_DEFAUT_SSL_CIPHER        "HIGH:NORMAL"
  #define HTTP_DEFAUT_MAX_CONNEXION     16
  #define HTTP_DEFAUT_TCP_PORT          5560
+ #define HTTP_DEFAUT_MAX_UPLOAD_BYTES  10240
+ #define HTTP_DEFAUT_LWS_DEBUG_LEVEL   0
 
  enum WS_PROTO
   {	/* always first */
@@ -54,6 +56,8 @@
     struct lws_context *ws_context;                                                                      /* Context WebSocket */
     
     gint nbr_max_connexion;                                           /* Nombre maximum de connexion autorisées simultanément */
+    gint max_upload_bytes;                                                                   /* Taille max du fichier uploadé */
+    gint lws_debug_level;                                                              /* Niveau de debug de la librairie LWS */
     gint tcp_port;                                           /* Port d'écoute TCP (HTTP ou HTTPS, selon le paramètre suivant) */
     gboolean ssl_enable;                                                                             /* TRUE si connexion SSL */
     gchar ssl_cipher_list[128];
@@ -67,6 +71,7 @@
  struct HTTP_PER_SESSION_DATA
   { gchar url[80];
     struct lws_spa *spa;
+    struct HTTP_SESSION *session;
     gchar *post_data;
     gint post_data_length;
   };
@@ -93,6 +98,7 @@
  extern gboolean Http_Traiter_request_getmnemo ( struct lws *wsi, struct HTTP_SESSION *session, gchar *url );
  
  extern struct HTTP_SESSION *Http_get_session ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
+ extern gchar *Http_get_session_id ( struct HTTP_SESSION *session );
  extern void Http_Check_sessions ( void );
  extern void Http_Liberer_session ( struct HTTP_SESSION *session );
  extern void Http_Close_session ( struct lws *wsi, struct HTTP_SESSION *session );
@@ -101,12 +107,7 @@
  extern gint Http_Traiter_request_body_login ( struct lws *wsi, void *data, size_t taille );
  extern gint Http_Traiter_request_body_completion_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
  
- /* extern gint Http_Traiter_request_getslash ( struct HTTP_SESSION *session, struct MHD_Connection *connection );
- extern gint Http_Traiter_request_getgif ( struct MHD_Connection *connection );
- extern gboolean Http_Traiter_request_setm ( struct HTTP_SESSION *session, struct MHD_Connection *connection );
- extern void Http_Add_response_header ( struct MHD_Response *response );
- extern void Http_free_liste_satellites ( void );
- extern void Http_Check_satellites_states ( void );
- extern void Http_Traiter_XML_set_internal ( struct HTTP_SESSION *session );*/
+ extern gint Http_Traiter_request_postsvg ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip );
+ extern gint Http_Traiter_request_body_completion_postsvg ( struct lws *wsi );
 #endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
