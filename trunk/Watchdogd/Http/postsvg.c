@@ -48,8 +48,8 @@
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
  static gboolean Save_SVG_to_disk ( struct HTTP_SESSION *session, gchar *xmldata, gint xmldata_length )
-  { gchar filename[80], description[128];
-    xmlChar *xml_id, *xml_description;
+  { gchar filename[80], description[128], classe[80];
+    xmlChar *xml_description, *xml_classe;
     xmlNode *root_node, node;
     gboolean check;
     xmlDocPtr doc;
@@ -73,15 +73,15 @@
        return(FALSE);
      }
 
-    xml_id = xmlGetProp(root_node, "wtd-id");
-    if (xml_id == NULL)
+    xml_classe = xmlGetProp(root_node, "wtd-classe");
+    if (xml_classe == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: (sid %.12s) Properties 'wtd-id' not found", __func__, Http_get_session_id(session) );
+                "%s: (sid %.12s) Properties 'wtd-classe' not found", __func__, Http_get_session_id(session) );
        xmlFreeDoc(doc);                                                                                        /* Parsing NOK */
        return(FALSE);
      }
-    id = atoi ( xml_id );
-    xmlFree(xml_id);
+    g_snprintf( classe, sizeof(classe), "%s", xml_classe );
+    xmlFree(xml_classe);
 
     xml_description = xmlGetProp(root_node, "wtd-description");
     if (xml_description == NULL)

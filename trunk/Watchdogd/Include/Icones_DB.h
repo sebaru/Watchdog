@@ -34,6 +34,8 @@
  #define NOM_TABLE_CLASSE     "class"
  #define NOM_TABLE_ICONE      "icons"
 
+ #define NOM_TABLE_ICONE_NEW  "icons_new"
+ 
  struct CLASSEDB
   { gchar libelle[NBR_CARAC_CLASSE_ICONE_UTF8+1];
     guint id;
@@ -61,5 +63,7 @@
  extern gboolean Modifier_classeDB( struct CMD_TYPE_CLASSE *classe );
  extern gint Icone_get_data_version ( void );
  extern void Icone_set_data_version ( void );
+ gint Ajouter_Modifier_iconenewDB( struct CMD_TYPE_ICONE_NEW *icone );
+
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

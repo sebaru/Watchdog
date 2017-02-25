@@ -584,7 +584,19 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=2994;
+    if (database_version < 3019)
+     { g_snprintf( requete, sizeof(requete),
+                  "CREATE TABLE IF NOT EXISTS `icons_new` ("
+                  "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                  "`description` VARCHAR(160) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
+                  "`classe` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT '0',"
+                  "KEY (`classe`),"
+                  "PRIMARY KEY (`id`)"
+                  ") ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    database_version=3019;
 
     Libere_DB_SQL(&db);
 
