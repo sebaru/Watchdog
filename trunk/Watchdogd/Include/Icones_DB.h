@@ -47,6 +47,12 @@
     guint id_classe;
   };
 
+ struct ICONEDBNEW
+  { guint id;                                                      /* Numero du message dans la structure */
+    gchar description[160];
+    gchar classe [80];
+  };
+  
 /*************************************** Définitions des prototypes ***************************************/
  extern struct ICONEDB *Rechercher_iconeDB ( guint id );
  extern gboolean Recuperer_iconeDB ( struct DB **db, guint classe );
@@ -63,7 +69,7 @@
  extern gboolean Modifier_classeDB( struct CMD_TYPE_CLASSE *classe );
  extern gint Icone_get_data_version ( void );
  extern void Icone_set_data_version ( void );
- gint Ajouter_Modifier_iconenewDB( struct CMD_TYPE_ICONE_NEW *icone );
+ extern gint Ajouter_Modifier_iconenewDB( struct ICONEDBNEW *icone );
 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

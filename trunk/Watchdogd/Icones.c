@@ -292,7 +292,7 @@
 /* Entrées: une structure referencant l'icone a ajouter ou modifier                                                           */
 /* Sortie: -1 si pb, nouvel id sinon                                                                                          */
 /******************************************************************************************************************************/
- gint Ajouter_Modifier_iconenewDB( struct CMD_TYPE_ICONE_NEW *icone )
+ gint Ajouter_Modifier_iconenewDB( struct ICONEDBNEW *icone )
   { gchar *description, *classe;
     gchar requete[1024];
     gboolean retour;
@@ -321,8 +321,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s (description,classe) VALUES ('%s',%s') "
-                "ON DUPLICATE KEY UPDATE classe=VALUES(classe)",
+                "INSERT INTO %s (description,classe) VALUES ('%s','%s') "
+                "ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id), classe=VALUES(classe)",
                 NOM_TABLE_ICONE_NEW, description, icone->classe );
     g_free(description);
     g_free(classe);

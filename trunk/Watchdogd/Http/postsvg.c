@@ -33,24 +33,16 @@
  #include "watchdogd.h"
  #include "Http.h"
 
- static const char *PARAM_POSTSVG[] =
-  { "replace", "id", "data" };
- enum
-  { PARAM_POSTSVG_REPLACE,
-    PARAM_POSTSVG_ID,
-    PARAM_POSTSVG_DATA,
-    NBR_PARAM_POSTSVG
-  };
-
 /******************************************************************************************************************************/
 /* Save_SVG_to_disk: Process le fichier recu et met a jour la base de données                                                 */
 /* Entrées: replace!=0 si remplacement, id=numéro de fichier, les XMLData, et XMLLength                                       */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
  static gboolean Save_SVG_to_disk ( struct HTTP_SESSION *session, gchar *xmldata, gint xmldata_length )
-  { gchar filename[80], description[128], classe[80];
-    xmlChar *xml_description, *xml_classe;
+  { xmlChar *xml_description, *xml_classe;
     xmlNode *root_node, node;
+    struct ICONEDBNEW icone;
+    gchar filename[80];
     gboolean check;
     xmlDocPtr doc;
     gint fd, id;
@@ -80,7 +72,7 @@
        xmlFreeDoc(doc);                                                                                        /* Parsing NOK */
        return(FALSE);
      }
-    g_snprintf( classe, sizeof(classe), "%s", xml_classe );
+    g_snprintf( icone.classe, sizeof(icone.classe), "%s", xml_classe );
     xmlFree(xml_classe);
 
     xml_description = xmlGetProp(root_node, "wtd-description");
@@ -90,11 +82,14 @@
        xmlFreeDoc(doc);                                                                                        /* Parsing NOK */
        return(FALSE);
      }
-    g_snprintf( description, sizeof(description), "%s", xml_description );
+    g_snprintf( icone.description, sizeof(icone.description), "%s", xml_description );
     xmlFree(xml_description);
 
     xmlFreeDoc(doc);                                /* Parsing OK, on peut libérer le doc et enregistrer le buffer sur disque */
 
+    id = Ajouter_Modifier_iconenewDB ( &icone );
+    if (id==-1) return(FALSE);
+    
     g_snprintf( filename, sizeof(filename), "Svg/%d.svg", id );
     unlink(filename);                                                                      /* Suppression de l'ancien fichier */
     fd = open( filename, O_CREAT | O_WRONLY, S_IWUSR | S_IRUSR );                       /* Enregistrement du nouveau document */
