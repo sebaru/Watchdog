@@ -51,11 +51,10 @@
     struct DB *db;
     gint retour;
 
-    type_s   = lws_get_urlarg_by_name	( wsi, "type=",   token_type,   sizeof(token_type) );
-    num_s    = lws_get_urlarg_by_name	( wsi, "num=",    token_num,    sizeof(token_num) );
-    start_s  = lws_get_urlarg_by_name	( wsi, "start=",  token_start,  sizeof(token_start) );
-    length_s = lws_get_urlarg_by_name	( wsi, "length=", token_length, sizeof(token_length) );
-
+    type_s   = lws_get_urlarg_by_name	( wsi, "type=",    token_type,    sizeof(token_type) );
+    num_s    = lws_get_urlarg_by_name	( wsi, "num=",     token_num,     sizeof(token_num) );
+    start_s  = lws_get_urlarg_by_name	( wsi, "start=",   token_start,   sizeof(token_start) );
+    length_s = lws_get_urlarg_by_name	( wsi, "length=",  token_length,  sizeof(token_length) );
     libelle  = lws_get_urlarg_by_name	( wsi, "libelle=", token_libelle, sizeof(token_libelle) );
     groupe   = lws_get_urlarg_by_name	( wsi, "groupe=",  token_groupe,  sizeof(token_groupe) );
     dls      = lws_get_urlarg_by_name	( wsi, "dls=",     token_dls,     sizeof(token_dls) );
@@ -65,6 +64,14 @@
      { g_snprintf( critere, sizeof(critere), " AND msg.type=%d", atoi(type_s) );
        g_strlcat( requete, critere, sizeof(requete) );
      }
+
+    if (start_s)
+     { start = atoi (start_s); }
+    else start=0;
+
+    if (length_s)
+     { length = atoi (length_s); }
+    else length=100;
 
     if (num_s)
      { g_snprintf( critere, sizeof(critere), " AND msg.num=%d", atoi(num_s) );
