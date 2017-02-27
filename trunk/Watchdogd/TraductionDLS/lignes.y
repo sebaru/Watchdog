@@ -614,7 +614,10 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                   {{ $$=New_action_tempo($2, $3);
                      Liberer_options($3);
                   }}
-                | CPT_H ENTIER                {{ $$=New_action_cpt_h($2);          }}
+                | CPT_H ENTIER liste_options
+                  {{ $$=New_action_cpt_h($2, $3);
+                     Liberer_options($3);
+                  }}
                 | CPT_IMP ENTIER liste_options
                   {{ $$=New_action_cpt_imp($2, $3);
                      Liberer_options($3);
@@ -712,7 +715,7 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                                         }
                                        else $$=New_action_mono( alias->num );        break;
 
-                         case CPT_H  : $$=New_action_cpt_h( alias->num );            break;
+                         case CPT_H  : $$=New_action_cpt_h( alias->num, options );   break;
                          case CPT_IMP: $$=New_action_cpt_imp( alias->num, options ); break;
                          case ICONE  : $$=New_action_icone( alias->num, options );   break;
                          default: { char *chaine;
