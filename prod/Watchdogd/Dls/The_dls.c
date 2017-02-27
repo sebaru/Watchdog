@@ -496,13 +496,16 @@
 /* Met à jour le compteur horaire                                                                         */
 /* Le compteur compte les MINUTES !!                                                                      */
 /**********************************************************************************************************/
- void SCH( int num, int etat )
+ void SCH( int num, int etat, int reset )
   { if (num<0 || num>=NBR_COMPTEUR_H)
      { Info_new( Config.log, Config.log_dls, LOG_INFO, "SCH : num %d out of range", num );
        return;
      }
     if (etat)
-     { if ( ! Partage->ch[ num ].actif )
+     { if (reset)                                                   /* Le compteur doit-il etre resetté ? */
+        { Partage->ch[num].confDB.valeur = 0; }
+
+       if ( ! Partage->ch[ num ].actif )
         { Partage->ch[num].actif = TRUE;
           Partage->ch[num].old_top = Partage->top;
         }

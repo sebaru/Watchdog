@@ -85,13 +85,13 @@
 /* Sortie: FALSE si pb                                                                                                        */
 /******************************************************************************************************************************/
  gboolean Groupe_get_groupe_utilDB( guint id, guint *gids )
-  { gchar requete[200];
+  { gchar requete[256];
     guint cpt;
     gboolean retour;
     struct DB *db;
 
-    g_snprintf( requete, sizeof(requete), "SELECT gids FROM %s WHERE id_util=%d ORDER BY gids DESC",
-                NOM_TABLE_GIDS, id );
+    g_snprintf( requete, sizeof(requete), "SELECT DISTINCT gids FROM %s WHERE id_util=%d OR %d=%d ORDER BY gids DESC",
+                NOM_TABLE_GIDS, id, id, UID_ROOT );                               /* Root est dans tous les groupes existants */
 
     db = Init_DB_SQL();       
     if (!db)

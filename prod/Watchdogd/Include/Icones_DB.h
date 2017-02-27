@@ -34,6 +34,8 @@
  #define NOM_TABLE_CLASSE     "class"
  #define NOM_TABLE_ICONE      "icons"
 
+ #define NOM_TABLE_ICONE_NEW  "icons_new"
+ 
  struct CLASSEDB
   { gchar libelle[NBR_CARAC_CLASSE_ICONE_UTF8+1];
     guint id;
@@ -45,6 +47,12 @@
     guint id_classe;
   };
 
+ struct ICONEDBNEW
+  { guint id;                                                      /* Numero du message dans la structure */
+    gchar description[160];
+    gchar classe [80];
+  };
+  
 /*************************************** Définitions des prototypes ***************************************/
  extern struct ICONEDB *Rechercher_iconeDB ( guint id );
  extern gboolean Recuperer_iconeDB ( struct DB **db, guint classe );
@@ -61,5 +69,7 @@
  extern gboolean Modifier_classeDB( struct CMD_TYPE_CLASSE *classe );
  extern gint Icone_get_data_version ( void );
  extern void Icone_set_data_version ( void );
+ extern gint Ajouter_Modifier_iconenewDB( struct ICONEDBNEW *icone );
+
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

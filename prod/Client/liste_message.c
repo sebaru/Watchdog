@@ -103,7 +103,7 @@
  gchar *Type_sms_vers_string ( guint32 type )
   { switch (type)
      { case MSG_SMS_NONE       : return( _("-- Aucun SMS --") );
-       case MSG_SMS_YES        : return( _("----- YES -----") );
+       case MSG_SMS_YES        : return( _("--- SMS YES ---") );
        case MSG_SMS_GSM_ONLY   : return( _("--- GSM ONLY --") );
        case MSG_SMS_SMSBOX_ONLY: return( _("- SMSBOX ONLY -") );
      }

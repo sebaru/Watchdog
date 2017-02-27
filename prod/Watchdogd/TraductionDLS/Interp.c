@@ -191,17 +191,18 @@
 /* Entrées: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- struct ACTION *New_action_cpt_h( int num )
+ struct ACTION *New_action_cpt_h( int num, GList *options )
   { struct ACTION *action;
-    int taille;
+    int taille, reset;
 
+    reset = Get_option_entier ( options, RESET ); if (reset == -1) reset = 0;
     taille = 15;
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
 
-    g_snprintf( action->alors, taille, "SCH(%d,1);", num );
-    g_snprintf( action->sinon, taille, "SCH(%d,0);", num );
+    g_snprintf( action->alors, taille, "SCH(%d,1,%d);", num, reset );
+    g_snprintf( action->sinon, taille, "SCH(%d,0,%d);", num, reset );
     return(action);
   }
 /******************************************************************************************************************************/

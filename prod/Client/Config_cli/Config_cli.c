@@ -120,7 +120,7 @@
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
               "Config user ------------- %s", config_cli->user );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
-              "Config passwd ----------- %s", config_cli->passwd );
+              "Config passwd ----------- ******" );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,
               "Config ssl_file_ca ------ %s", config_cli->ssl_file_ca );
     Info_new( config_cli->log, config_cli->log_override, LOG_INFO,

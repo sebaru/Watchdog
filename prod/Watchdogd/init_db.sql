@@ -561,6 +561,19 @@ INSERT INTO `icons` (`id`, `libelle`, `id_classe`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `icons_new`
+--
+
+CREATE TABLE IF NOT EXISTS `icons_new` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` VARCHAR(160) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
+  `classe` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT '0',
+  KEY (`classe`),
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
+
+
+--
 -- Structure de la table `mnemos`
 --
 
@@ -804,7 +817,7 @@ CREATE TABLE IF NOT EXISTS `rs485` (
 CREATE TABLE IF NOT EXISTS `mnemos_Tempo` (
   `id_mnemo` int(11) NOT NULL,
   `delai_on` int(11) NOT NULL DEFAULT '0',
-  `delai_off` tinyint(1) NOT NULL DEFAULT '0',
+  `delai_off` int(11) NOT NULL DEFAULT '0',
   `min_on` int(11) NOT NULL DEFAULT '0',
   `max_on` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id_mnemo`),

@@ -103,7 +103,7 @@ blanc         [\t ]+
 ","                        { Dls_lval.val = VIRGULE;     return VIRGULE;     }
 "("                        { Dls_lval.val = POUV;        return POUV;        }
 ")"                        { Dls_lval.val = PFERM;       return PFERM;       }
-"="                        { Dls_lval.val = EGAL;        return EGAL;        }
+"="                        { Dls_lval.val = T_EGAL;      return T_EGAL;      }
 "<->"                      { Dls_lval.val = EQUIV;       return EQUIV;       }
 "->"                       { Dls_lval.val = DONNE;       return DONNE;       }
 "<"                        { Dls_lval.val = INF;         return INF;         }

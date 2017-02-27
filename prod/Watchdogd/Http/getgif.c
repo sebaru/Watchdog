@@ -59,4 +59,26 @@
     if (retour != 0) return(1);                                           /* Si erreur (<0) ou si ok (>0), on ferme la socket */
     return(0);
   }
+/******************************************************************************************************************************/
+/* Http_Traiter_request_getsvg: Traite une requete sur l'URI getsvg                                                           */
+/* Entrées: la connexion MHD                                                                                                  */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ gint Http_Traiter_request_getsvg ( struct lws *wsi, struct HTTP_SESSION *session )
+  { gchar nom_fichier[80], token_id[12];
+    const gchar *id_s;
+    gint id, retour;
+    
+    id_s = lws_get_urlarg_by_name ( wsi, "id=", token_id, sizeof(token_id) );
+    if (id_s) { id = atoi ( id_s ); } else { return(1); }
+
+    g_snprintf( nom_fichier, sizeof(nom_fichier), "Svg/%d.svg", id );
+
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+             "%s : (sid %.12s) Sending file '%s'", __func__, Http_get_session_id(session), nom_fichier );
+
+    retour = lws_serve_http_file ( wsi, nom_fichier, "image/xml+svg", NULL, 0);
+    if (retour != 0) return(1);                                           /* Si erreur (<0) ou si ok (>0), on ferme la socket */
+    return(0);
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

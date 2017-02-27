@@ -287,4 +287,53 @@
                 "Icone_set_data_version: updating Database_version to %s FAILED", chaine );
      }
   }
+/******************************************************************************************************************************/
+/* Ajouter_Modifier_iconeDB: Ajoute ou modifie un icone Watchdog                                                              */
+/* Entrées: une structure referencant l'icone a ajouter ou modifier                                                           */
+/* Sortie: -1 si pb, nouvel id sinon                                                                                          */
+/******************************************************************************************************************************/
+ gint Ajouter_Modifier_iconenewDB( struct ICONEDBNEW *icone )
+  { gchar *description, *classe;
+    gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
+    gint id;
+
+    description = Normaliser_chaine ( icone->description );
+    if (!description)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible %s", __func__, icone->description );
+       return(-1);
+     }
+
+    classe = Normaliser_chaine ( icone->classe );
+    if (!classe)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible %s", __func__, icone->classe );
+       g_free(description);
+       return(-1);
+     }
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       g_free(description);
+       g_free(classe);
+       return(-1);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "INSERT INTO %s (description,classe) VALUES ('%s','%s') "
+                "ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id), classe=VALUES(classe)",
+                NOM_TABLE_ICONE_NEW, description, icone->classe );
+    g_free(description);
+    g_free(classe);
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if ( retour == FALSE )
+     { Libere_DB_SQL(&db); 
+       return(-1);
+     }
+    id = Recuperer_last_ID_SQL ( db );
+    Libere_DB_SQL(&db);
+    return(id);
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/
