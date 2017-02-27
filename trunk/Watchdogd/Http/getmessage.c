@@ -79,17 +79,17 @@
      }
 
     if (libelle)
-     { g_snprintf( critere, sizeof(critere), " AND msg.libelle LIKE '%s'", libelle );
+     { g_snprintf( critere, sizeof(critere), " AND syn.libelle LIKE '%s'", libelle );
        g_strlcat( requete, critere, sizeof(requete) );
      }
 
     if (dls)
-     { g_snprintf( critere, sizeof(critere), " AND msg.dls_shortname LIKE '%s'", dls );
+     { g_snprintf( critere, sizeof(critere), " AND dls.shortname LIKE '%s'", dls );
        g_strlcat( requete, critere, sizeof(requete) );
      }
 
     if (groupe)
-     { g_snprintf( critere, sizeof(critere), " AND (msg.syn_groupe LIKE '%s' OR msg.syn_page LIKE '%s' OR msg.syn_libelle LIKE '%s')",
+     { g_snprintf( critere, sizeof(critere), " AND (syn.groupe LIKE '%s' OR syn.page LIKE '%s' OR syn.libelle LIKE '%s')",
                    groupe, groupe, groupe );
        g_strlcat( requete, critere, sizeof(requete) );
      }
