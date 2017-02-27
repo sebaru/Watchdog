@@ -34,19 +34,20 @@
 
 extern int ligne_source_dls;                           /* Compteur du numero de ligne_source_dls en cours */
 int erreur;                                                             /* Compteur d'erreur du programme */
-#define  NON_DEFINI                  "Ligne %d: %s is not defined\n"
-#define  DEJA_DEFINI                 "Ligne %d: %s is already defined\n"
-#define  INTERDIT_GAUCHE             "Ligne %d: %s interdit en position gauche\n"
-#define  INTERDIT_DROITE             "Ligne %d: %s interdit en position droite\n"
-#define  INTERDIT_BARRE              "Ligne %d: Use of /%s forbidden\n"
-#define  INTERDIT_BARRE_DROITE       "Ligne %d: /%s interdit en position droite\n"
-#define  INTERDIT_REL_ORDRE          "Ligne %d: %s interdit dans la relation d'ordre\n"
-#define  INTERDIT_COMPARAISON        "Ligne %d: %s ne peut s'utiliser dans une comparaison\n"
-#define  INTERDIT_CALCUL             "Ligne %d: %s ne peut s'utiliser dans un calcul\n"
-#define  INTERDIT_CALCUL_RESULT      "Ligne %d: %s ne peut s'utiliser dans un résultat de calcul\n"
-#define  INTERDIT_BIT_B_RESERVED     "Ligne %d: Bistable système B%04d interdit en position droite\n"
-#define  MANQUE_COMPARAISON          "Ligne %d: %s doit s'utiliser dans une comparaison\n"
-#define  ERR_SYNTAXE                 "Ligne %d: Erreur de syntaxe -> %s\n"
+#define  NON_DEFINI                   "Ligne %d: %s is not defined\n"
+#define  DEJA_DEFINI                  "Ligne %d: %s is already defined\n"
+#define  INTERDIT_GAUCHE              "Ligne %d: %s interdit en position gauche\n"
+#define  INTERDIT_DROITE              "Ligne %d: %s interdit en position droite\n"
+#define  INTERDIT_BARRE               "Ligne %d: Use of /%s forbidden\n"
+#define  INTERDIT_BARRE_DROITE        "Ligne %d: /%s interdit en position droite\n"
+#define  INTERDIT_REL_ORDRE           "Ligne %d: %s interdit dans la relation d'ordre\n"
+#define  INTERDIT_COMPARAISON         "Ligne %d: %s ne peut s'utiliser dans une comparaison\n"
+#define  INTERDIT_CALCUL              "Ligne %d: %s ne peut s'utiliser dans un calcul\n"
+#define  INTERDIT_CALCUL_RESULT       "Ligne %d: %s ne peut s'utiliser dans un résultat de calcul\n"
+#define  INTERDIT_BIT_B_RESERVED      "Ligne %d: Bistable système B%04d interdit en position droite\n"
+#define  INTERDIT_COMPARAISON_EA_EGAL "Ligne %d: EA%d ne peut s'utiliser avec '='\n"
+#define  MANQUE_COMPARAISON           "Ligne %d: %s doit s'utiliser dans une comparaison\n"
+#define  ERR_SYNTAXE                  "Ligne %d: Erreur de syntaxe -> %s\n"
 
 
 %}
@@ -60,7 +61,7 @@ int erreur;                                                             /* Compt
          struct COMPARATEUR *comparateur;
        };
 
-%token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS POUV PFERM EGAL OU ET BARRE T_FOIS
+%token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS POUV PFERM T_EGAL OU ET BARRE T_FOIS
 %token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL T_TRUE T_FALSE
@@ -385,13 +386,25 @@ unite:          modulateur ENTIER HEURE ENTIER
                 }}
                | EANA ENTIER ordre VALF
                 {{ int taille;
-                   taille = 40;
-                   $$ = New_chaine( taille );
-                   switch( $3 )
-                    { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $4, $2 ); break;
-                      case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $4, $2 ); break;
-                      case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $4, $2 ); break;
-                      case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $4, $2 ); break;
+                   if ($3 == T_EGAL)
+                    { char *chaine;
+                      taille = 20 + strlen(INTERDIT_COMPARAISON_EA_EGAL) + 1;
+                      chaine = New_chaine(taille);
+                      g_snprintf(chaine, taille, INTERDIT_COMPARAISON_EA_EGAL, ligne_source_dls, $2 );
+                      Emettre_erreur(chaine); g_free(chaine);
+                      erreur++;
+                      $$=New_chaine(2);
+                      g_snprintf( $$, 2, "0" ); 
+                    }
+                   else
+                    { taille = 40;
+                      $$ = New_chaine( taille );
+                      switch( $3 )
+                       { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $4, $2 ); break;
+                         case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $4, $2 ); break;
+                         case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_T_EGAL(%f,%d)", $4, $2 ); break;
+                         case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_T_EGAL(%f,%d)", $4, $2 ); break;
+                       }
                     }
                 }}
                 | CPT_IMP ordre VALF
@@ -403,6 +416,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                       case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", $1, $3 );  break;
                       case INF_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", $1, $3 ); break;
                       case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", $1, $3 ); break;
+                      case T_EGAL     : g_snprintf( $$, taille, "CI(%d)==%f", $1, $3 ); break;
                     }
                 }}
                 | barre T_TEMPO ENTIER liste_options 
@@ -506,13 +520,25 @@ unite:          modulateur ENTIER HEURE ENTIER
                                          g_snprintf( $$, 2, "0" );                                      
                                        }
                                       else
-                                       { taille = 50;
-                                         $$ = New_chaine( taille ); /* 10 caractères max */
-                                         switch($4->type)
-                                          { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $4->valf, alias->num ); break;
-                                            case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $4->valf, alias->num ); break;
-                                            case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $4->valf, alias->num ); break;
-                                            case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $4->valf, alias->num ); break;
+                                       { char *chaine;
+                                         if ($4->type == T_EGAL)
+                                          { taille = 20 + strlen(INTERDIT_COMPARAISON_EA_EGAL) + 1;
+                                            chaine = New_chaine(taille);
+                                            g_snprintf(chaine, taille, INTERDIT_COMPARAISON_EA_EGAL, ligne_source_dls, alias->num );
+                                            Emettre_erreur(chaine); g_free(chaine);
+                                            erreur++;
+                                            $$=New_chaine(2);
+                                            g_snprintf( $$, 2, "0" ); 
+                                          }
+                                         else
+                                          { taille = 50;
+                                            $$ = New_chaine( taille ); /* 10 caractères max */
+                                            switch($4->type)
+                                             { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $4->valf, alias->num ); break;
+                                               case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $4->valf, alias->num ); break;
+                                               case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_T_EGAL(%f,%d)", $4->valf, alias->num ); break;
+                                               case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_T_EGAL(%f,%d)", $4->valf, alias->num ); break;
+                                             }
                                           }
                                        }
                                       break;
@@ -533,6 +559,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                                             case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", alias->num, $4->valf );  break;
                                             case INF_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", alias->num, $4->valf ); break;
                                             case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", alias->num, $4->valf ); break;
+                                            case T_EGAL     : g_snprintf( $$, taille, "CI(%d)==%f", alias->num, $4->valf ); break;
                                           }
                                        }
                                       break;
@@ -762,7 +789,7 @@ jour_semaine:   LUNDI        {{ $$=1; }}
                 | SAMEDI     {{ $$=6; }}
                 | DIMANCHE   {{ $$=0; }}
                 ;
-ordre:          INF | SUP | INF_OU_EGAL | SUP_OU_EGAL
+ordre:          INF | SUP | INF_OU_EGAL | SUP_OU_EGAL | T_EGAL
                 ;
 /********************************************* Gestion des options ****************************************/
 liste_options:  POUV options PFERM   {{ $$ = $2;   }}
@@ -775,32 +802,32 @@ options:        options VIRGULE une_option
                 | une_option    {{ $$ = g_list_append( NULL, $1 ); }}
                 ;
 
-une_option:     MODE EGAL ENTIER
+une_option:     MODE T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->type = MODE;
                    $$->entier = $3;
                 }}
-                | COLOR EGAL couleur
+                | COLOR T_EGAL couleur
                 {{ $$=New_option();
                    $$->type = COLOR;
                    $$->entier = $3;
                 }}
-                | CLIGNO EGAL ENTIER
+                | CLIGNO T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->type = CLIGNO;
                    $$->entier = $3;
                 }}
-                | CONSIGNE EGAL ENTIER
+                | CONSIGNE T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->type = CONSIGNE;
                    $$->entier = $3;
                 }}
-                | RESET EGAL ENTIER
+                | RESET T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->type = RESET;
                    $$->entier = $3;
                 }}
-                | RATIO EGAL ENTIER
+                | RATIO T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->type = RATIO;
                    $$->entier = $3;
