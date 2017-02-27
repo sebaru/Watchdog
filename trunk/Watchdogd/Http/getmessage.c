@@ -79,17 +79,17 @@
      }
 
     if (libelle)
-     { g_snprintf( critere, sizeof(critere), " AND syn.libelle LIKE '%s'", libelle );
+     { g_snprintf( critere, sizeof(critere), " AND syn.libelle LIKE '%%%s%%'", libelle );
        g_strlcat( requete, critere, sizeof(requete) );
      }
 
     if (dls)
-     { g_snprintf( critere, sizeof(critere), " AND dls.shortname LIKE '%s'", dls );
+     { g_snprintf( critere, sizeof(critere), " AND dls.shortname LIKE '%%%s%%'", dls );
        g_strlcat( requete, critere, sizeof(requete) );
      }
 
     if (groupe)
-     { g_snprintf( critere, sizeof(critere), " AND (syn.groupe LIKE '%s' OR syn.page LIKE '%s' OR syn.libelle LIKE '%s')",
+     { g_snprintf( critere, sizeof(critere), " AND (syn.groupe LIKE '%%%s%%' OR syn.page LIKE '%%%s%%' OR syn.libelle LIKE '%%%s%%')",
                    groupe, groupe, groupe );
        g_strlcat( requete, critere, sizeof(requete) );
      }
@@ -143,6 +143,7 @@
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_groupe", "%s", msg->syn_groupe );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_page", "%s", msg->syn_page );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_libelle", "%s", msg->syn_libelle );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"dls_shortname", "%s", msg->dls_shortname );
        xmlTextWriterEndElement(writer);                                                                        /* End message */
        g_free(msg);
      }
