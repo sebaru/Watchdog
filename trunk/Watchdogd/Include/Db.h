@@ -46,7 +46,7 @@
     gboolean free;                                                    /* Le resultat est-il free ou non ? */
     MYSQL_ROW row;
     gint id;
-    gchar requete[80];
+    gchar requete[256];
   };
 /************************************* Prototypes de fonctions ********************************************/
  extern gchar *Normaliser_chaine( gchar *pre_comment );

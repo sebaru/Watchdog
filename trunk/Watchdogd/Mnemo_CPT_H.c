@@ -170,7 +170,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Updater_cpthDB: Connexion DB impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
        return;
      }
 
@@ -183,5 +183,6 @@
        Lancer_requete_SQL ( db, requete );
      }
     Libere_DB_SQL( &db );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CptH updated", __func__ );
   }
 /*--------------------------------------------------------------------------------------------------------*/
