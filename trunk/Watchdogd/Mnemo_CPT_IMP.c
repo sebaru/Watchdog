@@ -144,8 +144,7 @@
        return;
      }
 
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    while ( db->row )
+    while ( Recuperer_ligne_SQL(db) )                                                      /* Chargement d'une ligne resultat */
      { gint num;
        num = atoi( db->row[0] );
        if (num < NBR_COMPTEUR_IMP)
@@ -160,9 +159,9 @@
        else
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
 			       "Charger_cpt_imp: num (%d) out of range (max=%d)", num, NBR_COMPTEUR_IMP ); }
-       Recuperer_ligne_SQL(db);                                                            /* Chargement d'une ligne resultat */
      }
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Charger_cpt_imp: DB reloaded" );
+    Libere_DB_SQL (&db);
   }
 /******************************************************************************************************************************/
 /* Ajouter_cpt_impDB: Ajout ou edition d'un entreeANA                                                                         */
