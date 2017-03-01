@@ -141,8 +141,7 @@
        return;
      }
 
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    while ( db->row )
+    while ( Recuperer_ligne_SQL(db) )                                                      /* Chargement d'une ligne resultat */
      { gint num;
        num = atoi( db->row[0] );
        if (num < NBR_COMPTEUR_H)
@@ -153,9 +152,9 @@
        else
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
 			       "Charger_cpth: num (%d) out of range (max=%d)", num, NBR_COMPTEUR_H ); }
-       Recuperer_ligne_SQL(db);                                                            /* Chargement d'une ligne resultat */
      }
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Charger_cpth: DB reloaded" );
+    Libere_DB_SQL (&db);
   }
 /******************************************************************************************************************************/
 /* Updater_cpthDB : Met à jour l'ensemble des CompteurHoraire dans la base de données                                         */
@@ -170,7 +169,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Updater_cpthDB: Connexion DB impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
        return;
      }
 
@@ -183,5 +182,6 @@
        Lancer_requete_SQL ( db, requete );
      }
     Libere_DB_SQL( &db );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CptH updated", __func__ );
   }
 /*--------------------------------------------------------------------------------------------------------*/
