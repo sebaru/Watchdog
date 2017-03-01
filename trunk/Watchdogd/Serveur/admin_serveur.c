@@ -183,7 +183,7 @@
      { Admin_ssrv_status ( connexion );
      } else
     if ( ! strcmp ( commande, "msgs" ) )
-     { Admin_ssrv_msgs ( connexion, ligne + 5, NULL );
+     { Admin_ssrv_msgs ( connexion, ligne + 5, "all" );
      } else
     if ( ! strcmp ( commande, "msg" ) )
      { gchar name[80];
