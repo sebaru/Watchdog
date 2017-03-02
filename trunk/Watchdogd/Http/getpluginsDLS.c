@@ -111,7 +111,7 @@ gchar token_length[12];
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"compil_status", "%d", dls->compil_status );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_groupe", "%s", dls->syn_groupe );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_page", "%s", dls->syn_page );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_page", "%s", dls->syn_id );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_id", "%d", dls->syn_id );
        xmlTextWriterEndElement(writer);                                                                        /* End Element */
        g_free(dls);
      }
