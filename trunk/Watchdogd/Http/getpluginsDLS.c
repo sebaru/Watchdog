@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Http/getmessage.c       Gestion des request getmessage pour le thread HTTP de watchdog                           */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                                    22.09.2016 14:18:41 */
+/* Watchdogd/Http/getpluginsDLS.c       Gestion des request Plugins DLS pour le thread HTTP de watchdog                       */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                                    02.03.2017 14:26:57 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * getmessage.c
+ * getpluginsDLS.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -33,31 +33,27 @@
  #include "watchdogd.h"
  #include "Http.h"
 /******************************************************************************************************************************/
-/* Http_Traiter_request_getmessage: Traite une requete sur l'URI message                                                      */
+/* Http_Traiter_request_getpluginsDLS: Traite une requete sur l'URI pluginDLS                                                 */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- gboolean Http_Traiter_request_getmessage ( struct lws *wsi, struct HTTP_SESSION *session )
-  { gchar token_length[12], token_start[12], token_type[12], token_num[12];
-    gchar token_dls[200], token_libelle[200],token_groupe[200];
-    const gchar *length_s, *start_s, *type_s, *num_s, *libelle, *groupe, *dls;
-    unsigned char header[256], *header_cur, *header_end;
+ gboolean Http_Traiter_request_getpluginsDLS ( struct lws *wsi, struct HTTP_SESSION *session )
+  { unsigned char header[256], *header_cur, *header_end;
    	const char *content_type = "application/xml";
     gchar requete[1024], critere[512];
-    struct CMD_TYPE_MESSAGE *msg;
-    gint type, start, length;
+    struct CMD_TYPE_PLUGIN_DLS *dls;
     xmlTextWriterPtr writer;
     xmlBufferPtr buf;
     struct DB *db;
     gint retour;
 
-    type_s   = lws_get_urlarg_by_name	( wsi, "type=",    token_type,    sizeof(token_type) );
-    num_s    = lws_get_urlarg_by_name	( wsi, "num=",     token_num,     sizeof(token_num) );
-    start_s  = lws_get_urlarg_by_name	( wsi, "start=",   token_start,   sizeof(token_start) );
-    length_s = lws_get_urlarg_by_name	( wsi, "length=",  token_length,  sizeof(token_length) );
-    libelle  = lws_get_urlarg_by_name	( wsi, "libelle=", token_libelle, sizeof(token_libelle) );
-    groupe   = lws_get_urlarg_by_name	( wsi, "groupe=",  token_groupe,  sizeof(token_groupe) );
-    dls      = lws_get_urlarg_by_name	( wsi, "dls=",     token_dls,     sizeof(token_dls) );
+/*
+
+gchar token_length[12];
+    const gchar *length_s;
+    gint length;
+
+        type_s   = lws_get_urlarg_by_name	( wsi, "shornttype=",    token_type,    sizeof(token_type) );
 
     g_snprintf( requete, sizeof(requete), "1=1" );
     if (type_s)
@@ -65,49 +61,25 @@
        g_strlcat( requete, critere, sizeof(requete) );
      }
 
-    if (start_s)
-     { start = atoi (start_s); }
-    else start=0;
-
-    if (length_s)
-     { length = atoi (length_s); }
-    else length=100;
-
     if (num_s)
      { g_snprintf( critere, sizeof(critere), " AND msg.num=%d", atoi(num_s) );
        g_strlcat( requete, critere, sizeof(requete) );
      }
 
-    if (libelle)
-     { g_snprintf( critere, sizeof(critere), " AND syn.libelle LIKE '%%%s%%'", libelle );
-       g_strlcat( requete, critere, sizeof(requete) );
-     }
-
-    if (dls)
-     { g_snprintf( critere, sizeof(critere), " AND dls.shortname LIKE '%%%s%%'", dls );
-       g_strlcat( requete, critere, sizeof(requete) );
-     }
-
-    if (groupe)
-     { g_snprintf( critere, sizeof(critere),
-                  " AND (syn.groupe LIKE '%%%s%%' OR syn.page LIKE '%%%s%%' OR syn.libelle LIKE '%%%s%%'"
-                       " OR dls_shortname LIKE '%%%s%%')",
-                   groupe, groupe, groupe, groupe );
-       g_strlcat( requete, critere, sizeof(requete) );
-     }
+*/
 
 /************************************************ Préparation du buffer XML ***************************************************/
     buf = xmlBufferCreate();                                                                        /* Creation du buffer xml */
     if (buf == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getmessage : XML Buffer creation failed" );
+                 "%s : XML Buffer creation failed", __func__ );
        return(FALSE);
      }
 
     writer = xmlNewTextWriterMemory(buf, 0);                                                         /* Creation du write XML */
     if (writer == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getmessage : XML Writer creation failed" );
+                 "%s : XML Writer creation failed", __func__ );
        xmlBufferFree(buf);
        return(FALSE);
      }
@@ -115,47 +87,40 @@
     retour = xmlTextWriterStartDocument(writer, NULL, "UTF-8", "yes" );                               /* Creation du document */
     if (retour < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getmessage : XML Start document failed" );
+                 "%s : XML Start document failed", __func__ );
        xmlBufferFree(buf);
        return(FALSE);
      }
                                                                       /* Lancement de la requete de recuperation des messages */
-    if ( ! Recuperer_messageDB_with_conditions( &db, requete, start, length ) )
+    if ( ! Recuperer_plugins_dlsDB(&db) )
      { xmlFreeTextWriter(writer);                                                                 /* Libération du writer XML */
        xmlBufferFree(buf);                                            /* Libération du buffer dont nous n'avons plus besoin ! */
        return(FALSE);
      }
     xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping messages !!");
-    xmlTextWriterStartElement(writer, (const unsigned char *) "Messages");
+    xmlTextWriterStartElement(writer, (const unsigned char *) "PluginsDLS");
 /*------------------------------------------------------- Dumping message ----------------------------------------------------*/
-    while ( (msg=Recuperer_messageDB_suite( &db )) != NULL )                     /* Mise en forme avant envoi au client léger */
-     { xmlTextWriterStartElement(writer, (const unsigned char *) "Message");
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"id", "%d", msg->id );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"num", "%d", msg->num );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"type", "%d", msg->type );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"enable", "%d", msg->enable );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"sms", "%d", msg->sms );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"bit_voc", "%d", msg->bit_voc );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"vitesse_voc", "%d", msg->vitesse_voc );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"type_voc", "%d", msg->type_voc );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"time_repeat", "%d", msg->time_repeat );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"libelle", "%s", msg->libelle );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"libelle_audio", "%s", msg->libelle_audio );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"libelle_sms", "%s", msg->libelle_sms );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_groupe", "%s", msg->syn_groupe );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_page", "%s", msg->syn_page );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_libelle", "%s", msg->syn_libelle );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"dls_id", "%d", msg->dls_id );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"dls_shortname", "%s", msg->dls_shortname );
-       xmlTextWriterEndElement(writer);                                                                        /* End message */
-       g_free(msg);
+    while ( (dls=Recuperer_plugins_dlsDB_suite( &db )) != NULL )                 /* Mise en forme avant envoi au client léger */
+     { xmlTextWriterStartElement(writer, (const unsigned char *) "PluginDLS");
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"id", "%d", dls->type );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"nom", "%s", dls->nom );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"shortname", "%s", dls->shortname );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"enable", "%d", dls->on );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"type", "%d", dls->type );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"compil_date", "%d", dls->compil_date );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"compil_status", "%d", dls->compil_status );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_groupe", "%s", dls->syn_groupe );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_page", "%s", dls->syn_page );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_page", "%s", dls->syn_id );
+       xmlTextWriterEndElement(writer);                                                                        /* End Element */
+       g_free(dls);
      }
     xmlTextWriterEndElement(writer);                                                                          /* End messages */
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"Dumping messages done !");
+    xmlTextWriterWriteComment(writer, (const unsigned char *)"Dumping Plugins done !");
     retour = xmlTextWriterEndDocument(writer);                                                                /* End document */
     if (retour < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getmessage : Failed to end Document" );
+                 "%s : Failed to end Document", __func__ );
        xmlFreeTextWriter(writer);                                                                 /* Libération du writer XML */
        xmlBufferFree(buf);
        return(FALSE);

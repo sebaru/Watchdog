@@ -209,6 +209,8 @@
                 { Http_Traiter_request_getstatus ( wsi ); }
                else if ( ! strncasecmp ( url, "/ws/messages", 12 ) )
                 { return( Http_Traiter_request_getmessage ( wsi, session ) ); }
+               else if ( ! strncasecmp ( url, "/ws/getpluginsDLS", 17 ) )
+                { return( Http_Traiter_request_getpluginsDLS ( wsi, session ) ); }
                else if ( ! strncasecmp ( url, "/ws/getmnemo", 13 ) )
                 { return( Http_Traiter_request_getmnemo ( wsi, session, url+13 ) ); }
                else if ( ! strncasecmp ( url, "/ws/getsyn", 11 ) )
