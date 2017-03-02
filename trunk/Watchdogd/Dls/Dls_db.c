@@ -170,13 +170,11 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT %s.id,%s.name,%s.shortname,actif,type,syn_id,groupe,page,compil_date,compil_status"
-                " FROM %s,%s"
-                " WHERE %s.syn_id = %s.id"
-                " ORDER BY groupe,page,name",
-                NOM_TABLE_DLS, NOM_TABLE_DLS, NOM_TABLE_DLS,
-                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, /* From */
-                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE /* Where */
+                "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.type,dls.syn_id,syn.groupe,syn.page,dls.compil_date,dls.compil_status"
+                " FROM %s as dls,%s as syn"
+                " WHERE dls.syn_id = syn.id"
+                " ORDER BY groupe,page,shortname",
+                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE
               );
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if (retour == FALSE) Libere_DB_SQL (&db);
