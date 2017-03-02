@@ -102,7 +102,7 @@ gchar token_length[12];
 /*------------------------------------------------------- Dumping message ----------------------------------------------------*/
     while ( (dls=Recuperer_plugins_dlsDB_suite( &db )) != NULL )                 /* Mise en forme avant envoi au client léger */
      { xmlTextWriterStartElement(writer, (const unsigned char *) "PluginDLS");
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"id", "%d", dls->type );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"id", "%d", dls->id );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"nom", "%s", dls->nom );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"shortname", "%s", dls->shortname );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"enable", "%d", dls->on );
