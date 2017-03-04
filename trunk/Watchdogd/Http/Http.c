@@ -195,7 +195,7 @@
                                         (char *)&remote_name, sizeof(remote_name),
                                         (char *)&remote_ip, sizeof(remote_ip) );
                session = Http_get_session ( wsi, remote_name, remote_ip );
-               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Request from %s/%s (sid %8s): %s",
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Request from %s/%s (sid %.12s): %s",
                          __func__, remote_name, remote_ip, Http_get_session_id(session), url );
                if (session) session->last_top = Partage->top;                                             /* Tagging temporel */
 
@@ -211,9 +211,11 @@
                 { if (session) Http_Close_session ( wsi, session ); }
                else if ( ! strcasecmp ( url, "/ws/status" ) )
                 { Http_Traiter_request_getstatus ( wsi ); }
-               else if ( ! strncasecmp ( url, "/ws/messages", 12 ) )
+               else if ( ! strcasecmp ( url, "/ws/messages" ) )
                 { return( Http_Traiter_request_getmessage ( wsi, session ) ); }
-               else if ( ! strncasecmp ( url, "/ws/getpluginsDLS", 17 ) )
+               else if ( ! strcasecmp ( url, "/ws/setmessage" ) )
+                { return( Http_Traiter_request_getmessage ( wsi, session ) ); }
+               else if ( ! strcasecmp ( url, "/ws/getpluginsDLS" ) )
                 { return( Http_Traiter_request_getpluginsDLS ( wsi, session ) ); }
                else if ( ! strncasecmp ( url, "/ws/getmnemo", 13 ) )
                 { return( Http_Traiter_request_getmnemo ( wsi, session, url+13 ) ); }
