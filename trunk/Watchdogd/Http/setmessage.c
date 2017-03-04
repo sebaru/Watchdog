@@ -48,7 +48,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : 0 ou 1 selon si la transaction est completed                                                                      */
 /******************************************************************************************************************************/
- gint Http_Traiter_request_body_completion_set_message ( struct lws *wsi )
+ gint Http_Traiter_request_body_completion_setmessage ( struct lws *wsi )
   { unsigned char header[512], *header_cur, *header_end;
     struct HTTP_PER_SESSION_DATA *pss;
     JsonNode *root_node;
