@@ -214,7 +214,7 @@
                else if ( ! strcasecmp ( url, "/ws/messages" ) )
                 { return( Http_Traiter_request_getmessage ( wsi, session ) ); }
                else if ( ! strcasecmp ( url, "/ws/setmessage" ) )
-                { return( Http_Traiter_request_setmessage ( wsi, session ) ); }
+                { return( Http_Traiter_request_setmessage ( wsi, session, remote_name, remote_ip ) ); }
                else if ( ! strcasecmp ( url, "/ws/getpluginsDLS" ) )
                 { return( Http_Traiter_request_getpluginsDLS ( wsi, session ) ); }
                else if ( ! strncasecmp ( url, "/ws/getmnemo", 13 ) )
