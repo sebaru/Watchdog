@@ -171,6 +171,8 @@
                 { return( Http_Traiter_request_body_login ( wsi, data, taille ) ); }
                else if ( ! strcasecmp ( pss->url, "/ws/postsvg" ) )
                 { return( Http_CB_file_upload( wsi, data, taille ) ); }
+               else if ( ! strcasecmp ( pss->url, "/ws/setmessage" ) )
+                { return( Http_CB_file_upload( wsi, data, taille ) ); }
              }
             break;
        case LWS_CALLBACK_HTTP_BODY_COMPLETION:
@@ -181,6 +183,8 @@
                 { return( Http_Traiter_request_body_completion_login ( wsi, remote_name, remote_ip ) ); }
                else if ( ! strcasecmp ( pss->url, "/ws/postsvg" ) )
                 { return( Http_Traiter_request_body_completion_postsvg ( wsi ) ); }
+               else if ( ! strcasecmp ( pss->url, "/ws/setmessage" ) )
+                { return( Http_Traiter_request_body_completion_setmessage ( wsi ) ); }
               }
             break;
        case LWS_CALLBACK_HTTP:
@@ -222,7 +226,7 @@
                else if ( ! strncasecmp ( url, "/ws/audio/", 10 ) )
                 { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
                else if ( ! strcasecmp ( url, "/ws/postsvg" ) )
-                { return( Http_Traiter_request_postsvg ( session, wsi, remote_name, remote_ip ) ); }
+                { return( Http_Traiter_request_postsvg ( wsi, session, remote_name, remote_ip ) ); }
                else                                                                                             /* Par défaut */
                 { return( Http_Traiter_request_getui ( wsi, remote_name, remote_ip, url+1 ) ); }
                return(1);                                                                    /* Par défaut, on clos la socket */
