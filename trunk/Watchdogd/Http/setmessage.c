@@ -95,12 +95,12 @@
 
        msg = (struct CMD_TYPE_MESSAGE *)g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
        if (msg)
-        { msg->id          = json_node_get_int ( json_object_get_member (object, "id" ) );
-          msg->num         = json_node_get_int ( json_object_get_member (object, "num" ) );
-          msg->dls_id      = json_node_get_int ( json_object_get_member (object, "dls_id" ) );
-          msg->time_repeat = json_node_get_int ( json_object_get_member (object, "time_repeat" ) );
-          msg->sms         = json_node_get_int ( json_object_get_member (object, "sms" ) );
-          msg->enable      = json_node_get_boolean ( json_object_get_member (object, "enable" ) );
+        { msg->id          = atoi( json_node_get_string ( json_object_get_member (object, "id" ) ) );
+          msg->num         = atoi( json_node_get_string ( json_object_get_member (object, "num" ) ) );
+          msg->dls_id      = atoi( json_node_get_string ( json_object_get_member (object, "dls_id" ) ) );
+          msg->time_repeat = atoi( json_node_get_string ( json_object_get_member (object, "time_repeat" ) ) );
+          msg->sms         = atoi( json_node_get_string ( json_object_get_member (object, "sms" ) ) );
+          msg->enable      = atoi( json_node_get_string ( json_object_get_member (object, "enable" ) ) );
           g_snprintf( msg->libelle, sizeof(msg->libelle), "%s",
                       json_node_get_string ( json_object_get_member (object, "libelle" ) ) );
           g_snprintf( msg->libelle_sms, sizeof(msg->libelle_sms), "%s",
