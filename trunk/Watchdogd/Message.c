@@ -96,7 +96,7 @@
                 "type,bit_voc,enable,sms,type_voc,vitesse_voc,time_repeat,dls_id) VALUES "
                 "(%d,'%s','%s','%s',%d,%d,%d,%d,%d,%d,%d,%d)", NOM_TABLE_MSG, msg->num,
                 libelle, libelle_audio, libelle_sms, msg->type,
-                msg->bit_voc, (msg->enable ? "1" : "0"),
+                msg->bit_voc, (msg->enable ? 1 : 0),
                 msg->sms, msg->type_voc, msg->vitesse_voc, msg->time_repeat, msg->dls_id
               );
     g_free(libelle);
@@ -315,7 +315,7 @@
                 "libelle_audio='%s',libelle_sms='%s',type_voc=%d,vitesse_voc=%d,time_repeat=%d,dls_id=%d "
                 "WHERE id=%d",
                 NOM_TABLE_MSG, msg->num, libelle, msg->type, msg->bit_voc,
-                               (msg->enable ? "1" : "0"), msg->sms,
+                               (msg->enable ? 1 : 0), msg->sms,
                                libelle_audio, libelle_sms, msg->type_voc, msg->vitesse_voc,
                                msg->time_repeat, msg->dls_id,
                 msg->id );

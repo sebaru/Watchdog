@@ -79,10 +79,6 @@
      }
 
     root_node = json_parser_get_root (parser);
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %.12s) Received: type_name=%s, node_type=%d", __func__, Http_get_session_id(pss->session),
-              json_node_type_name (root_node), json_node_get_node_type (root_node)
-            );
     if (json_node_get_node_type (root_node) == JSON_NODE_OBJECT)
      { struct CMD_TYPE_MESSAGE *msg;
        JsonObject *object;
@@ -97,6 +93,7 @@
        if (msg)
         { msg->id          = atoi( json_node_get_string ( json_object_get_member (object, "id" ) ) );
           msg->num         = atoi( json_node_get_string ( json_object_get_member (object, "num" ) ) );
+          msg->type        = atoi( json_node_get_string ( json_object_get_member (object, "type" ) ) );
           msg->dls_id      = atoi( json_node_get_string ( json_object_get_member (object, "dls_id" ) ) );
           msg->time_repeat = atoi( json_node_get_string ( json_object_get_member (object, "time_repeat" ) ) );
           msg->sms         = atoi( json_node_get_string ( json_object_get_member (object, "sms" ) ) );
@@ -113,15 +110,18 @@
                    "%s: (sid %.12s) Memory Error", __func__, Http_get_session_id(pss->session) );
         }
      }
-
+    else
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                "%s: (sid %.12s) Received wrong node_type=%d (%s)", __func__, Http_get_session_id(pss->session),
+                 json_node_get_node_type (root_node), json_node_type_name (root_node) );
+     }
     g_object_unref(parser);                                                                      /* Libération du parser Json */
 end:
+    g_free(pss->post_data);
     retour = lws_add_http_header_status( wsi, code, &header_cur, header_end );
     retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
     *header_cur='\0';                                                                               /* Caractere null d'arret */
     lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-
-    g_free(pss->post_data);
     pss->post_data_length = 0;
     return(lws_http_transaction_completed(wsi));
   }
