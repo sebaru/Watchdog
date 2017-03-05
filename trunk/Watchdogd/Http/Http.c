@@ -107,19 +107,24 @@
 /******************************************************************************************************************************/
  gint Http_json_get_int ( JsonObject *object, gchar *name )
   { JsonNode *node;
+    GValue valeur = G_VALUE_INIT;
 
     if (!object) return(-1);
     node = json_object_get_member(object, name );
     if(!node) return(-1);
     if(json_node_get_node_type (node) != JSON_NODE_VALUE) return(-1);
-    switch( json_node_get_value_type (node) )
-     { case G_TYPE_INT:
+    json_node_get_value (node, &valeur);
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+             "%s: Parsing value type %d ('%s') for attribut '%s'", __func__, G_VALUE_TYPE(&valeur), G_VALUE_TYPE_NAME(&valeur), name );
+    switch( G_VALUE_TYPE(&valeur) )             
+     { case G_TYPE_INT64:
+       case G_TYPE_INT:
             return( json_node_get_int ( node ) );
        case G_TYPE_STRING:
             return (atoi ( json_node_get_string(node) ));
        default:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                     "%s: Valeur type unknown (%d) for name %s", __func__, json_node_get_value_type (node), name );
+                     "%s: Valeur type unknown (%d) for name '%s'", __func__, json_node_get_value_type (node), name );
      }
     return(-1);
   }
