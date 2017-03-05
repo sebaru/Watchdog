@@ -119,7 +119,7 @@
             return (atoi ( json_node_get_string(node) ));
        default:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                     "%s: Valeur type unknown: %d", __func__, json_node_get_value_type (node) );
+                     "%s: Valeur type unknown (%d) for name %s", __func__, json_node_get_value_type (node), name );
      }
     return(-1);
   }
