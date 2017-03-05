@@ -91,13 +91,13 @@
 
        msg = (struct CMD_TYPE_MESSAGE *)g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
        if (msg)
-        { msg->id          = atoi( json_node_get_string ( json_object_get_member (object, "id" ) ) );
-          msg->num         = atoi( json_node_get_string ( json_object_get_member (object, "num" ) ) );
-          msg->type        = atoi( json_node_get_string ( json_object_get_member (object, "type" ) ) );
-          msg->dls_id      = atoi( json_node_get_string ( json_object_get_member (object, "dls_id" ) ) );
-          msg->time_repeat = atoi( json_node_get_string ( json_object_get_member (object, "time_repeat" ) ) );
-          msg->sms         = atoi( json_node_get_string ( json_object_get_member (object, "sms" ) ) );
-          msg->enable      = atoi( json_node_get_string ( json_object_get_member (object, "enable" ) ) );
+        { msg->id          = Http_json_get_int (object, "id");
+          msg->num         = Http_json_get_int (object, "num");
+          msg->type        = Http_json_get_int (object, "type");
+          msg->dls_id      = Http_json_get_int (object, "dls_id");
+          msg->time_repeat = Http_json_get_int (object, "time_repeat");
+          msg->sms         = Http_json_get_int (object, "sms");
+          msg->enable      = Http_json_get_int (object, "enable");
           g_snprintf( msg->libelle, sizeof(msg->libelle), "%s",
                       json_node_get_string ( json_object_get_member (object, "libelle" ) ) );
           g_snprintf( msg->libelle_sms, sizeof(msg->libelle_sms), "%s",

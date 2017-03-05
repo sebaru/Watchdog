@@ -101,6 +101,29 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Http_json_get_int : Récupère un entier dans l'object JSON passé en paramètre, dont le nom est name                         */
+/* Entrées : l'object JSON et le name                                                                                         */
+/* Sortie : un entier, ou -1 si erreur                                                                                        */
+/******************************************************************************************************************************/
+ gint Http_json_get_int ( JsonObject *object, gchar *name )
+  { JsonNode *node;
+
+    if (!object) return(-1);
+    node = json_object_get_member(object, name );
+    if(!node) return(-1);
+    if(json_node_get_node_type (node) != JSON_NODE_VALUE) return(-1);
+    switch( json_node_get_value_type (node) )
+     { case G_TYPE_INT:
+            return( json_node_get_int ( node ) );
+       case G_TYPE_STRING:
+            return (atoi ( json_node_get_string(node) ));
+       default:
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                     "%s: Valeur type unknown: %d", __func__, json_node_get_value_type (node) );
+     }
+    return(-1);
+  }
+/******************************************************************************************************************************/
 /* CB_ws_login : Gere le protocole WS status (appellée par libwebsockets)                                                    */
 /* Entrées : le contexte, le message, l'URL                                                                                   */
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
