@@ -66,11 +66,15 @@
     code = 500;
     parser = json_parser_new();                                                                    /* Creation du parser JSON */
     if (!parser)
-     { goto end;
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+             "%s: (sid %.12s) Parser Creation Error", __func__, Http_get_session_id(pss->session) );
+       goto end;
      }
 
     if ( json_parser_load_from_data ( parser, pss->post_data, pss->post_data_length, NULL ) == FALSE )           /* Parsing ! */
-     { g_object_unref(parser);
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+             "%s: (sid %.12s) Parsing Error", __func__, Http_get_session_id(pss->session) );
+       g_object_unref(parser);
        goto end;
      }
 
