@@ -28,6 +28,7 @@
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
  #include "Http.h"
+
 /******************************************************************************************************************************/
 /* Http_Traiter_request_setmessage: Traite une requete sur l'URI message                                                      */
 /* Entrées: la connexion Websocket                                                                                            */
@@ -78,7 +79,36 @@
              "%s: (sid %.12s) Received: type_name=%s, node_type=%d", __func__, Http_get_session_id(pss->session),
               json_node_type_name (root_node), json_node_get_node_type (root_node)
             );
-    code = 200;
+    if (json_node_get_node_type (root_node) == JSON_NODE_OBJECT)
+     { struct CMD_TYPE_MESSAGE *msg;
+       JsonObject *object;
+       JsonNode *node;
+
+       object = json_node_get_object (root_node);
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                "%s: (sid %.12s) Received: object with %d members", __func__, Http_get_session_id(pss->session),
+                json_object_get_size (object) );
+
+       msg = (struct CMD_TYPE_MESSAGE *)g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
+       if (msg)
+        { msg->id          = json_node_get_int ( json_object_get_member (object, "id" ) );
+          msg->num         = json_node_get_int ( json_object_get_member (object, "num" ) );
+          msg->dls_id      = json_node_get_int ( json_object_get_member (object, "dls_id" ) );
+          msg->time_repeat = json_node_get_int ( json_object_get_member (object, "time_repeat" ) );
+          msg->sms         = json_node_get_int ( json_object_get_member (object, "sms" ) );
+          msg->enable      = json_node_get_boolean ( json_object_get_member (object, "enable" ) );
+          g_snprintf( msg->libelle, sizeof(msg->libelle), "%s",
+                      json_node_get_string ( json_object_get_member (object, "libelle" ) ) );
+          g_snprintf( msg->libelle_sms, sizeof(msg->libelle_sms), "%s",
+                      json_node_get_string ( json_object_get_member (object, "libelle_sms" ) ) );
+          if ( Modifier_messageDB(msg) == TRUE ) code = 200;
+          g_free(msg);
+        }
+       else
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                   "%s: (sid %.12s) Memory Error", __func__, Http_get_session_id(pss->session) );
+        }
+     }
 
     g_object_unref(parser);                                                                      /* Libération du parser Json */
 end:
