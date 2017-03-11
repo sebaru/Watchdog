@@ -117,9 +117,11 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
              "%s: Parsing value type %d ('%s') for attribut '%s'", __func__, G_VALUE_TYPE(&valeur), G_VALUE_TYPE_NAME(&valeur), name );
     switch( G_VALUE_TYPE(&valeur) )             
-     { case G_TYPE_INT64:
+     { case G_TYPE_BOOLEAN:
+            return( json_node_get_boolean(node) );
+       case G_TYPE_INT64:
        case G_TYPE_INT:
-            return( json_node_get_int ( node ) );
+            return( json_node_get_int(node) );
        case G_TYPE_STRING:
             return (atoi ( json_node_get_string(node) ));
        default:

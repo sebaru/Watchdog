@@ -123,6 +123,6 @@ end:
     *header_cur='\0';                                                                               /* Caractere null d'arret */
     lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
     pss->post_data_length = 0;
-    return(lws_http_transaction_completed(wsi));
+    return(1);                                         /* on clos direct la connexion -- lws_http_transaction_completed(wsi));*/
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

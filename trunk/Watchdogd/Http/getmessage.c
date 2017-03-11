@@ -119,8 +119,8 @@
        json_builder_begin_object (builder);                                                             /* Contenu du Message */
 
        json_builder_set_member_name  ( builder, "id" );            json_builder_add_int_value    ( builder, msg->id );
-       json_builder_set_member_name  ( builder, "type" );          json_builder_add_int_value    ( builder, msg->id );
-       json_builder_set_member_name  ( builder, "enable" );        json_builder_add_boolean_value( builder, msg->id );
+       json_builder_set_member_name  ( builder, "type" );          json_builder_add_int_value    ( builder, msg->type );
+       json_builder_set_member_name  ( builder, "enable" );        json_builder_add_boolean_value( builder, msg->enable );
        json_builder_set_member_name  ( builder, "num" );           json_builder_add_int_value    ( builder, msg->num );
        json_builder_set_member_name  ( builder, "sms" );           json_builder_add_int_value    ( builder, msg->sms );
        json_builder_set_member_name  ( builder, "bit_voc" );       json_builder_add_int_value    ( builder, msg->bit_voc );
