@@ -81,7 +81,7 @@
      }
 
     if (libelle)
-     { g_snprintf( critere, sizeof(critere), " AND syn.libelle LIKE '%%%s%%'", libelle );
+     { g_snprintf( critere, sizeof(critere), " AND msg.libelle LIKE '%%%s%%'", libelle );
        g_strlcat( requete, critere, sizeof(requete) );
      }
 
