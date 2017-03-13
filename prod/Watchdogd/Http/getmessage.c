@@ -42,14 +42,16 @@
     gchar token_dls[200], token_libelle[200],token_groupe[200];
     const gchar *length_s, *start_s, *type_s, *num_s, *libelle, *groupe, *dls;
     unsigned char header[256], *header_cur, *header_end;
-   	const char *content_type = "application/xml";
+   	const char *content_type = "application/json";
     gchar requete[1024], critere[512];
     struct CMD_TYPE_MESSAGE *msg;
     gint type, start, length;
-    xmlTextWriterPtr writer;
-    xmlBufferPtr buf;
     struct DB *db;
     gint retour;
+    JsonBuilder *builder;
+    JsonGenerator *gen;
+    gchar *buf;
+    gsize taille_buf;
 
     type_s   = lws_get_urlarg_by_name	( wsi, "type=",    token_type,    sizeof(token_type) );
     num_s    = lws_get_urlarg_by_name	( wsi, "num=",     token_num,     sizeof(token_num) );
@@ -89,11 +91,63 @@
      }
 
     if (groupe)
-     { g_snprintf( critere, sizeof(critere), " AND (syn.groupe LIKE '%%%s%%' OR syn.page LIKE '%%%s%%' OR syn.libelle LIKE '%%%s%%')",
-                   groupe, groupe, groupe );
+     { g_snprintf( critere, sizeof(critere),
+                  " AND (syn.groupe LIKE '%%%s%%' OR syn.page LIKE '%%%s%%' OR syn.libelle LIKE '%%%s%%'"
+                       " OR dls_shortname LIKE '%%%s%%')",
+                   groupe, groupe, groupe, groupe );
        g_strlcat( requete, critere, sizeof(requete) );
      }
 
+/************************************************ Préparation du buffer XML ***************************************************/
+    builder = json_builder_new ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                 "Http_Traiter_request_getmessage : JSon builder creation failed" );
+       return(FALSE);
+     }
+                                                                      /* Lancement de la requete de recuperation des messages */
+    if ( ! Recuperer_messageDB_with_conditions( &db, requete, start, length ) )
+     { g_object_unref(builder);
+       return(FALSE);
+     }
+/*------------------------------------------------------- Dumping message ----------------------------------------------------*/
+    json_builder_begin_object (builder);                                                        /* Création du noeud principal */
+    json_builder_set_member_name  ( builder, "Messages" );
+    json_builder_begin_array (builder);                                                        /* Création du noeud principal */
+    while ( (msg=Recuperer_messageDB_suite( &db )) != NULL )                     /* Mise en forme avant envoi au client léger */
+     { 
+       json_builder_begin_object (builder);                                                             /* Contenu du Message */
+
+       json_builder_set_member_name  ( builder, "id" );            json_builder_add_int_value    ( builder, msg->id );
+       json_builder_set_member_name  ( builder, "type" );          json_builder_add_int_value    ( builder, msg->type );
+       json_builder_set_member_name  ( builder, "enable" );        json_builder_add_boolean_value( builder, msg->enable );
+       json_builder_set_member_name  ( builder, "num" );           json_builder_add_int_value    ( builder, msg->num );
+       json_builder_set_member_name  ( builder, "sms" );           json_builder_add_int_value    ( builder, msg->sms );
+       json_builder_set_member_name  ( builder, "bit_voc" );       json_builder_add_int_value    ( builder, msg->bit_voc );
+       json_builder_set_member_name  ( builder, "time_repeat" );   json_builder_add_int_value    ( builder, msg->time_repeat );
+       json_builder_set_member_name  ( builder, "dls_id" );        json_builder_add_int_value    ( builder, msg->dls_id );
+       json_builder_set_member_name  ( builder, "libelle" );       json_builder_add_string_value ( builder, msg->libelle );
+       json_builder_set_member_name  ( builder, "libelle_sms" );   json_builder_add_string_value ( builder, msg->libelle_sms );
+       json_builder_set_member_name  ( builder, "syn_groupe" );    json_builder_add_string_value ( builder, msg->syn_groupe );
+       json_builder_set_member_name  ( builder, "syn_page" );      json_builder_add_string_value ( builder, msg->syn_page );
+       json_builder_set_member_name  ( builder, "syn_libelle" );   json_builder_add_string_value ( builder, msg->syn_libelle );
+       json_builder_set_member_name  ( builder, "dls_shortname" ); json_builder_add_string_value ( builder, msg->dls_shortname );
+
+       json_builder_end_object (builder);                                                              /* Fin dump du message */
+       g_free(msg);
+     }
+    json_builder_end_array (builder);                                                                         /* End Document */
+    json_builder_end_object (builder);                                                                         /* End Document */
+
+    gen = json_generator_new ();
+    json_generator_set_root ( gen, json_builder_get_root(builder) );
+    json_generator_set_pretty ( gen, TRUE );
+    buf = json_generator_to_data (gen, &taille_buf);
+    /*json_node_free (root); ???*/
+    g_object_unref(builder);
+    g_object_unref(gen);
+          
+#ifdef bouh
 /************************************************ Préparation du buffer XML ***************************************************/
     buf = xmlBufferCreate();                                                                        /* Creation du buffer xml */
     if (buf == NULL)
@@ -143,6 +197,7 @@
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_groupe", "%s", msg->syn_groupe );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_page", "%s", msg->syn_page );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_libelle", "%s", msg->syn_libelle );
+       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"dls_id", "%d", msg->dls_id );
        xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"dls_shortname", "%s", msg->dls_shortname );
        xmlTextWriterEndElement(writer);                                                                        /* End message */
        g_free(msg);
@@ -158,7 +213,7 @@
        return(FALSE);
      }
     xmlFreeTextWriter(writer);                                                                    /* Libération du writer XML */
-
+#endif
 /*************************************************** Envoi au client **********************************************************/
     header_cur = header;
     header_end = header + sizeof(header);
@@ -166,12 +221,12 @@
     retour = lws_add_http_header_status( wsi, 200, &header_cur, header_end );
     retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, (const unsigned char *)content_type, strlen(content_type),
                                            &header_cur, header_end );
-    retour = lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );
+    retour = lws_add_http_header_content_length ( wsi, taille_buf, &header_cur, header_end );
     retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
     *header_cur='\0';                                                                               /* Caractere null d'arret */
     lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-    lws_write ( wsi, buf->content, buf->use, LWS_WRITE_HTTP);                                               /* Send to client */
-    xmlBufferFree(buf);                                               /* Libération du buffer dont nous n'avons plus besoin ! */
+    lws_write ( wsi, buf, taille_buf, LWS_WRITE_HTTP);                                                      /* Send to client */
+    g_free(buf);                                                      /* Libération du buffer dont nous n'avons plus besoin ! */
     return(TRUE);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

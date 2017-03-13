@@ -183,7 +183,7 @@
      { Admin_ssrv_status ( connexion );
      } else
     if ( ! strcmp ( commande, "msgs" ) )
-     { Admin_ssrv_msgs ( connexion, ligne + 5, NULL );
+     { Admin_ssrv_msgs ( connexion, ligne + 5, "all" );
      } else
     if ( ! strcmp ( commande, "msg" ) )
      { gchar name[80];
@@ -213,8 +213,8 @@
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'SSRV'\n" );
        Admin_write ( connexion, "  dbcfg...              - Manage Threads Parameters in Database\n" );
        Admin_write ( connexion, "  list                  - Listes les sous serveurs\n" );
-       Admin_write ( connexion, "  msg all $message      - Send $message to all connected client\n" );
-       Admin_write ( connexion, "  msg $user $message    - Send $message to $user\n" );
+       Admin_write ( connexion, "  msgs $message         - Send $message to all connected client\n" );
+       Admin_write ( connexion, "  msg $user $message    - Send $message to $user (can be 'all')\n" );
        Admin_write ( connexion, "  killid $id            - Kill session with ID $id\n" );
        Admin_write ( connexion, "  kill $name            - Kill all sessions for user $name\n" );
        Admin_write ( connexion, "  status                - Show status of the Thread SSRV\n" );

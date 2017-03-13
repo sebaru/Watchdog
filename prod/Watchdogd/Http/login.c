@@ -114,6 +114,7 @@
     GSList *liste;
 
     pss = lws_wsi_user ( wsi );
+    if ( lws_hdr_total_length( wsi, WSI_TOKEN_HTTP_COOKIE ) <= 0) return(NULL);
     if ( lws_hdr_copy( wsi, buffer, sizeof(buffer), WSI_TOKEN_HTTP_COOKIE ) != -1 )     /* Récupération de la valeur du token */
      { gchar *cookies, *cookie, *savecookies;
        gchar *cookie_name, *cookie_value, *savecookie;
@@ -142,7 +143,7 @@
               }
              else Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                            "Http_get_session: Cookie found for %s(%s): %s=%s",
-                            remote_name, remote_ip, cookie_name, cookie_value );
+                            remote_name, remote_ip, (cookie_name ? cookie_name : "none"), (cookie_value ? cookie_value : "none") );
            }
         }       
      }

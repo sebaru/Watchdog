@@ -101,6 +101,36 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Http_json_get_int : Récupère un entier dans l'object JSON passé en paramètre, dont le nom est name                         */
+/* Entrées : l'object JSON et le name                                                                                         */
+/* Sortie : un entier, ou -1 si erreur                                                                                        */
+/******************************************************************************************************************************/
+ gint Http_json_get_int ( JsonObject *object, gchar *name )
+  { JsonNode *node;
+    GValue valeur = G_VALUE_INIT;
+
+    if (!object) return(-1);
+    node = json_object_get_member(object, name );
+    if(!node) return(-1);
+    if(json_node_get_node_type (node) != JSON_NODE_VALUE) return(-1);
+    json_node_get_value (node, &valeur);
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+             "%s: Parsing value type %d ('%s') for attribut '%s'", __func__, G_VALUE_TYPE(&valeur), G_VALUE_TYPE_NAME(&valeur), name );
+    switch( G_VALUE_TYPE(&valeur) )             
+     { case G_TYPE_BOOLEAN:
+            return( json_node_get_boolean(node) );
+       case G_TYPE_INT64:
+       case G_TYPE_INT:
+            return( json_node_get_int(node) );
+       case G_TYPE_STRING:
+            return (atoi ( json_node_get_string(node) ));
+       default:
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                     "%s: Valeur type unknown (%d) for name '%s'", __func__, json_node_get_value_type (node), name );
+     }
+    return(-1);
+  }
+/******************************************************************************************************************************/
 /* CB_ws_login : Gere le protocole WS status (appellée par libwebsockets)                                                    */
 /* Entrées : le contexte, le message, l'URL                                                                                   */
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
@@ -171,6 +201,8 @@
                 { return( Http_Traiter_request_body_login ( wsi, data, taille ) ); }
                else if ( ! strcasecmp ( pss->url, "/ws/postsvg" ) )
                 { return( Http_CB_file_upload( wsi, data, taille ) ); }
+               else if ( ! strcasecmp ( pss->url, "/ws/setmessage" ) )
+                { return( Http_CB_file_upload( wsi, data, taille ) ); }
              }
             break;
        case LWS_CALLBACK_HTTP_BODY_COMPLETION:
@@ -181,6 +213,8 @@
                 { return( Http_Traiter_request_body_completion_login ( wsi, remote_name, remote_ip ) ); }
                else if ( ! strcasecmp ( pss->url, "/ws/postsvg" ) )
                 { return( Http_Traiter_request_body_completion_postsvg ( wsi ) ); }
+               else if ( ! strcasecmp ( pss->url, "/ws/setmessage" ) )
+                { return( Http_Traiter_request_body_completion_setmessage ( wsi ) ); }
               }
             break;
        case LWS_CALLBACK_HTTP:
@@ -191,7 +225,7 @@
                                         (char *)&remote_name, sizeof(remote_name),
                                         (char *)&remote_ip, sizeof(remote_ip) );
                session = Http_get_session ( wsi, remote_name, remote_ip );
-               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Request from %s/%s (sid %8s): %s",
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Request from %s/%s (sid %.12s): %s",
                          __func__, remote_name, remote_ip, Http_get_session_id(session), url );
                if (session) session->last_top = Partage->top;                                             /* Tagging temporel */
 
@@ -207,8 +241,12 @@
                 { if (session) Http_Close_session ( wsi, session ); }
                else if ( ! strcasecmp ( url, "/ws/status" ) )
                 { Http_Traiter_request_getstatus ( wsi ); }
-               else if ( ! strncasecmp ( url, "/ws/messages", 12 ) )
+               else if ( ! strcasecmp ( url, "/ws/messages" ) )
                 { return( Http_Traiter_request_getmessage ( wsi, session ) ); }
+               else if ( ! strcasecmp ( url, "/ws/setmessage" ) )
+                { return( Http_Traiter_request_setmessage ( wsi, session, remote_name, remote_ip ) ); }
+               else if ( ! strcasecmp ( url, "/ws/getpluginsDLS" ) )
+                { return( Http_Traiter_request_getpluginsDLS ( wsi, session ) ); }
                else if ( ! strncasecmp ( url, "/ws/getmnemo", 13 ) )
                 { return( Http_Traiter_request_getmnemo ( wsi, session, url+13 ) ); }
                else if ( ! strncasecmp ( url, "/ws/getsyn", 11 ) )
@@ -220,7 +258,7 @@
                else if ( ! strncasecmp ( url, "/ws/audio/", 10 ) )
                 { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
                else if ( ! strcasecmp ( url, "/ws/postsvg" ) )
-                { return( Http_Traiter_request_postsvg ( session, wsi, remote_name, remote_ip ) ); }
+                { return( Http_Traiter_request_postsvg ( wsi, session, remote_name, remote_ip ) ); }
                else                                                                                             /* Par défaut */
                 { return( Http_Traiter_request_getui ( wsi, remote_name, remote_ip, url+1 ) ); }
                return(1);                                                                    /* Par défaut, on clos la socket */

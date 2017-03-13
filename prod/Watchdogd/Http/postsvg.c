@@ -118,7 +118,7 @@
 /* Entrées: la connexion MHD                                                                                                  */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- gint Http_Traiter_request_postsvg ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip )
+ gint Http_Traiter_request_postsvg ( struct lws *wsi, struct HTTP_SESSION *session, gchar *remote_name, gchar *remote_ip )
   { struct HTTP_PER_SESSION_DATA *pss;
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
@@ -130,9 +130,9 @@
     return(0);                                                        /* si pas de session, on continue de traiter la request */
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_request_postsvg: Traite une requete de postsvg                                                                    */
-/* Entrées: la connexion MHD                                                                                                  */
-/* Sortie : néant                                                                                                             */
+/* Http_Traiter_request_body_completion_postsvg: le payload est arrivé, il faut traiter le SVG                                */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : 0 ou 1 selon si la transaction est completed                                                                      */
 /******************************************************************************************************************************/
  gint Http_Traiter_request_body_completion_postsvg ( struct lws *wsi )
   { unsigned char header[512], *header_cur, *header_end;

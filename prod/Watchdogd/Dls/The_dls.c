@@ -539,8 +539,7 @@
           Partage->ci[num].val_en_cours2 = 0.0;                /* Valeur transitoire pour gérer les ratio */
           changed = TRUE;
         }
-
-       if ( ! Partage->ci[ num ].actif )                                              /* Passage en actif */
+       else if ( ! Partage->ci[ num ].actif )                                         /* Passage en actif */
         { Partage->ci[num].actif = TRUE;
           Partage->ci[num].val_en_cours1++;
           if (Partage->ci[num].val_en_cours1>=ratio)
@@ -551,7 +550,7 @@
         }
      }
     else
-     { if (!reset) Partage->ci[ num ].actif = FALSE; }
+     { Partage->ci[ num ].actif = FALSE; }
 
     switch (Partage->ci[ num ].confDB.type)                        /* Calcul de la valeur réelle du CI */
      { case CI_TOTALISATEUR :

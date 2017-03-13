@@ -29,7 +29,8 @@
  #define _HTTP_H_
  #include <libwebsockets.h>
  #include <libxml/xmlwriter.h>
- 
+ #include <json-glib/json-glib.h>
+
  #define NOM_THREAD                    "http"
  #define HTTP_DEFAUT_FILE_CA           "http_cacert.pem"
  #define HTTP_DEFAUT_FILE_CERT         "http_serveursigne.pem"
@@ -89,12 +90,16 @@
 
 /*************************************************** Définitions des prototypes ***********************************************/
  extern gboolean Http_Lire_config ( void );
+ extern gint Http_json_get_int ( JsonObject *object, gchar *name );
  extern gboolean Http_Traiter_request_getsyn ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gboolean Http_Traiter_request_getstatus ( struct lws *wsi );
  extern gint Http_Traiter_request_getgif ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gint Http_Traiter_request_getsvg ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_getaudio ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gint Http_Traiter_request_getmessage ( struct lws *wsi, struct HTTP_SESSION *session );
+ extern gint Http_Traiter_request_setmessage ( struct lws *wsi, struct HTTP_SESSION *session, gchar *remote_name, gchar *remote_ip );
+ extern gint Http_Traiter_request_body_completion_setmessage ( struct lws *wsi );
+ extern gint Http_Traiter_request_getpluginsDLS ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_getui ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gboolean Http_Traiter_request_getmnemo ( struct lws *wsi, struct HTTP_SESSION *session, gchar *url );
  
@@ -108,7 +113,7 @@
  extern gint Http_Traiter_request_body_login ( struct lws *wsi, void *data, size_t taille );
  extern gint Http_Traiter_request_body_completion_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
  
- extern gint Http_Traiter_request_postsvg ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip );
+ extern gint Http_Traiter_request_postsvg ( struct lws *wsi, struct HTTP_SESSION *session, gchar *remote_name, gchar *remote_ip );
  extern gint Http_Traiter_request_body_completion_postsvg ( struct lws *wsi );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
