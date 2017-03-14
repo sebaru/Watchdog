@@ -42,7 +42,6 @@
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'AUDIO'\n" );
        Admin_write ( connexion, "  dbcfg ...             - Get/Set Database Parameters\n" );
        Admin_write ( connexion, "  tell_mp3 num          - Send message num with mp3 format\n" );
-       Admin_write ( connexion, "  tell_espeak num       - Send message num with espeak format\n" );
        Admin_write ( connexion, "  help                  - This help\n" );
      } else
     if ( ! strcmp ( commande, "tell_mp3" ) )
@@ -50,13 +49,6 @@
        sscanf ( ligne, "%s %d", commande, &msg.num );                /* Découpage de la ligne de commande */
        Jouer_mp3 ( &msg );
        g_snprintf( chaine, sizeof(chaine), " Message id %d sent (mp3)\n", msg.num );
-       Admin_write ( connexion, chaine );
-     } else
-    if ( ! strcmp ( commande, "tell_espeak" ) )
-     { struct CMD_TYPE_MESSAGE msg;
-       sscanf ( ligne, "%s %d", commande, &msg.num );                /* Découpage de la ligne de commande */
-       Jouer_espeak ( &msg );
-       g_snprintf( chaine, sizeof(chaine), " Message id %d sent (espeak)\n", msg.num );
        Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */

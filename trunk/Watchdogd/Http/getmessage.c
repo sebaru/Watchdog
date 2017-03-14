@@ -123,7 +123,8 @@
        json_builder_set_member_name  ( builder, "enable" );        json_builder_add_boolean_value( builder, msg->enable );
        json_builder_set_member_name  ( builder, "num" );           json_builder_add_int_value    ( builder, msg->num );
        json_builder_set_member_name  ( builder, "sms" );           json_builder_add_int_value    ( builder, msg->sms );
-       json_builder_set_member_name  ( builder, "bit_voc" );       json_builder_add_int_value    ( builder, msg->bit_voc );
+       json_builder_set_member_name  ( builder, "audio" );         json_builder_add_boolean_value( builder, msg->audio );
+       json_builder_set_member_name  ( builder, "bit_audio" );     json_builder_add_int_value    ( builder, msg->bit_audio );
        json_builder_set_member_name  ( builder, "time_repeat" );   json_builder_add_int_value    ( builder, msg->time_repeat );
        json_builder_set_member_name  ( builder, "dls_id" );        json_builder_add_int_value    ( builder, msg->dls_id );
        json_builder_set_member_name  ( builder, "libelle" );       json_builder_add_string_value ( builder, msg->libelle );

@@ -540,8 +540,8 @@
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_message) );             /* Acquisition du modele */
 
     g_snprintf( chaine, sizeof(chaine), "%04d", message->num);
-    if (message->bit_voc)
-     { g_snprintf( audio, sizeof(audio), "%s%04d", Type_bit_interne_court(MNEMO_MONOSTABLE), message->bit_voc ); }
+    if (message->audio)
+     { g_snprintf( audio, sizeof(audio), "%s%04d", Type_bit_interne_court(MNEMO_MONOSTABLE), message->bit_audio ); }
     else
      { g_snprintf( audio, sizeof(audio), "- no -"); }
 

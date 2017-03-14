@@ -749,18 +749,17 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `libelle_audio` text COLLATE utf8_unicode_ci NOT NULL,
   `libelle_sms` text COLLATE utf8_unicode_ci NOT NULL,
   `type` int(11) NOT NULL DEFAULT '0',
-  `bit_voc` int(11) DEFAULT NULL,
+  `audio` tinyint(1) NOT NULL DEFAULT '0',
+  `bit_audio` int(11) DEFAULT NULL,
   `enable` tinyint(1) NOT NULL DEFAULT '0',
   `sms` int(11) NOT NULL DEFAULT '0',
-  `type_voc` int(11) NOT NULL DEFAULT '4',
-  `vitesse_voc` int(11) NOT NULL DEFAULT '150',
-  `time_repeat` int(11) NOT NULL,
+  `time_repeat` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
-INSERT INTO `msgs` (`id`, `num`, `dls_id`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `bit_voc`, `enable`, `sms`, `type_voc`, `vitesse_voc`, `time_repeat`) VALUES
-(1, 0, 1, 'Warning, system is halting', 'Warning, system is halting', 'Warning, system is halting', 0, 1, TRUE, FALSE, 1, 150, 0),
-(2, 1, 1, 'Warning, system is rebooting', 'Warning, system is rebooting', 'Warning, system is rebooting', 0, 1, TRUE, FALSE, 1, 150, 0);
+INSERT INTO `msgs` (`id`, `num`, `dls_id`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `enable`, `sms` ) VALUES
+(1, 0, 1, 'Warning, system is halting', 'Warning, system is halting', 'Warning, system is halting', 1, TRUE, FALSE ),
+(2, 1, 1, 'Warning, system is rebooting', 'Warning, system is rebooting', 'Warning, system is rebooting', 1, TRUE, FALSE );
 
 -- --------------------------------------------------------
 
