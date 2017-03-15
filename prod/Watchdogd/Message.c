@@ -93,11 +93,11 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s(num,libelle,libelle_audio,libelle_sms,"
-                "type,bit_voc,enable,sms,type_voc,vitesse_voc,time_repeat,dls_id) VALUES "
-                "(%d,'%s','%s','%s',%d,%d,%d,%d,%d,%d,%d,%d)", NOM_TABLE_MSG, msg->num,
+                "type,audio,bit_audio,enable,sms,time_repeat,dls_id) VALUES "
+                "(%d,'%s','%s','%s',%d,%d,%d,%d,%d,%d,%d)", NOM_TABLE_MSG, msg->num,
                 libelle, libelle_audio, libelle_sms, msg->type,
-                msg->bit_voc, (msg->enable ? 1 : 0),
-                msg->sms, msg->type_voc, msg->vitesse_voc, msg->time_repeat, msg->dls_id
+                (msg->audio ? 1 : 0), msg->bit_audio, (msg->enable ? 1 : 0),
+                msg->sms, msg->time_repeat, msg->dls_id
               );
     g_free(libelle);
     g_free(libelle_audio);
@@ -129,8 +129,8 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "type_voc,vitesse_voc,time_repeat,dls.id,dls.shortname,syn.id"
+                "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,audio,bit_audio,enable,groupe,page,sms,libelle_audio,libelle_sms,"
+                "time_repeat,dls.id,dls.shortname,syn.id"
                 " FROM %s as msg"
                 " INNER JOIN %s as dls ON msg.dls_id=dls.id"
                 " INNER JOIN %s as syn ON dls.syn_id=syn.id"
@@ -189,22 +189,21 @@
     else
      { memcpy( &msg->libelle,       db->row[2],  sizeof(msg->libelle ) );    /* Recopie dans la structure */
        memcpy( &msg->syn_libelle,   db->row[4],  sizeof(msg->syn_libelle) );
-       memcpy( &msg->syn_groupe,    db->row[7],  sizeof(msg->syn_groupe  ) );
-       memcpy( &msg->syn_page,      db->row[8],  sizeof(msg->syn_page    ) );
-       memcpy( &msg->libelle_audio, db->row[10], sizeof(msg->libelle_audio) );
-       memcpy( &msg->libelle_sms,   db->row[11], sizeof(msg->libelle_sms  ) );
-       memcpy( &msg->dls_shortname, db->row[16], sizeof(msg->dls_shortname) );
+       memcpy( &msg->syn_groupe,    db->row[8],  sizeof(msg->syn_groupe  ) );
+       memcpy( &msg->syn_page,      db->row[9],  sizeof(msg->syn_page    ) );
+       memcpy( &msg->libelle_audio, db->row[11], sizeof(msg->libelle_audio) );
+       memcpy( &msg->libelle_sms,   db->row[12], sizeof(msg->libelle_sms  ) );
+       memcpy( &msg->dls_shortname, db->row[15], sizeof(msg->dls_shortname) );
        msg->id          = atoi(db->row[0]);
        msg->num         = atoi(db->row[1]);
        msg->type        = atoi(db->row[3]);
-       msg->bit_voc     = atoi(db->row[5]);
-       msg->enable      = atoi(db->row[6]);
-       msg->sms         = atoi(db->row[9]);
-       msg->type_voc    = atoi(db->row[12]);
-       msg->vitesse_voc = atoi(db->row[13]);
-       msg->time_repeat = atoi(db->row[14]);
-       msg->dls_id      = atoi(db->row[15]);
-       msg->syn_id      = atoi(db->row[17]);
+       msg->audio       = atoi(db->row[5]);
+       msg->bit_audio   = atoi(db->row[6]);
+       msg->enable      = atoi(db->row[7]);
+       msg->sms         = atoi(db->row[10]);
+       msg->time_repeat = atoi(db->row[13]);
+       msg->dls_id      = atoi(db->row[14]);
+       msg->syn_id      = atoi(db->row[16]);
      }
     return(msg);
   }
@@ -219,8 +218,8 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "type_voc,vitesse_voc,time_repeat,dls.id,dls.shortname,syn.id"
+                "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,audio,bit_audio,enable,groupe,page,sms,libelle_audio,libelle_sms,"
+                "time_repeat,dls.id,dls.shortname,syn.id"
                 " FROM %s as msg"
                 " INNER JOIN %s as dls ON msg.dls_id=dls.id"
                 " INNER JOIN %s as syn ON dls.syn_id=syn.id"
@@ -261,8 +260,8 @@
      }
    
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,bit_voc,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "type_voc,vitesse_voc,time_repeat,dls.id,dls.shortname,syn.id"
+                "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,audio,bit_audio,enable,groupe,page,sms,libelle_audio,libelle_sms,"
+                "time_repeat,dls.id,dls.shortname,syn.id"
                 " FROM %s as msg"
                 " INNER JOIN %s as dls ON msg.dls_id=dls.id"
                 " INNER JOIN %s as syn ON dls.syn_id=syn.id"
@@ -311,13 +310,12 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "num=%d,libelle='%s',type=%d,bit_voc=%d,enable=%d,sms=%d,"
-                "libelle_audio='%s',libelle_sms='%s',type_voc=%d,vitesse_voc=%d,time_repeat=%d,dls_id=%d "
+                "num=%d,libelle='%s',type=%d,audio=%d,bit_audio=%d,enable=%d,sms=%d,"
+                "libelle_audio='%s',libelle_sms='%s',time_repeat=%d,dls_id=%d "
                 "WHERE id=%d",
-                NOM_TABLE_MSG, msg->num, libelle, msg->type, msg->bit_voc,
+                NOM_TABLE_MSG, msg->num, libelle, msg->type, (msg->audio ? 1 : 0), msg->bit_audio,
                                (msg->enable ? 1 : 0), msg->sms,
-                               libelle_audio, libelle_sms, msg->type_voc, msg->vitesse_voc,
-                               msg->time_repeat, msg->dls_id,
+                               libelle_audio, libelle_sms, msg->time_repeat, msg->dls_id,
                 msg->id );
     g_free(libelle);
     g_free(libelle_audio);

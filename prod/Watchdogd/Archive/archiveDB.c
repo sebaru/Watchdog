@@ -67,5 +67,7 @@
 
     Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
+    Info_new( Config.log, Config.log_arch, LOG_INFO, 
+             "Arch_Update_SQL_Partitions: Create NEw partition p%04d%02d", annee, mois );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -74,7 +74,7 @@
  void Audio_Gerer_histo( struct CMD_TYPE_HISTO *histo )
   { gint taille;
 
-    if ( ! histo->msg.bit_voc ) { g_free(histo); return; }                                   /* Si flag = 0; on return direct */
+    if ( ! histo->msg.audio ) { g_free(histo); return; }                                     /* Si flag = 0; on return direct */
 
     pthread_mutex_lock( &Cfg_audio.lib->synchro );                                  /* Ajout dans la liste de audio a traiter */
     taille = g_slist_length( Cfg_audio.Liste_histos );
@@ -165,82 +165,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Jouer_espeak : Joue un message via synthèse vocale et attend la fin de la diffusion                                        */
-/* Entrée : le message à jouer                                                                                                */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- void Jouer_espeak ( struct CMD_TYPE_MESSAGE *msg )
-  { gchar nom_fichier[128], cible[128];
-    gint fd_cible, pid, num;
-
-    g_snprintf( nom_fichier, sizeof(nom_fichier), "Son/%d.pho", msg->num );
-    unlink( nom_fichier );                                                                /* Destruction des anciens fichiers */
-    g_snprintf( cible,       sizeof(cible),       "Son/%d.au",  msg->num );
-    unlink( cible );                                                                      /* Destruction des anciens fichiers */
-/***************************************** Création du PHO ************************************************/
-    num = msg->num;                                                    /* Attention, on fork donc plus de mémoire partagée !! */
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "Lancement de ESPEAK %d", num );
-    pid = fork();
-    if (pid<0)
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                "Jouer_espeak: Fork Fabrication '%s' failed pid=%d", nom_fichier, pid );
-     }
-    else if (!pid)                                                                     /* Création du .au en passant par .pho */
-     { gchar texte[80], chaine[30], chaine2[30];
-       switch (msg->type_voc)
-        { case 0: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr1" ); break;
-          case 1: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr4" ); break;
-          case 2: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr1" ); break;
-          default:
-          case 3: g_snprintf( chaine, sizeof(chaine), "mb/mb-fr4" ); break;
-        }
-       g_snprintf( chaine2, sizeof(chaine2), "%d", msg->vitesse_voc );
-       fd_cible = open ( nom_fichier, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-       dup2( fd_cible, 1 );
-       g_snprintf( texte, sizeof(texte), "%s", msg->libelle_audio );
-       execlp( "espeak", "espeak", "-q", "-s", chaine2, "-v", chaine, texte, NULL );
-/*       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "Jouer_espeak: '%s' exec failed pid=%d", nom_fichier, pid );*/
-       _exit(0);
-     }
-    else
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                "Jouer_espeak: '%s' waiting to finish pid=%d", nom_fichier, pid );
-       waitpid(pid, NULL, 0 );
-     }
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-             "Jouer_espeak: '%s' finished pid=%d", nom_fichier, pid );
-
-/****************************************************** Création du AU ********************************************************/
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "Jouer_espeak: Lancement de MBROLA '%s'", cible );
-    pid = fork();
-    if (pid<0)
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "Jouer_espeak: Fabrication '%s' failed pid=%d", cible, pid ); }
-    else if (!pid)                                                 /* Création du .au en passant par .pho */
-     { gchar chaine[30];
-       switch (msg->type_voc)
-        { case 0: g_snprintf( chaine, sizeof(chaine), "fr1" ); break;
-          case 1: g_snprintf( chaine, sizeof(chaine), "fr2" ); break;
-          case 2: g_snprintf( chaine, sizeof(chaine), "fr6" ); break;
-          default:
-          case 3: g_snprintf( chaine, sizeof(chaine), "fr4" ); break;
-        }
-       execlp( "mbrola-linux-i386", "mbrola-linux-i386", chaine, nom_fichier, cible, NULL );
-       /*Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "Jouer_espeak: Lancement mbrola '%s' failed pid=%d (%s)", cible, pid, strerror(errno) );*/
-       _exit(0);
-     }
-    else
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                "Jouer_espeak: waiting for mbrola '%s' to finish pid=%d", cible, pid );
-       waitpid(pid, NULL, 0 );
-     }
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "mbrola '%s' finished pid=%d", cible, pid );
-/**************************************************** Lancement de l'audio ****************************************************/
-    Jouer_wav(cible);
-  }
-/******************************************************************************************************************************/
 /* Main: Fonction principale du Thread Audio                                                                                  */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
@@ -307,7 +231,7 @@
                    "Run_thread : Envoi du message audio %d", histo->msg.num );
 
           if (Config.instance_is_master)
-           { Envoyer_commande_dls( histo->msg.bit_voc );                     /* Positionnement du profil audio via monostable */
+           { Envoyer_commande_dls( histo->msg.bit_audio );                   /* Positionnement du profil audio via monostable */
              Envoyer_commande_dls( NUM_BIT_M_AUDIO_START );                  /* Positionné quand on envoi une diffusion audio */
            }
 

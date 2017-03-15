@@ -45,6 +45,5 @@
 /*************************************** Définitions des prototypes ***************************************/
  extern gboolean Audio_Lire_config ( void );
  extern gboolean Jouer_mp3 ( struct CMD_TYPE_MESSAGE *msg );
- extern void Jouer_espeak ( struct CMD_TYPE_MESSAGE *msg );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

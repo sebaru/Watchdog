@@ -102,7 +102,9 @@
                       json_node_get_string ( json_object_get_member (object, "libelle" ) ) );
           g_snprintf( msg->libelle_sms, sizeof(msg->libelle_sms), "%s",
                       json_node_get_string ( json_object_get_member (object, "libelle_sms" ) ) );
-          if ( Modifier_messageDB(msg) == TRUE ) code = 200;
+          if (id==-1)
+             { if ( Ajouter_messageDB(msg) == TRUE ) code = 200; }
+          else if ( Modifier_messageDB(msg) == TRUE ) code = 200;
           g_free(msg);
         }
        else
