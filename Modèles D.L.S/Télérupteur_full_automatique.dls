@@ -23,7 +23,7 @@
                                     /*******************************************/
   /* Start */
 
- - _START -> /ACTELE_PLG, MEACTELE_PLG,
+ - _START -> /ACTELE_PLG,/MEACTELE_PLG,
              /MDEF_REPOS_PLG, /MDEF_REPOS_F_PLG,
              /MDEF_TRAVAIL_PLG, /MDEF_TRAVAIL_F_PLG;
 
