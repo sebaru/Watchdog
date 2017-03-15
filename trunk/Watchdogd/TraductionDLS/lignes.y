@@ -402,8 +402,8 @@ unite:          modulateur ENTIER HEURE ENTIER
                       switch( $3 )
                        { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $4, $2 ); break;
                          case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $4, $2 ); break;
-                         case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_T_EGAL(%f,%d)", $4, $2 ); break;
-                         case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_T_EGAL(%f,%d)", $4, $2 ); break;
+                         case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $4, $2 ); break;
+                         case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $4, $2 ); break;
                        }
                     }
                 }}
@@ -536,8 +536,8 @@ unite:          modulateur ENTIER HEURE ENTIER
                                             switch($4->type)
                                              { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $4->valf, alias->num ); break;
                                                case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $4->valf, alias->num ); break;
-                                               case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_T_EGAL(%f,%d)", $4->valf, alias->num ); break;
-                                               case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_T_EGAL(%f,%d)", $4->valf, alias->num ); break;
+                                               case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $4->valf, alias->num ); break;
+                                               case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $4->valf, alias->num ); break;
                                              }
                                           }
                                        }
