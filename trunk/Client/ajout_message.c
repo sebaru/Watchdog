@@ -183,6 +183,28 @@
     Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_TYPE_NUM_MNEMO_VOC,
                    (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
   }
+/**********************************************************************************************************/
+/* Rafraichir_sensibilite: met a jour la sensibilite des widgets de la fenetre propriete                  */
+/* Entrée: void                                                                                           */
+/* Sortie: void                                                                                           */
+/**********************************************************************************************************/
+ static void Rafraichir_sensibilite_msg ( void )
+  { gboolean enable, audio;
+    enable = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_enable) );
+    audio  = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_audio) );
+    gtk_widget_set_sensitive( Spin_num, enable );
+    gtk_widget_set_sensitive( Spin_time_repeat, enable );
+    gtk_widget_set_sensitive( Entry_lib, enable );
+    gtk_widget_set_sensitive( Entry_lib_sms, enable );
+    gtk_widget_set_sensitive( Combo_type, enable );
+    gtk_widget_set_sensitive( Combo_dls, enable );
+    gtk_widget_set_sensitive( Combo_sms, enable );
+    gtk_widget_set_sensitive( Check_audio, enable );
+    gtk_widget_set_sensitive( Entry_lib_audio, enable & audio);
+    gtk_widget_set_sensitive( Entry_mp3, enable & audio);
+    gtk_widget_set_sensitive( Spin_bit_audio, enable & audio);
+    gtk_widget_set_sensitive( Entry_bit_audio, enable & audio);
+  }
 /******************************************************************************************************************************/
 /* Menu_ajouter_editer_message: Ajoute ou edite un message au systeme                                                         */
 /* Entrée: La structure du message a editer ou a creer                                                                        */
@@ -224,7 +246,8 @@
     i = 0;
     Check_enable = gtk_check_button_new_with_label( _("Enable") );
     gtk_table_attach_defaults( GTK_TABLE(table), Check_enable, 0, 1, i, i+1 );
-
+    g_signal_connect( G_OBJECT( GTK_CHECK_BUTTON(Check_enable) ), "clicked",
+                      G_CALLBACK( Rafraichir_sensibilite_msg ), NULL );
     texte = gtk_label_new( _("Type") );     /* Création de l'option menu pour le choix du type de message */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
 
@@ -259,29 +282,7 @@
     Liste_index_dls = NULL;
     Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_WANT_DLS_FOR_MESSAGE, NULL, 0 );
 
-/******************************************************** Paragraphe Voix *****************************************************/
-    i++;
-    Check_audio = gtk_check_button_new_with_label( _("Message Vocal") );
-    gtk_table_attach_defaults( GTK_TABLE(table), Check_enable, 0, 1, i, i+1 );
-
-    texte = gtk_label_new( _("Profil Audio") );                                              /* Numéro du bit M a positionner */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 1, 2, i, i+1 );;
-    Spin_bit_audio = gtk_spin_button_new_with_range( 30, 59, 1 );                                     /* Range M0030 -> M0059 */
-    g_signal_connect( G_OBJECT(Spin_bit_audio), "changed",
-                      G_CALLBACK(Afficher_mnemo_voc), NULL );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit_audio, 2, 3, i, i+1 );;
-
-    Entry_bit_audio = gtk_entry_new();
-    gtk_entry_set_editable( GTK_ENTRY(Entry_bit_audio), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_audio, 3, 4, i, i+1 );
-
-    i++;
-    texte = gtk_label_new( _("Message Audio") );                                                    /* Le message en lui-meme */
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Entry_lib_audio = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_lib_audio), NBR_CARAC_LIBELLE_MSG );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib_audio, 1, 4, i, i+1 );
-
+/******************************************************** Paragraphe SMS ******************************************************/
     i++;
     Combo_sms = gtk_combo_box_new_text();
     for ( cpt=0; cpt<NBR_TYPE_MSG_SMS; cpt++ )
@@ -291,6 +292,29 @@
     Entry_lib_sms = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_lib_sms), NBR_CARAC_LIBELLE_MSG );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib_sms, 1, 4, i, i+1 );
+
+/******************************************************** Paragraphe Voix *****************************************************/
+    i++;
+    Check_audio = gtk_check_button_new_with_label( _("Message Vocal") );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_audio, 0, 1, i, i+1 );
+    g_signal_connect( G_OBJECT( GTK_CHECK_BUTTON(Check_audio) ), "clicked",
+                      G_CALLBACK( Rafraichir_sensibilite_msg ), NULL );
+
+    Spin_bit_audio = gtk_spin_button_new_with_range( 30, 59, 1 );                                     /* Range M0030 -> M0059 */
+    g_signal_connect( G_OBJECT(Spin_bit_audio), "changed",
+                      G_CALLBACK(Afficher_mnemo_voc), NULL );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bit_audio, 1, 2, i, i+1 );;
+
+    Entry_bit_audio = gtk_entry_new();
+    gtk_entry_set_editable( GTK_ENTRY(Entry_bit_audio), FALSE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bit_audio, 2, 4, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("Message Audio") );                                                    /* Le message en lui-meme */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Entry_lib_audio = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_lib_audio), NBR_CARAC_LIBELLE_MSG );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib_audio, 1, 4, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("Mp3 upload") );
@@ -319,6 +343,7 @@
            gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_sms), 0 );
            gtk_widget_grab_focus( Spin_num );
          }
+    Rafraichir_sensibilite_msg();
     gtk_widget_show_all(F_ajout);                                                        /* Affichage de l'interface complète */
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
