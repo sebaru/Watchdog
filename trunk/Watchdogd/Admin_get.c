@@ -72,7 +72,7 @@
         { g_snprintf( chaine, sizeof(chaine), " | - T -> num '%d' out of range\n", num );
           Admin_write ( connexion, chaine );
 	       }
-       Admin_write ( connexion, "|-\n" );
+       Admin_write ( connexion, " |-\n" );
      } else
     if ( ! strcmp ( commande, "i" ) )
      { int num;
@@ -87,7 +87,7 @@
         } else
         { g_snprintf( chaine, sizeof(chaine), " | - I -> num '%d' out of range\n", num ); }
        Admin_write ( connexion, chaine );
-       Admin_write ( connexion, "|-\n" );
+       Admin_write ( connexion, " |-\n" );
      } else
     if ( ! strcmp ( commande, "msg" ) )
      { int num;
@@ -99,14 +99,14 @@
         } else
         { g_snprintf( chaine, sizeof(chaine), " | - MSG -> num '%d' out of range\n", num ); }
        Admin_write ( connexion, chaine );
-       Admin_write ( connexion, "|-\n" );
+       Admin_write ( connexion, " |-\n" );
      } else
     if ( ! strcmp ( commande, "m" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " | - M%03d = %d\n", num, M(num) );
        Admin_write ( connexion, chaine );
-       Admin_write ( connexion, "|-\n" );
+       Admin_write ( connexion, " |-\n" );
      } else
     if ( ! strcmp ( commande, "e" ) )
      { int num;
@@ -114,7 +114,7 @@
        g_snprintf( chaine, sizeof(chaine), " | - E%03d = %d\n",
                    num, E(num) );
        Admin_write ( connexion, chaine );
-       Admin_write ( connexion, "|-\n" );
+       Admin_write ( connexion, " |-\n" );
      } else
     if ( ! strcmp ( commande, "ea" ) )
      { int num;
@@ -130,21 +130,21 @@
         } else
         { g_snprintf( chaine, sizeof(chaine), " | - EA -> num '%d' out of range (max=%d)\n", num,NBR_ENTRE_ANA ); }
        Admin_write ( connexion, chaine );
-       Admin_write ( connexion, "|-\n" );
+       Admin_write ( connexion, " |-\n" );
      } else
     if ( ! strcmp ( commande, "b" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " | - B%03d = %d\n", num, B(num) );
        Admin_write ( connexion, chaine );
-       Admin_write ( connexion, "|-\n" );
+       Admin_write ( connexion, " |-\n" );
      } else
     if ( ! strcmp ( commande, "a" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " | - A%03d = %d\n", num, A(num) );
        Admin_write ( connexion, chaine );
-       Admin_write ( connexion, "|-\n" );
+       Admin_write ( connexion, " |-\n" );
      } else
     if ( ! strcmp ( commande, "ci" ) )
      { int num;
@@ -159,7 +159,7 @@
         } else
         { g_snprintf( chaine, sizeof(chaine), " | - CI -> num '%d' out of range\n", num ); }
        Admin_write ( connexion, chaine );
-       Admin_write ( connexion, "|-\n" );
+       Admin_write ( connexion, " |-\n" );
      } else
     if ( ! strcmp ( commande, "ch" ) )
      { int num;
@@ -171,11 +171,11 @@
         } else
         { g_snprintf( chaine, sizeof(chaine), " | - CH -> num '%d' out of range\n", num ); }
        Admin_write ( connexion, chaine );
-       Admin_write ( connexion, "|-\n" );
+       Admin_write ( connexion, " |-\n" );
      } else
      { g_snprintf( chaine, sizeof(chaine), " | - Unknown command : %s\n", ligne );
        Admin_write ( connexion, chaine );
-       Admin_write ( connexion, "|-\n" );
+       Admin_write ( connexion, " |-\n" );
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

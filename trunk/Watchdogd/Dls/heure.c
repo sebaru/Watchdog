@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Dls/heure.c    ->    fonctions appelées par les plugins D.L.S                                */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       lun 22 déc 2003 16:46:02 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Dls/heure.c    ->    fonctions appelées par les plugins D.L.S                                                    */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                           lun 22 déc 2003 16:46:02 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * heure.c
  * This file is part of Watchdog
@@ -27,15 +27,15 @@
  
  #include <time.h>
 
- #include "Module_dls.h"                /* Inclusion des prototypes de fonctions de controle/commande DLS */
+ #include "Module_dls.h"                                    /* Inclusion des prototypes de fonctions de controle/commande DLS */
 
- static int nbr_heure, nbr_minute;                                 /* Gestion des demarrages à heure fixe */
- static int num_jour_semaine;                                             /* Numéro du jour de la semaine */
-/**********************************************************************************************************/
-/* Prendre_heure: Prend la date/heure actuelle de la machine                                              */
-/* Entrée: rien                                                                                           */
-/* Sortie: les variables globales de gestion de l'heure sont mises à jour                                 */
-/**********************************************************************************************************/
+ static int nbr_heure, nbr_minute;                                                     /* Gestion des demarrages à heure fixe */
+ static int num_jour_semaine;                                                                 /* Numéro du jour de la semaine */
+/******************************************************************************************************************************/
+/* Prendre_heure: Prend la date/heure actuelle de la machine                                                                  */
+/* Entrée: rien                                                                                                               */
+/* Sortie: les variables globales de gestion de l'heure sont mises à jour                                                     */
+/******************************************************************************************************************************/
  void Prendre_heure ( void )
   { struct tm tm;
     time_t temps;
@@ -46,32 +46,32 @@
     nbr_minute = tm.tm_min;
     num_jour_semaine = tm.tm_wday;
   }
-/**********************************************************************************************************/
-/* Heure: renvoie TRUE si l'heure actuelle a changée (une fois par minute donc) et vaut les parametres    */
-/* Entrée: heure et minute attendue                                                                       */
-/* Sortie: rien ou pas rien                                                                               */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Heure: renvoie TRUE si le jour actuel est celui en parametre                                                               */
+/* Entrée: le jour a tester                                                                                                   */
+/* Sortie: TRUE / FALSE                                                                                                       */
+/******************************************************************************************************************************/
  int Jour_semaine ( int jour )
   { return( num_jour_semaine == jour ); }
-/**********************************************************************************************************/
-/* Heure: renvoie TRUE si l'heure actuelle a changée (une fois par minute donc) et vaut les parametres    */
-/* Entrée: heure et minute attendue                                                                       */
-/* Sortie: rien ou pas rien                                                                               */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Heure: renvoie TRUE si l'heure actuelle est celle en paramètre                                                             */
+/* Entrée: heure et minute attendue                                                                                           */
+/* Sortie: TRUE / FALSE                                                                                                       */
+/******************************************************************************************************************************/
  int Heure ( int heure, int minute )
   { return( nbr_heure==heure && nbr_minute==minute ); }
-/**********************************************************************************************************/
-/* Heure: renvoie TRUE si l'heure actuelle a changée (une fois par minute donc) et vaut les parametres    */
-/* Entrée: heure et minute attendue                                                                       */
-/* Sortie: rien ou pas rien                                                                               */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Heure: renvoie TRUE si l'heure actuelle est avant celle en parametre                                                       */
+/* Entrée: heure et minute attendue                                                                                           */
+/* Sortie: TRUE / FALSE                                                                                                       */
+/******************************************************************************************************************************/
  int Heure_apres ( int heure, int minute )
-  { return( (heure<nbr_heure || (heure==nbr_heure && minute<nbr_minute)) ); }
-/**********************************************************************************************************/
-/* Heure: renvoie TRUE si l'heure actuelle a changée (une fois par minute donc) et vaut les parametres    */
-/* Entrée: heure et minute attendue                                                                       */
-/* Sortie: rien ou pas rien                                                                               */
-/**********************************************************************************************************/
+  { return( (heure<nbr_heure || (heure==nbr_heure && minute<=nbr_minute)) ); }
+/******************************************************************************************************************************/
+/* Heure: renvoie TRUE si l'heure actuelle est future a celle en parametre                                                    */
+/* Entrée: heure et minute attendue                                                                                           */
+/* Sortie: TRUE / FALSE                                                                                                       */
+/******************************************************************************************************************************/
  int Heure_avant ( int heure, int minute )
-  { return( (heure>nbr_heure || (heure==nbr_heure && minute>nbr_minute)) ); }
-/*--------------------------------------------------------------------------------------------------------*/
+  { return( (heure>nbr_heure || (heure==nbr_heure && minute>=nbr_minute)) ); }
+/*----------------------------------------------------------------------------------------------------------------------------*/
