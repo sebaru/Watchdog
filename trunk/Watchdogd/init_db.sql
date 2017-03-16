@@ -186,7 +186,7 @@ INSERT INTO `groups` (`id`, `name`, `comment`) VALUES
 (2, 'Admin-MsgDB', 'Members can add/remove/edit Msgs'),
 (3, 'Admin-iconDB', 'Members can add/remove/edit icons'),
 (4, 'Admin-synopDB', 'Members can add/remove/edit syn'),
-(5, 'Log', 'Members can see the log'),
+(5, 'Admin-mnemos', 'Members can manage Mnemonique'),
 (6, 'Admin-dlsDB', 'Members can add/remove/edit DLS plugins'),
 (7, 'Admin-histoDB', 'Members can ack/query histo'),
 (8, 'Admin-scenarioDB', 'Members can add/remove Scenario'),

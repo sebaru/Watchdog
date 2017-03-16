@@ -91,6 +91,7 @@
 /*************************************************** Définitions des prototypes ***********************************************/
  extern gboolean Http_Lire_config ( void );
  extern gint Http_json_get_int ( JsonObject *object, gchar *name );
+ extern void Http_Send_error_code ( struct lws *wsi, gint code );
  extern gboolean Http_Traiter_request_getsyn ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gboolean Http_Traiter_request_getstatus ( struct lws *wsi );
  extern gint Http_Traiter_request_getgif ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );

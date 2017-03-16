@@ -53,6 +53,11 @@
     gchar *buf;
     gsize taille_buf;
 
+    if ( session==NULL || session->util==NULL || Tester_groupe_util( session->util, GID_MESSAGE)==FALSE)
+     { Http_Send_error_code ( wsi, 304 );
+       return(TRUE);
+     }
+
     type_s   = lws_get_urlarg_by_name	( wsi, "type=",    token_type,    sizeof(token_type) );
     num_s    = lws_get_urlarg_by_name	( wsi, "num=",     token_num,     sizeof(token_num) );
     start_s  = lws_get_urlarg_by_name	( wsi, "start=",   token_start,   sizeof(token_start) );
@@ -144,81 +149,12 @@
     json_generator_set_root ( gen, json_builder_get_root(builder) );
     json_generator_set_pretty ( gen, TRUE );
     buf = json_generator_to_data (gen, &taille_buf);
-    /*json_node_free (root); ???*/
     g_object_unref(builder);
     g_object_unref(gen);
           
-#ifdef bouh
-/************************************************ Préparation du buffer XML ***************************************************/
-    buf = xmlBufferCreate();                                                                        /* Creation du buffer xml */
-    if (buf == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getmessage : XML Buffer creation failed" );
-       return(FALSE);
-     }
-
-    writer = xmlNewTextWriterMemory(buf, 0);                                                         /* Creation du write XML */
-    if (writer == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getmessage : XML Writer creation failed" );
-       xmlBufferFree(buf);
-       return(FALSE);
-     }
-
-    retour = xmlTextWriterStartDocument(writer, NULL, "UTF-8", "yes" );                               /* Creation du document */
-    if (retour < 0)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getmessage : XML Start document failed" );
-       xmlBufferFree(buf);
-       return(FALSE);
-     }
-                                                                      /* Lancement de la requete de recuperation des messages */
-    if ( ! Recuperer_messageDB_with_conditions( &db, requete, start, length ) )
-     { xmlFreeTextWriter(writer);                                                                 /* Libération du writer XML */
-       xmlBufferFree(buf);                                            /* Libération du buffer dont nous n'avons plus besoin ! */
-       return(FALSE);
-     }
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping messages !!");
-    xmlTextWriterStartElement(writer, (const unsigned char *) "Messages");
-/*------------------------------------------------------- Dumping message ----------------------------------------------------*/
-    while ( (msg=Recuperer_messageDB_suite( &db )) != NULL )                     /* Mise en forme avant envoi au client léger */
-     { xmlTextWriterStartElement(writer, (const unsigned char *) "Message");
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"id", "%d", msg->id );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"num", "%d", msg->num );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"type", "%d", msg->type );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"enable", "%d", msg->enable );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"sms", "%d", msg->sms );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"bit_voc", "%d", msg->bit_voc );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"vitesse_voc", "%d", msg->vitesse_voc );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"type_voc", "%d", msg->type_voc );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"time_repeat", "%d", msg->time_repeat );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"libelle", "%s", msg->libelle );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"libelle_audio", "%s", msg->libelle_audio );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"libelle_sms", "%s", msg->libelle_sms );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_groupe", "%s", msg->syn_groupe );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_page", "%s", msg->syn_page );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"syn_libelle", "%s", msg->syn_libelle );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"dls_id", "%d", msg->dls_id );
-       xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"dls_shortname", "%s", msg->dls_shortname );
-       xmlTextWriterEndElement(writer);                                                                        /* End message */
-       g_free(msg);
-     }
-    xmlTextWriterEndElement(writer);                                                                          /* End messages */
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"Dumping messages done !");
-    retour = xmlTextWriterEndDocument(writer);                                                                /* End document */
-    if (retour < 0)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getmessage : Failed to end Document" );
-       xmlFreeTextWriter(writer);                                                                 /* Libération du writer XML */
-       xmlBufferFree(buf);
-       return(FALSE);
-     }
-    xmlFreeTextWriter(writer);                                                                    /* Libération du writer XML */
-#endif
 /*************************************************** Envoi au client **********************************************************/
     header_cur = header;
     header_end = header + sizeof(header);
-    
     retour = lws_add_http_header_status( wsi, 200, &header_cur, header_end );
     retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, (const unsigned char *)content_type, strlen(content_type),
                                            &header_cur, header_end );

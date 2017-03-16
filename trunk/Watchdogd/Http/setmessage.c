@@ -60,6 +60,12 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
              "%s: (sid %.12s) HTTP request body completion", __func__, Http_get_session_id(pss->session) );
 
+
+    if ( pss->session==NULL || pss->session->util==NULL || Tester_groupe_util( pss->session->util, GID_MNEMO)==FALSE)
+     { Http_Send_error_code ( wsi, 304 );
+       return(TRUE);
+     }
+
     header_cur = header;                                                             /* Préparation des headers de la réponse */
     header_end = header + sizeof(header);
 

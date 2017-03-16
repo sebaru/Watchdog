@@ -50,6 +50,11 @@
     xmlBufferPtr buf;
     gint retour;
 
+    if ( session==NULL || session->util==NULL || Tester_groupe_util( session->util, GID_MNEMO)==FALSE)
+     { Http_Send_error_code ( wsi, 304 );
+       return(TRUE);
+     }
+
     type_s = lws_get_urlarg_by_name	( wsi, "type=",   token_type,   sizeof(token_type) );
     if (type_s) { critere.type = atoi ( type_s ); } else { critere.type   = -1; }
     num_s  = lws_get_urlarg_by_name	( wsi, "num=",  token_num,  sizeof(token_num) );
