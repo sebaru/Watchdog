@@ -142,7 +142,9 @@
 
     pss = lws_wsi_user ( wsi );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-             "%s: (sid %.12s) Sending Error code %d", __func__, Http_get_session_id(pss->session), code );
+             "%s: (sid %.12s) Sending Error code '%d' for '%s'", __func__, Http_get_session_id(pss->session), code,
+             (pss->session ? (pss->session->util ? pss->session->util->nom : "nouser") : "--no session--")
+            );
 
     header_cur = header;
     header_end = header + sizeof(header);
