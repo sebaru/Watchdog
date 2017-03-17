@@ -312,7 +312,7 @@
                 "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
                 "dls.name, mnemo.tableau, mnemo.acro_syn"
                 " FROM %s as mnemo INNER JOIN %s as dls ON mnemo.num_plugin=dls.id INNER JOIN %s as syn ON dls.syn_id = syn.id"
-                " WHERE mnemo.type = %d AND mnemo.num = %d",
+                " WHERE mnemo.type = %d AND mnemo.num = %d LIMIT 1",
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, critere->type, critere->num
               );
 

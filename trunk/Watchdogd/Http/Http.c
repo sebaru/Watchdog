@@ -139,6 +139,10 @@
   { unsigned char header[256], *header_cur, *header_end;
    	gint retour;
 
+    pss = lws_wsi_user ( wsi );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARN,
+             "%s: (sid %.12s) Sending Error code %d", __func__, Http_get_session_id(pss->session), code );
+
     header_cur = header;
     header_end = header + sizeof(header);
 
