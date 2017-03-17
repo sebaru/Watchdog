@@ -98,7 +98,7 @@
     if (groupe)
      { g_snprintf( critere, sizeof(critere),
                   " AND (syn.groupe LIKE '%%%s%%' OR syn.page LIKE '%%%s%%' OR syn.libelle LIKE '%%%s%%'"
-                       " OR dls_shortname LIKE '%%%s%%')",
+                       " OR dls.shortname LIKE '%%%s%%')",
                    groupe, groupe, groupe, groupe );
        g_strlcat( requete, critere, sizeof(requete) );
      }
