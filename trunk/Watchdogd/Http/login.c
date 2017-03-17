@@ -361,8 +361,8 @@ search_again:
              lws_write ( wsi, buf->content, buf->use, LWS_WRITE_HTTP);                                      /* Send to client */
              xmlBufferFree(buf);                                      /* Libération du buffer dont nous n'avons plus besoin ! */
              Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                      "Http_Traiter_request_login: (sid %.12s), New Session Cookie for %s(%s)",
-                       Http_get_session_id(session), remote_name, remote_ip );
+                      "Http_Traiter_request_login: (sid %.12s), New Session Cookie for '%s' from %s(%s)",
+                       Http_get_session_id(session), session->util->nom, remote_name, remote_ip );
           }
         }
      }
