@@ -137,10 +137,11 @@
 /******************************************************************************************************************************/
  void Http_Send_error_code ( struct lws *wsi, gint code )
   { unsigned char header[256], *header_cur, *header_end;
-   	gint retour;
+   	struct HTTP_PER_SESSION_DATA *pss;
+    gint retour;
 
     pss = lws_wsi_user ( wsi );
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARN,
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
              "%s: (sid %.12s) Sending Error code %d", __func__, Http_get_session_id(pss->session), code );
 
     header_cur = header;
