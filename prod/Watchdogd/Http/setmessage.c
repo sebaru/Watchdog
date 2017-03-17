@@ -54,16 +54,22 @@
     struct HTTP_PER_SESSION_DATA *pss;
     JsonNode *root_node;
     JsonParser *parser;
-    gint retour, taille, replace = -1, id = -1, code;
+    gint retour, taille, code;
 
     pss = lws_wsi_user ( wsi );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
              "%s: (sid %.12s) HTTP request body completion", __func__, Http_get_session_id(pss->session) );
 
+
+    if ( pss->session==NULL || pss->session->util==NULL || Tester_groupe_util( pss->session->util, GID_MESSAGE)==FALSE)
+     { Http_Send_error_code ( wsi, 401 );
+       return(TRUE);
+     }
+
     header_cur = header;                                                             /* Préparation des headers de la réponse */
     header_end = header + sizeof(header);
 
-    code = 500;
+    code = 400;                                                                                                /* Bad Request */
     parser = json_parser_new();                                                                    /* Creation du parser JSON */
     if (!parser)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
@@ -98,12 +104,16 @@
           msg->time_repeat = Http_json_get_int (object, "time_repeat");
           msg->sms         = Http_json_get_int (object, "sms");
           msg->enable      = Http_json_get_int (object, "enable");
-          g_snprintf( msg->libelle, sizeof(msg->libelle), "%s",
-                      json_node_get_string ( json_object_get_member (object, "libelle" ) ) );
-          g_snprintf( msg->libelle_sms, sizeof(msg->libelle_sms), "%s",
-                      json_node_get_string ( json_object_get_member (object, "libelle_sms" ) ) );
-          if (id==-1)
-             { if ( Ajouter_messageDB(msg) == TRUE ) code = 200; }
+          node = json_object_get_member (object, "libelle" );
+          if (node) g_snprintf( msg->libelle, sizeof(msg->libelle), "%s", json_node_get_string ( node ) );
+               else g_snprintf( msg->libelle, sizeof(msg->libelle), "undefined" );
+
+          node = json_object_get_member (object, "libelle_sms" );
+          if (node) g_snprintf( msg->libelle_sms, sizeof(msg->libelle_sms), "%s", json_node_get_string ( node ) );
+               else g_snprintf( msg->libelle_sms, sizeof(msg->libelle_sms), "undefined" );
+
+          if (msg->id==-1)
+             { if ( Ajouter_messageDB(msg) != -1 ) code = 200; }
           else if ( Modifier_messageDB(msg) == TRUE ) code = 200;
           g_free(msg);
         }

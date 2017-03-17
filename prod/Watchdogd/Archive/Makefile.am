@@ -6,7 +6,7 @@
 SUBDIRS= 
 
 noinst_LTLIBRARIES     = libarchive.la
-libarchive_la_SOURCES    = Archive.c archiveDB.c
+libarchive_la_SOURCES    = Archive.c archiveDB.c admin_arch.c
 
 AM_CPPFLAGS= `pkg-config --cflags glib-2.0` \
              `mysql_config --cflags` \

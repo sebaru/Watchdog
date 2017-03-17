@@ -239,8 +239,7 @@
            { Jouer_wav("Son/jingle.wav"); }                                                         /* On balance le jingle ! */
           Cfg_audio.last_audio = Partage->top;
 
-          if ( ! Jouer_mp3 ( &histo->msg ) )                           /* Par priorité : mp3 d'abord, synthèse vocale ensuite */
-           { Jouer_espeak ( &histo->msg ); }
+          Jouer_mp3 ( &histo->msg );                                   /* Par priorité : mp3 d'abord, synthèse vocale ensuite */
         }
        g_free(histo);
      }
