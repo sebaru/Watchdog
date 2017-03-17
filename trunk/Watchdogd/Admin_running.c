@@ -47,7 +47,6 @@
        Admin_write ( connexion, "  audit                 - Audit bit/s\n" );
        Admin_write ( connexion, "  dbcfg                 - Manage Threads Parameters in Database\n" );
        Admin_write ( connexion, "  clear_histo           - Clear Histo DB\n" );
-       Admin_write ( connexion, "  clear_arch            - Clear Archvie List\n" );
        Admin_write ( connexion, "  get                   - Sous-menu de lecture des bits internes\n" );
        Admin_write ( connexion, "  set                   - Sous-menu d'affectation des bits internes\n" );
        Admin_write ( connexion, "  modbus                - Sous-menu de gestion des equipements MODBUS\n" );
@@ -103,12 +102,6 @@
     if ( ! strcmp ( commande, "reload_confDB" ) )
      { Charger_config_bit_interne ();     /* Chargement des configurations des bits internes depuis la DB */
        g_snprintf( chaine, sizeof(chaine), " Reload done\n" );
-       Admin_write ( connexion, chaine );
-     } else
-    if ( ! strcmp ( commande, "clear_arch" ) )
-     { gint nbr;
-       nbr = Arch_Clear_list ();                            /* Clear de la list des archives à prendre en compte */
-       g_snprintf( chaine, sizeof(chaine), " ArchiveList cleared (%d components)\n", nbr );
        Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "audit" ) )
