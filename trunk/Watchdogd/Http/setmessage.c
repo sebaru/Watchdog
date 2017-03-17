@@ -61,7 +61,7 @@
              "%s: (sid %.12s) HTTP request body completion", __func__, Http_get_session_id(pss->session) );
 
 
-    if ( pss->session==NULL || pss->session->util==NULL || Tester_groupe_util( pss->session->util, GID_MNEMO)==FALSE)
+    if ( pss->session==NULL || pss->session->util==NULL || Tester_groupe_util( pss->session->util, GID_MESSAGE)==FALSE)
      { Http_Send_error_code ( wsi, 401 );
        return(TRUE);
      }
