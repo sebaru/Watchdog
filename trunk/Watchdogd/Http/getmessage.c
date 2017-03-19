@@ -53,7 +53,7 @@
     gchar *buf;
     gsize taille_buf;
 
-    if ( session==NULL || session->util==NULL || Tester_groupe_util( session->util, GID_MESSAGE)==FALSE)
+    if ( session==NULL || session->util==NULL || Tester_groupe_util(session->util, GID_MESSAGE)==FALSE)
      { Http_Send_error_code ( wsi, 401 );
        return(TRUE);
      }
@@ -78,7 +78,7 @@
 
     if (length_s)
      { length = atoi (length_s); }
-    else length=100;
+    else length=500;
 
     if (num_s)
      { g_snprintf( critere, sizeof(critere), " AND msg.num=%d", atoi(num_s) );

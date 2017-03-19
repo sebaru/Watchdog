@@ -239,6 +239,8 @@
                 { return( Http_Traiter_request_body_completion_postsvg ( wsi ) ); }
                else if ( ! strcasecmp ( pss->url, "/ws/setmessage" ) )
                 { return( Http_Traiter_request_body_completion_setmessage ( wsi ) ); }
+               else if ( ! strcasecmp ( pss->url, "/ws/delmessage" ) )
+                { return( Http_Traiter_request_body_completion_delmessage ( wsi ) ); }
               }
             break;
        case LWS_CALLBACK_HTTP:
@@ -269,6 +271,8 @@
                 { return( Http_Traiter_request_getmessage ( wsi, session ) ); }
                else if ( ! strcasecmp ( url, "/ws/setmessage" ) )
                 { return( Http_Traiter_request_setmessage ( wsi, session, remote_name, remote_ip ) ); }
+               else if ( ! strcasecmp ( url, "/ws/delmessage" ) )
+                { return( Http_Traiter_request_delmessage ( wsi, session ) ); }
                else if ( ! strcasecmp ( url, "/ws/getpluginsDLS" ) )
                 { return( Http_Traiter_request_getpluginsDLS ( wsi, session ) ); }
                else if ( ! strncasecmp ( url, "/ws/getmnemo", 13 ) )
