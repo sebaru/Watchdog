@@ -61,13 +61,13 @@
          { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Retirer_synoptiqueDB: elimination failed %s", requete ); }
     else { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "Retirer_synoptiqueDB: elimination ok" ); }
 
-/****************************************** Retrait des capteurs ******************************************/
+/****************************************** Retrait des cadrans ******************************************/
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "DELETE FROM %s WHERE syn_id=%d", NOM_TABLE_CAPTEUR, syn->id );
+                "DELETE FROM %s WHERE syn_id=%d", NOM_TABLE_CADRAN, syn->id );
 
     if ( ! Lancer_requete_SQL ( db, requete ) )
-         { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Retirer_synoptiqueDB: elimination capteur failed %s", requete ); }
-    else { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "Retirer_synoptiqueDB: elimination capteur ok" ); }
+         { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Retirer_synoptiqueDB: elimination cadran failed %s", requete ); }
+    else { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "Retirer_synoptiqueDB: elimination cadran ok" ); }
 
 /****************************************** Retrait des comment *******************************************/
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */

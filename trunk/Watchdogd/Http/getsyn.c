@@ -118,35 +118,35 @@
      }
     xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping passerelles !!");
 
-/*------------------------------------------- Dumping capteur --------------------------------------------*/
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping capteurs !!");
-    if ( Recuperer_capteurDB( &db, id_syn ) )
+/*------------------------------------------- Dumping cadran --------------------------------------------*/
+    xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping cadrans !!");
+    if ( Recuperer_cadranDB( &db, id_syn ) )
      { for ( ; ; )
-        { struct CMD_TYPE_CAPTEUR *capteur;
+        { struct CMD_TYPE_CADRAN *cadran;
           gfloat valeur = 0.0;
           gchar *unite= NULL;
-          capteur = Recuperer_capteurDB_suite( &db );
-          if (!capteur) break;                                                              /* Terminé ?? */
+          cadran = Recuperer_cadranDB_suite( &db );
+          if (!cadran) break;                                                              /* Terminé ?? */
 
-          xmlTextWriterStartElement(writer, (const unsigned char *)"capteur");           /* Start Capteur */
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"id",      "%d", capteur->id );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"libelle", "%s", capteur->libelle );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"type", "%d",    capteur->type );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"num", "%d",     capteur->bit_controle );
-          switch(capteur->type)
+          xmlTextWriterStartElement(writer, (const unsigned char *)"cadran");           /* Start Capteur */
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"id",      "%d", cadran->id );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"libelle", "%s", cadran->libelle );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"type", "%d",    cadran->type );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"num", "%d",     cadran->bit_controle );
+          switch(cadran->type)
            { case MNEMO_ENTREE_ANA:
-                  valeur = Partage->ea[capteur->bit_controle].val_ech;
-                  unite =  Partage->ea[capteur->bit_controle].confDB.unite;
+                  valeur = Partage->ea[cadran->bit_controle].val_ech;
+                  unite =  Partage->ea[cadran->bit_controle].confDB.unite;
                   break;
              default: valeur = 0.0; unite = "?";
            }
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"valeur", "%f", valeur );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"unite", "%s", unite );
           xmlTextWriterEndElement(writer);                                              /* End passerelle */
-          g_free(capteur);
+          g_free(cadran);
         }
      }
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping capteurs !!");
+    xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping cadrans !!");
 #endif
 /*-------------------------------------------------------- Dumping motif -----------------------------------------------------*/
     xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping motifs !!");

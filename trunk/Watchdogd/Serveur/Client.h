@@ -36,7 +36,7 @@
  #include "Utilisateur_DB.h"
 
  #define TAILLE_MACHINE            30                                                    /* Taille max pour un nom d'hote DNS */
- #define TEMPS_UPDATE_CAPTEUR      20                                  /* Rafraichissement des capteurs toutes les 2 secondes */
+ #define TEMPS_UPDATE_CADRAN      20                                  /* Rafraichissement des cadrans toutes les 2 secondes */
  #define TEMPS_PULSE               20                                                           /* Envoi d'un pulse au client */
 
  enum
@@ -78,7 +78,7 @@
     GSList *Liste_new_motif;                               /* Liste des changements de motifs a traiter et envoyer aux client */
     GSList *Liste_bit_syns;                                /* Ensemble des bits CTRL utilisés pour les synoptiques visualisés */
 
-    GSList *Liste_bit_capteurs;                            /* Ensemble des bits EAxx utilisés pour les synoptiques visualisés */
+    GSList *Liste_bit_cadrans;                            /* Ensemble des bits EAxx utilisés pour les synoptiques visualisés */
 
 /* Communication des Evenements depuis SSRV vers les clients */
     GSList *Liste_events;                                                                       /* Liste des evenements recus */
@@ -93,7 +93,7 @@
     guint taille_Source_DLS_new;                                                     /* Taille en mémoire du buffer ci dessus */
     gint id_creation_message_mp3;                                              /* ID fichier message mp3 en cours de creation */
     gint classe_icone;                                                            /* Classe d'icone en cours de visualisation */
-    gint date_next_send_capteur;                                             /* Date du prochain envoi des capteurs au client */
+    gint date_next_send_cadran;                                             /* Date du prochain envoi des cadrans au client */
     struct CMD_CRITERE_HISTO_MSGS requete;                                       /* Pour la sauvegarde de la requete en cours */
     struct CMD_TYPE_SOURCE_DLS dls;                                         /* Pour la sauvegarde et compilation dls en cours */
 

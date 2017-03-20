@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Serveur/envoi_synoptique_capteur.c     Envoi des capteurs aux clients                                            */
+/* Watchdogd/Serveur/envoi_synoptique_cadran.c     Envoi des cadrans aux clients                                              */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                          dim 22 mai 2005 17:35:28 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * envoi_synoptique_capteur.c
+ * envoi_synoptique_cadran.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -34,141 +34,141 @@
  #include "watchdogd.h"
  #include "Sous_serveur.h"
 /******************************************************************************************************************************/
-/* Proto_effacer_capteur_atelier: Retrait du capteur en parametre                                                             */
-/* Entrée: le client demandeur et le capteur en question                                                                      */
+/* Proto_effacer_cadran_atelier: Retrait du cadran en parametre                                                               */
+/* Entrée: le client demandeur et le cadran en question                                                                       */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Proto_effacer_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur )
+ void Proto_effacer_cadran_atelier ( struct CLIENT *client, struct CMD_TYPE_CADRAN *rezo_cadran )
   { gboolean retour;
-    retour = Retirer_capteurDB( rezo_capteur );
+    retour = Retirer_cadranDB( rezo_cadran );
 
     if (retour)
-     { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_CAPTEUR_OK,
-                     (gchar *)rezo_capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
+     { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_CADRAN_OK,
+                     (gchar *)rezo_cadran, sizeof(struct CMD_TYPE_CADRAN) );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to delete capteur %s", rezo_capteur->libelle);
+                   "Unable to delete cadran %s", rezo_cadran->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
   }
 /******************************************************************************************************************************/
-/* Proto_ajouter_capteur_atelier: Ajout d'un capteur dans un synoptique                                                       */
-/* Entrée: le client demandeur et le capteur en question                                                                      */
+/* Proto_ajouter_cadran_atelier: Ajout d'un cadran dans un synoptique                                                         */
+/* Entrée: le client demandeur et le cadran en question                                                                       */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Proto_ajouter_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur )
-  { struct CMD_TYPE_CAPTEUR *result;
+ void Proto_ajouter_cadran_atelier ( struct CLIENT *client, struct CMD_TYPE_CADRAN *rezo_cadran )
+  { struct CMD_TYPE_CADRAN *result;
     gint id;
 
-    id = Ajouter_capteurDB ( rezo_capteur );
+    id = Ajouter_cadranDB ( rezo_cadran );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to add capteur %s", rezo_capteur->libelle );
+                   "Unable to add cadran %s", rezo_cadran->libelle );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_capteurDB( id );
+    else { result = Rechercher_cadranDB( id );
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate capteur %d", id );
+                          "Unable to locate cadran %d", id );
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_CAPTEUR_OK,
-                            (gchar *)result, sizeof(struct CMD_TYPE_CAPTEUR) );
+            { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_CADRAN_OK,
+                            (gchar *)result, sizeof(struct CMD_TYPE_CADRAN) );
               g_free(result);
             }
          }
   }
 /******************************************************************************************************************************/
-/* Proto_valider_editer_capteur_atelier: Le client desire editer un capteur                                                   */
-/* Entrée: le client demandeur et le capteur en question                                                                      */
+/* Proto_valider_editer_cadran_atelier: Le client desire editer un cadran                                                     */
+/* Entrée: le client demandeur et le cadran en question                                                                       */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Proto_valider_editer_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur )
+ void Proto_valider_editer_cadran_atelier ( struct CLIENT *client, struct CMD_TYPE_CADRAN *rezo_cadran )
   { gboolean retour;
-    retour = Modifier_capteurDB ( rezo_capteur );
+    retour = Modifier_cadranDB ( rezo_cadran );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to save capteur %s", rezo_capteur->libelle);
+                   "Unable to save cadran %s", rezo_cadran->libelle);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
   }
 /******************************************************************************************************************************/
-/* Chercher_bit_capteurs: Renvoie 0 si l'element en argument est dans la liste                                                */
+/* Chercher_bit_cadrans: Renvoie 0 si l'element en argument est dans la liste                                                */
 /* Entrée: L'element                                                                                                          */
 /* Sortie: 0 si present, 1 sinon                                                                                              */
 /******************************************************************************************************************************/
- static gint Chercher_bit_capteurs ( struct CAPTEUR *element, struct CAPTEUR *cherche )
+ static gint Chercher_bit_cadrans ( struct CADRAN *element, struct CADRAN *cherche )
   { if (element->bit_controle == cherche->bit_controle &&
         element->type == cherche->type)
          return 0;
     else return 1;
   }
 /******************************************************************************************************************************/
-/* Envoyer_capteur_tag: Envoi des capteur au client en parametre                                                              */
+/* Envoyer_cadran_tag: Envoi des cadran au client en parametre                                                                */
 /* Entrée: Le client, le tag reseau et sous-tag                                                                               */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Envoyer_capteur_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
-  { struct CMD_TYPE_CAPTEUR *capteur;
+ void Envoyer_cadran_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
+  { struct CMD_TYPE_CADRAN *cadran;
     struct CMD_ENREG nbr;
     struct DB *db;
 
-    if ( ! Recuperer_capteurDB( &db, client->syn_to_send->id ) )
-     { return; }                                                                                   /* Si pas de capteurs (??) */
+    if ( ! Recuperer_cadranDB( &db, client->syn_to_send->id ) )
+     { return; }                                                                                    /* Si pas de cadrans (??) */
 
     nbr.num = db->nbr_result;
     if (nbr.num)
-     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d capteurs", nbr.num );
+     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d cadrans", nbr.num );
        Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
                       (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
 
-    while ( (capteur = Recuperer_capteurDB_suite( &db )) != NULL )                   /* Pour tous les capteurs de la database */
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_capteur_tag: capteur %d (%s) to client %s",
-                 capteur->id, capteur->libelle, client->machine );
+    while ( (cadran = Recuperer_cadranDB_suite( &db )) != NULL )                      /* Pour tous les cadrans de la database */
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, 
+                "Envoyer_cadran_tag: cadran %d (%s) to client %s",
+                 cadran->id, cadran->libelle, client->machine );
 
-       Envoi_client ( client, tag, sstag,                                                       /* Envoi du capteur au client */
-                      (gchar *)capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
+       Envoi_client ( client, tag, sstag,                                                        /* Envoi du cadran au client */
+                      (gchar *)cadran, sizeof(struct CMD_TYPE_CADRAN) );
 
        if (tag == TAG_SUPERVISION)                                          /* Si mode supervision on envoit la valeur d'init */
-        { struct CMD_ETAT_BIT_CAPTEUR *init_capteur;
-          struct CAPTEUR *capteur_new;
-		  capteur_new = (struct CAPTEUR *) g_try_malloc0 ( sizeof(struct CAPTEUR) );
-		  if (!capteur_new)
+        { struct CMD_ETAT_BIT_CADRAN *init_cadran;
+          struct CADRAN *cadran_new;
+		  cadran_new = (struct CADRAN *) g_try_malloc0 ( sizeof(struct CADRAN) );
+		  if (!cadran_new)
            { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                      "Envoyer_capteur_tag: Memory Error for %d (%s)", capteur->id, capteur->libelle );
+                      "Envoyer_cadran_tag: Memory Error for %d (%s)", cadran->id, cadran->libelle );
            }
           else
-           { capteur_new->type         = capteur->type;
-			 capteur_new->bit_controle = capteur->bit_controle;
+           { cadran_new->type         = cadran->type;
+			 cadran_new->bit_controle = cadran->bit_controle;
 			 
-             init_capteur = Formater_capteur(capteur_new);                                 /* Formatage de la chaine associée */
-             if (init_capteur)                                                            /* envoi la valeur d'init au client */
-              { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CAPTEUR,
-                              (gchar *)init_capteur, sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
-                g_free(init_capteur);                                                                 /* On libere la mémoire */
+             init_cadran = Formater_cadran(cadran_new);                                   /* Formatage de la chaine associée */
+             if (init_cadran)                                                            /* envoi la valeur d'init au client */
+              { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CADRAN,
+                              (gchar *)init_cadran, sizeof(struct CMD_ETAT_BIT_CADRAN) );
+                g_free(init_cadran);                                                                 /* On libere la mémoire */
               }
              else { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                             "Envoyer_capteur_tag: Formater_capteur failed for %d (%s)", capteur->id, capteur->libelle );
+                             "Envoyer_cadran_tag: Formater_cadran failed for %d (%s)", cadran->id, cadran->libelle );
                   }
 
-             if ( ! g_slist_find_custom(client->Liste_bit_capteurs, capteur_new, (GCompareFunc) Chercher_bit_capteurs) )
-              { client->Liste_bit_capteurs = g_slist_prepend( client->Liste_bit_capteurs, capteur_new ); }
-             else g_free( capteur_new );                          /* si deja dans la liste, plus besoin de cette zone mémoire */
+             if ( ! g_slist_find_custom(client->Liste_bit_cadrans, cadran_new, (GCompareFunc) Chercher_bit_cadrans) )
+              { client->Liste_bit_cadrans = g_slist_prepend( client->Liste_bit_cadrans, cadran_new ); }
+             else g_free( cadran_new );                          /* si deja dans la liste, plus besoin de cette zone mémoire */
 	      }
         }
-       g_free(capteur);
+       g_free(cadran);
      }
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
   }
