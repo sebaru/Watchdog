@@ -605,7 +605,12 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=3055;
+    if (database_version < 3082)
+     { g_snprintf( requete, sizeof(requete), "RENAME TABLE syns_capteurs TO syns_cadrans" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+       
+    database_version=3082;
 
     Libere_DB_SQL(&db);
 
