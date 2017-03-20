@@ -174,6 +174,7 @@
     Charger_cpth();
     Charger_cpt_imp();
     Charger_tempo();
+    Charger_messages();
   }
 /**********************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                         */

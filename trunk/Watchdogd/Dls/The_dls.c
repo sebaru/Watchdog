@@ -578,43 +578,75 @@
      }
     if (changed == TRUE) Ajouter_arch( MNEMO_CPT_IMP, num, Partage->ci[num].confDB.valeur );
   }
-/**********************************************************************************************************/
-/* MSG: Positionnement des message DLS                                                                    */
-/* Entrée: numero, etat                                                                                   */
-/* Sortie: Neant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* MSG: Positionnement des messages DLS                                                                                       */
+/* Entrée: numero, etat                                                                                                       */
+/* Sortie: Neant                                                                                                              */
+/******************************************************************************************************************************/
  void MSG( int num, int etat )
   { if ( num<0 || num>=NBR_MESSAGE_ECRITS )
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_WARNING, "MSG : num %03d out of range", num ); }
+        { Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: num %03d out of range", __func__, num ); }
        return;
      }
 
     if ( Partage->g[num].etat != etat )
      { Partage->g[num].etat = etat;
 
-       if ( Partage->g[num].last_change + 10 <= Partage->top )   /* Si pas de change depuis plus de 1 sec */
+       if ( Partage->g[num].last_change + 10 <= Partage->top )                       /* Si pas de change depuis plus de 1 sec */
         { Partage->g[num].changes = 0; }
 
-       if ( Partage->g[num].changes <= 5 ) 
+       if ( Partage->g[num].changes > 5 && !(Partage->top % 50) )   /* Si persistence d'anomalie on prévient toutes les 5 sec */
+        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: last_change trop tot for MSG%03d!", __func__, num ); }
+       else if ( Partage->g[num].persist == FALSE)                    /* Si pas de persistence, on envoi l'evenement de suite */
         { struct MESSAGES_EVENT *event;
           event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
           if (!event)
            { Info_new( Config.log, Config.log_dls, LOG_ERR,
-                      "MSG: malloc Event failed. Memory error for MSG%d", num );
+                      "%s: malloc Event failed. Memory error for MSG%d", __func__, num );
            }
           else
            { event->num  = num;
-             event->etat = etat;
-             pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
+             event->etat = etat;                                                        /* Recopie de l'état dans l'evenement */
+             pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
              Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
              pthread_mutex_unlock( &Partage->com_msrv.synchro );
            }
           Partage->g[num].changes++;
-        } else if ( ! (Partage->top % 50 ))                /* Si persistence on prévient toutes les 5 sec */
-        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "MSG: last_change trop tot for MSG%03d!", num ); }
-       Partage->g[num].last_change = Partage->top;
-       Partage->audit_bit_interne_per_sec++;
+          Partage->g[num].last_change = Partage->top;
+          Partage->audit_bit_interne_per_sec++;
+        }
+       else if (etat)                    /* Si persistence, le message persiste si etat = 0. Si etat=1, stop/start du message */
+        { struct MESSAGES_EVENT *event;
+          event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
+          if (!event)
+           { Info_new( Config.log, Config.log_dls, LOG_ERR,
+                      "%s: malloc Event failed. Memory error for MSG%d", __func__, num );
+           }
+          else
+           { event->num  = num;
+             event->etat = 0;
+             pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
+             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
+             pthread_mutex_unlock( &Partage->com_msrv.synchro );
+           }
+
+          event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
+          if (!event)
+           { Info_new( Config.log, Config.log_dls, LOG_ERR,
+                      "%s: malloc Event failed. Memory error for MSG%d", __func__, num );
+           }
+          else
+           { event->num  = num;
+             event->etat = 1;
+             pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
+             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
+             pthread_mutex_unlock( &Partage->com_msrv.synchro );
+           }
+          Partage->g[num].changes++;
+          Partage->g[num].last_change = Partage->top;
+          Partage->audit_bit_interne_per_sec++;
+        }
      }
   }
 /******************************************************************************************************************************/

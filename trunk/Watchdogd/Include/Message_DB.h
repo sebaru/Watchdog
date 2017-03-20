@@ -42,6 +42,7 @@
  extern gint Ajouter_messageDB ( struct CMD_TYPE_MESSAGE *msg );
  extern gboolean Retirer_messageDB ( struct CMD_TYPE_MESSAGE *msg );
  extern gboolean Modifier_messageDB( struct CMD_TYPE_MESSAGE *msg );
+ extern void Charger_messages ( void );
 
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

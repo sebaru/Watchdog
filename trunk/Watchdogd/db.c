@@ -605,12 +605,14 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    if (database_version < 3082)
+    if (database_version < 3083)
      { g_snprintf( requete, sizeof(requete), "RENAME TABLE syns_capteurs TO syns_cadrans" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs ADD `persist` TINYINT(1) NOT NULL DEFAULT '0' AFTER `enable`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
        
-    database_version=3082;
+    database_version=3083;
 
     Libere_DB_SQL(&db);
 

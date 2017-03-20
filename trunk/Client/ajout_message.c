@@ -47,6 +47,7 @@
  static GtkWidget *F_ajout;                                                                /* Widget de l'interface graphique */
  static GtkWidget *Spin_num;                                                    /* Numéro du message en cours d'édition/ajout */
  static GtkWidget *Entry_lib;                                                                           /* Libelle du message */
+ static GtkWidget *Check_persist;                                      /* Le message est-il persistent sur front descendant ? */
  static GtkWidget *Check_audio;                                                                 /* Le message est-il vocal ?? */
  static GtkWidget *Entry_lib_audio;                                                               /* Libelle audio du message */
  static GtkWidget *Entry_lib_sms;                                                                   /* Libelle sms du message */
@@ -192,6 +193,7 @@
   { gboolean enable, audio;
     enable = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_enable) );
     audio  = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_audio) );
+    gtk_widget_set_sensitive( Check_persist, enable );
     gtk_widget_set_sensitive( Spin_num, enable );
     gtk_widget_set_sensitive( Spin_time_repeat, enable );
     gtk_widget_set_sensitive( Entry_lib, enable );
@@ -248,6 +250,8 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Check_enable, 0, 1, i, i+1 );
     g_signal_connect( G_OBJECT( GTK_CHECK_BUTTON(Check_enable) ), "clicked",
                       G_CALLBACK( Rafraichir_sensibilite_msg ), NULL );
+    Check_persist = gtk_check_button_new_with_label( _("Persistent") );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_persist, 1, 2, i, i+1 );
     texte = gtk_label_new( _("Type") );     /* Création de l'option menu pour le choix du type de message */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
 
@@ -331,6 +335,7 @@
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type), edit_msg->type );
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_sms), edit_msg->sms );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_enable), edit_msg->enable );
+       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_persist), edit_msg->persist );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_audio), edit_msg->audio );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), edit_msg->num );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_audio), edit_msg->bit_audio );
@@ -339,6 +344,7 @@
      }
     else { gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_enable), TRUE );
            gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_audio), FALSE );
+           gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_persist), FALSE );
            gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type), 0 );
            gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_sms), 0 );
            gtk_widget_grab_focus( Spin_num );

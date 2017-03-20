@@ -752,6 +752,7 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `audio` tinyint(1) NOT NULL DEFAULT '0',
   `bit_audio` int(11) DEFAULT NULL,
   `enable` tinyint(1) NOT NULL DEFAULT '0',
+  `persist` tinyint(1) NOT NULL DEFAULT '0',
   `sms` int(11) NOT NULL DEFAULT '0',
   `time_repeat` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)

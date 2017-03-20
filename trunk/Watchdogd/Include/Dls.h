@@ -101,6 +101,7 @@
     gint last_change;
     gint changes;
     gint next_repeat;
+    gboolean persist;
   };
 
  struct MESSAGES_EVENT
