@@ -550,7 +550,7 @@
         }
      }
     else
-     { Partage->ci[ num ].actif = FALSE; }
+     { if (reset==0) Partage->ci[ num ].actif = FALSE; }
 
     switch (Partage->ci[ num ].confDB.type)                        /* Calcul de la valeur réelle du CI */
      { case CI_TOTALISATEUR :
