@@ -47,7 +47,7 @@
     static GList *Arrivee_motif = NULL;
     static GList *Arrivee_icone = NULL;
     static GList *Arrivee_pass = NULL;
-    static GList *Arrivee_capteur = NULL;
+    static GList *Arrivee_cadran = NULL;
     static GList *Arrivee_comment = NULL;
     static GList *Arrivee_palette = NULL;
     static GList *Arrivee_camera_sup = NULL;
@@ -85,7 +85,7 @@
        case SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE_EA:
              { struct CMD_TYPE_MNEMO_BASE *mnemo;
                mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
-               Proto_afficher_mnemo_capteur_atelier( mnemo );
+               Proto_afficher_mnemo_cadran_atelier( mnemo );
              }
             break;
        case SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE_PASS:
@@ -142,16 +142,16 @@
                Proto_cacher_une_palette_atelier( palette );
              }
             break;
-       case SSTAG_SERVEUR_ATELIER_ADD_CAPTEUR_OK:
-             { struct CMD_TYPE_CAPTEUR *capteur;
-               capteur = (struct CMD_TYPE_CAPTEUR *)connexion->donnees;
-               Proto_afficher_un_capteur_atelier( capteur );
+       case SSTAG_SERVEUR_ATELIER_ADD_CADRAN_OK:
+             { struct CMD_TYPE_CADRAN *cadran;
+               cadran = (struct CMD_TYPE_CADRAN *)connexion->donnees;
+               Proto_afficher_un_cadran_atelier( cadran );
              }
             break;
-       case SSTAG_SERVEUR_ATELIER_DEL_CAPTEUR_OK:
-             { struct CMD_TYPE_CAPTEUR *capteur;
-               capteur = (struct CMD_TYPE_CAPTEUR *)connexion->donnees;
-               Proto_cacher_un_capteur_atelier( capteur );
+       case SSTAG_SERVEUR_ATELIER_DEL_CADRAN_OK:
+             { struct CMD_TYPE_CADRAN *cadran;
+               cadran = (struct CMD_TYPE_CADRAN *)connexion->donnees;
+               Proto_cacher_un_cadran_atelier( cadran );
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER:
@@ -305,22 +305,22 @@
              }
             break;
 
-       case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR:
-             { struct CMD_TYPE_CAPTEUR *capteur;
+       case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CADRAN:
+             { struct CMD_TYPE_CADRAN *cadran;
                Set_progress_plus(1);
 
-               capteur = (struct CMD_TYPE_CAPTEUR *)g_try_malloc0( sizeof( struct CMD_TYPE_CAPTEUR ) );
-               if (!capteur) { printf("Pas assez de mémoire\n"); return;  }
-               memcpy( capteur, connexion->donnees, sizeof(struct CMD_TYPE_CAPTEUR ) );
-               Arrivee_capteur = g_list_append( Arrivee_capteur, capteur );
-               save_id = capteur->syn_id;
+               cadran = (struct CMD_TYPE_CADRAN *)g_try_malloc0( sizeof( struct CMD_TYPE_CADRAN ) );
+               if (!cadran) { printf("Pas assez de mémoire\n"); return;  }
+               memcpy( cadran, connexion->donnees, sizeof(struct CMD_TYPE_CADRAN ) );
+               Arrivee_cadran = g_list_append( Arrivee_cadran, cadran );
+               save_id = cadran->syn_id;
              }
             break;
-       case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR_FIN:
-             { g_list_foreach( Arrivee_capteur, (GFunc)Proto_afficher_un_capteur_atelier, NULL );
-               g_list_foreach( Arrivee_capteur, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_capteur );
-               Arrivee_capteur = NULL;
+       case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CADRAN_FIN:
+             { g_list_foreach( Arrivee_cadran, (GFunc)Proto_afficher_un_cadran_atelier, NULL );
+               g_list_foreach( Arrivee_cadran, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_cadran );
+               Arrivee_cadran = NULL;
                Chercher_page_notebook( TYPE_PAGE_ATELIER, save_id, TRUE );
              }
             break;

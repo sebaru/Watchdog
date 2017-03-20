@@ -132,7 +132,7 @@
        union { struct TRAME_ITEM_MOTIF *trame_motif;         /* Pointeur sur l'item selectionné principal */
                struct TRAME_ITEM_PASS  *trame_pass;          /* Pointeur sur l'item selectionné principal */
                struct TRAME_ITEM_COMMENT *trame_comment;
-               struct TRAME_ITEM_CAPTEUR *trame_capteur;
+               struct TRAME_ITEM_CADRAN *trame_cadran;
                struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
              };
 
@@ -156,12 +156,12 @@
  extern void Detruire_page ( struct PAGE_NOTEBOOK *page_a_virer );
  extern GtkWidget *Creer_boite_travail ( void );
  extern void Set_progress_plus( gint plus );
- extern void Set_progress_text( gchar *capteur, gint max );
+ extern void Set_progress_text( gchar *cadran, gint max );
  extern void Set_progress_pulse( void );
  extern void Raz_progress_pulse( void );
  extern struct PAGE_NOTEBOOK *Chercher_page_notebook ( guint type, guint id, gboolean affiche );
  extern gboolean Tester_page_notebook ( guint type );
- extern GtkWidget *Bobouton ( GdkPixmap *pix, GdkBitmap *bitmap, gchar *capteur );
+ extern GtkWidget *Bobouton ( GdkPixmap *pix, GdkBitmap *bitmap, gchar *cadran );
  extern gint Nbr_page_type ( gint type );
  extern struct PAGE_NOTEBOOK *Page_actuelle ( void );
  
@@ -305,8 +305,8 @@
                                 struct TRAME_ITEM_COMMENT *trame_comment );
  extern void Clic_sur_pass ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                              struct TRAME_ITEM_PASS *trame_pass );
- extern void Clic_sur_capteur ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
-                                struct TRAME_ITEM_CAPTEUR *trame_capteur );
+ extern void Clic_sur_cadran ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
+                                struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Clic_sur_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                             struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
  extern gint Nouveau_groupe ( void );
@@ -360,11 +360,11 @@
  extern void Proto_afficher_une_passerelle_atelier( struct CMD_TYPE_PASSERELLE *rezo_pass );
  extern void Proto_cacher_une_passerelle_atelier( struct CMD_TYPE_PASSERELLE *pass );
 
-                                                                          /* Dans atelier_ajout_capteur.c */
- extern void Menu_ajouter_editer_capteur ( struct TRAME_ITEM_CAPTEUR *trame_capteur );
- extern void Proto_afficher_un_capteur_atelier( struct CMD_TYPE_CAPTEUR *rezo_capteur );
- extern void Proto_cacher_un_capteur_atelier( struct CMD_TYPE_CAPTEUR *capteur );
- extern void Proto_afficher_mnemo_capteur_atelier ( struct CMD_TYPE_MNEMO_BASE *mnemo );
+                                                                          /* Dans atelier_ajout_cadran.c */
+ extern void Menu_ajouter_editer_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
+ extern void Proto_afficher_un_cadran_atelier( struct CMD_TYPE_CADRAN *rezo_cadran );
+ extern void Proto_cacher_un_cadran_atelier( struct CMD_TYPE_CADRAN *cadran );
+ extern void Proto_afficher_mnemo_cadran_atelier ( struct CMD_TYPE_MNEMO_BASE *mnemo );
 
                                                                           /* Dans atelier_ajout_palette.c */
  extern void Creer_fenetre_ajout_palette ( struct TYPE_INFO_ATELIER *infos );
@@ -395,8 +395,8 @@
                                            GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Clic_sur_camera_sup_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                                GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
- extern void Clic_sur_capteur_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
-                                            GdkEvent *event, struct TRAME_ITEM_CAPTEUR *trame_capteur );
+ extern void Clic_sur_cadran_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                            GdkEvent *event, struct TRAME_ITEM_CADRAN *trame_cadran );
 
                                                                             /* Dans supervision_comment.c */
  extern void Proto_afficher_un_comment_supervision( struct CMD_TYPE_COMMENT *rezo_comment );
@@ -408,9 +408,9 @@
                                                                             /* Dans supervision_palette.c */
  extern void Proto_afficher_une_palette_supervision( struct CMD_TYPE_PALETTE *rezo_palette );
 
-                                                                            /* Dans supervision_capteur.c */
- extern void Proto_afficher_un_capteur_supervision( struct CMD_TYPE_CAPTEUR *rezo_capteur );
- extern void Proto_changer_etat_capteur( struct CMD_ETAT_BIT_CAPTEUR *etat_capteur );
+                                                                             /* Dans supervision_cadran.c */
+ extern void Proto_afficher_un_cadran_supervision( struct CMD_TYPE_CADRAN *rezo_cadran );
+ extern void Proto_changer_etat_cadran( struct CMD_ETAT_BIT_CADRAN *etat_cadran );
 
                                                                              /* Dans supervision_camera.c */
  extern void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup );

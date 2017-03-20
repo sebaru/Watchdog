@@ -59,10 +59,10 @@
                Proto_changer_etat_motif( change_motif );
              }
             break;
-       case SSTAG_SERVEUR_SUPERVISION_CHANGE_CAPTEUR:
-             { struct CMD_ETAT_BIT_CAPTEUR *change_capteur;
-               change_capteur = (struct CMD_ETAT_BIT_CAPTEUR *)connexion->donnees;
-               Proto_changer_etat_capteur( change_capteur );
+       case SSTAG_SERVEUR_SUPERVISION_CHANGE_CADRAN:
+             { struct CMD_ETAT_BIT_CADRAN *change_cadran;
+               change_cadran = (struct CMD_ETAT_BIT_CADRAN *)connexion->donnees;
+               Proto_changer_etat_cadran( change_cadran );
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF:
@@ -128,15 +128,15 @@
                Chercher_page_notebook( TYPE_PAGE_SUPERVISION, save_id, TRUE );
              }
             break;
-       case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR:
-             { struct CMD_TYPE_CAPTEUR *capteur;
-               capteur = (struct CMD_TYPE_CAPTEUR *)connexion->donnees;
-               Proto_afficher_un_capteur_supervision ( capteur );
+       case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CADRAN:
+             { struct CMD_TYPE_CADRAN *cadran;
+               cadran = (struct CMD_TYPE_CADRAN *)connexion->donnees;
+               Proto_afficher_un_cadran_supervision ( cadran );
                Set_progress_plus(1);
-               save_id = capteur->syn_id;
+               save_id = cadran->syn_id;
              }
             break;
-       case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR_FIN:
+       case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CADRAN_FIN:
              { Chercher_page_notebook( TYPE_PAGE_SUPERVISION, save_id, TRUE ); }
             break;
 /******************************************** Reception des cameras de supervision ********************************************/
