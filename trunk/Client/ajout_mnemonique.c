@@ -49,6 +49,7 @@
  static GtkWidget *Table_options_AI;                                          /* Table des options associées aux Analog Input */
  static GtkWidget *Table_options_CPTIMP;                            /* Table des options associées aux compteurs d'impulsions */
  static GtkWidget *Table_options_Tempo;                                      /* Table des options associées aux temporisation */
+ static GtkWidget *Table_options_Registre;                                       /* Table des options associées aux registres */
 /******************************************************************************************************************************/
 /* CB_ajouter_editer_mnemonique: Fonction appelée qd on appuie sur un des boutons de l'interface                              */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
@@ -72,9 +73,10 @@
     Option_mnemo.mnemo_base.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
 
     switch ( Option_mnemo.mnemo_base.type )
-     { case MNEMO_ENTREE_ANA: Get_options_AI     ( &Option_mnemo ); break;
-       case MNEMO_CPT_IMP   : Get_options_CPTIMP ( &Option_mnemo ); break;
-       case MNEMO_TEMPO     : Get_options_Tempo  ( &Option_mnemo ); break;
+     { case MNEMO_ENTREE_ANA: Get_options_AI       ( &Option_mnemo ); break;
+       case MNEMO_CPT_IMP   : Get_options_CPTIMP   ( &Option_mnemo ); break;
+       case MNEMO_TEMPO     : Get_options_Tempo    ( &Option_mnemo ); break;
+       case MNEMO_REGISTRE  : Get_options_Registre ( &Option_mnemo ); break;
      }
 
     switch(reponse)
@@ -129,10 +131,12 @@
     gtk_widget_hide ( Table_options_AI );
     gtk_widget_hide ( Table_options_CPTIMP );
     gtk_widget_hide ( Table_options_Tempo );
+    gtk_widget_hide ( Table_options_Registre );
     switch(type)
      { case MNEMO_ENTREE_ANA: gtk_widget_show_all ( Table_options_AI ); break;
        case MNEMO_CPT_IMP   : gtk_widget_show_all ( Table_options_CPTIMP ); break;
        case MNEMO_TEMPO     : gtk_widget_show_all ( Table_options_Tempo ); break;
+       case MNEMO_REGISTRE  : gtk_widget_show_all ( Table_options_Registre ); break;
      }
   }
 /******************************************************************************************************************************/
@@ -171,6 +175,9 @@
             break;
        case MNEMO_CPT_IMP:
             gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_COMPTEUR_IMP );
+            break;
+       case MNEMO_REGISTRE:
+            gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, (gdouble) NBR_REGISTRE );
             break;
        default: 
             gtk_spin_button_set_range (GTK_SPIN_BUTTON(Spin_num), 0.0, 1.0 );
@@ -299,6 +306,12 @@
     gtk_table_set_col_spacings( GTK_TABLE(Table_options_AI), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), Table_options_AI, TRUE, TRUE, 0 );
 
+/*********************************************** Seconde page : spéciale registre *********************************************/
+    Table_options_Registre = Get_options_Registre_gtktable();
+    gtk_table_set_row_spacings( GTK_TABLE(Table_options_Registre), 5 );
+    gtk_table_set_col_spacings( GTK_TABLE(Table_options_Registre), 5 );
+    gtk_box_pack_start( GTK_BOX(hboite), Table_options_Registre, TRUE, TRUE, 0 );
+
 /*********************************************** Seconde page : spéciale compteur impulsion ***********************************/
     Table_options_CPTIMP = Get_options_CPTIMP_gtktable();
     gtk_table_set_row_spacings( GTK_TABLE(Table_options_CPTIMP), 5 );
@@ -326,6 +339,7 @@
     Set_options_AI ( mnemo_full );
     Set_options_CPTIMP ( mnemo_full );
     Set_options_Tempo ( mnemo_full );
+    Set_options_Registre ( mnemo_full );
 
     gtk_widget_grab_focus( Entry_lib );
     Rafraichir_sensibilite_options();
