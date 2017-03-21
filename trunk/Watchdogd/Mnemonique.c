@@ -134,10 +134,11 @@
 /******************************************************************************************************************************/
  static gboolean Modifier_mnemo_optionsDB ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { switch (mnemo_full->mnemo_base.type)
-     { case MNEMO_ENTREE_ANA: return( Modifier_mnemo_aiDB     ( mnemo_full ) );
-       case MNEMO_CPT_IMP   : return( Modifier_mnemo_cptimpDB ( mnemo_full ) );
-       case MNEMO_CPTH      : return( Modifier_mnemo_cpthDB   ( mnemo_full ) );
-       case MNEMO_TEMPO     : return( Modifier_mnemo_tempoDB  ( mnemo_full ) );
+     { case MNEMO_ENTREE_ANA: return( Modifier_mnemo_aiDB      ( mnemo_full ) );
+       case MNEMO_CPT_IMP   : return( Modifier_mnemo_cptimpDB  ( mnemo_full ) );
+       case MNEMO_CPTH      : return( Modifier_mnemo_cpthDB    ( mnemo_full ) );
+       case MNEMO_TEMPO     : return( Modifier_mnemo_tempoDB   ( mnemo_full ) );
+       case MNEMO_REGISTRE  : return( Modifier_mnemo_registreDB( mnemo_full ) );
        default : return(TRUE);
      }
   }
@@ -383,6 +384,15 @@
           if (mnemo_tempo) 
            { memcpy ( &mnemo_full->mnemo_tempo, mnemo_tempo, sizeof(struct CMD_TYPE_MNEMO_TEMPO) );
              g_free(mnemo_tempo);
+           }
+          break;
+        }
+       case MNEMO_REGISTRE:
+        { struct CMD_TYPE_MNEMO_REGISTRE *mnemo_r;
+          mnemo_r = Rechercher_mnemo_registreDB ( id );
+          if (mnemo_r) 
+           { memcpy ( &mnemo_full->mnemo_r, mnemo_r, sizeof(struct CMD_TYPE_MNEMO_REGISTRE) );
+             g_free(mnemo_r);
            }
           break;
         }
