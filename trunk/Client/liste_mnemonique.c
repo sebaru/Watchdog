@@ -64,6 +64,7 @@
     { 0x0, 0x0,    0x7FFF, 0xCFFF },
     { 0x0, 0x0,    0x7FFF, 0x0    },
     { 0x0, 0xFFFF, 0xFFFF, 0x0    },
+    { 0x0, 0x7FFF, 0x7FFF, 0x0    }, /* Registres */
   };
  static GdkColor COULEUR_TEXTE[NBR_TYPE_MNEMO]=
   { { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
@@ -76,18 +77,20 @@
     { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
     { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
     { 0x0, 0x0,    0x0,    0x0    },
+    { 0x0, 0x0,    0x0,    0x0    }, /* Registres */
   };
  static gchar *TYPE_BIT_INTERNE[ NBR_TYPE_MNEMO ]=          /* Type des différents bits internes utilisés */
-  { "Bistable      B",
-    "Monostable    M",
-    "Temporisation T",
-    "Entree TOR    E",
-    "Sortie TOR    A",
-    "Entree ANA    EA",
-    "Sortie ANA    AA",
-    "Icone         I",
-    "Compteur H    CH",
-    "Compteur IMP  CI",
+  { "B  - Bistable",
+    "M  - Monostable",
+    "T  - Temporisation",
+    "EA - Entree TOR",
+    "A  - Sortie TOR",
+    "EA - Entree ANA",
+    "AA - Sortie ANA",
+    "I  - Visuel Icone",
+    "CH - Compteur H",
+    "CI - Compteur IMP",
+    "R  - Registre",
   };
  static gchar *TYPE_BIT_INTERNE_COURT[ NBR_TYPE_MNEMO ]=    /* Type des différents bits internes utilisés */
   { "B",
@@ -100,6 +103,7 @@
     "I",
     "CH",
     "CI",
+    "R",
   };
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
