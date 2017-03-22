@@ -57,7 +57,7 @@
     else       { g_snprintf( date_creation, sizeof(date_creation), "Erreur" );    }
 
     g_snprintf( chaine, sizeof(chaine),
-              " [%03d]%12s -> enable=%d, expire=%d, date_expire = %s, mustchangepwd = %d, cansetpwd = %d\n"
+              " [%03d]%12s -> enable=%d, expire=%d, date_expire = %s, mustchangepwd = %s, cansetpwd = %s\n"
               "   |               -> date_creation = %s, date_modif = %s\n"
               "   |               -> sms_enable  = %d, sms_allow_cde  = %d, sms_phone = %s\n"
               "   |               -> imsg_enable = %d, imsg_allow_cde = %d, imsg_jabber_id = %s\n"
@@ -66,8 +66,8 @@
               "   |               -> salt=%s\n"
               "   |               -> hash=%s\n"
               "   |----------------> %s\n",
-                util->id, util->nom, util->enable, util->expire, date_expire, util->mustchangepwd,
-                util->cansetpwd, date_creation, date_modif,
+                util->id, util->nom, util->enable, util->expire, date_expire, (util->mustchangepwd ? "TRUE" : "FALSE"),
+                (util->cansetpwd ? "TRUE" : "FALSE"), date_creation, date_modif,
                 util->sms_enable, util->sms_allow_cde, util->sms_phone,
                 util->imsg_enable, util->imsg_allow_cde, util->imsg_jabberid,
                 util->imsg_available,
@@ -263,8 +263,7 @@
           Admin_write ( connexion, chaine );
         }
        else
-        { g_snprintf( util->hash, sizeof(util->hash), pwd );
-          if( Modifier_utilisateurDB_set_password( util ) )
+        { if( Modifier_utilisateurDB_set_password( util, pwd ) )
            { g_snprintf( chaine, sizeof(chaine), " Password set for user %s\n", util->nom ); }
           else
            { g_snprintf( chaine, sizeof(chaine), " Error while setting password\n" ); }

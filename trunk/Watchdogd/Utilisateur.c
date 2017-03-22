@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Utilisateur/Utilisateur.c    Interface DB mots de passe pour watchdog2.0                     */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      ven 03 avr 2009 20:35:37 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Utilisateur/Utilisateur.c    Interface DB mots de passe pour watchdog2.0                                         */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          ven 03 avr 2009 20:35:37 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Utilisateur.c
  * This file is part of Watchdog
@@ -33,30 +33,30 @@
  #include <time.h>
  #include <openssl/rand.h>
  
-/************************************ Prototypes des fonctions ********************************************/
+/*********************************************** Prototypes des fonctions *****************************************************/
  #include "watchdogd.h"
 
-/**********************************************************************************************************/
-/* Utilisateur_set_new_salt: Positionne un nouveau salt pour l'utilisateur en parametre                   */
-/* Entrées: une structure util                                                                            */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Utilisateur_set_new_salt: Positionne un nouveau salt pour l'utilisateur en parametre                                       */
+/* Entrées: une structure util                                                                                                */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  void Utilisateur_set_new_salt ( struct CMD_TYPE_UTILISATEUR *util )
   { guchar salt[EVP_MAX_MD_SIZE];
     guint cpt;
 
-    memset ( salt, 0, sizeof(salt) );                                                  /* RAZ des buffers */
+    memset ( salt, 0, sizeof(salt) );                                                                      /* RAZ des buffers */
     memset ( util->salt, 0, sizeof(util->salt) );
 
-    RAND_pseudo_bytes( (guchar *)salt, sizeof(salt) );                  /* Récupération d'un nouveau SALT */
-    for (cpt=0; cpt<sizeof(salt); cpt++)                                   /* Mise en forme au format HEX */
+    RAND_pseudo_bytes( (guchar *)salt, sizeof(salt) );                                      /* Récupération d'un nouveau SALT */
+    for (cpt=0; cpt<sizeof(salt); cpt++)                                                       /* Mise en forme au format HEX */
      { g_snprintf( &util->salt[2*cpt], 3, "%02X", (guchar)salt[cpt] ); }
   }
-/**********************************************************************************************************/
-/* Utilisateur_has_password: Prepare un hashé du code confidentiel de l'utilisateur en parametre          */
-/* Entrées: une structure util, un code confidentiel                                                      */
-/* Sortie: un environnement de hashage EVP_MDCTX                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Utilisateur_has_password: Prepare un hashé du code confidentiel de l'utilisateur en parametre                              */
+/* Entrées: une structure util, un code confidentiel                                                                          */
+/* Sortie: un environnement de hashage EVP_MDCTX                                                                              */
+/******************************************************************************************************************************/
  gchar *Utilisateur_hash_password ( struct CMD_TYPE_UTILISATEUR *util, gchar *pwd )
   { guchar hash_memory[EVP_MAX_MD_SIZE];
     gchar *result;
@@ -66,7 +66,7 @@
     result = (gchar *)g_try_malloc0( 2*EVP_MAX_MD_SIZE + 1 );
     if (!result) return(NULL);
 
-    mdctx = EVP_MD_CTX_create();                                        /* Creation du HASH correspondant */
+    mdctx = EVP_MD_CTX_create();                                                            /* Creation du HASH correspondant */
     EVP_DigestInit_ex (mdctx, EVP_sha512(), NULL);
     EVP_DigestUpdate  (mdctx, util->nom, strlen(util->nom) );
     EVP_DigestUpdate  (mdctx, util->salt, sizeof(util->salt)-1);
@@ -74,15 +74,15 @@
     EVP_DigestFinal_ex(mdctx, (guchar *)&hash_memory, &md_len);
     EVP_MD_CTX_destroy(mdctx);
 
-    for (cpt=0; cpt<md_len; cpt++)                                         /* Mise en forme au format HEX */
+    for (cpt=0; cpt<md_len; cpt++)                                                             /* Mise en forme au format HEX */
      { g_snprintf( result + 2*cpt, 3, "%02X", (guchar)hash_memory[cpt] ); }
     return(result);
   }
-/**********************************************************************************************************/
-/* Check_utilisateur_password: Vérifie le mot de passe fourni                                             */
-/* Entrées: une structure util, un code confidentiel                                                      */
-/* Sortie: FALSE si erreur                                                                                */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Check_utilisateur_password: Vérifie le mot de passe fourni                                                                 */
+/* Entrées: une structure util, un code confidentiel                                                                          */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
  gboolean Check_utilisateur_password( struct CMD_TYPE_UTILISATEUR *util, gchar *pwd )
   { gint retour;
     gchar *hash;
@@ -281,33 +281,33 @@
 /**********************************************************************************************************/
  gint Modifier_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util )
   { return( Ajouter_Modifier_utilisateurDB ( FALSE, util ) ); }
-/**********************************************************************************************************/
-/* Set_password: Correspond au changement de password de l'utilisateur                                    */
-/* Entrées: un log, une db, un id utilisateur, une clef, un password                                      */
-/* Sortie: FALSE si probleme                                                                              */
-/**********************************************************************************************************/
- gboolean Modifier_utilisateurDB_set_password( struct CMD_TYPE_UTILISATEUR *util )
+/******************************************************************************************************************************/
+/* Set_password: Correspond au changement de password de l'utilisateur                                                        */
+/* Entrées: un log, une db, un id utilisateur, une clef, un password                                                          */
+/* Sortie: FALSE si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ gboolean Modifier_utilisateurDB_set_password( struct CMD_TYPE_UTILISATEUR *util, gchar *password )
   { gchar requete[512];
     gchar *salt, *hash;
     gboolean retour;
     struct DB *db;
 
-    Utilisateur_set_new_salt ( util );                                  /* Récupération d'un nouveau SALT */
+    Utilisateur_set_new_salt ( util );                                                      /* Récupération d'un nouveau SALT */
 
     salt = Normaliser_chaine ( (gchar *)util->salt );
     if (!salt)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_utilisateurDB: Normalisation salt impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation salt impossible", __func__ );
        return(FALSE);
      }
 
-    hash = Utilisateur_hash_password ( util, util->hash );    /* Le nouveau mot de passe est dans le hash */
+    hash = Utilisateur_hash_password ( util, password );                                         /* Le nouveau mot de passe ! */
     if (!hash)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_utilisateurDB: Calcul du Hash impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Calcul du Hash impossible", __func__ );
        g_free(salt);
        return(FALSE);
      }
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "             
                 "salt='%s',hash='%s',date_modif='%d',mustchangepwd=0 WHERE id=%d",
                 NOM_TABLE_UTIL, salt, hash, (gint)time(NULL), util->id );
@@ -316,19 +316,19 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_utilisateurDB_set_password: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
-    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     if ( ! retour )
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Modifier_utilisateurDB_set_password: update failed %d (%s)", util->id, util->nom );
+                "%s: update failed %d (%s)", __func__, util->id, util->nom );
        return(FALSE);
      }
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                "Modifier_utilisateurDB_set_password: update ok for id=%d (%s)", util->id, util->nom );
+                "%s: update ok for id=%d (%s)", __func__, util->id, util->nom );
     return(TRUE);
   }
 /**********************************************************************************************************/
