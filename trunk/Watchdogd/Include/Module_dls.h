@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdog/Include/Module_dls.h -> Déclaration des prototypes de fonctions                               */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      jeu 31 jui 2003 11:49:36 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Include/Module_dls.h -> Déclaration des prototypes de fonctions                                                  */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          jeu 31 jui 2003 11:49:36 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Module_dls.h
  * This file is part of Watchdog
@@ -37,7 +37,9 @@
  extern int EA_ech_inf_egal( float val, int num );
  extern int EA_ech_sup_egal( float val, int num );
  extern void SEA( int num, float val_avant_ech );
+ extern void SR( int num, float val );
  extern float EA_ech( int num );
+ extern float R( int num );
  extern float CI( int num );
  extern void SI( int num, int etat, int rouge, int vert, int bleu, int cligno );
  extern void SB( int num, int etat );

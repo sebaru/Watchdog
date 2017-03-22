@@ -101,6 +101,7 @@
  extern gint Http_Traiter_request_setmessage ( struct lws *wsi, struct HTTP_SESSION *session, gchar *remote_name, gchar *remote_ip );
  extern gint Http_Traiter_request_delmessage ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_body_completion_setmessage ( struct lws *wsi );
+ extern gint Http_Traiter_request_body_completion_delmessage ( struct lws *wsi );
  extern gint Http_Traiter_request_getpluginsDLS ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_getui ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gboolean Http_Traiter_request_getmnemo ( struct lws *wsi, struct HTTP_SESSION *session, gchar *url );

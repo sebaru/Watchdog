@@ -109,6 +109,11 @@
     gchar etat;
   };
 
+ struct REGISTRE
+  { struct CMD_TYPE_MNEMO_REGISTRE confDB;
+    gfloat val;
+  };
+
  struct I_MOTIF
   { gint etat;
     gint rouge;
