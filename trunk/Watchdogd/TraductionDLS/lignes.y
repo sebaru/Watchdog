@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/TraductionDLS/ligne.y        Définitions des ligne dls DLS                                   */
-/* Projet WatchDog version 2.0       Gestion d'habitat                    jeu. 24 juin 2010 19:37:44 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/TraductionDLS/ligne.y        Définitions des ligne dls DLS                                                       */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                        jeu. 24 juin 2010 19:37:44 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * lignes.y
  * This file is part of Watchdog
@@ -32,8 +32,8 @@
 #include "Proto_traductionDLS.h"
 #include "Dls.h"
 
-extern int ligne_source_dls;                           /* Compteur du numero de ligne_source_dls en cours */
-int erreur;                                                             /* Compteur d'erreur du programme */
+extern int ligne_source_dls;                                               /* Compteur du numero de ligne_source_dls en cours */
+int erreur;                                                                                 /* Compteur d'erreur du programme */
 #define  NON_DEFINI                   "Ligne %d: %s is not defined\n"
 #define  DEJA_DEFINI                  "Ligne %d: %s is already defined\n"
 #define  INTERDIT_GAUCHE              "Ligne %d: %s interdit en position gauche\n"
@@ -71,7 +71,7 @@ int erreur;                                                             /* Compt
 %type  <val>    modulateur jour_semaine
 
 %token <val>    BI MONO ENTREE SORTIE T_TEMPO T_TYPE T_RETARD
-%token <val>    T_MSG ICONE CPT_H CPT_IMP EANA T_START
+%token <val>    T_MSG ICONE CPT_H CPT_IMP EANA T_START T_REGISTRE
 %type  <val>    alias_bit
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI
@@ -123,6 +123,7 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                       case CPT_H :
                       case CPT_IMP:
                       case T_MSG :
+                      case T_REGISTRE :
                       case ICONE : if ($3==1)                                             /* Barre = 1 ?? */
                                     { taille = strlen($1) + strlen(INTERDIT_BARRE) + 1;
                                       chaine = New_chaine(taille);
@@ -149,7 +150,7 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                     }
                 }}
                 ;
-alias_bit:      BI | MONO | ENTREE | SORTIE | T_MSG | T_TEMPO | ICONE | CPT_H | CPT_IMP | EANA
+alias_bit:      BI | MONO | ENTREE | SORTIE | T_MSG | T_TEMPO | ICONE | CPT_H | CPT_IMP | EANA | T_REGISTRE
                 ;
 /******************************************* Gestion des instructions *************************************/
 listeInstr:     une_instr listeInstr
@@ -180,7 +181,7 @@ une_instr:      MOINS expr DONNE action PVIRGULE
                    char *instr;
                    taille = strlen($4)+strlen($2)+35;
                    instr = New_chaine( taille );
-                   g_snprintf( instr, taille, "if(%s) { SEA(%d,%s); }\n", $2, $6, $4 );
+                   g_snprintf( instr, taille, "if(%s) { SR(%d,%s); }\n", $2, $6, $4 );
                    Emettre( instr ); g_free(instr);
                    g_free($2);
                    g_free($4);
@@ -237,6 +238,12 @@ calcul_expr3:   VALF
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "EA_ech(%d)", $2 );
                 }}
+                | T_REGISTRE ENTIER
+                {{ int taille;
+                   taille = 15;
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille, "R(%d)", $2 );
+                }}
                 | POUV calcul_expr PFERM
                 {{ $$=$2; }}
                 | ID
@@ -246,18 +253,25 @@ calcul_expr3:   VALF
                    alias = Get_alias_par_nom($1);                                  /* On recupere l'alias */
                    if (alias)
                     { switch(alias->bit)               /* On traite que ce qui peut passer en "condition" */
-                       { case EANA  : { taille = 50;
-                                        $$ = New_chaine( taille ); /* 10 caractères max */
-                                        g_snprintf( $$, taille, "EA_ech(%d)", alias->num ); break;
-                                      }
-                                      break;
-                         default:     taille = strlen($1) + strlen(INTERDIT_CALCUL) + 1;
-                                      chaine = New_chaine(taille);
-                                      g_snprintf(chaine, taille, INTERDIT_CALCUL, ligne_source_dls, $1 );
-                                      Emettre_erreur(chaine); g_free(chaine);
-                                      erreur++;
-                                      $$=New_chaine(2);
-                                      g_snprintf( $$, 2, "0" );
+                       { case EANA  :
+                          { taille = 15;
+                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            g_snprintf( $$, taille, "EA_ech(%d)", alias->num );
+                            break;
+                          }
+                         case T_REGISTRE:
+                          { taille = 15;
+                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            g_snprintf( $$, taille, "R(%d)", alias->num );
+                            break;
+                          }
+                         default: taille = strlen($1) + strlen(INTERDIT_CALCUL) + 1;
+                                  chaine = New_chaine(taille);
+                                  g_snprintf(chaine, taille, INTERDIT_CALCUL, ligne_source_dls, $1 );
+                                  Emettre_erreur(chaine); g_free(chaine);
+                                  erreur++;
+                                  $$=New_chaine(2);
+                                  g_snprintf( $$, 2, "0" );
                        }
                     }
                    else { taille = strlen($1) + strlen(NON_DEFINI) + 1;
@@ -273,7 +287,7 @@ calcul_expr3:   VALF
                 }}
                 ;
 
-calcul_ea_result: EANA ENTIER
+calcul_ea_result: T_REGISTRE ENTIER
                 {{ $$ = $2;
                 }}
                 | ID
@@ -283,14 +297,16 @@ calcul_ea_result: EANA ENTIER
                    alias = Get_alias_par_nom($1);                                  /* On recupere l'alias */
                    if (alias)
                     { switch(alias->bit)               /* On traite que ce qui peut passer en "condition" */
-                       { case EANA  : $$ = alias->num;
-                                      break;
-                         default:     taille = strlen($1) + strlen(INTERDIT_CALCUL_RESULT) + 1;
-                                      chaine = New_chaine(taille);
-                                      g_snprintf(chaine, taille, INTERDIT_CALCUL_RESULT, ligne_source_dls, $1 );
-                                      Emettre_erreur(chaine); g_free(chaine);
-                                      erreur++;
-                                      $$=0;
+                       { case T_REGISTRE:
+                          { $$ = alias->num;
+                            break;
+                          }
+                         default: taille = strlen($1) + strlen(INTERDIT_CALCUL_RESULT) + 1;
+                                  chaine = New_chaine(taille);
+                                  g_snprintf(chaine, taille, INTERDIT_CALCUL_RESULT, ligne_source_dls, $1 );
+                                  Emettre_erreur(chaine); g_free(chaine);
+                                  erreur++;
+                                  $$=0;
                        }
                     }
                    else { taille = strlen($1) + strlen(NON_DEFINI) + 1;
@@ -405,6 +421,18 @@ unite:          modulateur ENTIER HEURE ENTIER
                          case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $4, $2 ); break;
                          case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $4, $2 ); break;
                        }
+                    }
+                }}
+               | T_REGISTRE ENTIER ordre VALF
+                {{ int taille;
+                   taille = 40;
+                   $$ = New_chaine( taille );
+                   switch( $3 )
+                    { case INF        : g_snprintf( $$, taille, "R(%d)<%f", $2, $4 ); break;
+                      case SUP        : g_snprintf( $$, taille, "R(%d)>%f", $2, $4 ); break;
+                      case INF_OU_EGAL: g_snprintf( $$, taille, "R(%d)<=%f", $2, $4 ); break;
+                      case SUP_OU_EGAL: g_snprintf( $$, taille, "R(%d)>=%f", $2, $4 ); break;
+                      case T_EGAL     : g_snprintf( $$, taille, "R(%d)==%f", $2, $4 ); break;
                     }
                 }}
                 | CPT_IMP ordre VALF
@@ -542,6 +570,30 @@ unite:          modulateur ENTIER HEURE ENTIER
                                           }
                                        }
                                       break;
+                         case T_REGISTRE:
+                          { if (!$4)
+                             { taille = strlen($2) + strlen(MANQUE_COMPARAISON) + 1;
+                               chaine = New_chaine(taille);
+                               g_snprintf(chaine, taille, MANQUE_COMPARAISON, ligne_source_dls, $2 );
+                               Emettre_erreur(chaine); g_free(chaine);
+                               erreur++;
+                               $$=New_chaine(2);
+                               g_snprintf( $$, 2, "0" );                                      
+                             }
+                            else
+                             { char *chaine;
+                               taille = 40;
+                               $$ = New_chaine( taille );
+                               switch( $4->type )
+                                { case INF        : g_snprintf( $$, taille, "R(%d)<%f", $2, $4 ); break;
+                                  case SUP        : g_snprintf( $$, taille, "R(%d)>%f", $2, $4 ); break;
+                                  case INF_OU_EGAL: g_snprintf( $$, taille, "R(%d)<=%f", $2, $4 ); break;
+                                  case SUP_OU_EGAL: g_snprintf( $$, taille, "R(%d)>=%f", $2, $4 ); break;
+                                  case T_EGAL     : g_snprintf( $$, taille, "R(%d)==%f", $2, $4 ); break;
+                                }
+                             }
+                            break;
+                           }
                          case CPT_IMP:if (!$4)
                                        { taille = strlen($2) + strlen(MANQUE_COMPARAISON) + 1;
                                          chaine = New_chaine(taille);
