@@ -27,7 +27,6 @@
  
  #include <string.h>
  #include <unistd.h>
- #include <microhttpd.h>
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"
  #include "Http.h"
