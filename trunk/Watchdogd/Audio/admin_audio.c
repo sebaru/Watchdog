@@ -53,9 +53,7 @@
        Admin_write ( connexion, chaine );
      } else
     if ( ! strcmp ( commande, "tell_google" ) )
-     { gchar texte[128];
-       sscanf ( ligne, "%s %d", commande, texte );                                       /* Découpage de la ligne de commande */
-       Jouer_google_speech ( texte );
+     { Jouer_google_speech ( ligne + 12 );
        g_snprintf( chaine, sizeof(chaine), " Message sent with google_speech\n" );
        Admin_write ( connexion, chaine );
      } else

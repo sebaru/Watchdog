@@ -151,6 +151,7 @@
     if (pid<0)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
                  "%s: '%s' fork failed pid=%d (%s)", __func__, nom_fichier, pid, strerror(errno) );
+       return(FALSE);
      }
     else if (!pid)
      { execlp( "mpg123", "mpg123", "-vvvv", nom_fichier, NULL );
@@ -168,7 +169,7 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Jouer_mp3 : Joue un fichier mp3 et attend la fin de la diffusion                                                           */
+/* Jouer_google_speech : Joue un texte avec google_speech et attend la fin de la diffusion                                    */
 /* Entrée : le message à jouer                                                                                                */
 /* Sortie : True si OK, False sinon                                                                                           */
 /******************************************************************************************************************************/
@@ -180,9 +181,10 @@
     if (pid<0)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
                  "%s: '%s' fork failed pid=%d (%s)", __func__, libelle_audio, pid, strerror(errno) );
+       return(FALSE);
      }
     else if (!pid)
-     { execlp( "google_speech", "google_speech", "-l", Cfg_audio.language, libelle_audio, NULL );
+     { execlp( "google_speech", "google_speech", "-v", "debug", "-l", Cfg_audio.language, libelle_audio, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
                 "%s: '%s' exec failed pid=%d (%s)", __func__, libelle_audio, pid, strerror( errno ) );
        _exit(0);
@@ -192,7 +194,8 @@
                 "%s: '%s' waiting to finish pid=%d", __func__, libelle_audio, pid );
        waitpid(pid, NULL, 0 );
      }
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "%s: google_speech '%s' finished pid=%d", libelle_audio, pid );
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+             "%s: google_speech '%s' finished pid=%d", __func__, libelle_audio, pid );
 
     return(TRUE);
   }
