@@ -116,6 +116,7 @@
     Msg.type       = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) );
     Msg.enable     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_enable) );
     Msg.audio      = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_audio) );
+    Msg.persist    = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_persist) );
     Msg.sms        = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_sms) );
     Msg.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
     index               = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls) );

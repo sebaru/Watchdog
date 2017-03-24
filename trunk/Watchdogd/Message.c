@@ -76,7 +76,7 @@
        if (num < NBR_MESSAGE_ECRITS)
         { Partage->g[num].persist = atoi( db->row[1] );
           Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                    "%d: Chargement config MSG[%04d]", __func__, num );
+                    "%s: Chargement config MSG[%04d]", __func__, num );
         }
        else
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING,

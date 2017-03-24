@@ -93,8 +93,8 @@
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        if (num<NBR_MESSAGE_ECRITS)
-        { g_snprintf( chaine, sizeof(chaine), " | - MSG%03d = %d, changes = %d, last_change = %d top=%d\n",
-                      num, Partage->g[num].etat, Partage->g[num].changes,
+        { g_snprintf( chaine, sizeof(chaine), " | - MSG%03d = %d, persist = %d, changes = %d, last_change = %d top=%d\n",
+                      num, Partage->g[num].etat, Partage->g[num].persist, Partage->g[num].changes,
                       Partage->g[num].last_change, Partage->top );
         } else
         { g_snprintf( chaine, sizeof(chaine), " | - MSG -> num '%d' out of range\n", num ); }
