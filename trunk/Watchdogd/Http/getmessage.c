@@ -27,7 +27,6 @@
  
  #include <string.h>
  #include <unistd.h>
- #include <libxml/xmlwriter.h>
 
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
@@ -103,17 +102,19 @@
        g_strlcat( requete, critere, sizeof(requete) );
      }
 
-/************************************************ Préparation du buffer XML ***************************************************/
+/************************************************ Préparation du buffer JSON **************************************************/
     builder = json_builder_new ();
     if (builder == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getmessage : JSon builder creation failed" );
-       return(FALSE);
+       Http_Send_error_code ( wsi, 500 );
+       return(TRUE);
      }
                                                                       /* Lancement de la requete de recuperation des messages */
     if ( ! Recuperer_messageDB_with_conditions( &db, requete, start, length ) )
      { g_object_unref(builder);
-       return(FALSE);
+       Http_Send_error_code ( wsi, 500 );
+       return(TRUE);
      }
 /*------------------------------------------------------- Dumping message ----------------------------------------------------*/
     json_builder_begin_object (builder);                                                        /* Création du noeud principal */
@@ -143,7 +144,7 @@
        g_free(msg);
      }
     json_builder_end_array (builder);                                                                         /* End Document */
-    json_builder_end_object (builder);                                                                         /* End Document */
+    json_builder_end_object (builder);                                                                        /* End Document */
 
     gen = json_generator_new ();
     json_generator_set_root ( gen, json_builder_get_root(builder) );
@@ -155,6 +156,7 @@
 /*************************************************** Envoi au client **********************************************************/
     header_cur = header;
     header_end = header + sizeof(header);
+
     retour = lws_add_http_header_status( wsi, 200, &header_cur, header_end );
     retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, (const unsigned char *)content_type, strlen(content_type),
                                            &header_cur, header_end );
