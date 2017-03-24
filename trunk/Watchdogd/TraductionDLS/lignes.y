@@ -184,7 +184,7 @@ une_instr:      MOINS expr DONNE action PVIRGULE
                    g_snprintf( instr, taille, "if(%s) { SR(%d,%s); }\n", $2, $8, $5 );
                    Emettre( instr ); g_free(instr);
                    g_free($2);
-                   g_free($4);
+                   g_free($5);
                 }}
                 ;
 /******************************************* Partie CALCUL ************************************************/
