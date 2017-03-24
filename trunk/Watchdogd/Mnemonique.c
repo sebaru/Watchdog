@@ -406,11 +406,11 @@
 /******************************************************************************************************************************/
  gboolean Modifier_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { if (Modifier_mnemo_baseDB ( &mnemo_full->mnemo_base ) == FALSE )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_mnemo_fullDB: Modifier_mnemo_baseDB failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Modifier_mnemo_baseDB failed", __func__ );
        return(FALSE);
      }
     if (Modifier_mnemo_optionsDB ( mnemo_full ) == FALSE)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_mnemo_fullDB: Modifier_mnemo_optionsDB failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Modifier_mnemo_optionsDB failed", __func__ );
        return(FALSE);
      }
     return(TRUE);

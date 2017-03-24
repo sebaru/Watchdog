@@ -57,11 +57,11 @@
   { GtkWidget *table, *texte;
     gint cpt, i;
 
-    table = gtk_table_new( 2, 2, TRUE );
+    table = gtk_table_new( 2, 4, TRUE );
 
     i=0;
-    texte = gtk_label_new( _("Options for Analog Inputs") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 2, i, i+1 );
+    texte = gtk_label_new( _("Options for Registers") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 4, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("Unit") );
