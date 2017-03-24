@@ -33,6 +33,8 @@ Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libcurl openssl lib
                    `mysql_config --cflags`
 
 sysconf_DATA = watchdogd.conf
+systemddir = $(sysconfdir)/systemd/system/
+systemd_DATA = Watchdogd.service
 pkgdata_DATA = init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
