@@ -37,7 +37,7 @@
  #define NOM_TABLE_MNEMO_CPTH     "mnemos_CptHoraire"
  #define NOM_TABLE_MNEMO_CPTIMP   "mnemos_CptImp"
  #define NOM_TABLE_MNEMO_TEMPO    "mnemos_Tempo"
- #define NOM_TABLE_MNEMO_REGISTRE "mnemos_Tempo"
+ #define NOM_TABLE_MNEMO_REGISTRE "mnemos_Registre"
 
 /***************************************************** Définitions des prototypes *********************************************/
  extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB ( guint id );
