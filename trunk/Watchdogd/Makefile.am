@@ -32,13 +32,11 @@ Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libcurl openssl lib
                    `libgcrypt-config --cflags` \
                    `mysql_config --cflags`
 
-sysconf_DATA = watchdogd.conf
-systemddir = $(sysconfdir)/systemd/system/
-systemd_DATA = Watchdogd.service
+sysconf_DATA = watchdogd.conf.sample Watchdogd.service watchdogd-httpd.conf.sample
 pkgdata_DATA = init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/Watchdogd/Include
 
-EXTRA_DIST = watchdogd.conf init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
+EXTRA_DIST = watchdogd-http.conf.sample Watchdogd.service watchdogd.conf init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
 MAINTAINERCLEANFILES = Makefile.in
