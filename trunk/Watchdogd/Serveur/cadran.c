@@ -48,6 +48,8 @@
             return( cadran->val_ech != Partage->ch[cadran->bit_controle].confDB.valeur );
        case MNEMO_CPT_IMP:
             return( cadran->val_ech != Partage->ci[cadran->bit_controle].confDB.valeur );
+       case MNEMO_REGISTRE:
+            return( cadran->val_ech != Partage->registre[cadran->bit_controle].val );
        default: return(FALSE);
      }
   }
@@ -127,6 +129,19 @@
                cadran->val_ech = Partage->ci[cadran->bit_controle].confDB.valeur;
              }
             break;
+       case MNEMO_REGISTRE:
+            cadran->val_ech = Partage->registre[cadran->bit_controle].val;
+            if(-1000000.0<cadran->val_ech && cadran->val_ech<1000000.0)
+             { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%6.2f %s", cadran->val_ech,
+                           Partage->registre[cadran->bit_controle].confDB.unite
+                         );
+             }
+            else
+             { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%8.0f %s", cadran->val_ech,
+                           Partage->registre[cadran->bit_controle].confDB.unite
+                         );
+             }
+            return(etat_cadran);
        default:
             g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
                         "unknown"

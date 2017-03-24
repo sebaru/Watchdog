@@ -175,6 +175,7 @@
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_type), Type_bit_interne(MNEMO_BISTABLE) );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_type), Type_bit_interne(MNEMO_CPTH) );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_type), Type_bit_interne(MNEMO_CPT_IMP) );
+    gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_type), Type_bit_interne(MNEMO_REGISTRE) );
     gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 0 );
     g_signal_connect( G_OBJECT(Combo_type), "changed",
                       G_CALLBACK(Afficher_mnemo_cadran_ctrl), NULL );
