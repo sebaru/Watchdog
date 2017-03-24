@@ -121,7 +121,8 @@
        json_builder_set_member_name  ( builder, "motifs" );
        json_builder_begin_array (builder);                                                         /* Création du noeud Motif */
        while( (motif = Recuperer_motifDB_suite( &db )) )
-        { json_builder_set_member_name  ( builder, "id" );           json_builder_add_int_value    ( builder, motif->id );
+        { json_builder_begin_object (builder);                                                 /* Contenu du contenu du noeud */
+          json_builder_set_member_name  ( builder, "id" );           json_builder_add_int_value    ( builder, motif->id );
           json_builder_set_member_name  ( builder, "libelle" );      json_builder_add_string_value ( builder, motif->libelle );
           json_builder_set_member_name  ( builder, "icone_id" );     json_builder_add_int_value    ( builder, motif->icone_id );
           json_builder_set_member_name  ( builder, "posx" );         json_builder_add_int_value    ( builder, motif->position_x );
@@ -134,6 +135,7 @@
           json_builder_set_member_name  ( builder, "vert" );         json_builder_add_int_value    ( builder, Partage->i[motif->bit_controle].vert );
           json_builder_set_member_name  ( builder, "bleu" );         json_builder_add_int_value    ( builder, Partage->i[motif->bit_controle].bleu );
           json_builder_set_member_name  ( builder, "cligno" );       json_builder_add_int_value    ( builder, Partage->i[motif->bit_controle].cligno );
+          json_builder_end_object (builder);                                                                /* End Passerelle */
           g_free(motif);
         }
        json_builder_end_array (builder);                                                                  /* End Motifs Array */
