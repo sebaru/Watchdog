@@ -61,7 +61,7 @@ int erreur;                                                                     
          struct COMPARATEUR *comparateur;
        };
 
-%token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS POUV PFERM T_EGAL OU ET BARRE T_FOIS
+%token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS T_POUV T_PFERM T_EGAL OU ET BARRE T_FOIS
 %token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL T_TRUE T_FALSE
@@ -176,12 +176,12 @@ une_instr:      MOINS expr DONNE action PVIRGULE
                    g_free($4->alors); g_free($4);
                    g_free($2);
                 }}
-                | MOINS expr MOINS calcul_expr DONNE calcul_ea_result PVIRGULE
+                | MOINS expr MOINS T_POUV calcul_expr T_PFERM DONNE calcul_ea_result PVIRGULE
                 {{ int taille;
                    char *instr;
-                   taille = strlen($4)+strlen($2)+35;
+                   taille = strlen($5)+strlen($2)+35;
                    instr = New_chaine( taille );
-                   g_snprintf( instr, taille, "if(%s) { SR(%d,%s); }\n", $2, $6, $4 );
+                   g_snprintf( instr, taille, "if(%s) { SR(%d,%s); }\n", $2, $8, $5 );
                    Emettre( instr ); g_free(instr);
                    g_free($2);
                    g_free($4);
@@ -244,7 +244,7 @@ calcul_expr3:   VALF
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "R(%d)", $2 );
                 }}
-                | POUV calcul_expr PFERM
+                | T_POUV calcul_expr T_PFERM
                 {{ $$=$2; }}
                 | ID
                 {{ struct ALIAS *alias;
@@ -455,7 +455,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                                ($1==1 ? "!" : ""), $3 );
                    Liberer_options($4);
                 }}
-                | barre POUV expr PFERM
+                | barre T_POUV expr T_PFERM
                 {{ int taille;
                    taille = strlen($3)+5;
                    $$ = New_chaine( taille );
@@ -844,7 +844,7 @@ jour_semaine:   LUNDI        {{ $$=1; }}
 ordre:          INF | SUP | INF_OU_EGAL | SUP_OU_EGAL | T_EGAL
                 ;
 /********************************************* Gestion des options ****************************************/
-liste_options:  POUV options PFERM   {{ $$ = $2;   }}
+liste_options:  T_POUV options T_PFERM   {{ $$ = $2;   }}
                 |                    {{ $$ = NULL; }}
                 ;
 
