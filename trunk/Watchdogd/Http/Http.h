@@ -41,6 +41,11 @@
  #define HTTP_DEFAUT_MAX_UPLOAD_BYTES  10240
  #define HTTP_DEFAUT_LWS_DEBUG_LEVEL   0
 
+ #define HTTP_200_OK                   200
+ #define HTTP_BAD_REQUEST              400
+ #define HTTP_UNAUTHORIZED             401
+ #define HTTP_SERVER_ERROR             100
+ 
  enum WS_PROTO
   {	/* always first */
     WS_PROTO_HTTP = 0,
@@ -102,6 +107,8 @@
  extern gint Http_Traiter_request_delmessage ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_body_completion_setmessage ( struct lws *wsi );
  extern gint Http_Traiter_request_body_completion_delmessage ( struct lws *wsi );
+ extern gint Http_Traiter_request_postfile ( struct lws *wsi, struct HTTP_SESSION *session );
+ extern gint Http_Traiter_request_body_completion_postfile ( struct lws *wsi );
  extern gint Http_Traiter_request_getpluginsDLS ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_getui ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gboolean Http_Traiter_request_getmnemo ( struct lws *wsi, struct HTTP_SESSION *session, gchar *url );

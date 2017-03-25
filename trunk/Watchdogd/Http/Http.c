@@ -222,11 +222,8 @@
 		          break;
        case LWS_CALLBACK_HTTP_BODY:
              { if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
-                { return( Http_Traiter_request_body_login ( wsi, data, taille ) ); }
-               else if ( ! strcasecmp ( pss->url, "/ws/postsvg" ) )
-                { return( Http_CB_file_upload( wsi, data, taille ) ); }
-               else if ( ! strcasecmp ( pss->url, "/ws/setmessage" ) )
-                { return( Http_CB_file_upload( wsi, data, taille ) ); }
+                { return( Http_Traiter_request_body_login ( wsi, data, taille ) ); }                /* Utilisation ud lws_spa */
+               return( Http_CB_file_upload( wsi, data, taille ) );          /* Sinon, c'est un buffer type json ou un fichier */
              }
             break;
        case LWS_CALLBACK_HTTP_BODY_COMPLETION:
@@ -241,6 +238,8 @@
                 { return( Http_Traiter_request_body_completion_setmessage ( wsi ) ); }
                else if ( ! strcasecmp ( pss->url, "/ws/delmessage" ) )
                 { return( Http_Traiter_request_body_completion_delmessage ( wsi ) ); }
+               else if ( ! strcasecmp ( pss->url, "/ws/postfile" ) )
+                { return( Http_Traiter_request_body_completion_postfile ( wsi ) ); }
               }
             break;
        case LWS_CALLBACK_HTTP:
@@ -251,8 +250,6 @@
                                         (char *)&remote_name, sizeof(remote_name),
                                         (char *)&remote_ip, sizeof(remote_ip) );
                session = Http_get_session ( wsi, remote_name, remote_ip );
-               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Request from %s/%s (sid %.12s): %s",
-                         __func__, remote_name, remote_ip, Http_get_session_id(session), url );
                if (session) session->last_top = Partage->top;                                             /* Tagging temporel */
 
                if ( ! strcasecmp ( url, "/favicon.ico" ) )
@@ -287,9 +284,14 @@
                 { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
                else if ( ! strcasecmp ( url, "/ws/postsvg" ) )
                 { return( Http_Traiter_request_postsvg ( wsi, session, remote_name, remote_ip ) ); }
+               else if ( ! strcasecmp ( url, "/ws/postfile" ) )
+                { return( Http_Traiter_request_postfile ( wsi, session ) ); }
                else                                                                                             /* Par défaut */
-                { return( Http_Traiter_request_getui ( wsi, remote_name, remote_ip, url+1 ) ); }
-               return(1);                                                                    /* Par défaut, on clos la socket */
+                { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Request from %s/%s (sid %.12s): %s",
+                            __func__, remote_name, remote_ip, Http_get_session_id(session), url );
+                  return( Http_Traiter_request_getui ( wsi, remote_name, remote_ip, url+1 ) );
+                }
+               return(1);                                                                    /* Par défaut, on clot la socket */
              }
 		          break;
        case LWS_CALLBACK_HTTP_FILE_COMPLETION:
