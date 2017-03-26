@@ -51,7 +51,7 @@
     gint retour;
 
     if ( session==NULL || session->util==NULL || Tester_groupe_util( session->util, GID_MNEMO)==FALSE)
-     { Http_Send_error_code ( wsi, 401 );
+     { Http_Send_response_code ( wsi, HTTP_UNAUTHORIZED, NULL, 0 );
        return(TRUE);
      }
 

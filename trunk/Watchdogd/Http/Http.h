@@ -44,6 +44,7 @@
  #define HTTP_200_OK                   200
  #define HTTP_BAD_REQUEST              400
  #define HTTP_UNAUTHORIZED             401
+ #define HTTP_BAD_METHOD               405
  #define HTTP_SERVER_ERROR             100
  
  enum WS_PROTO
@@ -96,7 +97,7 @@
 /*************************************************** Définitions des prototypes ***********************************************/
  extern gboolean Http_Lire_config ( void );
  extern gint Http_json_get_int ( JsonObject *object, gchar *name );
- extern void Http_Send_error_code ( struct lws *wsi, gint code );
+ extern  void Http_Send_response_code ( struct lws *wsi, gint code, gchar *buffer, gint taille_buf );
  extern gboolean Http_Traiter_request_getsyn ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gboolean Http_Traiter_request_getstatus ( struct lws *wsi );
  extern gint Http_Traiter_request_getgif ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );

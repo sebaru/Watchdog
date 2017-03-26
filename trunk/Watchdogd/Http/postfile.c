@@ -38,80 +38,37 @@
 /* Entrées: replace!=0 si remplacement, id=numéro de fichier, les XMLData, et XMLLength                                       */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static gboolean Save_file_to_disk ( struct HTTP_SESSION *session, gchar *xmldata, gint xmldata_length )
-  { xmlChar *xml_description, *xml_classe;
-    xmlNode *root_node, node;
-    struct ICONEDBNEW icone;
-    gchar filename[80];
-    gboolean check;
-    xmlDocPtr doc;
-    gint fd, id;
-
+ static gint Save_mp3_to_disk ( struct HTTP_SESSION *session, const gchar *name, gchar *buffer, gint taille )
+  { gchar filename[80];
+    gint id, retour, fd;
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %.12s) Trying to validate & save new file file (length=%d)",
-              __func__, Http_get_session_id(session), xmldata_length );
+             "%s: (sid %.12s) Trying to validate & save new MP3 file '%s' (length=%d)",
+              __func__, Http_get_session_id(session), name, taille );
                   
-    doc = xmlReadMemory( xmldata, xmldata_length, "newfile.xml", NULL, 0 );
-    if (doc == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: (sid %.12s) Unable to Parse new Doc '%s'", __func__, Http_get_session_id(session), filename );
-	      return(FALSE);
-     }
-    root_node = xmlDocGetRootElement(doc);                                                        /* Vérification du document */
-    if ( strcmp(root_node->name, "file") )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: (sid %.12s) Root node is not file", __func__, Http_get_session_id(session) );
-       xmlFreeDoc(doc);                                                                                        /* Parsing NOK */
-       return(FALSE);
-     }
+    if (sscanf ( name, "%d", &id ) != 1) return(HTTP_BAD_REQUEST);
 
-    xml_classe = xmlGetProp(root_node, "wtd-classe");
-    if (xml_classe == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: (sid %.12s) Properties 'wtd-classe' not found", __func__, Http_get_session_id(session) );
-       xmlFreeDoc(doc);                                                                                        /* Parsing NOK */
-       return(FALSE);
-     }
-    g_snprintf( icone.classe, sizeof(icone.classe), "%s", xml_classe );
-    xmlFree(xml_classe);
+    g_snprintf( filename, sizeof(filename), "Son/%d.mp3", id );
 
-    xml_description = xmlGetProp(root_node, "wtd-description");
-    if (xml_description == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: (sid %.12s) Properties 'wtd-description' not found", __func__, Http_get_session_id(session) );
-       xmlFreeDoc(doc);                                                                                        /* Parsing NOK */
-       return(FALSE);
-     }
-    g_snprintf( icone.description, sizeof(icone.description), "%s", xml_description );
-    xmlFree(xml_description);
-
-    xmlFreeDoc(doc);                                /* Parsing OK, on peut libérer le doc et enregistrer le buffer sur disque */
-
-    id = Ajouter_Modifier_iconenewDB ( &icone );
-    if (id==-1) return(FALSE);
-    
-    g_snprintf( filename, sizeof(filename), "file/%d.file", id );
     unlink(filename);                                                                      /* Suppression de l'ancien fichier */
     fd = open( filename, O_CREAT | O_WRONLY, S_IWUSR | S_IRUSR );                       /* Enregistrement du nouveau document */
     if (fd < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                 "%s: (sid %.12s) Unable to create new file '%s' (%s)",
                  __func__, Http_get_session_id(session), filename, strerror(errno) );
-	      return(FALSE);
+	      return(HTTP_SERVER_ERROR);
      }
 
-    if (write( fd, xmldata, xmldata_length ) != xmldata_length)
+    retour = write( fd, buffer, taille );                                         /* Enregistrement du buffer dans le fichier */
+    close(fd);
+    if (retour != taille)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                 "%s: (sid %.12s) Writing error for '%s' (%s)",
                  __func__, Http_get_session_id(session), filename, strerror(errno) );
-	      return(FALSE);
+       return(HTTP_SERVER_ERROR);
      }
-    else
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                "%s: (sid %.12s) New file file saved: '%s'", __func__, Http_get_session_id(session), filename );
-     }
-    close(fd);
-    return(TRUE);
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
+             "%s: (sid %.12s) New file file saved: '%s'", __func__, Http_get_session_id(session), filename );
+    return(HTTP_200_OK);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_postfile: Traite une requete de postfile                                                              */
@@ -122,12 +79,16 @@
   { struct HTTP_PER_SESSION_DATA *pss;
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-             "%s: (sid %.12s) HTTP request",
-              __func__, Http_get_session_id(session) );
+             "%s: (sid %.12s) HTTP request", __func__, Http_get_session_id(session) );
+
+    if (lws_hdr_total_length(wsi, WSI_TOKEN_GET_URI))                                 /* Header de type GET ?? Si oui, erreur */
+     { Http_Send_response_code ( wsi, HTTP_BAD_METHOD, NULL, 0 );
+       return(1);
+     }
 
     pss = lws_wsi_user ( wsi );
     g_snprintf( pss->url, sizeof(pss->url), "/ws/postfile" );
-    return(0);                                                        /* si pas de session, on continue de traiter la request */
+    return(0);
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_body_completion_postfile: le payload est arrivé, il faut traiter le fichier                           */
@@ -143,35 +104,41 @@
 
     pss = lws_wsi_user ( wsi );
 
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %.12s) HTTP request body completion", __func__, Http_get_session_id(pss->session) );
     type = lws_get_urlarg_by_name	( wsi, "type=", token_type, sizeof(token_type) );
     name = lws_get_urlarg_by_name	( wsi, "name=", token_name, sizeof(token_name) );
 
-    if ( type && name)
-     { if (!strcasecmp(type,"dls"))
-        { /* code = Save_dls_to_disk == FALSE); */
-        }
-       else if( !strcasecmp(type,"mp3"))
-        { /* Save_dls_to_disk */
-        }
-       else if( !strcasecmp(type,"svg"))
-        { /* Save_dls_to_disk */
-        }
-       else code = HTTP_BAD_REQUEST;
-         
-       header_cur = header;                                                          /* Préparation des headers de la réponse */
-       header_end = header + sizeof(header);
-       retour = lws_add_http_header_status( wsi, code, &header_cur, header_end );
-       retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
-       *header_cur='\0';                                                                            /* Caractere null d'arret */
-       lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+             "%s: (sid %.12s) HTTP request for type='%s', name='%s'", __func__, Http_get_session_id(pss->session),
+             (type ? type : "none"), (name ? name : "none") );
+
+    if ( ! (type && name) )
+     { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST, NULL, 0 );                                             /* Bad Request */
+       g_free(pss->post_data);
+       pss->post_data_length = 0;
+       return(1);
+     }
+
+    code = HTTP_BAD_REQUEST;
+    if (!strcasecmp(type,"dls"))
+     { /* code = Save_dls_to_disk == FALSE); */
+     }
+    else if( !strcasecmp(type,"mp3"))
+     { code = Save_mp3_to_disk( pss->session, name, pss->post_data, pss->post_data_length);
+     }
+    else if( !strcasecmp(type,"svg"))
+      { /* Save_dls_to_disk */
      }
     else
-     { Http_Send_error_code ( wsi, HTTP_BAD_REQUEST ); }                                                       /* Bad Request */
-
+     { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST, NULL, 0 );                                             /* Bad Request */
+       g_free(pss->post_data);
+       pss->post_data_length = 0;
+       return(1);
+     }
+         
+    Http_Send_response_code ( wsi, code, NULL, 0 );
     g_free(pss->post_data);
     pss->post_data_length = 0;
-    return(lws_http_transaction_completed(wsi));
+    if (code==HTTP_200_OK) return( lws_http_transaction_completed(wsi) );
+    return(1);                                                                                         /* si erreur, on coupe */
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

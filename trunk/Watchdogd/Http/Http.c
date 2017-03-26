@@ -131,19 +131,19 @@
     return(-1);
   }
 /******************************************************************************************************************************/
-/* Http_Send_error_code: Utiliser pour renvoyer un code d'erreur                                                              */
+/* Http_Send_response_code: Utiliser pour renvoyer un code reponse                                                            */
 /* Entrée: La structure wsi de reference                                                                                      */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_Send_error_code ( struct lws *wsi, gint code )
+ void Http_Send_response_code ( struct lws *wsi, gint code, gchar *buffer, gint taille_buf )
   { unsigned char header[256], *header_cur, *header_end;
    	struct HTTP_PER_SESSION_DATA *pss;
     gint retour;
 
     pss = lws_wsi_user ( wsi );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-             "%s: (sid %.12s) Sending Error code '%d' for '%s'", __func__, Http_get_session_id(pss->session), code,
-             (pss->session ? (pss->session->util ? pss->session->util->nom : "--no user--") : "--no session--")
+             "%s: (sid %.12s) Sending Response code '%d' for '%s' (taille_buf=%d)", __func__, Http_get_session_id(pss->session), code,
+             (pss->session ? (pss->session->util ? pss->session->util->nom : "--no user--") : "--no session--"), taille_buf
             );
 
     header_cur = header;
@@ -240,6 +240,10 @@
                 { return( Http_Traiter_request_body_completion_delmessage ( wsi ) ); }
                else if ( ! strcasecmp ( pss->url, "/ws/postfile" ) )
                 { return( Http_Traiter_request_body_completion_postfile ( wsi ) ); }
+               else
+                { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST, NULL, 0 );
+                  return(1);
+                }
               }
             break;
        case LWS_CALLBACK_HTTP:

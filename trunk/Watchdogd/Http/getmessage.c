@@ -53,7 +53,7 @@
     gsize taille_buf;
 
     if ( session==NULL || session->util==NULL || Tester_groupe_util(session->util, GID_MESSAGE)==FALSE)
-     { Http_Send_error_code ( wsi, 401 );
+     { Http_Send_response_code ( wsi, HTTP_UNAUTHORIZED, NULL, 0 );
        return(TRUE);
      }
 
@@ -107,13 +107,13 @@
     if (builder == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getmessage : JSon builder creation failed" );
-       Http_Send_error_code ( wsi, 500 );
+       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR, NULL, 0 );
        return(TRUE);
      }
                                                                       /* Lancement de la requete de recuperation des messages */
     if ( ! Recuperer_messageDB_with_conditions( &db, requete, start, length ) )
      { g_object_unref(builder);
-       Http_Send_error_code ( wsi, 500 );
+       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR, NULL, 0 );
        return(TRUE);
      }
 /*------------------------------------------------------- Dumping message ----------------------------------------------------*/

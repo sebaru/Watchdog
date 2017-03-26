@@ -62,7 +62,7 @@
 
 
     if ( pss->session==NULL || pss->session->util==NULL || Tester_groupe_util( pss->session->util, GID_MESSAGE)==FALSE)
-     { Http_Send_error_code ( wsi, 401 );
+     { Http_Send_response_code ( wsi, HTTP_UNAUTHORIZED, NULL, 0 );
        return(TRUE);
      }
 
