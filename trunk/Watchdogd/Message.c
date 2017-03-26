@@ -144,7 +144,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s(num,libelle,libelle_audio,libelle_sms,"
                 "type,audio,bit_audio,enable,sms,time_repeat,dls_id,persist) VALUES "
-                "(%d,'%s','%s','%s',%d,%d,%d,%d,%d,%d,%d)", NOM_TABLE_MSG, msg->num,
+                "(%d,'%s','%s','%s',%d,%d,%d,%d,%d,%d,%d,%d)", NOM_TABLE_MSG, msg->num,
                 libelle, libelle_audio, libelle_sms, msg->type,
                 (msg->audio ? 1 : 0), msg->bit_audio, (msg->enable ? 1 : 0),
                 msg->sms, msg->time_repeat, msg->dls_id, (msg->persist ? 1 : 0)
