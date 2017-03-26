@@ -42,6 +42,7 @@
     pthread_mutex_unlock( &Partage->com_arch.synchro );
 
     g_snprintf( chaine, sizeof(chaine), " | Length of Arch list : %d\n", save_nbr );
+    Admin_write ( connexion, chaine );
     g_snprintf( chaine, sizeof(chaine), " -\n");
     Admin_write ( connexion, chaine );
   }
