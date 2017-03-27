@@ -44,7 +44,10 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
              "%s: (sid %.12s) Trying to validate & save new MP3 file '%s' (length=%d)",
               __func__, Http_get_session_id(session), name, taille );
-                  
+
+    if ( session==NULL || session->util==NULL || Tester_groupe_util( session->util, GID_MESSAGE )==FALSE )
+     { return(HTTP_UNAUTHORIZED); }
+
     if (sscanf ( name, "%d", &id ) != 1) return(HTTP_BAD_REQUEST);
 
     g_snprintf( filename, sizeof(filename), "Son/%d.mp3", id );
