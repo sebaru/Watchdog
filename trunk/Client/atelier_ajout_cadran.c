@@ -203,6 +203,7 @@
           case MNEMO_BISTABLE  : gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 2 ); break;
           case MNEMO_CPTH      : gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 3 ); break;
           case MNEMO_CPT_IMP   : gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 4 ); break;
+          case MNEMO_REGISTRE  : gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 5 ); break;
         }
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bitctrl), trame_cadran->cadran->bit_controle );
      }

@@ -83,7 +83,7 @@
   { "B  - Bistable",
     "M  - Monostable",
     "T  - Temporisation",
-    "EA - Entree TOR",
+    "E  - Entree TOR",
     "A  - Sortie TOR",
     "EA - Entree ANA",
     "AA - Sortie ANA",
