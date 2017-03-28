@@ -51,6 +51,7 @@
     MNEMO_MOTIF,
     MNEMO_CPTH,
     MNEMO_CPT_IMP,
+    MNEMO_REGISTRE,
     NBR_TYPE_MNEMO
   };
 
@@ -85,6 +86,11 @@
     gfloat max;
     guint  type;                                                                                   /* Type de gestion de l'EA */
     gchar  unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                                          /* Km, h, ° ... */
+  };
+
+/**************************************************** AddOns pour les Registres ***********************************************/
+ struct CMD_TYPE_MNEMO_REGISTRE
+  { gchar  unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                                          /* Km, h, ° ... */
   };
 
 /****************************************************** Pour les compteurs d'impulsions ***************************************/
@@ -131,6 +137,7 @@
     union { struct CMD_TYPE_MNEMO_AI mnemo_ai;
             struct CMD_TYPE_MNEMO_CPT_IMP mnemo_cptimp;
             struct CMD_TYPE_MNEMO_TEMPO mnemo_tempo;
+            struct CMD_TYPE_MNEMO_REGISTRE mnemo_r;
           };
   };
 

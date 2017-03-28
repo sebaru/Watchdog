@@ -116,6 +116,7 @@
        case MNEMO_CPT_IMP    :  Charger_cpt_imp ();     break;                                 /* Update de la running config */
        case MNEMO_CPTH       :  Charger_cpth ();        break;                                 /* Update de la running config */
        case MNEMO_TEMPO      :  Charger_tempo ();       break;                                 /* Update de la running config */
+       case MNEMO_REGISTRE   :  Charger_registre ();    break;                                 /* Update de la running config */
      }
     g_free(result);
   }

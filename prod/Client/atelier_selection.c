@@ -46,7 +46,7 @@
     struct TRAME_ITEM_MOTIF      *trame_motif;
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
-    struct TRAME_ITEM_CAPTEUR    *trame_capteur;
+    struct TRAME_ITEM_CADRAN    *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     if (!infos->Selection.items) return(FALSE);
 
@@ -61,9 +61,9 @@
        case TYPE_PASSERELLE:
             trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
             return( groupe == trame_pass->groupe_dpl );
-       case TYPE_CAPTEUR:
-            trame_capteur = (struct TRAME_ITEM_CAPTEUR *)objet->data;
-            return( groupe == trame_capteur->groupe_dpl );
+       case TYPE_CADRAN:
+            trame_cadran = (struct TRAME_ITEM_CADRAN *)objet->data;
+            return( groupe == trame_cadran->groupe_dpl );
        case TYPE_CAMERA_SUP:
             trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
             return( groupe == trame_camera_sup->groupe_dpl );
@@ -86,7 +86,7 @@
   { struct TRAME_ITEM_MOTIF      *trame_motif;
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
-    struct TRAME_ITEM_CAPTEUR    *trame_capteur;
+    struct TRAME_ITEM_CADRAN    *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GList *objet;
 
@@ -111,10 +111,10 @@
                g_object_set( trame_pass->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
                trame_pass->selection = FALSE;
                break;
-          case TYPE_CAPTEUR:
-               trame_capteur = (struct TRAME_ITEM_CAPTEUR *)objet->data;
-               g_object_set( trame_capteur->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-               trame_capteur->selection = FALSE;
+          case TYPE_CADRAN:
+               trame_cadran = (struct TRAME_ITEM_CADRAN *)objet->data;
+               g_object_set( trame_cadran->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+               trame_cadran->selection = FALSE;
                break;
           case TYPE_CAMERA_SUP:
                trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
@@ -139,7 +139,7 @@
   { struct TRAME_ITEM_MOTIF      *trame_motif;
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
-    struct TRAME_ITEM_CAPTEUR    *trame_capteur;
+    struct TRAME_ITEM_CADRAN    *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GList *objet;
  printf("Selectionner groupe %d\n", groupe );   
@@ -197,17 +197,17 @@
                    }
                 }
                break;
-          case TYPE_CAPTEUR:
-               trame_capteur = (struct TRAME_ITEM_CAPTEUR *)objet->data;
-               if (trame_capteur->groupe_dpl == groupe)
-                { if (!trame_capteur->selection)
-                   { g_object_set( trame_capteur->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-                     trame_capteur->selection = TRUE;
+          case TYPE_CADRAN:
+               trame_cadran = (struct TRAME_ITEM_CADRAN *)objet->data;
+               if (trame_cadran->groupe_dpl == groupe)
+                { if (!trame_cadran->selection)
+                   { g_object_set( trame_cadran->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                     trame_cadran->selection = TRUE;
                      infos->Selection.items = g_list_append( infos->Selection.items, objet->data );
                    }
                   else if (deselect)
-                   { g_object_set( trame_capteur->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                     trame_capteur->selection = FALSE;
+                   { g_object_set( trame_cadran->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                     trame_cadran->selection = FALSE;
                      infos->Selection.items = g_list_remove( infos->Selection.items, objet->data );
                    }
                 }
@@ -242,7 +242,7 @@
   { struct TRAME_ITEM_MOTIF      *trame_motif;
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
-    struct TRAME_ITEM_CAPTEUR    *trame_capteur;
+    struct TRAME_ITEM_CADRAN    *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GList *selection;
     gint largeur_grille;
@@ -287,10 +287,10 @@
                Trame_rafraichir_comment(trame_comm);                                    /* Refresh visuel */
                break;
 
-          case TYPE_CAPTEUR:
-               trame_capteur = ((struct TRAME_ITEM_CAPTEUR *)(selection->data));
-               new_x = trame_capteur->capteur->position_x+dx;
-               new_y = trame_capteur->capteur->position_y+dy;
+          case TYPE_CADRAN:
+               trame_cadran = ((struct TRAME_ITEM_CADRAN *)(selection->data));
+               new_x = trame_cadran->cadran->position_x+dx;
+               new_y = trame_cadran->cadran->position_y+dy;
 
                if (GTK_TOGGLE_BUTTON(infos->Check_grid)->active)
                 { new_x = new_x/largeur_grille * largeur_grille;
@@ -298,11 +298,11 @@
                 }
 
                if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X )
-                { trame_capteur->capteur->position_x = new_x; }
+                { trame_cadran->cadran->position_x = new_x; }
                if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y )
-                { trame_capteur->capteur->position_y = new_y; }
+                { trame_cadran->cadran->position_y = new_y; }
 
-               Trame_rafraichir_capteur(trame_capteur);                                 /* Refresh visuel */
+               Trame_rafraichir_cadran(trame_cadran);                                 /* Refresh visuel */
                break;
 
           case TYPE_MOTIF:
@@ -353,7 +353,7 @@
     struct TRAME_ITEM_MOTIF      *trame_motif;
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
-    struct TRAME_ITEM_CAPTEUR    *trame_capteur;
+    struct TRAME_ITEM_CADRAN    *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GList *selection;
 
@@ -379,10 +379,10 @@
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_MOTIF,
                               (gchar *)trame_motif->motif, sizeof( struct CMD_TYPE_MOTIF ) );
                break;
-          case TYPE_CAPTEUR:
-               trame_capteur = ((struct TRAME_ITEM_CAPTEUR *)selection->data);
-               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CAPTEUR,
-                              (gchar *)trame_capteur->capteur, sizeof( struct CMD_TYPE_CAPTEUR ) );
+          case TYPE_CADRAN:
+               trame_cadran = ((struct TRAME_ITEM_CADRAN *)selection->data);
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CADRAN,
+                              (gchar *)trame_cadran->cadran, sizeof( struct CMD_TYPE_CADRAN ) );
                break;
           case TYPE_CAMERA_SUP:
                trame_camera_sup = ((struct TRAME_ITEM_CAMERA_SUP *)selection->data);
@@ -406,11 +406,11 @@
     struct TRAME_ITEM_MOTIF      *trame_motif;
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
-    struct TRAME_ITEM_CAPTEUR    *trame_capteur;
+    struct TRAME_ITEM_CADRAN    *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     struct CMD_TYPE_MOTIF id_motif;
     struct CMD_TYPE_COMMENT id_comment;
-    struct CMD_TYPE_CAPTEUR id_capteur;
+    struct CMD_TYPE_CADRAN id_cadran;
     struct CMD_TYPE_PASSERELLE id_pass;
     struct CMD_TYPE_CAMERA_SUP id_camera_sup;
     GList *selection;
@@ -443,13 +443,13 @@
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_MOTIF,
                               (gchar *)&id_motif, sizeof( struct CMD_TYPE_MOTIF ) );
                break;
-          case TYPE_CAPTEUR:
-               trame_capteur = ((struct TRAME_ITEM_CAPTEUR *)selection->data);
-               id_capteur.id = trame_capteur->capteur->id;
-               memcpy( &id_capteur.libelle, trame_capteur->capteur->libelle,
-                       sizeof(id_capteur.libelle) );
-               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_CAPTEUR,
-                              (gchar *)&id_capteur, sizeof( struct CMD_TYPE_CAPTEUR ) );
+          case TYPE_CADRAN:
+               trame_cadran = ((struct TRAME_ITEM_CADRAN *)selection->data);
+               id_cadran.id = trame_cadran->cadran->id;
+               memcpy( &id_cadran.libelle, trame_cadran->cadran->libelle,
+                       sizeof(id_cadran.libelle) );
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_CADRAN,
+                              (gchar *)&id_cadran, sizeof( struct CMD_TYPE_CADRAN ) );
                break;
           case TYPE_CAMERA_SUP:
                trame_camera_sup = ((struct TRAME_ITEM_CAMERA_SUP *)selection->data);
@@ -493,8 +493,8 @@
           case TYPE_MOTIF:
                ((struct TRAME_ITEM_MOTIF *)selection->data)->groupe_dpl = new_groupe;
                break;
-          case TYPE_CAPTEUR:
-               ((struct TRAME_ITEM_CAPTEUR *)selection->data)->groupe_dpl = new_groupe;
+          case TYPE_CADRAN:
+               ((struct TRAME_ITEM_CADRAN *)selection->data)->groupe_dpl = new_groupe;
                break;
           case TYPE_CAMERA_SUP:
                ((struct TRAME_ITEM_CAMERA_SUP *)selection->data)->groupe_dpl = new_groupe;
@@ -528,8 +528,8 @@
          case TYPE_MOTIF:
               ((struct TRAME_ITEM_MOTIF *)infos->Selection.trame_motif)->groupe_dpl = Nouveau_groupe();
               break;
-         case TYPE_CAPTEUR:
-              ((struct TRAME_ITEM_CAPTEUR *)infos->Selection.trame_capteur)->groupe_dpl = Nouveau_groupe();
+         case TYPE_CADRAN:
+              ((struct TRAME_ITEM_CADRAN *)infos->Selection.trame_cadran)->groupe_dpl = Nouveau_groupe();
               break;
          case TYPE_CAMERA_SUP:
               ((struct TRAME_ITEM_CAMERA_SUP *)infos->Selection.trame_camera_sup)->groupe_dpl = Nouveau_groupe();
@@ -547,7 +547,7 @@
   { struct TRAME_ITEM_MOTIF      *trame_motif;
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
-    struct TRAME_ITEM_CAPTEUR    *trame_capteur;
+    struct TRAME_ITEM_CADRAN    *trame_cadran;
     GList *selection;
     gfloat angle;
 
@@ -572,10 +572,10 @@
               trame_comm->comment->angle = angle;
               Trame_rafraichir_comment(trame_comm);
               break;
-         case TYPE_CAPTEUR:
-              trame_capteur = (struct TRAME_ITEM_CAPTEUR *)selection->data;
-              trame_capteur->capteur->angle = angle;
-              Trame_rafraichir_capteur(trame_capteur);
+         case TYPE_CADRAN:
+              trame_cadran = (struct TRAME_ITEM_CADRAN *)selection->data;
+              trame_cadran->cadran->angle = angle;
+              Trame_rafraichir_cadran(trame_cadran);
               break;
          case TYPE_CAMERA_SUP:
               break;

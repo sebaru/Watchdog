@@ -100,12 +100,12 @@
     gchar   libelle[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];                     /* Libelle du synoptique cible */
     guint   position;                                                        /* en abscisses et ordonnées */
   };
-/*********************************************** Gestion des capteurs ***************************************/
- struct CMD_TYPE_CAPTEUR
+/*********************************************** Gestion des cadrans ***************************************/
+ struct CMD_TYPE_CADRAN
   { gint    id;
     gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
     gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                       /* Libelle du synoptique cible */
-    gchar   acro_syn [ NBR_CARAC_ACRO_SYN_MNEMONIQUE_UTF8 + 1 ];            /* Visuel Acronyme du capteur */
+    gchar   acro_syn [ NBR_CARAC_ACRO_SYN_MNEMONIQUE_UTF8 + 1 ];            /* Visuel Acronyme du cadran */
     gint    type;                                                              /* type du bit de controle */
     gint    bit_controle;                                                                   /* Ixxx, Cxxx */
     guint   position_x;                                                      /* en abscisses et ordonnées */
@@ -142,8 +142,8 @@
     SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS_FIN,        /* Le serveur envoi des pass dans l'atelier client */
     SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE,     /* Le serveur envoi des palettes dans l'atelier client */
     SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE_FIN, /* Le serveur envoi des palettes dans l'atelier client */
-    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR,     /* Le serveur envoi des capteurs dans l'atelier client */
-    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR_FIN, /* Le serveur envoi des capteurs dans l'atelier client */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CADRAN,       /* Le serveur envoi des cadrans dans l'atelier client */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CADRAN_FIN,   /* Le serveur envoi des cadrans dans l'atelier client */
     SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP,    /* Le serveur envoi des camera dans l'atelier client */
     SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP_FIN,/* Le serveur envoi des camera dans l'atelier client */
 
@@ -187,11 +187,11 @@
     SSTAG_SERVEUR_ATELIER_DEL_PALETTE_OK,            /* Le client desire editer par atelier le synoptique */
     SSTAG_CLIENT_ATELIER_EDIT_PALETTE,            /* Le client envoi les propriétés du palette au serveur */
 
-    SSTAG_CLIENT_ATELIER_ADD_CAPTEUR,      /* Le client veut ajouter un capteur au syn en cours d'edition */
-    SSTAG_SERVEUR_ATELIER_ADD_CAPTEUR_OK,                       /* Le serveur valide l'ajout d'un capteur */
-    SSTAG_CLIENT_ATELIER_DEL_CAPTEUR,                               /* Le client veut detruire un capteur */
-    SSTAG_SERVEUR_ATELIER_DEL_CAPTEUR_OK,                                             /* Destruction OKAY */
-    SSTAG_CLIENT_ATELIER_EDIT_CAPTEUR,            /* Le serveur envoi les propriétés du capteur au client */
+    SSTAG_CLIENT_ATELIER_ADD_CADRAN,        /* Le client veut ajouter un cadran au syn en cours d'edition */
+    SSTAG_SERVEUR_ATELIER_ADD_CADRAN_OK,                         /* Le serveur valide l'ajout d'un cadran */
+    SSTAG_CLIENT_ATELIER_DEL_CADRAN,                                 /* Le client veut detruire un cadran */
+    SSTAG_SERVEUR_ATELIER_DEL_CADRAN_OK,                                              /* Destruction OKAY */
+    SSTAG_CLIENT_ATELIER_EDIT_CADRAN,              /* Le serveur envoi les propriétés du cadran au client */
 
     SSTAG_CLIENT_ATELIER_ADD_CAMERA_SUP,/* Le client veut ajouter une camera_sup au syn en cours d'edition */
     SSTAG_SERVEUR_ATELIER_ADD_CAMERA_SUP_OK,                /* Le serveur valide l'ajout d'une camera_sup */

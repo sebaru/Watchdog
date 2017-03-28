@@ -37,7 +37,7 @@
  #define NOM_TABLE_COMMENT        "syns_comments"
  #define NOM_TABLE_PASSERELLE     "syns_pass"
  #define NOM_TABLE_PALETTE        "syns_palettes"
- #define NOM_TABLE_CAPTEUR        "syns_capteurs"
+ #define NOM_TABLE_CADRAN        "syns_cadrans"
  #define NOM_TABLE_CAMERASUP      "syns_camerasup"
 
 /*************************************** Définitions des prototypes ***************************************/
@@ -76,12 +76,12 @@
  extern struct CMD_TYPE_PALETTE *Rechercher_paletteDB ( guint id );
  extern gboolean Modifier_paletteDB( struct CMD_TYPE_PALETTE *pass );
 
- extern gboolean Retirer_capteurDB ( struct CMD_TYPE_CAPTEUR *capteur );
- extern gint Ajouter_capteurDB ( struct CMD_TYPE_CAPTEUR *capteur );
- extern gboolean Recuperer_capteurDB ( struct DB **db, gint id_syn );
- extern struct CMD_TYPE_CAPTEUR *Recuperer_capteurDB_suite( struct DB **db );
- extern struct CMD_TYPE_CAPTEUR *Rechercher_capteurDB ( guint id );
- extern gboolean Modifier_capteurDB( struct CMD_TYPE_CAPTEUR *capteur );
+ extern gboolean Retirer_cadranDB ( struct CMD_TYPE_CADRAN *cadran );
+ extern gint Ajouter_cadranDB ( struct CMD_TYPE_CADRAN *cadran );
+ extern gboolean Recuperer_cadranDB ( struct DB **db, gint id_syn );
+ extern struct CMD_TYPE_CADRAN *Recuperer_cadranDB_suite( struct DB **db );
+ extern struct CMD_TYPE_CADRAN *Rechercher_cadranDB ( guint id );
+ extern gboolean Modifier_cadranDB( struct CMD_TYPE_CADRAN *cadran );
 
  extern gboolean Retirer_camera_supDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA_SUP *camera_sup );
  extern gint Ajouter_camera_supDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA_SUP *camera_sup );

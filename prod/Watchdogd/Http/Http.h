@@ -41,6 +41,15 @@
  #define HTTP_DEFAUT_MAX_UPLOAD_BYTES  10240
  #define HTTP_DEFAUT_LWS_DEBUG_LEVEL   0
 
+ #define HTTP_200_OK                   200
+ #define HTTP_BAD_REQUEST              400
+ #define HTTP_UNAUTHORIZED             401
+ #define HTTP_BAD_METHOD               405
+ #define HTTP_SERVER_ERROR             100
+
+ #define HTTP_CONTENT_JSON             "application/json"
+ #define HTTP_CONTENT_XML              "application/xml"
+ 
  enum WS_PROTO
   {	/* always first */
     WS_PROTO_HTTP = 0,
@@ -91,7 +100,8 @@
 /*************************************************** Définitions des prototypes ***********************************************/
  extern gboolean Http_Lire_config ( void );
  extern gint Http_json_get_int ( JsonObject *object, gchar *name );
- extern void Http_Send_error_code ( struct lws *wsi, gint code );
+ extern void Http_Send_response_code ( struct lws *wsi, gint code );
+ extern void Http_Send_response_code_with_buffer ( struct lws *wsi, gint code, gchar *content_type, gchar *buffer, gint taille_buf );
  extern gboolean Http_Traiter_request_getsyn ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gboolean Http_Traiter_request_getstatus ( struct lws *wsi );
  extern gint Http_Traiter_request_getgif ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
@@ -101,6 +111,9 @@
  extern gint Http_Traiter_request_setmessage ( struct lws *wsi, struct HTTP_SESSION *session, gchar *remote_name, gchar *remote_ip );
  extern gint Http_Traiter_request_delmessage ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_body_completion_setmessage ( struct lws *wsi );
+ extern gint Http_Traiter_request_body_completion_delmessage ( struct lws *wsi );
+ extern gint Http_Traiter_request_postfile ( struct lws *wsi, struct HTTP_SESSION *session );
+ extern gint Http_Traiter_request_body_completion_postfile ( struct lws *wsi );
  extern gint Http_Traiter_request_getpluginsDLS ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_getui ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gboolean Http_Traiter_request_getmnemo ( struct lws *wsi, struct HTTP_SESSION *session, gchar *url );

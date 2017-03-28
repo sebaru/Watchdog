@@ -52,9 +52,12 @@
  gint Http_Traiter_request_body_completion_setmessage ( struct lws *wsi )
   { unsigned char header[512], *header_cur, *header_end;
     struct HTTP_PER_SESSION_DATA *pss;
-    JsonNode *root_node;
+    struct CMD_TYPE_MESSAGE *msg;
+    JsonNode *root_node, *node;
     JsonParser *parser;
-    gint retour, taille, code;
+    JsonObject *object;
+    gint retour, taille;
+    gchar buf[80];
 
     pss = lws_wsi_user ( wsi );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
@@ -62,79 +65,98 @@
 
 
     if ( pss->session==NULL || pss->session->util==NULL || Tester_groupe_util( pss->session->util, GID_MESSAGE)==FALSE)
-     { Http_Send_error_code ( wsi, 401 );
-       return(TRUE);
+     { Http_Send_response_code ( wsi, HTTP_UNAUTHORIZED );
+       pss->post_data_length = 0;
+       g_free(pss->post_data);
+       return(1);
      }
 
     header_cur = header;                                                             /* Préparation des headers de la réponse */
     header_end = header + sizeof(header);
 
-    code = 400;                                                                                                /* Bad Request */
     parser = json_parser_new();                                                                    /* Creation du parser JSON */
     if (!parser)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
              "%s: (sid %.12s) Parser Creation Error", __func__, Http_get_session_id(pss->session) );
-       goto end;
+       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
+       pss->post_data_length = 0;
+       g_free(pss->post_data);
+       return(1);
      }
 
     if ( json_parser_load_from_data ( parser, pss->post_data, pss->post_data_length, NULL ) == FALSE )           /* Parsing ! */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
              "%s: (sid %.12s) Parsing Error", __func__, Http_get_session_id(pss->session) );
        g_object_unref(parser);
-       goto end;
+       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
+       pss->post_data_length = 0;
+       g_free(pss->post_data);
+       return(1);
      }
 
     root_node = json_parser_get_root (parser);
-    if (json_node_get_node_type (root_node) == JSON_NODE_OBJECT)
-     { struct CMD_TYPE_MESSAGE *msg;
-       JsonObject *object;
-       JsonNode *node;
-
-       object = json_node_get_object (root_node);
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "%s: (sid %.12s) Received: object with %d members", __func__, Http_get_session_id(pss->session),
-                json_object_get_size (object) );
-
-       msg = (struct CMD_TYPE_MESSAGE *)g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
-       if (msg)
-        { msg->id          = Http_json_get_int (object, "id");
-          msg->num         = Http_json_get_int (object, "num");
-          msg->type        = Http_json_get_int (object, "type");
-          msg->dls_id      = Http_json_get_int (object, "dls_id");
-          msg->time_repeat = Http_json_get_int (object, "time_repeat");
-          msg->sms         = Http_json_get_int (object, "sms");
-          msg->enable      = Http_json_get_int (object, "enable");
-          node = json_object_get_member (object, "libelle" );
-          if (node) g_snprintf( msg->libelle, sizeof(msg->libelle), "%s", json_node_get_string ( node ) );
-               else g_snprintf( msg->libelle, sizeof(msg->libelle), "undefined" );
-
-          node = json_object_get_member (object, "libelle_sms" );
-          if (node) g_snprintf( msg->libelle_sms, sizeof(msg->libelle_sms), "%s", json_node_get_string ( node ) );
-               else g_snprintf( msg->libelle_sms, sizeof(msg->libelle_sms), "undefined" );
-
-          if (msg->id==-1)
-             { if ( Ajouter_messageDB(msg) != -1 ) code = 200; }
-          else if ( Modifier_messageDB(msg) == TRUE ) code = 200;
-          g_free(msg);
-        }
-       else
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "%s: (sid %.12s) Memory Error", __func__, Http_get_session_id(pss->session) );
-        }
-     }
-    else
+    if (json_node_get_node_type (root_node) != JSON_NODE_OBJECT)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                 "%s: (sid %.12s) Received wrong node_type=%d (%s)", __func__, Http_get_session_id(pss->session),
                  json_node_get_node_type (root_node), json_node_type_name (root_node) );
+       g_object_unref(parser);                                                                   /* Libération du parser Json */
+       Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );
+       pss->post_data_length = 0;
+       g_free(pss->post_data);
+       return(1);
      }
+
+    object = json_node_get_object (root_node);
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+             "%s: (sid %.12s) Received: object with %d members", __func__, Http_get_session_id(pss->session),
+              json_object_get_size (object) );
+
+    msg = (struct CMD_TYPE_MESSAGE *)g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
+    if (!msg)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                "%s: (sid %.12s) Memory Error", __func__, Http_get_session_id(pss->session) );
+       g_object_unref(parser);
+       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
+       pss->post_data_length = 0;
+       g_free(pss->post_data);
+       return(1);
+     }
+
+    msg->id          = Http_json_get_int (object, "id");
+    msg->num         = Http_json_get_int (object, "num");
+    msg->type        = Http_json_get_int (object, "type");
+    msg->dls_id      = Http_json_get_int (object, "dls_id");
+    msg->time_repeat = Http_json_get_int (object, "time_repeat");
+    msg->sms         = Http_json_get_int (object, "sms");
+    msg->enable      = Http_json_get_int (object, "enable");
+    node = json_object_get_member (object, "libelle" );
+    if (node) g_snprintf( msg->libelle, sizeof(msg->libelle), "%s", json_node_get_string ( node ) );
+         else g_snprintf( msg->libelle, sizeof(msg->libelle), "undefined" );
+
+    node = json_object_get_member (object, "libelle_sms" );
+    if (node) g_snprintf( msg->libelle_sms, sizeof(msg->libelle_sms), "%s", json_node_get_string ( node ) );
+         else g_snprintf( msg->libelle_sms, sizeof(msg->libelle_sms), "undefined" );
     g_object_unref(parser);                                                                      /* Libération du parser Json */
-end:
-    g_free(pss->post_data);
-    retour = lws_add_http_header_status( wsi, code, &header_cur, header_end );
-    retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
-    *header_cur='\0';                                                                               /* Caractere null d'arret */
-    lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
     pss->post_data_length = 0;
-    return(1);                                         /* on clos direct la connexion -- lws_http_transaction_completed(wsi));*/
+    g_free(pss->post_data);
+
+    if (msg->id==-1)
+     { if ( (msg->id = Ajouter_messageDB(msg)) != -1)
+        { gchar buf[80];
+          g_snprintf( buf, sizeof(buf), "{ \"msg_id\" : %d }", msg->id );
+          Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, strlen(buf) );
+        }
+       else Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
+     }          
+    else
+     { if ( Modifier_messageDB(msg) == TRUE )
+        { gchar buf[80];
+          g_snprintf( buf, sizeof(buf), "{ \"msg_id\" : %d }", msg->id );
+          Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, strlen(buf) );
+        }
+       else Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
+     }          
+    g_free(msg);
+    return(lws_http_transaction_completed(wsi));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

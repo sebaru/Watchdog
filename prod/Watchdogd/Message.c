@@ -36,6 +36,56 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Updater_msg_run: Update la running config du message en parametre                                                          */
+/* Entrée: une structure identifiant le message                                                                               */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ static gboolean Updater_msg_run ( struct CMD_TYPE_MESSAGE *msg )
+  { if ( msg && msg->num < NBR_MESSAGE_ECRITS )
+     { Partage->g[msg->num].persist = msg->persist;
+     }
+  }
+/******************************************************************************************************************************/
+/* Charger_messages: Chargement de la configuration des messages depuis la DB vers la running config                          */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Charger_messages ( void )
+  { gchar requete[512];
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
+       return;
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT num,persist"
+                " FROM %s",
+                NOM_TABLE_MSG );
+
+    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
+     { Libere_DB_SQL (&db);
+       return;
+     }
+
+    while ( Recuperer_ligne_SQL(db) )                                                      /* Chargement d'une ligne resultat */
+     { gint num;
+       num = atoi( db->row[0] );
+       if (num < NBR_MESSAGE_ECRITS)
+        { Partage->g[num].persist = atoi( db->row[1] );
+          Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+                    "%s: Chargement config MSG[%04d]", __func__, num );
+        }
+       else
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+			       "%s: num (%d) out of range (max=%d)", __func__, num, NBR_MESSAGE_ECRITS ); }
+     }
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: DB reloaded", __func__ );
+    Libere_DB_SQL (&db);
+  }
+/******************************************************************************************************************************/
 /* Retirer_messageDB: Elimination d'un message                                                                                */
 /* Entrée: une structure identifiant le message a retirer                                                                     */
 /* Sortie: false si probleme                                                                                                  */
@@ -93,11 +143,11 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s(num,libelle,libelle_audio,libelle_sms,"
-                "type,audio,bit_audio,enable,sms,time_repeat,dls_id) VALUES "
-                "(%d,'%s','%s','%s',%d,%d,%d,%d,%d,%d,%d)", NOM_TABLE_MSG, msg->num,
+                "type,audio,bit_audio,enable,sms,time_repeat,dls_id,persist) VALUES "
+                "(%d,'%s','%s','%s',%d,%d,%d,%d,%d,%d,%d,%d)", NOM_TABLE_MSG, msg->num,
                 libelle, libelle_audio, libelle_sms, msg->type,
                 (msg->audio ? 1 : 0), msg->bit_audio, (msg->enable ? 1 : 0),
-                msg->sms, msg->time_repeat, msg->dls_id
+                msg->sms, msg->time_repeat, msg->dls_id, (msg->persist ? 1 : 0)
               );
     g_free(libelle);
     g_free(libelle_audio);
@@ -116,6 +166,7 @@
      }
     id = Recuperer_last_ID_SQL ( db );
     Libere_DB_SQL(&db);
+    Updater_msg_run ( msg );
     return(id);
   }
 /******************************************************************************************************************************/
@@ -130,7 +181,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,audio,bit_audio,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "time_repeat,dls.id,dls.shortname,syn.id"
+                "time_repeat,dls.id,dls.shortname,syn.id,persist"
                 " FROM %s as msg"
                 " INNER JOIN %s as dls ON msg.dls_id=dls.id"
                 " INNER JOIN %s as syn ON dls.syn_id=syn.id"
@@ -204,6 +255,7 @@
        msg->time_repeat = atoi(db->row[13]);
        msg->dls_id      = atoi(db->row[14]);
        msg->syn_id      = atoi(db->row[16]);
+       msg->persist     = atoi(db->row[17]);
      }
     return(msg);
   }
@@ -219,7 +271,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,audio,bit_audio,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "time_repeat,dls.id,dls.shortname,syn.id"
+                "time_repeat,dls.id,dls.shortname,syn.id,persist"
                 " FROM %s as msg"
                 " INNER JOIN %s as dls ON msg.dls_id=dls.id"
                 " INNER JOIN %s as syn ON dls.syn_id=syn.id"
@@ -261,7 +313,7 @@
    
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,audio,bit_audio,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "time_repeat,dls.id,dls.shortname,syn.id"
+                "time_repeat,dls.id,dls.shortname,syn.id,persist"
                 " FROM %s as msg"
                 " INNER JOIN %s as dls ON msg.dls_id=dls.id"
                 " INNER JOIN %s as syn ON dls.syn_id=syn.id"
@@ -311,11 +363,11 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
                 "num=%d,libelle='%s',type=%d,audio=%d,bit_audio=%d,enable=%d,sms=%d,"
-                "libelle_audio='%s',libelle_sms='%s',time_repeat=%d,dls_id=%d "
+                "libelle_audio='%s',libelle_sms='%s',time_repeat=%d,dls_id=%d,persist=%d "
                 "WHERE id=%d",
                 NOM_TABLE_MSG, msg->num, libelle, msg->type, (msg->audio ? 1 : 0), msg->bit_audio,
                                (msg->enable ? 1 : 0), msg->sms,
-                               libelle_audio, libelle_sms, msg->time_repeat, msg->dls_id,
+                               libelle_audio, libelle_sms, msg->time_repeat, msg->dls_id, (msg->persist ? 1 : 0),
                 msg->id );
     g_free(libelle);
     g_free(libelle_audio);
@@ -329,6 +381,7 @@
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
+    Updater_msg_run ( msg );
     return(retour);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

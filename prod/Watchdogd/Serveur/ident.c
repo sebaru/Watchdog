@@ -54,12 +54,13 @@
      { Client_mode ( client, DECONNECTE );
        return;
      }
-
-    if (Modifier_utilisateurDB_set_password( util ))
-     { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_PWDCHANGED, NULL, 0 ); }
+    
+    if (Modifier_utilisateurDB_set_password( client->util, util->hash ))                      /* Le password est dans le hash */
+     { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_PWDCHANGED, NULL, 0 );
+       Client_mode ( client, DECONNECTE );                                         /* On deconnecte le client tout de suite ! */
+     }
     else
      { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CANNOTCHANGEPWD, NULL, 0 ); }
-    Client_mode ( client, DECONNECTE );                                            /* On deconnecte le client tout de suite ! */
   }
 /******************************************************************************************************************************/
 /* Tester_autorisation: envoi de l'autorisation ou non au client                                                              */
@@ -72,7 +73,7 @@
     gchar *nom;
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "Tester_autorisation: Auth in progress for nom='%s', version='%s' (socket %d)",
+             "%s: Auth in progress for nom='%s', version='%s' (socket %d)", __func__,
               ident->nom, ident->version, client->connexion->socket );
     memcpy( &client->ident, ident, sizeof( struct REZO_CLI_IDENT ) );                              /* Recopie pour sauvegarde */
             
@@ -87,6 +88,9 @@
                     (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, gtkmessage.message );
        Client_mode ( client, DECONNECTE );
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
+             "%s: Auth NOK with wrong version number for nom='%s', version='%s' (socket %d)", __func__,
+              ident->nom, ident->version, client->connexion->socket );
        return(FALSE);
      }
 
@@ -99,11 +103,14 @@
                      (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, gtkmessage.message );
        Client_mode ( client, DECONNECTE );
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
+                "%s: User not found in DB for nom='%s', version='%s' (socket %d)", __func__,
+                 ident->nom, ident->version, client->connexion->socket );
        return(FALSE);
      }
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-             "Tester_autorisation: User %s (id=%d) found in database. Checking parameters.",
+             "Tester_autorisation: User '%s' (id=%d) found in database. Checking parameters.",
               client->util->nom, client->util->id );
 
 /*********************************************************** Compte du client *************************************************/

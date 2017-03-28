@@ -130,9 +130,9 @@
        if (client->util)            { g_free( client->util ); }
        if (client->syn_to_send)     { g_free( client->syn_to_send ); }
        if (client->Liste_bit_syns)  { g_slist_free(client->Liste_bit_syns); }
-       if (client->Liste_bit_capteurs)
-                                    { g_slist_foreach( client->Liste_bit_capteurs, (GFunc) g_free, NULL );
-                                      g_slist_free(client->Liste_bit_capteurs);
+       if (client->Liste_bit_cadrans)
+                                    { g_slist_foreach( client->Liste_bit_cadrans, (GFunc) g_free, NULL );
+                                      g_slist_free(client->Liste_bit_cadrans);
                                     }
        if (client->Liste_histo)     { g_slist_foreach( client->Liste_histo, (GFunc) g_free, NULL );
                                       g_slist_free ( client->Liste_histo );

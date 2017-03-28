@@ -45,6 +45,7 @@
  #define NBR_MESSAGE_ECRITS    NBR_BIT_DLS
  #define NBR_COMPTEUR_H        256
  #define NBR_COMPTEUR_IMP      256
+ #define NBR_REGISTRE          NBR_BIT_DLS
  #define NBR_CAMERA            16
 
  struct CMD_TYPE_PLUGIN_DLS

@@ -47,8 +47,8 @@
     Envoyer_palette_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE,
                                                SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE_FIN );
 
-    Envoyer_capteur_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR,
-                                               SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAPTEUR_FIN );
+    Envoyer_cadran_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CADRAN,
+                                               SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CADRAN_FIN );
 
     Envoyer_passerelle_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS,
 	                                              SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS_FIN );
@@ -304,29 +304,29 @@
                Proto_effacer_palette_atelier( client, palette );
              }
             break;
-/************************************************* Gestion des capteurs synoptiques *******************************************/
-       case SSTAG_CLIENT_ATELIER_ADD_CAPTEUR:
-             { struct CMD_TYPE_CAPTEUR *capteur;
-               capteur = (struct CMD_TYPE_CAPTEUR *)connexion->donnees;
+/************************************************* Gestion des cadrans synoptiques *******************************************/
+       case SSTAG_CLIENT_ATELIER_ADD_CADRAN:
+             { struct CMD_TYPE_CADRAN *cadran;
+               cadran = (struct CMD_TYPE_CADRAN *)connexion->donnees;
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                         "Le client desire ajouter un capteur" );
-               Proto_ajouter_capteur_atelier( client, capteur );
+                         "Le client desire ajouter un cadran" );
+               Proto_ajouter_cadran_atelier( client, cadran );
              }
             break;
-       case SSTAG_CLIENT_ATELIER_DEL_CAPTEUR:
-             { struct CMD_TYPE_CAPTEUR *capteur;
-               capteur = (struct CMD_TYPE_CAPTEUR *)connexion->donnees;
+       case SSTAG_CLIENT_ATELIER_DEL_CADRAN:
+             { struct CMD_TYPE_CADRAN *cadran;
+               cadran = (struct CMD_TYPE_CADRAN *)connexion->donnees;
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                         "Le client desire effacer le capteur numéro %d", capteur->id );
-               Proto_effacer_capteur_atelier( client, capteur );
+                         "Le client desire effacer le cadran numéro %d", cadran->id );
+               Proto_effacer_cadran_atelier( client, cadran );
              }
             break;
-       case SSTAG_CLIENT_ATELIER_EDIT_CAPTEUR:
-             { struct CMD_TYPE_CAPTEUR *capteur;
-               capteur = (struct CMD_TYPE_CAPTEUR *)connexion->donnees;
+       case SSTAG_CLIENT_ATELIER_EDIT_CADRAN:
+             { struct CMD_TYPE_CADRAN *cadran;
+               cadran = (struct CMD_TYPE_CADRAN *)connexion->donnees;
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                         "Le client desire modifier le palette numéro %d", capteur->id );
-               Proto_valider_editer_capteur_atelier( client, capteur );
+                         "Le client desire modifier le palette numéro %d", cadran->id );
+               Proto_valider_editer_cadran_atelier( client, cadran );
              }
             break;
      }

@@ -74,7 +74,7 @@
                                }
                               infos->Selection.trame_motif->motif->layer = layer + 1;
                               break;
-       case TYPE_CAPTEUR    : goo_canvas_item_raise ( infos->Selection.trame_capteur->item_groupe, NULL );
+       case TYPE_CADRAN    : goo_canvas_item_raise ( infos->Selection.trame_cadran->item_groupe, NULL );
                               break;
        case TYPE_PASSERELLE : goo_canvas_item_raise ( infos->Selection.trame_pass->item_groupe, NULL );
                               break;
@@ -110,7 +110,7 @@
                                }
                               infos->Selection.trame_motif->motif->layer = 0;
                               break;
-       case TYPE_CAPTEUR    : goo_canvas_item_lower ( infos->Selection.trame_capteur->item_groupe, NULL );
+       case TYPE_CADRAN    : goo_canvas_item_lower ( infos->Selection.trame_cadran->item_groupe, NULL );
                               break;
        case TYPE_PASSERELLE : goo_canvas_item_lower ( infos->Selection.trame_pass->item_groupe, NULL );
                               break;
@@ -133,7 +133,7 @@
 printf("Afficher_propriete: debut\n");
     switch (infos->Selection.type)
      { case TYPE_MOTIF      : Editer_propriete_TOR( infos->Selection.trame_motif );          break;
-       case TYPE_CAPTEUR    : Menu_ajouter_editer_capteur( infos->Selection.trame_capteur ); break;
+       case TYPE_CADRAN    : Menu_ajouter_editer_cadran( infos->Selection.trame_cadran ); break;
        case TYPE_PASSERELLE : Editer_propriete_pass( infos->Selection.trame_pass );          break;
        default: printf("Afficher_propriete: Type de selection inconnu\n");
      }
@@ -265,10 +265,10 @@ printf("Afficher_propriete: debut\n");
                                        y = infos->Selection.trame_motif->motif->position_y;
                                        angle = infos->Selection.trame_motif->motif->angle;
                                        break;
-                                  case TYPE_CAPTEUR:
-                                       x = infos->Selection.trame_capteur->capteur->position_x;
-                                       y = infos->Selection.trame_capteur->capteur->position_y;
-                                       angle = infos->Selection.trame_capteur->capteur->angle;
+                                  case TYPE_CADRAN:
+                                       x = infos->Selection.trame_cadran->cadran->position_x;
+                                       y = infos->Selection.trame_cadran->cadran->position_y;
+                                       angle = infos->Selection.trame_cadran->cadran->angle;
                                        break;
                                   case TYPE_CAMERA_SUP:
                                        x = infos->Selection.trame_camera_sup->camera_sup->position_x;
@@ -452,16 +452,16 @@ printf("Clic sur pass: page trouvée \n");
               event->type == GDK_2BUTTON_PRESS) Afficher_propriete();
   }
 /**********************************************************************************************************/
-/* Clic_sur_capteur: Appelé quand un evenement est capté sur un capteur                                       */
+/* Clic_sur_cadran: Appelé quand un evenement est capté sur un cadran                                       */
 /* Entrée: une structure Event                                                                            */
 /* Sortie :rien                                                                                           */
 /**********************************************************************************************************/
- void Clic_sur_capteur ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
-                      struct TRAME_ITEM_CAPTEUR *trame_capteur )
+ void Clic_sur_cadran ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
+                      struct TRAME_ITEM_CADRAN *trame_cadran )
   { struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
     static GtkWidget *Popup = NULL;
-    static GnomeUIInfo Popup_capteur[]=
+    static GnomeUIInfo Popup_cadran[]=
      { GNOMEUIINFO_ITEM_STOCK( N_("Properties"), NULL, Afficher_propriete, GNOME_STOCK_PIXMAP_PROPERTIES ),
        GNOMEUIINFO_SEPARATOR,
        /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate item"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
@@ -472,27 +472,27 @@ printf("Clic sur pass: page trouvée \n");
        GNOMEUIINFO_ITEM_STOCK( N_("Delete selection"), NULL, Effacer_selection, GNOME_STOCK_PIXMAP_TRASH ),
        GNOMEUIINFO_END
      };
-printf("Clic sur capteur \n");
-    if (!(trame_capteur && event)) return;
+printf("Clic sur cadran \n");
+    if (!(trame_cadran && event)) return;
 
     page = Page_actuelle();                                               /* On recupere la page actuelle */
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
     infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
-printf("Clic sur capteur: page trouvée, %p \n", trame_capteur);
+printf("Clic sur cadran: page trouvée, %p \n", trame_cadran);
 
-    infos->Selection.type = TYPE_CAPTEUR;
-    infos->Selection.groupe = trame_capteur->groupe_dpl;
-    infos->Selection.trame_capteur = trame_capteur;
+    infos->Selection.type = TYPE_CADRAN;
+    infos->Selection.groupe = trame_cadran->groupe_dpl;
+    infos->Selection.trame_cadran = trame_cadran;
 
     Clic_general( infos, event );                                                /* Fonction de base clic */
 
-    Mettre_a_jour_description( infos, 0, trame_capteur->capteur->libelle );
+    Mettre_a_jour_description( infos, 0, trame_cadran->cadran->libelle );
     if (event->type == GDK_BUTTON_PRESS)
      { if ( event->button.button == 1)
-        { goo_canvas_item_raise( trame_capteur->select_mi, NULL );
+        { goo_canvas_item_raise( trame_cadran->select_mi, NULL );
         }
        else if (event->button.button == 3)
-        { if (!Popup) Popup = gnome_popup_menu_new( Popup_capteur );                       /* Creation menu */
+        { if (!Popup) Popup = gnome_popup_menu_new( Popup_cadran );                       /* Creation menu */
           gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
 
         }

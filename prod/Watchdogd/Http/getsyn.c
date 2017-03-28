@@ -27,8 +27,6 @@
  
  #include <string.h>
  #include <unistd.h>
- #include <microhttpd.h>
- #include <libxml/xmlwriter.h>
 
 /************************************************** Prototypes de fonctions ***************************************************/
  #include "watchdogd.h"
@@ -40,154 +38,152 @@
 /******************************************************************************************************************************/
  gboolean Http_Traiter_request_getsyn ( struct lws *wsi, struct HTTP_SESSION *session )
   { unsigned char header[256], *header_cur, *header_end;
-    const char *content_type = "application/xml";
+    const char *content_type = "application/json";
  	  struct CMD_TYPE_SYNOPTIQUE *syndb;
-    xmlTextWriterPtr writer;
-    xmlBufferPtr buf;
+    JsonBuilder *builder;
+    JsonGenerator *gen;
     struct DB *db;
     gint retour;
     const gchar *id_syn_s;
    	gchar token_id[12];
     gchar requete[256];
     gint id_syn;
+    gchar *buf;
+    gsize taille_buf;
+
+#ifdef bouh
+    if ( session==NULL || session->util==NULL )
+     { Http_Send_response_code ( wsi, 401 );
+       return(TRUE);
+     }
+#endif
 
     id_syn_s   = lws_get_urlarg_by_name	( wsi, "id_syn=",   token_id,   sizeof(token_id) );
-    if (id_syn_s) { id_syn = atoi ( id_syn_s ); } else { return(FALSE); }
-
-    buf = xmlBufferCreate();                                                                        /* Creation du buffer xml */
-    if (buf == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getsyn : XML Buffer creation failed" );
-       return(FALSE);
-     }
-
-    writer = xmlNewTextWriterMemory(buf, 0);                                                         /* Creation du write XML */
-    if (writer == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getsyn : XML Writer creation failed" );
-       xmlBufferFree(buf);
-       return(FALSE);
-     }
-
-    retour = xmlTextWriterStartDocument(writer, NULL, "UTF-8", "yes" );                               /* Creation du document */
-    if (retour < 0)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getsyn : XML Start document failed" );
-       xmlBufferFree(buf);
-       return(FALSE);
-     }
+    if (id_syn_s) { id_syn = atoi ( id_syn_s ); }
+    else { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ); /* Bad Request */
+           return(TRUE);
+         }
 
     syndb = Rechercher_synoptiqueDB ( id_syn );
     if ( ! syndb )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                 "Http_Traiter_request_getsyn : Synoptique %d not found in DB", id_syn );
-       xmlBufferFree(buf);
+                 "%s: (sid %.12s) Synoptique %d not found in DB", __func__, Http_get_session_id ( session ), id_syn );
+       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
        return(FALSE);
      }
 
-    retour = xmlTextWriterStartElement(writer, (const unsigned char *) "synoptique");
-    if (retour < 0)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getsyn : XML Failed to Start element synoptique" );
-       g_free(syndb);
-       xmlBufferFree(buf);
-       return(FALSE);
-     }
-
-    xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"id",      "%d", syndb->id );
-    xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"groupe",  "%s", syndb->groupe );
-    xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"page",    "%s", syndb->page );
-    xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"libelle", "%s", syndb->libelle );
-    g_free(syndb);                                                               /* On a terminé avec la structure synoptique */
 #ifdef bouh
-/*--------------------------------------------------- Dumping Passerelle -----------------------------------------------------*/
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping passerelles !!");
-    if ( Recuperer_passerelleDB( &db, id_syn ) )
-     { for ( ; ; )
-        { struct CMD_TYPE_PASSERELLE *pass;
-          pass = Recuperer_passerelleDB_suite( &db );
-          if (!pass) break;                                                                 /* Terminé ?? */
+    if ( Tester_groupe_util(session->util, syndb->access_groupe)==FALSE)
+     { g_free(syndb);
+       Http_Send_response_code ( wsi, 401 );
+       return(TRUE);
+     }
+#endif
+     
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = json_builder_new ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                 "%s : (sid %.12s) JSon builder creation failed", __func__, Http_get_session_id ( session ) );
+       g_free(syndb);
+       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
+       return(TRUE);
+     }
+                                                          /* Lancement de la requete de recuperation du contenu du synoptique */
+/*------------------------------------------------------- Dumping synoptique -------------------------------------------------*/
+    json_builder_set_member_name  ( builder, "Synoptique" );
+    json_builder_begin_object (builder);                                                                  /* Contenu du Noeud */
+    json_builder_set_member_name  ( builder, "id" );            json_builder_add_int_value    ( builder, syndb->id );
+    json_builder_set_member_name  ( builder, "groupe" );        json_builder_add_string_value ( builder, syndb->groupe );
+    json_builder_set_member_name  ( builder, "page" );          json_builder_add_string_value ( builder, syndb->page );
+    json_builder_set_member_name  ( builder, "libelle" );       json_builder_add_string_value ( builder, syndb->libelle );
+    g_free(syndb);
 
-          xmlTextWriterStartElement(writer, (const unsigned char *)"passerelle");     /* Start Passerelle */
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"id",           "%d", pass->id );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"syn_cible_id", "%d", pass->syn_cible_id );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"libelle",      "%s", pass->libelle );
-          xmlTextWriterEndElement(writer);                                              /* End passerelle */
+/*-------------------------------------------------------- Dumping passerelles -----------------------------------------------*/
+    if ( Recuperer_passerelleDB( &db, id_syn ) )
+     { struct CMD_TYPE_PASSERELLE *pass;
+       json_builder_set_member_name  ( builder, "passerelles" );
+       json_builder_begin_array (builder);                                                   /* Création du noeud Passerelles */
+       while ( (pass = Recuperer_passerelleDB_suite( &db )) != NULL )
+        { json_builder_begin_object (builder);                                                 /* Contenu du Noeud Passerelle */
+          json_builder_set_member_name  ( builder, "id" );            json_builder_add_int_value    ( builder, pass->id );
+          json_builder_set_member_name  ( builder, "syn_cible_id" );  json_builder_add_int_value    ( builder, pass->syn_cible_id );
+          json_builder_set_member_name  ( builder, "libelle" );       json_builder_add_string_value ( builder, pass->libelle );
+          json_builder_end_object (builder);                                                                /* End Passerelle */
           g_free(pass);
         }
+       json_builder_end_array (builder);                                                              /* End Passerelle Array */
      }
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping passerelles !!");
 
-/*------------------------------------------- Dumping capteur --------------------------------------------*/
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping capteurs !!");
-    if ( Recuperer_capteurDB( &db, id_syn ) )
+/*-------------------------------------------------------- Dumping motifs  ---------------------------------------------------*/
+    if ( Recuperer_motifDB( &db, id_syn ) )
+     { struct CMD_TYPE_MOTIF *motif;
+       json_builder_set_member_name  ( builder, "motifs" );
+       json_builder_begin_array (builder);                                                         /* Création du noeud Motif */
+       while( (motif = Recuperer_motifDB_suite( &db )) )
+        { json_builder_begin_object (builder);                                                 /* Contenu du contenu du noeud */
+          json_builder_set_member_name  ( builder, "id" );           json_builder_add_int_value    ( builder, motif->id );
+          json_builder_set_member_name  ( builder, "libelle" );      json_builder_add_string_value ( builder, motif->libelle );
+          json_builder_set_member_name  ( builder, "icone_id" );     json_builder_add_int_value    ( builder, motif->icone_id );
+          json_builder_set_member_name  ( builder, "posx" );         json_builder_add_int_value    ( builder, motif->position_x );
+          json_builder_set_member_name  ( builder, "posy" );         json_builder_add_int_value    ( builder, motif->position_y );
+          json_builder_set_member_name  ( builder, "angle" );        json_builder_add_double_value ( builder, motif->angle );
+          json_builder_set_member_name  ( builder, "type_gestion" ); json_builder_add_int_value    ( builder, motif->type_gestion );
+          json_builder_set_member_name  ( builder, "bit_ctrl" );     json_builder_add_int_value    ( builder, motif->bit_controle );
+          json_builder_set_member_name  ( builder, "etat" );         json_builder_add_int_value    ( builder, Partage->i[motif->bit_controle].etat );
+          json_builder_set_member_name  ( builder, "rouge" );        json_builder_add_int_value    ( builder, Partage->i[motif->bit_controle].rouge );
+          json_builder_set_member_name  ( builder, "vert" );         json_builder_add_int_value    ( builder, Partage->i[motif->bit_controle].vert );
+          json_builder_set_member_name  ( builder, "bleu" );         json_builder_add_int_value    ( builder, Partage->i[motif->bit_controle].bleu );
+          json_builder_set_member_name  ( builder, "cligno" );       json_builder_add_int_value    ( builder, Partage->i[motif->bit_controle].cligno );
+          json_builder_end_object (builder);                                                                /* End Passerelle */
+          g_free(motif);
+        }
+       json_builder_end_array (builder);                                                                  /* End Motifs Array */
+     }
+    json_builder_end_object (builder);                                                                        /* End Document */
+
+    gen = json_generator_new ();                                                                      /* Creating JSON buffer */
+    json_generator_set_root ( gen, json_builder_get_root(builder) );
+    json_generator_set_pretty ( gen, TRUE );
+    buf = json_generator_to_data (gen, &taille_buf);
+    g_object_unref(builder);
+    g_object_unref(gen);
+
+
+
+#ifdef bouh
+
+/*------------------------------------------- Dumping cadran --------------------------------------------*/
+    xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping cadrans !!");
+    if ( Recuperer_cadranDB( &db, id_syn ) )
      { for ( ; ; )
-        { struct CMD_TYPE_CAPTEUR *capteur;
+        { struct CMD_TYPE_CADRAN *cadran;
           gfloat valeur = 0.0;
           gchar *unite= NULL;
-          capteur = Recuperer_capteurDB_suite( &db );
-          if (!capteur) break;                                                              /* Terminé ?? */
+          cadran = Recuperer_cadranDB_suite( &db );
+          if (!cadran) break;                                                              /* Terminé ?? */
 
-          xmlTextWriterStartElement(writer, (const unsigned char *)"capteur");           /* Start Capteur */
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"id",      "%d", capteur->id );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"libelle", "%s", capteur->libelle );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"type", "%d",    capteur->type );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"num", "%d",     capteur->bit_controle );
-          switch(capteur->type)
+          xmlTextWriterStartElement(writer, (const unsigned char *)"cadran");           /* Start Capteur */
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"id",      "%d", cadran->id );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"libelle", "%s", cadran->libelle );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"type", "%d",    cadran->type );
+          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"num", "%d",     cadran->bit_controle );
+          switch(cadran->type)
            { case MNEMO_ENTREE_ANA:
-                  valeur = Partage->ea[capteur->bit_controle].val_ech;
-                  unite =  Partage->ea[capteur->bit_controle].confDB.unite;
+                  valeur = Partage->ea[cadran->bit_controle].val_ech;
+                  unite =  Partage->ea[cadran->bit_controle].confDB.unite;
                   break;
              default: valeur = 0.0; unite = "?";
            }
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"valeur", "%f", valeur );
           xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"unite", "%s", unite );
           xmlTextWriterEndElement(writer);                                              /* End passerelle */
-          g_free(capteur);
+          g_free(cadran);
         }
      }
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping capteurs !!");
+    xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping cadrans !!");
 #endif
-/*-------------------------------------------------------- Dumping motif -----------------------------------------------------*/
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping motifs !!");
-    if ( Recuperer_motifDB( &db, id_syn ) )
-     { struct CMD_TYPE_MOTIF *motif;
-       while( (motif = Recuperer_motifDB_suite( &db )) )
-        { xmlTextWriterStartElement(writer, (const unsigned char *)"motif");                                   /* Start Motif */
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"id",     "%d", motif->id );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"icone_id","%d", motif->icone_id );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"libelle","%s", motif->libelle );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"posx",   "%d", motif->position_x );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"posy",   "%d", motif->position_y );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"angle",  "%f", motif->angle );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"type_gestion","%d", motif->type_gestion );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"bit_ctrl","%d", motif->bit_controle );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"etat",   "%d", Partage->i[motif->bit_controle].etat );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"rouge",  "%d", Partage->i[motif->bit_controle].rouge );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"vert",   "%d", Partage->i[motif->bit_controle].vert );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"bleu",   "%d", Partage->i[motif->bit_controle].bleu );
-          xmlTextWriterWriteFormatAttribute( writer, (const unsigned char *)"cligno", "%d", Partage->i[motif->bit_controle].cligno );
-          xmlTextWriterEndElement(writer);                                                                       /* End motif */
-          g_free(motif);
-        }
-     }
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping motifs !!");
 
-    retour = xmlTextWriterEndElement(writer);                                                               /* End synoptique */
-    if (retour < 0)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getsyn : Failed to end element Synoptique" );
-       xmlBufferFree(buf);
-       return(FALSE);
-     }
-
-    retour = xmlTextWriterEndDocument(writer);
-    if (retour < 0)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getsyn : Failed to end Document" );
-       xmlBufferFree(buf);
-       return(FALSE);
-     }
 
 /*************************************************** Envoi au client **********************************************************/
     header_cur = header;
@@ -196,12 +192,12 @@
     retour = lws_add_http_header_status( wsi, 200, &header_cur, header_end );
     retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, (const unsigned char *)content_type, strlen(content_type),
                                            &header_cur, header_end );
-    retour = lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );
+    retour = lws_add_http_header_content_length ( wsi, taille_buf, &header_cur, header_end );
     retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
     *header_cur='\0';                                                                               /* Caractere null d'arret */
     lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-    lws_write ( wsi, buf->content, buf->use, LWS_WRITE_HTTP);                                               /* Send to client */
-    xmlBufferFree(buf);                                               /* Libération du buffer dont nous n'avons plus besoin ! */
+    lws_write ( wsi, buf, taille_buf, LWS_WRITE_HTTP);                                                      /* Send to client */
+    g_free(buf);                                                      /* Libération du buffer dont nous n'avons plus besoin ! */
     return(TRUE);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

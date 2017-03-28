@@ -87,6 +87,7 @@
  extern int Get_option_entier( GList *liste_options, gint type );
  extern void Liberer_options ( GList *options );
 
+ extern int Dls_error ( char *s );
  extern void Dls_restart ( FILE *input_file );
  #endif
 /*--------------------------------------------------------------------------------------------------------*/

@@ -46,6 +46,7 @@
 
     Cfg_audio.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
     Cfg_audio.enable            = FALSE; 
+    g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", AUDIO_DEFAUT_LANGUAGE );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
@@ -60,6 +61,8 @@
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_audio.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_audio.lib->Thread_debug = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "language" ) )
+        { g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", valeur ); }
        else
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,
                    "Audio_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
@@ -138,7 +141,7 @@
     g_snprintf( nom_fichier, sizeof(nom_fichier), "Son/%d.mp3", msg->num );
     fd_cible = open ( nom_fichier, O_RDONLY, 0 );
     if (fd_cible < 0) { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                                  "Jouer_mp3: '%s' not found", nom_fichier );
+                                  "%s: '%s' not found", __func__, nom_fichier );
                         return(FALSE);
                       }
     else close (fd_cible);
@@ -147,20 +150,52 @@
     pid = fork();
     if (pid<0)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                 "Jouer_mp3: '%s' fork failed pid=%d (%s)", nom_fichier, pid, strerror(errno) );
+                 "%s: '%s' fork failed pid=%d (%s)", __func__, nom_fichier, pid, strerror(errno) );
+       return(FALSE);
      }
     else if (!pid)
      { execlp( "mpg123", "mpg123", "-vvvv", nom_fichier, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "Jouer_mp3: '%s' exec failed pid=%d (%s)", nom_fichier, pid, strerror( errno ) );
+                "%s: '%s' exec failed pid=%d (%s)", __func__, nom_fichier, pid, strerror( errno ) );
        _exit(0);
      }
     else
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                "Jouer_mp3: '%s' waiting to finish pid=%d", nom_fichier, pid );
+                "%s: '%s' waiting to finish pid=%d", __func__, nom_fichier, pid );
        waitpid(pid, NULL, 0 );
      }
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "Jouer_mp3: MPG123 '%s' finished pid=%d", nom_fichier, pid );
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "%s: MPG123 '%s' finished pid=%d", __func__, nom_fichier, pid );
+
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Jouer_google_speech : Joue un texte avec google_speech et attend la fin de la diffusion                                    */
+/* Entrée : le message à jouer                                                                                                */
+/* Sortie : True si OK, False sinon                                                                                           */
+/******************************************************************************************************************************/
+ gboolean Jouer_google_speech ( gchar *libelle_audio )
+  { gint pid;
+
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "%s: Send '%s'", __func__, libelle_audio );
+    pid = fork();
+    if (pid<0)
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
+                 "%s: '%s' fork failed pid=%d (%s)", __func__, libelle_audio, pid, strerror(errno) );
+       return(FALSE);
+     }
+    else if (!pid)
+     { execlp( "google_speech", "google_speech", "-v", "debug", "-l", Cfg_audio.language, libelle_audio, NULL );
+       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
+                "%s: '%s' exec failed pid=%d (%s)", __func__, libelle_audio, pid, strerror( errno ) );
+       _exit(0);
+     }
+    else
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+                "%s: '%s' waiting to finish pid=%d", __func__, libelle_audio, pid );
+       waitpid(pid, NULL, 0 );
+     }
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+             "%s: google_speech '%s' finished pid=%d", __func__, libelle_audio, pid );
 
     return(TRUE);
   }
@@ -239,7 +274,8 @@
            { Jouer_wav("Son/jingle.wav"); }                                                         /* On balance le jingle ! */
           Cfg_audio.last_audio = Partage->top;
 
-          Jouer_mp3 ( &histo->msg );                                   /* Par priorité : mp3 d'abord, synthèse vocale ensuite */
+          if (Jouer_mp3 ( &histo->msg ) == FALSE)                      /* Par priorité : mp3 d'abord, synthèse vocale ensuite */
+           { Jouer_google_speech( histo->msg.libelle_audio ); }
         }
        g_free(histo);
      }

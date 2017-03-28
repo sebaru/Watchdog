@@ -8,14 +8,14 @@ SUBDIRS = Include Serveur Dls TraductionDLS Archive Enocean \
 
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
-                    shm.c Config.c \
+                    shm.c Config.c Mnemo_Registre.c \
                     db.c Mnemonique.c Mnemo_AI.c Mnemo_CPT_IMP.c Mnemo_CPT_H.c Message.c \
 		    Icones.c classe.c \
 		    Mnemo_Tempo.c Histo_msgs.c Camera.c distrib_Events.c \
                     distrib_MSGxxx.c distrib_Ixxx.c \
                     Admin.c Admin_running.c Admin_process.c Admin_dls.c Admin_set.c Admin_get.c Admin_dbcfg.c Admin_user.c \
                     Utilisateur.c Util_groupe.c Util_login_failed.c Util_actif.c \
-                    Synoptiques.c Syn_motifs.c Syn_comment.c Syn_passerelle.c Syn_palette.c Syn_capteur.c Syn_camera_sup.c
+                    Synoptiques.c Syn_motifs.c Syn_comment.c Syn_passerelle.c Syn_palette.c Syn_cadran.c Syn_camera_sup.c
 
 Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
 		    TraductionDLS/libtradDLS.la \
@@ -32,11 +32,11 @@ Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libcurl openssl lib
                    `libgcrypt-config --cflags` \
                    `mysql_config --cflags`
 
-sysconf_DATA = watchdogd.conf
+sysconf_DATA = watchdogd.conf.sample Watchdogd.service watchdogd-httpd.conf.sample
 pkgdata_DATA = init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/Watchdogd/Include
 
-EXTRA_DIST = watchdogd.conf init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
+EXTRA_DIST = watchdogd-http.conf.sample Watchdogd.service watchdogd.conf init_db.sql openssl.cnf Programmateur_mysql.sql Delete_old_avi.sh lircrc
 MAINTAINERCLEANFILES = Makefile.in

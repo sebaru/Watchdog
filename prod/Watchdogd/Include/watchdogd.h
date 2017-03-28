@@ -133,6 +133,7 @@
     struct MESSAGES g [ NBR_MESSAGE_ECRITS ];                                                   /* Message vers veille et syn */
     struct I_MOTIF i[ NBR_BIT_CONTROLE ];                                                               /* DLS=rw, Sserveur=r */
     struct TEMPO Tempo_R[NBR_TEMPO];
+    struct REGISTRE registre[NBR_REGISTRE];
   };
 
 /************************************************ Définitions des prototypes **************************************************/

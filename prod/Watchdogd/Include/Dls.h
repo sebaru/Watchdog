@@ -101,11 +101,17 @@
     gint last_change;
     gint changes;
     gint next_repeat;
+    gboolean persist;
   };
 
  struct MESSAGES_EVENT
   { guint num;
     gchar etat;
+  };
+
+ struct REGISTRE
+  { struct CMD_TYPE_MNEMO_REGISTRE confDB;
+    gfloat val;
   };
 
  struct I_MOTIF

@@ -30,7 +30,6 @@
  #include <sys/types.h>
  #include <sys/stat.h>
  #include <fcntl.h>
- #include <microhttpd.h>
 
 /******************************************** Prototypes de fonctions *************************************/
  #include "watchdogd.h"

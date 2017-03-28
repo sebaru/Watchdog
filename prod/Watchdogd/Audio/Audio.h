@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Include/Audio.h        Déclaration structure internes pour audio                             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     mer 15 avr 2009 15:40:43 CEST  */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Include/Audio.h        Déclaration structure internes pour audio                                                 */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                         mer 15 avr 2009 15:40:43 CEST  */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Audio.h
  * This file is part of Watchdog
@@ -30,20 +30,23 @@
 
  #define NOM_THREAD                 "audio"
 
- #define AUDIO_JINGLE                3000                /* Jingle si pas de message au bout de 5 minutes */
- #define NUM_BIT_M_AUDIO_START       4                      /* bit positionné quand start diffusion audio */
- #define NUM_BIT_M_AUDIO_END         5                      /* Bit positionné quand arret diffusion audio */
- #define NUM_BIT_M_AUDIO_INHIB       6                /* Bit positionné si inhibition des messages vocaux */
+ #define AUDIO_JINGLE                3000                                    /* Jingle si pas de message au bout de 5 minutes */
+ #define AUDIO_DEFAUT_LANGUAGE       "fr"                                                  /* Language par défaut pour le TTS */
+ #define NUM_BIT_M_AUDIO_START       4                                          /* bit positionné quand start diffusion audio */
+ #define NUM_BIT_M_AUDIO_END         5                                          /* Bit positionné quand arret diffusion audio */
+ #define NUM_BIT_M_AUDIO_INHIB       6                                    /* Bit positionné si inhibition des messages vocaux */
 
  struct AUDIO_CONFIG
   { struct LIBRAIRIE *lib;
-    GSList *Liste_histos;                                                 /* liste de message a prononcer */
-    gint last_audio;                                               /* Date de la derniere emission sonore */
-    gboolean enable;                                                  /* Is this thread enabled at boot ? */
+    GSList *Liste_histos;                                                                     /* liste de message a prononcer */
+    gint last_audio;                                                                   /* Date de la derniere emission sonore */
+    gboolean enable;                                                                      /* Is this thread enabled at boot ? */
+    gchar language[80];                                             /* Language de restitution vocal, au format google_speech */
   } Cfg_audio;
 
-/*************************************** Définitions des prototypes ***************************************/
+/*********************************************** Définitions des prototypes ***************************************************/
  extern gboolean Audio_Lire_config ( void );
  extern gboolean Jouer_mp3 ( struct CMD_TYPE_MESSAGE *msg );
+ extern gboolean Jouer_google_speech ( gchar *libelle_audio );
 #endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Dls/The_dls.c  Gestion et execution des plugins DLS Watchdgo 2.0                             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                  lmar. 06 juil. 2010 18:31:32 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Dls/The_dls.c  Gestion et execution des plugins DLS Watchdgo 2.0                                                 */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                       mar. 06 juil. 2010 18:31:32 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * The_dls.c
  * This file is part of Watchdog
@@ -38,19 +38,19 @@
 
  #include "watchdogd.h"
 
-/**********************************************************************************************************/
-/* Chrono: renvoi la difference de temps entre deux structures timeval                                    */
-/* Entrée: le temps avant, et le temps apres l'action                                                     */
-/* Sortie: un float                                                                                       */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Chrono: renvoi la difference de temps entre deux structures timeval                                                        */
+/* Entrée: le temps avant, et le temps apres l'action                                                                         */
+/* Sortie: un float                                                                                                           */
+/******************************************************************************************************************************/
  static float Chrono ( struct timeval *avant, struct timeval *apres )
   { if (!(avant && apres)) return(0.0);
     else return( apres->tv_sec - avant->tv_sec + (apres->tv_usec - avant->tv_usec)/1000000.0 );
   }
 
-/**********************************************************************************************************/
-/* Renvoie la valeur d'une entre TOR                                                                      */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Renvoie la valeur d'une entre TOR                                                                                          */
+/******************************************************************************************************************************/
  int E( int num )
   { if ( (num>=0) && (num<NBR_ENTRE_TOR) ) return ( (Partage->e[ num ].etat ? 1 : 0) );
     else
@@ -71,6 +71,26 @@
      }
   }
 /******************************************************************************************************************************/
+/* R : Renvoie la valeur du registre dont le numéro est en parametre                                                          */
+/******************************************************************************************************************************/
+ float R( int num )
+  { if (num>=0 && num<NBR_REGISTRE)
+     { return ( Partage->registre[ num ].val );
+     }
+    if (!(Partage->top % 600))
+     { Info_new( Config.log, Config.log_dls, LOG_INFO, "%s : num %d out of range", __func__, num ); }
+    return(0.0);
+  }
+/******************************************************************************************************************************/
+/* SR : Positionne la valeur du registre dont le numéro est en parametre                                                      */
+/******************************************************************************************************************************/
+ void SR( int num, float val )
+  { if (num>=0 && num<NBR_REGISTRE)
+     { Partage->registre[ num ].val = val; }
+    else if (!(Partage->top % 600))
+     { Info_new( Config.log, Config.log_dls, LOG_INFO, "%s : num %d out of range", __func__, num ); }
+  }
+/******************************************************************************************************************************/
 /* EA_inrange : Renvoie 1 si l'EA en paramètre est dans le range de mesure                                                    */
 /******************************************************************************************************************************/
  int EA_inrange( int num )
@@ -81,9 +101,9 @@
      }
     return(0);
   }
-/**********************************************************************************************************/
-/* EA_ech : Renvoie la valeur de l'EA interprétée (mis à l'échelle)                                       */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* EA_ech : Renvoie la valeur de l'EA interprétée (mis à l'échelle)                                                           */
+/******************************************************************************************************************************/
  float EA_ech( int num )
   { if (num>=0 && num<NBR_ENTRE_ANA)
      { gfloat val_ech;
@@ -96,9 +116,9 @@
      }
     return(0.0);
   }
-/**********************************************************************************************************/
-/* EA_ech_inf : Teste si la valeur de l'EA est inf à une mesure                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* EA_ech_inf : Teste si la valeur de l'EA est inf à une mesure                                                               */
+/******************************************************************************************************************************/
  int EA_ech_inf( float val, int num )
   { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) < val); }
     else
@@ -578,43 +598,75 @@
      }
     if (changed == TRUE) Ajouter_arch( MNEMO_CPT_IMP, num, Partage->ci[num].confDB.valeur );
   }
-/**********************************************************************************************************/
-/* MSG: Positionnement des message DLS                                                                    */
-/* Entrée: numero, etat                                                                                   */
-/* Sortie: Neant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* MSG: Positionnement des messages DLS                                                                                       */
+/* Entrée: numero, etat                                                                                                       */
+/* Sortie: Neant                                                                                                              */
+/******************************************************************************************************************************/
  void MSG( int num, int etat )
   { if ( num<0 || num>=NBR_MESSAGE_ECRITS )
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_WARNING, "MSG : num %03d out of range", num ); }
+        { Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: num %03d out of range", __func__, num ); }
        return;
      }
 
     if ( Partage->g[num].etat != etat )
      { Partage->g[num].etat = etat;
 
-       if ( Partage->g[num].last_change + 10 <= Partage->top )   /* Si pas de change depuis plus de 1 sec */
+       if ( Partage->g[num].last_change + 10 <= Partage->top )                       /* Si pas de change depuis plus de 1 sec */
         { Partage->g[num].changes = 0; }
 
-       if ( Partage->g[num].changes <= 5 ) 
+       if ( Partage->g[num].changes > 5 && !(Partage->top % 50) )   /* Si persistence d'anomalie on prévient toutes les 5 sec */
+        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: last_change trop tot for MSG%03d!", __func__, num ); }
+       else if ( Partage->g[num].persist == FALSE)                    /* Si pas de persistence, on envoi l'evenement de suite */
         { struct MESSAGES_EVENT *event;
           event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
           if (!event)
            { Info_new( Config.log, Config.log_dls, LOG_ERR,
-                      "MSG: malloc Event failed. Memory error for MSG%d", num );
+                      "%s: malloc Event failed. Memory error for MSG%d", __func__, num );
            }
           else
            { event->num  = num;
-             event->etat = etat;
-             pthread_mutex_lock( &Partage->com_msrv.synchro );       /* Ajout dans la liste de msg a traiter */
+             event->etat = etat;                                                        /* Recopie de l'état dans l'evenement */
+             pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
              Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
              pthread_mutex_unlock( &Partage->com_msrv.synchro );
            }
           Partage->g[num].changes++;
-        } else if ( ! (Partage->top % 50 ))                /* Si persistence on prévient toutes les 5 sec */
-        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "MSG: last_change trop tot for MSG%03d!", num ); }
-       Partage->g[num].last_change = Partage->top;
-       Partage->audit_bit_interne_per_sec++;
+          Partage->g[num].last_change = Partage->top;
+          Partage->audit_bit_interne_per_sec++;
+        }
+       else if (etat)                    /* Si persistence, le message persiste si etat = 0. Si etat=1, stop/start du message */
+        { struct MESSAGES_EVENT *event;
+          event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
+          if (!event)
+           { Info_new( Config.log, Config.log_dls, LOG_ERR,
+                      "%s: malloc Event failed. Memory error for MSG%d", __func__, num );
+           }
+          else
+           { event->num  = num;
+             event->etat = 0;
+             pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
+             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
+             pthread_mutex_unlock( &Partage->com_msrv.synchro );
+           }
+
+          event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
+          if (!event)
+           { Info_new( Config.log, Config.log_dls, LOG_ERR,
+                      "%s: malloc Event failed. Memory error for MSG%d", __func__, num );
+           }
+          else
+           { event->num  = num;
+             event->etat = 1;
+             pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
+             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
+             pthread_mutex_unlock( &Partage->com_msrv.synchro );
+           }
+          Partage->g[num].changes++;
+          Partage->g[num].last_change = Partage->top;
+          Partage->audit_bit_interne_per_sec++;
+        }
      }
   }
 /******************************************************************************************************************************/

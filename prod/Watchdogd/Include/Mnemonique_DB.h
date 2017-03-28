@@ -32,11 +32,12 @@
  #include "Reseaux.h"
  #include "Db.h"
 
- #define NOM_TABLE_MNEMO        "mnemos"
- #define NOM_TABLE_MNEMO_AI     "mnemos_AnalogInput"
- #define NOM_TABLE_MNEMO_CPTH   "mnemos_CptHoraire"
- #define NOM_TABLE_MNEMO_CPTIMP "mnemos_CptImp"
- #define NOM_TABLE_MNEMO_TEMPO  "mnemos_Tempo"
+ #define NOM_TABLE_MNEMO          "mnemos"
+ #define NOM_TABLE_MNEMO_AI       "mnemos_AnalogInput"
+ #define NOM_TABLE_MNEMO_CPTH     "mnemos_CptHoraire"
+ #define NOM_TABLE_MNEMO_CPTIMP   "mnemos_CptImp"
+ #define NOM_TABLE_MNEMO_TEMPO    "mnemos_Tempo"
+ #define NOM_TABLE_MNEMO_REGISTRE "mnemos_Registre"
 
 /***************************************************** Définitions des prototypes *********************************************/
  extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB ( guint id );
@@ -68,6 +69,10 @@
  extern void Charger_tempo ( void );                                                                    /* Dans Mnemo_tempo.c */
  extern struct CMD_TYPE_MNEMO_TEMPO *Rechercher_mnemo_tempoDB ( guint id );
  extern gboolean Modifier_mnemo_tempoDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
+
+ extern void Charger_registre ( void );                                                              /* Dans Mnemo_registre.c */
+ extern struct CMD_TYPE_MNEMO_REGISTRE *Rechercher_mnemo_registreDB ( guint id );
+ extern gboolean Modifier_mnemo_registreDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
 
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

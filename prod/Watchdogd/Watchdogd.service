@@ -1,6 +1,6 @@
 [Unit]
 Description=Watchdog server daemon
-After=syslog.target network.target auditd.service
+After=mariadb.service syslog.target network.target auditd.service
 Requires=mariadb.service
 [Service]
 ExecStart=/usr/local/bin/Watchdogd -f

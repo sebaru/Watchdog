@@ -185,25 +185,25 @@
                pthread_detach( tid );
                break;
         }
-/************************************************* Envoi des chaines capteurs *************************************************/
-       if (client->mode == VALIDE && client->Liste_bit_capteurs && client->date_next_send_capteur < Partage->top)
-        { struct CAPTEUR *capteur;
-          GSList *liste_capteur;
-          client->date_next_send_capteur = Partage->top + TEMPS_UPDATE_CAPTEUR;
-          liste_capteur = client->Liste_bit_capteurs;
-          while (liste_capteur)                                                           /* Pour tous les capteurs du client */
-           { capteur = (struct CAPTEUR *)liste_capteur->data;
-              if (Tester_update_capteur(capteur))                                      /* Doit-on updater le capteur client ? */
-              { struct CMD_ETAT_BIT_CAPTEUR *etat;
-                etat = Formater_capteur(capteur);                                          /* Formatage de la chaine associée */
+/************************************************* Envoi des chaines cadrans *************************************************/
+       if (client->mode == VALIDE && client->Liste_bit_cadrans && client->date_next_send_cadran < Partage->top)
+        { struct CADRAN *cadran;
+          GSList *liste_cadran;
+          client->date_next_send_cadran = Partage->top + TEMPS_UPDATE_CADRAN;
+          liste_cadran = client->Liste_bit_cadrans;
+          while (liste_cadran)                                                           /* Pour tous les cadrans du client */
+           { cadran = (struct CADRAN *)liste_cadran->data;
+              if (Tester_update_cadran(cadran))                                      /* Doit-on updater le cadran client ? */
+              { struct CMD_ETAT_BIT_CADRAN *etat;
+                etat = Formater_cadran(cadran);                                          /* Formatage de la chaine associée */
                 if (etat)                                                                                     /* envoi client */
-                 { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CAPTEUR,
-                                 (gchar *)etat, sizeof(struct CMD_ETAT_BIT_CAPTEUR) );
+                 { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_CADRAN,
+                                 (gchar *)etat, sizeof(struct CMD_ETAT_BIT_CADRAN) );
                    g_free(etat);                                                                      /* On libere la mémoire */
                  }
-                else Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Not enought memory to send capteur" );
+                else Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "Not enought memory to send cadran" );
               }
-             liste_capteur = liste_capteur->next;                                              /* On passe au capteur suivant */
+             liste_cadran = liste_cadran->next;                                              /* On passe au cadran suivant */
            }
         }
 /********************************************** Envoi des histos et des motifs ************************************************/

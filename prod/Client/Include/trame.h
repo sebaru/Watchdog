@@ -66,7 +66,7 @@
         TYPE_PASSERELLE,
         TYPE_COMMENTAIRE,
         TYPE_MOTIF,
-        TYPE_CAPTEUR,
+        TYPE_CADRAN,
         TYPE_CAMERA_SUP
       };
 
@@ -155,7 +155,7 @@
     gint selection;
   };
 
- struct TRAME_ITEM_CAPTEUR
+ struct TRAME_ITEM_CADRAN
   { gint type;                                                                                              /* Type de l'item */
     GooCanvasItem *item_groupe;
     GooCanvasItem *item_carre;
@@ -163,7 +163,7 @@
     GooCanvasItem *item_acro_syn;
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
-    struct CMD_TYPE_CAPTEUR *capteur;
+    struct CMD_TYPE_CADRAN *cadran;
     gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
     gint selection;
   };
@@ -185,7 +185,7 @@
   { union { struct TRAME_ITEM_MOTIF motif;
             struct TRAME_ITEM_PASS pass;
             struct TRAME_ITEM_COMMENT comment;
-            struct TRAME_ITEM_CAPTEUR capteur;
+            struct TRAME_ITEM_CADRAN cadran;
             struct TRAME_ITEM_CAMERA_SUP camera_sup;
           };
   };
@@ -201,7 +201,7 @@
  extern void Trame_rafraichir_motif ( struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Trame_rafraichir_comment ( struct TRAME_ITEM_COMMENT *trame_comment );
  extern void Trame_rafraichir_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
- extern void Trame_rafraichir_capteur ( struct TRAME_ITEM_CAPTEUR *trame_capteur );
+ extern void Trame_rafraichir_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Trame_rafraichir_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
  extern void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num,
                                    guchar r, guchar v, guchar b );
@@ -217,14 +217,14 @@
                                                             struct CMD_TYPE_COMMENT *comm );
  extern struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame,
                                                          struct CMD_TYPE_PASSERELLE *pass );
- extern struct TRAME_ITEM_CAPTEUR *Trame_ajout_capteur ( gint flag, struct TRAME *trame,
-                                                     struct CMD_TYPE_CAPTEUR *capteur );
+ extern struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( gint flag, struct TRAME *trame,
+                                                     struct CMD_TYPE_CADRAN *cadran );
  extern void Trame_ajout_motif_par_item ( struct TRAME *trame,
                                           struct TRAME_ITEM_MOTIF *trame_motif );
  extern struct TRAME_ITEM_MOTIF *Trame_new_item ( void );
  extern struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
                                                                struct CMD_TYPE_CAMERA_SUP *camera_sup );
- extern void Trame_del_capteur ( struct TRAME_ITEM_CAPTEUR *trame_capteur );
+ extern void Trame_del_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Trame_del_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
  extern void Trame_del_commentaire ( struct TRAME_ITEM_COMMENT *trame_comm );
  extern void Trame_del_item ( struct TRAME_ITEM_MOTIF *trame_motif );

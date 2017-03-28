@@ -47,8 +47,8 @@
     Envoyer_palette_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,
                                                    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE_FIN );
 
-    Envoyer_capteur_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR,
-                                                   SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR_FIN );
+    Envoyer_cadran_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CADRAN,
+                                                   SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CADRAN_FIN );
 
     Envoyer_passerelle_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS,
 	                                                  SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN );

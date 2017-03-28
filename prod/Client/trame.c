@@ -120,8 +120,8 @@
 /* Entrée: un item                                                                                        */
 /* Sortie: rieng                                                                                          */
 /**********************************************************************************************************/
- void Trame_del_capteur ( struct TRAME_ITEM_CAPTEUR *trame_capteur )
-  { if (trame_capteur->item_groupe) goo_canvas_item_remove( trame_capteur->item_groupe );
+ void Trame_del_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran )
+  { if (trame_cadran->item_groupe) goo_canvas_item_remove( trame_cadran->item_groupe );
   }
 /**********************************************************************************************************/
 /* Trame_del_item: Renvoi un nouveau item, completement vierge                                            */
@@ -318,23 +318,23 @@
     trame_pass->en_cours_bleu3  = b;
   }
 /**********************************************************************************************************/
-/* Trame_rafraichir_capteur: remet à jour la position, rotation, echelle du capteur en parametre          */
-/* Entrée: la structure graphique TRAME_ITEM_CAPTEUR                                                      */
+/* Trame_rafraichir_cadran: remet à jour la position, rotation, echelle du cadran en parametre          */
+/* Entrée: la structure graphique TRAME_ITEM_CADRAN                                                      */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- void Trame_rafraichir_capteur ( struct TRAME_ITEM_CAPTEUR *trame_capteur )
-  { if (!(trame_capteur && trame_capteur->capteur)) return;
+ void Trame_rafraichir_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran )
+  { if (!(trame_cadran && trame_cadran->cadran)) return;
 
-    cairo_matrix_init_identity ( &trame_capteur->transform );
-    cairo_matrix_translate ( &trame_capteur->transform,
-                             (gdouble)trame_capteur->capteur->position_x,
-                             (gdouble)trame_capteur->capteur->position_y
+    cairo_matrix_init_identity ( &trame_cadran->transform );
+    cairo_matrix_translate ( &trame_cadran->transform,
+                             (gdouble)trame_cadran->cadran->position_x,
+                             (gdouble)trame_cadran->cadran->position_y
                            );
 
-    cairo_matrix_rotate ( &trame_capteur->transform, (gdouble)trame_capteur->capteur->angle*FACTEUR_PI );
-    cairo_matrix_scale  ( &trame_capteur->transform, 1.0, 1.0 );
+    cairo_matrix_rotate ( &trame_cadran->transform, (gdouble)trame_cadran->cadran->angle*FACTEUR_PI );
+    cairo_matrix_scale  ( &trame_cadran->transform, 1.0, 1.0 );
 
-    goo_canvas_item_set_transform ( trame_capteur->item_groupe, &trame_capteur->transform );
+    goo_canvas_item_set_transform ( trame_cadran->item_groupe, &trame_cadran->transform );
   }
 /**********************************************************************************************************/
 /* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                         */
@@ -892,54 +892,54 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     return(trame_pass);
   }
 /**********************************************************************************************************/
-/* Trame_ajout_capteur: Ajoute un capteur sur le visuel                                                   */
-/* Entrée: une structure capteur, la trame de reference                                                   */
+/* Trame_ajout_cadran: Ajoute un cadran sur le visuel                                                   */
+/* Entrée: une structure cadran, la trame de reference                                                   */
 /* Sortie: reussite                                                                                       */
 /**********************************************************************************************************/
- struct TRAME_ITEM_CAPTEUR *Trame_ajout_capteur ( gint flag, struct TRAME *trame,
-                                                  struct CMD_TYPE_CAPTEUR *capteur )
-  { struct TRAME_ITEM_CAPTEUR *trame_capteur;
+ struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( gint flag, struct TRAME *trame,
+                                                  struct CMD_TYPE_CADRAN *cadran )
+  { struct TRAME_ITEM_CADRAN *trame_cadran;
        
-    if (!(trame && capteur)) return(NULL);
-    trame_capteur = g_try_malloc0( sizeof(struct TRAME_ITEM_CAPTEUR) );
-    if (!trame_capteur) return(NULL);
+    if (!(trame && cadran)) return(NULL);
+    trame_cadran = g_try_malloc0( sizeof(struct TRAME_ITEM_CADRAN) );
+    if (!trame_cadran) return(NULL);
 
-    trame_capteur->capteur = capteur;
+    trame_cadran->cadran = cadran;
 
-    trame_capteur->item_groupe = goo_canvas_group_new ( trame->canvas_root,             /* Groupe capteur */
+    trame_cadran->item_groupe = goo_canvas_group_new ( trame->canvas_root,             /* Groupe cadran */
                                                         NULL);
 
-    trame_capteur->item_carre = goo_canvas_rect_new (trame_capteur->item_groupe,
+    trame_cadran->item_carre = goo_canvas_rect_new (trame_cadran->item_groupe,
                                                      -55.0, -15.0, 110.0, 30.0,
                                                      "fill_color", "gray",
                                                      "stroke_color", "green", NULL);
 
-    trame_capteur->item_entry = goo_canvas_text_new ( trame_capteur->item_groupe,
-                                                      "- capteur -", 0.0, 0.0,
+    trame_cadran->item_entry = goo_canvas_text_new ( trame_cadran->item_groupe,
+                                                      "- cadran -", 0.0, 0.0,
                                                       -1, GTK_ANCHOR_CENTER,
                                                       "font", "arial italic 12",
                                                       NULL);
 
-    trame_capteur->item_acro_syn = goo_canvas_text_new ( trame_capteur->item_groupe,
-                                                         capteur->acro_syn, 0.0, 30.0, -1, GTK_ANCHOR_CENTER,
+    trame_cadran->item_acro_syn = goo_canvas_text_new ( trame_cadran->item_groupe,
+                                                         cadran->acro_syn, 0.0, 30.0, -1, GTK_ANCHOR_CENTER,
                                                         "font", "arial", "fill_color", "yellow",
                                                          NULL );
 
 
     if ( flag )
-     { trame_capteur->select_mi = goo_canvas_rect_new (trame_capteur->item_groupe,
+     { trame_cadran->select_mi = goo_canvas_rect_new (trame_cadran->item_groupe,
                                                        -2.5, -2.5, 7.5, 7.5,
                                                        "fill_color", "green",
                                                        "stroke_color", "black", NULL);
-       g_object_set( trame_capteur->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+       g_object_set( trame_cadran->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
      }
 
-    Trame_rafraichir_capteur ( trame_capteur );
+    Trame_rafraichir_cadran ( trame_cadran );
 
-    trame_capteur->type = TYPE_CAPTEUR;
-    trame->trame_items = g_list_append( trame->trame_items, trame_capteur );
+    trame_cadran->type = TYPE_CADRAN;
+    trame->trame_items = g_list_append( trame->trame_items, trame_cadran );
 
-    return(trame_capteur);
+    return(trame_cadran);
   }
 /**********************************************************************************************************/
 /* Trame_creer_trame: Creation d'une nouvelle trame                                                       */
@@ -986,7 +986,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
   { struct TRAME_ITEM_MOTIF *trame_motif;
     struct TRAME_ITEM_COMMENT *trame_comm;
     struct TRAME_ITEM_PASS *trame_pass;
-    struct TRAME_ITEM_CAPTEUR *trame_capteur;
+    struct TRAME_ITEM_CADRAN *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GList *objet;
 
@@ -999,9 +999,9 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                             Trame_del_passerelle( trame_pass );
                             g_free(trame_pass);
                             break;
-          case TYPE_CAPTEUR:  trame_capteur = (struct TRAME_ITEM_CAPTEUR *)objet->data;
-                            Trame_del_capteur( trame_capteur );
-                            g_free(trame_capteur);
+          case TYPE_CADRAN:  trame_cadran = (struct TRAME_ITEM_CADRAN *)objet->data;
+                            Trame_del_cadran( trame_cadran );
+                            g_free(trame_cadran);
                             break;
           case TYPE_COMMENTAIRE:
                             trame_comm = (struct TRAME_ITEM_COMMENT *)objet->data;

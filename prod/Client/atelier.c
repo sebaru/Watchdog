@@ -44,7 +44,7 @@
  static void Menu_ajouter_motif ( struct TYPE_INFO_ATELIER *infos );
  static void Menu_ajouter_commentaire ( struct TYPE_INFO_ATELIER *infos );
  static void Menu_ajouter_passerelle ( struct TYPE_INFO_ATELIER *infos );
- static void Menu_ajouter_capteur ( struct TYPE_INFO_ATELIER *infos );
+ static void Menu_ajouter_cadran ( struct TYPE_INFO_ATELIER *infos );
  static void Menu_enregistrer_synoptique( struct TYPE_INFO_ATELIER *infos );
   
 /******************************************************************************************************************************/
@@ -127,12 +127,12 @@ printf("fin Detruire page atelier\n");
  static void Menu_ajouter_commentaire ( struct TYPE_INFO_ATELIER *infos )
   { Creer_fenetre_ajout_commentaire (); }
 /******************************************************************************************************************************/
-/* Menu_ajouter_capteur: Ajout d'un capteur                                                                                   */
+/* Menu_ajouter_cadran: Ajout d'un cadran                                                                                   */
 /* Entrée: rien                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- static void Menu_ajouter_capteur ( struct TYPE_INFO_ATELIER *infos )
-  { Menu_ajouter_editer_capteur ( NULL ); }
+ static void Menu_ajouter_cadran ( struct TYPE_INFO_ATELIER *infos )
+  { Menu_ajouter_editer_cadran ( NULL ); }
 /******************************************************************************************************************************/
 /* Menu_ajouter_passerelle: Ajout d'une passerelle                                                                            */
 /* Entrée: rien                                                                                                               */
@@ -156,7 +156,7 @@ printf("fin Detruire page atelier\n");
   { struct TRAME_ITEM_MOTIF *trame_motif;
     struct TRAME_ITEM_COMMENT *trame_comment;
     struct TRAME_ITEM_PASS *trame_pass;
-    struct TRAME_ITEM_CAPTEUR *trame_capteur;
+    struct TRAME_ITEM_CADRAN *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
 
     GList *objet;
@@ -184,10 +184,10 @@ printf("fin Detruire page atelier\n");
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_PASS,
                               (gchar *)trame_pass->pass, sizeof(struct CMD_TYPE_PASSERELLE) );
                break;
-          case TYPE_CAPTEUR:
-               trame_capteur = (struct TRAME_ITEM_CAPTEUR *)objet->data;
-               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_CAPTEUR,
-                              (gchar *)trame_capteur->capteur, sizeof(struct CMD_TYPE_CAPTEUR) );
+          case TYPE_CADRAN:
+               trame_cadran = (struct TRAME_ITEM_CADRAN *)objet->data;
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_CADRAN,
+                              (gchar *)trame_cadran->cadran, sizeof(struct CMD_TYPE_CADRAN) );
                break;
           case TYPE_CAMERA_SUP:
                trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
@@ -217,7 +217,7 @@ printf("fin Detruire page atelier\n");
 /******************************************************************************************************************************/
  void Creer_page_atelier( gint syn_id, gchar *libelle_syn )
   { GtkWidget *separateur, *frame, *bouton, *boite, *hboite, *table, *label;
-    GtkWidget *vboite, *capteur, *spin, *boite1, *scroll;
+    GtkWidget *vboite, *cadran, *spin, *boite1, *scroll;
     GtkWidget *menu_bar, *menu_main, *menu_bouton, *ssmenu;
     GtkAdjustment *adj;
     struct TYPE_INFO_ATELIER *infos;
@@ -248,22 +248,22 @@ printf("fin Detruire page atelier\n");
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(vboite), table, FALSE, FALSE, 0 );
     
-    capteur = gtk_label_new( _("Position X/Y") );                                                   /* Affichage des abcisses */
-    gtk_table_attach_defaults( GTK_TABLE(table), capteur, 0, 1, 0, 1 );
+    cadran = gtk_label_new( _("Position X/Y") );                                                   /* Affichage des abcisses */
+    gtk_table_attach_defaults( GTK_TABLE(table), cadran, 0, 1, 0, 1 );
     infos->Entry_posxy = gtk_entry_new();
     gtk_entry_set_editable( GTK_ENTRY(infos->Entry_posxy), FALSE );
     gtk_table_attach_defaults( GTK_TABLE(table), infos->Entry_posxy, 1, 3, 0, 1 );
 
-    capteur = gtk_label_new( _("Rotate") );
-    gtk_table_attach( GTK_TABLE(table), capteur, 3, 4, 0, 1, 0, 0, 0, 0 );
+    cadran = gtk_label_new( _("Rotate") );
+    gtk_table_attach( GTK_TABLE(table), cadran, 3, 4, 0, 1, 0, 0, 0, 0 );
     infos->Adj_angle = (GtkAdjustment *)gtk_adjustment_new( 0.0, -180.0, +180.0, 0.5, 10.0, 0.0 );
     spin = gtk_spin_button_new(infos->Adj_angle, 1.0, 1);
     gtk_table_attach_defaults( GTK_TABLE(table), spin, 4, 5, 0, 1 );
     g_signal_connect_swapped( G_OBJECT(infos->Adj_angle), "value_changed",
                               G_CALLBACK(Rotationner_selection), infos );
 
-    capteur = gtk_label_new( _("Description") );
-    gtk_table_attach_defaults( GTK_TABLE(table), capteur, 0, 1, 1, 2 );
+    cadran = gtk_label_new( _("Description") );
+    gtk_table_attach_defaults( GTK_TABLE(table), cadran, 0, 1, 1, 2 );
     infos->Entry_libelle = gtk_entry_new();
     gtk_table_attach_defaults( GTK_TABLE(table), infos->Entry_libelle, 1, 5, 1, 2 );
     gtk_entry_set_editable ( GTK_ENTRY(infos->Entry_libelle), FALSE );
@@ -361,9 +361,9 @@ printf("fin Detruire page atelier\n");
                               G_CALLBACK(Menu_ajouter_passerelle), infos );
     gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
 
-    menu_bouton = gtk_image_menu_item_new_with_label ( _("Capteurs") );
+    menu_bouton = gtk_image_menu_item_new_with_label ( _("Cadrans") );
     g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
-                              G_CALLBACK(Menu_ajouter_capteur), infos );
+                              G_CALLBACK(Menu_ajouter_cadran), infos );
     gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
 
     menu_bouton = gtk_image_menu_item_new_with_label ( _("Cameras") );

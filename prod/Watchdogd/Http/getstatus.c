@@ -131,17 +131,7 @@
 
     xmlFreeTextWriter(writer);                                                                    /* Libération du writer XML */
 
-    header_cur = header;
-    header_end = header + sizeof(header);
-    
-    lws_add_http_header_status( wsi, 200, &header_cur, header_end );
-    lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, (const unsigned char *)content_type, strlen(content_type),
-                                  &header_cur, header_end );
-    lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );
-    lws_finalize_http_header ( wsi, &header_cur, header_end );
-    *header_cur='\0';                                                                               /* Caractere null d'arret */
-    lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-    lws_write ( wsi, buf->content, buf->use, LWS_WRITE_HTTP);                                               /* Send to client */
+    Http_Send_response_code_with_buffer( wsi, HTTP_200_OK, HTTP_CONTENT_XML, buf->content, buf->use );
     xmlBufferFree(buf);                                               /* Libération du buffer dont nous n'avons plus besoin ! */
     return(TRUE);
   }

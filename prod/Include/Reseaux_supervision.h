@@ -43,7 +43,7 @@
   { guint   bit_clic;
     guint   bit_clic2;
   };
- struct CMD_ETAT_BIT_CAPTEUR
+ struct CMD_ETAT_BIT_CADRAN
   { guint   bit_controle;
     guint   type;
     gchar   libelle[25];
@@ -60,15 +60,15 @@
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN,                      /* Le serveur envoi des passerelles page supervision */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,                          /* Le serveur envoi des palettes page supervision */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE_FIN,                      /* Le serveur envoi des palettes page supervision */
-    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR,                          /* Le serveur envoi des capteurs page supervision */
-    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAPTEUR_FIN,                      /* Le serveur envoi des capteurs page supervision */
+    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CADRAN,                            /* Le serveur envoi des cadrans page supervision */
+    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CADRAN_FIN,                        /* Le serveur envoi des cadrans page supervision */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP,                         /* Le serveur envoi des camera page supervision */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP_FIN,                     /* Le serveur envoi des camera page supervision */
 
     SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,                            /* Un motif à changé d'etat, nous l'envoyons au client */
     SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN,                          /* Reponse si le numero Ixxx n'est pas utilisé dans le client */
-    SSTAG_SERVEUR_SUPERVISION_CHANGE_CAPTEUR,                        /* Un capteur à changé d'etat, nous l'envoyons au client */
-    SSTAG_CLIENT_CHANGE_CAPTEUR_UNKNOWN,                        /* Reponse si le numero Ixxx n'est pas utilisé dans le client */
+    SSTAG_SERVEUR_SUPERVISION_CHANGE_CADRAN,                          /* Un cadran à changé d'etat, nous l'envoyons au client */
+    SSTAG_CLIENT_CHANGE_CADRAN_UNKNOWN,                         /* Reponse si le numero Ixxx n'est pas utilisé dans le client */
     SSTAG_CLIENT_ACTION_M,                                                            /* Le client envoie un bit M au serveur */
   };
 

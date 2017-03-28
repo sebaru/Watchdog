@@ -68,6 +68,7 @@
     guint  bit_audio;                                                         /* Numéro du Monostable associé au profil vocal */
     gchar  libelle_audio[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     guint  time_repeat;                                               /* Temps entre deux répétitions (si non nul) en minutes */
+    gboolean persist;                                                                               /* Persistence du message */
   };
 
  struct CMD_TYPE_MESSAGES

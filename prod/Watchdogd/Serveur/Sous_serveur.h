@@ -61,7 +61,7 @@
     GSList *Liste_events;                                                                       /* Liste des evenements recus */
   } Cfg_ssrv;
 
- struct CAPTEUR
+ struct CADRAN
   { gint   type;                                                                                   /* type du bit de controle */
     guint  bit_controle;
     gfloat val_ech;
@@ -104,8 +104,8 @@
  extern void Connecter_ssl( struct CLIENT *client );                                                         /* Dans accept.c */
 
 
- extern gboolean Tester_update_capteur( struct CAPTEUR *capteur );                                          /* Dans capteur.c */
- extern struct CMD_ETAT_BIT_CAPTEUR *Formater_capteur( struct CAPTEUR *capteur );
+ extern gboolean Tester_update_cadran( struct CADRAN *cadran );                                          /* Dans cadran.c */
+ extern struct CMD_ETAT_BIT_CADRAN *Formater_cadran( struct CADRAN *cadran );
 
                                                                                                               /* Dans ident.c */
  extern gboolean Tester_autorisation ( struct CLIENT *client, struct REZO_CLI_IDENT *ident );
@@ -199,11 +199,11 @@
  extern void Proto_ajouter_palette_atelier ( struct CLIENT *client, struct CMD_TYPE_PALETTE *rezo_palette );
  extern void Proto_valider_editer_palette_atelier ( struct CLIENT *client, struct CMD_TYPE_PALETTE *rezo_palette );
 
-                                                                                           /* Dans envoi_synoptique_capteur.c */
- extern void Envoyer_capteur_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
- extern void Proto_effacer_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur );
- extern void Proto_ajouter_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur );
- extern void Proto_valider_editer_capteur_atelier ( struct CLIENT *client, struct CMD_TYPE_CAPTEUR *rezo_capteur );
+                                                                                           /* Dans envoi_synoptique_cadran.c */
+ extern void Envoyer_cadran_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
+ extern void Proto_effacer_cadran_atelier ( struct CLIENT *client, struct CMD_TYPE_CADRAN *rezo_cadran );
+ extern void Proto_ajouter_cadran_atelier ( struct CLIENT *client, struct CMD_TYPE_CADRAN *rezo_cadran );
+ extern void Proto_valider_editer_cadran_atelier ( struct CLIENT *client, struct CMD_TYPE_CADRAN *rezo_cadran );
 
  extern void *Envoyer_mnemoniques_thread ( struct CLIENT *client );                                /* Dans envoi_mnemonique.c */
  extern void Proto_envoyer_type_num_mnemo_tag( int tag, int ss_tag, struct CLIENT *client,

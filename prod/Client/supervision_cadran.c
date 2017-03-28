@@ -1,10 +1,10 @@
 /**********************************************************************************************************/
-/* Client/supervision_capteur.c        Affichage des capteurs synoptique de supervision                   */
+/* Client/supervision_cadran.c        Affichage des cadrans synoptique de supervision                     */
 /* Projet WatchDog version 2.0       Gestion d'habitat                       mer 01 fév 2006 18:41:37 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
- * supervision_capteur.c
+ * supervision_cadran.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sébastien Lefevre
@@ -41,38 +41,38 @@
  #include "protocli.h"
 
 /**********************************************************************************************************/
-/* Proto_afficher_un_capteur_supervision: Ajoute un capteur sur la trame de supervision                   */
-/* Entrée: une reference sur le capteur                                                                   */
+/* Proto_afficher_un_cadran_supervision: Ajoute un cadran sur la trame de supervision                     */
+/* Entrée: une reference sur le cadran                                                                    */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_capteur_supervision( struct CMD_TYPE_CAPTEUR *rezo_capteur )
-  { struct TRAME_ITEM_CAPTEUR *trame_capteur;
+ void Proto_afficher_un_cadran_supervision( struct CMD_TYPE_CADRAN *rezo_cadran )
+  { struct TRAME_ITEM_CADRAN *trame_cadran;
     struct TYPE_INFO_SUPERVISION *infos;
-    struct CMD_TYPE_CAPTEUR *capteur;
+    struct CMD_TYPE_CADRAN *cadran;
 
-    infos = Rechercher_infos_supervision_par_id_syn ( rezo_capteur->syn_id );
+    infos = Rechercher_infos_supervision_par_id_syn ( rezo_cadran->syn_id );
     if (!(infos && infos->Trame)) return;
-    capteur = (struct CMD_TYPE_CAPTEUR *)g_try_malloc0( sizeof(struct CMD_TYPE_CAPTEUR) );
-    if (!capteur)
+    cadran = (struct CMD_TYPE_CADRAN *)g_try_malloc0( sizeof(struct CMD_TYPE_CADRAN) );
+    if (!cadran)
      { return;
      }
-    memcpy ( capteur, rezo_capteur, sizeof( struct CMD_TYPE_CAPTEUR ) );
+    memcpy ( cadran, rezo_cadran, sizeof( struct CMD_TYPE_CADRAN ) );
 
-    trame_capteur = Trame_ajout_capteur ( FALSE, infos->Trame, capteur );
-    trame_capteur->groupe_dpl = Nouveau_groupe();                 /* Numéro de groupe pour le deplacement */
-    g_signal_connect( G_OBJECT(trame_capteur->item_groupe), "button-press-event",
-                      G_CALLBACK(Clic_sur_capteur_supervision), trame_capteur );
+    trame_cadran = Trame_ajout_cadran ( FALSE, infos->Trame, cadran );
+    trame_cadran->groupe_dpl = Nouveau_groupe();                 /* Numéro de groupe pour le deplacement */
+    g_signal_connect( G_OBJECT(trame_cadran->item_groupe), "button-press-event",
+                      G_CALLBACK(Clic_sur_cadran_supervision), trame_cadran );
   }
 /**********************************************************************************************************/
 /* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                   */
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_changer_etat_capteur( struct CMD_ETAT_BIT_CAPTEUR *etat_capteur )
-  { struct TRAME_ITEM_CAPTEUR *trame_capteur;
+ void Proto_changer_etat_cadran( struct CMD_ETAT_BIT_CADRAN *etat_cadran )
+  { struct TRAME_ITEM_CADRAN *trame_cadran;
     struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
-    GList *liste_capteurs;
+    GList *liste_cadrans;
     GList *liste;
     gint cpt;
 
@@ -83,18 +83,18 @@
        if (page->type != TYPE_PAGE_SUPERVISION) { liste = liste->next; continue; }
        infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
 
-       liste_capteurs = infos->Trame->trame_items;        /* On parcours tous les capteurs de chaque page */
-       while (liste_capteurs)
-        { switch( *((gint *)liste_capteurs->data) )
-           { case TYPE_CAPTEUR    : cpt++;                          /* Nous updatons un capteur de plus ! */ 
-                                    trame_capteur = (struct TRAME_ITEM_CAPTEUR *)liste_capteurs->data;
+       liste_cadrans = infos->Trame->trame_items;          /* On parcours tous les cadrans de chaque page */
+       while (liste_cadrans)
+        { switch( *((gint *)liste_cadrans->data) )
+           { case TYPE_CADRAN    : cpt++;                            /* Nous updatons un cadran de plus ! */ 
+                                    trame_cadran = (struct TRAME_ITEM_CADRAN *)liste_cadrans->data;
 
-                                    if (etat_capteur->bit_controle == trame_capteur->capteur->bit_controle &&
-                                        etat_capteur->type == trame_capteur->capteur->type
+                                    if (etat_cadran->bit_controle == trame_cadran->cadran->bit_controle &&
+                                        etat_cadran->type == trame_cadran->cadran->type
                                        )
-                                     { printf("Proto_changer_etat_capteur: change %s\n", etat_capteur->libelle );
-                                       g_object_set( trame_capteur->item_entry,
-                                                     "text", etat_capteur->libelle, NULL );
+                                     { printf("Proto_changer_etat_cadran: change %s\n", etat_cadran->libelle );
+                                       g_object_set( trame_cadran->item_entry,
+                                                     "text", etat_cadran->libelle, NULL );
                                      }
                                     break;
              case TYPE_MOTIF:
@@ -103,13 +103,13 @@
                                     break;
              default: break;
            }
-          liste_capteurs=liste_capteurs->next;
+          liste_cadrans=liste_cadrans->next;
         }
        liste = liste->next;
      }
     if (!cpt)             /* Si nous n'avons rien mis à jour, c'est que le bit Ixxx ne nous est pas utile */
-     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_CAPTEUR_UNKNOWN,
-                      (gchar *)etat_capteur, sizeof(struct CMD_ETAT_BIT_CAPTEUR) ); 
+     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_CADRAN_UNKNOWN,
+                      (gchar *)etat_cadran, sizeof(struct CMD_ETAT_BIT_CADRAN) ); 
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

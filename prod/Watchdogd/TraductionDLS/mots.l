@@ -58,6 +58,7 @@ blanc         [\t ]+
 "_B"                       { Dls_lval.val = BI;          return BI;          }
 "_M"                       { Dls_lval.val = MONO;        return MONO;        }
 "_T"                       { Dls_lval.val = T_TEMPO;     return T_TEMPO;     }
+"_R"                       { Dls_lval.val = T_REGISTRE;  return T_REGISTRE;  }
 "_CH"                      { Dls_lval.val = CPT_H;       return CPT_H;       }
 "_CI"                      { Dls_lval.val = CPT_IMP;     return CPT_IMP;     }
 "_MSG"                     { Dls_lval.val = T_MSG;       return T_MSG;       }
@@ -101,8 +102,8 @@ blanc         [\t ]+
 "-"                        { Dls_lval.val = MOINS;       return MOINS;       }
 ";"                        { Dls_lval.val = PVIRGULE;    return PVIRGULE;    }
 ","                        { Dls_lval.val = VIRGULE;     return VIRGULE;     }
-"("                        { Dls_lval.val = POUV;        return POUV;        }
-")"                        { Dls_lval.val = PFERM;       return PFERM;       }
+"("                        { Dls_lval.val = T_POUV;      return T_POUV;      }
+")"                        { Dls_lval.val = T_PFERM;     return T_PFERM;     }
 "="                        { Dls_lval.val = T_EGAL;      return T_EGAL;      }
 "<->"                      { Dls_lval.val = EQUIV;       return EQUIV;       }
 "->"                       { Dls_lval.val = DONNE;       return DONNE;       }

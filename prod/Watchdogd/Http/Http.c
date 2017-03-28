@@ -131,18 +131,18 @@
     return(-1);
   }
 /******************************************************************************************************************************/
-/* Http_Send_error_code: Utiliser pour renvoyer un code d'erreur                                                              */
+/* Http_Send_response_code: Utiliser pour renvoyer un code reponse                                                            */
 /* Entrée: La structure wsi de reference                                                                                      */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_Send_error_code ( struct lws *wsi, gint code )
+ void Http_Send_response_code ( struct lws *wsi, gint code )
   { unsigned char header[256], *header_cur, *header_end;
    	struct HTTP_PER_SESSION_DATA *pss;
     gint retour;
 
     pss = lws_wsi_user ( wsi );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-             "%s: (sid %.12s) Sending Error code '%d' for '%s'", __func__, Http_get_session_id(pss->session), code,
+             "%s: (sid %.12s) Sending Response code '%d' for '%s' ", __func__, Http_get_session_id(pss->session), code,
              (pss->session ? (pss->session->util ? pss->session->util->nom : "--no user--") : "--no session--")
             );
 
@@ -155,7 +155,35 @@
     lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
   }
 /******************************************************************************************************************************/
-/* CB_ws_login : Gere le protocole WS status (appellée par libwebsockets)                                                    */
+/* Http_Send_response_code: Utiliser pour renvoyer un code reponse                                                            */
+/* Entrée: La structure wsi de reference                                                                                      */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_Send_response_code_with_buffer ( struct lws *wsi, gint code, gchar *content_type, gchar *buffer, gint taille_buf )
+  { unsigned char header[256], *header_cur, *header_end;
+   	struct HTTP_PER_SESSION_DATA *pss;
+    gint retour;
+
+    pss = lws_wsi_user ( wsi );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+             "%s: (sid %.12s) Sending Response code '%d' for '%s' (taille_buf=%d)", __func__, Http_get_session_id(pss->session), code,
+             (pss->session ? (pss->session->util ? pss->session->util->nom : "--no user--") : "--no session--"), taille_buf
+            );
+
+    header_cur = header;
+    header_end = header + sizeof(header);
+
+    retour = lws_add_http_header_status( wsi, code, &header_cur, header_end );
+    retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, (const unsigned char *)content_type, strlen(content_type),
+                                           &header_cur, header_end );
+    retour = lws_add_http_header_content_length ( wsi, taille_buf, &header_cur, header_end );
+    retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
+    *header_cur='\0';                                                                               /* Caractere null d'arret */
+    lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
+    lws_write ( wsi, buffer, taille_buf, LWS_WRITE_HTTP);                                                   /* Send to client */
+  }
+/******************************************************************************************************************************/
+/* CB_ws_login : Gere le protocole WS status (appellée par libwebsockets)                                                     */
 /* Entrées : le contexte, le message, l'URL                                                                                   */
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
 /******************************************************************************************************************************/
@@ -222,11 +250,8 @@
 		          break;
        case LWS_CALLBACK_HTTP_BODY:
              { if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
-                { return( Http_Traiter_request_body_login ( wsi, data, taille ) ); }
-               else if ( ! strcasecmp ( pss->url, "/ws/postsvg" ) )
-                { return( Http_CB_file_upload( wsi, data, taille ) ); }
-               else if ( ! strcasecmp ( pss->url, "/ws/setmessage" ) )
-                { return( Http_CB_file_upload( wsi, data, taille ) ); }
+                { return( Http_Traiter_request_body_login ( wsi, data, taille ) ); }                /* Utilisation ud lws_spa */
+               return( Http_CB_file_upload( wsi, data, taille ) );          /* Sinon, c'est un buffer type json ou un fichier */
              }
             break;
        case LWS_CALLBACK_HTTP_BODY_COMPLETION:
@@ -241,6 +266,12 @@
                 { return( Http_Traiter_request_body_completion_setmessage ( wsi ) ); }
                else if ( ! strcasecmp ( pss->url, "/ws/delmessage" ) )
                 { return( Http_Traiter_request_body_completion_delmessage ( wsi ) ); }
+               else if ( ! strcasecmp ( pss->url, "/ws/postfile" ) )
+                { return( Http_Traiter_request_body_completion_postfile ( wsi ) ); }
+               else
+                { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );
+                  return(1);
+                }
               }
             break;
        case LWS_CALLBACK_HTTP:
@@ -251,8 +282,6 @@
                                         (char *)&remote_name, sizeof(remote_name),
                                         (char *)&remote_ip, sizeof(remote_ip) );
                session = Http_get_session ( wsi, remote_name, remote_ip );
-               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Request from %s/%s (sid %.12s): %s",
-                         __func__, remote_name, remote_ip, Http_get_session_id(session), url );
                if (session) session->last_top = Partage->top;                                             /* Tagging temporel */
 
                if ( ! strcasecmp ( url, "/favicon.ico" ) )
@@ -287,9 +316,14 @@
                 { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
                else if ( ! strcasecmp ( url, "/ws/postsvg" ) )
                 { return( Http_Traiter_request_postsvg ( wsi, session, remote_name, remote_ip ) ); }
+               else if ( ! strcasecmp ( url, "/ws/postfile" ) )
+                { return( Http_Traiter_request_postfile ( wsi, session ) ); }
                else                                                                                             /* Par défaut */
-                { return( Http_Traiter_request_getui ( wsi, remote_name, remote_ip, url+1 ) ); }
-               return(1);                                                                    /* Par défaut, on clos la socket */
+                { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Request from %s/%s (sid %.12s): %s",
+                            __func__, remote_name, remote_ip, Http_get_session_id(session), url );
+                  return( Http_Traiter_request_getui ( wsi, remote_name, remote_ip, url+1 ) );
+                }
+               return(1);                                                                    /* Par défaut, on clot la socket */
              }
 		          break;
        case LWS_CALLBACK_HTTP_FILE_COMPLETION:

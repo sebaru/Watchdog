@@ -134,10 +134,11 @@
 /******************************************************************************************************************************/
  static gboolean Modifier_mnemo_optionsDB ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { switch (mnemo_full->mnemo_base.type)
-     { case MNEMO_ENTREE_ANA: return( Modifier_mnemo_aiDB     ( mnemo_full ) );
-       case MNEMO_CPT_IMP   : return( Modifier_mnemo_cptimpDB ( mnemo_full ) );
-       case MNEMO_CPTH      : return( Modifier_mnemo_cpthDB   ( mnemo_full ) );
-       case MNEMO_TEMPO     : return( Modifier_mnemo_tempoDB  ( mnemo_full ) );
+     { case MNEMO_ENTREE_ANA: return( Modifier_mnemo_aiDB      ( mnemo_full ) );
+       case MNEMO_CPT_IMP   : return( Modifier_mnemo_cptimpDB  ( mnemo_full ) );
+       case MNEMO_CPTH      : return( Modifier_mnemo_cpthDB    ( mnemo_full ) );
+       case MNEMO_TEMPO     : return( Modifier_mnemo_tempoDB   ( mnemo_full ) );
+       case MNEMO_REGISTRE  : return( Modifier_mnemo_registreDB( mnemo_full ) );
        default : return(TRUE);
      }
   }
@@ -386,6 +387,15 @@
            }
           break;
         }
+       case MNEMO_REGISTRE:
+        { struct CMD_TYPE_MNEMO_REGISTRE *mnemo_r;
+          mnemo_r = Rechercher_mnemo_registreDB ( id );
+          if (mnemo_r) 
+           { memcpy ( &mnemo_full->mnemo_r, mnemo_r, sizeof(struct CMD_TYPE_MNEMO_REGISTRE) );
+             g_free(mnemo_r);
+           }
+          break;
+        }
      }
     return(mnemo_full);
   }
@@ -396,11 +406,11 @@
 /******************************************************************************************************************************/
  gboolean Modifier_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { if (Modifier_mnemo_baseDB ( &mnemo_full->mnemo_base ) == FALSE )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_mnemo_fullDB: Modifier_mnemo_baseDB failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Modifier_mnemo_baseDB failed", __func__ );
        return(FALSE);
      }
     if (Modifier_mnemo_optionsDB ( mnemo_full ) == FALSE)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_mnemo_fullDB: Modifier_mnemo_optionsDB failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Modifier_mnemo_optionsDB failed", __func__ );
        return(FALSE);
      }
     return(TRUE);

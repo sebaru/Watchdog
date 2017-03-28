@@ -78,7 +78,7 @@
  extern struct CMD_TYPE_UTILISATEUR *Rechercher_utilisateurDB_by_name( gchar *nom );
  extern gboolean Modifier_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util );
  extern gchar *Nom_utilisateur_reserve( gint id );
- extern gboolean Modifier_utilisateurDB_set_password( struct CMD_TYPE_UTILISATEUR *util );
+ extern gboolean Modifier_utilisateurDB_set_password( struct CMD_TYPE_UTILISATEUR *util, gchar *password );
  extern gboolean Modifier_utilisateurDB_set_cansetpwd( struct CMD_TYPE_UTILISATEUR *util );
  extern gboolean Modifier_utilisateurDB_set_mustchangepwd( struct CMD_TYPE_UTILISATEUR *util );
  extern void Utilisateur_set_new_salt ( struct CMD_TYPE_UTILISATEUR *util );

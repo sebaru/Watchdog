@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Syn_capteur.c       Ajout/retrait de module capteur dans les synoptiques                                         */
+/* Watchdogd/Syn_cadran.c       Ajout/retrait de module cadran dans les synoptiques                                         */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                           dim 29 jan 2006 15:09:58 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * capteur.c
+ * cadran.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -36,23 +36,23 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Retirer_capteurDB: Elimination d'un capteur                                                                                */
-/* Entrée: un capteur                                                                                                         */
+/* Retirer_cadranDB: Elimination d'un cadran                                                                                */
+/* Entrée: un cadran                                                                                                         */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
- gboolean Retirer_capteurDB ( struct CMD_TYPE_CAPTEUR *capteur )
+ gboolean Retirer_cadranDB ( struct CMD_TYPE_CADRAN *cadran )
   { gchar requete[200];
     gboolean retour;
     struct DB *db;
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_capteurDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_cadranDB: DB connexion failed" );
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "DELETE FROM %s WHERE id=%d", NOM_TABLE_CAPTEUR, capteur->id );
+                "DELETE FROM %s WHERE id=%d", NOM_TABLE_CADRAN, cadran->id );
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
@@ -60,10 +60,10 @@
   }
 /******************************************************************************************************************************/
 /* Ajouter_msgDB: Ajout ou edition d'un message                                                                               */
-/* Entrée: un capteur                                                                                                         */
+/* Entrée: un cadran                                                                                                         */
 /* Sortie: -1 si probleme sinon last_id_sql                                                                                   */
 /******************************************************************************************************************************/
- gint Ajouter_capteurDB ( struct CMD_TYPE_CAPTEUR *capteur )
+ gint Ajouter_cadranDB ( struct CMD_TYPE_CADRAN *cadran )
   { gchar requete[512];
     gboolean retour;
     struct DB *db;
@@ -71,15 +71,15 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_capteurDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_cadranDB: DB connexion failed" );
        return(-1);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s(syn_id,type,bitctrl,posx,posy,angle)"
-                " VALUES (%d,%d,%d,%d,%d,'%f')", NOM_TABLE_CAPTEUR,
-                capteur->syn_id, capteur->type, capteur->bit_controle,
-                capteur->position_x, capteur->position_y, capteur->angle );
+                " VALUES (%d,%d,%d,%d,%d,'%f')", NOM_TABLE_CADRAN,
+                cadran->syn_id, cadran->type, cadran->bit_controle,
+                cadran->position_x, cadran->position_y, cadran->angle );
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if ( retour == FALSE )
@@ -95,7 +95,7 @@
 /* Entrée: un id de synoptique et une database                                                                                */
 /* Sortie: FALSE si pb                                                                                                        */
 /******************************************************************************************************************************/
- gboolean Recuperer_capteurDB ( struct DB **db_retour, gint id_syn )
+ gboolean Recuperer_cadranDB ( struct DB **db_retour, gint id_syn )
   { gchar requete[2048];
     gboolean retour;
     struct DB *db;
@@ -109,10 +109,10 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.libelle,%s.posx,%s.posy,%s.angle,acro_syn"
                 " FROM %s,%s WHERE %s.type=%s.type AND %s.bitctrl=%s.num AND syn_id=%d",
-                NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, 
-                NOM_TABLE_MNEMO, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, 
-                NOM_TABLE_CAPTEUR, NOM_TABLE_MNEMO,                                                                   /* From */
-                NOM_TABLE_CAPTEUR, NOM_TABLE_MNEMO, NOM_TABLE_CAPTEUR, NOM_TABLE_MNEMO,
+                NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, 
+                NOM_TABLE_MNEMO, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, 
+                NOM_TABLE_CADRAN, NOM_TABLE_MNEMO,                                                                   /* From */
+                NOM_TABLE_CADRAN, NOM_TABLE_MNEMO, NOM_TABLE_CADRAN, NOM_TABLE_MNEMO,
                 id_syn );
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if (retour == FALSE) Libere_DB_SQL (&db);
@@ -122,10 +122,10 @@
 /******************************************************************************************************************************/
 /* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                                    */
 /* Entrée: une database                                                                                                       */
-/* Sortie: un capteur                                                                                                         */
+/* Sortie: un cadran                                                                                                         */
 /******************************************************************************************************************************/
- struct CMD_TYPE_CAPTEUR *Recuperer_capteurDB_suite( struct DB **db_orig )
-  { struct CMD_TYPE_CAPTEUR *capteur;
+ struct CMD_TYPE_CADRAN *Recuperer_cadranDB_suite( struct DB **db_orig )
+  { struct CMD_TYPE_CADRAN *cadran;
     struct DB *db;
 
     db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
@@ -136,80 +136,80 @@
        return(NULL);
      }
 
-    capteur = (struct CMD_TYPE_CAPTEUR *)g_try_malloc0( sizeof(struct CMD_TYPE_CAPTEUR) );
-    if (!capteur) Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                           "Recuperer_capteurDB_suite: memory error" );
+    cadran = (struct CMD_TYPE_CADRAN *)g_try_malloc0( sizeof(struct CMD_TYPE_CADRAN) );
+    if (!cadran) Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                           "Recuperer_cadranDB_suite: memory error" );
     else
-     { capteur->id           = atoi(db->row[0]);
-       capteur->syn_id       = atoi(db->row[1]);                                       /* Synoptique ou est placée le capteur */
-       capteur->type         = atoi(db->row[2]);
-       capteur->bit_controle = atoi(db->row[3]);                                                                /* Ixxx, Cxxx */
-       capteur->position_x   = atoi(db->row[5]);                                                 /* en abscisses et ordonnées */
-       capteur->position_y   = atoi(db->row[6]);
-       capteur->angle        = atof(db->row[7]);
-       g_snprintf( capteur->libelle, sizeof(capteur->libelle), "%s" ,db->row[4] );               /* Recopie dans la structure */
-       g_snprintf( capteur->acro_syn, sizeof(capteur->acro_syn), "%s" ,db->row[8] );             /* Recopie dans la structure */
+     { cadran->id           = atoi(db->row[0]);
+       cadran->syn_id       = atoi(db->row[1]);                                       /* Synoptique ou est placée le cadran */
+       cadran->type         = atoi(db->row[2]);
+       cadran->bit_controle = atoi(db->row[3]);                                                                /* Ixxx, Cxxx */
+       cadran->position_x   = atoi(db->row[5]);                                                 /* en abscisses et ordonnées */
+       cadran->position_y   = atoi(db->row[6]);
+       cadran->angle        = atof(db->row[7]);
+       g_snprintf( cadran->libelle, sizeof(cadran->libelle), "%s" ,db->row[4] );               /* Recopie dans la structure */
+       g_snprintf( cadran->acro_syn, sizeof(cadran->acro_syn), "%s" ,db->row[8] );             /* Recopie dans la structure */
      }
-    return(capteur);
+    return(cadran);
   }
 /******************************************************************************************************************************/
-/* Rechercher_capteurDB: Recupération du capteur dont l'id est en parametre                                                   */
-/* Entrée: un id de capteur                                                                                                   */
-/* Sortie: un capteur                                                                                                         */
+/* Rechercher_cadranDB: Recupération du cadran dont l'id est en parametre                                                   */
+/* Entrée: un id de cadran                                                                                                   */
+/* Sortie: un cadran                                                                                                         */
 /******************************************************************************************************************************/
- struct CMD_TYPE_CAPTEUR *Rechercher_capteurDB ( guint id )
-  { struct CMD_TYPE_CAPTEUR *capteur;
+ struct CMD_TYPE_CADRAN *Rechercher_cadranDB ( guint id )
+  { struct CMD_TYPE_CADRAN *cadran;
     gchar requete[512];
     struct DB *db;
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_capteurDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_cadranDB: DB connexion failed" );
        return(NULL);
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.libelle,%s.posx,%s.posy,%s.angle,acro_syn"
                 " FROM %s,%s WHERE %s.type=%s.type AND %s.bitctrl=%s.num AND %s.id=%d",
-                NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, 
-                NOM_TABLE_MNEMO, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, NOM_TABLE_CAPTEUR, 
-                NOM_TABLE_CAPTEUR, NOM_TABLE_MNEMO,                                               /* From */
-                NOM_TABLE_CAPTEUR, NOM_TABLE_MNEMO, NOM_TABLE_CAPTEUR, NOM_TABLE_MNEMO,
-                NOM_TABLE_CAPTEUR, id );
+                NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, 
+                NOM_TABLE_MNEMO, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, 
+                NOM_TABLE_CADRAN, NOM_TABLE_MNEMO,                                               /* From */
+                NOM_TABLE_CADRAN, NOM_TABLE_MNEMO, NOM_TABLE_CADRAN, NOM_TABLE_MNEMO,
+                NOM_TABLE_CADRAN, id );
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { Libere_DB_SQL( &db );
        return(NULL);
      }
 
-    capteur = Recuperer_capteurDB_suite( &db );
+    cadran = Recuperer_cadranDB_suite( &db );
     Libere_DB_SQL( &db );
-    if (!capteur) Info_new( Config.log, Config.log_dls, LOG_INFO, "Rechercher_capteurDB: Capteur %03d not found in DB", id );
-    return(capteur);
+    if (!cadran) Info_new( Config.log, Config.log_dls, LOG_INFO, "Rechercher_cadranDB: Capteur %03d not found in DB", id );
+    return(cadran);
   }
 /******************************************************************************************************************************/
-/* Modifier_capteurDB: Modification d'un capteur Watchdog                                                                     */
-/* Entrées: un capteur                                                                                                        */
+/* Modifier_cadranDB: Modification d'un cadran Watchdog                                                                     */
+/* Entrées: un cadran                                                                                                        */
 /* Sortie: FALSE si pb                                                                                                        */
 /******************************************************************************************************************************/
- gboolean Modifier_capteurDB( struct CMD_TYPE_CAPTEUR *capteur )
+ gboolean Modifier_cadranDB( struct CMD_TYPE_CADRAN *cadran )
   { gchar requete[1024];
     gboolean retour;
     struct DB *db;
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_capteurDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_cadranDB: DB connexion failed" );
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "             
                 "type=%d,bitctrl=%d,posx=%d,posy=%d,angle='%f'"
-                " WHERE id=%d;", NOM_TABLE_CAPTEUR,
-                capteur->type, capteur->bit_controle,
-                capteur->position_x, capteur->position_y, capteur->angle,
-                capteur->id );
+                " WHERE id=%d;", NOM_TABLE_CADRAN,
+                cadran->type, cadran->bit_controle,
+                cadran->position_x, cadran->position_y, cadran->angle,
+                cadran->id );
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
