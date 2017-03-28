@@ -40,9 +40,7 @@
   { gchar token_length[12], token_start[12], token_type[12], token_num[12];
     gchar token_dls[200], token_libelle[200],token_groupe[200];
     const gchar *length_s, *start_s, *type_s, *num_s, *libelle, *groupe, *dls;
-    unsigned char header[256], *header_cur, *header_end;
-   	const char *content_type = "application/json";
-    gchar requete[1024], critere[512];
+gchar requete[1024], critere[512];
     struct CMD_TYPE_MESSAGE *msg;
     gint type, start, length;
     struct DB *db;
@@ -53,7 +51,7 @@
     gsize taille_buf;
 
     if ( session==NULL || session->util==NULL || Tester_groupe_util(session->util, GID_MESSAGE)==FALSE)
-     { Http_Send_response_code ( wsi, HTTP_UNAUTHORIZED, NULL, 0 );
+     { Http_Send_response_code ( wsi, HTTP_UNAUTHORIZED );
        return(TRUE);
      }
 
@@ -107,13 +105,13 @@
     if (builder == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getmessage : JSon builder creation failed" );
-       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR, NULL, 0 );
+       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
        return(TRUE);
      }
                                                                       /* Lancement de la requete de recuperation des messages */
     if ( ! Recuperer_messageDB_with_conditions( &db, requete, start, length ) )
      { g_object_unref(builder);
-       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR, NULL, 0 );
+       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
        return(TRUE);
      }
 /*------------------------------------------------------- Dumping message ----------------------------------------------------*/
@@ -154,17 +152,7 @@
     g_object_unref(gen);
           
 /*************************************************** Envoi au client **********************************************************/
-    header_cur = header;
-    header_end = header + sizeof(header);
-
-    retour = lws_add_http_header_status( wsi, 200, &header_cur, header_end );
-    retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, (const unsigned char *)content_type, strlen(content_type),
-                                           &header_cur, header_end );
-    retour = lws_add_http_header_content_length ( wsi, taille_buf, &header_cur, header_end );
-    retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
-    *header_cur='\0';                                                                               /* Caractere null d'arret */
-    lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-    lws_write ( wsi, buf, taille_buf, LWS_WRITE_HTTP);                                                      /* Send to client */
+    Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf );
     g_free(buf);                                                      /* Libération du buffer dont nous n'avons plus besoin ! */
     return(TRUE);
   }

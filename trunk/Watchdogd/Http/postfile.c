@@ -85,7 +85,7 @@
              "%s: (sid %.12s) HTTP request", __func__, Http_get_session_id(session) );
 
     if (lws_hdr_total_length(wsi, WSI_TOKEN_GET_URI))                                 /* Header de type GET ?? Si oui, erreur */
-     { Http_Send_response_code ( wsi, HTTP_BAD_METHOD, NULL, 0 );
+     { Http_Send_response_code ( wsi, HTTP_BAD_METHOD );
        return(1);
      }
 
@@ -115,7 +115,7 @@
              (type ? type : "none"), (name ? name : "none") );
 
     if ( ! (type && name) )
-     { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST, NULL, 0 );                                             /* Bad Request */
+     { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                             /* Bad Request */
        g_free(pss->post_data);
        pss->post_data_length = 0;
        return(1);
@@ -132,13 +132,13 @@
       { /* Save_dls_to_disk */
      }
     else
-     { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST, NULL, 0 );                                             /* Bad Request */
+     { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                             /* Bad Request */
        g_free(pss->post_data);
        pss->post_data_length = 0;
        return(1);
      }
          
-    Http_Send_response_code ( wsi, code, NULL, 0 );
+    Http_Send_response_code ( wsi, code );
     g_free(pss->post_data);
     pss->post_data_length = 0;
     if (code==HTTP_200_OK) return( lws_http_transaction_completed(wsi) );

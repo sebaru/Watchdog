@@ -135,7 +135,31 @@
 /* Entrée: La structure wsi de reference                                                                                      */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_Send_response_code ( struct lws *wsi, gint code, gchar *buffer, gint taille_buf )
+ void Http_Send_response_code ( struct lws *wsi, gint code )
+  { unsigned char header[256], *header_cur, *header_end;
+   	struct HTTP_PER_SESSION_DATA *pss;
+    gint retour;
+
+    pss = lws_wsi_user ( wsi );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+             "%s: (sid %.12s) Sending Response code '%d' for '%s' ", __func__, Http_get_session_id(pss->session), code,
+             (pss->session ? (pss->session->util ? pss->session->util->nom : "--no user--") : "--no session--")
+            );
+
+    header_cur = header;
+    header_end = header + sizeof(header);
+
+    retour = lws_add_http_header_status( wsi, code, &header_cur, header_end );
+    retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
+   *header_cur='\0';                                                                                /* Caractere null d'arret */
+    lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
+  }
+/******************************************************************************************************************************/
+/* Http_Send_response_code: Utiliser pour renvoyer un code reponse                                                            */
+/* Entrée: La structure wsi de reference                                                                                      */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Http_Send_response_code_with_buffer ( struct lws *wsi, gint code, gchar *content_type, gchar *buffer, gint taille_buf )
   { unsigned char header[256], *header_cur, *header_end;
    	struct HTTP_PER_SESSION_DATA *pss;
     gint retour;
@@ -150,12 +174,16 @@
     header_end = header + sizeof(header);
 
     retour = lws_add_http_header_status( wsi, code, &header_cur, header_end );
+    retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, (const unsigned char *)content_type, strlen(content_type),
+                                           &header_cur, header_end );
+    retour = lws_add_http_header_content_length ( wsi, taille_buf, &header_cur, header_end );
     retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
-   *header_cur='\0';                                                                                /* Caractere null d'arret */
+    *header_cur='\0';                                                                               /* Caractere null d'arret */
     lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
+    lws_write ( wsi, buffer, taille_buf, LWS_WRITE_HTTP);                                                   /* Send to client */
   }
 /******************************************************************************************************************************/
-/* CB_ws_login : Gere le protocole WS status (appellée par libwebsockets)                                                    */
+/* CB_ws_login : Gere le protocole WS status (appellée par libwebsockets)                                                     */
 /* Entrées : le contexte, le message, l'URL                                                                                   */
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
 /******************************************************************************************************************************/
@@ -241,7 +269,7 @@
                else if ( ! strcasecmp ( pss->url, "/ws/postfile" ) )
                 { return( Http_Traiter_request_body_completion_postfile ( wsi ) ); }
                else
-                { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST, NULL, 0 );
+                { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );
                   return(1);
                 }
               }

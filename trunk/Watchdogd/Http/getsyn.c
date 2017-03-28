@@ -60,7 +60,7 @@
 
     id_syn_s   = lws_get_urlarg_by_name	( wsi, "id_syn=",   token_id,   sizeof(token_id) );
     if (id_syn_s) { id_syn = atoi ( id_syn_s ); }
-    else { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST, NULL, 0 ); /* Bad Request */
+    else { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ); /* Bad Request */
            return(TRUE);
          }
 
@@ -68,7 +68,7 @@
     if ( ! syndb )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
                  "%s: (sid %.12s) Synoptique %d not found in DB", __func__, Http_get_session_id ( session ), id_syn );
-       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR, NULL, 0 );
+       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
        return(FALSE);
      }
 
@@ -86,7 +86,7 @@
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "%s : (sid %.12s) JSon builder creation failed", __func__, Http_get_session_id ( session ) );
        g_free(syndb);
-       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR, NULL, 0 );
+       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
        return(TRUE);
      }
                                                           /* Lancement de la requete de recuperation du contenu du synoptique */
