@@ -37,7 +37,7 @@
  gint Http_Traiter_request_setmessage ( struct lws *wsi, struct HTTP_SESSION *session, gchar *remote_name, gchar *remote_ip )
   { struct HTTP_PER_SESSION_DATA *pss;
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-             "%s: (sid %.12s) HTTP request from %s(%s)",
+             "%s: (sid %s) HTTP request from %s(%s)",
               __func__, Http_get_session_id(session), remote_name, remote_ip );
 
     pss = lws_wsi_user ( wsi );
@@ -61,7 +61,7 @@
 
     pss = lws_wsi_user ( wsi );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %.12s) HTTP request body completion", __func__, Http_get_session_id(pss->session) );
+             "%s: (sid %s) HTTP request body completion", __func__, Http_get_session_id(pss->session) );
 
 
     if ( pss->session==NULL || pss->session->util==NULL || Tester_groupe_util( pss->session->util, GID_MESSAGE)==FALSE)
@@ -77,7 +77,7 @@
     parser = json_parser_new();                                                                    /* Creation du parser JSON */
     if (!parser)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %.12s) Parser Creation Error", __func__, Http_get_session_id(pss->session) );
+             "%s: (sid %s) Parser Creation Error", __func__, Http_get_session_id(pss->session) );
        Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
        pss->post_data_length = 0;
        g_free(pss->post_data);
@@ -86,7 +86,7 @@
 
     if ( json_parser_load_from_data ( parser, pss->post_data, pss->post_data_length, NULL ) == FALSE )           /* Parsing ! */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %.12s) Parsing Error", __func__, Http_get_session_id(pss->session) );
+             "%s: (sid %s) Parsing Error", __func__, Http_get_session_id(pss->session) );
        g_object_unref(parser);
        Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
        pss->post_data_length = 0;
@@ -97,7 +97,7 @@
     root_node = json_parser_get_root (parser);
     if (json_node_get_node_type (root_node) != JSON_NODE_OBJECT)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "%s: (sid %.12s) Received wrong node_type=%d (%s)", __func__, Http_get_session_id(pss->session),
+                "%s: (sid %s) Received wrong node_type=%d (%s)", __func__, Http_get_session_id(pss->session),
                  json_node_get_node_type (root_node), json_node_type_name (root_node) );
        g_object_unref(parser);                                                                   /* Libération du parser Json */
        Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );
@@ -108,13 +108,13 @@
 
     object = json_node_get_object (root_node);
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %.12s) Received: object with %d members", __func__, Http_get_session_id(pss->session),
+             "%s: (sid %s) Received: object with %d members", __func__, Http_get_session_id(pss->session),
               json_object_get_size (object) );
 
     msg = (struct CMD_TYPE_MESSAGE *)g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
     if (!msg)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: (sid %.12s) Memory Error", __func__, Http_get_session_id(pss->session) );
+                "%s: (sid %s) Memory Error", __func__, Http_get_session_id(pss->session) );
        g_object_unref(parser);
        Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
        pss->post_data_length = 0;
@@ -122,13 +122,16 @@
        return(1);
      }
 
-    msg->id          = Http_json_get_int (object, "id");
+    msg->id          = Http_json_get_int (object, "id");                           /* Récupération des valeurs des paramètres */
     msg->num         = Http_json_get_int (object, "num");
     msg->type        = Http_json_get_int (object, "type");
     msg->dls_id      = Http_json_get_int (object, "dls_id");
     msg->time_repeat = Http_json_get_int (object, "time_repeat");
     msg->sms         = Http_json_get_int (object, "sms");
     msg->enable      = Http_json_get_int (object, "enable");
+    msg->audio       = Http_json_get_int (object, "audio");
+    msg->bit_audio   = Http_json_get_int (object, "bit_audio");
+    msg->persist     = Http_json_get_int (object, "persist");
     node = json_object_get_member (object, "libelle" );
     if (node) g_snprintf( msg->libelle, sizeof(msg->libelle), "%s", json_node_get_string ( node ) );
          else g_snprintf( msg->libelle, sizeof(msg->libelle), "undefined" );

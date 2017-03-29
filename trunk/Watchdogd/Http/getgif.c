@@ -75,7 +75,7 @@
     g_snprintf( nom_fichier, sizeof(nom_fichier), "Svg/%d.svg", id );
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s : (sid %.12s) Sending file '%s'", __func__, Http_get_session_id(session), nom_fichier );
+             "%s : (sid %s) Sending file '%s'", __func__, Http_get_session_id(session), nom_fichier );
 
     retour = lws_serve_http_file ( wsi, nom_fichier, "image/xml+svg", NULL, 0);
     if (retour != 0) return(1);                                           /* Si erreur (<0) ou si ok (>0), on ferme la socket */

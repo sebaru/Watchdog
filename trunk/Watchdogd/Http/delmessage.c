@@ -37,7 +37,7 @@
  gint Http_Traiter_request_delmessage ( struct lws *wsi, struct HTTP_SESSION *session )
   { struct HTTP_PER_SESSION_DATA *pss;
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %.12s) HTTP request",
+             "%s: (sid %s) HTTP request",
               __func__, Http_get_session_id(session) );
 
     pss = lws_wsi_user ( wsi );
@@ -58,7 +58,7 @@
 
     pss = lws_wsi_user ( wsi );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %.12s) Processing...", __func__, Http_get_session_id(pss->session) );
+             "%s: (sid %s) Processing...", __func__, Http_get_session_id(pss->session) );
 
 
     if ( pss->session==NULL || pss->session->util==NULL || Tester_groupe_util( pss->session->util, GID_MESSAGE)==FALSE)
@@ -73,13 +73,13 @@
     parser = json_parser_new();                                                                    /* Creation du parser JSON */
     if (!parser)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %.12s) Parser Creation Error", __func__, Http_get_session_id(pss->session) );
+             "%s: (sid %s) Parser Creation Error", __func__, Http_get_session_id(pss->session) );
        goto end;
      }
 
     if ( json_parser_load_from_data ( parser, pss->post_data, pss->post_data_length, NULL ) == FALSE )           /* Parsing ! */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %.12s) Parsing Error", __func__, Http_get_session_id(pss->session) );
+             "%s: (sid %s) Parsing Error", __func__, Http_get_session_id(pss->session) );
        g_object_unref(parser);
        goto end;
      }
@@ -92,7 +92,7 @@
 
        object = json_node_get_object (root_node);
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "%s: (sid %.12s) Received: object with %d members", __func__, Http_get_session_id(pss->session),
+                "%s: (sid %s) Received: object with %d members", __func__, Http_get_session_id(pss->session),
                 json_object_get_size (object) );
 
        msg.id = Http_json_get_int (object, "id");
@@ -100,7 +100,7 @@
      }
     else
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "%s: (sid %.12s) Received wrong node_type=%d (%s)", __func__, Http_get_session_id(pss->session),
+                "%s: (sid %s) Received wrong node_type=%d (%s)", __func__, Http_get_session_id(pss->session),
                  json_node_get_node_type (root_node), json_node_type_name (root_node) );
      }
     g_object_unref(parser);                                                                      /* Libération du parser Json */

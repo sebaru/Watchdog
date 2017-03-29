@@ -89,6 +89,7 @@
  struct HTTP_SESSION
   { /*gint     type;*/
     gchar    sid[2*EVP_MAX_MD_SIZE+1];
+    gchar    sid_string[120];
     gchar    remote_name[80];
     gchar    remote_ip[20];
     gchar    user_agent[120];

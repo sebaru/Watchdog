@@ -48,19 +48,19 @@
     gint fd, id;
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %.12s) Trying to validate & save new SVG file (length=%d)",
+             "%s: (sid %s) Trying to validate & save new SVG file (length=%d)",
               __func__, Http_get_session_id(session), xmldata_length );
                   
     doc = xmlReadMemory( xmldata, xmldata_length, "newsvg.xml", NULL, 0 );
     if (doc == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: (sid %.12s) Unable to Parse new Doc '%s'", __func__, Http_get_session_id(session), filename );
+                "%s: (sid %s) Unable to Parse new Doc '%s'", __func__, Http_get_session_id(session), filename );
 	      return(FALSE);
      }
     root_node = xmlDocGetRootElement(doc);                                                        /* Vérification du document */
     if ( strcmp(root_node->name, "svg") )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: (sid %.12s) Root node is not SVG", __func__, Http_get_session_id(session) );
+                "%s: (sid %s) Root node is not SVG", __func__, Http_get_session_id(session) );
        xmlFreeDoc(doc);                                                                                        /* Parsing NOK */
        return(FALSE);
      }
@@ -68,7 +68,7 @@
     xml_classe = xmlGetProp(root_node, "wtd-classe");
     if (xml_classe == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: (sid %.12s) Properties 'wtd-classe' not found", __func__, Http_get_session_id(session) );
+                "%s: (sid %s) Properties 'wtd-classe' not found", __func__, Http_get_session_id(session) );
        xmlFreeDoc(doc);                                                                                        /* Parsing NOK */
        return(FALSE);
      }
@@ -78,7 +78,7 @@
     xml_description = xmlGetProp(root_node, "wtd-description");
     if (xml_description == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: (sid %.12s) Properties 'wtd-description' not found", __func__, Http_get_session_id(session) );
+                "%s: (sid %s) Properties 'wtd-description' not found", __func__, Http_get_session_id(session) );
        xmlFreeDoc(doc);                                                                                        /* Parsing NOK */
        return(FALSE);
      }
@@ -95,20 +95,20 @@
     fd = open( filename, O_CREAT | O_WRONLY, S_IWUSR | S_IRUSR );                       /* Enregistrement du nouveau document */
     if (fd < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: (sid %.12s) Unable to create new file '%s' (%s)",
+                "%s: (sid %s) Unable to create new file '%s' (%s)",
                  __func__, Http_get_session_id(session), filename, strerror(errno) );
 	      return(FALSE);
      }
 
     if (write( fd, xmldata, xmldata_length ) != xmldata_length)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: (sid %.12s) Writing error for '%s' (%s)",
+                "%s: (sid %s) Writing error for '%s' (%s)",
                  __func__, Http_get_session_id(session), filename, strerror(errno) );
 	      return(FALSE);
      }
     else
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                "%s: (sid %.12s) New SVG file saved: '%s'", __func__, Http_get_session_id(session), filename );
+                "%s: (sid %s) New SVG file saved: '%s'", __func__, Http_get_session_id(session), filename );
      }
     close(fd);
     return(TRUE);
@@ -122,7 +122,7 @@
   { struct HTTP_PER_SESSION_DATA *pss;
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-             "%s: (sid %.12s) HTTP request from %s(%s)",
+             "%s: (sid %s) HTTP request from %s(%s)",
               __func__, Http_get_session_id(session), remote_name, remote_ip );
 
     pss = lws_wsi_user ( wsi );
@@ -142,7 +142,7 @@
     pss = lws_wsi_user ( wsi );
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %.12s) HTTP request body completion", __func__, Http_get_session_id(pss->session) );
+             "%s: (sid %s) HTTP request body completion", __func__, Http_get_session_id(pss->session) );
 
     header_cur = header;                                                             /* Préparation des headers de la réponse */
     header_end = header + sizeof(header);

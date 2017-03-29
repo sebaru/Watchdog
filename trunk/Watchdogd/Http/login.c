@@ -52,27 +52,27 @@
     buf = xmlBufferCreate();                                                                        /* Creation du buffer xml */
     if (buf == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Groups_to_xml: XML Buffer creation failed" );
+                 "%s: XML Buffer creation failed", __func__ );
        return(NULL);
      }
 
     if ( (writer = xmlNewTextWriterMemory(buf, 0)) == NULL )                                         /* Creation du write XML */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Groups_to_xml : XML Writer creation failed" );
+                "%s: XML Writer creation failed", __func__ );
        xmlBufferFree(buf);
        return(NULL);
      }
 
     if ( xmlTextWriterStartDocument(writer, NULL, "UTF-8", "yes" ) < 0 )                              /* Creation du document */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Groups_to_xml : XML Start document failed" );
+                "%s: XML Start document failed", __func__ );
        xmlBufferFree(buf);
        return(NULL);
      }
 
     if (xmlTextWriterStartElement(writer, (const unsigned char *) "Groups") < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Groups_to_xml : XML Failed to Start element Groups" );
+                "%s: XML Failed to Start element Groups", __func__ );
        xmlBufferFree(buf);
        return(NULL);
      }
@@ -85,7 +85,7 @@
 
     if (xmlTextWriterEndDocument(writer)<0)                                                                   /* End document */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getstatus : Failed to end Document" );
+                 "%s: Failed to end Document", __func__ );
        xmlBufferFree(buf);
        return(NULL);
      }
@@ -99,7 +99,7 @@
 /* Sortie : sid ou "---" si erreur                                                                                            */
 /******************************************************************************************************************************/
  gchar *Http_get_session_id ( struct HTTP_SESSION *session )
-	 { if (session) return(session->sid);
+	 { if (session) return(session->sid_string);
     return("--- none ---");
   }
 /******************************************************************************************************************************/
@@ -126,7 +126,7 @@
            { cookie_value = strtok_r ( NULL, "=", &savecookie );
              if ( ! strcmp( cookie_name, "sid" ) )
               { sid = cookie_value;
-                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "Http_get_session : Searching for sid %.12s", sid );
+                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "Http_get_session : Searching for sid %s", sid );
                 pthread_mutex_lock( &Cfg_http.lib->synchro );                         /* Recherche dans la liste des sessions */
                 liste = Cfg_http.Liste_sessions;
                 while ( liste )
@@ -142,7 +142,7 @@
                 return(NULL);
               }
              else Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                           "Http_get_session: Cookie found for %s(%s): %s=%s",
+                           "%s: Cookie found for %s(%s): %s=%s", __func__,
                             remote_name, remote_ip, (cookie_name ? cookie_name : "none"), (cookie_value ? cookie_value : "none") );
            }
         }       
@@ -158,9 +158,9 @@
   { pthread_mutex_lock( &Cfg_http.lib->synchro );                                     /* Recherche dans la liste des sessions */
     Cfg_http.Liste_sessions = g_slist_remove ( Cfg_http.Liste_sessions, session );
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
-    if (session->util) g_free(session->util);
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-             "Http_Liberer_session : session close for SID %.12s", session->sid );
+             "%s: (sid %s) session closed", __func__, Http_get_session_id (session) );
+    if (session->util) g_free(session->util);
     g_free(session);                                                                     /* Libération mémoire le cas échéant */
   }
 /******************************************************************************************************************************/
@@ -195,7 +195,7 @@
     session = (struct HTTP_SESSION *) g_try_malloc0 ( sizeof( struct HTTP_SESSION ) );
     if (!session)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Http_New_session: Memory Alloc ERROR session" );
+                "%s: Memory Alloc ERROR session", __func__ );
        return(NULL);
      }
     session->last_top = Partage->top;
@@ -212,7 +212,7 @@
      { g_snprintf( &session->sid[2*cpt], 3, "%02X", (guchar)cookie_bin[cpt] ); }
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "Http_New_session : Creation session '%.12s' for %s/%s", session->sid, session->remote_name, session->remote_ip );
+             "%s: Creation session '%s' for %s/%s", __func__, session->sid, session->remote_name, session->remote_ip );
 
     pthread_mutex_lock( &Cfg_http.lib->synchro );                                         /* Ajout dans la liste des sessions */
     Cfg_http.Liste_sessions = g_slist_prepend( Cfg_http.Liste_sessions, session );
@@ -235,7 +235,7 @@ search_again:
      { session = (struct HTTP_SESSION *)liste->data;
        if (session->last_top && Partage->top - session->last_top >= 864000 )
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                   "Http_Check_sessions : closing timeout for SID %.12s", session->sid );
+                   "%s: closing timeout for SID %.12s", __func__, session->sid );
         }
        liste = liste->next;
      }
@@ -290,8 +290,8 @@ search_again:
     struct HTTP_SESSION *session;
     gint retour, taille;
 
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-             "Http_Traiter_request_body_completion_login: (sid %.12s) HTTP request from %s(%s)",
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+             "%s: (sid %s) HTTP request from %s(%s)", __func__,
               Http_get_session_id(NULL), remote_name, remote_ip );
 
     pss = lws_wsi_user ( wsi );
@@ -306,7 +306,7 @@ search_again:
     util = Rechercher_utilisateurDB_by_name( username );
     if (!util)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                "Http_Traiter_request_body_completion_login: (sid %.12s) Username '%s' not found",
+                "%s: (sid %s) Username '%s' not found", __func__,
                  Http_get_session_id(NULL), username );
        retour = lws_add_http_header_status( wsi, 401, &header_cur, header_end );                              /* Unauthorized */
        retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
@@ -315,7 +315,7 @@ search_again:
      }
     else if ( Check_utilisateur_password( util, password ) == FALSE )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                "Http_Traiter_request_body_completion_login: (sid %.12s) Wrong Password for user '%s'",
+                "%s: (sid %s) Wrong Password for user '%s'", __func__,
                  Http_get_session_id(NULL), username );
        retour = lws_add_http_header_status( wsi, 401, &header_cur, header_end );                              /* Unauthorized */
        retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
@@ -347,12 +347,14 @@ search_again:
              gchar cookie[512];
 
              session->util = util;                                                  /* Sauvegarde de la structure utilisateur */
-          
+             g_snprintf( session->sid_string, sizeof(session->sid_string), "%.12s:%s:%s:%s",
+                         session->sid, session->remote_ip, session->remote_name, session->util->nom );
+
              g_snprintf ( cookie, sizeof(cookie), "sid=%s; Max-Age=%d; ", session->sid, 60*60*12 );
              retour = lws_add_http_header_status( wsi, 200, &header_cur, header_end );
              retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_SET_COOKIE, (const unsigned char *)cookie, strlen(cookie),
                                                     &header_cur, header_end );
-             retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, content_type, strlen(content_type),
+             retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, HTTP_CONTENT_XML, strlen(HTTP_CONTENT_XML),
                                                     &header_cur, header_end );
              retour = lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );
              retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
@@ -361,8 +363,8 @@ search_again:
              lws_write ( wsi, buf->content, buf->use, LWS_WRITE_HTTP);                                      /* Send to client */
              xmlBufferFree(buf);                                      /* Libération du buffer dont nous n'avons plus besoin ! */
              Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                      "Http_Traiter_request_login: (sid %.12s), New Session Cookie for '%s' from %s(%s)",
-                       Http_get_session_id(session), session->util->nom, remote_name, remote_ip );
+                      "%s: (sid %s), New Session Cookie", __func__,
+                       Http_get_session_id(session) );
           }
         }
      }

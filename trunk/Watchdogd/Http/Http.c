@@ -142,7 +142,7 @@
 
     pss = lws_wsi_user ( wsi );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-             "%s: (sid %.12s) Sending Response code '%d' for '%s' ", __func__, Http_get_session_id(pss->session), code,
+             "%s: (sid %s) Sending Response code '%d' for '%s' ", __func__, Http_get_session_id(pss->session), code,
              (pss->session ? (pss->session->util ? pss->session->util->nom : "--no user--") : "--no session--")
             );
 
@@ -166,7 +166,7 @@
 
     pss = lws_wsi_user ( wsi );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-             "%s: (sid %.12s) Sending Response code '%d' for '%s' (taille_buf=%d)", __func__, Http_get_session_id(pss->session), code,
+             "%s: (sid %s) Sending Response code '%d' for '%s' (taille_buf=%d)", __func__, Http_get_session_id(pss->session), code,
              (pss->session ? (pss->session->util ? pss->session->util->nom : "--no user--") : "--no session--"), taille_buf
             );
 
@@ -201,7 +201,7 @@
     
     if (pss->post_data_length >= Cfg_http.max_upload_bytes)                  /* Si taille de fichier trop importante, on vire */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Http_CB_file_upload: (sid %.12s) file too long (%d/%d), aborting",
+                "Http_CB_file_upload: (sid %s) file too long (%d/%d), aborting",
                  Http_get_session_id(pss->session), pss->post_data_length, Cfg_http.max_upload_bytes );
        return(1);
      }
@@ -211,7 +211,7 @@
     pss->post_data_length += taille;
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "Http_CB_file_upload: (sid %.12s) received %d bytes (total length=%d, max %d)",
+             "Http_CB_file_upload: (sid %s) received %d bytes (total length=%d, max %d)",
               Http_get_session_id(pss->session), taille, pss->post_data_length, Cfg_http.max_upload_bytes );
     return 0;
   }
@@ -319,7 +319,7 @@
                else if ( ! strcasecmp ( url, "/ws/postfile" ) )
                 { return( Http_Traiter_request_postfile ( wsi, session ) ); }
                else                                                                                             /* Par défaut */
-                { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Request from %s/%s (sid %.12s): %s",
+                { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Request from %s/%s (sid %s): %s",
                             __func__, remote_name, remote_ip, Http_get_session_id(session), url );
                   return( Http_Traiter_request_getui ( wsi, remote_name, remote_ip, url+1 ) );
                 }

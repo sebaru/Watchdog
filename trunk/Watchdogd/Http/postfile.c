@@ -42,7 +42,7 @@
   { gchar filename[80];
     gint id, retour, fd;
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %.12s) Trying to validate & save new MP3 file '%s' (length=%d)",
+             "%s: (sid %s) Trying to validate & save new MP3 file '%s' (length=%d)",
               __func__, Http_get_session_id(session), name, taille );
 
     if ( session==NULL || session->util==NULL || Tester_groupe_util( session->util, GID_MESSAGE )==FALSE )
@@ -56,7 +56,7 @@
     fd = open( filename, O_CREAT | O_WRONLY, S_IWUSR | S_IRUSR );                       /* Enregistrement du nouveau document */
     if (fd < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: (sid %.12s) Unable to create new file '%s' (%s)",
+                "%s: (sid %s) Unable to create new file '%s' (%s)",
                  __func__, Http_get_session_id(session), filename, strerror(errno) );
 	      return(HTTP_SERVER_ERROR);
      }
@@ -65,12 +65,12 @@
     close(fd);
     if (retour != taille)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: (sid %.12s) Writing error for '%s' (%s)",
+                "%s: (sid %s) Writing error for '%s' (%s)",
                  __func__, Http_get_session_id(session), filename, strerror(errno) );
        return(HTTP_SERVER_ERROR);
      }
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-             "%s: (sid %.12s) New file file saved: '%s'", __func__, Http_get_session_id(session), filename );
+             "%s: (sid %s) New file saved: '%s'", __func__, Http_get_session_id(session), filename );
     return(HTTP_200_OK);
   }
 /******************************************************************************************************************************/
@@ -82,7 +82,7 @@
   { struct HTTP_PER_SESSION_DATA *pss;
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-             "%s: (sid %.12s) HTTP request", __func__, Http_get_session_id(session) );
+             "%s: (sid %s) HTTP request", __func__, Http_get_session_id(session) );
 
     if (lws_hdr_total_length(wsi, WSI_TOKEN_GET_URI))                                 /* Header de type GET ?? Si oui, erreur */
      { Http_Send_response_code ( wsi, HTTP_BAD_METHOD );
@@ -111,7 +111,7 @@
     name = lws_get_urlarg_by_name	( wsi, "name=", token_name, sizeof(token_name) );
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %.12s) HTTP request for type='%s', name='%s'", __func__, Http_get_session_id(pss->session),
+             "%s: (sid %s) HTTP request for type='%s', name='%s'", __func__, Http_get_session_id(pss->session),
              (type ? type : "none"), (name ? name : "none") );
 
     if ( ! (type && name) )
