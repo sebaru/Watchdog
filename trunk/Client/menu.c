@@ -27,14 +27,33 @@
 
  #include <gnome.h>
  #include "Reseaux.h"
+ #include "client.h"
  #include "Config_cli.h"
 
+ extern struct CLIENT Client;                                    /* Identifiant de l'utilisateur en cours */
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
+/**********************************************************************************************************/
+/* Menu_want_plugin_dls: l'utilisateur desire editer la base plugin_dls                                   */
+/* Entrée/Sortie: rien                                                                                    */
+/**********************************************************************************************************/
+ void Menu_want_client_leger ( void )
+  { gint pid;
+    printf( "%s: Lancement d'un firefox\n", __func__ );
+    pid = fork();
+    if (pid<0) return;
+    else if (!pid)                                                   /* Lancement de la ligne de commande */
+     { gchar chaine[256];
+       g_snprintf( chaine, sizeof(chaine), "http://%s/index.html", Client.host );
+       execlp( "firefox", "firefox", chaine, NULL );
+       printf("Lancement de firefox failed\n");
+       _exit(0);
+     }
+  }
 /**********************************************************************************************************/
 /* Menu_want_plugin_dls: l'utilisateur desire editer la base plugin_dls                                   */
 /* Entrée/Sortie: rien                                                                                    */

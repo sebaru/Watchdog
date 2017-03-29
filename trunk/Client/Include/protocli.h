@@ -280,6 +280,7 @@
  extern void Menu_ajouter_editer_classe ( struct CMD_TYPE_CLASSE *edit_classe );
 
  extern void Menu_want_plugin_dls ( void );                                                                    /* Dans menu.c */
+ extern void Menu_want_client_leger ( void );
  extern void Menu_want_util ( void );
  extern void Menu_want_groupe ( void );
  extern void Menu_want_message ( void );

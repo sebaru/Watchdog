@@ -76,8 +76,8 @@
  GnomeUIInfo Menu_admin[]=                                       /*!< Définition du menu d'administration */
   { GNOMEUIINFO_ITEM_STOCK( N_("_Administration"), N_("Administration"),
                             Menu_want_page_admin, GNOME_STOCK_PIXMAP_PROPERTIES ),
-    GNOMEUIINFO_ITEM_STOCK( N_("Edit _Messages"), N_("Edit messages"),
-                            Menu_want_message, GNOME_STOCK_PIXMAP_MAIL ),
+    GNOMEUIINFO_ITEM_STOCK( N_("Edit _Messages NEW"), N_("Edit messages"),
+                            Menu_want_client_leger, GNOME_STOCK_PIXMAP_MAIL ),
     GNOMEUIINFO_ITEM_STOCK( N_("M_nemoniques"), N_("Edit mnemoniques"),
                             Menu_want_mnemonique, GNOME_STOCK_PIXMAP_BOOK_GREEN ),
     GNOMEUIINFO_ITEM_STOCK( N_("_D.L.S"), N_("Edit DLS plugins"),
@@ -86,6 +86,9 @@
     GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_SUBTREE(N_("_Habilitations"), Menu_habilitation),
     GNOMEUIINFO_SUBTREE(N_("_Low level"), Menu_lowlevel),
+    GNOMEUIINFO_SEPARATOR,
+    GNOMEUIINFO_ITEM_STOCK( N_("Edit _Messages OLD"), N_("Edit messages"),
+                            Menu_want_message, GNOME_STOCK_PIXMAP_MAIL ),
     GNOMEUIINFO_END
   };
  GnomeUIInfo Menu_view[]=                                                    /*!< Définition du menu view */
