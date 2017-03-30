@@ -91,17 +91,17 @@
 
     if (ajout == TRUE)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "INSERT INTO %s(type,num,num_plugin,acronyme,libelle,command_text,tableau,acro_syn) VALUES "
+                   "INSERT INTO %s(type,num,dls_id,acronyme,libelle,command_text,tableau,acro_syn) VALUES "
                    "(%d,%d,%d,'%s','%s','%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
-                   mnemo->num, mnemo->num_plugin, acro, libelle, command_text, tableau, acro_syn );
+                   mnemo->num, mnemo->dls_id, acro, libelle, command_text, tableau, acro_syn );
      } else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "UPDATE %s SET "             
-                   "type=%d,libelle='%s',acronyme='%s',command_text='%s',num_plugin=%d,num=%d,tableau='%s',"
+                   "type=%d,libelle='%s',acronyme='%s',command_text='%s',dls_id=%d,num=%d,tableau='%s',"
                    "acro_syn='%s' "
                    "WHERE id=%d",
                    NOM_TABLE_MNEMO, mnemo->type, libelle, acro, command_text, 
-                   mnemo->num_plugin, mnemo->num, tableau, acro_syn, mnemo->id );
+                   mnemo->dls_id, mnemo->num, tableau, acro_syn, mnemo->id );
      }
     g_free(libelle);
     g_free(acro);
@@ -180,9 +180,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
+                "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
                 "dls.name, mnemo.tableau, mnemo.acro_syn"
-                " FROM %s as mnemo INNER JOIN %s as dls ON mnemo.num_plugin=dls.id INNER JOIN %s as syn ON dls.syn_id = syn.id",
+                " FROM %s as mnemo INNER JOIN %s as dls ON mnemo.dls_id=dls.id INNER JOIN %s as syn ON dls.syn_id = syn.id",
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE
               );
 
@@ -205,22 +205,31 @@
 /* Entrée: un pointeur vers la nouvelle connexion base de données                                                             */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Recuperer_mnemo_baseDB ( struct DB **db_retour )
-  { gchar requete[1024];
+ gboolean Recuperer_mnemo_baseDB_with_conditions ( struct DB **db_retour, gchar *conditions, gint start, gint length )
+  { gchar requete[1024], critere[256];
     gboolean retour;
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
-                "dls.name, mnemo.tableau, mnemo.acro_syn"
-                " FROM %s as mnemo INNER JOIN %s as dls ON mnemo.num_plugin=dls.id INNER JOIN %s as syn ON dls.syn_id = syn.id"
-                " ORDER BY groupe,page,name,type,num",
-                NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE
+                "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
+                "dls.shortname, mnemo.tableau, mnemo.acro_syn"
+                " FROM %s as mnemo INNER JOIN %s as dls ON mnemo.dls_id=dls.id INNER JOIN %s as syn ON dls.syn_id = syn.id"
+                " WHERE %s ORDER BY groupe,page,name,type,num",
+                NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, conditions
               );                                                                                    /* order by test 25/01/06 */
+
+    if (start != -1 && length != -1)                                                 /* Critere d'affichage (offset et count) */
+     { g_snprintf( critere, sizeof(critere), " LIMIT %d,%d", start, length );
+       g_strlcat( requete, critere, sizeof(requete) );
+     }
+    else if (length!=-1)
+     { g_snprintf( critere, sizeof(critere), " LIMIT %d", length );
+       g_strlcat( requete, critere, sizeof(requete) );
+     }
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_mnemoDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
@@ -253,15 +262,15 @@
      { g_snprintf( mnemo->acronyme,     sizeof(mnemo->acronyme),     "%s", db->row[4] );
        g_snprintf( mnemo->libelle,      sizeof(mnemo->libelle),      "%s", db->row[5] );
        g_snprintf( mnemo->command_text, sizeof(mnemo->command_text), "%s", db->row[6] );
-       g_snprintf( mnemo->groupe,       sizeof(mnemo->groupe),       "%s", db->row[7] );
-       g_snprintf( mnemo->page,         sizeof(mnemo->page),         "%s", db->row[8] );
-       g_snprintf( mnemo->plugin_dls,   sizeof(mnemo->plugin_dls),   "%s", db->row[9] );
+       g_snprintf( mnemo->syn_groupe,   sizeof(mnemo->syn_groupe),   "%s", db->row[7] );
+       g_snprintf( mnemo->syn_page,     sizeof(mnemo->syn_page),     "%s", db->row[8] );
+       g_snprintf( mnemo->dls_shortname,sizeof(mnemo->dls_shortname),"%s", db->row[9] );
        g_snprintf( mnemo->tableau,      sizeof(mnemo->tableau),      "%s", db->row[10] );
        g_snprintf( mnemo->acro_syn,     sizeof(mnemo->acro_syn),     "%s", db->row[11] );
-       mnemo->id          = atoi(db->row[0]);
-       mnemo->type        = atoi(db->row[1]);
-       mnemo->num         = atoi(db->row[2]);
-       mnemo->num_plugin  = atoi(db->row[3]);
+       mnemo->id     = atoi(db->row[0]);
+       mnemo->type   = atoi(db->row[1]);
+       mnemo->num    = atoi(db->row[2]);
+       mnemo->dls_id = atoi(db->row[3]);
      }
     return(mnemo);
   }
@@ -276,10 +285,10 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
+                "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
                 "dls.name, mnemo.tableau, mnemo.acro_syn"
                 " FROM %s as mnemo"
-                " INNER JOIN %s as dls ON mnemo.num_plugin=dls.id"
+                " INNER JOIN %s as dls ON mnemo.dls_id=dls.id"
                 " INNER JOIN %s as syn ON dls.syn_id = syn.id"
                 " WHERE mnemo.id = %d", NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, id
               );
@@ -310,9 +319,9 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT mnemo.id,mnemo.type,num,num_plugin,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
+                "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
                 "dls.name, mnemo.tableau, mnemo.acro_syn"
-                " FROM %s as mnemo INNER JOIN %s as dls ON mnemo.num_plugin=dls.id INNER JOIN %s as syn ON dls.syn_id = syn.id"
+                " FROM %s as mnemo INNER JOIN %s as dls ON mnemo.dls_id=dls.id INNER JOIN %s as syn ON dls.syn_id = syn.id"
                 " WHERE mnemo.type = %d AND mnemo.num = %d LIMIT 1",
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, critere->type, critere->num
               );

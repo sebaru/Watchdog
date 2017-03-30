@@ -60,15 +60,15 @@
   { guint id;                                                                    /* ID unique du mnemonique dans la structure */
     guint type;                                                                                    /* Type du bit interne lié */
     guint num;                                                                             /* Numéro du bit lié au mnemonique */
-    guint num_plugin;                                                                         /* Numéro du plugin DLS associé */
-    gchar  groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
-    gchar  page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
-    gchar  plugin_dls[NBR_CARAC_PLUGIN_DLS_UTF8+1];
+    guint dls_id;                                                                             /* Numéro du plugin DLS associé */
+    gchar  syn_groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
+    gchar  syn_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
+    gchar  dls_shortname[NBR_CARAC_PLUGIN_DLS_UTF8+1];
     gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
     gchar  command_text[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
     gchar  tableau[ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
-    gchar  acro_syn[ NBR_CARAC_ACRO_SYN_MNEMONIQUE_UTF8 + 1 ];        /* Acronyme présenté sur le synoptique, en mode capteur */
+    gchar  acro_syn[ NBR_CARAC_ACRO_SYN_MNEMONIQUE_UTF8 + 1 ];         /* Acronyme présenté sur le synoptique, en mode cadran */
   };
 
 /**************************************************** AddOns pour les Analog Input ********************************************/

@@ -189,9 +189,9 @@
     if (!mnemo)                                      /* Si pas trouvé, création d'un mnemo 'discovered' ? */
      { struct CMD_TYPE_MNEMO_FULL new_mnemo;
        memset( &new_mnemo, 0, sizeof(new_mnemo) );
-       new_mnemo.mnemo_base.type       = MNEMO_MONOSTABLE;
-       new_mnemo.mnemo_base.num        = 9999;
-       new_mnemo.mnemo_base.num_plugin = 1;
+       new_mnemo.mnemo_base.type   = MNEMO_MONOSTABLE;
+       new_mnemo.mnemo_base.num    = 9999;
+       new_mnemo.mnemo_base.dls_id = 1;
        g_snprintf( new_mnemo.mnemo_base.acronyme,     sizeof(new_mnemo.mnemo_base.acronyme), "Discovered Event" );
        g_snprintf( new_mnemo.mnemo_base.libelle,      sizeof(new_mnemo.mnemo_base.libelle),  "To be filled" );
        g_snprintf( new_mnemo.mnemo_base.command_text, sizeof(new_mnemo.mnemo_base.command_text), "%s", request );

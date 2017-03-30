@@ -46,7 +46,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_groupeDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
@@ -56,7 +56,7 @@
 
     if ( ! Lancer_requete_SQL ( db, requete ))
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Groupe_set_groupe_utilDB: Delete failed id=%d", id_util );
+                "%s: Delete failed id=%d", __func__, id_util );
        Libere_DB_SQL(&db);
        return(FALSE);
      }
@@ -70,7 +70,7 @@
 
        if ( ! Lancer_requete_SQL ( db, requete ))
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                   "Groupe_set_groupe_utilDB: set gids failed for id=%d", id_util );
+                   "%s: set gids failed for id=%d", __func__, id_util );
           Libere_DB_SQL(&db);
           return(FALSE);
         }
@@ -90,12 +90,14 @@
     gboolean retour;
     struct DB *db;
 
-    g_snprintf( requete, sizeof(requete), "SELECT DISTINCT gids FROM %s WHERE id_util=%d OR %d=%d ORDER BY gids DESC",
-                NOM_TABLE_GIDS, id, id, UID_ROOT );                               /* Root est dans tous les groupes existants */
+    g_snprintf( requete, sizeof(requete),
+               "SELECT DISTINCT id FROM %s AS groups LEFT JOIN %s AS gids ON groups.id = gids.gids "
+               "WHERE (gids.id_util=%d OR %d=0) ORDER BY id DESC",
+                NOM_TABLE_GROUPE, NOM_TABLE_GIDS, id, id, UID_ROOT );             /* Root est dans tous les groupes existants */
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_groupeDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
@@ -132,7 +134,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_groupeDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
      }
 
@@ -159,7 +161,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_groupeDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
@@ -187,7 +189,7 @@
 
     groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof(struct CMD_TYPE_GROUPE) );
     if (!groupe) Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                          "Recuperer_groupeDB_suite: memory error" );
+                          "%s: memory error", __func__ );
     else
      { groupe->id = atoi(db->row[0]);
        memcpy( &groupe->nom, db->row[1], sizeof(groupe->nom) );                                  /* Recopie dans la structure */
@@ -235,7 +237,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_groupeDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
@@ -257,12 +259,12 @@
 
     nom     = Normaliser_chaine ( groupe->nom );
     if (!nom)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_groupeDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
        return(-1);
      }
     comment = Normaliser_chaine ( groupe->commentaire );
     if (!comment)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_groupeDB: Normalisation impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
        g_free(nom);
        return(-1);
      }
@@ -274,7 +276,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_groupeDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(-1);
      }
 
@@ -308,7 +310,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_groupeDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 

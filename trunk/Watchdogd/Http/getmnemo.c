@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Http/getmnemo.c       Gestion des request getmnemo pour le thread HTTP de watchdog                               */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                                    22.09.2016 14:18:41 */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                                    30.03.2017 09:43:52 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -27,7 +27,6 @@
  
  #include <string.h>
  #include <unistd.h>
- #include <libxml/xmlwriter.h>
 
 /******************************************************* Prototypes de fonctions **********************************************/
  #include "watchdogd.h"
@@ -37,97 +36,120 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- gboolean Http_Traiter_request_getmnemo ( struct lws *wsi, struct HTTP_SESSION *session, gchar *url )
-  { unsigned char header[256], *header_cur, *header_end;
-   	const gchar *num_s, *type_s;
-    const char *content_type = "application/xml";
+ gint Http_Traiter_request_getmnemos ( struct lws *wsi, struct HTTP_SESSION *session )
+  { gchar token_length[12], token_start[12], token_type[12], token_num[12];
+    gchar token_dls[200], token_libelle[200],token_groupe[200];
+    const gchar *length_s, *start_s, *type_s, *num_s, *libelle, *groupe, *dls;
+    gchar requete[1024], critere[512];
     struct CMD_TYPE_MNEMO_BASE *mnemo;
-    struct CMD_TYPE_NUM_MNEMONIQUE critere;
-    gchar token_num[12], token_type[12];
-    gchar requete[256];
-    gint type, num;
-    xmlTextWriterPtr writer;
-    xmlBufferPtr buf;
+    gint type, start, length;
+    struct DB *db;
     gint retour;
+    JsonBuilder *builder;
+    JsonGenerator *gen;
+    gchar *buf;
+    gsize taille_buf;
 
-    if ( session==NULL || session->util==NULL || Tester_groupe_util( session->util, GID_MNEMO)==FALSE)
+    if ( session==NULL || session->util==NULL || Tester_groupe_util(session->util, GID_MNEMO)==FALSE )
      { Http_Send_response_code ( wsi, HTTP_UNAUTHORIZED );
        return(TRUE);
      }
 
-    type_s = lws_get_urlarg_by_name	( wsi, "type=",   token_type,   sizeof(token_type) );
-    if (type_s) { critere.type = atoi ( type_s ); } else { critere.type   = -1; }
-    num_s  = lws_get_urlarg_by_name	( wsi, "num=",  token_num,  sizeof(token_num) );
-    if (num_s)  { critere.num  = atoi ( num_s );  } else { critere.num  = -1; }
+    type_s   = lws_get_urlarg_by_name	( wsi, "type=",    token_type,    sizeof(token_type) );
+    num_s    = lws_get_urlarg_by_name	( wsi, "num=",     token_num,     sizeof(token_num) );
+    start_s  = lws_get_urlarg_by_name	( wsi, "start=",   token_start,   sizeof(token_start) );
+    length_s = lws_get_urlarg_by_name	( wsi, "length=",  token_length,  sizeof(token_length) );
+    libelle  = lws_get_urlarg_by_name	( wsi, "libelle=", token_libelle, sizeof(token_libelle) );
+    groupe   = lws_get_urlarg_by_name	( wsi, "groupe=",  token_groupe,  sizeof(token_groupe) );
+    dls      = lws_get_urlarg_by_name	( wsi, "dls=",     token_dls,     sizeof(token_dls) );
 
-/************************************************ Préparation du buffer XML ***************************************************/
-    buf = xmlBufferCreate();                                                                        /* Creation du buffer xml */
-    if (buf == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getmnemo : XML Buffer creation failed" );
-       return(FALSE);
-     }
-
-    writer = xmlNewTextWriterMemory(buf, 0);                                                         /* Creation du write XML */
-    if (writer == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getmnemo : XML Writer creation failed" );
-       xmlBufferFree(buf);
-       return(FALSE);
+    g_snprintf( requete, sizeof(requete), "1=1" );
+    if (type_s)
+     { g_snprintf( critere, sizeof(critere), " AND mnemo.type=%d", atoi(type_s) );
+       g_strlcat( requete, critere, sizeof(requete) );
      }
 
-    retour = xmlTextWriterStartDocument(writer, NULL, "UTF-8", "yes" );                               /* Creation du document */
-    if (retour < 0)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getmnemo : XML Start document failed" );
-       xmlBufferFree(buf);
-       return(FALSE);
-     }
-                                                                        /* Lancement de la requete de recuperation des mnemos */
-    mnemo =  Rechercher_mnemo_baseDB_type_num ( &critere );
-    if (!mnemo)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Http_Traiter_request_getmnemo : Mnemo %d/%d not found", critere.type, critere.num );
-       xmlFreeTextWriter(writer);                                                                 /* Libération du writer XML */
-       xmlBufferFree(buf);                                            /* Libération du buffer dont nous n'avons plus besoin ! */
-       return(FALSE);
-     }
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping mnemo !!");
-    xmlTextWriterStartElement(writer, (const unsigned char *) "mnemo");
-/*------------------------------------------------------- Dumping mnemo ----------------------------------------------------*/
-    if ( ! strncasecmp ( url, "Light", 5 ) )
-     { xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"libelle", "%s", mnemo->libelle );
-       if (mnemo->type == MNEMO_ENTREE_ANA)
-        {
-          xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"unite", "test" );
-        }
-     }
-    g_free(mnemo);
-    xmlTextWriterEndElement(writer);                                                                             /* End mnemo */
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"Dumping mnemo done !");
-    retour = xmlTextWriterEndDocument(writer);                                                                /* End document */
-    if (retour < 0)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getmnemo : Failed to end Document" );
-       xmlFreeTextWriter(writer);                                                                 /* Libération du writer XML */
-       xmlBufferFree(buf);
-       return(FALSE);
-     }
-    xmlFreeTextWriter(writer);                                                                    /* Libération du writer XML */
+    if (start_s)
+     { start = atoi (start_s); }
+    else start=0;
 
+    if (length_s)
+     { length = atoi (length_s); }
+    else length=500;
+
+    if (num_s)
+     { g_snprintf( critere, sizeof(critere), " AND mnemo.num=%d", atoi(num_s) );
+       g_strlcat( requete, critere, sizeof(requete) );
+     }
+
+    if (libelle)
+     { g_snprintf( critere, sizeof(critere), " AND mnemo.libelle LIKE '%%%s%%'", libelle );
+       g_strlcat( requete, critere, sizeof(requete) );
+     }
+
+    if (dls)
+     { g_snprintf( critere, sizeof(critere), " AND dls.shortname LIKE '%%%s%%'", dls );
+       g_strlcat( requete, critere, sizeof(requete) );
+     }
+
+    if (groupe)
+     { g_snprintf( critere, sizeof(critere),
+                  " AND (syn.groupe LIKE '%%%s%%' OR syn.page LIKE '%%%s%%' OR syn.libelle LIKE '%%%s%%'"
+                       " OR dls.shortname LIKE '%%%s%%')",
+                   groupe, groupe, groupe, groupe );
+       g_strlcat( requete, critere, sizeof(requete) );
+     }
+
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = json_builder_new ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
+                 "%s: JSon builder creation failed", __func__ );
+       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
+       return(1);
+     }
+                                                                      /* Lancement de la requete de recuperation des mnemos */
+    if ( ! Recuperer_mnemo_baseDB_with_conditions( &db, requete, start, length ) )
+     { g_object_unref(builder);
+       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
+       return(1);
+     }
+/*------------------------------------------------------- Dumping mnemo ------------------------------------------------------*/
+    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+    json_builder_set_member_name  ( builder, "Mnemos" );
+    json_builder_begin_array (builder);                                                        /* Création du noeud principal */
+    while ( (mnemo=Recuperer_mnemo_baseDB_suite( &db )) != NULL )                /* Mise en forme avant envoi au client léger */
+     { 
+       json_builder_begin_object (builder);                                                          /* Contenu du Mnemonique */
+
+       json_builder_set_member_name  ( builder, "id" );            json_builder_add_int_value    ( builder, mnemo->id );
+       json_builder_set_member_name  ( builder, "type" );          json_builder_add_int_value    ( builder, mnemo->type );
+       json_builder_set_member_name  ( builder, "num" );           json_builder_add_int_value    ( builder, mnemo->num );
+       json_builder_set_member_name  ( builder, "dls_id" );        json_builder_add_int_value    ( builder, mnemo->dls_id );
+       json_builder_set_member_name  ( builder, "dls_shortname" ); json_builder_add_string_value ( builder, mnemo->dls_shortname );
+       json_builder_set_member_name  ( builder, "libelle" );       json_builder_add_string_value ( builder, mnemo->libelle );
+       json_builder_set_member_name  ( builder, "command_text" );  json_builder_add_string_value ( builder, mnemo->command_text );
+       json_builder_set_member_name  ( builder, "syn_groupe" );    json_builder_add_string_value ( builder, mnemo->syn_groupe );
+       json_builder_set_member_name  ( builder, "syn_page" );      json_builder_add_string_value ( builder, mnemo->syn_page );
+       json_builder_set_member_name  ( builder, "tableau" );       json_builder_add_string_value ( builder, mnemo->tableau );
+       json_builder_set_member_name  ( builder, "acro_syn" );      json_builder_add_string_value ( builder, mnemo->acro_syn );
+
+       json_builder_end_object (builder);                                                                /* Fin dump du mnemo */
+       g_free(mnemo);
+     }
+    json_builder_end_array (builder);                                                                         /* End Document */
+    json_builder_end_object (builder);                                                                        /* End Document */
+
+    gen = json_generator_new ();
+    json_generator_set_root ( gen, json_builder_get_root(builder) );
+    json_generator_set_pretty ( gen, TRUE );
+    buf = json_generator_to_data (gen, &taille_buf);
+    g_object_unref(builder);
+    g_object_unref(gen);
+          
 /*************************************************** Envoi au client **********************************************************/
-    header_cur = header;
-    header_end = header + sizeof(header);
-    
-    retour = lws_add_http_header_status( wsi, 200, &header_cur, header_end );
-    retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, (const unsigned char *)content_type, strlen(content_type),
-                                           &header_cur, header_end );
-    retour = lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );
-    retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
-    *header_cur='\0';                                                                               /* Caractere null d'arret */
-    lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-    lws_write ( wsi, buf->content, buf->use, LWS_WRITE_HTTP);                                               /* Send to client */
-    xmlBufferFree(buf);                                               /* Libération du buffer dont nous n'avons plus besoin ! */
-    return(TRUE);
+    Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf );
+    g_free(buf);                                                      /* Libération du buffer dont nous n'avons plus besoin ! */
+    return(lws_http_transaction_completed(wsi));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

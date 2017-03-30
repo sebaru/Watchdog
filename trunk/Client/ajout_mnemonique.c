@@ -67,10 +67,10 @@
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_tableau) ) );
     g_snprintf( Option_mnemo.mnemo_base.acro_syn, sizeof(Option_mnemo.mnemo_base.acro_syn),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acro_syn) ) );
-    index                              = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls) );
-    Option_mnemo.mnemo_base.num_plugin = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, index ) );
-    Option_mnemo.mnemo_base.type       = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
-    Option_mnemo.mnemo_base.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
+    index                          = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls) );
+    Option_mnemo.mnemo_base.dls_id = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, index ) );
+    Option_mnemo.mnemo_base.type   = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
+    Option_mnemo.mnemo_base.num    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
 
     switch ( Option_mnemo.mnemo_base.type )
      { case MNEMO_ENTREE_ANA: Get_options_AI       ( &Option_mnemo ); break;
@@ -107,7 +107,7 @@
     g_snprintf( chaine, sizeof(chaine), "%s/%s/%s", dls->syn_groupe, dls->syn_page, dls->shortname );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_dls), chaine );
     Liste_index_dls = g_list_append( Liste_index_dls, GINT_TO_POINTER(dls->id) );
-    if (Option_mnemo.mnemo_base.num_plugin == dls->id)
+    if (Option_mnemo.mnemo_base.dls_id == dls->id)
      { gtk_combo_box_set_active ( GTK_COMBO_BOX (Combo_dls),
                                   g_list_index(Liste_index_dls, GINT_TO_POINTER(dls->id))
                                 );

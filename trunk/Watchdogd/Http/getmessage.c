@@ -36,11 +36,11 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- gboolean Http_Traiter_request_getmessage ( struct lws *wsi, struct HTTP_SESSION *session )
+ gint Http_Traiter_request_getmessage ( struct lws *wsi, struct HTTP_SESSION *session )
   { gchar token_length[12], token_start[12], token_type[12], token_num[12];
     gchar token_dls[200], token_libelle[200],token_groupe[200];
     const gchar *length_s, *start_s, *type_s, *num_s, *libelle, *groupe, *dls;
-gchar requete[1024], critere[512];
+    gchar requete[1024], critere[512];
     struct CMD_TYPE_MESSAGE *msg;
     gint type, start, length;
     struct DB *db;
@@ -50,9 +50,9 @@ gchar requete[1024], critere[512];
     gchar *buf;
     gsize taille_buf;
 
-    if ( session==NULL || session->util==NULL || Tester_groupe_util(session->util, GID_MESSAGE)==FALSE)
+    if ( session==NULL || session->util==NULL || Tester_groupe_util(session->util, GID_MESSAGE)==FALSE )
      { Http_Send_response_code ( wsi, HTTP_UNAUTHORIZED );
-       return(TRUE);
+       return(1);
      }
 
     type_s   = lws_get_urlarg_by_name	( wsi, "type=",    token_type,    sizeof(token_type) );
@@ -106,16 +106,16 @@ gchar requete[1024], critere[512];
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "Http_Traiter_request_getmessage : JSon builder creation failed" );
        Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
-       return(TRUE);
+       return(1);
      }
                                                                       /* Lancement de la requete de recuperation des messages */
     if ( ! Recuperer_messageDB_with_conditions( &db, requete, start, length ) )
      { g_object_unref(builder);
        Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
-       return(TRUE);
+       return(1);
      }
 /*------------------------------------------------------- Dumping message ----------------------------------------------------*/
-    json_builder_begin_object (builder);                                                        /* Création du noeud principal */
+    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
     json_builder_set_member_name  ( builder, "Messages" );
     json_builder_begin_array (builder);                                                        /* Création du noeud principal */
     while ( (msg=Recuperer_messageDB_suite( &db )) != NULL )                     /* Mise en forme avant envoi au client léger */
@@ -154,6 +154,6 @@ gchar requete[1024], critere[512];
 /*************************************************** Envoi au client **********************************************************/
     Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf );
     g_free(buf);                                                      /* Libération du buffer dont nous n'avons plus besoin ! */
-    return(TRUE);
+    return(lws_http_transaction_completed(wsi));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

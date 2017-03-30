@@ -117,7 +117,7 @@
  extern gint Http_Traiter_request_body_completion_postfile ( struct lws *wsi );
  extern gint Http_Traiter_request_getpluginsDLS ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_getui ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
- extern gboolean Http_Traiter_request_getmnemo ( struct lws *wsi, struct HTTP_SESSION *session, gchar *url );
+ extern gint Http_Traiter_request_getmnemos ( struct lws *wsi, struct HTTP_SESSION *session );
  
  extern struct HTTP_SESSION *Http_get_session ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
  extern gchar *Http_get_session_id ( struct HTTP_SESSION *session );

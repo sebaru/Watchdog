@@ -200,7 +200,7 @@ INSERT INTO `groups` (`id`, `name`, `comment`) VALUES
 (3, 'Admin-iconDB', 'Members can add/remove/edit icons'),
 (4, 'Admin-synopDB', 'Members can add/remove/edit syn'),
 (5, 'Admin-mnemos', 'Members can manage Mnemonique'),
-(6, 'Admin-dlsDB', 'Members can add/remove/edit DLS plugins'),
+(6, 'Admin-dlsDB', 'Members can add/remove/edit DLS'),
 (7, 'Admin-histoDB', 'Members can ack/query histo'),
 (8, 'Admin-scenarioDB', 'Members can add/remove Scenario'),
 (9, 'Admin-Lowlevel I/O', 'Configuration MODBUS/RS485/ONDULEUR/...'),
@@ -594,7 +594,7 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type` int(11) NOT NULL DEFAULT '0',
   `num` int(11) NOT NULL DEFAULT '0',
-  `num_plugin` int(11) NOT NULL DEFAULT '0',
+  `dls_id` int(11) NOT NULL DEFAULT '0',
   `acronyme` text COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `command_text` text COLLATE utf8_unicode_ci NOT NULL,
@@ -603,7 +603,7 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
   PRIMARY KEY (`id`), FULLTEXT(`command_text`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
-INSERT INTO `mnemos` (`id`, `type`, `num`, `num_plugin`, `acronyme`, `libelle`, `command_text`) VALUES
+INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `command_text`) VALUES
 (01, 0,   0, 1, 'SYS_TOGGLE_RUN', 'Change d''Ã©tat tous les tours programme', ''),
 (02, 0,   1, 1, 'SYS_ALWAYS_0', 'Toujours Ã  0', ''),
 (03, 0,   2, 1, 'SYS_ALWAYS_1', 'Toujours Ã  1', ''),
