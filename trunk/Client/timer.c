@@ -241,7 +241,7 @@
                                  Timer_motif( trame_motif, (nbr_cligno < 1 ? 1 : 0) );
                                  break;
           case TYPE_COMMENTAIRE:                                
-          case TYPE_CADRAN:     break;
+          case TYPE_CADRAN:      break;
           case TYPE_PASSERELLE : trame_pass = (struct TRAME_ITEM_PASS *)liste_motifs->data;
                                  Timer_pass( trame_pass, (nbr_cligno < 1 ? 1 : 0) );
                                  break;

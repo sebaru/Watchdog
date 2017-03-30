@@ -79,7 +79,7 @@
     if (!(trame_motif && event)) return;
 
     if (event->type == GDK_BUTTON_PRESS)
-     { if (trame_motif->motif->type_gestion == TYPE_BOUTON)
+     { if (trame_motif->motif->type_gestion == TYPE_BOUTON && (trame_motif->last_clic + 2 <= time(NULL)) )
         { printf("Appui sur bouton num_image=%d\n", trame_motif->num_image );
           if ( (trame_motif->num_image % 3) == 1 )
            { Trame_choisir_frame( trame_motif, trame_motif->num_image + 1,      /* Frame 2: bouton appuyé */
@@ -89,6 +89,7 @@
            }
         }
        appui = trame_motif;
+       time(&appui->last_clic);                                        /* Mémorisation de la date de clic */
      }
     else if (event->type == GDK_BUTTON_RELEASE && appui)
      {

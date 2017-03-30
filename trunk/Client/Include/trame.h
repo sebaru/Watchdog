@@ -102,6 +102,7 @@
 
     guchar etat;                                                                                     /* Etat attendu du motif */
     gint   cligno;                                                                                    /* Etat cligno du motif */
+    time_t last_clic;
 
     struct CMD_TYPE_MOTIF *motif;
     gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
