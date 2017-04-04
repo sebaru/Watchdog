@@ -31,7 +31,6 @@
  #include <sys/types.h>
  #include <sys/stat.h>
  #include <unistd.h>
- #include <rrd.h>
 
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
 
