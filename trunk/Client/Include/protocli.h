@@ -30,7 +30,6 @@
 
  #include <gnome.h>
  #include <openssl/ssl.h>
- #include <gtkdatabox.h>
  #include <gtksourceview/gtksourceprintcompositor.h>
 
  #include "Reseaux.h"
