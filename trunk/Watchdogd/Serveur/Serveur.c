@@ -187,8 +187,12 @@
 /******************************************************************************************************************************/
  void Client_mode ( struct CLIENT *client, gint mode )
   { if (client->mode == DECONNECTE)
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-                "Client_mode: positionnement impossible pour %s car mode = DECONNECTE", client->util->nom);
+     { gchar *nom;
+       if (client->util && client->util->nom)
+        { nom = client->util->nom; }
+       else nom = "Unknown";
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
+                "Client_mode: positionnement impossible pour %s car mode = DECONNECTE", nom );
        return;
      }
 
