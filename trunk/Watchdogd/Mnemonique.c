@@ -215,7 +215,7 @@
                 "dls.shortname, mnemo.tableau, mnemo.acro_syn"
                 " FROM %s as mnemo INNER JOIN %s as dls ON mnemo.dls_id=dls.id INNER JOIN %s as syn ON dls.syn_id = syn.id"
                 " WHERE %s ORDER BY groupe,page,name,type,num",
-                NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, conditions
+                NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, (conditions ? conditions : "1=1")
               );                                                                                    /* order by test 25/01/06 */
 
     if (start != -1 && length != -1)                                                 /* Critere d'affichage (offset et count) */

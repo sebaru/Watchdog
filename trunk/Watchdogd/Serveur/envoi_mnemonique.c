@@ -194,7 +194,7 @@
 
     prctl(PR_SET_NAME, "W-EnvoiMnemo", 0, 0, 0 );
 
-    if ( ! Recuperer_mnemo_baseDB( &db ) )
+    if ( ! Recuperer_mnemo_baseDB_with_conditions( &db, NULL, -1, -1 ) )
      { Unref_client( client );                                                            /* Déréférence la structure cliente */
        return;
      }
