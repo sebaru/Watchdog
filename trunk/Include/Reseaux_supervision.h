@@ -36,17 +36,16 @@
     guchar  bleu;
     guchar  cligno;
   };
- struct CMD_ETAT_BIT_CLIC
-  { guint   num;
-  };
- struct CMD_WANT_SCENARIO_MOTIF
-  { guint   bit_clic;
-    guint   bit_clic2;
-  };
  struct CMD_ETAT_BIT_CADRAN
   { guint   bit_controle;
     guint   type;
     gchar   libelle[25];
+  };
+
+ struct CMD_SET_BIT_INTERNE
+  { guint type;
+    guint num;
+    gfloat valeur;
   };
 
  enum 
@@ -70,6 +69,7 @@
     SSTAG_SERVEUR_SUPERVISION_CHANGE_CADRAN,                          /* Un cadran à changé d'etat, nous l'envoyons au client */
     SSTAG_CLIENT_CHANGE_CADRAN_UNKNOWN,                         /* Reponse si le numero Ixxx n'est pas utilisé dans le client */
     SSTAG_CLIENT_ACTION_M,                                                            /* Le client envoie un bit M au serveur */
+    SSTAG_CLIENT_SET_BIT_INTERNE,                                               /* Le client envoie un bit interne au serveur */
   };
 
 #endif

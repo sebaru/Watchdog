@@ -33,11 +33,11 @@
  #include "Config_cli.h"
  #include "trame.h"
 
- extern struct CLIENT Client;                           /* Identifiant de l'utilisateur en cours */
- extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
- extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
+ extern struct CLIENT Client;                                                        /* Identifiant de l'utilisateur en cours */
+ extern GList *Liste_pages;                                                       /* Liste des pages ouvertes sur le notebook */  
+ extern GtkWidget *Notebook;                                                             /* Le Notebook de controle du client */
+ extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
+ extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
 
  static GnomeUIInfo Menu_popup[]=
   { /*GNOMEUIINFO_ITEM_STOCK ( N_("Program"), NULL, Envoyer_action_programme, GNOME_STOCK_PIXMAP_EXEC ),*/
@@ -47,7 +47,9 @@
  static struct TRAME_ITEM_CADRAN *appui_cadran = NULL;
  static struct TRAME_ITEM_CAMERA_SUP *appui_camera_sup = NULL;
 
-/********************************* Définitions des prototypes programme ***********************************/
+ static GtkWidget *F_set_registre;                                                         /* Widget de l'interface graphique */
+ static GtkWidget *Spin_valeur;                                                                         /* Valeur du registre */
+/****************************************** Définitions des prototypes programme **********************************************/
  #include "protocli.h"
 
  extern struct TRAME *Trame_supervision;                               /* La trame de fond de supervision */
@@ -57,16 +59,17 @@
 /* Sortie :rien                                                                                           */
 /**********************************************************************************************************/
  static void Envoyer_action_immediate ( struct TRAME_ITEM_MOTIF *trame_motif )
-  { struct CMD_ETAT_BIT_CLIC bit_clic;
+  { struct CMD_SET_BIT_INTERNE bit;
+    bit.type = MNEMO_MONOSTABLE;
     if (trame_motif->motif->type_gestion == TYPE_BOUTON)
-     { bit_clic.num = trame_motif->motif->bit_clic + (trame_motif->num_image / 3);
+     { bit.num = trame_motif->motif->bit_clic + (trame_motif->num_image / 3);
      }
     else
-     { bit_clic.num = trame_motif->motif->bit_clic; }
+     { bit.num = trame_motif->motif->bit_clic; }
 
-    Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_ACTION_M,
-                   (gchar *)&bit_clic, sizeof(struct CMD_ETAT_BIT_CLIC) );
-    printf("Envoi M%d = 1 au serveur \n", bit_clic.num );
+    Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SET_BIT_INTERNE,
+                   (gchar *)&bit, sizeof(struct CMD_SET_BIT_INTERNE) );
+    printf("Envoi M%d = 1 au serveur \n", bit.num );
   }
 /**********************************************************************************************************/
 /* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision   */
@@ -199,15 +202,77 @@ printf("release !\n");
   { Clic_cadran_supervision_action ( "month" ); }
  static void Clic_cadran_supervision_year ( void )
   { Clic_cadran_supervision_action ( "year" ); }
-/**********************************************************************************************************/
-/* Clic_sur_cadran_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision  */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* CB_Cadran_Set_registre: Fonction appelée qd on appuie sur un des boutons de l'interface de modification de consigne        */
+/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
+/* sortie: TRUE                                                                                                               */
+/******************************************************************************************************************************/
+ static gboolean CB_Cadran_Set_registre ( GtkDialog *dialog, gint reponse, gint regnum )
+  { struct CMD_SET_BIT_INTERNE Set_bit;
+    Set_bit.type = MNEMO_REGISTRE;
+    Set_bit.num = regnum;
+    Set_bit.valeur = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON(Spin_valeur) );
+    
+    switch(reponse)
+     { case GTK_RESPONSE_OK:
+             { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SET_BIT_INTERNE,
+                              (gchar *)&Set_bit, sizeof( struct CMD_SET_BIT_INTERNE ) );
+             }
+            break;
+       case GTK_RESPONSE_CANCEL:
+       default:              break;
+     }
+    gtk_widget_destroy(F_set_registre);
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Clic_cadran_set_registre: Appelé quand l'utilisateur souhaite entrer une consigne                                          */
+/* Entrée: le cadran, au travers de son lien trame_cadran                                                                     */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Clic_cadran_set_registre ( struct TRAME_ITEM_CADRAN *trame_cadran )
+  { GtkWidget *frame, *table, *texte, *hboite;
+    gint i;
+    F_set_registre = gtk_dialog_new_with_buttons( _("Change Register"), GTK_WINDOW(F_client),
+                                                  GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                                  GTK_STOCK_OK, GTK_RESPONSE_OK,
+                                                  NULL);
+    g_signal_connect( F_set_registre, "response",
+                      G_CALLBACK(CB_Cadran_Set_registre),
+                      GINT_TO_POINTER(trame_cadran->cadran->bit_controle) );
+
+    frame = gtk_frame_new("Settings");                                                   /* Création de l'interface graphique */
+    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
+    gtk_container_set_border_width( GTK_CONTAINER(frame), 6 );
+    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(F_set_registre)->vbox ), frame, TRUE, TRUE, 0 );
+
+    hboite = gtk_hbox_new( FALSE, 6 );
+    gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
+    gtk_container_add( GTK_CONTAINER(frame), hboite );
+
+    table = gtk_table_new( 1, 2, TRUE );
+    gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
+    gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
+    gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
+
+    i = 0;
+    texte = gtk_label_new( "Nouvelle consigne" );                                   /* Création du champ de nouvelle consigne */
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+
+    Spin_valeur = gtk_spin_button_new_with_range( -1000, +1000, 0.1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_valeur, 1, 2, i, i+1 );
+    gtk_widget_show_all(F_set_registre);                                                 /* Affichage de l'interface complète */
+  }
+/******************************************************************************************************************************/
+/* Clic_sur_cadran_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision                      */
+/* Entrée: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
  void Clic_sur_cadran_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                      GdkEvent *event, struct TRAME_ITEM_CADRAN *trame_cadran )
   { static GtkWidget *Popup = NULL;
-    static GnomeUIInfo Popup_comment[]=
+    static GnomeUIInfo Popup_cadran[]=
      { GNOMEUIINFO_ITEM_STOCK( N_("Last Hour"),  NULL, Clic_cadran_supervision_hour, GNOME_STOCK_PIXMAP_BOOK_OPEN ),
        GNOMEUIINFO_ITEM_STOCK( N_("Last Day"),   NULL, Clic_cadran_supervision_day, GNOME_STOCK_PIXMAP_BOOK_RED ),
        GNOMEUIINFO_ITEM_STOCK( N_("Last Week"),  NULL, Clic_cadran_supervision_week, GNOME_STOCK_PIXMAP_BOOK_GREEN ),
@@ -220,10 +285,14 @@ printf("release !\n");
     appui_cadran = trame_cadran;
 
     if (event->type == GDK_BUTTON_PRESS)
-     { if ( ((GdkEventButton *)event)->button == 1)           /* Release sur le motif qui a été appuyé ?? */
-        { Clic_cadran_supervision_hour ();		 }
+     { if ( ((GdkEventButton *)event)->button == 1 )                              /* Release sur le motif qui a été appuyé ?? */
+        { if (trame_cadran->cadran->type != MNEMO_REGISTRE)
+           { Clic_cadran_supervision_hour (); }
+          else
+           { Clic_cadran_set_registre ( trame_cadran ); }
+        }
        else if (event->button.button == 3)
-        { if (!Popup) Popup = gnome_popup_menu_new( Popup_comment );                     /* Creation menu */
+        { if (!Popup) Popup = gnome_popup_menu_new( Popup_cadran );                     /* Creation menu */
           gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
         }
      }

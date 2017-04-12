@@ -125,10 +125,15 @@
                client->Liste_bit_syns = g_slist_remove ( client->Liste_bit_syns, GINT_TO_POINTER( etat->num ) );
              }
             break;
-       case SSTAG_CLIENT_ACTION_M:
-             { struct CMD_ETAT_BIT_CLIC *bit;
-               bit = (struct CMD_ETAT_BIT_CLIC *)connexion->donnees;
-               Envoyer_commande_dls( bit->num );
+       case SSTAG_CLIENT_SET_BIT_INTERNE:
+             { struct CMD_SET_BIT_INTERNE *bit;
+               bit = (struct CMD_SET_BIT_INTERNE *)connexion->donnees;
+               switch( bit->type )
+                { case MNEMO_MONOSTABLE: Envoyer_commande_dls( bit->num );
+                                         break;
+                  case MNEMO_REGISTRE:   SR( bit->num, bit->valeur );
+                                         break;
+                }
              }
             break;
      }

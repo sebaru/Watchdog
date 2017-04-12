@@ -891,14 +891,15 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 
     return(trame_pass);
   }
-/**********************************************************************************************************/
-/* Trame_ajout_cadran: Ajoute un cadran sur le visuel                                                   */
-/* Entrée: une structure cadran, la trame de reference                                                   */
-/* Sortie: reussite                                                                                       */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Trame_ajout_cadran: Ajoute un cadran sur le visuel                                                                         */
+/* Entrée: une structure cadran, la trame de reference                                                                        */
+/* Sortie: reussite                                                                                                           */
+/******************************************************************************************************************************/
  struct TRAME_ITEM_CADRAN *Trame_ajout_cadran ( gint flag, struct TRAME *trame,
-                                                  struct CMD_TYPE_CADRAN *cadran )
+                                                struct CMD_TYPE_CADRAN *cadran )
   { struct TRAME_ITEM_CADRAN *trame_cadran;
+    gchar *couleur_bordure;
        
     if (!(trame && cadran)) return(NULL);
     trame_cadran = g_try_malloc0( sizeof(struct TRAME_ITEM_CADRAN) );
@@ -906,27 +907,30 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 
     trame_cadran->cadran = cadran;
 
-    trame_cadran->item_groupe = goo_canvas_group_new ( trame->canvas_root,             /* Groupe cadran */
+    trame_cadran->item_groupe = goo_canvas_group_new ( trame->canvas_root,                                   /* Groupe cadran */
                                                         NULL);
 
+    if (cadran->type == MNEMO_REGISTRE)
+     { couleur_bordure = "red"; }
+    else
+     { couleur_bordure = "green"; }
     trame_cadran->item_carre = goo_canvas_rect_new (trame_cadran->item_groupe,
-                                                     -55.0, -15.0, 110.0, 30.0,
-                                                     "fill_color", "gray",
-                                                     "stroke_color", "green", NULL);
+                                                    -55.0, -15.0, 110.0, 30.0,
+                                                    "fill_color", "gray",
+                                                    "stroke_color", couleur_bordure, NULL);
 
     trame_cadran->item_entry = goo_canvas_text_new ( trame_cadran->item_groupe,
-                                                      "- cadran -", 0.0, 0.0,
-                                                      -1, GTK_ANCHOR_CENTER,
-                                                      "font", "arial italic 12",
-                                                      NULL);
+                                                     "- cadran -", 0.0, 0.0,
+                                                     -1, GTK_ANCHOR_CENTER,
+                                                     "font", "arial italic 12",
+                                                     NULL);
 
     trame_cadran->item_acro_syn = goo_canvas_text_new ( trame_cadran->item_groupe,
-                                                         cadran->acro_syn, 0.0, 30.0, -1, GTK_ANCHOR_CENTER,
-                                                        "font", "arial", "fill_color", "yellow",
-                                                         NULL );
+                                                        cadran->acro_syn, 0.0, 30.0, -1, GTK_ANCHOR_CENTER,
+                                                       "font", "arial", "fill_color", "yellow",
+                                                        NULL );
 
-
-    if ( flag )
+    if ( flag )                                                                                    /* flag == TRUE si ATELIER */
      { trame_cadran->select_mi = goo_canvas_rect_new (trame_cadran->item_groupe,
                                                        -2.5, -2.5, 7.5, 7.5,
                                                        "fill_color", "green",
