@@ -137,9 +137,9 @@
 
        time(&date);
        localtime_r( &date, &tm );
-       if (tm.tm_mday == 1 && tm.tm_hour == 0 && tm.tm_min == 0 && tm.tm_sec == 0)     /* Est-on le premier du mois minuit ?? */
+       if (tm.tm_mday == 1 && tm.tm_hour == 0 && tm.tm_min == 0)                       /* Est-on le premier du mois minuit ?? */
         { Arch_Update_SQL_Partitions( tm.tm_year, tm.tm_mon );
-          sleep(5);
+          sleep(60);
         }
         
        if (!Partage->com_arch.liste_arch)                                                     /* Si pas de message, on tourne */
