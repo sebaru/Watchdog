@@ -711,7 +711,8 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `com
 (106, 0, 12, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
 (107, 0, 11, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
 (108, 0, 10, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(109, 0, 09, 1, 'SYS_RESERVED', 'Reserved for internal use', '');
+(109, 0, 09, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
+(110, 1, 07, 1, 'SYS_EVENT_NOT_FOUND', 'Event not found', '');
 
 -- --------------------------------------------------------
 

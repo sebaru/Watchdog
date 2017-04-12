@@ -628,7 +628,13 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=3113;
+    if (database_version < 3128)
+     { g_snprintf( requete, sizeof(requete), "INSERT INTO mnemos (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `command_text`) VALUES "
+                                             "(110, 1, 07, 1, 'SYS_EVENT_NOT_FOUND', 'Event not found', '')" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    database_version=3128;
 
     Libere_DB_SQL(&db);
 

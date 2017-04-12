@@ -195,7 +195,7 @@
        g_snprintf( new_mnemo.mnemo_base.acronyme,     sizeof(new_mnemo.mnemo_base.acronyme), "Discovered Event" );
        g_snprintf( new_mnemo.mnemo_base.libelle,      sizeof(new_mnemo.mnemo_base.libelle),  "To be filled" );
        g_snprintf( new_mnemo.mnemo_base.command_text, sizeof(new_mnemo.mnemo_base.command_text), "%s", request );
-
+       Envoyer_commande_dls( 7 );                                                      /* Met à un le bit SYS_EVENT_NOT_FOUND */
        if ( Ajouter_mnemo_fullDB ( &new_mnemo ) < 0 )                                /* Ajout auto dans la base de mnemonique */
         { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                    "Gerer_arrive_Events_string: Error adding new mnemo in DB for event %s", request );
