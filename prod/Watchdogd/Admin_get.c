@@ -41,16 +41,17 @@
     if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'SET'\n" );
 
-       Admin_write ( connexion, "  e num                 - Get E[num]\n" );
-       Admin_write ( connexion, "  ea num                - Get EA[num]\n" );
-       Admin_write ( connexion, "  m num                 - Get M[num]\n" );
-       Admin_write ( connexion, "  b num                 - Get B[num]\n" );
-       Admin_write ( connexion, "  a num                 - Get A[num]\n" );
-       Admin_write ( connexion, "  msg num               - Get MSG[num]\n" );
-       Admin_write ( connexion, "  tr num                - Get TR[num]\n" );
-       Admin_write ( connexion, "  i num                 - Get I[num]\n" );
-       Admin_write ( connexion, "  ci num                - Get CI[num]\n" );
-       Admin_write ( connexion, "  ch num                - Get CH[num]\n" );
+       Admin_write ( connexion, "  e $num                - Get E[$num]\n" );
+       Admin_write ( connexion, "  ea $num               - Get EA[$num]\n" );
+       Admin_write ( connexion, "  m $num                - Get M[$num]\n" );
+       Admin_write ( connexion, "  b $num                - Get B[$num]\n" );
+       Admin_write ( connexion, "  a $num                - Get A[$num]\n" );
+       Admin_write ( connexion, "  msg $num              - Get MSG[$num]\n" );
+       Admin_write ( connexion, "  tr $num               - Get TR[$num]\n" );
+       Admin_write ( connexion, "  i $num                - Get I[$num]\n" );
+       Admin_write ( connexion, "  ci $num               - Get CI[$num]\n" );
+       Admin_write ( connexion, "  ch $num               - Get CH[$num]\n" );
+       Admin_write ( connexion, "  r $num                - Get Registre $num _R[$num]\n" );
        Admin_write ( connexion, "  help                  - This help\n" );
      } else
     if ( ! strcmp ( commande, "t" ) )
@@ -128,7 +129,19 @@
                       Partage->ea[num].confDB.min, Partage->ea[num].confDB.max 
                     );
         } else
-        { g_snprintf( chaine, sizeof(chaine), " | - EA -> num '%d' out of range (max=%d)\n", num,NBR_ENTRE_ANA ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - EA -> num '%d' out of range (max=%d)\n", num, NBR_ENTRE_ANA ); }
+       Admin_write ( connexion, chaine );
+       Admin_write ( connexion, " |-\n" );
+     } else
+    if ( ! strcmp ( commande, "r" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       if (num<NBR_REGISTRE)
+        { g_snprintf( chaine, sizeof(chaine),
+                      " | - R%03d = %8.2f\n", num, R(num)
+                    );
+        } else
+        { g_snprintf( chaine, sizeof(chaine), " | - R -> num '%d' out of range (max=%d)\n", num, NBR_REGISTRE ); }
        Admin_write ( connexion, chaine );
        Admin_write ( connexion, " |-\n" );
      } else
