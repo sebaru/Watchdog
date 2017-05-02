@@ -286,7 +286,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
-                "dls.name, mnemo.tableau, mnemo.acro_syn"
+                "dls.shortname, mnemo.tableau, mnemo.acro_syn"
                 " FROM %s as mnemo"
                 " INNER JOIN %s as dls ON mnemo.dls_id=dls.id"
                 " INNER JOIN %s as syn ON dls.syn_id = syn.id"
