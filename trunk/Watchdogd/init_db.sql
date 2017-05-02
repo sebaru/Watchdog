@@ -595,7 +595,7 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
   `type` int(11) NOT NULL DEFAULT '0',
   `num` int(11) NOT NULL DEFAULT '0',
   `dls_id` int(11) NOT NULL DEFAULT '0',
-  `acronyme` text COLLATE utf8_unicode_ci NOT NULL,
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `command_text` text COLLATE utf8_unicode_ci NOT NULL,
   `tableau` text COLLATE utf8_unicode_ci NOT NULL,
