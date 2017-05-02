@@ -634,7 +634,14 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=3128;
+    if (database_version < 3142)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos ADD UNIQUE(type,num);" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos ADD UNIQUE(acronyme);" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    database_version=3142;
 
     Libere_DB_SQL(&db);
 

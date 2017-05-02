@@ -600,7 +600,8 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
   `command_text` text COLLATE utf8_unicode_ci NOT NULL,
   `tableau` text COLLATE utf8_unicode_ci NOT NULL,
   `acro_syn` text COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`), FULLTEXT(`command_text`)
+  PRIMARY KEY (`id`), FULLTEXT(`command_text`),
+  UNIQUE KEY `type` (`type`,`num`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `command_text`) VALUES
