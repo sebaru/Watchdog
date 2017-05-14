@@ -91,7 +91,7 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                     { case ENTREE:
                       case SORTIE:
                       case BI    : if ( New_alias($1, $4, $5, $3, $6) == FALSE )                             /* Deja defini ? */
-                                    { Emettre_erreur_new( "'%s' is already defined", $1 ); }
+                                    { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $1 ); }
                                    break;
                       case T_TEMPO :
                       case EANA  :
@@ -101,13 +101,13 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                       case T_MSG :
                       case T_REGISTRE :
                       case ICONE : if ($3==1)                                             /* Barre = 1 ?? */
-                                    { Emettre_erreur_new( "Use of '/%s' is forbidden", $1 ); }
+                                    { Emettre_erreur_new( "Ligne %d:Use of '/%s' is forbidden", DlsScanner_get_lineno(), $1 ); }
                                    else
                                     { if (New_alias($1, $4, $5, 0, $6) == FALSE)
-                                       { Emettre_erreur_new( "'%s' is already defined", $1 ); }
+                                       { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $1 ); }
                                     }
                                    break;
-                      default: Emettre_erreur_new( "Syntaxe Error near '%s'", $1 );
+                      default: Emettre_erreur_new( "Ligne %d: Syntaxe Error near '%s'", DlsScanner_get_lineno(), $1 );
                                break;
                     }
                 }}
@@ -228,14 +228,14 @@ calcul_expr3:   VALF
                             break;
                           }
                          default: 
-                          { Emettre_erreur_new( "'%s' ne peut s'utiliser dans un calcul", $1 );
+                          { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser dans un calcul", DlsScanner_get_lineno(), $1 );
                             $$=New_chaine(2);
                             g_snprintf( $$, 2, "0" );
                           }
                        }
                     }
                    else 
-                    { Emettre_erreur_new( "'%s' is not defined", $1 );
+                    { Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $1 );
                       $$=New_chaine(2);
                       g_snprintf( $$, 2, "0" );
                     }
@@ -258,13 +258,13 @@ calcul_ea_result: T_REGISTRE ENTIER
                             break;
                           }
                          default: 
-                          { Emettre_erreur_new( "'%s' ne peut s'utiliser dans un résultat de calcul", $1 );
+                          { Emettre_erreur_new( "Ligne %d :'%s' ne peut s'utiliser dans un résultat de calcul", DlsScanner_get_lineno(), $1 );
                             $$=0;
                           }
                        }
                     }
                    else
-                    { Emettre_erreur_new( "'%s' is not defined", $1 );
+                    { Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $1 );
                       $$=0;
                     }
                    g_free($1);                                     /* On n'a plus besoin de l'identifiant */
@@ -354,7 +354,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                | EANA ENTIER ordre VALF
                 {{ int taille;
                    if ($3 == T_EGAL)
-                    { Emettre_erreur_new( "EA%04d ne peut s'utiliser avec le comparateur '='", $2 );
+                    { Emettre_erreur_new( "Ligne %d: EA%04d ne peut s'utiliser avec le comparateur '='", DlsScanner_get_lineno(), $2 );
                       $$=New_chaine(2);
                       g_snprintf( $$, 2, "0" ); 
                     }
@@ -420,7 +420,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                                  alias->bit==BI ||
                                  alias->bit==MONO)
                          )
-                       { Emettre_erreur_new( "'%s' ne peut s'utiliser dans une comparaison", $2 );
+                       { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser dans une comparaison", DlsScanner_get_lineno(), $2 );
                          $$=New_chaine(2);
                          g_snprintf( $$, 2, "0" );                                      
                        } else
@@ -429,7 +429,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                                   alias->bit==CPT_IMP ||
                                   alias->bit==CPT_H)
                          )
-                       { Emettre_erreur_new( "'%s' ne peut s'utiliser qu'avec une comparaison", $2 );
+                       { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser qu'avec une comparaison", DlsScanner_get_lineno(), $2 );
                          $$=New_chaine(2);
                          g_snprintf( $$, 2, "0" );                                      
                        } 
@@ -467,7 +467,8 @@ unite:          modulateur ENTIER HEURE ENTIER
                          case EANA:
                           { char *chaine;
                             if ($4->type == T_EGAL)
-                             { Emettre_erreur_new( "'%s (EA%4d)' ne peut s'utiliser avec le comparateur '='", $2, alias->num );
+                             { Emettre_erreur_new( "Ligne %d: '%s (EA%4d)' ne peut s'utiliser avec le comparateur '='",
+                                                   DlsScanner_get_lineno(), $2, alias->num );
                                $$=New_chaine(2);
                                g_snprintf( $$, 2, "0" ); 
                              }
@@ -509,13 +510,13 @@ unite:          modulateur ENTIER HEURE ENTIER
                             break;
                           }
                          default:
-                          { Emettre_erreur_new( "'%s' n'est pas une condition valide", $2 );
+                          { Emettre_erreur_new( "Ligne %d: '%s' n'est pas une condition valide", DlsScanner_get_lineno(), $2 );
                             $$=New_chaine(2);
                             g_snprintf( $$, 2, "0" );
                           }
                        }
                     }
-                   else { Emettre_erreur_new( "'%s' is not defined", $2 );                         /* si l'alias n'existe pas */
+                   else { Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $2 );/* si l'alias n'existe pas */
                           $$=New_chaine(2);
                           g_snprintf( $$, 2, "0" );
                         }
@@ -557,7 +558,7 @@ une_action:     barre SORTIE ENTIER
                        { $$=New_action_bi($3, $1); }
                      else
                        { guint taille;
-                         Emettre_erreur_new( "'%B05d' could not be set (system bit)", $3 );
+                         Emettre_erreur_new( "Ligne %d: '%B05d' could not be set (system bit)", DlsScanner_get_lineno(), $3 );
                          $$=New_action();
                          taille = 2;
                          $$->alors = New_chaine( taille );
@@ -591,7 +592,7 @@ une_action:     barre SORTIE ENTIER
                    alias = Get_alias_par_nom( $2 );
                    if (!alias)
                     { char *chaine;
-                      Emettre_erreur_new( "'%s' is not defined", $2 );
+                      Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $2 );
 
                       $$=New_action();
                       taille = 2;
@@ -608,7 +609,7 @@ une_action:     barre SORTIE ENTIER
                                  alias->bit==T_MSG ||
                                  alias->bit==MONO)
                          )
-                       { Emettre_erreur_new( "'/%s' ne peut s'utiliser", alias->nom );
+                       { Emettre_erreur_new( "Ligne %d: '/%s' ne peut s'utiliser", DlsScanner_get_lineno(), alias->nom );
                          $$=New_action();
                          taille = 2;
                          $$->alors = New_chaine( taille );
@@ -622,7 +623,7 @@ une_action:     barre SORTIE ENTIER
                          case BI     : if (alias->num >= NBR_BIT_BISTABLE_RESERVED)
                                         { $$=New_action_bi( alias->num, $1 ); }
                                        else
-                                        { Emettre_erreur_new( "'%B05d' could not be set (system bit)", alias->bit );
+                                        { Emettre_erreur_new( "Ligne %d: '%B05d' could not be set (system bit)", DlsScanner_get_lineno(), alias->bit );
                                           $$=New_action();
                                           taille = 2;
                                           $$->alors = New_chaine( taille );
@@ -634,7 +635,7 @@ une_action:     barre SORTIE ENTIER
                          case CPT_H  : $$=New_action_cpt_h( alias->num, options );   break;
                          case CPT_IMP: $$=New_action_cpt_imp( alias->num, options ); break;
                          case ICONE  : $$=New_action_icone( alias->num, options );   break;
-                         default: { Emettre_erreur_new( "'%s' syntax error", alias->nom );
+                         default: { Emettre_erreur_new( "Ligne %d: '%s' syntax error", DlsScanner_get_lineno(), alias->nom );
                                     $$=New_action();
                                     taille = 2;
                                     $$->alors = New_chaine( taille );

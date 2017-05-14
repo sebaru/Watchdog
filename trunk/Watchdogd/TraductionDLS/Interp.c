@@ -66,32 +66,12 @@
     write( Id_cible, chaine, taille );
   }
 /******************************************************************************************************************************/
-/* Emettre: Met a jour le fichier temporaire en code intermédiaire                                                            */
-/* Entrées: la ligne d'instruction à mettre                                                                                   */
-/* Sortie: void                                                                                                               */
-/******************************************************************************************************************************/
- void Emettre_erreur( char *chaine )
-  { static gchar *too_many="Too many errors...";
-    int taille;
-    if ( nbr_erreur < 15 )
-     { taille = strlen(chaine);
-       Info_new( Config.log, Config.log_dls, LOG_ERR, "Emettre_erreur %s", chaine );
-       write( Id_log, chaine, taille );
-     } else
-    if ( nbr_erreur == 15 )
-     { taille = strlen(too_many);
-       Info_new( Config.log, Config.log_dls, LOG_ERR, "Emettre_erreur: %s", too_many );
-       write( Id_log, too_many, taille );
-     }
-    nbr_erreur++;
-  }
-/******************************************************************************************************************************/
 /* DlsScanner_error: Appellé par le scanner en cas d'erreur de syntaxe (et non une erreur de grammaire !)                     */
 /* Entrée : la chaine source de l'erreur de syntaxe                                                                           */
 /* Sortie : appel de la fonction Emettre_erreur_new en backend                                                                */
 /******************************************************************************************************************************/
  int DlsScanner_error ( char *s )
-  { Emettre_erreur_new( "Syntaxe error : %s", s );
+  { Emettre_erreur_new( "Ligne %d: %s", DlsScanner_get_lineno(), s );
     return(0);
   }
 /******************************************************************************************************************************/
@@ -99,18 +79,22 @@
 /* Entrée: le numéro de ligne, le format et les paramètres associés                                                           */
 /******************************************************************************************************************************/
  void Emettre_erreur_new( gchar *format, ... )
-  { gchar ligne[20], chaine[512];
+  { static gchar *too_many="Too many errors...\n";
+    gchar log[256], chaine[256];
     va_list ap;
 
-    g_snprintf( ligne, sizeof(ligne), "Line %d:", DlsScanner_get_lineno() );
-    write( Id_log, ligne, strlen(ligne) );
+    if (nbr_erreur<15)
+     { va_start( ap, format );
+       g_vsnprintf( chaine, sizeof(chaine), format, ap );
+       va_end ( ap );
+       g_snprintf( log, sizeof(log), "%s\n", chaine );
+       write( Id_log, log, strlen(log) );
 
-    va_start( ap, format );
-    g_vsnprintf( chaine, sizeof(chaine), format, ap );
-    va_end ( ap );
-    write( Id_log, chaine, strlen(chaine) );
-
-    Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: %s %s", __func__, ligne, chaine );
+       Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: %s", __func__, chaine );
+     }
+    else if (nbr_erreur==15)
+     { write( Id_log, too_many, strlen(too_many)+1 ); }
+    nbr_erreur++;
   }
 /******************************************************************************************************************************/
 /* New_option: Alloue une certaine quantité de mémoire pour les options                                                       */
@@ -392,25 +376,23 @@
   { gchar chaine[80];
     FILE *rc;
 
- /*   ligne_source_dls  = 1;                                       /* Initialisation des variables globales */
-
-   /* erreur=0;*/
+    DlsScanner_set_lineno(1);                                                                     /* Reset du numéro de ligne */
+    nbr_erreur = 0;                                                                   /* Au départ, nous n'avons pas d'erreur */
     rc = fopen(source, "r");
     if (rc)
      { Emettre(" #include <Module_dls.h>\n void Go ( int start )\n {\n");
-       DlsScanner_debug = 0;                                                        /* Debug de la traduction ?? */
+       DlsScanner_debug = 1;                                                                     /* Debug de la traduction ?? */
        DlsScanner_restart(rc);
        DlsScanner_parse();
        Emettre(" }\n");
 
        fclose(rc);
-       if (0/*erreur*/)
-        { g_snprintf(chaine, sizeof(chaine), "test" ); /*%d syntax error%s found\n", erreur, (erreur>1 ? "s" : "") );*/
-          Emettre_erreur( chaine );
+       if (nbr_erreur)
+        { Emettre_erreur_new( "%d error%s found", nbr_erreur, (nbr_erreur>1 ? "s" : "") );
           return(FALSE);
         } else
         { g_snprintf(chaine, sizeof(chaine), "No syntax error found\n" );
-          Emettre_erreur( chaine );
+          Emettre_erreur_new( "No error found" );
         }
        return(TRUE);
      } else printf("ouverture plugin impossible: niet\n");
@@ -454,7 +436,6 @@
     pthread_mutex_lock( &Partage->com_dls.synchro_traduction );                           /* Attente unicité de la traduction */
 
     Alias = NULL;                                                                                  /* Par défaut, pas d'alias */
-    nbr_erreur = 0;                                                                   /* Au départ, nous n'avons pas d'erreur */
     if ( Interpreter_source_dls( (new ? source : source_ok) ) )
          { retour = TRAD_DLS_OK; }
     else { retour = TRAD_DLS_ERROR; }
@@ -464,9 +445,7 @@
        while(liste)
         { alias = (struct ALIAS *)liste->data;
           if ( (!alias->used) )
-           { gchar chaine[128];
-             g_snprintf(chaine, sizeof(chaine), "Warning: %s not used\n", alias->nom );
-             Emettre_erreur( chaine ); 
+           { Emettre_erreur_new( "Warning: %s not used", alias->nom );
              retour = TRAD_DLS_WARNING;
            }
           liste = liste->next;
