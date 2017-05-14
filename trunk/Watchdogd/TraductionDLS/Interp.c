@@ -38,8 +38,11 @@
  #include "watchdogd.h"
  #include "lignes.h"
 
- GList *Alias=NULL;
- static int Id_cible;                                                               /* Pour la création du fichier temporaire */
+ static GList *Alias=NULL;                                                   /* Liste des alias identifiés dans le source DLS */
+ static GSList *Liste_Actions_bit=NULL;                                   /* Liste des actions rencontrées dans le source DLS */
+ static GSList *Liste_Actions_num=NULL;                                   /* Liste des actions rencontrées dans le source DLS */
+ static gchar *Buffer=NULL;
+ static gint Buffer_used=0, Buffer_taille=0;
  static int Id_log;                                                                     /* Pour la creation du fichier de log */
  static int nbr_erreur;
 
@@ -62,8 +65,23 @@
  void Emettre( char *chaine )
   { int taille;
     taille = strlen(chaine);
+    if ( Buffer_used + taille > Buffer_taille)
+     { gchar *new_Buffer;
+       Info_new( Config.log, Config.log_dls, LOG_DEBUG,
+                "%s: buffer too small, trying to expand it to %d", __func__, Buffer_taille + 1024 );
+       new_Buffer = g_try_realloc( Buffer, Buffer_taille + 1024 );
+       if (!new_Buffer)
+        { Info_new( Config.log, Config.log_dls, LOG_ERR,
+                   "%s: Fail to expand buffer. skipping", __func__ );
+        }
+       Buffer = new_Buffer;
+       Buffer_taille = Buffer_taille + 1024;
+       Info_new( Config.log, Config.log_dls, LOG_INFO,
+                "%s: Buffer expanded to %d bytes", __func__, Buffer_taille );
+     }
     Info_new( Config.log, Config.log_dls, LOG_DEBUG, "Emettre %s", chaine );
-    write( Id_cible, chaine, taille );
+    memcpy ( Buffer + Buffer_used, chaine, taille );                                          /* Recopie du bout de buffer */
+    Buffer_used += taille;
   }
 /******************************************************************************************************************************/
 /* DlsScanner_error: Appellé par le scanner en cas d'erreur de syntaxe (et non une erreur de grammaire !)                     */
@@ -369,79 +387,65 @@
     Alias = NULL;
   }
 /******************************************************************************************************************************/
-/* Interpreter_source_dls: lecture d'un .dls en parametre et production du .c                                                 */
-/* Entrée: le nom du fichier originel                                                                                         */
-/******************************************************************************************************************************/
- static gboolean Interpreter_source_dls ( gchar *source )
-  { gchar chaine[80];
-    FILE *rc;
-
-    DlsScanner_set_lineno(1);                                                                     /* Reset du numéro de ligne */
-    nbr_erreur = 0;                                                                   /* Au départ, nous n'avons pas d'erreur */
-    rc = fopen(source, "r");
-    if (rc)
-     { Emettre(" #include <Module_dls.h>\n void Go ( int start )\n {\n");
-       DlsScanner_debug = 1;                                                                     /* Debug de la traduction ?? */
-       DlsScanner_restart(rc);
-       DlsScanner_parse();
-       Emettre(" }\n");
-
-       fclose(rc);
-       if (nbr_erreur)
-        { Emettre_erreur_new( "%d error%s found", nbr_erreur, (nbr_erreur>1 ? "s" : "") );
-          return(FALSE);
-        } else
-        { g_snprintf(chaine, sizeof(chaine), "No syntax error found\n" );
-          Emettre_erreur_new( "No error found" );
-        }
-       return(TRUE);
-     } else printf("ouverture plugin impossible: niet\n");
-    return(FALSE);
-  }
-/******************************************************************************************************************************/
 /* Traduire: Traduction du fichier en paramètre du langage DLS vers le langage C                                              */
 /* Entrée: l'id du modul, new = true si il faut compiler le .dls.new                                                          */
 /* Sortie: TRAD_DLS_OK, _WARNING ou _ERROR                                                                                    */
 /******************************************************************************************************************************/
  gint Traduire_DLS( gboolean new, gint id )
-  { gchar source[80], source_ok[80], cible[80], log[80];
+  { gchar source[80], source_ok[80], log[80];
     struct ALIAS *alias;
     gint retour;
     GList *liste;
+    FILE *rc;
 
+    Buffer_taille = 1024;
+    Buffer = g_try_malloc0( Buffer_taille );                                             /* Initialisation du buffer resultat */
+    if (!Buffer) return ( TRAD_DLS_ERROR );
+    Buffer_used = 0;
+    
     g_snprintf( source,    sizeof(source),    "Dls/%d.dls.new", id );
     g_snprintf( source_ok, sizeof(source_ok), "Dls/%d.dls", id );
-    g_snprintf( cible,     sizeof(cible),     "Dls/%d.c",   id );
     g_snprintf( log,       sizeof(log),       "Dls/%d.log", id );
-    unlink ( cible );
     unlink ( log );
-    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "Traduire_DLS: new=%d, id=%d, source=%s, source_ok=%s cible=%s, log=%s",
-              new, id, source, source_ok, cible, log );
-
-    Id_cible = open( cible, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-    if (Id_cible<0)
-     { Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                "Traduire_DLS: Target creation failed %s (%s)", cible, strerror(errno) ); 
-       return(TRAD_DLS_ERROR_FILE);
-     }
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "Traduire_DLS: new=%d, id=%d, source=%s, source_ok=%s, log=%s",
+              new, id, source, source_ok, log );
 
     Id_log = open( log, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (Id_log<0)
      { Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                "Traduire_DLS: Log creation failed %s (%s)", cible, strerror(errno) ); 
-       close(Id_cible);
+                "Traduire_DLS: Log creation failed %s (%s)", log, strerror(errno) ); 
+       close(Id_log);
        return(TRAD_DLS_ERROR_FILE);
      }
 
     pthread_mutex_lock( &Partage->com_dls.synchro_traduction );                           /* Attente unicité de la traduction */
 
     Alias = NULL;                                                                                  /* Par défaut, pas d'alias */
-    if ( Interpreter_source_dls( (new ? source : source_ok) ) )
-         { retour = TRAD_DLS_OK; }
-    else { retour = TRAD_DLS_ERROR; }
+    Liste_Actions_bit = NULL;                                                                    /* Par défaut, pas d'actions */
+    Liste_Actions_num = NULL;                                                                    /* Par défaut, pas d'actions */
+    DlsScanner_set_lineno(1);                                                                     /* Reset du numéro de ligne */
+    nbr_erreur = 0;                                                                   /* Au départ, nous n'avons pas d'erreur */
+    rc = fopen( (new ? source : source_ok), "r" );
+    if (!rc) retour = TRAD_DLS_ERROR;
+    else
+     { Emettre(" #include <Module_dls.h>\n void Go ( int start )\n {\n");
+       DlsScanner_debug = 0;                                                                     /* Debug de la traduction ?? */
+       DlsScanner_restart(rc);
+       DlsScanner_parse();                                                                       /* Parsing du fichier source */
+       Emettre(" }\n");
+       fclose(rc);
+     }
 
-    if (retour==TRAD_DLS_OK)                                                      /* Si pas d'erreur, on regarde les warnings */
-     { liste = Alias;
+    if (nbr_erreur)
+     { Emettre_erreur_new( "%d error%s found", nbr_erreur, (nbr_erreur>1 ? "s" : "") );
+       retour = TRAD_DLS_ERROR;
+     }
+    else
+     { gchar cible[80];
+       gint fd;
+       Emettre_erreur_new( "No error found" );
+
+       liste = Alias;
        while(liste)
         { alias = (struct ALIAS *)liste->data;
           if ( (!alias->used) )
@@ -450,12 +454,54 @@
            }
           liste = liste->next;
         }
-     }
 
-    close(Id_cible);
+       g_snprintf( cible, sizeof(cible), "Dls/%d.c",   id );                  /* Enregistrement du buffer resultat sur disque */
+       unlink ( cible );
+       fd = open( cible, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+       if (fd<0)
+        { Info_new( Config.log, Config.log_dls, LOG_WARNING,
+                   "%s: Target creation failed %s (%s)", __func__, cible, strerror(errno) ); 
+          retour = TRAD_DLS_ERROR_FILE;
+        }
+       else
+        { gchar *Chaine_bit= " static int Tableau_bit[]= { ", *Tableau_end=" -1 };\n";
+          gchar *Chaine_num= " static int Tableau_num[]= { ";
+          gchar *Fonction= " int *Get_Tableau_bit(void) { return(Tableau_bit); }\n"
+                           " int *Get_Tableau_num(void) { return(Tableau_num); }\n";
+          GSList *liste;
+          gint cpt=0;                                                                                   /* Compteur d'actions */
+
+          write(fd, Chaine_bit, strlen(Chaine_bit) );                                                 /* Ecriture du prologue */
+          liste = Liste_Actions_bit;                                       /* Initialise les tableaux des actions rencontrées */
+          while(liste)
+           { gchar chaine[12];
+             g_snprintf(chaine, sizeof(chaine), "%d, ", GPOINTER_TO_INT(liste->data) );
+             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+             liste = liste->next;
+           }
+          write(fd, Tableau_end, strlen(Tableau_end) );                                               /* Ecriture du prologue */
+
+          write(fd, Chaine_num, strlen(Chaine_num) );                                                 /* Ecriture du prologue */
+          liste = Liste_Actions_num;                                       /* Initialise les tableaux des actions rencontrées */
+          while(liste)
+           { gchar chaine[12];
+             g_snprintf(chaine, sizeof(chaine), "%d, ", GPOINTER_TO_INT(liste->data) );
+             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+             liste = liste->next;
+           }
+          write(fd, Tableau_end, strlen(Tableau_end) );                                               /* Ecriture du prologue */
+
+          write(fd, Fonction, strlen(Fonction) );                                                     /* Ecriture du prologue */
+
+          write(fd, Buffer, Buffer_used );                                                     /* Ecriture du buffer resultat */
+          close(fd);
+        }
+       retour = TRAD_DLS_OK;
+     }
     close(Id_log);
     Liberer_memoire();
-
+    g_free(Buffer);
+    Buffer = NULL;
     if (retour != TRAD_DLS_ERROR && new)
      { Info_new( Config.log, Config.log_dls, LOG_DEBUG,
                 "Traduire_DLS: Renaming '%s' to '%s'", source, source_ok );
