@@ -43,7 +43,6 @@
  static int Id_log;                                                                     /* Pour la creation du fichier de log */
  static int nbr_erreur;
 
- extern gboolean Interpreter_source_dls ( gchar *source );
 /******************************************************************************************************************************/
 /* New_chaine: Alloue une certaine quantité de mémoire pour utiliser des chaines de caractères                                */
 /* Entrées: la longueur souhaitée                                                                                             */
@@ -85,6 +84,33 @@
        write( Id_log, too_many, taille );
      }
     nbr_erreur++;
+  }
+/******************************************************************************************************************************/
+/* DlsScanner_error: Appellé par le scanner en cas d'erreur de syntaxe (et non une erreur de grammaire !)                     */
+/* Entrée : la chaine source de l'erreur de syntaxe                                                                           */
+/* Sortie : appel de la fonction Emettre_erreur_new en backend                                                                */
+/******************************************************************************************************************************/
+ int DlsScanner_error ( char *s )
+  { Emettre_erreur_new( "Syntaxe error : %s", s );
+    return(0);
+  }
+/******************************************************************************************************************************/
+/* Emettre_erreur_new: collecte des erreurs de traduction D.L.S                                                               */
+/* Entrée: le numéro de ligne, le format et les paramètres associés                                                           */
+/******************************************************************************************************************************/
+ void Emettre_erreur_new( gchar *format, ... )
+  { gchar ligne[20], chaine[512];
+    va_list ap;
+
+    g_snprintf( ligne, sizeof(ligne), "Line %d:", DlsScanner_get_lineno() );
+    write( Id_log, ligne, strlen(ligne) );
+
+    va_start( ap, format );
+    g_vsnprintf( chaine, sizeof(chaine), format, ap );
+    va_end ( ap );
+    write( Id_log, chaine, strlen(chaine) );
+
+    Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: %s %s", __func__, ligne, chaine );
   }
 /******************************************************************************************************************************/
 /* New_option: Alloue une certaine quantité de mémoire pour les options                                                       */
@@ -353,10 +379,42 @@
 /* Entrées: kedal                                                                                                             */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- void Liberer_memoire( void )
+ static void Liberer_memoire( void )
   { g_list_foreach( Alias, (GFunc) Liberer_alias, NULL );
     g_list_free( Alias );
     Alias = NULL;
+  }
+/******************************************************************************************************************************/
+/* Interpreter_source_dls: lecture d'un .dls en parametre et production du .c                                                 */
+/* Entrée: le nom du fichier originel                                                                                         */
+/******************************************************************************************************************************/
+ static gboolean Interpreter_source_dls ( gchar *source )
+  { gchar chaine[80];
+    FILE *rc;
+
+ /*   ligne_source_dls  = 1;                                       /* Initialisation des variables globales */
+
+   /* erreur=0;*/
+    rc = fopen(source, "r");
+    if (rc)
+     { Emettre(" #include <Module_dls.h>\n void Go ( int start )\n {\n");
+       DlsScanner_debug = 0;                                                        /* Debug de la traduction ?? */
+       DlsScanner_restart(rc);
+       DlsScanner_parse();
+       Emettre(" }\n");
+
+       fclose(rc);
+       if (0/*erreur*/)
+        { g_snprintf(chaine, sizeof(chaine), "test" ); /*%d syntax error%s found\n", erreur, (erreur>1 ? "s" : "") );*/
+          Emettre_erreur( chaine );
+          return(FALSE);
+        } else
+        { g_snprintf(chaine, sizeof(chaine), "No syntax error found\n" );
+          Emettre_erreur( chaine );
+        }
+       return(TRUE);
+     } else printf("ouverture plugin impossible: niet\n");
+    return(FALSE);
   }
 /******************************************************************************************************************************/
 /* Traduire: Traduction du fichier en paramètre du langage DLS vers le langage C                                              */
