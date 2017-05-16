@@ -94,7 +94,7 @@
     GNOMEUIINFO_SUBTREE(N_("_Habilitations"), Menu_habilitation),
     GNOMEUIINFO_SUBTREE(N_("_Low level"), Menu_lowlevel),
     GNOMEUIINFO_SEPARATOR,
-    GNOMEUIINFO_SUBTREE(N_("_Client léger"), Menu_client_leger),
+    GNOMEUIINFO_SUBTREE(N_("_Client leger"), Menu_client_leger),
     GNOMEUIINFO_END
   };
  GnomeUIInfo Menu_view[]=                                                                        /*!< Définition du menu view */
