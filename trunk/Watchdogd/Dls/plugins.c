@@ -44,9 +44,30 @@
  #endif
 
 /******************************************************************************************************************************/
+/* Check_action_bit_use: Vérifie que les bits d'actions positionnés par le module sont bien owné par celui-ci                 */
+/* Entrée: Le plugin D.L.S                                                                                                    */
+/* Sortie: FALSE si problème                                                                                                  */
+/******************************************************************************************************************************/
+ static gboolean Check_action_bit_use ( struct PLUGIN_DLS *dls )
+  { gint cpt;
+    if(!dls) return(FALSE);
+    if(!(dls->Get_Tableau_bit && dls->Get_Tableau_num)) return(TRUE);
+    for ( cpt=0; dls->Get_Tableau_bit(cpt) != -1; cpt++ )
+     { struct CMD_TYPE_NUM_MNEMONIQUE critere;
+       struct CMD_TYPE_MNEMO_BASE *mnemo;
+       critere.type = dls->Get_Tableau_bit(cpt);
+       critere.num  = dls->Get_Tableau_num(cpt);
+       mnemo = Rechercher_mnemo_baseDB_type_num ( &critere );
+       if (!mnemo) return(FALSE);
+       if (mnemo->id != dls->plugindb.id) return(FALSE);
+       g_free(mnemo);
+     }
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                                              */
-/* Entrée: Le nom de fichier correspondant                                                                                    */
-/* Sortie: Rien                                                                                                               */
+/* Entrée: Le plugin D.L.S                                                                                                    */
+/* Sortie: FALSE si problème                                                                                                  */
 /******************************************************************************************************************************/
  static gboolean Charger_un_plugin ( struct PLUGIN_DLS *dls )
   { gchar nom_fichier_absolu[60];
@@ -54,7 +75,7 @@
 
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%d.so", dls->plugindb.id );
     strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );                 /* Init des variables communes */
-    dls->starting = 1;
+    dls->starting = 1;                                                             /* au chargement, le bit de start vaut 1 ! */
     dls->conso    = 0.0;
 
     retour = FALSE;                                                                          /* Par défaut, on retourne FALSE */
@@ -65,15 +86,34 @@
      }
     else
      { dls->go = dlsym( dls->handle, "Go" );                                                 /* Recherche de la fonction 'Go' */
-       if (!dls->go) { Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                                "Charger_un_plugin: Candidat %04d failed sur absence GO", dls->plugindb.id ); 
-                       dlclose( dls->handle );
-                       dls->handle = NULL;
-                     }
-       else
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "Charger_un_plugin: plugin %04d loaded (%s)",
-                    dls->plugindb.id, dls->plugindb.nom );
-          retour = TRUE;
+       if (!dls->go)
+        { Info_new( Config.log, Config.log_dls, LOG_WARNING,
+                    "Charger_un_plugin: Candidat %04d failed sur absence GO", dls->plugindb.id ); 
+          dlclose( dls->handle );
+          dls->handle = NULL;
+        }
+       if (dls->handle) dls->Get_Tableau_bit = dlsym( dls->handle, "Get_Tableau_bit" );           /* Recherche de la fonction */
+       if (!dls->Get_Tableau_bit)
+        { Info_new( Config.log, Config.log_dls, LOG_WARNING,
+                   "%s: Candidat %04d does not provide Get_Tableau_bit function", __func__, dls->plugindb.id ); 
+          Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING );
+        }
+       if (dls->handle) dls->Get_Tableau_num = dlsym( dls->handle, "Get_Tableau_num" );           /* Recherche de la fonction */
+       if (!dls->Get_Tableau_num)
+        { Info_new( Config.log, Config.log_dls, LOG_WARNING,
+                   "%s: Candidat %04d does not provide Get_Tableau_num function", __func__, dls->plugindb.id ); 
+          Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING );
+        }
+       
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %04d loaded (%s)",
+                 __func__, dls->plugindb.id, dls->plugindb.nom );
+       retour = TRUE;
+
+       if (Check_action_bit_use( dls ) == FALSE )
+        { Info_new( Config.log, Config.log_dls, LOG_WARNING,
+                   "%s: Candidat %04d -> bit(s) set but not owned by itself... Disabling", __func__, dls->plugindb.id ); 
+          Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_ERROR_BIT_SET_BUT_NOT_OWNED );
+          dls->plugindb.on=FALSE;
         }
      }
     pthread_mutex_lock( &Partage->com_dls.synchro );                                  /* Ajout dans la liste de travail D.L.S */
@@ -188,31 +228,27 @@
     struct PLUGIN_DLS *dls;
     struct DB *db;                                                                                       /* Database Watchdog */
 
-    if (Recuperer_plugins_dlsDB( &db ))
-     { do
-        { plugin = Recuperer_plugins_dlsDB_suite( &db );
-          if (!plugin)
-           { Config.compil = 0;                                                                          /* fin de traitement */
-             return;
-           }
-   
-          dls = (struct PLUGIN_DLS *)g_try_malloc0( sizeof(struct PLUGIN_DLS) );
-          if (!dls)
-           { Info_new( Config.log, Config.log_dls, LOG_ERR, "Charger_plugins: out of memory" );
-             g_free(plugin);
-           }
-          else { memcpy( &dls->plugindb, plugin, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-                 g_free(plugin);
-                                                                                          /* Si option "compil" au demarrage" */
-                 if (Config.compil == 1) Compiler_source_dls( FALSE, FALSE, dls->plugindb.id, NULL, 0 );
-                 Charger_un_plugin( dls );                                                            /* Chargement du plugin */
-               }
-        } while ( TRUE );
+    if (!Recuperer_plugins_dlsDB( &db ))
+     { Info_new( Config.log, Config.log_dls, LOG_ERR, "Charger_plugins: Unable to load plugins" );
+       return;
      }
-    else  { Info_new( Config.log, Config.log_dls, LOG_ERR, "Charger_plugins: Unable to load plugins" );
-            return;
-          }
- }
+    
+    while( (plugin = Recuperer_plugins_dlsDB_suite( &db )) != NULL )
+     { dls = (struct PLUGIN_DLS *)g_try_malloc0( sizeof(struct PLUGIN_DLS) );
+       if (!dls)
+        { Info_new( Config.log, Config.log_dls, LOG_ERR, "Charger_plugins: out of memory" );
+          g_free(plugin);
+        }
+       else { memcpy( &dls->plugindb, plugin, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+              g_free(plugin);
+                                                                                          /* Si option "compil" au demarrage" */
+              if (Config.compil == 1) Compiler_source_dls( FALSE, FALSE, dls->plugindb.id, NULL, 0 );
+              Charger_un_plugin( dls );                                                               /* Chargement du plugin */
+            }
+     }
+
+    Config.compil = 0;                                                                                   /* fin de traitement */
+  }
 /******************************************************************************************************************************/
 /* Activer_plugin_by_id: Active ou non un plugin by id                                                                        */
 /* Entrée: l'ID du plugin                                                                                                     */
@@ -228,11 +264,21 @@
      { plugin = (struct PLUGIN_DLS *)plugins->data;
 
        if ( plugin->plugindb.id == id )
-        { plugin->plugindb.on = actif;
-          plugin->conso = 0.0;
-          plugin->starting = 1;
-          Info_new( Config.log, Config.log_dls, LOG_INFO, "Activer_plugin_by_id: id %04d %s (%s)",
-                    plugin->plugindb.id, (actif ? "started" : "stopped"), plugin->plugindb.nom );
+        { if (Check_action_bit_use( plugin ) == TRUE )
+           { plugin->plugindb.on = actif;
+             plugin->conso = 0.0;
+             plugin->starting = 1;
+             Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: id %04d %s (%s)",
+                       __func__, plugin->plugindb.id, (actif ? "started" : "stopped"), plugin->plugindb.nom );
+           }
+          else
+           { plugin->plugindb.on = 0;
+             plugin->conso = 0.0;
+             plugin->starting = 0;
+             Info_new( Config.log, Config.log_dls, LOG_WARNING,
+                      "%s: Candidat %04d -> bit(s) set but not owned by itself... Disabling", __func__, plugin ); 
+             Set_compil_status_plugin_dlsDB( plugin->plugindb.id, DLS_COMPIL_ERROR_BIT_SET_BUT_NOT_OWNED );
+           }
           break;
         }
        plugins = plugins->next;

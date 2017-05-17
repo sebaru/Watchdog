@@ -466,8 +466,8 @@
        else
         { gchar *Chaine_bit= " static int Tableau_bit[]= { ", *Tableau_end=" -1 };\n";
           gchar *Chaine_num= " static int Tableau_num[]= { ";
-          gchar *Fonction= " int *Get_Tableau_bit(void) { return(Tableau_bit); }\n"
-                           " int *Get_Tableau_num(void) { return(Tableau_num); }\n";
+          gchar *Fonction= " int Get_Tableau_bit(int n) { return(Tableau_bit[n]); }\n"
+                           " int Get_Tableau_num(int n) { return(Tableau_num[n]); }\n";
           GSList *liste;
           gint cpt=0;                                                                                   /* Compteur d'actions */
 
