@@ -49,7 +49,7 @@
 /* Sortie: FALSE si problème                                                                                                  */
 /******************************************************************************************************************************/
  static gboolean Check_action_bit_use ( struct PLUGIN_DLS *dls )
-  { gint cpt;
+  { gint cpt, dls_id;
     if(!dls) return(FALSE);
     if(!(dls->Get_Tableau_bit && dls->Get_Tableau_num)) return(TRUE);
     for ( cpt=0; dls->Get_Tableau_bit(cpt) != -1; cpt++ )
@@ -58,9 +58,12 @@
        critere.type = dls->Get_Tableau_bit(cpt);
        critere.num  = dls->Get_Tableau_num(cpt);
        mnemo = Rechercher_mnemo_baseDB_type_num ( &critere );
+       Info_new( Config.log, Config.log_dls, LOG_WARNING,
+                "%s: Test Mnemo %d %d for id %d: mnemo %p", __func__, critere.type, critere.num, dls->plugindb.id, mnemo ); 
        if (!mnemo) return(FALSE);
-       if (mnemo->id != dls->plugindb.id) return(FALSE);
+       dls_id = mnemo->id;
        g_free(mnemo);
+       if (dls_id != dls->plugindb.id) return(FALSE);
      }
     return(TRUE);
   }
@@ -115,6 +118,9 @@
           Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_ERROR_BIT_SET_BUT_NOT_OWNED );
           dls->plugindb.on=FALSE;
         }
+       else Info_new( Config.log, Config.log_dls, LOG_INFO,
+                     "%s: Candidat %04d -> bit(s) ownership OK", __func__, dls->plugindb.id ); 
+
      }
     pthread_mutex_lock( &Partage->com_dls.synchro );                                  /* Ajout dans la liste de travail D.L.S */
     Partage->com_dls.Plugins = g_slist_append( Partage->com_dls.Plugins, dls );
@@ -292,7 +298,8 @@
 /******************************************************************************************************************************/
  gint Compiler_source_dls( gboolean new, gboolean reset, gint id, gchar *buffer, gint taille_buffer )
   { gint retour;
-
+    gint pidgcc;
+       
     if (buffer) memset (buffer, 0, taille_buffer);                                                 /* RAZ du buffer de sortie */
 
     Info_new( Config.log, Config.log_dls, LOG_NOTICE,
@@ -318,7 +325,9 @@
 
        id_fichier = open( log, O_RDONLY, 0 );                /* Ouverture du fichier log et chargement du contenu dans buffer */
        if (id_fichier<0)
-        { Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_LOAD_LOG );
+        { Info_new( Config.log, Config.log_dls, LOG_ERR,
+                "%s: Impossible de charger le fichier de log '%s' : %s", __func__, log, strerror(errno) );
+          Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_LOAD_LOG );
           return(DLS_COMPIL_ERROR_LOAD_LOG);
         }
        else { int nbr_car, index_buffer_erreur;
@@ -335,44 +344,39 @@
        return ( DLS_COMPIL_ERROR_TRAD );
      }
 
-    if (retour == TRAD_DLS_WARNING || retour == TRAD_DLS_OK)
-     { gint pidgcc;
-       pidgcc = fork();
-       if (pidgcc<0)
-        { Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                   "Compiler_source_dls_Fils: envoi erreur Fork GCC %d", id );
-          Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_FORK_GCC );
-          return(DLS_COMPIL_ERROR_FORK_GCC);
-        }
-       else if (!pidgcc)
-        { gchar source[80], cible[80];
-          g_snprintf( source, sizeof(source), "Dls/%d.c", id );
-          g_snprintf( cible,  sizeof(cible),  "Dls/libdls%d.so", id );
-          Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-                   "Compiler_source_dls_Fils: GCC start (pid %d) source %s cible %s!",
-                    pidgcc, source, cible );
-          execlp( "gcc", "gcc", "-I", REP_INCLUDE_GLIB, "-shared", "-o3",
-                  "-Wall", "-lwatchdog-dls", source, "-fPIC", "-o", cible, NULL );
-          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "Compiler_source_dls_Fils: lancement GCC failed" );
-          _exit(0);
-        }
-
+    pidgcc = fork();
+    if (pidgcc<0)
+     { Info_new( Config.log, Config.log_dls, LOG_WARNING,
+                "Compiler_source_dls_Fils: envoi erreur Fork GCC %d", id );
+       Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_FORK_GCC );
+       return(DLS_COMPIL_ERROR_FORK_GCC);
+     }
+    else if (!pidgcc)
+     { gchar source[80], cible[80];
+       g_snprintf( source, sizeof(source), "Dls/%d.c", id );
+       g_snprintf( cible,  sizeof(cible),  "Dls/libdls%d.so", id );
        Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-               "Compiler_source_dls: Waiting for gcc to finish pid %d", pidgcc );
-       wait4(pidgcc, NULL, 0, NULL );
-       Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-               "Compiler_source_dls: gcc is down, OK %d", pidgcc );
-
-       if (reset)
-        { pthread_mutex_lock( &Partage->com_dls.synchro );                              /* Demande le reset du plugin à D.L.S */
-          Partage->com_dls.liste_plugin_reset = g_slist_append ( Partage->com_dls.liste_plugin_reset,
-                                                                 GINT_TO_POINTER(id) );
-          pthread_mutex_unlock( &Partage->com_dls.synchro );
-        }
-
-       Info_new( Config.log, Config.log_dls, LOG_DEBUG, "Compiler_source_dls: end of %d", id );
+                "%s: GCC start (pid %d) source %s cible %s!",
+                 __func__, pidgcc, source, cible );
+       execlp( "gcc", "gcc", "-I", REP_INCLUDE_GLIB, "-shared", "-o3",
+               "-Wall", "-lwatchdog-dls", source, "-fPIC", "-o", cible, NULL );
+       Info_new( Config.log, Config.log_dls, LOG_DEBUG, "Compiler_source_dls_Fils: lancement GCC failed" );
+       _exit(0);
      }
 
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG,
+            "%s: Waiting for gcc to finish pid %d", __func__, pidgcc );
+    wait4(pidgcc, NULL, 0, NULL );
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG,
+            "%s: gcc is down, OK %d", __func__, pidgcc );
+
+    if (reset)
+     { pthread_mutex_lock( &Partage->com_dls.synchro );                                 /* Demande le reset du plugin à D.L.S */
+       Partage->com_dls.liste_plugin_reset = g_slist_append ( Partage->com_dls.liste_plugin_reset, GINT_TO_POINTER(id) );
+       pthread_mutex_unlock( &Partage->com_dls.synchro );
+     }
+
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "Compiler_source_dls: end of %d", id );
     if (retour == TRAD_DLS_WARNING)
      { Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_OK_WITH_WARNINGS );
        return( DLS_COMPIL_OK_WITH_WARNINGS );

@@ -45,6 +45,7 @@
  static gint Buffer_used=0, Buffer_taille=0;
  static int Id_log;                                                                     /* Pour la creation du fichier de log */
  static int nbr_erreur;
+ static int Dls_id;                                                                /* numéro du plugin en cours de traduction */
 
 /******************************************************************************************************************************/
 /* New_chaine: Alloue une certaine quantité de mémoire pour utiliser des chaines de caractères                                */
@@ -152,6 +153,64 @@
     return(-1);
   }
 /******************************************************************************************************************************/
+/* Check_ownership: Vérifie la propriété du bit interne en action                                                             */
+/* Entrées: le type et numéro du bit interne a testet                                                                         */
+/* Sortie: FALSE si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ gboolean Check_ownership ( gint type, gint num )
+  { struct CMD_TYPE_NUM_MNEMONIQUE critere;
+    struct CMD_TYPE_MNEMO_BASE *mnemo;
+    critere.type = type;
+    critere.num  = num;
+    gchar chaine[80];
+    gboolean retour;
+    retour = FALSE;
+    mnemo = Rechercher_mnemo_baseDB_type_num ( &critere );
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG,
+             "%s: Test Mnemo %d %d for id %d: mnemo %p", __func__, critere.type, critere.num, Dls_id, mnemo ); 
+    if (mnemo)
+     { if (mnemo->dls_id == Dls_id) retour=TRUE;
+       g_free(mnemo);
+     }
+    
+    if(retour == FALSE)
+     { switch (type)
+        { case MNEMO_BISTABLE:
+               g_snprintf( chaine, sizeof(chaine), "Ligne %d: B%04d not owned by plugin", DlsScanner_get_lineno(), num );
+               break;
+          case MNEMO_CPTH:
+               g_snprintf( chaine, sizeof(chaine), "Ligne %d: CH%04d not owned by plugin", DlsScanner_get_lineno(), num );
+               break;
+          case MNEMO_CPT_IMP:
+               g_snprintf( chaine, sizeof(chaine), "Ligne %d: CI%04d not owned by plugin", DlsScanner_get_lineno(), num );
+               break;
+          case MNEMO_MONOSTABLE:
+               g_snprintf( chaine, sizeof(chaine), "Ligne %d: M%04d not owned by plugin", DlsScanner_get_lineno(), num );
+               break;
+          case MNEMO_MOTIF:
+               g_snprintf( chaine, sizeof(chaine), "Ligne %d: I%04d not owned by plugin", DlsScanner_get_lineno(), num );
+               break;
+          case MNEMO_REGISTRE:
+               g_snprintf( chaine, sizeof(chaine), "Ligne %d: R%04d not owned by plugin", DlsScanner_get_lineno(), num );
+               break;
+          case MNEMO_SORTIE:
+               g_snprintf( chaine, sizeof(chaine), "Ligne %d: A%04d not owned by plugin", DlsScanner_get_lineno(), num );
+               break;
+          case MNEMO_SORTIE_ANA:
+               g_snprintf( chaine, sizeof(chaine), "Ligne %d: AA%04d not owned by plugin", DlsScanner_get_lineno(), num );
+               break;
+          case MNEMO_TEMPO:
+               g_snprintf( chaine, sizeof(chaine), "Ligne %d: T%04d not owned by plugin", DlsScanner_get_lineno(), num );
+               break;
+          default: Emettre_erreur_new( "Ligne %d: Ownership problem (but bit type unknown)", DlsScanner_get_lineno() );
+               break;
+        }
+       Emettre_erreur_new( "%s", chaine );
+       return(FALSE);
+     }
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
 /* Entrées: rien                                                                                                              */
 /* Sortie: NULL si probleme                                                                                                   */
@@ -174,6 +233,8 @@
     int taille;
 
     taille = 15;
+/*  Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(MNEMO_MESSAGE) );
+    Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );*/
     action = New_action();
     action->alors = New_chaine( taille );
     g_snprintf( action->alors, taille, "MSG(%d,1);", num );
@@ -191,6 +252,9 @@
     int taille;
 
     taille = 20;
+    Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(MNEMO_SORTIE) );
+    Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );
+    Check_ownership ( MNEMO_SORTIE, num );
     action = New_action();
     action->alors = New_chaine( taille );
     g_snprintf( action->alors, taille, "SA(%d,%d);", num, !barre );
@@ -206,6 +270,9 @@
     int taille;
 
     taille = 15;
+    Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(MNEMO_MONOSTABLE) );
+    Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );
+    Check_ownership ( MNEMO_MONOSTABLE, num );
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
@@ -225,6 +292,9 @@
 
     reset = Get_option_entier ( options, RESET ); if (reset == -1) reset = 0;
     taille = 15;
+    Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(MNEMO_CPTH) );
+    Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );
+    Check_ownership ( MNEMO_CPTH, num );
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
@@ -245,6 +315,9 @@
     ratio = Get_option_entier ( options, RATIO ); if (ratio == -1) ratio = 1;
 
     taille = 20;
+    Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(MNEMO_CPT_IMP) );
+    Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );
+    Check_ownership ( MNEMO_CPT_IMP, num );
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
@@ -266,6 +339,9 @@
     coul   = Get_option_entier ( options, COLOR  ); if (coul   == -1) coul = 0;
     cligno = Get_option_entier ( options, CLIGNO ); if (cligno == -1) cligno = 0;
     taille = 40;
+    Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(MNEMO_MOTIF) );
+    Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );
+    Check_ownership ( MNEMO_MOTIF, num );
     action = New_action();
     action->alors = New_chaine( taille );
     switch (coul)
@@ -293,6 +369,9 @@
   { struct ACTION *action;
     int taille;
 
+    Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(MNEMO_TEMPO) );
+    Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );
+    Check_ownership ( MNEMO_TEMPO, num );
     action = New_action();
     taille = 40;
     action->alors = New_chaine( taille );
@@ -312,9 +391,12 @@
     int taille;
 
     taille = 20;
+    Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(MNEMO_BISTABLE) );
+    Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );
+    Check_ownership ( MNEMO_BISTABLE, num );
     action = New_action();
     action->alors = New_chaine( taille );
-
+       
     g_snprintf( action->alors, taille, "SB(%d,%d);", num, !barre );
     return(action);
   }
@@ -393,6 +475,7 @@
 /******************************************************************************************************************************/
  gint Traduire_DLS( gboolean new, gint id )
   { gchar source[80], source_ok[80], log[80];
+    GSList *liste_bit, *liste_num;
     struct ALIAS *alias;
     gint retour;
     GList *liste;
@@ -420,6 +503,7 @@
 
     pthread_mutex_lock( &Partage->com_dls.synchro_traduction );                           /* Attente unicité de la traduction */
 
+    Dls_id = id;                                     /* Sauvegarde, pour notamment les tests de d'ownership des bits internes */
     Alias = NULL;                                                                                  /* Par défaut, pas d'alias */
     Liste_Actions_bit = NULL;                                                                    /* Par défaut, pas d'actions */
     Liste_Actions_num = NULL;                                                                    /* Par défaut, pas d'actions */
@@ -443,19 +527,10 @@
     else
      { gchar cible[80];
        gint fd;
-       Emettre_erreur_new( "No error found" );
+       Emettre_erreur_new( "No error found" );                        /* Pas d'erreur rencontré (mais peu etre des warning !) */
+       retour = TRAD_DLS_OK;
 
-       liste = Alias;
-       while(liste)
-        { alias = (struct ALIAS *)liste->data;
-          if ( (!alias->used) )
-           { Emettre_erreur_new( "Warning: %s not used", alias->nom );
-             retour = TRAD_DLS_WARNING;
-           }
-          liste = liste->next;
-        }
-
-       g_snprintf( cible, sizeof(cible), "Dls/%d.c",   id );                  /* Enregistrement du buffer resultat sur disque */
+       g_snprintf( cible, sizeof(cible), "Dls/%d.c", id );                    /* Enregistrement du buffer resultat sur disque */
        unlink ( cible );
        fd = open( cible, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
        if (fd<0)
@@ -496,7 +571,16 @@
           write(fd, Buffer, Buffer_used );                                                     /* Ecriture du buffer resultat */
           close(fd);
         }
-       retour = TRAD_DLS_OK;
+
+       liste = Alias;                                           /* Libération des alias, et remonté d'un Warning si il y en a */
+       while(liste)
+        { alias = (struct ALIAS *)liste->data;
+          if ( (!alias->used) )
+           { Emettre_erreur_new( "Warning: %s not used", alias->nom );
+             retour = TRAD_DLS_WARNING;
+           }
+          liste = liste->next;
+        }
      }
     close(Id_log);
     Liberer_memoire();
@@ -504,7 +588,7 @@
     Buffer = NULL;
     if (retour != TRAD_DLS_ERROR && new)
      { Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-                "Traduire_DLS: Renaming '%s' to '%s'", source, source_ok );
+                "%s: Renaming '%s' to '%s'", __func__, source, source_ok );
        unlink ( source_ok );                                                   /* Recopie sur le fichier "officiel" du plugin */
        rename( source, source_ok );
      }

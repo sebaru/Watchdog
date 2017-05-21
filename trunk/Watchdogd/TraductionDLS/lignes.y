@@ -205,6 +205,7 @@ calcul_expr3:   VALF
                    taille = 15;
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "R(%d)", $2 );
+                   Check_ownership ( MNEMO_REGISTRE, $2 );
                 }}
                 | T_POUV calcul_expr T_PFERM
                 {{ $$=$2; }}
@@ -225,6 +226,7 @@ calcul_expr3:   VALF
                           { taille = 15;
                             $$ = New_chaine( taille ); /* 10 caractères max */
                             g_snprintf( $$, taille, "R(%d)", alias->num );
+                            Check_ownership ( MNEMO_REGISTRE, alias->num );
                             break;
                           }
                          default: 
