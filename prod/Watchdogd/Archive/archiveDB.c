@@ -50,12 +50,13 @@
 /******************************************************************************************************************************/
  void Arch_Update_SQL_Partitions ( guint annee, guint mois )
   { gchar requete[512];
+    gboolean retour;
     struct DB *db;
 
     db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_arch, LOG_ERR, 
-                "Arch_Update_SQL_Partitions: Unable to open database %s", Config.db_database );
+                "%s: Unable to open database %s", __func__, Config.db_database );
        return;
      }
 
@@ -65,9 +66,16 @@
                 " PARTITION p_MAX VALUES LESS THAN MAXVALUE);",
                 NOM_TABLE_ARCH, annee, mois, annee, mois );
 
-    Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
-    Info_new( Config.log, Config.log_arch, LOG_INFO, 
-             "Arch_Update_SQL_Partitions: Create NEw partition p%04d%02d", annee, mois );
+    if (retour)
+     { Info_new( Config.log, Config.log_arch, LOG_INFO, 
+                "%s: New partition p%04d%02d created", __func__, annee, mois );
+     }
+    else
+     { Info_new( Config.log, Config.log_arch, LOG_ERR, 
+                "%s: New partition p%04d%02d failed (%s)", __func__, annee, mois, requete );
+     }
+     
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

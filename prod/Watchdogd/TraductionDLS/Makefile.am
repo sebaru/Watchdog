@@ -9,8 +9,8 @@ libtradDLS_la_SOURCES = lignes.y mots.l Interp.c
 
 .NOTPARALLEL:
 
-AM_LFLAGS = -PDls_ -olex.yy.c
-AM_YFLAGS = -p Dls_
+AM_LFLAGS = -PDlsScanner_ --outfile=mots.c
+AM_YFLAGS = -p DlsScanner_ -d -t -v
 
 #Pour LEX et YACC
 libtradDLS_la_LIBADD  = @LEXLIB@
@@ -24,5 +24,5 @@ libtradDLS_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0` \
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/Watchdogd/Include
 
-EXTRA_DIST = lignes.h
-CLEANFILES = lignes.h lignes.c mots.c
+EXTRA_DIST = mots.h lignes.h
+CLEANFILES = mots.h lignes.h lignes.c mots.c

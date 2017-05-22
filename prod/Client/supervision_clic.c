@@ -82,7 +82,8 @@
     if (!(trame_motif && event)) return;
 
     if (event->type == GDK_BUTTON_PRESS)
-     { if (trame_motif->motif->type_gestion == TYPE_BOUTON && (trame_motif->last_clic + 2 <= time(NULL)) )
+     { appui = trame_motif;                                  /* Sauvegarde en attendant la release button */
+       if (trame_motif->motif->type_gestion == TYPE_BOUTON && (trame_motif->last_clic + 1 <= time(NULL)) )
         { printf("Appui sur bouton num_image=%d\n", trame_motif->num_image );
           if ( (trame_motif->num_image % 3) == 1 )
            { Trame_choisir_frame( trame_motif, trame_motif->num_image + 1,      /* Frame 2: bouton appuyé */
@@ -90,13 +91,11 @@
                                   trame_motif->vert,
                                   trame_motif->bleu );
            }
+          time(&appui->last_clic);                                     /* Mémorisation de la date de clic */
         }
-       appui = trame_motif;
-       time(&appui->last_clic);                                        /* Mémorisation de la date de clic */
      }
     else if (event->type == GDK_BUTTON_RELEASE && appui)
      {
-printf("release !\n");
        if ( ((GdkEventButton *)event)->button == 3 &&
              trame_motif->motif->type_dialog == ACTION_PROGRAMME)                     /* Gestion du popup */
         { if (!Popup) Popup = gnome_popup_menu_new( Menu_popup );

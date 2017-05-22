@@ -31,25 +31,6 @@
 #include <glib.h>
 #include "Proto_traductionDLS.h"
 #include "Dls.h"
-
-extern int ligne_source_dls;                                               /* Compteur du numero de ligne_source_dls en cours */
-int erreur;                                                                                 /* Compteur d'erreur du programme */
-#define  NON_DEFINI                   "Ligne %d: %s is not defined\n"
-#define  DEJA_DEFINI                  "Ligne %d: %s is already defined\n"
-#define  INTERDIT_GAUCHE              "Ligne %d: %s interdit en position gauche\n"
-#define  INTERDIT_DROITE              "Ligne %d: %s interdit en position droite\n"
-#define  INTERDIT_BARRE               "Ligne %d: Use of /%s forbidden\n"
-#define  INTERDIT_BARRE_DROITE        "Ligne %d: /%s interdit en position droite\n"
-#define  INTERDIT_REL_ORDRE           "Ligne %d: %s interdit dans la relation d'ordre\n"
-#define  INTERDIT_COMPARAISON         "Ligne %d: %s ne peut s'utiliser dans une comparaison\n"
-#define  INTERDIT_CALCUL              "Ligne %d: %s ne peut s'utiliser dans un calcul\n"
-#define  INTERDIT_CALCUL_RESULT       "Ligne %d: %s ne peut s'utiliser dans un résultat de calcul\n"
-#define  INTERDIT_BIT_B_RESERVED      "Ligne %d: Bistable système B%04d interdit en position droite\n"
-#define  INTERDIT_COMPARAISON_EA_EGAL "Ligne %d: EA%d ne peut s'utiliser avec '='\n"
-#define  MANQUE_COMPARAISON           "Ligne %d: %s doit s'utiliser dans une comparaison\n"
-#define  ERR_SYNTAXE                  "Ligne %d: Erreur de syntaxe -> %s\n"
-
-
 %}
 
 %union { int val;
@@ -109,13 +90,8 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                    switch($4)
                     { case ENTREE:
                       case SORTIE:
-                      case BI    : if ( New_alias($1, $4, $5, $3, $6) == FALSE )         /* Deja defini ? */
-                                    { taille = strlen($1) + strlen(DEJA_DEFINI) + 1;
-                                      chaine = New_chaine(taille);
-                                      g_snprintf( chaine, taille, DEJA_DEFINI, ligne_source_dls, $1 );
-                                      Emettre_erreur(chaine); g_free(chaine);
-                                      erreur++;
-                                    }
+                      case BI    : if ( New_alias($1, $4, $5, $3, $6) == FALSE )                             /* Deja defini ? */
+                                    { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $1 ); }
                                    break;
                       case T_TEMPO :
                       case EANA  :
@@ -125,34 +101,20 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                       case T_MSG :
                       case T_REGISTRE :
                       case ICONE : if ($3==1)                                             /* Barre = 1 ?? */
-                                    { taille = strlen($1) + strlen(INTERDIT_BARRE) + 1;
-                                      chaine = New_chaine(taille);
-                                      g_snprintf( chaine, taille, INTERDIT_BARRE, ligne_source_dls, $1 );
-                                      Emettre_erreur(chaine); g_free(chaine);
-                                      erreur++;
-                                    }
+                                    { Emettre_erreur_new( "Ligne %d:Use of '/%s' is forbidden", DlsScanner_get_lineno(), $1 ); }
                                    else
                                     { if (New_alias($1, $4, $5, 0, $6) == FALSE)
-                                       { taille = strlen($1) + strlen(DEJA_DEFINI) + 1;
-                                         chaine = New_chaine(taille);
-                                         g_snprintf( chaine, taille, DEJA_DEFINI, ligne_source_dls, $1 );
-                                         Emettre_erreur(chaine); g_free(chaine);
-                                         erreur++;
-                                       }
+                                       { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $1 ); }
                                     }
                                    break;
-                      default: taille = strlen($1) + strlen(ERR_SYNTAXE) + 1;
-                               chaine = New_chaine(taille);
-                               g_snprintf( chaine, taille, ERR_SYNTAXE, ligne_source_dls, $1 );
-                               Emettre_erreur(chaine); g_free(chaine);
-                               erreur++;
+                      default: Emettre_erreur_new( "Ligne %d: Syntaxe Error near '%s'", DlsScanner_get_lineno(), $1 );
                                break;
                     }
                 }}
                 ;
 alias_bit:      BI | MONO | ENTREE | SORTIE | T_MSG | T_TEMPO | ICONE | CPT_H | CPT_IMP | EANA | T_REGISTRE
                 ;
-/******************************************* Gestion des instructions *************************************/
+/**************************************************** Gestion des instructions ************************************************/
 listeInstr:     une_instr listeInstr
                 | une_instr
                 ;
@@ -187,7 +149,7 @@ une_instr:      MOINS expr DONNE action PVIRGULE
                    g_free($5);
                 }}
                 ;
-/******************************************* Partie CALCUL ************************************************/
+/****************************************************** Partie CALCUL *********************************************************/
 calcul_expr:    calcul_expr OU calcul_expr2
                 {{ int taille;
                    taille = strlen($1) + strlen($3) + 4;
@@ -243,6 +205,7 @@ calcul_expr3:   VALF
                    taille = 15;
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "R(%d)", $2 );
+                   Check_ownership ( MNEMO_REGISTRE, $2 );
                 }}
                 | T_POUV calcul_expr T_PFERM
                 {{ $$=$2; }}
@@ -263,26 +226,21 @@ calcul_expr3:   VALF
                           { taille = 15;
                             $$ = New_chaine( taille ); /* 10 caractères max */
                             g_snprintf( $$, taille, "R(%d)", alias->num );
+                            Check_ownership ( MNEMO_REGISTRE, alias->num );
                             break;
                           }
-                         default: taille = strlen($1) + strlen(INTERDIT_CALCUL) + 1;
-                                  chaine = New_chaine(taille);
-                                  g_snprintf(chaine, taille, INTERDIT_CALCUL, ligne_source_dls, $1 );
-                                  Emettre_erreur(chaine); g_free(chaine);
-                                  erreur++;
-                                  $$=New_chaine(2);
-                                  g_snprintf( $$, 2, "0" );
+                         default: 
+                          { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser dans un calcul", DlsScanner_get_lineno(), $1 );
+                            $$=New_chaine(2);
+                            g_snprintf( $$, 2, "0" );
+                          }
                        }
                     }
-                   else { taille = strlen($1) + strlen(NON_DEFINI) + 1;
-                          chaine = New_chaine(taille);
-                          g_snprintf(chaine, taille, NON_DEFINI, ligne_source_dls, $1 );
-                          Emettre_erreur(chaine); g_free(chaine);
-                          erreur++;
-                          
-                          $$=New_chaine(2);
-                          g_snprintf( $$, 2, "0" );
-                        }
+                   else 
+                    { Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $1 );
+                      $$=New_chaine(2);
+                      g_snprintf( $$, 2, "0" );
+                    }
                    g_free($1);                                     /* On n'a plus besoin de l'identifiant */
                 }}
                 ;
@@ -301,25 +259,20 @@ calcul_ea_result: T_REGISTRE ENTIER
                           { $$ = alias->num;
                             break;
                           }
-                         default: taille = strlen($1) + strlen(INTERDIT_CALCUL_RESULT) + 1;
-                                  chaine = New_chaine(taille);
-                                  g_snprintf(chaine, taille, INTERDIT_CALCUL_RESULT, ligne_source_dls, $1 );
-                                  Emettre_erreur(chaine); g_free(chaine);
-                                  erreur++;
-                                  $$=0;
+                         default: 
+                          { Emettre_erreur_new( "Ligne %d :'%s' ne peut s'utiliser dans un résultat de calcul", DlsScanner_get_lineno(), $1 );
+                            $$=0;
+                          }
                        }
                     }
-                   else { taille = strlen($1) + strlen(NON_DEFINI) + 1;
-                          chaine = New_chaine(taille);
-                          g_snprintf(chaine, taille, NON_DEFINI, ligne_source_dls, $1 );
-                          Emettre_erreur(chaine); g_free(chaine);
-                          erreur++;
-                          $$=0;
-                        }
+                   else
+                    { Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $1 );
+                      $$=0;
+                    }
                    g_free($1);                                     /* On n'a plus besoin de l'identifiant */
                 }}
                 ;
-/******************************************* Partie LOGIQUE ***********************************************/
+/******************************************************* Partie LOGIQUE *******************************************************/
 expr:           expr OU facteur
                 {{ int taille;
                    taille = strlen($1)+strlen($3)+7;
@@ -363,19 +316,19 @@ unite:          modulateur ENTIER HEURE ENTIER
                 }}
                 | T_START
                 {{ int taille;
-                   taille = 18;
+                   taille = 10;
                    $$ = New_chaine(taille);
                    g_snprintf( $$, taille, "(start)" );
                 }}
                 | T_TRUE
                 {{ int taille;
-                   taille = 18;
+                   taille = 5;
                    $$ = New_chaine(taille);
                    g_snprintf( $$, taille, "(1)" );
                 }}
                 | T_FALSE
                 {{ int taille;
-                   taille = 18;
+                   taille = 5;
                    $$ = New_chaine(taille);
                    g_snprintf( $$, taille, "(0)" );
                 }}
@@ -403,12 +356,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                | EANA ENTIER ordre VALF
                 {{ int taille;
                    if ($3 == T_EGAL)
-                    { char *chaine;
-                      taille = 20 + strlen(INTERDIT_COMPARAISON_EA_EGAL) + 1;
-                      chaine = New_chaine(taille);
-                      g_snprintf(chaine, taille, INTERDIT_COMPARAISON_EA_EGAL, ligne_source_dls, $2 );
-                      Emettre_erreur(chaine); g_free(chaine);
-                      erreur++;
+                    { Emettre_erreur_new( "Ligne %d: EA%04d ne peut s'utiliser avec le comparateur '='", DlsScanner_get_lineno(), $2 );
                       $$=New_chaine(2);
                       g_snprintf( $$, 2, "0" ); 
                     }
@@ -467,178 +415,119 @@ unite:          modulateur ENTIER HEURE ENTIER
                 {{ struct ALIAS *alias;
                    char *chaine;
                    int taille;
-                   alias = Get_alias_par_nom($2);                                  /* On recupere l'alias */
+                   alias = Get_alias_par_nom($2);                                                      /* On recupere l'alias */
                    if (alias)
-                    { switch(alias->bit)               /* On traite que ce qui peut passer en "condition" */
-                       { case T_TEMPO : if ($4)
-                                       { taille = strlen($2) + strlen(INTERDIT_COMPARAISON) + 1;
-                                         chaine = New_chaine(taille);
-                                         g_snprintf(chaine, taille, INTERDIT_COMPARAISON, ligne_source_dls, $2 );
-                                         Emettre_erreur(chaine); g_free(chaine);
-                                         erreur++;
-                                         $$=New_chaine(2);
-                                         g_snprintf( $$, 2, "0" );                                      
-                                       } 
-                                      else
-                                       { int taille;
-                                         taille = 40;
-                                         $$ = New_chaine( taille ); /* 10 caractères max */
-                                         g_snprintf( $$, taille, "%sT(%d)",
-                                                     ($1==1 ? "!" : ""), alias->num );
-                                       }
-                                      break;
-                         case ENTREE: if ($4)
-                                       { taille = strlen($2) + strlen(INTERDIT_COMPARAISON) + 1;
-                                         chaine = New_chaine(taille);
-                                         g_snprintf(chaine, taille, INTERDIT_COMPARAISON, ligne_source_dls, $2 );
-                                         Emettre_erreur(chaine); g_free(chaine);
-                                         erreur++;
-                                         $$=New_chaine(2);
-                                         g_snprintf( $$, 2, "0" );                                      
-                                       }
-                                      else
-                                       { taille = 15;
-                                         $$ = New_chaine( taille ); /* 10 caractères max */
-                                         if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
-                                              g_snprintf( $$, taille, "E(%d)", alias->num );
-                                         else g_snprintf( $$, taille, "!E(%d)", alias->num );
-                                       }
-                                      break;
-                         case BI    : if ($4)
-                                       { taille = strlen($2) + strlen(INTERDIT_COMPARAISON) + 1;
-                                         chaine = New_chaine(taille);
-                                         g_snprintf(chaine, taille, INTERDIT_COMPARAISON, ligne_source_dls, $2 );
-                                         Emettre_erreur(chaine); g_free(chaine);
-                                         erreur++;
-                                         $$=New_chaine(2);
-                                         g_snprintf( $$, 2, "0" );                                      
-                                       }
-                                      else
-                                       { taille = 15;
-                                         $$ = New_chaine( taille ); /* 10 caractères max */
-                                         if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
-                                              g_snprintf( $$, taille, "B(%d)", alias->num );
-                                         else g_snprintf( $$, taille, "!B(%d)", alias->num );
-                                       }
-                                      break;
-                         case MONO  : if ($4)
-                                       { taille = strlen($2) + strlen(INTERDIT_COMPARAISON) + 1;
-                                         chaine = New_chaine(taille);
-                                         g_snprintf(chaine, taille, INTERDIT_COMPARAISON, ligne_source_dls, $2 );
-                                         Emettre_erreur(chaine); g_free(chaine);
-                                         erreur++;
-                                         $$=New_chaine(2);
-                                         g_snprintf( $$, 2, "0" );                                      
-                                       }
-                                      else
-                                       { taille = 15;
-                                         $$ = New_chaine( taille ); /* 10 caractères max */
-                                         if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
-                                              g_snprintf( $$, taille, "M(%d)", alias->num );
-                                         else g_snprintf( $$, taille, "!M(%d)", alias->num );
-                                       }
-                                      break;
-                         case EANA  : if (!$4)
-                                       { taille = strlen($2) + strlen(MANQUE_COMPARAISON) + 1;
-                                         chaine = New_chaine(taille);
-                                         g_snprintf(chaine, taille, MANQUE_COMPARAISON, ligne_source_dls, $2 );
-                                         Emettre_erreur(chaine); g_free(chaine);
-                                         erreur++;
-                                         $$=New_chaine(2);
-                                         g_snprintf( $$, 2, "0" );                                      
-                                       }
-                                      else
-                                       { char *chaine;
-                                         if ($4->type == T_EGAL)
-                                          { taille = 20 + strlen(INTERDIT_COMPARAISON_EA_EGAL) + 1;
-                                            chaine = New_chaine(taille);
-                                            g_snprintf(chaine, taille, INTERDIT_COMPARAISON_EA_EGAL, ligne_source_dls, alias->num );
-                                            Emettre_erreur(chaine); g_free(chaine);
-                                            erreur++;
-                                            $$=New_chaine(2);
-                                            g_snprintf( $$, 2, "0" ); 
-                                          }
-                                         else
-                                          { taille = 50;
-                                            $$ = New_chaine( taille ); /* 10 caractères max */
-                                            switch($4->type)
-                                             { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $4->valf, alias->num ); break;
-                                               case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $4->valf, alias->num ); break;
-                                               case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $4->valf, alias->num ); break;
-                                               case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $4->valf, alias->num ); break;
-                                             }
-                                          }
-                                       }
-                                      break;
-                         case T_REGISTRE:
-                          { if (!$4)
-                             { taille = strlen($2) + strlen(MANQUE_COMPARAISON) + 1;
-                               chaine = New_chaine(taille);
-                               g_snprintf(chaine, taille, MANQUE_COMPARAISON, ligne_source_dls, $2 );
-                               Emettre_erreur(chaine); g_free(chaine);
-                               erreur++;
+                    { if ($4 && (alias->bit==T_TEMPO ||                              /* Vérification des bits non comparables */
+                                 alias->bit==ENTREE ||
+                                 alias->bit==BI ||
+                                 alias->bit==MONO)
+                         )
+                       { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser dans une comparaison", DlsScanner_get_lineno(), $2 );
+                         $$=New_chaine(2);
+                         g_snprintf( $$, 2, "0" );                                      
+                       } else
+                      if (!$4 && (alias->bit==EANA ||                    /* Vérification des bits obligatoirement comparables */
+                                  alias->bit==T_REGISTRE ||
+                                  alias->bit==CPT_IMP ||
+                                  alias->bit==CPT_H)
+                         )
+                       { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser qu'avec une comparaison", DlsScanner_get_lineno(), $2 );
+                         $$=New_chaine(2);
+                         g_snprintf( $$, 2, "0" );                                      
+                       } 
+                      else switch(alias->bit)                              /* On traite que ce qui peut passer en "condition" */
+                       { case T_TEMPO :
+                          { taille = 40;
+                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            g_snprintf( $$, taille, "%sT(%d)", ($1==1 ? "!" : ""), alias->num );
+                            break;
+                          }
+                         case ENTREE:
+                          { taille = 15;
+                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
+                                 { g_snprintf( $$, taille, "E(%d)", alias->num ); }
+                            else { g_snprintf( $$, taille, "!E(%d)", alias->num ); }
+                            break;
+                          }
+                         case BI:
+                          { taille = 15;
+                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
+                                 { g_snprintf( $$, taille, "B(%d)", alias->num ); }
+                            else { g_snprintf( $$, taille, "!B(%d)", alias->num ); }
+                            break;
+                          }
+                         case MONO:
+                          { taille = 15;
+                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
+                                 { g_snprintf( $$, taille, "M(%d)", alias->num ); }
+                            else { g_snprintf( $$, taille, "!M(%d)", alias->num ); }
+                            break;
+                          }
+                         case EANA:
+                          { char *chaine;
+                            if ($4->type == T_EGAL)
+                             { Emettre_erreur_new( "Ligne %d: '%s (EA%4d)' ne peut s'utiliser avec le comparateur '='",
+                                                   DlsScanner_get_lineno(), $2, alias->num );
                                $$=New_chaine(2);
-                               g_snprintf( $$, 2, "0" );                                      
+                               g_snprintf( $$, 2, "0" ); 
                              }
                             else
-                             { char *chaine;
-                               taille = 40;
-                               $$ = New_chaine( taille );
-                               switch( $4->type )
-                                { case INF        : g_snprintf( $$, taille, "R(%d)<%f", $2, $4 ); break;
-                                  case SUP        : g_snprintf( $$, taille, "R(%d)>%f", $2, $4 ); break;
-                                  case INF_OU_EGAL: g_snprintf( $$, taille, "R(%d)<=%f", $2, $4 ); break;
-                                  case SUP_OU_EGAL: g_snprintf( $$, taille, "R(%d)>=%f", $2, $4 ); break;
-                                  case T_EGAL     : g_snprintf( $$, taille, "R(%d)==%f", $2, $4 ); break;
+                             { taille = 50;
+                               $$ = New_chaine( taille ); /* 10 caractères max */
+                               switch($4->type)
+                                { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $4->valf, alias->num ); break;
+                                  case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $4->valf, alias->num ); break;
+                                  case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $4->valf, alias->num ); break;
+                                  case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $4->valf, alias->num ); break;
                                 }
                              }
                             break;
+                          }
+                         case T_REGISTRE:
+                          { char *chaine;
+                            taille = 40;
+                            $$ = New_chaine( taille );
+                            switch( $4->type )
+                             { case INF        : g_snprintf( $$, taille, "R(%d)<%f", $2, $4 ); break;
+                               case SUP        : g_snprintf( $$, taille, "R(%d)>%f", $2, $4 ); break;
+                               case INF_OU_EGAL: g_snprintf( $$, taille, "R(%d)<=%f", $2, $4 ); break;
+                               case SUP_OU_EGAL: g_snprintf( $$, taille, "R(%d)>=%f", $2, $4 ); break;
+                               case T_EGAL     : g_snprintf( $$, taille, "R(%d)==%f", $2, $4 ); break;
+                             }
+                            break;
                            }
-                         case CPT_IMP:if (!$4)
-                                       { taille = strlen($2) + strlen(MANQUE_COMPARAISON) + 1;
-                                         chaine = New_chaine(taille);
-                                         g_snprintf(chaine, taille, MANQUE_COMPARAISON, ligne_source_dls, $2 );
-                                         Emettre_erreur(chaine); g_free(chaine);
-                                         erreur++;
-                                         $$=New_chaine(2);
-                                         g_snprintf( $$, 2, "0" );                                      
-                                       }
-                                      else
-                                       { taille = 30;
-                                         $$ = New_chaine( taille ); /* 10 caractères max */
-                                         switch($4->type)
-                                          { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", alias->num, $4->valf );  break;
-                                            case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", alias->num, $4->valf );  break;
-                                            case INF_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", alias->num, $4->valf ); break;
-                                            case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", alias->num, $4->valf ); break;
-                                            case T_EGAL     : g_snprintf( $$, taille, "CI(%d)==%f", alias->num, $4->valf ); break;
-                                          }
-                                       }
-                                      break;
-                         default:     taille = strlen($2) + strlen(INTERDIT_GAUCHE) + 1;
-                                      chaine = New_chaine(taille);
-                                      g_snprintf(chaine, taille, INTERDIT_GAUCHE, ligne_source_dls, $2 );
-                                      Emettre_erreur(chaine); g_free(chaine);
-                                      erreur++;
-                                      $$=New_chaine(2);
-                                      g_snprintf( $$, 2, "0" );
+                         case CPT_IMP:
+                          { taille = 30;
+                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            switch($4->type)
+                             { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", alias->num, $4->valf );  break;
+                               case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", alias->num, $4->valf );  break;
+                               case INF_OU_EGAL: g_snprintf( $$, taille, "CI(%d)<=%f", alias->num, $4->valf ); break;
+                               case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", alias->num, $4->valf ); break;
+                               case T_EGAL     : g_snprintf( $$, taille, "CI(%d)==%f", alias->num, $4->valf ); break;
+                             }
+                            break;
+                          }
+                         default:
+                          { Emettre_erreur_new( "Ligne %d: '%s' n'est pas une condition valide", DlsScanner_get_lineno(), $2 );
+                            $$=New_chaine(2);
+                            g_snprintf( $$, 2, "0" );
+                          }
                        }
                     }
-                   else { taille = strlen($2) + strlen(NON_DEFINI) + 1;
-                          chaine = New_chaine(taille);
-                          g_snprintf(chaine, taille, NON_DEFINI, ligne_source_dls, $2 );
-                          Emettre_erreur(chaine); g_free(chaine);
-                          erreur++;
-                          
+                   else { Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $2 );/* si l'alias n'existe pas */
                           $$=New_chaine(2);
                           g_snprintf( $$, 2, "0" );
                         }
-                   g_free($2);                                     /* On n'a plus besoin de l'identifiant */
+                   g_free($2);                                                         /* On n'a plus besoin de l'identifiant */
                    Liberer_options($3);
-                   if ($4) g_free($4);
+                   if ($4) g_free($4);                                               /* Libération du comparateur s'il existe */
                 }}
                 ;
-/********************************************* Gestion des actions ****************************************/
+/************************************************* Gestion des actions ********************************************************/
 action:         action VIRGULE une_action
                 {{ int taille;
                    $$=New_action();
@@ -664,19 +553,14 @@ action:         action VIRGULE une_action
                 | une_action {{ $$=$1; }}
                 ;
 
-une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);     }}
+une_action:     barre SORTIE ENTIER
+                  {{ $$=New_action_sortie($3, $1);     }}
                 | barre BI ENTIER
                   {{ if ($3 >= NBR_BIT_BISTABLE_RESERVED)
                        { $$=New_action_bi($3, $1); }
                      else
-                       { char *chaine;
-                          guint taille;
-                         taille = strlen(INTERDIT_BIT_B_RESERVED) + 1;
-                         chaine = New_chaine(taille);
-                         g_snprintf( chaine, taille, INTERDIT_BIT_B_RESERVED, ligne_source_dls, $3 );
-                         Emettre_erreur(chaine); g_free(chaine);
-                         erreur++;
-
+                       { guint taille;
+                         Emettre_erreur_new( "Ligne %d: '%B05d' could not be set (system bit)", DlsScanner_get_lineno(), $3 );
                          $$=New_action();
                          taille = 2;
                          $$->alors = New_chaine( taille );
@@ -684,7 +568,8 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                          $$->sinon = NULL;
                        }
                   }}
-                | MONO ENTIER                 {{ $$=New_action_mono($2);           }}
+                | MONO ENTIER
+                  {{ $$=New_action_mono($2);           }}
                 | ICONE ENTIER liste_options
                   {{ $$=New_action_icone($2, $3);
                      Liberer_options($3);
@@ -701,18 +586,15 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                   {{ $$=New_action_cpt_imp($2, $3);
                      Liberer_options($3);
                   }}
-                | T_MSG ENTIER                {{ $$=New_action_msg($2);            }}
+                | T_MSG ENTIER
+                  {{ $$=New_action_msg($2);            }}
                 | barre ID liste_options
-                {{ struct ALIAS *alias;                               /* Definition des actions via alias */
+                {{ struct ALIAS *alias;                                                   /* Definition des actions via alias */
                    int taille;
                    alias = Get_alias_par_nom( $2 );
                    if (!alias)
                     { char *chaine;
-                      taille = strlen($2) + strlen(NON_DEFINI) + 1;
-                      chaine = New_chaine(taille);
-                      g_snprintf( chaine, taille, NON_DEFINI, ligne_source_dls, $2 );
-                      Emettre_erreur(chaine); g_free(chaine);
-                      erreur++;
+                      Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $2 );
 
                       $$=New_action();
                       taille = 2;
@@ -720,90 +602,42 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                       g_snprintf( $$->alors, taille, " " ); 
                       $$->sinon = NULL;
                     }
-                   else
+                   else                                                           /* L'alias existe, vérifions ses parametres */
                     { GList *options, *options_g, *options_d;
                       options_g = g_list_copy( $3 );
                       options_d = g_list_copy( alias->options );
-                      options = g_list_concat( options_g, options_d );/* Concaténation des listes d'options */
-                      switch(alias->bit)
-                       { case T_TEMPO  : if ($1)
-                                        { char *chaine;
-                                          taille = strlen(alias->nom) + strlen(INTERDIT_BARRE_DROITE) + 1;
-                                          chaine = New_chaine(taille);
-                                          g_snprintf( chaine, taille, INTERDIT_BARRE_DROITE,
-                                                      ligne_source_dls, alias->nom );
-                                          Emettre_erreur(chaine); g_free(chaine);
-                                          erreur++; 
-
-                                          $$=New_action();
-                                          taille = 2;
-                                          $$->alors = New_chaine( taille );
-                                          g_snprintf( $$->alors, taille, " " ); 
-                                          $$->sinon = NULL;
-                                        }
-                                       else $$=New_action_tempo( alias->num, options );
-                                       break;
-                         case T_MSG  : if ($1)
-                                        { char *chaine;
-                                          taille = strlen(alias->nom) + strlen(INTERDIT_BARRE_DROITE) + 1;
-                                          chaine = New_chaine(taille);
-                                          g_snprintf( chaine, taille, INTERDIT_BARRE_DROITE,
-                                                      ligne_source_dls, alias->nom );
-                                          Emettre_erreur(chaine); g_free(chaine);
-                                          erreur++; 
-
-                                          $$=New_action();
-                                          taille = 2;
-                                          $$->alors = New_chaine( taille );
-                                          g_snprintf( $$->alors, taille, " " ); 
-                                          $$->sinon = NULL;
-                                        }
-                                       else $$=New_action_msg( alias->num );
-                                       break;
+                      options = g_list_concat( options_g, options_d );                  /* Concaténation des listes d'options */
+                      if ($1 && (alias->bit==T_TEMPO ||
+                                 alias->bit==T_MSG ||
+                                 alias->bit==MONO)
+                         )
+                       { Emettre_erreur_new( "Ligne %d: '/%s' ne peut s'utiliser", DlsScanner_get_lineno(), alias->nom );
+                         $$=New_action();
+                         taille = 2;
+                         $$->alors = New_chaine( taille );
+                         g_snprintf( $$->alors, taille, " " ); 
+                         $$->sinon = NULL;
+                       }
+                      else switch(alias->bit)
+                       { case T_TEMPO: $$=New_action_tempo( alias->num, options );   break;
+                         case T_MSG  : $$=New_action_msg( alias->num );              break;
                          case SORTIE : $$=New_action_sortie( alias->num, $1 );       break;
                          case BI     : if (alias->num >= NBR_BIT_BISTABLE_RESERVED)
                                         { $$=New_action_bi( alias->num, $1 ); }
                                        else
-                                        { char *chaine;
-                                           taille = strlen(INTERDIT_BIT_B_RESERVED) + 1;
-                                           chaine = New_chaine(taille);
-                                           g_snprintf( chaine, taille, INTERDIT_BIT_B_RESERVED, ligne_source_dls, alias->num );
-                                           Emettre_erreur(chaine); g_free(chaine);
-                                           erreur++;
-
-                                           $$=New_action();
-                                           taille = 2;
-                                           $$->alors = New_chaine( taille );
-                                           g_snprintf( $$->alors, taille, " " ); 
-                                           $$->sinon = NULL;
-                                        }
-                                       break;
-                         case MONO   : if ($1)
-                                        { char *chaine;
-                                          taille = strlen(alias->nom) + strlen(INTERDIT_BARRE_DROITE) + 2;
-                                          chaine = New_chaine(taille);
-                                          g_snprintf( chaine, taille, INTERDIT_BARRE_DROITE, ligne_source_dls, alias->nom );
-                                          Emettre_erreur(chaine); g_free(chaine);
-                                          erreur++;
-
+                                        { Emettre_erreur_new( "Ligne %d: '%B05d' could not be set (system bit)", DlsScanner_get_lineno(), alias->bit );
                                           $$=New_action();
                                           taille = 2;
                                           $$->alors = New_chaine( taille );
                                           g_snprintf( $$->alors, taille, " " ); 
                                           $$->sinon = NULL;
                                         }
-                                       else $$=New_action_mono( alias->num );        break;
-
+                                       break;
+                         case MONO   : $$=New_action_mono( alias->num );        break;
                          case CPT_H  : $$=New_action_cpt_h( alias->num, options );   break;
                          case CPT_IMP: $$=New_action_cpt_imp( alias->num, options ); break;
                          case ICONE  : $$=New_action_icone( alias->num, options );   break;
-                         default: { char *chaine;
-                                    taille = strlen(alias->nom) + strlen(INTERDIT_DROITE) + 1;
-                                    chaine = New_chaine(taille);
-                                    g_snprintf( chaine, taille, INTERDIT_DROITE, ligne_source_dls, alias->nom );
-                                    Emettre_erreur(chaine); g_free(chaine);
-                                    erreur++;
-
+                         default: { Emettre_erreur_new( "Ligne %d: '%s' syntax error", DlsScanner_get_lineno(), alias->nom );
                                     $$=New_action();
                                     taille = 2;
                                     $$->alors = New_chaine( taille );
@@ -813,7 +647,7 @@ une_action:     barre SORTIE ENTIER           {{ $$=New_action_sortie($3, $1);  
                        }
                       g_list_free(options);
                     }
-                   Liberer_options($3);                                /* On libére les options "locales" */
+                   Liberer_options($3);                                                    /* On libére les options "locales" */
                    g_free($2);
                 }}
                 ;
@@ -843,7 +677,7 @@ jour_semaine:   LUNDI        {{ $$=1; }}
                 ;
 ordre:          INF | SUP | INF_OU_EGAL | SUP_OU_EGAL | T_EGAL
                 ;
-/********************************************* Gestion des options ****************************************/
+/**************************************************** Gestion des options *****************************************************/
 liste_options:  T_POUV options T_PFERM   {{ $$ = $2;   }}
                 |                    {{ $$ = NULL; }}
                 ;
@@ -890,51 +724,5 @@ une_option:     MODE T_EGAL ENTIER
 couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE | KAKI
                 ;
 %%
-/**********************************************************************************************************/
-/* yyerror: Gestion des erreurs de syntaxe                                                                */
-/**********************************************************************************************************/
- int Dls_error ( char *s )
-  { char *chaine;
-    int taille;
 
-    taille = strlen(ERR_SYNTAXE) + strlen(s) + 5;
-    chaine = New_chaine( taille );
-    g_snprintf( chaine, taille, ERR_SYNTAXE, ligne_source_dls, s );
-    Emettre_erreur( chaine );
-    g_free(chaine);
-    erreur++;
-    return(0);
-  }
-/**********************************************************************************************************/
-/* Interpreter: lecture et production de code intermedaire a partir du fichier en parametre               */
-/* Entrée: le nom du fichier originel                                                                     */
-/**********************************************************************************************************/
- gboolean Interpreter_source_dls ( gchar *source )
-  { gchar chaine[80];
-    FILE *rc;
-
-    ligne_source_dls  = 1;                                       /* Initialisation des variables globales */
-
-    erreur=0;
-    rc = fopen(source, "r");
-    if (rc)
-     { Emettre(" #include <Module_dls.h>\n void Go ( int start )\n {\n");
-       Dls_debug = 0;                                                        /* Debug de la traduction ?? */
-       Dls_restart(rc);
-       Dls_parse();
-       Emettre(" }\n");
-
-       fclose(rc);
-       if (erreur)
-        { g_snprintf(chaine, sizeof(chaine), "%d syntax error%s found\n", erreur, (erreur>1 ? "s" : "") );
-          Emettre_erreur( chaine );
-          return(FALSE);
-        } else
-        { g_snprintf(chaine, sizeof(chaine), "No syntax error found\n" );
-          Emettre_erreur( chaine );
-        }
-       return(TRUE);
-     } else printf("ouverture plugin impossible: niet\n");
-    return(FALSE);
-  }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

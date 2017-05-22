@@ -69,9 +69,10 @@
  extern gint Traduire_DLS( gboolean new, gint id );                                      /* Dans Interp.c */
  extern char *New_chaine( int longueur );
  extern void Emettre( char *chaine );
- extern void Emettre_erreur( char *chaine );
+ extern void Emettre_erreur_new( gchar *format, ... );
  extern void Emettre_init_alias( void );
  extern struct COMPARATEUR *New_comparateur( void );
+ extern gboolean Check_ownership ( gint type, gint num );
  extern struct ACTION *New_action( void );
  extern struct ACTION *New_action_msg( int num );
  extern struct ACTION *New_action_sortie( int num, int barre );
@@ -86,8 +87,11 @@
  extern struct OPTION *New_option( void );
  extern int Get_option_entier( GList *liste_options, gint type );
  extern void Liberer_options ( GList *options );
-
- extern int Dls_error ( char *s );
- extern void Dls_restart ( FILE *input_file );
- #endif
+ extern int DlsScanner_error ( char *s );
+/* Fonctions mise a disposition par Flex et Bison */
+ extern int  DlsScanner_lex (void);
+ extern void DlsScanner_restart  (FILE * input_file );
+ extern int  DlsScanner_get_lineno (void );
+ extern void DlsScanner_set_lineno (int _line_number);
+ #endif 
 /*--------------------------------------------------------------------------------------------------------*/

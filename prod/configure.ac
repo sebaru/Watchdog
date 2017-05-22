@@ -53,14 +53,13 @@ then
 fi
 
 AC_CHECK_PROGS(FLEX,flex,none)
-if test "$BISON" = "none"
+if test "$FLEX" = "none"
 then
   AC_MSG_ERROR([no suitable flex found. Please install the 'flex' package.])
 fi
 
 dnl parametres par defaut
 CFLAGS="-O -pipe -g -ggdb"
-YACC="$YACC -d -t -v"
 
 LIBW_MAJOR_VERSION=4
 LIBW_MINOR_VERSION=0

@@ -42,6 +42,8 @@
     void *handle;                                                                              /* Handle du fichier librairie */
     void (*go)(int);                                                                      /* Fonction de traitement du module */
     float conso;                                                                         /* Consommation temporelle du plugin */
+    int (*Get_Tableau_bit)(int);                                               /* Fonction d'identification des bits utilisés */
+    int (*Get_Tableau_num)(int);                                               /* Fonction d'identification des bits utilisés */
   };
 
  enum                                                                                  /* différent statut des temporisations */

@@ -70,7 +70,9 @@
     "Syntax error",
     "Error Fork GCC",
     "OK with Warnings",
-    "OK"
+    "OK",
+    "Functions are missing. Need compiling again.",
+    "Error, plugin is setting bits he does not own."
   };
 
 /******************************************* Définitions des prototypes programme *********************************************/
@@ -104,7 +106,7 @@
  static gchar *Dls_compil_status ( guint status )
   { if (status >= NBR_DLS_COMPIL_STATUS)
          return("Unknown");
-    else return ( DLS_COMPIL_STATUS[status]);
+    else return ( DLS_COMPIL_STATUS[status] );
   }
 /******************************************************************************************************************************/
 /* Menu_refresh_plugin_D.L.S: rafraichir la liste des plugins D.L.S                                                           */
