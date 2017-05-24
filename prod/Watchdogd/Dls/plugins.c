@@ -61,7 +61,7 @@
        Info_new( Config.log, Config.log_dls, LOG_WARNING,
                 "%s: Test Mnemo %d %d for id %d: mnemo %p", __func__, critere.type, critere.num, dls->plugindb.id, mnemo ); 
        if (!mnemo) return(FALSE);
-       dls_id = mnemo->id;
+       dls_id = mnemo->dls_id;
        g_free(mnemo);
        if (dls_id != dls->plugindb.id) return(FALSE);
      }
