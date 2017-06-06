@@ -59,16 +59,22 @@
 /* Sortie: TRUE / FALSE                                                                                                       */
 /******************************************************************************************************************************/
  int Heure ( int heure, int minute )
-  { return( nbr_heure==heure && nbr_minute==minute ); }
+  { static int hold_minute=-1;
+    if ( nbr_heure==heure && nbr_minute==minute && hold_minute!=nbr_minute )
+     { hold_minute = minute;
+       return(1);
+     }
+    return(0);
+  }
 /******************************************************************************************************************************/
-/* Heure: renvoie TRUE si l'heure actuelle est avant celle en parametre                                                       */
+/* Heure: renvoie TRUE si l'heure actuelle est future à celle en parametre                                                    */
 /* Entrée: heure et minute attendue                                                                                           */
 /* Sortie: TRUE / FALSE                                                                                                       */
 /******************************************************************************************************************************/
  int Heure_apres ( int heure, int minute )
   { return( (heure<nbr_heure || (heure==nbr_heure && minute<=nbr_minute)) ); }
 /******************************************************************************************************************************/
-/* Heure: renvoie TRUE si l'heure actuelle est future a celle en parametre                                                    */
+/* Heure: renvoie TRUE si l'heure actuelle est antérieure a celle en parametre                                                */
 /* Entrée: heure et minute attendue                                                                                           */
 /* Sortie: TRUE / FALSE                                                                                                       */
 /******************************************************************************************************************************/
