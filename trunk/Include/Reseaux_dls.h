@@ -59,6 +59,7 @@
     guint type;                                                                           /* Module, Sous groupe, groupe, ... */
     guint compil_date;                                                                        /* Date de derniere compilation */
     guint compil_status;                                                                    /* Statut de derniere compilation */
+    guint nbr_compil;                                                                         /* Nombre de compilation totale */
   };
  
  struct CMD_TYPE_SOURCE_DLS

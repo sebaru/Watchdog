@@ -60,11 +60,9 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET num_plugin=1 WHERE num_plugin=%d", NOM_TABLE_MNEMO, dls->id );
     Lancer_requete_SQL ( db, requete );
-#ifdef bouh
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "UPDATE %s SET num_plugin=1 WHERE num_plugin=%d", NOM_TABLE_MSGS, dls->id );
+                "UPDATE %s SET dls_id=1 WHERE dls_id=%d", NOM_TABLE_MSG, dls->id );
     Lancer_requete_SQL ( db, requete );
-#endif
     Libere_DB_SQL(&db);
 
     g_snprintf( (gchar *)requete, sizeof(requete), "%d.dls", dls->id );
@@ -101,8 +99,8 @@
     if (ajout)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "INSERT INTO %s"             
-                   "(name,shortname,actif,type,syn_id,compil_date,compil_status)"
-                   "VALUES ('%s','%s','%s','%d',%d,0,0);",
+                   "(name,shortname,actif,type,syn_id,compil_date,compil_status,nbr_compil)"
+                   "VALUES ('%s','%s','%s','%d',%d,0,0,0);",
                    NOM_TABLE_DLS, nom, shortname, (dls->on ? "true" : "false"), dls->type, dls->syn_id );
      }
     else
@@ -170,7 +168,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.type,dls.syn_id,syn.groupe,syn.page,dls.compil_date,dls.compil_status"
+                "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.type,dls.syn_id,syn.groupe,syn.page,"
+                "dls.compil_date,dls.compil_status,dls.nbr_compil"
                 " FROM %s as dls,%s as syn"
                 " WHERE dls.syn_id = syn.id"
                 " ORDER BY groupe,page,shortname",
@@ -212,6 +211,7 @@
        dls->syn_id        = atoi(db->row[5]);
        dls->compil_date   = atoi(db->row[8]);
        dls->compil_status = atoi(db->row[9]);
+       dls->nbr_compil    = atoi(db->row[10]);
      }
     return( dls );
   }
@@ -232,7 +232,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.name,%s.shortname,actif,type,syn_id,groupe,page,compil_date,compil_status"
+                "SELECT %s.id,%s.name,%s.shortname,actif,type,syn_id,groupe,page,"
+                "compil_date,compil_status,nbr_compil"
                 " FROM %s,%s"
                 " WHERE %s.syn_id = %s.id AND %s.id = %d",
                 NOM_TABLE_DLS, NOM_TABLE_DLS, NOM_TABLE_DLS,
@@ -262,7 +263,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "
-                "compil_date='%d', compil_status='%d' WHERE id=%d",
+                "compil_date='%d', compil_status='%d' nbr_compil=nbr_compil+1 WHERE id=%d",
                 NOM_TABLE_DLS, (gint)time(NULL), status, id );
 
     db = Init_DB_SQL();       
