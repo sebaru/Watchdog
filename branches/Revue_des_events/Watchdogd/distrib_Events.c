@@ -181,13 +181,13 @@
 /* Entrée: l'evenement à traiter                                                                                              */
 /* Sortie: le mnemo en question, ou NULL si non-trouvé (ou multi trouvailles)                                                 */
 /******************************************************************************************************************************/
- gint Map_event_to_mnemo_new( struct DB *db, gchar *instance, gchar *thread, gchar *objet )
+ gint Map_event_to_mnemo_new( struct DB **db_retour, gchar *instance, gchar *thread, gchar *objet )
   { struct CMD_TYPE_MNEMO_BASE *mnemo;
-    gchar *event[256];
+    gchar event[256];
     gint nbr_result;
 
-    g_snprintf( event, sizeof(chaine), "%s:%s:%s", instance, thread, objet );
-    if ( ! Recuperer_mnemo_baseDB_by_command_text ( &db, event ) )
+    g_snprintf( event, sizeof(event), "%s:%s:%s", instance, thread, objet );
+    if ( ! Recuperer_mnemo_baseDB_by_command_text ( db_retour, event ) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                  "%s: Error searching Database for event '%s'", __func__, event );
        return(0);
@@ -196,7 +196,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "%s: No match found for event '%s'", __func__, event );
      }
-    return(db->nbr_result);
+    return((*db_retour)->nbr_result);
   }
 /******************************************************************************************************************************/
 /* Gerer_arrive_Event_string: Gere l'arrive d'un event EVENT_INPUT                                                            */

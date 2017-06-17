@@ -162,6 +162,7 @@
  extern void Desabonner_distribution_events ( void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event) );
  extern void Send_Event ( gchar *instance, gchar *thread, guint type, gchar *objet, gfloat val_float );
  extern void Envoyer_Event_msrv( struct CMD_TYPE_MSRV_EVENT *event );
+ extern gint Map_event_to_mnemo_new( struct DB **db, gchar *instance, gchar *thread, gchar *objet );
  extern void Gerer_arrive_Axxx_dls ( void );
  
  extern void Gerer_arrive_MSGxxx_dls ( void );                                                       /* Dans distrib_MSGxxx.c */
