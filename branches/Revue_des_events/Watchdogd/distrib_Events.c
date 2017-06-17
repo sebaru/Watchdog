@@ -190,11 +190,13 @@
     if ( ! Recuperer_mnemo_baseDB_by_command_text ( db_retour, event ) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                  "%s: Error searching Database for event '%s'", __func__, event );
-       return(0);
+       return(-1);
      }
     if ( nbr_result == 0 )                                                                  /* Si pas d'enregistrement trouvé */
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "%s: No match found for event '%s'", __func__, event );
+       Libere_DB_SQL ( (*db_retour) );
+       return(0);
      }
     return((*db_retour)->nbr_result);
   }
@@ -269,7 +271,8 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Gerer_arrive_Axxx_dls ( void )
-  { struct CMD_TYPE_NUM_MNEMONIQUE critere;
+  { gchar instance[24], thread[24], event[128];
+    struct CMD_TYPE_NUM_MNEMONIQUE critere;
     struct CMD_TYPE_MNEMO_BASE *mnemo;
     gint num, reste;
 
@@ -285,19 +288,26 @@
     critere.num  = num;
     mnemo = Rechercher_mnemo_baseDB_type_num ( &critere );
     if (!mnemo)
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "Gerer_arrive_Axxx_dls: Mnemo not found for A%03d", num
-               );
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Mnemo not found for A%03d", __func__, num );
        return;
      }
 
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Recu A(%03d) (%s). Reste a traiter %03d",
+              __func__, num, mnemo->command_text, reste );
+
     if ( strlen ( mnemo->command_text ) > 0 )                      /* Existe t'il un evenement associé ? (implique furtivité) */
-     { Send_Event ( Config.instance_id, "MSRV", EVENT_OUTPUT, mnemo->command_text, 1.0 );
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                 "Gerer_arrive_Axxx_dls: Recu A(%03d) (%s). Reste a traiter %03d",
-                 num, mnemo->command_text, reste
-               );
-       SA ( num, 0 );                                                   /* L'evenement est traité, on fait retomber la sortie */
+     { if ( sscanf ( mnemo->command_text, "%[^:]:%[^:]:%s", instance, thread, event ) != 3 )
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                   "%s: Syntax Error for event '%s'", __func__, mnemo->command_text );
+        }
+       else
+        { if ( ! strcmp ( instance, Config.instance_id ) )                                /* Evenement pour cette instance ?? */
+           { Envoyer_event_to_librairie ( thread, event ); }
+          else
+           { /* Envoyer a une instance distante via requete HTTP */
+           }
+          SA ( num, 0 );                                                /* L'evenement est traité, on fait retomber la sortie */
+        }
      }
     g_free(mnemo);
   }

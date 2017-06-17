@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Rfxcom/Rfxcom.c  Gestion des capteurs RFXCOM Watchdog 2.0                                    */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     dim. 27 mai 2012 12:52:37 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Rfxcom/Rfxcom.c  Gestion des capteurs RFXCOM Watchdog 2.0                                                        */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                         dim. 27 mai 2012 12:52:37 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Rfxcom.c
  * This file is part of Watchdog
@@ -35,30 +35,30 @@
  #include <fcntl.h>
  #include <unistd.h>
 
- #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
+ #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Rfxcom.h"
 
-/**********************************************************************************************************/
-/* Rfxcom_Lire_config : Lit la config Watchdog et rempli la structure mémoire                             */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Rfxcom_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  gboolean Rfxcom_Lire_config ( void )
   { gchar *nom, *valeur;
     struct DB *db;
 
-    Cfg_rfxcom.lib->Thread_debug = FALSE;                                  /* Settings default parameters */
+    Cfg_rfxcom.lib->Thread_debug = FALSE;                                                      /* Settings default parameters */
     Cfg_rfxcom.enable            = FALSE; 
     g_snprintf( Cfg_rfxcom.port, sizeof(Cfg_rfxcom.port), "%s", DEFAUT_PORT_RFXCOM );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                      /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
                 "Rfxcom_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,                      /* Print Config */
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,                                          /* Print Config */
                 "Rfxcom_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "port" ) )
         { g_snprintf( Cfg_rfxcom.port, sizeof(Cfg_rfxcom.port), "%s", valeur ); }
@@ -73,10 +73,10 @@
      }
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Init_rfxcom: Initialisation de la ligne RFXCOM                                                         */
-/* Sortie: l'identifiant de la connexion                                                                  */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Init_rfxcom: Initialisation de la ligne RFXCOM                                                                             */
+/* Sortie: l'identifiant de la connexion                                                                                      */
+/******************************************************************************************************************************/
  static int Init_rfxcom ( void )
   { gchar trame_reset[] = { 0x0D, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
     gchar trame_get_status[] = { 0x0D, 00, 00, 01, 02, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
@@ -129,31 +129,23 @@
 /* Entrée: l'evenement a processer                                                                                            */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Rfxcom_Envoyer_event ( struct CMD_TYPE_MSRV_EVENT *event )
+ static void Rfxcom_Envoyer_event ( gchar *event )
   { gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
     gint type,sstype,id1,id2,id3,id4,housecode,unitcode,val, cpt;
-    gchar instance[24], thread[24];
     
-    if ( strcmp ( event->thread, "MSRV" ) ) return;                                               /* On ecoute que le MSRV ?? */
-
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
-             "Rfxcom_envoyer_event: Processing event %s (from instance %s, thread %s)",
-              event->objet, event->instance, event->thread );
+             "%s: Processing event %s (from instance %s, thread %s)", __func__, event );
 
-    if ( sscanf ( event->objet, "%[^:]:%[^:]:%d:%d:%d:%d:%d:%d:%d:%d:%d",
-                  instance, thread, &type, &sstype, &id1, &id2, &id3, &id4, &housecode, &unitcode, &val ) != 11 )
+    if ( sscanf ( event, "%d:%d:%d:%d:%d:%d:%d:%d:%d",
+                  &type, &sstype, &id1, &id2, &id3, &id4, &housecode, &unitcode, &val ) != 9 )
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
-                "Rfxcom_envoyer_event: Event %s Syntax Error (from instance %s, thread %s)",
-                 event->objet, event->instance, event->thread );
+                "%s: Event Syntax Error for '%s'", __func__, event );
        return;
      }
 
-    if ( strcmp ( instance, Config.instance_id ) ) return;                                      /* Are we the right thread ?? */
-    if ( strcmp ( thread, NOM_THREAD ) ) return;
-    
     if ( type == 0x11 && sstype == 0x00 )                                                             /* Envoi de lighting ?? */
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
-           "Rfxcom_envoyer_sortie: Envoi de %s au module ids=%02d %02d %02d %02d unit %02d",
+           "%s: Envoi de %s au module ids=%02d %02d %02d %02d unit %02d", __func__,
             (val ? "ON " : "OFF"), id1, id2, id3, id4, unitcode );
        trame_send_AC[0]  = 0x0B; /* Taille */
        trame_send_AC[1]  = 0x11; /* lightning 2 */
@@ -169,8 +161,7 @@
        trame_send_AC[11] = 0x0; /* rssi */
      }
     else { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
-                    "Rfxcom_envoyer_event: Event %s not supported (from instance %s, thread %s)",
-                     event->objet, event->instance, event->thread );
+                    "%s: Event '%s' not supported (from instance %s, thread %s)", __func__, event );
            return;
          }
 
@@ -179,15 +170,55 @@
        retour = write ( Cfg_rfxcom.fd, &trame_send_AC, trame_send_AC[0] + 1 );
        if (retour == -1)
         { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
-                   "Rfxcom_envoyer_sortie: Write Error for event %s (%s)", event->objet, strerror(errno) );
+                   "%s: Write Error for event %s (%s)", __func__, event, strerror(errno) );
         }
      }
   }
-/**********************************************************************************************************/
-/* Processer_trame: traitement de la trame recue par un microcontroleur                                   */
-/* Entrée: la trame a recue                                                                               */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Rfxcom_handle_input_event: En fonction de l'event en parametre, soit positionne les bits internes si Instance Master soit  */
+/*                            Transfert l'evenement au Master                                                                 */
+/* Entrée : L'evenement à traiter et la valeur recu par le capteur                                                            */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Rfxcom_handle_input_event ( gchar *event, gfloat val )
+  { struct CMD_TYPE_MNEMO_BASE *mnemo;
+    gchar response[160];
+    struct SMSDB *sms;
+    gint nbr_result;
+    struct DB *db;
+    
+    nbr_result =  Map_event_to_mnemo_new ( &db, Config.instance_id, NOM_THREAD, event );         /* Evenement pour ce texte ? */
+    if (nbr_result == 0)
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
+	               "%s: event '%s' not found", __func__, event );
+     }
+    else 
+	    { while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
+        { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_NOTICE,
+                   "%s: Match found for event '%s' -> Type %d Num %d - %s",
+                    event, mnemo->type, mnemo->num, mnemo->libelle );
+          switch (mnemo->type)
+           { case MNEMO_ENTREE_ANA:
+              { if (Config.instance_is_master==TRUE)                         /* Si Instance Master, on gere directe en locale */
+                 { SEA( mnemo->num, val ); }
+                else
+                 { /* Send EAnum=val via thread requete http vers le master */
+                 } 
+                break;
+              }
+           		default: Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
+                                "%s: Event '%s' not handled -> Type %d Num %d - %s",
+                                 __func__, event, mnemo->type, mnemo->num, mnemo->libelle );
+           }
+          g_free(mnemo);
+        }
+     }
+  }
+/******************************************************************************************************************************/
+/* Processer_trame: traitement de la trame recue par un microcontroleur                                                       */
+/* Entrée: la trame a recue                                                                                                   */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static int Processer_trame( struct TRAME_RFXCOM *trame )
   { 
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
@@ -284,23 +315,26 @@
      } 
     else if (trame->type == 0x52 && trame->sous_type == 0x01)                                                       /* Oregon */
      { gchar chaine[128];
+       gint nbr_result;
 
        g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:%03d:TEMP",
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
-       Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, chaine,
+
+    
+       Rfxcom_handle_input_event ( chaine, 
                      (trame->data[2] & 0x80 ? -1.0 : 1.0)* ( ((trame->data[2] & 0x7F)<<8) + trame->data[3]) / 10.0 );
                   
        g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:%03d:HUMIDITY",
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
-       Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, chaine, 1.0 * trame->data[4] );
+       Rfxcom_handle_input_event ( chaine, 1.0 * trame->data[4] );
 
        g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:%03d:BATTERY",
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
-       Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, chaine, 1.0 * (trame->data[6] >> 4) );
+       Rfxcom_handle_input_event ( chaine, 1.0 * (trame->data[6] >> 4) );
        
        g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:%03d:RSSI",
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
-       Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, chaine, 1.0 * (trame->data[6] & 0x0F) );
+       Rfxcom_handle_input_event ( chaine, 1.0 * (trame->data[6] & 0x0F) );
        
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                  "Processer_trame : get status type=%03d(0x%02X), sous_type=%03d(0x%02X), id1=%03d, id2=%03d, high=%03d, "
@@ -317,7 +351,7 @@
                     trame->type, trame->sous_type, trame->data[0] & 0x03, trame->data[1],
                     trame->data[2], trame->data[3], trame->data[4], trame->data[5] );
 
-       Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, chaine, 1.0 * trame->data[6] );
+       Rfxcom_handle_input_event ( chaine, 1.0 * trame->data[6] );
 
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                  "Processer_trame : get lighting ! type=%03d(0x%02X), sous_type=%03d(0x%02X), id1=%03d, id2=%03d, "
@@ -337,23 +371,22 @@
 /* Entrées: néant                                                                                                             */
 /* Sortie: l'evenement, à freer a la fin                                                                                      */
 /******************************************************************************************************************************/
- static struct CMD_TYPE_MSRV_EVENT *Rfxcom_Pick_event ( void )
-  { struct CMD_TYPE_MSRV_EVENT *event;
+ static gchar *Rfxcom_Pick_event ( void )
+  { gchar *event;
     if (!Cfg_rfxcom.Liste_events) return(NULL);
     pthread_mutex_lock( &Cfg_rfxcom.lib->synchro );                                                          /* lockage futex */
-    event = (struct CMD_TYPE_MSRV_EVENT *)Cfg_rfxcom.Liste_events->data;                            /* Recuperation du numero */
+    event = (gchar *)Cfg_rfxcom.Liste_events->data;                                                /* Recuperation de l'event */
     Cfg_rfxcom.Liste_events = g_slist_remove ( Cfg_rfxcom.Liste_events, event );
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
-             "Rfxcom_Pick_event: Reste a traiter %03d events",
-              g_slist_length(Cfg_rfxcom.Liste_events) );
+             "%s: Reste a traiter %03d events", __func__, g_slist_length(Cfg_rfxcom.Liste_events) );
     pthread_mutex_unlock( &Cfg_rfxcom.lib->synchro );
     return(event);
   }
 /******************************************************************************************************************************/
-/* Rfxcom_Gerer_sortie: Ajoute une demande d'envoi RF dans la liste des envois RFXCOM                                         */
+/* Send_Output_Event : Fonction appelée par le MSRV pour demander au thread de prendre en compte un event                     */
 /* Entrées: le numéro de la sortie                                                                                            */
 /******************************************************************************************************************************/
- void Rfxcom_Gerer_event( struct CMD_TYPE_MSRV_EVENT *event )                                  /* Num_a est l'id de la sortie */
+ static void Send_Output_Event( gchar *event )                                               /* evenement a prendre en compte */
   { gint taille;
 
     pthread_mutex_lock( &Cfg_rfxcom.lib->synchro );                                  /* Ajout dans la liste de tell a traiter */
@@ -362,7 +395,7 @@
 
     if (taille > MAX_ENREG_QUEUE)
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
-                "Rfxcom_Gerer_event: DROP (taille>MAX_ENREG_QUEUE(%d))", MAX_ENREG_QUEUE);
+                "%s: DROP (taille>MAX_ENREG_QUEUE(%d))", __func__, MAX_ENREG_QUEUE);
        return;
      }
 
@@ -399,7 +432,6 @@
        goto end;
      }
 
-    Abonner_distribution_events ( Rfxcom_Gerer_event, NOM_THREAD );              /* Desabonnement de la diffusion des sorties */
     nbr_oct_lu = 0;
     Cfg_rfxcom.mode = RFXCOM_RETRING;
     while( lib->Thread_run == TRUE)                                      /* On tourne tant que necessaire */
@@ -493,7 +525,7 @@
         }
 /************************************************** Transmission des trames aux sorties ***************************************/
        if (Cfg_rfxcom.Liste_events)                                                           /* Si pas de message, on tourne */
-        { struct CMD_TYPE_MSRV_EVENT *event;
+        { gchar *event;
           event = Rfxcom_Pick_event();                                                             /* Recuperation d'un event */
           Rfxcom_Envoyer_event ( event );
           g_free(event);

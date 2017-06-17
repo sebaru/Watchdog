@@ -75,8 +75,8 @@
     gboolean Thread_sigusr1;                                                          /* TRUE si le thread doit gerer le USR1 */
 
     void (*Run_thread)( struct LIBRAIRIE *lib );                                  /* Fonction principale de gestion du thread */
-                                                                                 /* Fonction de gestion des commandes d'admin */
-    void (*Admin_command)( struct CONNEXION *connexion, gchar *ligne );
+    void (*Admin_command)( struct CONNEXION *connexion, gchar *ligne );          /* Fonction de gestion des commandes d'admin */
+    void (*Send_Output_Event)( gchar *event );          /* Fonction appelé par le master pour deposer un event dans le thread */
   };
 
  struct COM_DB                                                                 /* Interfaçage avec le code de gestion des BDD */
@@ -156,11 +156,11 @@
  extern gboolean Stop_librairie ( struct LIBRAIRIE *lib );
  extern struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *nom_fichier );
  extern gboolean Decharger_librairie_par_prompt ( gchar *nom_fichier );
+ extern gboolean Envoyer_event_to_librairie ( gchar *prompt, gchar *event );
 
  extern void Gerer_arrive_Events ( void );                                                           /* Dans distrib_Events.c */
  extern void Abonner_distribution_events ( void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event), gchar *thread );
  extern void Desabonner_distribution_events ( void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event) );
- extern void Send_Event ( gchar *instance, gchar *thread, guint type, gchar *objet, gfloat val_float );
  extern void Envoyer_Event_msrv( struct CMD_TYPE_MSRV_EVENT *event );
  extern gint Map_event_to_mnemo_new( struct DB **db, gchar *instance, gchar *thread, gchar *objet );
  extern void Gerer_arrive_Axxx_dls ( void );
