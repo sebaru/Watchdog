@@ -103,6 +103,48 @@
     return(fd);
   }
 /******************************************************************************************************************************/
+/* Teleinfo_handle_input_event: En fonction de l'event en parametre, soit positionne les bits internes si Instance Master soit  */
+/*                            Transfert l'evenement au Master                                                                 */
+/* Entrée : L'evenement à traiter et la valeur recu par le capteur                                                            */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Teleinfo_handle_input_event ( gchar *event, gfloat val )
+  { struct CMD_TYPE_MNEMO_BASE *mnemo;
+    gchar response[160];
+    struct SMSDB *sms;
+    gint nbr_result;
+    struct DB *db;
+    
+    nbr_result =  Map_event_to_mnemo_new ( &db, Config.instance_id, NOM_THREAD, event );         /* Evenement pour ce texte ? */
+    if (nbr_result == 0)
+     { Envoyer_commande_dls( 7 );                                                      /* Met à un le bit SYS_EVENT_NOT_FOUND */
+       Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_WARNING,
+	               "%s: event '%s' not found", __func__, event );
+     }
+    else 
+	    { while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
+        { Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_NOTICE,
+                   "%s: Match found for event '%s' -> Type %d Num %d - %s",
+                    event, mnemo->type, mnemo->num, mnemo->libelle );
+          switch (mnemo->type)
+           { case MNEMO_ENTREE_ANA:
+              { if (Config.instance_is_master==TRUE)                         /* Si Instance Master, on gere directe en locale */
+                 { SEA( mnemo->num, val ); }
+                else
+                 { /* Envoyer_event_to_librairie("http", "setea?num=1&val=1.0" );
+                   Send EAnum=val via thread requete http vers le master */
+                 } 
+                break;
+              }
+           		default: Info_new( Config.log, Cfg_teleinfo.lib->Thread_debug, LOG_WARNING,
+                                "%s: Event '%s' not handled -> Type %d Num %d - %s",
+                                 __func__, event, mnemo->type, mnemo->num, mnemo->libelle );
+           }
+          g_free(mnemo);
+        }
+     }
+  }
+/******************************************************************************************************************************/
 /* Processer_trame: traitement de la trame recue par un microcontroleur                                                       */
 /* Entrée: la trame a recue                                                                                                   */
 /* Sortie: néant                                                                                                              */
@@ -110,43 +152,43 @@
  static void Processer_trame( void )
   { 
     if ( (! strncmp ( Cfg_teleinfo.buffer, "ADCO", 4 )) && Cfg_teleinfo.last_view_adco + 300 <= Partage->top )
-     { Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, "ADCO", atof( Cfg_teleinfo.buffer + 5) );
+     { Teleinfo_handle_input_event ( "ADCO", atof( Cfg_teleinfo.buffer + 5) );
        Cfg_teleinfo.last_view_adco = Partage->top;
      }
     else if ( (! strncmp ( Cfg_teleinfo.buffer, "ISOUS", 5 )) && Cfg_teleinfo.last_view_isous + 300 <= Partage->top )
-     { Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, "ISOUS", atof( Cfg_teleinfo.buffer + 6) );
+     { Teleinfo_handle_input_event ( "ISOUS", atof( Cfg_teleinfo.buffer + 6) );
        Cfg_teleinfo.last_view_isous = Partage->top;
      }
     else if ( (! strncmp ( Cfg_teleinfo.buffer, "HCHC", 4 )) && Cfg_teleinfo.last_view_hchc + 300 <= Partage->top )
-     { Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, "HCHC", atof( Cfg_teleinfo.buffer + 5) );
+     { Teleinfo_handle_input_event ( "HCHC", atof( Cfg_teleinfo.buffer + 5) );
 	      Cfg_teleinfo.last_view_hchc = Partage->top;
      }
     else if ( (! strncmp ( Cfg_teleinfo.buffer, "HCHP", 4 )) && Cfg_teleinfo.last_view_hchp + 300 <= Partage->top )
-     { Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, "HCHP", atof( Cfg_teleinfo.buffer + 5) );
+     { Teleinfo_handle_input_event ( "HCHP", atof( Cfg_teleinfo.buffer + 5) );
 	      Cfg_teleinfo.last_view_hchp = Partage->top;
      }
     else if ( (! strncmp ( Cfg_teleinfo.buffer, "IINST", 5 )) && Cfg_teleinfo.last_view_iinst + 300 <= Partage->top )
-     { Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, "IINST", atof( Cfg_teleinfo.buffer + 6) );
+     { Teleinfo_handle_input_event ( "IINST", atof( Cfg_teleinfo.buffer + 6) );
 	      Cfg_teleinfo.last_view_iinst = Partage->top;
      }
     else if ( (! strncmp ( Cfg_teleinfo.buffer, "IMAX", 4 )) && Cfg_teleinfo.last_view_imax + 300 <= Partage->top )
-     { Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, "IMAX", atof( Cfg_teleinfo.buffer + 5) );
+     { Teleinfo_handle_input_event ( "IMAX", atof( Cfg_teleinfo.buffer + 5) );
 	      Cfg_teleinfo.last_view_imax = Partage->top;
      }
     else if ( (! strncmp ( Cfg_teleinfo.buffer, "PAPP", 4 )) && Cfg_teleinfo.last_view_papp + 300 <= Partage->top )
-     { Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, "PAPP", atof( Cfg_teleinfo.buffer + 5) );
+     { Teleinfo_handle_input_event ( "PAPP", atof( Cfg_teleinfo.buffer + 5) );
 	      Cfg_teleinfo.last_view_papp = Partage->top;
      }
     else if ( (! strncmp ( Cfg_teleinfo.buffer, "PTEC", 4 )) && Cfg_teleinfo.last_view_ptec + 300 <= Partage->top )
-     { Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, "PTEC", atof( Cfg_teleinfo.buffer + 5) );
+     { Teleinfo_handle_input_event ( "PTEC", atof( Cfg_teleinfo.buffer + 5) );
 	      Cfg_teleinfo.last_view_ptec = Partage->top;
      }
     else if ( (! strncmp ( Cfg_teleinfo.buffer, "HHPHC", 5 )) && Cfg_teleinfo.last_view_hhchp + 300 <= Partage->top )
-     { Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, "HHPHC", atof( Cfg_teleinfo.buffer + 6) );
+     { Teleinfo_handle_input_event ( "HHPHC", atof( Cfg_teleinfo.buffer + 6) );
 	      Cfg_teleinfo.last_view_hhchp = Partage->top;
      }
     else if ( (! strncmp ( Cfg_teleinfo.buffer, "OPTARIF", 7 )) && Cfg_teleinfo.last_view_optarif + 300 <= Partage->top )
-     { Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, "OPTARIF", atof( Cfg_teleinfo.buffer + 8) );
+     { Teleinfo_handle_input_event ( "OPTARIF", atof( Cfg_teleinfo.buffer + 8) );
 	      Cfg_teleinfo.last_view_optarif = Partage->top;
      }
     else { return; }

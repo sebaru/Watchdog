@@ -296,7 +296,8 @@
 
     nbr_result =  Map_event_to_mnemo_new ( &db, Config.instance_id, NOM_THREAD, texte );         /* Evenement pour ce texte ? */
     if (nbr_result == 0)
-     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
+     { Envoyer_commande_dls( 7 );                                                      /* Met à un le bit SYS_EVENT_NOT_FOUND */
+       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
 	               "%s: event '%s' not found", __func__, texte );
        g_snprintf(response, sizeof(response), "Event not found: '%s'", texte);
 	      Envoyer_sms_gsm_text ( response );
