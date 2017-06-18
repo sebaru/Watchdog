@@ -587,7 +587,7 @@ une_action:     barre SORTIE ENTIER
                      Liberer_options($3);
                   }}
                 | T_MSG ENTIER
-                  {{ $$=New_action_msg($2);            }}
+                  {{ $$=New_action_msg($2); }}
                 | barre ID liste_options
                 {{ struct ALIAS *alias;                                                   /* Definition des actions via alias */
                    int taille;

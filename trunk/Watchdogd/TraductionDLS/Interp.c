@@ -38,9 +38,10 @@
  #include "watchdogd.h"
  #include "lignes.h"
 
- static GList *Alias=NULL;                                                   /* Liste des alias identifiés dans le source DLS */
+ static GSList *Alias=NULL;                                                  /* Liste des alias identifiés dans le source DLS */
  static GSList *Liste_Actions_bit=NULL;                                   /* Liste des actions rencontrées dans le source DLS */
  static GSList *Liste_Actions_num=NULL;                                   /* Liste des actions rencontrées dans le source DLS */
+ static GSList *Liste_Actions_msg=NULL;                                   /* Liste des actions rencontrées dans le source DLS */
  static gchar *Buffer=NULL;
  static gint Buffer_used=0, Buffer_taille=0;
  static int Id_log;                                                                     /* Pour la creation du fichier de log */
@@ -153,6 +154,31 @@
     return(-1);
   }
 /******************************************************************************************************************************/
+/* Check_msg_ownership: Vérifie la propriété du bit interne MSG en action                                                     */
+/* Entrées: le numéro du message positionné en action dans la ligne dls                                                       */
+/* Sortie: FALSE si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ static gboolean Check_msg_ownership ( gint num )
+  { struct CMD_TYPE_MESSAGE *message;
+    gchar chaine[80];
+    gboolean retour;
+    retour = FALSE;
+    message = Rechercher_messageDB ( num );
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG,
+             "%s: Test Message %d for id %d: mnemo %p", __func__, num, Dls_id, message ); 
+    if (message)
+     { if (message->dls_id == Dls_id) retour=TRUE;
+       g_free(message);
+     }
+    
+    if(retour == FALSE)
+     { g_snprintf( chaine, sizeof(chaine), "Ligne %d: MSG%04d not owned by plugin", DlsScanner_get_lineno(), num );
+       Emettre_erreur_new( "%s", chaine );
+       return(FALSE);
+     }
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Check_ownership: Vérifie la propriété du bit interne en action                                                             */
 /* Entrées: le type et numéro du bit interne a testet                                                                         */
 /* Sortie: FALSE si probleme                                                                                                  */
@@ -233,8 +259,8 @@
     int taille;
 
     taille = 15;
-/*  Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(MNEMO_MESSAGE) );
-    Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );*/
+    Liste_Actions_msg = g_slist_prepend ( Liste_Actions_msg, GINT_TO_POINTER(num) );
+    Check_msg_ownership ( num );
     action = New_action();
     action->alors = New_chaine( taille );
     g_snprintf( action->alors, taille, "MSG(%d,1);", num );
@@ -418,7 +444,7 @@
     alias->barre = barre;
     alias->options = options;
     alias->used = 0;
-    Alias = g_list_append( Alias, alias );
+    Alias = g_slist_prepend( Alias, alias );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -428,7 +454,7 @@
 /******************************************************************************************************************************/
  struct ALIAS *Get_alias_par_nom( char *nom )
   { struct ALIAS *alias;
-    GList *liste;
+    GSList *liste;
     liste = Alias;
     while(liste)
      { alias = (struct ALIAS *)liste->data;
@@ -464,9 +490,15 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Liberer_memoire( void )
-  { g_list_foreach( Alias, (GFunc) Liberer_alias, NULL );
-    g_list_free( Alias );
+  { g_slist_foreach( Alias, (GFunc) Liberer_alias, NULL );
+    g_slist_free( Alias );
     Alias = NULL;
+    g_slist_free(Liste_Actions_msg);
+    Liste_Actions_msg = NULL;
+    g_slist_free(Liste_Actions_bit);
+    Liste_Actions_bit = NULL;
+    g_slist_free(Liste_Actions_num);
+    Liste_Actions_num = NULL;
   }
 /******************************************************************************************************************************/
 /* Traduire: Traduction du fichier en paramètre du langage DLS vers le langage C                                              */
@@ -475,10 +507,9 @@
 /******************************************************************************************************************************/
  gint Traduire_DLS( gboolean new, gint id )
   { gchar source[80], source_ok[80], log[80];
-    GSList *liste_bit, *liste_num;
     struct ALIAS *alias;
+    GSList *liste;
     gint retour;
-    GList *liste;
     FILE *rc;
 
     Buffer_taille = 1024;
@@ -507,6 +538,7 @@
     Alias = NULL;                                                                                  /* Par défaut, pas d'alias */
     Liste_Actions_bit = NULL;                                                                    /* Par défaut, pas d'actions */
     Liste_Actions_num = NULL;                                                                    /* Par défaut, pas d'actions */
+    Liste_Actions_msg = NULL;                                                                    /* Par défaut, pas d'actions */
     DlsScanner_set_lineno(1);                                                                     /* Reset du numéro de ligne */
     nbr_erreur = 0;                                                                   /* Au départ, nous n'avons pas d'erreur */
     rc = fopen( (new ? source : source_ok), "r" );
@@ -539,11 +571,13 @@
           retour = TRAD_DLS_ERROR_FILE;
         }
        else
-        { gchar *Chaine_bit= " static int Tableau_bit[]= { ", *Tableau_end=" -1 };\n";
+        { gchar *Chaine_bit= " static int Tableau_bit[]= { ";
           gchar *Chaine_num= " static int Tableau_num[]= { ";
+          gchar *Chaine_msg= " static int Tableau_msg[]= { ";
+          gchar *Tableau_end=" -1 };\n";
           gchar *Fonction= " int Get_Tableau_bit(int n) { return(Tableau_bit[n]); }\n"
-                           " int Get_Tableau_num(int n) { return(Tableau_num[n]); }\n";
-          GSList *liste;
+                           " int Get_Tableau_num(int n) { return(Tableau_num[n]); }\n"
+                           " int Get_Tableau_msg(int n) { return(Tableau_msg[n]); }\n";
           gint cpt=0;                                                                                   /* Compteur d'actions */
 
           write(fd, Chaine_bit, strlen(Chaine_bit) );                                                 /* Ecriture du prologue */
@@ -558,6 +592,16 @@
 
           write(fd, Chaine_num, strlen(Chaine_num) );                                                 /* Ecriture du prologue */
           liste = Liste_Actions_num;                                       /* Initialise les tableaux des actions rencontrées */
+          while(liste)
+           { gchar chaine[12];
+             g_snprintf(chaine, sizeof(chaine), "%d, ", GPOINTER_TO_INT(liste->data) );
+             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+             liste = liste->next;
+           }
+          write(fd, Tableau_end, strlen(Tableau_end) );                                               /* Ecriture du prologue */
+
+          write(fd, Chaine_msg, strlen(Chaine_msg) );                                                 /* Ecriture du prologue */
+          liste = Liste_Actions_msg;                                       /* Initialise les tableaux des actions rencontrées */
           while(liste)
            { gchar chaine[12];
              g_snprintf(chaine, sizeof(chaine), "%d, ", GPOINTER_TO_INT(liste->data) );
