@@ -249,8 +249,8 @@
     result = New_chaine( taille );
     if (Get_option_entier( options, T_EDGE_UP) == 1)
      { Liste_edge_up_bi = g_slist_prepend ( Liste_edge_up_bi, GINT_TO_POINTER(num) );
-       if (barre) g_snprintf( result, taille, "!B%d_edge_up", num );
-             else g_snprintf( result, taille, "B%d_edge_up", num );
+       if (barre) g_snprintf( result, taille, "!B%d_edge_up_value", num );
+             else g_snprintf( result, taille, "B%d_edge_up_value", num );
      }
     else { if (barre) g_snprintf( result, taille, "!B(%d)", num );
                  else g_snprintf( result, taille, "B(%d)", num );
@@ -568,11 +568,9 @@
     rc = fopen( (new ? source : source_ok), "r" );
     if (!rc) retour = TRAD_DLS_ERROR;
     else
-     { Emettre(" #include <Module_dls.h>\n void Go ( int start )\n {\n");
-       DlsScanner_debug = 0;                                                                     /* Debug de la traduction ?? */
+     { DlsScanner_debug = 0;                                                                     /* Debug de la traduction ?? */
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
-       Emettre(" }\n");
        fclose(rc);
      }
 
@@ -595,14 +593,22 @@
           retour = TRAD_DLS_ERROR_FILE;
         }
        else
-        { gchar *Chaine_bit= " static int Tableau_bit[]= { ";
+        { gchar *include = " #include <Module_dls.h>\n";
+          gchar *Chaine_bit= " static int Tableau_bit[]= { ";
           gchar *Chaine_num= " static int Tableau_num[]= { ";
           gchar *Chaine_msg= " static int Tableau_msg[]= { ";
           gchar *Tableau_end=" -1 };\n";
           gchar *Fonction= " int Get_Tableau_bit(int n) { return(Tableau_bit[n]); }\n"
                            " int Get_Tableau_num(int n) { return(Tableau_num[n]); }\n"
                            " int Get_Tableau_msg(int n) { return(Tableau_msg[n]); }\n";
+          gchar *Start_Go = " void Go ( int start )\n"
+                            "  {\n"
+                            "    Update_B_edge_up_value();\n";
+          gchar *End_Go =   "  }\n";
+          gchar chaine[1024];
           gint cpt=0;                                                                                   /* Compteur d'actions */
+
+          write(fd, include, strlen(include));
 
           write(fd, Chaine_bit, strlen(Chaine_bit) );                                                 /* Ecriture du prologue */
           liste = Liste_Actions_bit;                                       /* Initialise les tableaux des actions rencontrées */
@@ -638,26 +644,39 @@
 
           liste = Liste_edge_up_bi;                                /* Initialise les fonctions de gestion des fronts montants */
           while(liste)
-           { gchar chaine[1024];
-             g_snprintf(chaine, sizeof(chaine),
-                      "/*******************************************************/"
-                      " static int B%d_edge_up (void) \n"
-                      "  { static int old_value=0;\n"
-                      "    static int new_value;\n"
-                      "    new_value = B(%d);"
-                      "    if (new_value == old_value) return(0);\n"
-                      "    if (new_value == 1) { old_value=1; return(1); }\n"
-                      "    old_value=0;\n"
-                      "    return(0);"
-                      "  }\n",
-                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data) );
+           { g_snprintf(chaine, sizeof(chaine),
+                      " static gint B%d_edge_up_value = 0\n", GPOINTER_TO_INT(liste->data) );
              write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
              liste = liste->next;
            }
-          write(fd, Tableau_end, strlen(Tableau_end) );                                               /* Ecriture du prologue */
 
 
+          g_snprintf(chaine, sizeof(chaine),
+                    "/*******************************************************/"
+                    " static void Update_B_edge_up_value (void)\n"
+                    "  { int new_value;\n  {\n" );
+          write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+
+          liste = Liste_edge_up_bi;                                /* Initialise les fonctions de gestion des fronts montants */
+          while(liste)
+           { gchar chaine[1024];
+             g_snprintf(chaine, sizeof(chaine),
+                      " new_value = B(%d);"
+                      " if (new_value == 0) B%d_edge_up_value = 0;\n"
+                      " else { if (B%d_edge_up_value==0 && new_value == 1) { B%d_edge_up_value=1; }\n"
+                      "                                               else { B%d_edge_up_value=0; }\n",
+                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
+                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
+                      GPOINTER_TO_INT(liste->data) );
+             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+             liste = liste->next;
+           }
+          g_snprintf(chaine, sizeof(chaine), "  }\n" );
+          write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+
+          write( fd, Start_Go, strlen(Start_Go) );
           write(fd, Buffer, Buffer_used );                                                     /* Ecriture du buffer resultat */
+          write( fd, End_Go, strlen(End_Go) );
           close(fd);
         }
 
