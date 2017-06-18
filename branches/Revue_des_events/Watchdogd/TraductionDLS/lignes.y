@@ -55,7 +55,7 @@
 %token <val>    T_MSG ICONE CPT_H CPT_IMP EANA T_START T_REGISTRE
 %type  <val>    alias_bit
 
-%token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI
+%token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI T_EDGE_UP
 %type  <val>    couleur
 
 %token <chaine> ID
@@ -332,12 +332,9 @@ unite:          modulateur ENTIER HEURE ENTIER
                    $$ = New_chaine(taille);
                    g_snprintf( $$, taille, "(0)" );
                 }}
-                | barre BI ENTIER
-                {{ int taille;
-                   taille = 10;
-                   $$ = New_chaine( taille ); /* 10 caractères max */
-                   if ($1) g_snprintf( $$, taille, "!B(%d)", $3 );
-                   else g_snprintf( $$, taille, "B(%d)", $3 );
+                | barre BI ENTIER liste_options
+                {{ $$ = New_condition_bi ( $1, $3, $4 );
+                   Liberer_options($4);
                 }}
                 | barre MONO ENTIER
                 {{ int taille;
@@ -346,12 +343,9 @@ unite:          modulateur ENTIER HEURE ENTIER
                    if ($1) g_snprintf( $$, taille, "!M(%d)", $3 );
                    else g_snprintf( $$, taille, "M(%d)", $3 );
                 }}
-                | barre ENTREE ENTIER
-                {{ int taille;
-                   taille = 10;
-                   $$ = New_chaine( taille ); /* 10 caractères max */
-                   if ($1) g_snprintf( $$, taille, "!E(%d)", $3 );
-                   else g_snprintf( $$, taille, "E(%d)", $3 );
+                | barre ENTREE ENTIER liste_options
+                {{ $$ = New_condition_entree ( $1, $3, $4 );
+                   Liberer_options($4);
                 }}
                | EANA ENTIER ordre VALF
                 {{ int taille;
@@ -443,19 +437,11 @@ unite:          modulateur ENTIER HEURE ENTIER
                             break;
                           }
                          case ENTREE:
-                          { taille = 15;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
-                            if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
-                                 { g_snprintf( $$, taille, "E(%d)", alias->num ); }
-                            else { g_snprintf( $$, taille, "!E(%d)", alias->num ); }
+                          { $$ = New_condition_entree( $1, alias->num, $3 );
                             break;
                           }
                          case BI:
-                          { taille = 15;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
-                            if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
-                                 { g_snprintf( $$, taille, "B(%d)", alias->num ); }
-                            else { g_snprintf( $$, taille, "!B(%d)", alias->num ); }
+                          { $$ = New_condition_bi( $1, alias->num, $3 );
                             break;
                           }
                          case MONO:
@@ -587,7 +573,7 @@ une_action:     barre SORTIE ENTIER
                      Liberer_options($3);
                   }}
                 | T_MSG ENTIER
-                  {{ $$=New_action_msg($2);            }}
+                  {{ $$=New_action_msg($2); }}
                 | barre ID liste_options
                 {{ struct ALIAS *alias;                                                   /* Definition des actions via alias */
                    int taille;
@@ -679,13 +665,13 @@ ordre:          INF | SUP | INF_OU_EGAL | SUP_OU_EGAL | T_EGAL
                 ;
 /**************************************************** Gestion des options *****************************************************/
 liste_options:  T_POUV options T_PFERM   {{ $$ = $2;   }}
-                |                    {{ $$ = NULL; }}
+                |                        {{ $$ = NULL; }}
                 ;
 
 options:        options VIRGULE une_option
                 {{ $$ = g_list_append( $1, $3 );
                 }}
-                | une_option    {{ $$ = g_list_append( NULL, $1 ); }}
+                | une_option {{ $$ = g_list_append( NULL, $1 ); }}
                 ;
 
 une_option:     MODE T_EGAL ENTIER
@@ -698,6 +684,11 @@ une_option:     MODE T_EGAL ENTIER
                    $$->type = COLOR;
                    $$->entier = $3;
                 }}
+                | CLIGNO
+                {{ $$=New_option();
+                   $$->type = CLIGNO;
+                   $$->entier = 1;
+                }}
                 | CLIGNO T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->type = CLIGNO;
@@ -708,6 +699,11 @@ une_option:     MODE T_EGAL ENTIER
                    $$->type = CONSIGNE;
                    $$->entier = $3;
                 }}
+                | RESET
+                {{ $$=New_option();
+                   $$->type = RESET;
+                   $$->entier = 1;
+                }}
                 | RESET T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->type = RESET;
@@ -717,6 +713,11 @@ une_option:     MODE T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->type = RATIO;
                    $$->entier = $3;
+                }}
+                | T_EDGE_UP
+                {{ $$=New_option();
+                   $$->type = T_EDGE_UP;
+                   $$->entier = 1;
                 }}
                 ;
 
