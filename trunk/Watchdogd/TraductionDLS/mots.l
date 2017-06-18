@@ -96,6 +96,7 @@ blanc         [\t ]+
 "ratio"                    { DlsScanner_lval.val = RATIO;       return RATIO;       }
 "color"                    { DlsScanner_lval.val = COLOR;       return COLOR;       }
 "cligno"                   { DlsScanner_lval.val = CLIGNO;      return CLIGNO;      }
+"edge_up"                  { DlsScanner_lval.val = T_EDGE_UP;   return T_EDGE_UP;   }
  /*********************************************** Le reste ************************************************/
 "."                        { DlsScanner_lval.val = ET;          return ET;          }
 "+"                        { DlsScanner_lval.val = OU;          return OU;          }

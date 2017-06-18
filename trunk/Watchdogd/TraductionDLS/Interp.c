@@ -42,6 +42,7 @@
  static GSList *Liste_Actions_bit=NULL;                                   /* Liste des actions rencontrées dans le source DLS */
  static GSList *Liste_Actions_num=NULL;                                   /* Liste des actions rencontrées dans le source DLS */
  static GSList *Liste_Actions_msg=NULL;                                   /* Liste des actions rencontrées dans le source DLS */
+ static GSList *Liste_edge_up_bi =NULL;                                    /* Liste des bits B utilisés avec l'option EDGE_UP */
  static gchar *Buffer=NULL;
  static gint Buffer_used=0, Buffer_taille=0;
  static int Id_log;                                                                     /* Pour la creation du fichier de log */
@@ -235,6 +236,26 @@
        return(FALSE);
      }
     return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* New_condition_bi: Prepare la chaine de caractere associée à la condition, en respectant les options                        */
+/* Entrées: numero du bit bistable et sa liste d'options                                                                      */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_bi( int barre, int num, GList *options )
+  { gchar *result;
+    gint taille;
+    taille = 24;
+    result = New_chaine( taille );
+    if (Get_option_entier( options, T_EDGE_UP) == 1)
+     { Liste_edge_up_bi = g_slist_prepend ( Liste_edge_up_bi, GINT_TO_POINTER(num) );
+       if (barre) g_snprintf( result, taille, "!B%d_edge_up", num );
+             else g_snprintf( result, taille, "B%d_edge_up", num );
+     }
+    else { if (barre) g_snprintf( result, taille, "!B(%d)", num );
+                 else g_snprintf( result, taille, "B(%d)", num );
+         }
+    return(result);
   }
 /******************************************************************************************************************************/
 /* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
@@ -499,6 +520,8 @@
     Liste_Actions_bit = NULL;
     g_slist_free(Liste_Actions_num);
     Liste_Actions_num = NULL;
+    g_slist_free(Liste_edge_up_bi);
+    Liste_edge_up_bi = NULL;
   }
 /******************************************************************************************************************************/
 /* Traduire: Traduction du fichier en paramètre du langage DLS vers le langage C                                              */
@@ -539,6 +562,7 @@
     Liste_Actions_bit = NULL;                                                                    /* Par défaut, pas d'actions */
     Liste_Actions_num = NULL;                                                                    /* Par défaut, pas d'actions */
     Liste_Actions_msg = NULL;                                                                    /* Par défaut, pas d'actions */
+    Liste_edge_up_bi  = NULL;                                               /* Liste des bits B utilisé avec l'option EDGE UP */
     DlsScanner_set_lineno(1);                                                                     /* Reset du numéro de ligne */
     nbr_erreur = 0;                                                                   /* Au départ, nous n'avons pas d'erreur */
     rc = fopen( (new ? source : source_ok), "r" );
@@ -611,6 +635,27 @@
           write(fd, Tableau_end, strlen(Tableau_end) );                                               /* Ecriture du prologue */
 
           write(fd, Fonction, strlen(Fonction) );                                                     /* Ecriture du prologue */
+
+          liste = Liste_edge_up_bi;                                /* Initialise les fonctions de gestion des fronts montants */
+          while(liste)
+           { gchar chaine[1024];
+             g_snprintf(chaine, sizeof(chaine),
+                      "/*******************************************************/"
+                      " static int B%d_edge_up (void) \n"
+                      "  { static int old_value=0;\n"
+                      "    static int new_value;\n"
+                      "    new_value = B(%d);"
+                      "    if (new_value == old_value) return(0);\n"
+                      "    if (new_value == 1) { old_value=1; return(1); }\n"
+                      "    old_value=0;\n"
+                      "    return(0);"
+                      "  }\n",
+                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data) );
+             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+             liste = liste->next;
+           }
+          write(fd, Tableau_end, strlen(Tableau_end) );                                               /* Ecriture du prologue */
+
 
           write(fd, Buffer, Buffer_used );                                                     /* Ecriture du buffer resultat */
           close(fd);
