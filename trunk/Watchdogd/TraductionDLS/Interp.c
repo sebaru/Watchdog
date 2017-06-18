@@ -39,10 +39,11 @@
  #include "lignes.h"
 
  static GSList *Alias=NULL;                                                  /* Liste des alias identifiés dans le source DLS */
- static GSList *Liste_Actions_bit=NULL;                                   /* Liste des actions rencontrées dans le source DLS */
- static GSList *Liste_Actions_num=NULL;                                   /* Liste des actions rencontrées dans le source DLS */
- static GSList *Liste_Actions_msg=NULL;                                   /* Liste des actions rencontrées dans le source DLS */
- static GSList *Liste_edge_up_bi =NULL;                                    /* Liste des bits B utilisés avec l'option EDGE_UP */
+ static GSList *Liste_Actions_bit    = NULL;                              /* Liste des actions rencontrées dans le source DLS */
+ static GSList *Liste_Actions_num    = NULL;                              /* Liste des actions rencontrées dans le source DLS */
+ static GSList *Liste_Actions_msg    = NULL;                              /* Liste des actions rencontrées dans le source DLS */
+ static GSList *Liste_edge_up_bi     = NULL;                               /* Liste des bits B utilisés avec l'option EDGE_UP */
+ static GSList *Liste_edge_up_entree = NULL;                               /* Liste des bits E utilisés avec l'option EDGE_UP */
  static gchar *Buffer=NULL;
  static gint Buffer_used=0, Buffer_taille=0;
  static int Id_log;                                                                     /* Pour la creation du fichier de log */
@@ -254,6 +255,26 @@
      }
     else { if (barre) g_snprintf( result, taille, "!B(%d)", num );
                  else g_snprintf( result, taille, "B(%d)", num );
+         }
+    return(result);
+  }
+/******************************************************************************************************************************/
+/* New_condition_bi: Prepare la chaine de caractere associée à la condition, en respectant les options                        */
+/* Entrées: numero du bit bistable et sa liste d'options                                                                      */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_entree( int barre, int num, GList *options )
+  { gchar *result;
+    gint taille;
+    taille = 24;
+    result = New_chaine( taille );
+    if (Get_option_entier( options, T_EDGE_UP) == 1)
+     { Liste_edge_up_bi = g_slist_prepend ( Liste_edge_up_bi, GINT_TO_POINTER(num) );
+       if (barre) g_snprintf( result, taille, "!E%d_edge_up_value", num );
+             else g_snprintf( result, taille, "E%d_edge_up_value", num );
+     }
+    else { if (barre) g_snprintf( result, taille, "!E(%d)", num );
+                 else g_snprintf( result, taille, "E(%d)", num );
          }
     return(result);
   }
@@ -514,14 +535,11 @@
   { g_slist_foreach( Alias, (GFunc) Liberer_alias, NULL );
     g_slist_free( Alias );
     Alias = NULL;
-    g_slist_free(Liste_Actions_msg);
-    Liste_Actions_msg = NULL;
-    g_slist_free(Liste_Actions_bit);
-    Liste_Actions_bit = NULL;
-    g_slist_free(Liste_Actions_num);
-    Liste_Actions_num = NULL;
-    g_slist_free(Liste_edge_up_bi);
-    Liste_edge_up_bi = NULL;
+    g_slist_free(Liste_Actions_msg);    Liste_Actions_msg    = NULL;
+    g_slist_free(Liste_Actions_bit);    Liste_Actions_bit    = NULL;
+    g_slist_free(Liste_Actions_num);    Liste_Actions_num    = NULL;
+    g_slist_free(Liste_edge_up_bi);     Liste_edge_up_bi     = NULL;
+    g_slist_free(Liste_edge_up_entree); Liste_edge_up_entree = NULL;
   }
 /******************************************************************************************************************************/
 /* Traduire: Traduction du fichier en paramètre du langage DLS vers le langage C                                              */
@@ -650,10 +668,18 @@
              liste = liste->next;
            }
 
+          liste = Liste_edge_up_entree;                            /* Initialise les fonctions de gestion des fronts montants */
+          while(liste)
+           { g_snprintf(chaine, sizeof(chaine),
+                      " static gint E%d_edge_up_value = 0\n", GPOINTER_TO_INT(liste->data) );
+             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+             liste = liste->next;
+           }
+
 
           g_snprintf(chaine, sizeof(chaine),
                     "/*******************************************************/"
-                    " static void Update_B_edge_up_value (void)\n"
+                    " static void Update_edge_up_value (void)\n"
                     "  { int new_value;\n  {\n" );
           write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
 
@@ -665,6 +691,20 @@
                       " if (new_value == 0) B%d_edge_up_value = 0;\n"
                       " else { if (B%d_edge_up_value==0 && new_value == 1) { B%d_edge_up_value=1; }\n"
                       "                                               else { B%d_edge_up_value=0; }\n",
+                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
+                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
+                      GPOINTER_TO_INT(liste->data) );
+             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+             liste = liste->next;
+           }
+          liste = Liste_edge_up_entree;                            /* Initialise les fonctions de gestion des fronts montants */
+          while(liste)
+           { gchar chaine[1024];
+             g_snprintf(chaine, sizeof(chaine),
+                      " new_value = E(%d);"
+                      " if (new_value == 0) E%d_edge_up_value = 0;\n"
+                      " else { if (E%d_edge_up_value==0 && new_value == 1) { E%d_edge_up_value=1; }\n"
+                      "                                               else { E%d_edge_up_value=0; }\n",
                       GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
                       GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
                       GPOINTER_TO_INT(liste->data) );

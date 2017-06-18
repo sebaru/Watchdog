@@ -333,17 +333,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                    g_snprintf( $$, taille, "(0)" );
                 }}
                 | barre BI ENTIER liste_options
-                {{ int taille;
-                   taille = 20;
-                   $$ = New_chaine( taille ); /* 10 caractères max */
-                   if (Get_option_entier( $4, T_EDGE_UP) == 1)
-                    { /* Ajout liste B_edge_up */
-                      if ($1) g_snprintf( $$, taille, "!B_edge_up(%d)", $3 );
-                         else g_snprintf( $$, taille, "B_edge_up(%d)", $3 );
-                    }
-                   else { if ($1) g_snprintf( $$, taille, "!B(%d)", $3 );
-                             else g_snprintf( $$, taille, "B(%d)", $3 );
-                        }
+                {{ $$ = New_condition_bi ( $1, $3, $4 );
                    Liberer_options($4);
                 }}
                 | barre MONO ENTIER
@@ -353,12 +343,9 @@ unite:          modulateur ENTIER HEURE ENTIER
                    if ($1) g_snprintf( $$, taille, "!M(%d)", $3 );
                    else g_snprintf( $$, taille, "M(%d)", $3 );
                 }}
-                | barre ENTREE ENTIER
-                {{ int taille;
-                   taille = 10;
-                   $$ = New_chaine( taille ); /* 10 caractères max */
-                   if ($1) g_snprintf( $$, taille, "!E(%d)", $3 );
-                   else g_snprintf( $$, taille, "E(%d)", $3 );
+                | barre ENTREE ENTIER liste_options
+                {{ $$ = New_condition_entree ( $1, $3, $4 );
+                   Liberer_options($4);
                 }}
                | EANA ENTIER ordre VALF
                 {{ int taille;
@@ -450,19 +437,11 @@ unite:          modulateur ENTIER HEURE ENTIER
                             break;
                           }
                          case ENTREE:
-                          { taille = 15;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
-                            if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
-                                 { g_snprintf( $$, taille, "E(%d)", alias->num ); }
-                            else { g_snprintf( $$, taille, "!E(%d)", alias->num ); }
+                          { $$ = New_condition_entree( $1, alias->num, $3 );
                             break;
                           }
                          case BI:
-                          { taille = 15;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
-                            if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
-                                 { g_snprintf( $$, taille, "B(%d)", alias->num ); }
-                            else { g_snprintf( $$, taille, "!B(%d)", alias->num ); }
+                          { $$ = New_condition_bi( $1, alias->num, $3 );
                             break;
                           }
                          case MONO:

@@ -74,6 +74,7 @@
  extern struct COMPARATEUR *New_comparateur( void );
  extern gboolean Check_ownership ( gint type, gint num );
  extern gchar *New_condition_bi( int barre, int num, GList *options );
+ extern gchar *New_condition_entree( int barre, int num, GList *options );
  extern struct ACTION *New_action( void );
  extern struct ACTION *New_action_msg( int num );
  extern struct ACTION *New_action_sortie( int num, int barre );
