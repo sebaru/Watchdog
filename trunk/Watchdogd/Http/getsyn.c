@@ -91,7 +91,7 @@
      }
                                                           /* Lancement de la requete de recuperation du contenu du synoptique */
 /*------------------------------------------------------- Dumping synoptique -------------------------------------------------*/
-    json_builder_set_member_name  ( builder, "Synoptique" );
+    /*json_builder_set_member_name  ( builder, "Synoptique" );  Pas de noeud principal */
     json_builder_begin_object (builder);                                                                  /* Contenu du Noeud */
     json_builder_set_member_name  ( builder, "id" );            json_builder_add_int_value    ( builder, syndb->id );
     json_builder_set_member_name  ( builder, "groupe" );        json_builder_add_string_value ( builder, syndb->groupe );
