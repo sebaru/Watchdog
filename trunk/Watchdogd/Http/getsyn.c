@@ -91,9 +91,9 @@
      }
                                                           /* Lancement de la requete de recuperation du contenu du synoptique */
 /*------------------------------------------------------- Dumping synoptique -------------------------------------------------*/
-    json_builder_begin_object (builder);                                                        /* Contenu du Noeud Principal */
+    json_builder_begin_object (builder);                                                               /* Contenu du Document */
     json_builder_set_member_name  ( builder, "Synoptique" );
-    json_builder_begin_object (builder);                                                                  /* Contenu du Noeud */
+    json_builder_begin_object (builder);                                                        /* Contenu du Noeud Principal */
     json_builder_set_member_name  ( builder, "id" );            json_builder_add_int_value    ( builder, syndb->id );
     json_builder_set_member_name  ( builder, "groupe" );        json_builder_add_string_value ( builder, syndb->groupe );
     json_builder_set_member_name  ( builder, "page" );          json_builder_add_string_value ( builder, syndb->page );
@@ -141,6 +141,7 @@
         }
        json_builder_end_array (builder);                                                                  /* End Motifs Array */
      }
+    json_builder_end_object (builder);                                                                 /* End Noeud principal */
     json_builder_end_object (builder);                                                                        /* End Document */
 
     gen = json_generator_new ();                                                                      /* Creating JSON buffer */
