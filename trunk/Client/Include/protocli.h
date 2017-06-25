@@ -31,7 +31,8 @@
  #include <gnome.h>
  #include <openssl/ssl.h>
  #include <gtksourceview/gtksourceprintcompositor.h>
-
+ #include <curl/curl.h>
+ 
  #include "Reseaux.h"
  #include "trame.h"
 
@@ -44,6 +45,7 @@
  #define PRINT_HEADER_RIGHT         "page %N / %Q"
  #define PRINT_FONT_NAME            "Monospace 10"
  #define PRINT_NBR_CHAR_GROUPE_PAGE 30
+ #define WATCHDOG_USER_AGENT        "Watchdog Client - libcurl"
 
  enum
   { TYPE_PAGE_PLUGIN_DLS,                                                                         /* Listes des plugins D.L.S */
