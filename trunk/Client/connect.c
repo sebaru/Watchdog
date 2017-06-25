@@ -223,7 +223,7 @@ one_again:
               { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "%s: sscanf failed", __func__ ); }
              else
               { if ( ! strcmp( name, "sid" ) )
-                 { Info_new( Config_cli.log, Config_cli.log_override, LOG_NOTICE, "%s: get SID '%s'", value );
+                 { Info_new( Config_cli.log, Config_cli.log_override, LOG_NOTICE, "%s: get SID '%s'", __func__, value );
                    g_snprintf( Client.sid, sizeof(Client.sid), "%s", value );
                  }
               }
