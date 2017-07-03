@@ -44,6 +44,7 @@
     float conso;                                                                         /* Consommation temporelle du plugin */
     int (*Get_Tableau_bit)(int);                                               /* Fonction d'identification des bits utilisés */
     int (*Get_Tableau_num)(int);                                               /* Fonction d'identification des bits utilisés */
+    int (*Get_Tableau_msg)(int);                                               /* Fonction d'identification des bits utilisés */
   };
 
  enum                                                                                  /* différent statut des temporisations */

@@ -51,20 +51,35 @@
  static gboolean Check_action_bit_use ( struct PLUGIN_DLS *dls )
   { gint cpt, dls_id;
     if(!dls) return(FALSE);
-    if(!(dls->Get_Tableau_bit && dls->Get_Tableau_num)) return(TRUE);
-    for ( cpt=0; dls->Get_Tableau_bit(cpt) != -1; cpt++ )
+    if(!dls->Get_Tableau_bit) return(TRUE);
+    if(!dls->Get_Tableau_num) return(TRUE);
+    if(!dls->Get_Tableau_msg) return(TRUE);
+
+    for ( cpt=0; dls->Get_Tableau_bit(cpt) != -1; cpt++ )                                          /* Check des bits internes */
      { struct CMD_TYPE_NUM_MNEMONIQUE critere;
        struct CMD_TYPE_MNEMO_BASE *mnemo;
        critere.type = dls->Get_Tableau_bit(cpt);
        critere.num  = dls->Get_Tableau_num(cpt);
        mnemo = Rechercher_mnemo_baseDB_type_num ( &critere );
-       Info_new( Config.log, Config.log_dls, LOG_WARNING,
+       Info_new( Config.log, Config.log_dls, LOG_DEBUG,
                 "%s: Test Mnemo %d %d for id %d: mnemo %p", __func__, critere.type, critere.num, dls->plugindb.id, mnemo ); 
        if (!mnemo) return(FALSE);
        dls_id = mnemo->dls_id;
        g_free(mnemo);
        if (dls_id != dls->plugindb.id) return(FALSE);
      }
+
+    for ( cpt=0; dls->Get_Tableau_msg(cpt) != -1; cpt++ )                                          /* Check des bits internes */
+     { struct CMD_TYPE_MESSAGE *message;
+       message = Rechercher_messageDB ( dls->Get_Tableau_msg(cpt) );
+       Info_new( Config.log, Config.log_dls, LOG_DEBUG,
+                "%s: Test MSG %d for id %d: mnemo %p", __func__, dls->Get_Tableau_msg(cpt), dls->plugindb.id, message ); 
+       if (!message) return(FALSE);
+       dls_id = message->dls_id;
+       g_free(message);
+       if (dls_id != dls->plugindb.id) return(FALSE);
+     }
+
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -95,18 +110,28 @@
           dlclose( dls->handle );
           dls->handle = NULL;
         }
-       if (dls->handle) dls->Get_Tableau_bit = dlsym( dls->handle, "Get_Tableau_bit" );           /* Recherche de la fonction */
-       if (!dls->Get_Tableau_bit)
-        { Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                   "%s: Candidat %04d does not provide Get_Tableau_bit function", __func__, dls->plugindb.id ); 
-          Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING );
-        }
-       if (dls->handle) dls->Get_Tableau_num = dlsym( dls->handle, "Get_Tableau_num" );           /* Recherche de la fonction */
-       if (!dls->Get_Tableau_num)
-        { Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                   "%s: Candidat %04d does not provide Get_Tableau_num function", __func__, dls->plugindb.id ); 
-          Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING );
-        }
+       if (dls->handle)
+        { dls->Get_Tableau_bit = dlsym( dls->handle, "Get_Tableau_bit" );                         /* Recherche de la fonction */
+          if (!dls->Get_Tableau_bit)
+           { Info_new( Config.log, Config.log_dls, LOG_WARNING,
+                      "%s: Candidat %04d does not provide Get_Tableau_bit function", __func__, dls->plugindb.id ); 
+             Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING );
+           }
+
+          dls->Get_Tableau_num = dlsym( dls->handle, "Get_Tableau_num" );                         /* Recherche de la fonction */
+          if (!dls->Get_Tableau_num)
+           { Info_new( Config.log, Config.log_dls, LOG_WARNING,
+                      "%s: Candidat %04d does not provide Get_Tableau_num function", __func__, dls->plugindb.id ); 
+             Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING );
+           }
+
+          dls->Get_Tableau_msg = dlsym( dls->handle, "Get_Tableau_msg" );                         /* Recherche de la fonction */
+          if (!dls->Get_Tableau_msg)
+           { Info_new( Config.log, Config.log_dls, LOG_WARNING,
+                      "%s: Candidat %04d does not provide Get_Tableau_msg function", __func__, dls->plugindb.id ); 
+             Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING );
+           }
+         }
        
        Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %04d loaded (%s)",
                  __func__, dls->plugindb.id, dls->plugindb.nom );

@@ -104,9 +104,7 @@
 /* Main: Fonction principale du thread                                                                                        */
 /******************************************************************************************************************************/
  void Run_arch ( void )
-  { time_t date;
-    struct tm tm;
-    struct DB *db;
+  { struct DB *db;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
@@ -135,11 +133,14 @@
           Partage->com_arch.Thread_sigusr1 = FALSE;
         }
 
-       time(&date);
-       localtime_r( &date, &tm );
-       if (tm.tm_mday == 1 && tm.tm_hour == 0 && tm.tm_min == 0)                       /* Est-on le premier du mois minuit ?? */
-        { Arch_Update_SQL_Partitions( 1900+tm.tm_year, tm.tm_mon );
-          sleep(60);
+       if ( (Partage->top % 864000) == 0)                                                                /* Une fois par jour */
+        { pthread_t tid;
+          if (pthread_create( &tid, NULL, (void *)Thread_Arch_Update_SQL_Partitions, NULL ))
+           { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: pthread_create failed for Update SQL Partitions", __func__ ); }
+          else
+           { pthread_detach( tid );                                  /* On le detache pour qu'il puisse se terminer tout seul */
+             sleep(1);
+           }
         }
         
        if (!Partage->com_arch.liste_arch)                                                     /* Si pas de message, on tourne */

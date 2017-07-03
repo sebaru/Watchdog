@@ -245,7 +245,8 @@
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void *Proto_compiler_source_dls_thread( struct CLIENT *client )
-  { struct CMD_GTK_MESSAGE erreur;
+  { struct CMD_TYPE_PLUGIN_DLS *result;
+    struct CMD_GTK_MESSAGE erreur;
     prctl(PR_SET_NAME, "W-Trad.DLS", 0, 0, 0 );
     switch ( Compiler_source_dls ( TRUE, TRUE, client->dls.id, erreur.message, sizeof(erreur.message) ) )
      { case DLS_COMPIL_ERROR_LOAD_SOURCE:
@@ -274,6 +275,14 @@
        default : g_snprintf( erreur.message, sizeof(erreur.message), "Unknown Error !");
      }
     Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_DLS_COMPIL_STATUS, (gchar *)&erreur, sizeof(erreur) );
+
+    result = Rechercher_plugin_dlsDB( client->dls.id );                     /* Mise a jour de l'onglet "plugin" en temps reel */
+    if (result) 
+     { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_VALIDE_EDIT_PLUGIN_DLS_OK,
+                     (gchar *)result, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+       g_free(result);
+     }
+
     Unref_client ( client );                                                           /* Plus besoin de la structure cliente */
     pthread_exit( NULL );
   }

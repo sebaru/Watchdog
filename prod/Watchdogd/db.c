@@ -634,7 +634,26 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=3128;
+    if (database_version < 3159)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls ADD `nbr_compil` INT(11) NOT NULL DEFAULT '0' AFTER `compil_status`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 3178)
+     { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `syns_scenario` ("
+                                             "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                                             "`id_syn` int(11) NOT NULL DEFAULT '0',"
+                                             "`libelle` text COLLATE utf8_unicode_ci NOT NULL,"
+                                             "`posx` int(11) NOT NULL DEFAULT '0',"
+                                             "`posy` int(11) NOT NULL DEFAULT '0',"
+                                             "`angle` float NOT NULL DEFAULT '0',"
+                                             "PRIMARY KEY (`id`),"
+                                             "CONSTRAINT `id_syn` FOREIGN KEY (`id_syn`) REFERENCES `syns` (`id`) ON DELETE CASCADE"
+                                             ") ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    database_version=3178;
 
     Libere_DB_SQL(&db);
 

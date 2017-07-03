@@ -26,7 +26,9 @@
  */
  
  #include <glib.h>
-
+ #include <sys/time.h>
+ #include <sys/prctl.h>
+ 
  #include "watchdogd.h"
 /******************************************************************************************************************************/
 /* Ajouter_archDB: Ajout d'une entree archive dans la Base de Données                                                         */
@@ -48,10 +50,19 @@
 /* Entrée: la date de la nouvelle partition                                                                                   */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
- void Arch_Update_SQL_Partitions ( guint annee, guint mois )
+ void Thread_Arch_Update_SQL_Partitions ( void )
   { gchar requete[512];
+    gint annee, mois;
+    time_t date;
+    struct tm tm;
     gboolean retour;
     struct DB *db;
+
+    prctl(PR_SET_NAME, "W-ArchPART", 0, 0, 0 );
+
+    time(&date);
+    localtime_r( &date, &tm );
+    if ( !(tm.tm_mday == 1 && tm.tm_hour == 0 && tm.tm_min == 0) ) return;             /* Est-on le premier du mois minuit ?? */
 
     db = Init_DB_SQL();       
     if (!db)
@@ -60,6 +71,11 @@
        return;
      }
 
+    Info_new( Config.log, Config.log_arch, LOG_DEBUG, 
+              "%s: New partition p%04d%02d created", __func__, annee, mois );
+
+    annee = 1900+tm.tm_year;
+    mois  = tm.tm_mon;
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "ALTER TABLE %s REORGANIZE PARTITION p_MAX INTO "
                 "(PARTITION p%04d%02d VALUES LESS THAN ('%04d-%02d-01'),"
@@ -76,6 +92,5 @@
      { Info_new( Config.log, Config.log_arch, LOG_ERR, 
                 "%s: New partition p%04d%02d failed (%s)", __func__, annee, mois, requete );
      }
-     
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

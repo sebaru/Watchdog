@@ -45,6 +45,7 @@
      COLONNE_NOM,
      COLONNE_COMPIL_DATE,
      COLONNE_COMPIL_STATUS,
+     COLONNE_COMPIL_NBR,
      COLONNE_COLOR_FOND,
      COLONNE_COLOR_TEXTE,
      NBR_COLONNE
@@ -419,6 +420,7 @@
                                               G_TYPE_STRING,                                                           /* Nom */
                                               G_TYPE_STRING,                                                   /* Compil_date */
                                               G_TYPE_STRING,                                                 /* Compil_status */
+                                              G_TYPE_UINT,                                                      /* Compil_nbr */
                                               GDK_TYPE_COLOR,                                                   /* Color_fond */
                                               GDK_TYPE_COLOR                                                   /* Color_texte */
                                 );
@@ -491,6 +493,16 @@
                                                          NULL);
     gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_COMPIL_STATUS);                              /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("# of Compil"), renderer,
+                                                         "text", COLONNE_COMPIL_NBR,
+                                                         "background-gdk", COLONNE_COLOR_FOND,
+                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,
+                                                         NULL);
+    gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_COMPIL_NBR);                                 /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
 
     /*gtk_tree_view_set_reorderable( GTK_TREE_VIEW(Liste_plugin_dls), TRUE );*/
@@ -572,17 +584,18 @@
                          COLONNE_SHORTNAME, plugin_dls->shortname,
                          COLONNE_COMPIL_DATE, date_compil,
                          COLONNE_COMPIL_STATUS, Dls_compil_status(plugin_dls->compil_status),
+                         COLONNE_COMPIL_NBR, plugin_dls->nbr_compil,
                          COLONNE_COLOR_FOND, &COULEUR_PLUGIN_FOND[plugin_dls->type],
                          COLONNE_COLOR_TEXTE, &COULEUR_PLUGIN_TEXTE[plugin_dls->type],
                           -1
                        );
     g_free( date_compil );
   }
-/**********************************************************************************************************/
-/* Afficher_un_plugin_dls: Ajoute un plugin_dls dans la liste des plugin_dlss                             */
-/* Entrée: une reference sur le plugin_dls                                                                */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Afficher_un_plugin_dls: Ajoute un plugin_dls dans la liste des plugin_dls                                                  */
+/* Entrée: une reference sur le plugin_dls                                                                                    */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Proto_afficher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *plugin_dls )
   { GtkListStore *store;
     GtkTreeIter iter;
@@ -592,11 +605,11 @@
     gtk_list_store_append ( store, &iter );                                      /* Acquisition iterateur */
     Rafraichir_visu_plugin_dls ( &iter, plugin_dls );
   }
-/**********************************************************************************************************/
-/* Cacher_un_plugin_dls: Enleve un plugin_dls de la liste des plugin_dlss                                 */
-/* Entrée: une reference sur le plugin_dls                                                                */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Cacher_un_plugin_dls: Enleve un plugin_dls de la liste des plugin_dls                                                      */
+/* Entrée: une reference sur le plugin_dls                                                                                    */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Proto_cacher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *plugin_dls )
   { GtkTreeModel *store;
     GtkTreeIter iter;
@@ -618,11 +631,11 @@
     if (valide)
      { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); }
   }
-/**********************************************************************************************************/
-/* Proto_rafrachir_un_plugin_dls: Rafraichissement du plugin_dls en parametre                             */
-/* Entrée: une reference sur le plugin_dls                                                                */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_rafrachir_un_plugin_dls: Rafraichissement du plugin_dls en parametre                                                 */
+/* Entrée: une reference sur le plugin_dls                                                                                    */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Proto_rafraichir_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *plugin_dls )
   { GtkTreeModel *store;
     GtkTreeIter iter;
@@ -644,4 +657,4 @@
     if (valide)
      { Rafraichir_visu_plugin_dls( &iter, plugin_dls ); }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

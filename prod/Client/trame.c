@@ -37,7 +37,6 @@
  #include <sys/stat.h>
  #include <sys/types.h>
  #include <fcntl.h>
- #include <curl/curl.h>
 
  #include "trame.h"
  #define DEBUG_TRAME
@@ -505,7 +504,7 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_gif_data );
     curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "Watchdog Client - Trame libcurl");
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT);
 /*       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0 );*/
 /*     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0 );                                    Warning ! */
 /*       curl_easy_setopt(curl, CURLOPT_CAINFO, Cfg_satellite.https_file_ca );
@@ -516,6 +515,7 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
     res = curl_easy_perform(curl);
     if (res)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "Download_gif : Error : Could not connect" );
+       curl_easy_cleanup(curl);
        if (Gif_received_buffer) { g_free(Gif_received_buffer); }
        return(FALSE);
      }
