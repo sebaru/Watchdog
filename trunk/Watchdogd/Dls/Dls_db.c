@@ -263,7 +263,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "
-                "compil_date='%d', compil_status='%d' nbr_compil=nbr_compil+1 WHERE id=%d",
+                "compil_date='%d', compil_status='%d', nbr_compil=nbr_compil+1 WHERE id=%d",
                 NOM_TABLE_DLS, (gint)time(NULL), status, id );
 
     db = Init_DB_SQL();       
