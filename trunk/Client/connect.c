@@ -243,11 +243,7 @@ one_again:
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Envoyer_authentification ( void )
-  { struct curl_httppost *formpost;
-    struct curl_httppost *lastptr;
-    CURLcode res;
-    CURL *curl;
-    pthread_t tid;
+  { pthread_t tid;
     
     g_snprintf( Client.ident.version, sizeof(Client.ident.version), "%s", VERSION );
     if (!Client.cli_certif)
