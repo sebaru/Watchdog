@@ -101,7 +101,7 @@
 /* Entrée: le numéro de ligne, le format et les paramètres associés                                                           */
 /******************************************************************************************************************************/
  void Emettre_erreur_new( gchar *format, ... )
-  { static gchar *too_many="Too many errors...\n";
+  { static gchar *too_many="Too many events. Limiting output...\n";
     gchar log[256], chaine[256];
     va_list ap;
 
@@ -621,7 +621,7 @@
                            " int Get_Tableau_msg(int n) { return(Tableau_msg[n]); }\n";
           gchar *Start_Go = " void Go ( int start )\n"
                             "  {\n"
-                            "    Update_B_edge_up_value();\n";
+                            "    Update_edge_up_value();\n";
           gchar *End_Go =   "  }\n";
           gchar chaine[1024];
           gint cpt=0;                                                                                   /* Compteur d'actions */
