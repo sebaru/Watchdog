@@ -178,12 +178,6 @@
                pthread_create( &tid, NULL, (void *)Envoyer_classes_pour_atelier_thread, client );
                pthread_detach( tid );
                break;
-          case ENVOI_SYNOPTIQUE_FOR_ATELIER:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send synoptique atelier" );
-               pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_atelier_thread, client );
-               pthread_detach( tid );
-               break;
         }
 /************************************************* Envoi des chaines cadrans *************************************************/
        if (client->mode == VALIDE && client->Liste_bit_cadrans && client->date_next_send_cadran < Partage->top)

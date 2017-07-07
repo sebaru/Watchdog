@@ -169,11 +169,6 @@
        case ENVOI_GROUPE_FOR_SYNOPTIQUE : return("ENVOI_GROUPE_FOR_SYNOPTIQUE");
        case ENVOI_CLASSE_FOR_ATELIER    : return("ENVOI_CLASSE_FOR_ATELIER");
        case ENVOI_ICONE_FOR_ATELIER     : return("ENVOI_ICONE_FOR_ATELIER");
-       case ENVOI_SYNOPTIQUE_FOR_ATELIER: return("ENVOI_SYNOPTIQUE_FOR_ATELIER");
-       case ENVOI_SYNOPTIQUE_FOR_ATELIER_PALETTE
-                                        : return("ENVOI_SYNOPTIQUE_FOR_ATELIER_PALETTE");
-       case ENVOI_PALETTE_FOR_ATELIER_PALETTE
-                                        : return("ENVOI_PALETTE_FOR_ATELIER_PALETTE");
 
        case VALIDE                      : return("VALIDE");
        case DECONNECTE                  : return("DECONNECTE");

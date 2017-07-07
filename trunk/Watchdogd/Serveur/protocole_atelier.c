@@ -122,7 +122,7 @@
              { struct CMD_TYPE_MOTIF *motif;
                motif = (struct CMD_TYPE_MOTIF *)connexion->donnees;
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                         "Le client desire effacer le motif numéro %d: %d", motif->id, motif->libelle );
+                         "Le client desire effacer le motif numéro %d: %s", motif->id, motif->libelle );
                Proto_effacer_motif_atelier( client, motif );
              }
             break;
@@ -244,7 +244,9 @@
        case SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER:
              { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                          "Le client desire les syn pour atelier" );
-               Client_mode( client, ENVOI_SYNOPTIQUE_FOR_ATELIER );
+               Ref_client( client, "Send synoptique atelier" );
+               pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_atelier_thread, client );
+               pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_ATELIER_ADD_PASS:
@@ -325,7 +327,7 @@
              { struct CMD_TYPE_CADRAN *cadran;
                cadran = (struct CMD_TYPE_CADRAN *)connexion->donnees;
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                         "Le client desire modifier le palette numéro %d", cadran->id );
+                         "Le client desire modifier le cadran numéro %d", cadran->id );
                Proto_valider_editer_cadran_atelier( client, cadran );
              }
             break;
