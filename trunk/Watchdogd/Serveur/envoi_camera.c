@@ -170,7 +170,7 @@
                       (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
 
-    while ( (camera = Recuperer_cameraDB_suite( db ) ) != NULL )
+    while ( (camera = Recuperer_cameraDB_suite( &db ) ) != NULL )
      { Envoi_client ( client, tag, sstag, (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
        g_free(camera);
      }
