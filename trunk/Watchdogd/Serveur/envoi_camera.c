@@ -65,10 +65,10 @@
 /**********************************************************************************************************/
  void Proto_valider_editer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
   { struct CMD_TYPE_CAMERA *camera;
-    gboolean retour;
+    gint retour;
 
     retour = Modifier_cameraDB ( rezo_camera );
-    if (retour==FALSE)
+    if (retour==-1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
                    "Unable to edit camera %s", rezo_camera->libelle);
