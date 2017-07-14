@@ -42,16 +42,13 @@
 /**********************************************************************************************************/
  void Proto_editer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
   { struct CMD_TYPE_CAMERA *camera;
-    struct DB *Db_watchdog;
-#ifdef bouh
-    Db_watchdog = client->Db_watchdog;
 
-    camera = Rechercher_cameraDB( Config.log, Db_watchdog, rezo_camera->id );
+    camera = Rechercher_cameraDB( rezo_camera->id );
 
     if (camera)
      { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_EDIT_CAMERA_OK,
                      (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
-       g_free(camera);                                                              /* liberation mémoire */
+       g_free(camera);                                                                 /* liberation mémoire */
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -60,7 +57,6 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-#endif
   }
 /**********************************************************************************************************/
 /* Proto_valider_editer_camera: Le client valide l'edition d'un camera                                    */
@@ -68,13 +64,10 @@
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  void Proto_valider_editer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
-  { struct CMD_TYPE_CAMERA *result;
+  { struct CMD_TYPE_CAMERA *camera;
     gboolean retour;
-    struct DB *Db_watchdog;
-#ifdef bouh
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Modifier_cameraDB ( Config.log, Db_watchdog, rezo_camera );
+    retour = Modifier_cameraDB ( rezo_camera );
     if (retour==FALSE)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -82,22 +75,20 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_cameraDB( Config.log, Db_watchdog, rezo_camera->id );
-         { if (!result)
+    else { camera = Rechercher_cameraDB( rezo_camera->id );
+           if (camera) 
+            { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_VALIDE_EDIT_CAMERA_OK,
+                            (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
+              g_free(camera);
+            }
+           else
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
                           "Unable to locate camera %s", rezo_camera->libelle);
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
-           else { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_VALIDE_EDIT_CAMERA_OK,
-                                (gchar *)result, sizeof(struct CMD_TYPE_CAMERA) );
-                  Partage->com_msrv.reset_motion_detect = TRUE;    /* Modification -> Reset motion_detect */
-                  g_free(result);
-                }
-            }
          }
-#endif
   }
 /**********************************************************************************************************/
 /* Proto_effacer_camera: Retrait du camera en parametre                                                   */
@@ -106,16 +97,12 @@
 /**********************************************************************************************************/
  void Proto_effacer_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
   { gboolean retour;
-    struct DB *Db_watchdog;
-#ifdef bouh
-    Db_watchdog = client->Db_watchdog;
 
-    retour = Retirer_cameraDB( Config.log, Db_watchdog, rezo_camera );
+    retour = Retirer_cameraDB( rezo_camera->id );
 
     if (retour)
-     { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_DEL_CAMERA_OK,
-                     (gchar *)rezo_camera, sizeof(struct CMD_TYPE_CAMERA) );
-       Partage->com_msrv.reset_motion_detect = TRUE;               /* Modification -> Reset motion_detect */
+     { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_DEL_MESSAGE_OK,
+                     (gchar *)rezo_camera, sizeof(struct CMD_TYPE_MESSAGE) );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -124,7 +111,6 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-#endif
   }
 /**********************************************************************************************************/
 /* Proto_ajouter_camera: Un client nous demande d'ajouter un camera Watchdog                              */
@@ -135,10 +121,8 @@
   { struct CMD_TYPE_CAMERA *camera;
     struct DB *Db_watchdog;
     gint id;
-#ifdef bouh
-    Db_watchdog = client->Db_watchdog;
 
-    id = Ajouter_cameraDB ( Config.log, Db_watchdog, rezo_camera );
+    id = Ajouter_cameraDB ( rezo_camera );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
@@ -146,7 +130,7 @@
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { camera = Rechercher_cameraDB( Config.log, Db_watchdog, id );
+    else { camera = Rechercher_cameraDB( id );
            if (!camera) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
@@ -155,13 +139,11 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_ADD_CAMERA_OK,
-                            (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
-              Partage->com_msrv.reset_motion_detect = TRUE;        /* Modification -> Reset motion_detect */
+            { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_ADD_MESSAGE_OK,
+                            (gchar *)camera, sizeof(struct CMD_TYPE_MESSAGE) );
               g_free(camera);
             }
          }
-#endif
   }
 /**********************************************************************************************************/
 /* Envoyer_cameras: Envoi des cameras au client GID_CAMERA                                                */
@@ -175,17 +157,7 @@
 
     prctl(PR_SET_NAME, "W-EnvoiCAMERA", 0, 0, 0 );
 
-Unref_client( client );                                        /* Déréférence la structure cliente */
-pthread_exit( NULL );
-
-#ifdef bouh
-    db = Init_DB_SQL();       
-    if (!db)
-     { Unref_client( client );                                        /* Déréférence la structure cliente */
-       pthread_exit( NULL );
-     }                                                                           /* Si pas de histos (??) */
-
-    if ( ! Recuperer_cameraDB( Config.log, db ) )
+    if ( ! Recuperer_cameraDB( &db ) )
      { Unref_client( client );                                        /* Déréférence la structure cliente */
        Libere_DB_SQL( &db );
        pthread_exit( NULL );
@@ -198,19 +170,15 @@ pthread_exit( NULL );
                       (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
 
-    for( ; ; )
-     { camera = Recuperer_cameraDB_suite( Config.log, db );
-       if (!camera)
-        { Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-          Libere_DB_SQL( &db );
-          Unref_client( client );                                     /* Déréférence la structure cliente */
-          pthread_exit ( NULL );
-        }
-
-       Envoi_client ( client, tag, sstag, (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
+    while ( (camera = Recuperer_cameraDB_suite( db ) ) != NULL )
+     { Envoi_client ( client, tag, sstag, (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
        g_free(camera);
      }
-#endif
+
+    Envoi_client ( client, tag, sstag_fin, NULL, 0 );
+    Libere_DB_SQL( &db );
+    Unref_client( client );                                     /* Déréférence la structure cliente */
+    pthread_exit ( NULL );
   }
 /**********************************************************************************************************/
 /* Envoyer_cameras: Envoi des cameras au client GID_CAMERA                                                */

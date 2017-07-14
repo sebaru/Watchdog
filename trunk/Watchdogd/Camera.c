@@ -133,7 +133,7 @@
 /* Entrée: un pointeur vers la nouvelle connexion base de données                                                             */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Recuperer_cameraDB ( struct DB **db_retour, gint id )
+ gboolean Recuperer_cameraDB ( struct DB **db_retour )
   { gchar requete[1024];
     gboolean retour;
     struct DB *db;

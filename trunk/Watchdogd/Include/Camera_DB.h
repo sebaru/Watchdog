@@ -38,7 +38,7 @@
  extern gboolean Retirer_cameraDB ( gint id );
  extern gint Ajouter_cameraDB ( struct CMD_TYPE_CAMERA *camera );
  extern gint Modifier_cameraDB ( struct CMD_TYPE_CAMERA *camera );
- extern gboolean Recuperer_cameraDB ( struct DB **db_retour, gint id );
+ extern gboolean Recuperer_cameraDB ( struct DB **db_retour );
  extern struct CMD_TYPE_CAMERA *Recuperer_cameraDB_suite( struct DB **db_orig );
  extern struct CMD_TYPE_CAMERA *Rechercher_cameraDB ( guint id );
 #endif
