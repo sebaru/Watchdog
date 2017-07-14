@@ -142,6 +142,14 @@
     GtkWidget *Liste_palette;                                                /* La liste des palettes associées au synoptique */
   };
 
+ enum                                       /* Numéro des colonnes dans les listes CAM (liste_camera et atelier_ajout_camera) */
+  {  COL_CAM_ID,
+     COL_CAM_NUM,
+     COL_CAM_LOCATION,
+     COL_CAM_LIBELLE,
+     NBR_COL_CAM
+  };
+
 /*--------------------------------------- Déclarations des prototypes de fonctions -------------------------------------------*/
  extern void Log( gchar *chaine );                                                                              /* Dans ihm.c */
  extern void Effacer_pages ( void );
@@ -369,8 +377,8 @@
  extern struct TRAME_ITEM_CAMERA_SUP *Id_vers_trame_camera_sup ( struct TYPE_INFO_ATELIER *infos, gint id );
  extern void Menu_ajouter_camera_sup ( void );
  extern void Proto_afficher_un_camera_for_atelier( struct CMD_TYPE_CAMERA *camera );
- extern void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup );
- extern void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERA_SUP *camera_sup );
+ extern void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
+ extern void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *camera_sup );
 
  extern void Creer_page_liste_histo_msgs( void );                                                  /* Dans liste_histo_msgs.c */
  extern void Proto_effacer_liste_histo_msgs( gint page_id );
@@ -406,7 +414,7 @@
  extern void Proto_changer_etat_cadran( struct CMD_ETAT_BIT_CADRAN *etat_cadran );
 
                                                                                                  /* Dans supervision_camera.c */
- extern void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup );
+ extern void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
 
                                                                                                    /* Dans option_entreetor.c */
  extern void Get_options_DI ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );

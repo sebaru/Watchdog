@@ -50,18 +50,6 @@
     gfloat angle;
   };
 
-/************************************************* Gestion des cameras de supervision *****************************************/
- struct SYN_CAMERA
-  { gint  id;
-    gint  syn_id;
-    gint  camera_src_id;
-    gchar libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                                             /* "ChSeb" */
-    gchar location[NBR_CARAC_LOCATION_CAMERA_UTF8];                               /* Libelle de la camera */
-    gint  posx;
-    gint  posy;
-    gfloat angle;
-  };
-
 /*************************************** Définitions des prototypes ***************************************/
  extern struct CMD_TYPE_SYNOPTIQUE *Rechercher_synoptiqueDB ( guint id );
  extern gboolean Recuperer_synoptiqueDB ( struct DB **db );
@@ -106,11 +94,11 @@
  extern gboolean Modifier_cadranDB( struct CMD_TYPE_CADRAN *cadran );
 
  extern gboolean Retirer_camera_supDB ( gint id );
- extern gint Ajouter_camera_supDB ( struct SYN_CAMERA *camera_sup );
- extern gint Modifier_camera_supDB ( struct SYN_CAMERA *camera_sup );
+ extern gint Ajouter_camera_supDB ( struct CMD_TYPE_CAMERASUP *camera_sup );
+ extern gint Modifier_camera_supDB ( struct CMD_TYPE_CAMERASUP *camera_sup );
  extern gboolean Recuperer_camera_supDB ( struct DB **db_retour, gint syn_id );
- extern struct SYN_CAMERA *Recuperer_camera_baseDB_suite( struct DB **db_orig );
- extern struct SYN_CAMERA *Rechercher_camera_supDB ( guint id );
+ extern struct CMD_TYPE_CAMERASUP *Recuperer_camera_baseDB_suite( struct DB **db_orig );
+ extern struct CMD_TYPE_CAMERASUP *Rechercher_camera_supDB ( guint id );
 
  extern gboolean Retirer_scenarioDB ( guint id );
  extern gint Ajouter_scenarioDB ( struct SYN_SCENARIO *scenario );

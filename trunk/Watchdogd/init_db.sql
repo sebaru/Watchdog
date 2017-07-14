@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS `class` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `class` (`id`, `libelle`) VALUES
+(0, 'Systeme'),
 (1, 'Divers'),
 (4, 'Etats_des_Commandes'),
 (5, 'Plans du Site'),
@@ -264,6 +265,7 @@ CREATE TABLE IF NOT EXISTS `icons` (
 --
 
 INSERT INTO `icons` (`id`, `libelle`, `id_classe`) VALUES
+(1, 'Camera', 0),
 (7, 'Tournevis', 18),
 (8, 'Poterie', 0),
 (12, 'Boule_rouge', 7),

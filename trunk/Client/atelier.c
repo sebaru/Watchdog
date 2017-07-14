@@ -367,12 +367,11 @@ printf("fin Detruire page atelier\n");
                               G_CALLBACK(Menu_ajouter_cadran), infos );
     gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
 
-#ifdef bouh
     menu_bouton = gtk_image_menu_item_new_with_label ( _("Cameras") );
     g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
                               G_CALLBACK(Menu_ajouter_camera_sup), infos );
     gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
-#endif
+
     gtk_menu_item_set_submenu (GTK_MENU_ITEM(menu_main), ssmenu );
 /****************************************************** Sous menu palette *****************************************************/
     menu_main = gtk_image_menu_item_new_with_label ( _("Gerer les palettes") );

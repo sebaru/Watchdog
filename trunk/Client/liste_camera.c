@@ -59,13 +59,6 @@
     GNOMEUIINFO_END
   };
 
- enum                                       /* Numéro des colonnes dans les listes CAM (liste_camera et atelier_ajout_camera) */
-  {  COL_CAM_ID,
-     COL_CAM_NUM,
-     COL_CAM_LOCATION,
-     COL_CAM_LIBELLE,
-     NBR_COL_CAM
-  };
 /******************************************************************************************************************************/
 /* CB_effacer_camera: Fonction appelée qd on appuie sur un des boutons de l'interface                                         */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */

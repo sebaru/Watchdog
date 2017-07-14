@@ -63,7 +63,7 @@
 /* Entrée: La structure referencant la camera                                                                                 */
 /* Sortie: -1 si probleme, 0 si modif OK, last_sql_id si ajout                                                                */
 /******************************************************************************************************************************/
- static gint Ajouter_Modifier_camera_supDB ( struct SYN_CAMERA *camera_sup, gint ajout )
+ static gint Ajouter_Modifier_camera_supDB ( struct CMD_TYPE_CAMERASUP *camera_sup, gint ajout )
   { gchar requete[512];
     gboolean retour;
     struct DB *db;
@@ -106,14 +106,14 @@
 /* Entrée: La structure referencant la camera                                                                                 */
 /* Sortie: -1 si probleme, 0 si modif OK, last_sql_id si ajout                                                                */
 /******************************************************************************************************************************/
- gint Ajouter_camera_supDB ( struct SYN_CAMERA *camera_sup )
+ gint Ajouter_camera_supDB ( struct CMD_TYPE_CAMERASUP *camera_sup )
   { return( Ajouter_Modifier_camera_supDB(camera_sup, TRUE) ); }
 /******************************************************************************************************************************/
 /* Modifier_camera_supDB: Modifie une camera sur le synoptique en cours                                                       */
 /* Entrée: La structure referencant la camera                                                                                 */
 /* Sortie: -1 si probleme, 0 si modif OK, last_sql_id si ajout                                                                */
 /******************************************************************************************************************************/
- gint Modifier_camera_supDB ( struct SYN_CAMERA *camera_sup )
+ gint Modifier_camera_supDB ( struct CMD_TYPE_CAMERASUP *camera_sup )
   { return( Ajouter_Modifier_camera_supDB(camera_sup, FALSE) ); }
 /******************************************************************************************************************************/
 /* Recuperer_camera_sup_DB: Renvoi la liste des camera de supervision d'un synoptique                                         */
@@ -148,8 +148,8 @@
 /* Entrée: un pointeur sur la connexion de baase de données                                                                   */
 /* Sortie: une structure nouvellement allouée                                                                                 */
 /******************************************************************************************************************************/
- struct SYN_CAMERA *Recuperer_camera_supDB_suite( struct DB **db_orig )
-  { struct SYN_CAMERA *camera;
+ struct CMD_TYPE_CAMERASUP *Recuperer_camera_supDB_suite( struct DB **db_orig )
+  { struct CMD_TYPE_CAMERASUP *camera;
     struct DB *db;
 
     db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
@@ -160,7 +160,7 @@
        return(NULL);
      }
 
-    camera = (struct SYN_CAMERA *)g_try_malloc0( sizeof(struct SYN_CAMERA) );
+    camera = (struct CMD_TYPE_CAMERASUP *)g_try_malloc0( sizeof(struct CMD_TYPE_CAMERASUP) );
     if (!camera) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
     else                                                                                /* Recopie dans la nouvelle structure */
      { g_snprintf( camera->libelle,  sizeof(camera->libelle),  "%s", db->row[2] );
@@ -178,8 +178,8 @@
 /* Entrée: un id de camera                                                                                                    */
 /* Sortie: une structure referencant la camera                                                                                */
 /******************************************************************************************************************************/
- struct SYN_CAMERA *Rechercher_camera_supDB ( guint id )
-  { struct SYN_CAMERA *camera_sup;
+ struct CMD_TYPE_CAMERASUP *Rechercher_camera_supDB ( guint id )
+  { struct CMD_TYPE_CAMERASUP *camera_sup;
     gchar requete[512];
     struct DB *db;
 

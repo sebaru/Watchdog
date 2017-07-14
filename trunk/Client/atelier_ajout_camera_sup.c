@@ -42,7 +42,6 @@
  static GtkWidget *F_ajout_camera_sup = NULL;                 /* Fenetre graphique de choix de camera_sup */
  static GtkWidget *Liste_camera;                      /* GtkTreeView pour la gestion des cameras Watchdog */
 
-#ifdef bouh
 /**********************************************************************************************************/
 /* Id_vers_trame_motif: Conversion d'un id motif en sa reference TRAME                                    */
 /* Entrée: Un id motif                                                                                    */
@@ -68,14 +67,14 @@
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_ajouter_camera_sup ( GtkDialog *dialog, gint reponse, gpointer data )
-  { struct CMD_TYPE_CAMERA_SUP add_camera_sup;
+  { struct CMD_TYPE_CAMERASUP add_camera_sup;
     struct TYPE_INFO_ATELIER *infos;
     struct PAGE_NOTEBOOK *page;
     GtkTreeSelection *selection;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
-    gint num;
+    gint id;
 
     page = Page_actuelle();                                               /* On recupere la page actuelle */
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return(TRUE);         /* Verification des contraintes */
@@ -90,17 +89,17 @@
             printf("lignes = %p\n", lignes );
             if (lignes)
              { gtk_tree_model_get_iter( store, &iter, lignes->data );  /* Recuperation ligne selectionnée */
-               gtk_tree_model_get( store, &iter, COL_CAM_ID, &num, -1 );                  /* Recup du num */
+               gtk_tree_model_get( store, &iter, COL_CAM_ID, &id, -1 );                  /* Recup du num */
                g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
                g_list_free (lignes);                                                /* Liberation mémoire */
 
-               add_camera_sup.position_x    = TAILLE_SYNOPTIQUE_X/2;
-               add_camera_sup.position_y    = TAILLE_SYNOPTIQUE_Y/2;                            
-               add_camera_sup.syn_id        = infos->syn.id;
-               add_camera_sup.camera_src_id = num;
+               add_camera_sup.posx   = TAILLE_SYNOPTIQUE_X/2;
+               add_camera_sup.posy   = TAILLE_SYNOPTIQUE_Y/2;                            
+               add_camera_sup.syn_id = infos->syn.id;
+               add_camera_sup.camera_src_id = id;
 
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CAMERA_SUP,
-                              (gchar *)&add_camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
+                              (gchar *)&add_camera_sup, sizeof(struct CMD_TYPE_CAMERASUP) );
                return(TRUE);                                              /* On laisse la fenetre ouverte */
              }
        case GTK_RESPONSE_CLOSE:
@@ -158,18 +157,18 @@
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup )
+ void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *rezo_camera_sup )
   { struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     struct TYPE_INFO_ATELIER *infos;
-    struct CMD_TYPE_CAMERA_SUP *camera_sup;
+    struct CMD_TYPE_CAMERASUP *camera_sup;
         
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_camera_sup->syn_id );
-    camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_try_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
+    camera_sup = (struct CMD_TYPE_CAMERASUP *)g_try_malloc0( sizeof(struct CMD_TYPE_CAMERASUP) );
     if (!camera_sup)
      { return;
      }
 
-    memcpy ( camera_sup, rezo_camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
+    memcpy ( camera_sup, rezo_camera_sup, sizeof(struct CMD_TYPE_CAMERASUP) );
 
     trame_camera_sup = Trame_ajout_camera_sup ( TRUE, infos->Trame_atelier, camera_sup );
     trame_camera_sup->groupe_dpl = Nouveau_groupe();              /* Numéro de groupe pour le deplacement */
@@ -190,7 +189,7 @@
 /* Entrée: une reference sur le message                                                                   */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERA_SUP *camera_sup )
+ void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *camera_sup )
   { struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     struct TYPE_INFO_ATELIER *infos;
         
@@ -204,5 +203,4 @@
     infos->Trame_atelier->trame_items = g_list_remove( infos->Trame_atelier->trame_items, trame_camera_sup );
     printf("Proto_cacher_un_camera_sup_atelier fin..\n");
   }
-#endif
 /*--------------------------------------------------------------------------------------------------------*/
