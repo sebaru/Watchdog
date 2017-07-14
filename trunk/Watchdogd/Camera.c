@@ -85,12 +85,12 @@
 
     if (ajout == TRUE)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "INSERT INTO %s (location,libelle) VALUES (%'%s','%s')",
-                   NOM_TABLE_CAMERA, location, libelle );
+                   "INSERT INTO %s (num,location,libelle) VALUES ('%d','%s','%s')",
+                   NOM_TABLE_CAMERA, camera->num, location, libelle );
      } else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE %s SET location='%s',libelle='%s' "
-                   "WHERE id=%d", NOM_TABLE_CAMERA, location, libelle, camera->id );
+                   "UPDATE %s SET num='%d', location='%s',libelle='%s' "
+                   "WHERE id=%d", camera->num, NOM_TABLE_CAMERA, location, libelle, camera->id );
      }
     g_free(libelle);
     g_free(location);
@@ -139,7 +139,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,location,libelle"
+                "SELECT id,num,location,libelle"
                 " FROM %s ORDER BY libelle",
                 NOM_TABLE_CAMERA                                                                  /* FROM */
               );
@@ -175,9 +175,10 @@
     camera = (struct CMD_TYPE_CAMERA *)g_try_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
     if (!camera) Info_new( Config.log, FALSE, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
     else                                                                                /* Recopie dans la nouvelle structure */
-     { g_snprintf( camera->location, sizeof(camera->location), "%s", db->row[1] );
-       g_snprintf( camera->libelle,  sizeof(camera->libelle),  "%s", db->row[2] );
-       camera->id     = atoi(db->row[0]);
+     { g_snprintf( camera->location, sizeof(camera->location), "%s", db->row[2] );
+       g_snprintf( camera->libelle,  sizeof(camera->libelle),  "%s", db->row[3] );
+       camera->id  = atoi(db->row[0]);
+       camera->num = atoi(db->row[1]);
      }
   }
 /******************************************************************************************************************************/
@@ -191,7 +192,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,location,libelle"
+                "SELECT id,num,location,libelle"
                 " FROM %s ORDER BY libelle WHERE id=%d",
                 NOM_TABLE_CAMERA,                                                                                     /* FROM */
                 id                                                                                                   /* Where */
@@ -199,7 +200,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_mnemo_baseDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
      }
 
