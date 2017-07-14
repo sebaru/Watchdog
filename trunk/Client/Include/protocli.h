@@ -85,17 +85,6 @@
     struct TRAME *Trame;                                                                   /* La trame de fond de supervision */
   };
 
- enum                                       /* Numéro des colonnes dans les listes CAM (liste_camera et atelier_ajout_camera) */
-  {  COL_CAM_ID,
-     COL_CAM_NUM,
-     COL_CAM_TYPE,
-     COL_CAM_BIT,
-     COL_CAM_OBJET,
-     COL_CAM_LIBELLE,
-     COL_CAM_LOCATION,
-     NBR_COL_CAM
-  };
-
  struct TYPE_INFO_SOURCE_DLS
   { GtkWidget *text;                                  /* Pour les plugins DLS, ici est placé le widget TextView correspondant */
     guint id;                                       /* Pour les plugins DLS, ici est stocké l'id du plugin en cours d'edition */

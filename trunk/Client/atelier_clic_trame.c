@@ -270,11 +270,13 @@ printf("Afficher_propriete: debut\n");
                                        y = infos->Selection.trame_cadran->cadran->position_y;
                                        angle = infos->Selection.trame_cadran->cadran->angle;
                                        break;
+#ifdef bouh
                                   case TYPE_CAMERA_SUP:
                                        x = infos->Selection.trame_camera_sup->camera_sup->position_x;
                                        y = infos->Selection.trame_camera_sup->camera_sup->position_y;
                                        angle = 0.0;
                                        break;
+#endif
                                   default: printf("Clic_general: type inconnu %d\n", infos->Selection.type );
                                            x=-1; y=-1; angle = 0.0;
                                 }
@@ -505,6 +507,7 @@ printf("Clic sur cadran: page trouvée, %p \n", trame_cadran);
 /* Entrée: une structure Event                                                                            */
 /* Sortie :rien                                                                                           */
 /**********************************************************************************************************/
+#ifdef bouh
  void Clic_sur_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                             struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
   { struct TYPE_INFO_ATELIER *infos;
@@ -544,4 +547,5 @@ printf("Clic sur cadran: page trouvée, %p \n", trame_cadran);
         }
      }
   }
+#endif
 /*--------------------------------------------------------------------------------------------------------*/

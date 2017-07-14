@@ -173,6 +173,7 @@
              }
             break;
 /******************************************** Reception des cameras ***************************************/
+#ifdef bouh
        case SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FOR_ATELIER:
              { struct CMD_TYPE_CAMERA *cam;
                Set_progress_plus(1);
@@ -191,7 +192,9 @@
                Arrivee_camera_for_atelier = NULL;
              }
             break;
+#endif
 /*********************************** Reception des cameras de supervision *********************************/
+#ifdef bouh
        case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP:
              { struct CMD_TYPE_CAMERA_SUP *camera_sup;
                Set_progress_plus(1);
@@ -221,6 +224,7 @@
                Proto_cacher_un_camera_sup_atelier( cam_sup );
              }
             break;
+#endif
 /******************************************** Reception des palettes **************************************/
        case SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_PALETTE:
              { struct CMD_TYPE_SYNOPTIQUE *syn;

@@ -127,6 +127,7 @@
        appui = NULL;                          /* L'action est faite, on ne selectionne donc plus le motif */
      }
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision   */
 /* Entrée: une structure Event                                                                            */
@@ -142,8 +143,6 @@
      { if ( ((GdkEventButton *)event)->button == 1)           /* Release sur le motif qui a été appuyé ?? */
         { gint pid;
 
-          printf( "Clic_sur_camera_sup_supervision : Lancement d'un Gst %s\n",
-                  trame_camera_sup->camera_sup->location );
           pid = fork();
           if (pid<0) return;
           else if (!pid)                                             /* Lancement de la ligne de commande */
@@ -165,6 +164,7 @@
        appui_camera_sup = NULL;               /* L'action est faite, on ne selectionne donc plus le motif */
      }
   }
+#endif
 /**********************************************************************************************************/
 /* Clic_sur_cadran_supervision_action: Appelé pour lancer un firefox sur la periode en parametre         */
 /* Entrée: période d'affichage                                                                            */

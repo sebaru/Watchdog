@@ -101,8 +101,8 @@
     retour = Retirer_cameraDB( rezo_camera->id );
 
     if (retour)
-     { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_DEL_MESSAGE_OK,
-                     (gchar *)rezo_camera, sizeof(struct CMD_TYPE_MESSAGE) );
+     { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_DEL_CAMERA_OK,
+                     (gchar *)rezo_camera, sizeof(struct CMD_TYPE_CAMERA) );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -139,8 +139,8 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { Envoi_client( client, TAG_MESSAGE, SSTAG_SERVEUR_ADD_MESSAGE_OK,
-                            (gchar *)camera, sizeof(struct CMD_TYPE_MESSAGE) );
+            { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_ADD_CAMERA_OK,
+                            (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
               g_free(camera);
             }
          }

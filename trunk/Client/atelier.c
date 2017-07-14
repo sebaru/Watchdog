@@ -189,12 +189,13 @@ printf("fin Detruire page atelier\n");
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_CADRAN,
                               (gchar *)trame_cadran->cadran, sizeof(struct CMD_TYPE_CADRAN) );
                break;
+#ifdef bouh
           case TYPE_CAMERA_SUP:
                trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_CAMERA_SUP,
                               (gchar *)trame_camera_sup->camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
                break;
-
+#endif
           default: printf("Enregistrer_synoptique: type inconnu\n" );
         }
        objet=objet->next;
@@ -366,11 +367,12 @@ printf("fin Detruire page atelier\n");
                               G_CALLBACK(Menu_ajouter_cadran), infos );
     gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
 
+#ifdef bouh
     menu_bouton = gtk_image_menu_item_new_with_label ( _("Cameras") );
     g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
                               G_CALLBACK(Menu_ajouter_camera_sup), infos );
     gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
-
+#endif
     gtk_menu_item_set_submenu (GTK_MENU_ITEM(menu_main), ssmenu );
 /****************************************************** Sous menu palette *****************************************************/
     menu_main = gtk_image_menu_item_new_with_label ( _("Gerer les palettes") );

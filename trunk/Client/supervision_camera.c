@@ -39,7 +39,7 @@
 
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
-
+#ifdef bouh
 /**********************************************************************************************************/
 /* Proto_afficher_un_camera_sup_supervision: Ajoute un camera_sup sur la trame de supervision             */
 /* Entrée: une reference sur le camera_sup                                                                */
@@ -65,4 +65,5 @@
     g_signal_connect( G_OBJECT(trame_camera_sup->item_groupe), "button-release-event",
                       G_CALLBACK(Clic_sur_camera_sup_supervision), trame_camera_sup );
   }
+#endif
 /*--------------------------------------------------------------------------------------------------------*/

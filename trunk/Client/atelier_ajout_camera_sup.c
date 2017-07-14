@@ -42,6 +42,7 @@
  static GtkWidget *F_ajout_camera_sup = NULL;                 /* Fenetre graphique de choix de camera_sup */
  static GtkWidget *Liste_camera;                      /* GtkTreeView pour la gestion des cameras Watchdog */
 
+#ifdef bouh
 /**********************************************************************************************************/
 /* Id_vers_trame_motif: Conversion d'un id motif en sa reference TRAME                                    */
 /* Entrée: Un id motif                                                                                    */
@@ -203,4 +204,5 @@
     infos->Trame_atelier->trame_items = g_list_remove( infos->Trame_atelier->trame_items, trame_camera_sup );
     printf("Proto_cacher_un_camera_sup_atelier fin..\n");
   }
+#endif
 /*--------------------------------------------------------------------------------------------------------*/

@@ -42,9 +42,6 @@
     guint   num;                                                                   /* Numéro de la camera */
     gchar   libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                           /* Libelle de la camera */
     gchar   location[NBR_CARAC_LOCATION_CAMERA_UTF8];                            /* Location de la camera */
-    gchar   objet[128];
-    gint    type;                                                            /* petite, moyenne, grande ? */
-    gint    bit;                      /* Numéro du bistable a positioner en cas de detection de mouvement */
   };
 
 /************************************************* Tag de communication ***********************************/
@@ -64,9 +61,6 @@
     SSTAG_SERVEUR_EDIT_CAMERA_OK,              /* Le serveur accepte et envoi les données correspondantes */
     SSTAG_CLIENT_VALIDE_EDIT_CAMERA,                             /* Le client renvoie les données editées */
     SSTAG_SERVEUR_VALIDE_EDIT_CAMERA_OK,                       /* Le serveur valide les nouvelles données */
-
-    SSTAG_CLIENT_TYPE_NUM_MNEMO_MOTION,                    /* Le client souhaite le mnemonique bit_motion */
-    SSTAG_SERVEUR_TYPE_NUM_MNEMO_MOTION,                          /* Le serveur répond avec le mnemonique */
   };
 
 #endif

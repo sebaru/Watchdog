@@ -140,6 +140,7 @@
              { Chercher_page_notebook( TYPE_PAGE_SUPERVISION, save_id, TRUE ); }
             break;
 /******************************************** Reception des cameras de supervision ********************************************/
+#ifdef bouh
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP:
              { struct CMD_TYPE_CAMERA_SUP *camera_sup;
                Set_progress_plus(1);
@@ -157,6 +158,7 @@
                Arrivee_camera_sup = NULL;
              }
             break;
+#endif
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

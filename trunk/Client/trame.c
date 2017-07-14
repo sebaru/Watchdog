@@ -216,6 +216,7 @@
 /* Entrée: la structure graphique TRAME_MOTIF                                                             */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
+#ifdef bouh
  void Trame_rafraichir_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
   { if (!(trame_camera_sup && trame_camera_sup->camera_sup)) return;
 
@@ -230,6 +231,7 @@
 
     goo_canvas_item_set_transform ( trame_camera_sup->item_groupe, &trame_camera_sup->transform );
   }
+#endif
 /**********************************************************************************************************/
 /* Trame_rafraichir_motif: remet à jour la position, rotation, echelle du motif en parametre              */
 /* Entrée: la structure graphique TRAME_MOTIF                                                             */
@@ -674,6 +676,7 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
      }
     return(trame_motif);
   }
+#ifdef bouh
 /**********************************************************************************************************/
 /* Trame_ajout_camera_sup: Ajoute un camera_sup sur le visuel                                             */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference         */
@@ -750,6 +753,7 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
     trame->trame_items = g_list_append( trame->trame_items, trame_camera_sup );
     return(trame_camera_sup);
   }
+#endif
 /**********************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                       */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference         */

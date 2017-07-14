@@ -59,6 +59,13 @@
     GNOMEUIINFO_END
   };
 
+ enum                                       /* Numéro des colonnes dans les listes CAM (liste_camera et atelier_ajout_camera) */
+  {  COL_CAM_ID,
+     COL_CAM_NUM,
+     COL_CAM_LOCATION,
+     COL_CAM_LIBELLE,
+     NBR_COL_CAM
+  };
 /**********************************************************************************************************/
 /* CB_effacer_camera: Fonction appelée qd on appuie sur un des boutons de l'interface                     */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
@@ -353,11 +360,8 @@
 
     store = gtk_list_store_new ( NBR_COL_CAM, G_TYPE_UINT,                                          /* Id */
                                               G_TYPE_STRING,                                    /* Numéro */
-                                              G_TYPE_STRING,                                      /* type */
-                                              G_TYPE_STRING,                                       /* bit */
-                                              G_TYPE_STRING,                                     /* objet */
-                                              G_TYPE_STRING,                                   /* libelle */
-                                              G_TYPE_STRING                                   /* location */
+                                              G_TYPE_STRING,                                  /* location */
+                                              G_TYPE_STRING                                    /* libelle */
                                );
 
     liste = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                 /* Creation de la vue */
@@ -374,25 +378,10 @@
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
-    g_object_set( renderer, "xalign", 0.5, NULL );
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Type"), renderer,
-                                                         "text", COL_CAM_TYPE,
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Location"), renderer,
+                                                         "text", COL_CAM_LOCATION,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAM_TYPE);                   /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
-
-    renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Motion bit"), renderer,
-                                                         "text", COL_CAM_BIT,
-                                                         NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAM_BIT);                    /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
-
-    renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Objet"), renderer,
-                                                         "text", COL_CAM_OBJET,
-                                                         NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAM_OBJET);                  /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAM_LOCATION);               /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
@@ -400,13 +389,6 @@
                                                          "text", COL_CAM_LIBELLE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COL_CAM_LIBELLE);                /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
-
-    renderer = gtk_cell_renderer_text_new();                              /* Colonne du libelle de camera */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Location"), renderer,
-                                                         "text", COL_CAM_LOCATION,
-                                                         NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COL_CAM_LOCATION);               /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (liste), colonne );
 
     /*gtk_tree_view_set_reorderable( GTK_TREE_VIEW(Liste_camera), TRUE );*/
@@ -484,16 +466,12 @@
  void Rafraichir_visu_camera( GtkListStore *store, GtkTreeIter *iter, struct CMD_TYPE_CAMERA *camera )
   { gchar chaine[24], bit[24];
 
-    g_snprintf( chaine, sizeof(chaine), "%04d", camera->num );
-    g_snprintf( bit, sizeof(bit), "%s%04d", Type_bit_interne_court(MNEMO_MONOSTABLE), camera->bit );
+    g_snprintf( chaine, sizeof(chaine), "CAM%04d", camera->num );
     gtk_list_store_set ( store, iter,
                          COL_CAM_ID, camera->id,
                          COL_CAM_NUM, chaine,
-                         COL_CAM_OBJET, camera->objet,
                          COL_CAM_LIBELLE, camera->libelle,
                          COL_CAM_LOCATION, camera->location,
-                         COL_CAM_TYPE, Type_camera_vers_string(camera->type),
-                         COL_CAM_BIT, bit,
                          -1
                        );
   }
