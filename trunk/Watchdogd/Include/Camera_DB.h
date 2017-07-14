@@ -35,13 +35,11 @@
  #define NOM_TABLE_CAMERA_MOTION       "cameras_motion"
 
 /*************************************** Définitions des prototypes ***************************************/
- extern gboolean Retirer_cameraDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA *camera );
- extern gint Ajouter_cameraDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA *camera );
- extern gboolean Recuperer_cameraDB ( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_CAMERA *Recuperer_cameraDB_suite( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_CAMERA *Rechercher_cameraDB ( struct LOG *log, struct DB *db, guint id );
- extern gboolean Modifier_cameraDB( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA *camera );
- extern void Camera_check_motion ( struct LOG *log, struct DB *db );
-
+ extern gboolean Retirer_cameraDB ( gint id );
+ extern gint Ajouter_cameraDB ( struct CMD_TYPE_CAMERA *camera );
+ extern gint Modifier_cameraDB ( struct CMD_TYPE_CAMERA *camera );
+ extern gboolean Recuperer_cameraDB ( struct DB **db_retour, gint id );
+ extern struct CMD_TYPE_CAMERA *Recuperer_cameraDB_suite( struct DB **db_orig );
+ extern struct CMD_TYPE_CAMERA *Rechercher_cameraDB ( guint id );
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

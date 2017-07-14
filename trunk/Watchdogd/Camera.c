@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Camera/Camera.c        Déclaration des fonctions pour la gestion des camera                  */
-/* Projet WatchDog version 2.0       Gestion d'habitat                  dim. 13 sept. 2009 10:57:58 CEST  */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Camera.c        Déclaration des fonctions pour la gestion des cameras                                            */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                      dim. 13 sept. 2009 10:57:58 CEST  */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Camera.c
  * This file is part of Watchdog
@@ -35,237 +35,181 @@
 
  #include "watchdogd.h"
 
-/**********************************************************************************************************/
-/* Retirer_cameraDB: Elimination d'un camera                                                              */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gboolean Retirer_cameraDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA *camera )
+/******************************************************************************************************************************/
+/* Retirer_cameraDB: Elimination d'un camera                                                                                  */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ gboolean Retirer_cameraDB ( gint id )
   { gchar requete[200];
+    gboolean retour;
+    struct DB *db;
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "DELETE FROM %s WHERE id=%d", NOM_TABLE_CAMERA, camera->id );
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "DELETE FROM %s WHERE id=%d", NOM_TABLE_CAMERA, id );
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
   }
-/**********************************************************************************************************/
-/* Ajouter_cameraDB: Ajout ou edition d'un camera                                                         */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure camera                        */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
- gint Ajouter_cameraDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA *camera )
-  { gchar *location, *objet, *libelle;
-    gchar requete[2048];
-    
+/******************************************************************************************************************************/
+/* Ajouter_Modifier_cameraDB: Ajout ou edition d'une camera                                                                   */
+/* Entrée: La structure referencant la camera                                                                                 */
+/* Sortie: -1 si probleme, 0 si modif OK, last_sql_id si ajout                                                                */
+/******************************************************************************************************************************/
+ static gint Ajouter_Modifier_cameraDB ( struct CMD_TYPE_CAMERA *camera, gint ajout )
+  { gchar *location, *libelle;
+    gchar requete[512];
+    gboolean retour;
+    struct DB *db;
+    gint last_id;
+
     location = Normaliser_chaine ( camera->location );              /* Formatage correct des chaines */
     if (!location)
-     { Info_new( Config.log, FALSE, LOG_WARNING, "Ajouter_cameraDB: Normalisation location impossible" );
+     { Info_new( Config.log, FALSE, LOG_WARNING, "%s: Normalisation location impossible", __func__ );
        return(-1);
      }
-    objet = Normaliser_chaine ( camera->objet );                    /* Formatage correct des chaines */
-    if (!objet)
-     { g_free(location);
-       Info_new( Config.log, FALSE, LOG_WARNING, "Ajouter_cameraDB: Normalisation objet impossible" );
-       return(-1);
-     }
+
     libelle = Normaliser_chaine ( camera->libelle );              /* Formatage correct des chaines */
     if (!libelle)
      { g_free(location);
-       g_free(objet);
-       Info_new( Config.log, FALSE, LOG_WARNING, "Ajouter_cameraDB: Normalisation libelle impossible" );
+       Info_new( Config.log, FALSE, LOG_WARNING, "%s: Normalisation libelle impossible", __func__ );
        return(-1);
      }
 
-    g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s"
-                "(num,type,bit,objet,location,libelle)"
-                "VALUES (%d,%d,%d,'%s','%s','%s')",
-                NOM_TABLE_CAMERA, camera->num, camera->type, camera->bit, objet, location, libelle
-              );
-    g_free(location);
-    g_free(objet);
+    if (ajout == TRUE)
+     { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
+                   "INSERT INTO %s (location,libelle) VALUES (%'%s','%s')",
+                   NOM_TABLE_CAMERA, location, libelle );
+     } else
+     { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
+                   "UPDATE %s SET location='%s',libelle='%s' "
+                   "WHERE id=%d", NOM_TABLE_CAMERA, location, libelle, camera->id );
+     }
     g_free(libelle);
+    g_free(location);
+    
 
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(-1); }
-    return( Recuperer_last_ID_SQL ( db ) );
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(-1);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if ( retour == FALSE )
+     { Libere_DB_SQL(&db); 
+       return(-1);
+     }
+
+    if (ajout==TRUE) last_id = Recuperer_last_ID_SQL ( db );
+    Libere_DB_SQL(&db);
+
+    if (ajout==TRUE) return(last_id);
+    else return(0);
   }
-/**********************************************************************************************************/
-/* Recuperer_liste_id_cameraDB: Recupération de la liste des ids des cameras                              */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- gboolean Recuperer_cameraDB ( struct LOG *log, struct DB *db )
-  { gchar requete[200];
+/******************************************************************************************************************************/
+/* Ajouter_cameraDB: Ajout une camera dans la base de données                                                                 */
+/* Entrée: La structure referencant la camera                                                                                 */
+/* Sortie: -1 si probleme, 0 si modif OK, last_sql_id si ajout                                                                */
+/******************************************************************************************************************************/
+ gint Ajouter_cameraDB ( struct CMD_TYPE_CAMERA *camera )
+  { return( Ajouter_Modifier_cameraDB(camera, TRUE) ); }
+/******************************************************************************************************************************/
+/* Modifier_cameraDB: Modifie une camera dans la base de données                                                              */
+/* Entrée: La structure referencant la camera                                                                                 */
+/* Sortie: -1 si probleme, 0 si modif OK, last_sql_id si ajout                                                                */
+/******************************************************************************************************************************/
+ gint Modifier_cameraDB ( struct CMD_TYPE_CAMERA *camera )
+  { return( Ajouter_Modifier_cameraDB(camera, FALSE) ); }
+/******************************************************************************************************************************/
+/* Recuperer_cameraDB: Renvoi la liste des camera en base de données                                                          */
+/* Entrée: un pointeur vers la nouvelle connexion base de données                                                             */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ gboolean Recuperer_cameraDB ( struct DB **db_retour, gint id )
+  { gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,num,type,bit,objet,location,libelle"
-                " FROM %s ORDER BY objet, libelle",
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT id,location,libelle"
+                " FROM %s ORDER BY libelle",
                 NOM_TABLE_CAMERA                                                                  /* FROM */
               );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
-  }
-/**********************************************************************************************************/
-/* Recuperer_liste_id_cameraDB: Recupération de la liste des ids des cameras                              */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- struct CMD_TYPE_CAMERA *Recuperer_cameraDB_suite( struct LOG *log, struct DB *db )
-  { struct CMD_TYPE_CAMERA *camera;
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
 
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
+  }
+/******************************************************************************************************************************/
+/* Recuperer_cameraDB_suite: Fonction itérative de récupération des camera                                                    */
+/* Entrée: un pointeur sur la connexion de base de données                                                                    */
+/* Sortie: une structure nouvellement allouée                                                                                 */
+/******************************************************************************************************************************/
+ struct CMD_TYPE_CAMERA *Recuperer_cameraDB_suite( struct DB **db_orig )
+  { struct CMD_TYPE_CAMERA *camera;
+    struct DB *db;
+
+    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
        return(NULL);
      }
 
     camera = (struct CMD_TYPE_CAMERA *)g_try_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
-    if (!camera) Info_new( Config.log, FALSE, LOG_ERR, "Recuperer_cameraDB_suite: Erreur allocation mémoire" );
-    else
-     { memcpy( &camera->objet,    db->row[4], sizeof(camera->objet    ) );
-       memcpy( &camera->location, db->row[5], sizeof(camera->location  ) );
-       memcpy( &camera->libelle,  db->row[6], sizeof(camera->libelle ) );
-       camera->id         = atoi(db->row[0]);
-       camera->num        = atoi(db->row[1]);
-       camera->type       = atoi(db->row[2]);
-       camera->bit        = atoi(db->row[3]);
+    if (!camera) Info_new( Config.log, FALSE, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
+    else                                                                                /* Recopie dans la nouvelle structure */
+     { g_snprintf( camera->location, sizeof(camera->location), "%s", db->row[1] );
+       g_snprintf( camera->libelle,  sizeof(camera->libelle),  "%s", db->row[2] );
+       camera->id     = atoi(db->row[0]);
      }
-    return(camera);
   }
-/**********************************************************************************************************/
-/* Rechercher_cameraDB: Recupération du camera dont le num est en parametre                               */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- struct CMD_TYPE_CAMERA *Rechercher_cameraDB ( struct LOG *log, struct DB *db, guint id )
-  { gchar requete[200];
-    struct CMD_TYPE_CAMERA *camera;
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT num,type,bit,objet,location,libelle"
-                " FROM %s WHERE id=%d",
-                NOM_TABLE_CAMERA,                                                                 /* FROM */
-                id                                                                               /* Where */
-              );
-
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(NULL); }
-
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Info_new( Config.log, FALSE, LOG_NOTICE, "Rechercher_cameraDB: CAMERA %d not found", id );
-       return(NULL);
-     }
-
-    camera = g_try_malloc0( sizeof(struct CMD_TYPE_CAMERA) );
-    if (!camera)
-     { Info_new( Config.log, FALSE, LOG_WARNING, "Rechercher_cameraDB: Mem error" ); }
-    else
-     { memcpy( &camera->objet,    db->row[3], sizeof(camera->objet    ) );
-       memcpy( &camera->location, db->row[4], sizeof(camera->location  ) );
-       memcpy( &camera->libelle,  db->row[5], sizeof(camera->libelle ) );
-       camera->num        = atoi(db->row[0]);
-       camera->type       = atoi(db->row[1]);
-       camera->bit        = atoi(db->row[2]);
-       camera->id         = id;
-     }
-    Liberer_resultat_SQL (db);
-    return(camera);
-  }
-/**********************************************************************************************************/
-/* Modifier_cameraDB: Modification d'un camera Watchdog                                                 */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
-/* Sortie: -1 si pb, id sinon                                                                             */
-/**********************************************************************************************************/
- gboolean Modifier_cameraDB( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA *camera )
-  { gchar *location, *libelle, *objet;
-    gchar requete[1024];
-
-    location = Normaliser_chaine ( camera->location );              /* Formatage correct des chaines */
-    if (!location)
-     { Info_new( Config.log, FALSE, LOG_WARNING, "Ajouter_cameraDB: Normalisation location impossible" );
-       return(-1);
-     }
-    objet = Normaliser_chaine ( camera->objet );                    /* Formatage correct des chaines */
-    if (!objet)
-     { g_free(location);
-       Info_new( Config.log, FALSE, LOG_WARNING, "Ajouter_cameraDB: Normalisation objet impossible" );
-       return(-1);
-     }
-    libelle = Normaliser_chaine ( camera->libelle );              /* Formatage correct des chaines */
-    if (!libelle)
-     { g_free(location);
-       g_free(objet);
-       Info_new( Config.log, FALSE, LOG_WARNING, "Ajouter_cameraDB: Normalisation libelle impossible" );
-       return(-1);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET "             
-                "location='%s',objet='%s',libelle='%s',type=%d,bit=%d,num=%d "
-                "WHERE id=%d",
-                NOM_TABLE_CAMERA, location, objet, libelle, camera->type,
-                camera->bit, camera->num,
-                camera->id
-              );
-    g_free(location);
-    g_free(objet);
-    g_free(libelle);
-    return ( Lancer_requete_SQL ( db, requete ) );                    /* Execution de la requete SQL */
-  }
-/**********************************************************************************************************/
-/* Rechercher_cameraDB: Recupération du camera dont le num est en parametre                               */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- static struct CMD_TYPE_CAMERA *Rechercher_cameraDB_motion ( struct LOG *log, struct DB *db )
-  { gchar requete[256];
-    struct CMD_TYPE_CAMERA *camera;
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id FROM %s",
-                NOM_TABLE_CAMERA_MOTION                                                                  /* FROM */
-              );
-
-    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
-     { return(NULL); }
-
-    Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       return(NULL);
-     }
-
-    camera = Rechercher_cameraDB( log, db, atoi(db->row[0]) );
-    if (!camera)
-     { Info_new( Config.log, FALSE, LOG_WARNING, "Rechercher_cameraDB_motion: Mem error" );
-       return(NULL);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "DELETE FROM %s WHERE id = %d",
-                NOM_TABLE_CAMERA_MOTION, camera->id );
-    Lancer_requete_SQL ( db, requete );
-
-    return(camera);
-  }
-/**********************************************************************************************************/
-/* Camera_check_motion : Vérifie si l'outil motion a donner un bit a activer                              */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: néant. Les bits DLS sont positionnés                                                           */
-/**********************************************************************************************************/
- void Camera_check_motion ( struct LOG *log, struct DB *db )
+/******************************************************************************************************************************/
+/* Rechercher_cameraDB: Recupération de la camera dont l'id est en parametre                                                  */
+/* Entrée: un id de camera                                                                                                    */
+/* Sortie: une structure referencant la camera                                                                                */
+/******************************************************************************************************************************/
+ struct CMD_TYPE_CAMERA *Rechercher_cameraDB ( guint id )
   { struct CMD_TYPE_CAMERA *camera;
+    gchar requete[200];
+    struct DB *db;
 
-    do { camera = Rechercher_cameraDB_motion ( log, db );
-         if (camera)
-          { Info_new( Config.log, FALSE, LOG_INFO, "Camera_check_motion: Mise a un du bit M%03d", camera->bit );
-            Envoyer_commande_dls ( camera->bit ); 
-            g_free(camera);
-          }
-       }
-    while (camera);
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT id,location,libelle"
+                " FROM %s ORDER BY libelle WHERE id=%d",
+                NOM_TABLE_CAMERA,                                                                                     /* FROM */
+                id                                                                                                   /* Where */
+              );
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_mnemo_baseDB: DB connexion failed" );
+       return(NULL);
+     }
+
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
+
+    camera = Recuperer_cameraDB_suite( &db );
+    if (camera) Libere_DB_SQL ( &db );
+    return(camera);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

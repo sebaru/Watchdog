@@ -28,11 +28,7 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 CREATE TABLE IF NOT EXISTS `cameras` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `location` varchar(600) NOT NULL,
-  `type` int(11) NOT NULL,
-  `bit` int(11) NOT NULL,
-  `objet` text NOT NULL,
   `libelle` text NOT NULL,
-  `num` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
@@ -895,7 +891,8 @@ CREATE TABLE IF NOT EXISTS `syns_camerasup` (
   `camera_src_id` int(11) NOT NULL,
   `posx` int(11) NOT NULL,
   `posy` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  CONSTRAINT `id_camera` FOREIGN KEY (`camera_src_id`) REFERENCES `cameras` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------

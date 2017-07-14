@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Serveur/protocole_camera.c    Gestion du protocole_camera pour Watchdog                      */
-/* Projet WatchDog version 2.0       Gestion d'habitat                   dim. 13 sept. 2009 11:59:10 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Serveur/protocole_camera.c    Gestion du protocole_camera pour Watchdog                                          */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                       dim. 13 sept. 2009 11:59:10 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * protocole_camera.c
  * This file is part of Watchdog
@@ -26,20 +26,19 @@
  */
  
  #include <glib.h>
-/******************************************** Prototypes de fonctions *************************************/
+/**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
-/**********************************************************************************************************/
-/* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
-/* Entrée: la connexion avec le serveur                                                                   */
-/* Sortie: Kedal                                                                                          */
-/**********************************************************************************************************/
+ /******************************************************************************************************************************/
+/* Gerer_protocole: Gestion de la communication entre le serveur et le client                                                 */
+/* Entrée: la connexion avec le serveur                                                                                       */
+/* Sortie: Kedal                                                                                                              */
+/******************************************************************************************************************************/
  void Gerer_protocole_camera( struct CLIENT *client )
   { struct CONNEXION *connexion;
     pthread_t tid;
     connexion = client->connexion;
 
-#ifdef bouh
     if ( ! Tester_groupe_util( client->util, GID_SYNOPTIQUE) )
      { struct CMD_GTK_MESSAGE gtkmessage;
        g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied" );
@@ -51,7 +50,7 @@
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_CAMERA:
              { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_CREATE_PAGE_CAMERA_OK, NULL, 0 );
-               Ref_client( client );                             /* Indique que la structure est utilisée */
+               Ref_client( client, "Send Cameras" );                                 /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Envoyer_cameras_thread, client );
                pthread_detach( tid );
              }
@@ -88,6 +87,5 @@
              }
             break;
      }
-#endif
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
