@@ -180,6 +180,7 @@
        camera->id  = atoi(db->row[0]);
        camera->num = atoi(db->row[1]);
      }
+    return(camera);
   }
 /******************************************************************************************************************************/
 /* Rechercher_cameraDB: Recupération de la camera dont l'id est en parametre                                                  */
