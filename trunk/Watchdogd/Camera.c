@@ -90,7 +90,7 @@
      } else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "UPDATE %s SET num='%d', location='%s',libelle='%s' "
-                   "WHERE id=%d", camera->num, NOM_TABLE_CAMERA, location, libelle, camera->id );
+                   "WHERE id=%d", NOM_TABLE_CAMERA, camera->num, location, libelle, camera->id );
      }
     g_free(libelle);
     g_free(location);
