@@ -193,7 +193,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT id,num,location,libelle"
-                " FROM %s ORDER BY libelle WHERE id=%d",
+                " FROM %s WHERE id=%d",
                 NOM_TABLE_CAMERA,                                                                                     /* FROM */
                 id                                                                                                   /* Where */
               );
