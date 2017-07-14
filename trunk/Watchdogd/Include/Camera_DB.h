@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Include/Camera.h        Déclaration structure internes des Camera watchdog                   */
-/* Projet WatchDog version 2.0       Gestion d'habitat                   dim. 13 sept. 2009 11:13:20 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Include/Camera.h        Déclaration structure internes des Camera watchdog                                       */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                       dim. 13 sept. 2009 11:13:20 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Camera.h
  * This file is part of Watchdog
@@ -32,9 +32,8 @@
  #include "Db.h"
 
  #define NOM_TABLE_CAMERA              "cameras"
- #define NOM_TABLE_CAMERA_MOTION       "cameras_motion"
 
-/*************************************** Définitions des prototypes ***************************************/
+/************************************************** Définitions des prototypes ************************************************/
  extern gboolean Retirer_cameraDB ( gint id );
  extern gint Ajouter_cameraDB ( struct CMD_TYPE_CAMERA *camera );
  extern gint Modifier_cameraDB ( struct CMD_TYPE_CAMERA *camera );
@@ -42,4 +41,4 @@
  extern struct CMD_TYPE_CAMERA *Recuperer_cameraDB_suite( struct DB **db_orig );
  extern struct CMD_TYPE_CAMERA *Rechercher_cameraDB ( guint id );
 #endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
