@@ -186,7 +186,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT camsup.id, camsup.syn_id, cam.libelle, cam.location, camsup.posx, camsup.posy, camsup.angle"
                 " FROM %s as camsup INNER JOIN %s as cam ON camsup.camera_src_id=cam.id"
-                " WHERE id=%d",
+                " WHERE camsup.id=%d",
                 NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, id );
 
     db = Init_DB_SQL();       
