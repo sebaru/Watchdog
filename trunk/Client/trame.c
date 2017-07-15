@@ -683,11 +683,12 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
     trame_camera_sup = g_try_malloc0( sizeof(struct TRAME_ITEM_CAMERA_SUP) );
     if (!trame_camera_sup) return(NULL);
     trame_camera_sup->camera_sup = camera_sup;
-
-    pixbuf = gdk_pixbuf_new_from_file ( "gif/0.gif", NULL );                                  /* Chargement du fichier Camera */
+printf("Test ajout cam\n");
+    pixbuf = gdk_pixbuf_new_from_file ( "gif/1.gif", NULL );                                  /* Chargement du fichier Camera */
     if (!pixbuf)
      { Download_gif ( 0, 0 );
-       pixbuf = gdk_pixbuf_new_from_file ( "gif/0.gif", NULL );                               /* Chargement du fichier Camera */
+printf("Download cam\n");
+       pixbuf = gdk_pixbuf_new_from_file ( "gif/1.gif", NULL );                               /* Chargement du fichier Camera */
        if (!pixbuf) { g_free(trame_camera_sup); return(NULL); }
      }
 

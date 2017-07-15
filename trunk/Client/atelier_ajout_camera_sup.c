@@ -109,11 +109,11 @@
     F_ajout_camera_sup = NULL;
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Commenter: Met en route le processus permettant de camera_super un synoptique                          */
-/* Entrée: widget/data                                                                                    */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Commenter: Met en route le processus permettant de camera_super un synoptique                                              */
+/* Entrée: widget/data                                                                                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Menu_ajouter_camera_sup ( void )
   { GtkWidget *hboite, *scroll;
     if (F_ajout_camera_sup) return;
@@ -130,19 +130,19 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_box_pack_start( GTK_BOX( GTK_DIALOG(F_ajout_camera_sup)->vbox ), hboite, TRUE, TRUE, 0 );
     
-/***************************************** La liste des cameras *******************************************/
+/**************************************************** La liste des cameras ****************************************************/
     Creer_liste_camera ( &Liste_camera, &scroll );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
     Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_WANT_PAGE_CAMERA_FOR_ATELIER,
-                   NULL, 0 );                                                    /* demande infos serveur */
+                   NULL, 0 );                                                                        /* demande infos serveur */
     gtk_widget_show_all( F_ajout_camera_sup );
   }
-/**********************************************************************************************************/
-/* Afficher_un_camera: Ajoute un camera dans la liste des cameras                                         */
-/* Entrée: une reference sur le camera                                                                    */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Afficher_un_camera: Ajoute un camera dans la liste des cameras                                                             */
+/* Entrée: une reference sur le camera                                                                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Proto_afficher_un_camera_for_atelier( struct CMD_TYPE_CAMERA *camera )
   { GtkListStore *store;
     GtkTreeIter iter;
