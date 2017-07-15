@@ -218,7 +218,7 @@
 /******************************************************************************************************************************/
  void Trame_rafraichir_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
   { if (!(trame_camera_sup && trame_camera_sup->camera_sup)) return;
-
+printf("Rafraichir camera : %d %d\n", trame_camera_sup->camera_sup->posx, trame_camera_sup->camera_sup->posy );
     cairo_matrix_init_identity ( &trame_camera_sup->transform );
     cairo_matrix_translate ( &trame_camera_sup->transform,
                              (gdouble)trame_camera_sup->camera_sup->posx,
@@ -684,11 +684,11 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
     if (!trame_camera_sup) return(NULL);
     trame_camera_sup->camera_sup = camera_sup;
 printf("Test ajout cam\n");
-    pixbuf = gdk_pixbuf_new_from_file ( "gif/1.gif", NULL );                                  /* Chargement du fichier Camera */
+    pixbuf = gdk_pixbuf_new_from_file ( "1.gif", NULL );                                      /* Chargement du fichier Camera */
     if (!pixbuf)
-     { Download_gif ( 0, 0 );
+     { Download_gif ( 1, 0 );
 printf("Download cam\n");
-       pixbuf = gdk_pixbuf_new_from_file ( "gif/1.gif", NULL );                               /* Chargement du fichier Camera */
+       pixbuf = gdk_pixbuf_new_from_file ( "1.gif", NULL );                                   /* Chargement du fichier Camera */
        if (!pixbuf) { g_free(trame_camera_sup); return(NULL); }
      }
 
@@ -696,7 +696,7 @@ printf("Download cam\n");
 
     trame_camera_sup->item = goo_canvas_image_new ( trame_camera_sup->item_groupe,
                                                     pixbuf,
-                                                    0, 0,
+                                                    -gdk_pixbuf_get_width(pixbuf)/2.0, -gdk_pixbuf_get_height(pixbuf)/2.0,
                                                     NULL );
 
 /*       g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->num );

@@ -171,6 +171,7 @@
     memcpy ( camera_sup, rezo_camera_sup, sizeof(struct CMD_TYPE_CAMERASUP) );
 
     trame_camera_sup = Trame_ajout_camera_sup ( TRUE, infos->Trame_atelier, camera_sup );
+    if (!trame_camera_sup) return;
     trame_camera_sup->groupe_dpl = Nouveau_groupe();              /* Numéro de groupe pour le deplacement */
 
     g_signal_connect( G_OBJECT(trame_camera_sup->item_groupe), "button-press-event",

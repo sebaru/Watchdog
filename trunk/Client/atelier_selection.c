@@ -321,11 +321,10 @@
                 { trame_motif->motif->position_y = new_y; }
                Trame_rafraichir_motif(trame_motif);                                     /* Refresh visuel */
                break;
-#ifdef bouh
           case TYPE_CAMERA_SUP:
                trame_camera_sup = ((struct TRAME_ITEM_CAMERA_SUP *)(selection->data));
-               new_x = trame_camera_sup->camera_sup->position_x+dx;
-               new_y = trame_camera_sup->camera_sup->position_y+dy;
+               new_x = trame_camera_sup->camera_sup->posx+dx;
+               new_y = trame_camera_sup->camera_sup->posy+dy;
 
                if (GTK_TOGGLE_BUTTON(infos->Check_grid)->active)
                 { new_x = new_x/largeur_grille * largeur_grille;
@@ -333,12 +332,11 @@
                 }
 
                if ( 0<new_x && new_x<TAILLE_SYNOPTIQUE_X )
-                { trame_camera_sup->camera_sup->position_x = new_x; }
+                { trame_camera_sup->camera_sup->posx = new_x; }
                if ( 0<new_y && new_y<TAILLE_SYNOPTIQUE_Y )
-                { trame_camera_sup->camera_sup->position_y = new_y; }
+                { trame_camera_sup->camera_sup->posy = new_y; }
                Trame_rafraichir_camera_sup(trame_camera_sup);                           /* Refresh visuel */
                break;
-#endif
           default: printf("Deplacer_selection: type inconnu\n" );
         }
        selection = selection->next;
@@ -386,13 +384,11 @@
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CADRAN,
                               (gchar *)trame_cadran->cadran, sizeof( struct CMD_TYPE_CADRAN ) );
                break;
-#ifdef bouh
           case TYPE_CAMERA_SUP:
                trame_camera_sup = ((struct TRAME_ITEM_CAMERA_SUP *)selection->data);
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CAMERA_SUP,
-                              (gchar *)trame_camera_sup->camera_sup, sizeof( struct CMD_TYPE_CAMERA_SUP ) );
+                              (gchar *)trame_camera_sup->camera_sup, sizeof( struct CMD_TYPE_CAMERASUP ) );
                break;
-#endif
           default: /*Selection = g_list_remove( Selection, Selection->data );*/
                    printf("Dupliquer_selection: type inconnu\n" );
         }
@@ -416,7 +412,7 @@
     struct CMD_TYPE_COMMENT id_comment;
     struct CMD_TYPE_CADRAN id_cadran;
     struct CMD_TYPE_PASSERELLE id_pass;
-/*    struct CMD_TYPE_CAMERA_SUP id_camera_sup;*/
+    struct CMD_TYPE_CAMERASUP id_camera_sup;
     GList *selection;
 
     page = Page_actuelle();                                               /* On recupere la page actuelle */
@@ -455,16 +451,14 @@
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_CADRAN,
                               (gchar *)&id_cadran, sizeof( struct CMD_TYPE_CADRAN ) );
                break;
-#ifdef bouh
           case TYPE_CAMERA_SUP:
                trame_camera_sup = ((struct TRAME_ITEM_CAMERA_SUP *)selection->data);
                id_camera_sup.id = trame_camera_sup->camera_sup->id;
                memcpy( &id_camera_sup.libelle, trame_camera_sup->camera_sup->libelle,
                        sizeof(id_camera_sup.libelle) );
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_CAMERA_SUP,
-                              (gchar *)&id_camera_sup, sizeof( struct CMD_TYPE_CAMERA_SUP ) );
+                              (gchar *)&id_camera_sup, sizeof( struct CMD_TYPE_CAMERASUP ) );
                break;
-#endif
           default: /*Selection = g_list_remove( Selection, Selection->data );*/
                    printf("Effacer_selection: type inconnu\n" );
         }
