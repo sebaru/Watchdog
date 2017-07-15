@@ -71,7 +71,7 @@
 
     if (ajout == TRUE)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "INSERT INTO %s(syn_id, camera_id, posx, posy, angle) VALUES "
+                   "INSERT INTO %s(syn_id, camera_src_id, posx, posy, angle) VALUES "
                    "('%d','%d','%d','%d','%f')", NOM_TABLE_CAMERASUP,
                    camera_sup->syn_id, camera_sup->camera_src_id, camera_sup->posx, camera_sup->posy, camera_sup->angle );
      } else
@@ -127,7 +127,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT camsup.id, camsup.syn_id, cam.libelle, cam.location, camsup.posx, camsup.posy, camsup.angle"
-                " FROM %s as camsup INNER JOIN %s as cam ON camsup.camera_id=cam.id"
+                " FROM %s as camsup INNER JOIN %s as cam ON camsup.camera_src_id=cam.id"
                 " WHERE syn_id=%d",
                 NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, syn_id
               );
@@ -185,7 +185,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT camsup.id, camsup.syn_id, cam.libelle, cam.location, camsup.posx, camsup.posy, camsup.angle"
-                " FROM %s as camsup INNER JOIN %s as cam ON camsup.camera_id=cam.id"
+                " FROM %s as camsup INNER JOIN %s as cam ON camsup.camera_src_id=cam.id"
                 " WHERE id=%d",
                 NOM_TABLE_CAMERASUP, id );
 
