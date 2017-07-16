@@ -124,7 +124,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT id,libelle,icone,syn_id,gid,bitctrl,bitclic,posx,posy,larg,haut,angle,"
                 "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer"
-                " FROM %s WHERE syn='%d' ORDER BY layer", NOM_TABLE_MOTIF, id_syn );
+                " FROM %s WHERE syn_id='%d' ORDER BY layer", NOM_TABLE_MOTIF, id_syn );
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if (retour == FALSE) Libere_DB_SQL (&db);
