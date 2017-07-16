@@ -72,7 +72,7 @@
     if (ajout == TRUE)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "INSERT INTO %s(syn_id, camera_src_id, posx, posy) VALUES "
-                   "('%d','%d','%d','%d','%f')", NOM_TABLE_CAMERASUP,
+                   "('%d','%d','%d','%d')", NOM_TABLE_CAMERASUP,
                    camera_sup->syn_id, camera_sup->camera_src_id, camera_sup->posx, camera_sup->posy );
      } else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
