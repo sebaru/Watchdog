@@ -208,7 +208,6 @@
   { Envoyer_synoptiques_tag( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_PALETTE,
                                                   SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_PALETTE_FIN );
     Unref_client( client );                                           /* Déréférence la structure cliente */
-    Client_mode ( client, ENVOI_PALETTE_FOR_ATELIER_PALETTE );
     pthread_exit( NULL );
   }
 /**********************************************************************************************************/

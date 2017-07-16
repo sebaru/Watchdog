@@ -52,10 +52,6 @@
     ENVOI_GROUPE_FOR_PROPRIETE_SYNOPTIQUE,                          /* Envoi des groupes pour la fenetre propriete synoptique */
     ENVOI_ICONE_FOR_ATELIER,
     ENVOI_CLASSE_FOR_ATELIER,
-    ENVOI_SYNOPTIQUE_FOR_ATELIER,                                          /* Envoi de la liste des syn pour choix passerelle */
-    ENVOI_SYNOPTIQUE_FOR_ATELIER_PALETTE,                                  /* Envoi de la liste des syn pour choix de palette */
-    ENVOI_PALETTE_FOR_ATELIER_PALETTE,
-
     DECONNECTE                                                                                            /* Deconnexion SOFT */
   };
 

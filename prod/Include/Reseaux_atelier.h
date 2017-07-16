@@ -34,10 +34,6 @@
  #define NBR_CARAC_LIBELLE_COMMENT     50                               /* taille max du libelle du motif */
  #define NBR_CARAC_LIBELLE_COMMENT_UTF8  (2*NBR_CARAC_LIBELLE_COMMENT)
 
-/********************************************* Qu'est-ce qu'une camera de supervision ?? **************************************/
- #define DEFAULT_CAMERA_LARGEUR        160
- #define DEFAULT_CAMERA_HAUTEUR        120
-
  struct CMD_TYPE_MOTIF
   { gint    id;                                                                                   /* Id du motif dans la base */
     gint    syn_id;                                                                    /* Numéro du synoptique ou est l'icone */
@@ -113,21 +109,17 @@
     gfloat  angle;
   };
 
-/*********************************************** Gestion des cameras de supervision ***********************/
- struct CMD_TYPE_CAMERA_SUP
+/************************************************* Gestion des cameras de supervision *****************************************/
+ struct CMD_TYPE_CAMERASUP
   { gint  id;
     gint  syn_id;
-    gint  num;                                                       /* Némero (utilisateur) de la camera */
-    gchar libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                                             /* "ChSeb" */
     gint  camera_src_id;
+    gchar libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                                             /* "ChSeb" */
     gchar location[NBR_CARAC_LOCATION_CAMERA_UTF8];                               /* Libelle de la camera */
-    gint  position_x;
-    gint  position_y;
-    gint  type;
-    gchar objet[128];
-    gint  bit;                        /* Numéro du bistable a positioner en cas de detection de mouvement */
-
+    gint  posx;
+    gint  posy;
   };
+
 /************************************************* Tag de communication ***********************************/
  enum 
   { SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE,  /* Envoi des groupes pour l'edition motif */

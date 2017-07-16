@@ -64,7 +64,7 @@
 /******************************************************************************************************************************/
  static void Admin_ssrv_list( struct CONNEXION *connexion )
   { struct CLIENT *client;
-    gchar chaine[128];
+    gchar chaine[256];
     GSList *liste;
     g_snprintf( chaine, sizeof(chaine), " -- Connected Users List --\n" );
     Admin_write ( connexion, chaine );

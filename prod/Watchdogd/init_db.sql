@@ -28,11 +28,7 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 CREATE TABLE IF NOT EXISTS `cameras` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `location` varchar(600) NOT NULL,
-  `type` int(11) NOT NULL,
-  `bit` int(11) NOT NULL,
-  `objet` text NOT NULL,
   `libelle` text NOT NULL,
-  `num` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
@@ -49,6 +45,7 @@ CREATE TABLE IF NOT EXISTS `class` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `class` (`id`, `libelle`) VALUES
+(0, 'Systeme'),
 (1, 'Divers'),
 (4, 'Etats_des_Commandes'),
 (5, 'Plans du Site'),
@@ -268,6 +265,7 @@ CREATE TABLE IF NOT EXISTS `icons` (
 --
 
 INSERT INTO `icons` (`id`, `libelle`, `id_classe`) VALUES
+(1, 'Camera', 0),
 (7, 'Tournevis', 18),
 (8, 'Poterie', 0),
 (12, 'Boule_rouge', 7),
@@ -895,8 +893,10 @@ CREATE TABLE IF NOT EXISTS `syns_camerasup` (
   `camera_src_id` int(11) NOT NULL,
   `posx` int(11) NOT NULL,
   `posy` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+  PRIMARY KEY (`id`),
+  CONSTRAINT `id_camera` FOREIGN KEY (`camera_src_id`) REFERENCES `cameras` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 
@@ -912,7 +912,8 @@ CREATE TABLE IF NOT EXISTS `syns_cadrans` (
   `posy` int(11) NOT NULL DEFAULT '0',
   `type` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -933,7 +934,8 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
   `posx` int(11) NOT NULL DEFAULT '0',
   `posy` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -945,7 +947,7 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
 CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `icone` int(11) NOT NULL DEFAULT '0',
-  `syn` int(11) NOT NULL DEFAULT '0',
+  `syn_id` int(11) NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `gid` int(11) NOT NULL DEFAULT '0',
   `bitctrl` int(11) NOT NULL DEFAULT '0',
@@ -963,7 +965,8 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `vert` int(11) NOT NULL DEFAULT '0',
   `bleu` int(11) NOT NULL DEFAULT '0',
   `layer` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -977,7 +980,9 @@ CREATE TABLE IF NOT EXISTS `syns_palettes` (
   `syn_id` int(11) NOT NULL DEFAULT '0',
   `syn_cible_id` int(11) NOT NULL DEFAULT '0',
   `pos` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  CONSTRAINT `id_syn`       FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `id_cible syn` FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------

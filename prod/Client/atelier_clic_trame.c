@@ -271,8 +271,8 @@ printf("Afficher_propriete: debut\n");
                                        angle = infos->Selection.trame_cadran->cadran->angle;
                                        break;
                                   case TYPE_CAMERA_SUP:
-                                       x = infos->Selection.trame_camera_sup->camera_sup->position_x;
-                                       y = infos->Selection.trame_camera_sup->camera_sup->position_y;
+                                       x = infos->Selection.trame_camera_sup->camera_sup->posx;
+                                       y = infos->Selection.trame_camera_sup->camera_sup->posy;
                                        angle = 0.0;
                                        break;
                                   default: printf("Clic_general: type inconnu %d\n", infos->Selection.type );
@@ -451,11 +451,11 @@ printf("Clic sur pass: page trouvée \n");
     else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
               event->type == GDK_2BUTTON_PRESS) Afficher_propriete();
   }
-/**********************************************************************************************************/
-/* Clic_sur_cadran: Appelé quand un evenement est capté sur un cadran                                       */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Clic_sur_cadran: Appelé quand un evenement est capté sur un cadran                                                         */
+/* Entrée: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
  void Clic_sur_cadran ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                       struct TRAME_ITEM_CADRAN *trame_cadran )
   { struct TYPE_INFO_ATELIER *infos;
@@ -475,16 +475,16 @@ printf("Clic sur pass: page trouvée \n");
 printf("Clic sur cadran \n");
     if (!(trame_cadran && event)) return;
 
-    page = Page_actuelle();                                               /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
+    page = Page_actuelle();                                                                   /* On recupere la page actuelle */
+    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;                                   /* Verification des contraintes */
+    infos = (struct TYPE_INFO_ATELIER *)page->infos;                             /* Pointeur sur les infos de la page atelier */
 printf("Clic sur cadran: page trouvée, %p \n", trame_cadran);
 
     infos->Selection.type = TYPE_CADRAN;
     infos->Selection.groupe = trame_cadran->groupe_dpl;
     infos->Selection.trame_cadran = trame_cadran;
 
-    Clic_general( infos, event );                                                /* Fonction de base clic */
+    Clic_general( infos, event );                                                                    /* Fonction de base clic */
 
     Mettre_a_jour_description( infos, 0, trame_cadran->cadran->libelle );
     if (event->type == GDK_BUTTON_PRESS)
@@ -500,11 +500,11 @@ printf("Clic sur cadran: page trouvée, %p \n", trame_cadran);
     else if ( event->button.button == 1 &&                                       /* Double clic gauche ?? */
               event->type == GDK_2BUTTON_PRESS) Afficher_propriete();
   }
-/**********************************************************************************************************/
-/* Clic_sur_motif: Appelé quand un evenement est capté sur un motif                                       */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Clic_sur_camera_sup: Appelé quand un evenement est capté sur une camera de supervision                                     */
+/* Entrée: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
  void Clic_sur_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                             struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
   { struct TYPE_INFO_ATELIER *infos;
@@ -522,15 +522,15 @@ printf("Clic sur cadran: page trouvée, %p \n", trame_cadran);
 
     if (!(trame_camera_sup && event)) return;
 
-    page = Page_actuelle();                                               /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
+    page = Page_actuelle();                                                                   /* On recupere la page actuelle */
+    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;                                   /* Verification des contraintes */
+    infos = (struct TYPE_INFO_ATELIER *)page->infos;                             /* Pointeur sur les infos de la page atelier */
 
     infos->Selection.type = TYPE_CAMERA_SUP;
     infos->Selection.groupe = trame_camera_sup->groupe_dpl;
     infos->Selection.trame_camera_sup = trame_camera_sup;
 
-    Clic_general( infos, event );                                                /* Fonction de base clic */
+    Clic_general( infos, event );                                                                    /* Fonction de base clic */
 
     Mettre_a_jour_description( infos, trame_camera_sup->camera_sup->camera_src_id,
                                       trame_camera_sup->camera_sup->libelle );
@@ -538,10 +538,10 @@ printf("Clic sur cadran: page trouvée, %p \n", trame_cadran);
      { if ( event->button.button == 1)
         { goo_canvas_item_raise( trame_camera_sup->select_mi, NULL ); }
        else if (event->button.button == 3)
-        { if (!Popup) Popup = gnome_popup_menu_new( Popup_camera_sup );                  /* Creation menu */
+        { if (!Popup) Popup = gnome_popup_menu_new( Popup_camera_sup );                                      /* Creation menu */
           gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
 
         }
      }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

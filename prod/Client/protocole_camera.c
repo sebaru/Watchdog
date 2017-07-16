@@ -74,7 +74,6 @@
        case SSTAG_SERVEUR_ADDPROGRESS_CAMERA:
              { struct CMD_TYPE_CAMERA *camera;
                Set_progress_plus(1);
-
                camera = (struct CMD_TYPE_CAMERA *)g_try_malloc0( sizeof( struct CMD_TYPE_CAMERA ) );
                if (!camera) return; 
                memcpy( camera, connexion->donnees, sizeof(struct CMD_TYPE_CAMERA ) );
@@ -87,12 +86,6 @@
                g_list_free( Arrivee_camera );
                Arrivee_camera = NULL;
                Chercher_page_notebook( TYPE_PAGE_CAMERA, 0, TRUE );
-             }
-            break;
-       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_MOTION:
-             { struct CMD_TYPE_MNEMO_BASE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
-               Proto_afficher_mnemo_camera( Reseau_ss_tag ( connexion ), mnemo );
              }
             break;
      }

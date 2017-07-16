@@ -193,12 +193,12 @@
             break;
 /*********************************** Reception des cameras de supervision *********************************/
        case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP:
-             { struct CMD_TYPE_CAMERA_SUP *camera_sup;
+             { struct CMD_TYPE_CAMERASUP *camera_sup;
                Set_progress_plus(1);
 
-               camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_try_malloc0( sizeof( struct CMD_TYPE_CAMERA_SUP ) );
+               camera_sup = (struct CMD_TYPE_CAMERASUP *)g_try_malloc0( sizeof( struct CMD_TYPE_CAMERASUP ) );
                if (!camera_sup) return; 
-               memcpy( camera_sup, connexion->donnees, sizeof(struct CMD_TYPE_CAMERA_SUP ) );
+               memcpy( camera_sup, connexion->donnees, sizeof(struct CMD_TYPE_CAMERASUP ) );
                Arrivee_camera_sup = g_list_append( Arrivee_camera_sup, camera_sup );
              }
             break;
@@ -210,14 +210,14 @@
              }
             break;
        case SSTAG_SERVEUR_ATELIER_ADD_CAMERA_SUP_OK:
-             { struct CMD_TYPE_CAMERA_SUP *cam_sup;
-               cam_sup = (struct CMD_TYPE_CAMERA_SUP *)connexion->donnees;
+             { struct CMD_TYPE_CAMERASUP *cam_sup;
+               cam_sup = (struct CMD_TYPE_CAMERASUP *)connexion->donnees;
                Proto_afficher_un_camera_sup_atelier( cam_sup );
              }
             break;
        case SSTAG_SERVEUR_ATELIER_DEL_CAMERA_SUP_OK:
-             { struct CMD_TYPE_CAMERA_SUP *cam_sup;
-               cam_sup = (struct CMD_TYPE_CAMERA_SUP *)connexion->donnees;
+             { struct CMD_TYPE_CAMERASUP *cam_sup;
+               cam_sup = (struct CMD_TYPE_CAMERASUP *)connexion->donnees;
                Proto_cacher_un_camera_sup_atelier( cam_sup );
              }
             break;

@@ -56,6 +56,9 @@
     Envoyer_comment_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT,
                                                SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT_FIN );
 
+    Envoyer_camera_sup_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP,
+                                                  SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP_FIN );
+
     g_free(client->syn_to_send);
     client->syn_to_send = NULL;
     Unref_client( client );                                                               /* Déréférence la structure cliente */
@@ -122,7 +125,7 @@
              { struct CMD_TYPE_MOTIF *motif;
                motif = (struct CMD_TYPE_MOTIF *)connexion->donnees;
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                         "Le client desire effacer le motif numéro %d: %d", motif->id, motif->libelle );
+                         "Le client desire effacer le motif numéro %d: %s", motif->id, motif->libelle );
                Proto_effacer_motif_atelier( client, motif );
              }
             break;
@@ -223,20 +226,20 @@
              }
             break;
        case SSTAG_CLIENT_ATELIER_ADD_CAMERA_SUP: 
-             { struct CMD_TYPE_CAMERA_SUP *camera_sup;
-               camera_sup = (struct CMD_TYPE_CAMERA_SUP *)connexion->donnees;
+             { struct CMD_TYPE_CAMERASUP *camera_sup;
+               camera_sup = (struct CMD_TYPE_CAMERASUP *)connexion->donnees;
                Proto_ajouter_camera_sup_atelier( client, camera_sup );
              }
             break;
        case SSTAG_CLIENT_ATELIER_DEL_CAMERA_SUP:
-             { struct CMD_TYPE_CAMERA_SUP *camera_sup;
-               camera_sup = (struct CMD_TYPE_CAMERA_SUP *)connexion->donnees;
+             { struct CMD_TYPE_CAMERASUP *camera_sup;
+               camera_sup = (struct CMD_TYPE_CAMERASUP *)connexion->donnees;
                Proto_effacer_camera_sup_atelier( client, camera_sup );
              }
             break;
        case SSTAG_CLIENT_ATELIER_EDIT_CAMERA_SUP:
-             { struct CMD_TYPE_CAMERA_SUP *camera_sup;
-               camera_sup = (struct CMD_TYPE_CAMERA_SUP *)connexion->donnees;
+             { struct CMD_TYPE_CAMERASUP *camera_sup;
+               camera_sup = (struct CMD_TYPE_CAMERASUP *)connexion->donnees;
                Proto_valider_editer_camera_sup_atelier( client, camera_sup );
              }
             break;
@@ -244,7 +247,9 @@
        case SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER:
              { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                          "Le client desire les syn pour atelier" );
-               Client_mode( client, ENVOI_SYNOPTIQUE_FOR_ATELIER );
+               Ref_client( client, "Send synoptique atelier" );
+               pthread_create( &tid, NULL, (void *)Envoyer_synoptiques_pour_atelier_thread, client );
+               pthread_detach( tid );
              }
             break;
        case SSTAG_CLIENT_ATELIER_ADD_PASS:
@@ -325,7 +330,7 @@
              { struct CMD_TYPE_CADRAN *cadran;
                cadran = (struct CMD_TYPE_CADRAN *)connexion->donnees;
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                         "Le client desire modifier le palette numéro %d", cadran->id );
+                         "Le client desire modifier le cadran numéro %d", cadran->id );
                Proto_valider_editer_cadran_atelier( client, cadran );
              }
             break;

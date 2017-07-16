@@ -85,17 +85,6 @@
     struct TRAME *Trame;                                                                   /* La trame de fond de supervision */
   };
 
- enum                                       /* Numéro des colonnes dans les listes CAM (liste_camera et atelier_ajout_camera) */
-  {  COL_CAM_ID,
-     COL_CAM_NUM,
-     COL_CAM_TYPE,
-     COL_CAM_BIT,
-     COL_CAM_OBJET,
-     COL_CAM_LIBELLE,
-     COL_CAM_LOCATION,
-     NBR_COL_CAM
-  };
-
  struct TYPE_INFO_SOURCE_DLS
   { GtkWidget *text;                                  /* Pour les plugins DLS, ici est placé le widget TextView correspondant */
     guint id;                                       /* Pour les plugins DLS, ici est stocké l'id du plugin en cours d'edition */
@@ -151,6 +140,14 @@
     GtkWidget *F_ajout_palette;                                                              /* Le fenetre d'ajout de palette */
     GtkWidget *Liste_syn;                                            /* La liste des synoptiques pour la fenetre des palettes */
     GtkWidget *Liste_palette;                                                /* La liste des palettes associées au synoptique */
+  };
+
+ enum                                       /* Numéro des colonnes dans les listes CAM (liste_camera et atelier_ajout_camera) */
+  {  COL_CAM_ID,
+     COL_CAM_NUM,
+     COL_CAM_LOCATION,
+     COL_CAM_LIBELLE,
+     NBR_COL_CAM
   };
 
 /*--------------------------------------- Déclarations des prototypes de fonctions -------------------------------------------*/
@@ -380,8 +377,8 @@
  extern struct TRAME_ITEM_CAMERA_SUP *Id_vers_trame_camera_sup ( struct TYPE_INFO_ATELIER *infos, gint id );
  extern void Menu_ajouter_camera_sup ( void );
  extern void Proto_afficher_un_camera_for_atelier( struct CMD_TYPE_CAMERA *camera );
- extern void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup );
- extern void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERA_SUP *camera_sup );
+ extern void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
+ extern void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *camera_sup );
 
  extern void Creer_page_liste_histo_msgs( void );                                                  /* Dans liste_histo_msgs.c */
  extern void Proto_effacer_liste_histo_msgs( gint page_id );
@@ -417,7 +414,7 @@
  extern void Proto_changer_etat_cadran( struct CMD_ETAT_BIT_CADRAN *etat_cadran );
 
                                                                                                  /* Dans supervision_camera.c */
- extern void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup );
+ extern void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
 
                                                                                                    /* Dans option_entreetor.c */
  extern void Get_options_DI ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );

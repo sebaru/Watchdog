@@ -90,8 +90,8 @@
  extern void Gerer_protocole_supervision( struct CLIENT *client );
  extern void Gerer_protocole_histo( struct CLIENT *client );
  extern void Gerer_protocole_synoptique( struct CLIENT *client );
- extern void Gerer_protocole_camera( struct CLIENT *client );
  extern void Gerer_protocole_admin( struct CLIENT *client );
+ extern void Gerer_protocole_camera( struct CLIENT *client );
  extern void Gerer_protocole_satellite( struct CLIENT *client );
 
                                                                                                               /* Dans envoi.c */
@@ -187,12 +187,6 @@
  extern void Proto_ajouter_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
  extern void Proto_valider_editer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
 
-                                                                                            /* Dans envoi_synoptique_motifs.c */
- extern void Proto_effacer_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERA_SUP *camera_sup );
- extern void Proto_ajouter_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERA_SUP *camera_sup );
- extern void Proto_valider_editer_camera_sup_atelier ( struct CLIENT *client,
-                                                       struct CMD_TYPE_CAMERA_SUP *camera_sup );
-
                                                                                           /* Dans envoi_synoptique_palettes.c */
  extern void Envoyer_palette_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
  extern void Proto_effacer_palette_atelier ( struct CLIENT *client, struct CMD_TYPE_PALETTE *rezo_palette );
@@ -244,5 +238,12 @@
  extern void *Envoyer_cameras_thread ( struct CLIENT *client );
  extern void *Envoyer_cameras_for_atelier_thread ( struct CLIENT *client );
 
+                                                                                        /* Dans envoi_synoptique_camera_sup.c */
+ extern void Proto_effacer_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
+ extern void Proto_ajouter_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
+ extern void Proto_valider_editer_camera_sup_atelier ( struct CLIENT *client,
+                                                struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
+ extern void Envoyer_camera_sup_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
+ 
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

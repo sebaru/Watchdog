@@ -211,18 +211,18 @@
        goo_canvas_item_set_transform ( trame_motif->select_bg, &trame_motif->transform_bg );
      }
   }
-/**********************************************************************************************************/
-/* Trame_rafraichir_motif: remet à jour la position, rotation, echelle du motif en parametre              */
-/* Entrée: la structure graphique TRAME_MOTIF                                                             */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Trame_rafraichir_motif: remet à jour la position, rotation, echelle du motif en parametre                                  */
+/* Entrée: la structure graphique TRAME_MOTIF                                                                                 */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  void Trame_rafraichir_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
   { if (!(trame_camera_sup && trame_camera_sup->camera_sup)) return;
-
+printf("Rafraichir camera : %d %d\n", trame_camera_sup->camera_sup->posx, trame_camera_sup->camera_sup->posy );
     cairo_matrix_init_identity ( &trame_camera_sup->transform );
     cairo_matrix_translate ( &trame_camera_sup->transform,
-                             (gdouble)trame_camera_sup->camera_sup->position_x,
-                             (gdouble)trame_camera_sup->camera_sup->position_y
+                             (gdouble)trame_camera_sup->camera_sup->posx,
+                             (gdouble)trame_camera_sup->camera_sup->posy
                            );
 
     cairo_matrix_rotate ( &trame_camera_sup->transform, 0.0 );
@@ -385,24 +385,18 @@
     trame_motif->en_cours_vert  = v;
     trame_motif->en_cours_bleu  = b;
   }
-/**********************************************************************************************************/
-/* Trame_choisir_frame: Choisit une frame parmi celles du motif                                           */
-/* Entrée: une structure TRAME_ITEM_MOTIF, le numero de frame voulue                                      */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Trame_choisir_frame: Choisit une frame parmi celles du motif                                                               */
+/* Entrée: une structure TRAME_ITEM_MOTIF, le numero de frame voulue                                                          */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num, guchar r, guchar v, guchar b )
   { GList *frame;
     
     if (!(trame_motif && trame_motif->motif)) { printf ("Niet\n"); return; }
 
-#ifdef bouh
- test le 11/11/12    if (trame_motif->num_image == num )                                         /* Frame deja affichée ?? */
-     { Trame_peindre_motif( trame_motif, r, v, b );
-       return;
-     }
-#endif
     frame = g_list_nth( trame_motif->images, num );
-    if (!frame) { frame = trame_motif->images;                                      /* Bouclage si erreur */
+    if (!frame) { frame = trame_motif->images;                                                          /* Bouclage si erreur */
                   num = 0;
                 }
 
@@ -674,76 +668,43 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
      }
     return(trame_motif);
   }
-/**********************************************************************************************************/
-/* Trame_ajout_camera_sup: Ajoute un camera_sup sur le visuel                                             */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference         */
-/* Sortie: reussite                                                                                       */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Trame_ajout_camera_sup: Ajoute un camera_sup sur le visuel                                                                 */
+/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* Sortie: la structure referencant la camera de supervision, ou NULL si erreur                                               */
+/******************************************************************************************************************************/
  struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
-                                                        struct CMD_TYPE_CAMERA_SUP *camera_sup )
+                                                        struct CMD_TYPE_CAMERASUP *camera_sup )
   { struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
+    GdkPixbuf *pixbuf;
 
     if (!(trame && camera_sup)) return(NULL);
 
     trame_camera_sup = g_try_malloc0( sizeof(struct TRAME_ITEM_CAMERA_SUP) );
     if (!trame_camera_sup) return(NULL);
-
     trame_camera_sup->camera_sup = camera_sup;
+printf("Test ajout cam\n");
+    pixbuf = gdk_pixbuf_new_from_file ( "1.gif", NULL );                                      /* Chargement du fichier Camera */
+    if (!pixbuf)
+     { Download_gif ( 1, 0 );
+printf("Download cam\n");
+       pixbuf = gdk_pixbuf_new_from_file ( "1.gif", NULL );                                   /* Chargement du fichier Camera */
+       if (!pixbuf) { g_free(trame_camera_sup); return(NULL); }
+     }
 
     trame_camera_sup->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );    /* Groupe MOTIF */
 
-    if ( flag )
-     { gchar chaine[256];
-       if ( camera_sup->type == CAMERA_MODE_ICONE )
-        { trame_camera_sup->item = goo_canvas_rect_new( trame_camera_sup->item_groupe,
-                                                        -55.0, -15.0, 110.0, 30.0,
-                                                        "fill-color", "blue",
-                                                        "stroke-color", "yellow",
-                                                        NULL);
+    trame_camera_sup->item = goo_canvas_image_new ( trame_camera_sup->item_groupe,
+                                                    pixbuf,
+                                                    -gdk_pixbuf_get_width(pixbuf)/2.0, -gdk_pixbuf_get_height(pixbuf)/2.0,
+                                                    NULL );
 
-        }
-       /*else if (camera_sup->type == CAMERA_MODE_INCRUSTATION )
-        { trame_camera_sup->item = goo_canvas_rect_new( trame_camera_sup->item_groupe,
-                                                        -DEFAULT_CAMERA_LARGEUR/2.0,
-                                                        -DEFAULT_CAMERA_HAUTEUR/2.0,
-                                                        DEFAULT_CAMERA_LARGEUR*1.0,
-                                                        DEFAULT_CAMERA_HAUTEUR*1.0,
-                                                        "fill-color", "blue",
-                                                        "stroke-color", "yellow",
-                                                        NULL);
-
-        }*/
-       g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->num );
+/*       g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->num );
        goo_canvas_text_new ( trame_camera_sup->item_groupe, chaine, 0.0, 0.0,
                                                          -1, GTK_ANCHOR_CENTER,
                                                          "fill-color", "yellow",
                                                          "font", "arial bold 14",
-                                                         NULL);
-       trame_camera_sup->select_mi = goo_canvas_rect_new (trame_camera_sup->item_groupe,
-                                                          -5.0, -5.0, 10.0, 10.0,
-                                                          "fill_color", "green",
-                                                          "stroke_color", "black", NULL);
-
-       g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-     }
-    else                                                                           /* Mode supersivion !! */
-     { gchar chaine[256];
-       if ( camera_sup->type == CAMERA_MODE_ICONE )
-        { trame_camera_sup->item = goo_canvas_rect_new( trame_camera_sup->item_groupe,
-                                                        -55.0, -15.0, 110.0, 30.0,
-                                                        "fill-color", "blue",
-                                                        "stroke-color", "yellow",
-                                                        NULL);
-
-          g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->num );
-          goo_canvas_text_new ( trame_camera_sup->item_groupe, chaine, 0.0, 0.0,
-                                                            -1, GTK_ANCHOR_CENTER,
-                                                            "fill-color", "yellow",
-                                                            "font", "arial bold 14",
-                                                         NULL);
-        }
-     }
-
+                                                         NULL);*/
     Trame_rafraichir_camera_sup ( trame_camera_sup );
 
     trame_camera_sup->type = TYPE_CAMERA_SUP;

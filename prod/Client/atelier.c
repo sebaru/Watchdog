@@ -192,9 +192,8 @@ printf("fin Detruire page atelier\n");
           case TYPE_CAMERA_SUP:
                trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_CAMERA_SUP,
-                              (gchar *)trame_camera_sup->camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
+                              (gchar *)trame_camera_sup->camera_sup, sizeof(struct CMD_TYPE_CAMERASUP) );
                break;
-
           default: printf("Enregistrer_synoptique: type inconnu\n" );
         }
        objet=objet->next;

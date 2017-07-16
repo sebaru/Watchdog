@@ -176,7 +176,7 @@
     GooCanvasItem *item_groupe;
     GooCanvasItem *select_mi;
 
-    struct CMD_TYPE_CAMERA_SUP *camera_sup;
+    struct CMD_TYPE_CAMERASUP *camera_sup;
     gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
     gint selection;
   };
@@ -224,7 +224,7 @@
                                           struct TRAME_ITEM_MOTIF *trame_motif );
  extern struct TRAME_ITEM_MOTIF *Trame_new_item ( void );
  extern struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
-                                                               struct CMD_TYPE_CAMERA_SUP *camera_sup );
+                                                               struct CMD_TYPE_CAMERASUP *camera_sup );
  extern void Trame_del_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Trame_del_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
  extern void Trame_del_commentaire ( struct TRAME_ITEM_COMMENT *trame_comm );
