@@ -71,15 +71,15 @@
 
     if (ajout == TRUE)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "INSERT INTO %s(syn_id, camera_src_id, posx, posy, angle) VALUES "
+                   "INSERT INTO %s(syn_id, camera_src_id, posx, posy) VALUES "
                    "('%d','%d','%d','%d','%f')", NOM_TABLE_CAMERASUP,
-                   camera_sup->syn_id, camera_sup->camera_src_id, camera_sup->posx, camera_sup->posy, camera_sup->angle );
+                   camera_sup->syn_id, camera_sup->camera_src_id, camera_sup->posx, camera_sup->posy );
      } else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "UPDATE %s SET "             
-                   "syn_id=%d,posx='%d',posy='%d',angle='%f' "
+                   "syn_id=%d,posx='%d',posy='%d' "
                    "WHERE id=%d", NOM_TABLE_CAMERASUP,
-                   camera_sup->syn_id, camera_sup->posx, camera_sup->posy, camera_sup->angle,
+                   camera_sup->syn_id, camera_sup->posx, camera_sup->posy,
                    camera_sup->id );
      }
 
@@ -126,7 +126,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT camsup.id, camsup.syn_id, cam.libelle, cam.location, camsup.posx, camsup.posy, camsup.angle"
+                "SELECT camsup.id, camsup.syn_id, cam.libelle, cam.location, camsup.posx, camsup.posy"
                 " FROM %s as camsup INNER JOIN %s as cam ON camsup.camera_src_id=cam.id"
                 " WHERE syn_id=%d",
                 NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, syn_id
@@ -169,7 +169,6 @@
        camera->syn_id = atoi(db->row[1]);
        camera->posx   = atoi(db->row[4]);
        camera->posy   = atoi(db->row[5]);
-       camera->angle  = atof(db->row[6]);
      }
     return(camera);
   }
@@ -184,7 +183,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT camsup.id, camsup.syn_id, cam.libelle, cam.location, camsup.posx, camsup.posy, camsup.angle"
+                "SELECT camsup.id, camsup.syn_id, cam.libelle, cam.location, camsup.posx, camsup.posy"
                 " FROM %s as camsup INNER JOIN %s as cam ON camsup.camera_src_id=cam.id"
                 " WHERE camsup.id=%d",
                 NOM_TABLE_CAMERASUP, NOM_TABLE_CAMERA, id );

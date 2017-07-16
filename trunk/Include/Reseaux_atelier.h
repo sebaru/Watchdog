@@ -118,7 +118,6 @@
     gchar location[NBR_CARAC_LOCATION_CAMERA_UTF8];                               /* Libelle de la camera */
     gint  posx;
     gint  posy;
-    gfloat angle;
   };
 
 /************************************************* Tag de communication ***********************************/
