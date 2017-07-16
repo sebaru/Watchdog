@@ -127,7 +127,6 @@
        appui = NULL;                          /* L'action est faite, on ne selectionne donc plus le motif */
      }
   }
-#ifdef bouh
 /**********************************************************************************************************/
 /* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision   */
 /* Entrée: une structure Event                                                                            */
@@ -147,16 +146,7 @@
           if (pid<0) return;
           else if (!pid)                                             /* Lancement de la ligne de commande */
            {
-#ifdef bouh
-             gchar chaine[sizeof(trame_camera_sup->camera_sup->location)+6];
-#endif
-
              execlp( "vlc", "vlc", trame_camera_sup->camera_sup->location, NULL );
-
-#ifdef bouh
-             g_snprintf( chaine, sizeof(chaine), "uri=%s", trame_camera_sup->camera_sup->location );
-             execlp( "gst-launch-0.10", "gst-launch-0.10", "playbin", chaine, NULL );
-#endif
              printf("AUDIO: Lancement gst-launch failed\n");
              _exit(0);
            }
@@ -164,7 +154,6 @@
        appui_camera_sup = NULL;               /* L'action est faite, on ne selectionne donc plus le motif */
      }
   }
-#endif
 /**********************************************************************************************************/
 /* Clic_sur_cadran_supervision_action: Appelé pour lancer un firefox sur la periode en parametre         */
 /* Entrée: période d'affichage                                                                            */
@@ -296,5 +285,4 @@
         }
      }
   }
-/*--------------------------------------------------------------------------------------------------------*/
-
+/*----------------------------------------------------------------------------------------------------------------------------*/

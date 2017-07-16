@@ -140,14 +140,13 @@
              { Chercher_page_notebook( TYPE_PAGE_SUPERVISION, save_id, TRUE ); }
             break;
 /******************************************** Reception des cameras de supervision ********************************************/
-#ifdef bouh
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP:
-             { struct CMD_TYPE_CAMERA_SUP *camera_sup;
+             { struct CMD_TYPE_CAMERASUP *camera_sup;
                Set_progress_plus(1);
 
-               camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_try_malloc0( sizeof( struct CMD_TYPE_CAMERA_SUP ) );
+               camera_sup = (struct CMD_TYPE_CAMERASUP *)g_try_malloc0( sizeof( struct CMD_TYPE_CAMERASUP ) );
                if (!camera_sup) return; 
-               memcpy( camera_sup, connexion->donnees, sizeof(struct CMD_TYPE_CAMERA_SUP ) );
+               memcpy( camera_sup, connexion->donnees, sizeof(struct CMD_TYPE_CAMERASUP ) );
                Arrivee_camera_sup = g_list_append( Arrivee_camera_sup, camera_sup );
              }
             break;
@@ -158,7 +157,6 @@
                Arrivee_camera_sup = NULL;
              }
             break;
-#endif
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

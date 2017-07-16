@@ -93,9 +93,7 @@
 /******************************************************************************************************************************/
  void Proto_valider_editer_camera_sup_atelier ( struct CLIENT *client,
                                                 struct CMD_TYPE_CAMERASUP *rezo_camera_sup )
-  { gboolean retour;
-    retour = Modifier_camera_supDB ( rezo_camera_sup );
-    if (retour==FALSE)
+  { if ( Modifier_camera_supDB ( rezo_camera_sup ) ==-1 )
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
                    "Unable to save camera_sup %d", rezo_camera_sup->camera_src_id);

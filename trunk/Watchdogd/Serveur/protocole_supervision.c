@@ -56,6 +56,9 @@
     Envoyer_comment_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,
                                                    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT_FIN );
 
+    Envoyer_camera_sup_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP,
+                                                      SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP_FIN );
+
     g_free(client->syn_to_send);
     client->syn_to_send = NULL;
     Unref_client( client );                                                               /* Déréférence la structure cliente */
