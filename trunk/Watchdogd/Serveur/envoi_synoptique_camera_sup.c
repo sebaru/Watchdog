@@ -108,19 +108,12 @@
 /* Entrée: Néant                                                                                                              */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- void *Envoyer_camera_sup_atelier_thread ( struct CLIENT *client )
+ void Envoyer_camera_sup_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
   { struct CMD_ENREG nbr;
     struct CMD_TYPE_CAMERASUP *camera_sup;
     struct DB *db;
-    gchar titre[20];
-    g_snprintf( titre, sizeof(titre), "W-CAMS-%06d", client->ssrv_id );
-    prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
-    if ( ! Recuperer_camera_supDB( &db, client->syn_to_send->id ) )
-     { Libere_DB_SQL( &db );
-       Unref_client( client );                                                            /* Déréférence la structure cliente */
-       pthread_exit ( NULL );
-     }                                                                                               /* Si pas de histos (??) */
+    if ( ! Recuperer_camera_supDB( &db, client->syn_to_send->id ) ) return;
 
     nbr.num = db->nbr_result;
     if (nbr.num)
@@ -130,51 +123,11 @@
      }
 
     while ( (camera_sup = Recuperer_camera_supDB_suite( &db )) != NULL )
-     { Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP,
+     { Envoi_client ( client, tag, sstag,
                       (gchar *)camera_sup, sizeof(struct CMD_TYPE_CAMERASUP) );
        g_free(camera_sup);
      }
     Libere_DB_SQL( &db );
-    Envoi_client ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP_FIN, NULL, 0 );
-    Unref_client( client );                                                               /* Déréférence la structure cliente */
-    pthread_exit ( NULL );
-  }
-/******************************************************************************************************************************/
-/* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                                      */
-/* Entrée: Néant                                                                                                              */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void *Envoyer_camera_sup_supervision_thread ( struct CLIENT *client )
-  { struct CMD_ENREG nbr;
-    struct CMD_TYPE_CAMERASUP *camera_sup;
-    struct DB *db;
-
-    gchar titre[20];
-    g_snprintf( titre, sizeof(titre), "W-CAMS-%06d", client->ssrv_id );
-    prctl(PR_SET_NAME, titre, 0, 0, 0 );
-
-    if ( ! Recuperer_camera_supDB( &db, client->syn_to_send->id ) )
-     { Libere_DB_SQL( &db );
-       Unref_client( client );                                                            /* Déréférence la structure cliente */
-       pthread_exit ( NULL );
-     }                                                                                               /* Si pas de histos (??) */
-
-    nbr.num = db->nbr_result;
-    if (nbr.num)
-     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d camera_sups", nbr.num );
-       Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
-                      (gchar *)&nbr, sizeof(struct CMD_ENREG) );
-     }
-
-    while ( (camera_sup = Recuperer_camera_supDB_suite( db )) != NULL )
-     { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP,
-                      (gchar *)camera_sup, sizeof(struct CMD_TYPE_CAMERASUP) );
-       g_free(camera_sup);
-     }
-
-    Libere_DB_SQL( &db );
-    Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP_FIN, NULL, 0 );
-    Unref_client( client );                                                               /* Déréférence la structure cliente */
-    pthread_exit( NULL );
+    Envoi_client ( client, tag, sstag_fin, NULL, 0 );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

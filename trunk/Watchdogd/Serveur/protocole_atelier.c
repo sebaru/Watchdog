@@ -56,6 +56,9 @@
     Envoyer_comment_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT,
                                                SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT_FIN );
 
+    Envoyer_camera_sup_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP,
+                                                  SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP_FIN );
+
     g_free(client->syn_to_send);
     client->syn_to_send = NULL;
     Unref_client( client );                                                               /* Déréférence la structure cliente */
@@ -223,20 +226,20 @@
              }
             break;
        case SSTAG_CLIENT_ATELIER_ADD_CAMERA_SUP: 
-             { struct CMD_TYPE_CAMERA_SUP *camera_sup;
-               camera_sup = (struct CMD_TYPE_CAMERA_SUP *)connexion->donnees;
+             { struct CMD_TYPE_CAMERASUP *camera_sup;
+               camera_sup = (struct CMD_TYPE_CAMERASUP *)connexion->donnees;
                Proto_ajouter_camera_sup_atelier( client, camera_sup );
              }
             break;
        case SSTAG_CLIENT_ATELIER_DEL_CAMERA_SUP:
-             { struct CMD_TYPE_CAMERA_SUP *camera_sup;
-               camera_sup = (struct CMD_TYPE_CAMERA_SUP *)connexion->donnees;
+             { struct CMD_TYPE_CAMERASUP *camera_sup;
+               camera_sup = (struct CMD_TYPE_CAMERASUP *)connexion->donnees;
                Proto_effacer_camera_sup_atelier( client, camera_sup );
              }
             break;
        case SSTAG_CLIENT_ATELIER_EDIT_CAMERA_SUP:
-             { struct CMD_TYPE_CAMERA_SUP *camera_sup;
-               camera_sup = (struct CMD_TYPE_CAMERA_SUP *)connexion->donnees;
+             { struct CMD_TYPE_CAMERASUP *camera_sup;
+               camera_sup = (struct CMD_TYPE_CAMERASUP *)connexion->donnees;
                Proto_valider_editer_camera_sup_atelier( client, camera_sup );
              }
             break;

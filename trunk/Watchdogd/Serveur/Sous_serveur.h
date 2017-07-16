@@ -238,5 +238,12 @@
  extern void *Envoyer_cameras_thread ( struct CLIENT *client );
  extern void *Envoyer_cameras_for_atelier_thread ( struct CLIENT *client );
 
+                                                                                        /* Dans envoi_synoptique_camera_sup.c */
+ extern void Proto_effacer_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
+ extern void Proto_ajouter_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
+ extern void Proto_valider_editer_camera_sup_atelier ( struct CLIENT *client,
+                                                struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
+ extern void Envoyer_camera_sup_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
+ 
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
