@@ -947,7 +947,7 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
 CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `icone` int(11) NOT NULL DEFAULT '0',
-  `syn` int(11) NOT NULL DEFAULT '0',
+  `syn_id` int(11) NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `gid` int(11) NOT NULL DEFAULT '0',
   `bitctrl` int(11) NOT NULL DEFAULT '0',
@@ -965,7 +965,8 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `vert` int(11) NOT NULL DEFAULT '0',
   `bleu` int(11) NOT NULL DEFAULT '0',
   `layer` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -979,7 +980,9 @@ CREATE TABLE IF NOT EXISTS `syns_palettes` (
   `syn_id` int(11) NOT NULL DEFAULT '0',
   `syn_cible_id` int(11) NOT NULL DEFAULT '0',
   `pos` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  CONSTRAINT `id_syn`       FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `id_cible syn` FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
