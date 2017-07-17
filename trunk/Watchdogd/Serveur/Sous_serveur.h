@@ -91,7 +91,7 @@
  extern void Gerer_protocole_histo( struct CLIENT *client );
  extern void Gerer_protocole_synoptique( struct CLIENT *client );
  extern void Gerer_protocole_admin( struct CLIENT *client );
- extern void Gerer_protocole_camera( struct CLIENT *client );
+ extern void Gerer_protocole_lowlevel( struct CLIENT *client );
  extern void Gerer_protocole_satellite( struct CLIENT *client );
 
                                                                                                               /* Dans envoi.c */

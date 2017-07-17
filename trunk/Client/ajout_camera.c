@@ -54,7 +54,7 @@
                   
     switch(reponse)
      { case GTK_RESPONSE_OK:
-             { Envoi_serveur( TAG_CAMERA, (edition ? SSTAG_CLIENT_VALIDE_EDIT_CAMERA
+             { Envoi_serveur( TAG_LOWLEVEL, (edition ? SSTAG_CLIENT_VALIDE_EDIT_CAMERA
                                                    : SSTAG_CLIENT_ADD_CAMERA),
                               (gchar *)&Camera, sizeof( struct CMD_TYPE_CAMERA ) );
              }

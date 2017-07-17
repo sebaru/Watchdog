@@ -91,7 +91,7 @@
     TAG_SUPERVISION,                                                                     /* Gestions de la partie supervision */
     TAG_HISTO,                                                                                          /* Gestions des histo */
     TAG_ATELIER,                                                                                     /* Gestions de l'atelier */
-    TAG_CAMERA,                                                                                         /* Gestion des camera */
+    TAG_LOWLEVEL,                                                                                         /* Gestion des camera */
     TAG_ADMIN,                                                    /* Utilisation des commandes d'admin depuis le client lourd */
     TAG_SATELLITE,                                                                             /* Echange vers les satellites */
   };

@@ -49,7 +49,7 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_CAMERA:
-             { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_CREATE_PAGE_CAMERA_OK, NULL, 0 );
+             { Envoi_client( client, TAG_LOWLEVEL, SSTAG_SERVEUR_CREATE_PAGE_CAMERA_OK, NULL, 0 );
                Ref_client( client, "Send Cameras" );                                 /* Indique que la structure est utilisée */
                pthread_create( &tid, NULL, (void *)Envoyer_cameras_thread, client );
                pthread_detach( tid );

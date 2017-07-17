@@ -188,7 +188,7 @@
  extern void Gerer_protocole_atelier ( struct CONNEXION *connexion );
  extern void Gerer_protocole_fichier_connecte ( struct CONNEXION *connexion );
  extern void Gerer_protocole_connexion ( struct CONNEXION *connexion );
- extern void Gerer_protocole_camera ( struct CONNEXION *connexion );
+ extern void Gerer_protocole_lowlevel ( struct CONNEXION *connexion );
  extern void Gerer_protocole_admin ( struct CONNEXION *connexion );
  extern gint Get_icone_version( void );
 

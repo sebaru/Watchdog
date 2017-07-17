@@ -66,7 +66,7 @@
                case TAG_SUPERVISION : Gerer_protocole_supervision  ( client ); break;
                case TAG_HISTO       : Gerer_protocole_histo        ( client ); break;
                case TAG_ATELIER     : Gerer_protocole_atelier      ( client ); break;
-               case TAG_CAMERA      : Gerer_protocole_camera       ( client ); break;
+               case TAG_LOWLEVEL      : Gerer_protocole_camera       ( client ); break;
                case TAG_ADMIN       : Gerer_protocole_admin        ( client ); break;
                case TAG_SATELLITE   : Gerer_protocole_satellite    ( client ); break;
                case TAG_CONNEXION   : if (Reseau_ss_tag(connexion) == SSTAG_CLIENT_SETPASSWORD )

@@ -46,7 +46,7 @@
     camera = Rechercher_cameraDB( rezo_camera->id );
 
     if (camera)
-     { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_EDIT_CAMERA_OK,
+     { Envoi_client( client, TAG_LOWLEVEL, SSTAG_SERVEUR_EDIT_CAMERA_OK,
                      (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
        g_free(camera);                                                                                  /* liberation mémoire */
      }
@@ -77,7 +77,7 @@
      }
     else { camera = Rechercher_cameraDB( rezo_camera->id );
            if (camera) 
-            { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_VALIDE_EDIT_CAMERA_OK,
+            { Envoi_client( client, TAG_LOWLEVEL, SSTAG_SERVEUR_VALIDE_EDIT_CAMERA_OK,
                             (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
               g_free(camera);
             }
@@ -101,7 +101,7 @@
     retour = Retirer_cameraDB( rezo_camera->id );
 
     if (retour)
-     { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_DEL_CAMERA_OK,
+     { Envoi_client( client, TAG_LOWLEVEL, SSTAG_SERVEUR_DEL_CAMERA_OK,
                      (gchar *)rezo_camera, sizeof(struct CMD_TYPE_CAMERA) );
      }
     else
@@ -139,7 +139,7 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_ADD_CAMERA_OK,
+            { Envoi_client( client, TAG_LOWLEVEL, SSTAG_SERVEUR_ADD_CAMERA_OK,
                             (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
               g_free(camera);
             }
@@ -186,7 +186,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  void *Envoyer_cameras_thread ( struct CLIENT *client )
-  { Envoyer_cameras_thread_tag( client, TAG_CAMERA, SSTAG_SERVEUR_ADDPROGRESS_CAMERA,
+  { Envoyer_cameras_thread_tag( client, TAG_LOWLEVEL, SSTAG_SERVEUR_ADDPROGRESS_CAMERA,
                                                     SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FIN );
     return(NULL);
   }
