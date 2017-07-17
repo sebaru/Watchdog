@@ -67,7 +67,8 @@
         TYPE_COMMENTAIRE,
         TYPE_MOTIF,
         TYPE_CADRAN,
-        TYPE_CAMERA_SUP
+        TYPE_CAMERA_SUP,
+        TYPE_SCENARIO
       };
 
  struct TRAME_ITEM_MOTIF
@@ -181,6 +182,17 @@
     gint selection;
   };
 
+ struct TRAME_ITEM_SCENARIO
+  { gint type;                                                                                              /* Type de l'item */
+    GooCanvasItem *item;
+    cairo_matrix_t transform;
+    GooCanvasItem *item_groupe;
+    GooCanvasItem *select_mi;
+
+    struct CMD_TYPE_SCENARIO *scenario;
+    gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
+    gint selection;
+  };
 
  struct TRAME_ITEM
   { union { struct TRAME_ITEM_MOTIF motif;
@@ -188,6 +200,7 @@
             struct TRAME_ITEM_COMMENT comment;
             struct TRAME_ITEM_CADRAN cadran;
             struct TRAME_ITEM_CAMERA_SUP camera_sup;
+            struct TRAME_ITEM_SCENARIO scenario;
           };
   };
 
@@ -225,11 +238,14 @@
  extern struct TRAME_ITEM_MOTIF *Trame_new_item ( void );
  extern struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
                                                                struct CMD_TYPE_CAMERASUP *camera_sup );
+ extern struct TRAME_ITEM_SCENARIO *Trame_ajout_scenario ( gint flag, struct TRAME *trame,
+                                                           struct CMD_TYPE_SCENARIO *scenario );
  extern void Trame_del_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Trame_del_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
  extern void Trame_del_commentaire ( struct TRAME_ITEM_COMMENT *trame_comm );
  extern void Trame_del_item ( struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Trame_del_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
+ extern void Trame_del_scenario ( struct TRAME_ITEM_SCENARIO *trame_scenario );
  extern struct TRAME *Trame_creer_trame ( guint taille_x, guint taille_y, char *coul, guint grille );
  extern void Trame_effacer_trame ( struct TRAME *trame );
  extern void Trame_detruire_trame ( struct TRAME *trame );

@@ -658,7 +658,19 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=3209;
+    if (database_version < 3215)
+     { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `syns_camerasup` ("
+                                             "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                                             "`syn_id` int(11) NOT NULL,"
+                                             "`num` int(11) NOT NULL,"
+                                             "`posx` int(11) NOT NULL,"
+                                             "`posy` int(11) NOT NULL,"
+                                             "PRIMARY KEY (`id`),"
+                                             "CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE"
+                                             ") ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;ALTER TABLE syns_motifs CHANGE `syn` `syn_id` int(11) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+    database_version=3215;
 
     Libere_DB_SQL(&db);
 

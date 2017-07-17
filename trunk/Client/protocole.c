@@ -85,7 +85,7 @@
       case TAG_SUPERVISION : Gerer_protocole_supervision  ( connexion ); break;
       case TAG_HISTO       : Gerer_protocole_histo        ( connexion ); break;
       case TAG_ATELIER     : Gerer_protocole_atelier      ( connexion ); break;
-      case TAG_LOWLEVEL      : Gerer_protocole_camera       ( connexion ); break;
+      case TAG_LOWLEVEL      : Gerer_protocole_lowlevel     ( connexion ); break;
       case TAG_ADMIN       : Gerer_protocole_admin        ( connexion ); break;
       case TAG_CONNEXION   : Gerer_protocole_connexion    ( connexion ); break;
       default : printf("Gerer_protocole : protocole inconnu %d\n", Reseau_tag(connexion) );

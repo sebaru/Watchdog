@@ -126,6 +126,7 @@
                struct TRAME_ITEM_COMMENT *trame_comment;
                struct TRAME_ITEM_CADRAN *trame_cadran;
                struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
+               struct TRAME_ITEM_SCENARIO *trame_scenario;
              };
 
        GList *items;                                                          /* Tous les items faisant parti de la selection */
@@ -307,9 +308,11 @@
  extern void Clic_sur_pass ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                              struct TRAME_ITEM_PASS *trame_pass );
  extern void Clic_sur_cadran ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
-                                struct TRAME_ITEM_CADRAN *trame_cadran );
+                               struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Clic_sur_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
-                            struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
+                                   struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
+ extern void Clic_sur_scenario ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
+                                 struct TRAME_ITEM_SCENARIO *trame_scenario );
  extern gint Nouveau_groupe ( void );
  
                                                                                                   /* Dans atelier_selection.c */
@@ -379,6 +382,12 @@
  extern void Proto_afficher_un_camera_for_atelier( struct CMD_TYPE_CAMERA *camera );
  extern void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
  extern void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *camera_sup );
+
+                                                                                             /* Dans atelier_ajout_scenario.c */
+/* extern struct TRAME_ITEM_SCENARIO *Id_vers_trame_camera_sup ( struct TYPE_INFO_ATELIER *infos, gint id );*/
+ extern void Menu_ajouter_scenario ( void );
+ extern void Proto_afficher_un_scenario_atelier( struct CMD_TYPE_SCENARIO *rezo_scenario );
+ extern void Proto_cacher_un_scenario_atelier( struct CMD_TYPE_SCENARIO *scenario );
 
  extern void Creer_page_liste_histo_msgs( void );                                                  /* Dans liste_histo_msgs.c */
  extern void Proto_effacer_liste_histo_msgs( gint page_id );

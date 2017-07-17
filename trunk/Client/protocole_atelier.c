@@ -51,6 +51,7 @@
     static GList *Arrivee_comment = NULL;
     static GList *Arrivee_palette = NULL;
     static GList *Arrivee_camera_sup = NULL;
+    static GList *Arrivee_scenario = NULL;
     static GList *Arrivee_groupe_propriete_syn = NULL;
     static GList *Arrivee_camera_for_atelier = NULL;
     static int save_id;
@@ -191,7 +192,7 @@
                Arrivee_camera_for_atelier = NULL;
              }
             break;
-/*********************************** Reception des cameras de supervision *********************************/
+/***************************************** Reception des cameras de supervision ***********************************************/
        case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP:
              { struct CMD_TYPE_CAMERASUP *camera_sup;
                Set_progress_plus(1);
@@ -219,6 +220,36 @@
              { struct CMD_TYPE_CAMERASUP *cam_sup;
                cam_sup = (struct CMD_TYPE_CAMERASUP *)connexion->donnees;
                Proto_cacher_un_camera_sup_atelier( cam_sup );
+             }
+            break;
+/********************************************* Reception des scenario *********************************************************/
+       case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_SCENARIO:
+             { struct CMD_TYPE_SCENARIO *scenario;
+               Set_progress_plus(1);
+
+               scenario = (struct CMD_TYPE_SCENARIO *)g_try_malloc0( sizeof( struct CMD_TYPE_SCENARIO ) );
+               if (!scenario) return; 
+               memcpy( scenario, connexion->donnees, sizeof(struct CMD_TYPE_SCENARIO ) );
+               Arrivee_scenario = g_list_append( Arrivee_scenario, scenario );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_SCENARIO_FIN:
+             { g_list_foreach( Arrivee_scenario, (GFunc)Proto_afficher_un_scenario_atelier, NULL );
+               g_list_foreach( Arrivee_scenario, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_scenario );
+               Arrivee_scenario = NULL;
+             }
+            break;
+       case SSTAG_SERVEUR_ATELIER_ADD_SCENARIO_OK:
+             { struct CMD_TYPE_SCENARIO *scenario;
+               scenario = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
+               Proto_afficher_un_scenario_atelier( scenario );
+             }
+            break;
+       case SSTAG_SERVEUR_ATELIER_DEL_SCENARIO_OK:
+             { struct CMD_TYPE_SCENARIO *scenario;
+               scenario = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
+               Proto_cacher_un_scenario_atelier( scenario );
              }
             break;
 /******************************************** Reception des palettes **************************************/

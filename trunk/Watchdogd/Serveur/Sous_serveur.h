@@ -241,9 +241,13 @@
                                                                                         /* Dans envoi_synoptique_camera_sup.c */
  extern void Proto_effacer_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
  extern void Proto_ajouter_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
- extern void Proto_valider_editer_camera_sup_atelier ( struct CLIENT *client,
-                                                struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
+ extern void Proto_valider_editer_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
  extern void Envoyer_camera_sup_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
- 
+
+                                                                                          /* Dans envoi_synoptique_scenario.c */
+ extern void Proto_effacer_scenario_atelier ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_scenario );
+ extern void Proto_ajouter_scenario_atelier ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_scenario );
+ extern void Proto_valider_editer_scenario_atelier ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_scenario );
+ extern void Envoyer_scenario_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin ); 
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

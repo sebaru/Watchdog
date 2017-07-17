@@ -63,6 +63,8 @@
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CADRAN_FIN,                        /* Le serveur envoi des cadrans page supervision */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP,                         /* Le serveur envoi des camera page supervision */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP_FIN,                     /* Le serveur envoi des camera page supervision */
+    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO,                         /* Le serveur envoi des scenario page supervision */
+    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO_FIN,                     /* Le serveur envoi des scenario page supervision */
 
     SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,                            /* Un motif à changé d'etat, nous l'envoyons au client */
     SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN,                          /* Reponse si le numero Ixxx n'est pas utilisé dans le client */

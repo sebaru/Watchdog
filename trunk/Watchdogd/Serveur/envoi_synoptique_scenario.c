@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Serveur/envoi_synoptique_camera_sup.c     Envoi des camera_sups aux clients                                      */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                          dim 22 mai 2005 17:35:28 CEST */
+/* Watchdogd/Serveur/envoi_synoptique_scenario.c     Envoi des scenarios aux clients                                          */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                                    17.07.2017 20:17:43 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * envoi_synoptique_camera_sup.c
+ * envoi_synoptique_scenario.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -39,17 +39,17 @@
 /* Entrée: le client demandeur et le syn en question                                                                          */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Proto_effacer_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERASUP *rezo_camera_sup )
+ void Proto_effacer_scenario_atelier ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_scenario )
   { gboolean retour;
-    retour = Retirer_camera_supDB( rezo_camera_sup->id );
+    retour = Retirer_scenarioDB( rezo_scenario->id );
     if (retour)
-     { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_CAMERA_SUP_OK,
-                     (gchar *)rezo_camera_sup, sizeof(struct CMD_TYPE_CAMERASUP) );
+     { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_DEL_SCENARIO_OK,
+                     (gchar *)rezo_scenario, sizeof(struct CMD_TYPE_SCENARIO) );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to delete camera_sup %s", rezo_camera_sup->libelle);
+                   "Unable to delete scenario %d", rezo_scenario->id);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -59,29 +59,29 @@
 /* Entrée: le client demandeur et le syn en question                                                                          */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Proto_ajouter_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERASUP *rezo_camera_sup )
-  { struct CMD_TYPE_CAMERASUP *result;
+ void Proto_ajouter_scenario_atelier ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_scenario )
+  { struct CMD_TYPE_SCENARIO *result;
     gint id;
 
-    id = Ajouter_camera_supDB ( rezo_camera_sup );
+    id = Ajouter_scenarioDB ( rezo_scenario );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to add camera_sup %s", rezo_camera_sup->libelle );
+                   "Unable to add scenario %d", rezo_scenario->num );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
-    else { result = Rechercher_camera_supDB( id );
+    else { result = Rechercher_scenarioDB( id );
            if (!result) 
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
-                          "Unable to locate camera_sup %s", rezo_camera_sup->libelle );
+                          "Unable to locate scenario %d", rezo_scenario->num );
               Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_CAMERA_SUP_OK,
-                            (gchar *)result, sizeof(struct CMD_TYPE_CAMERASUP) );
+            { Envoi_client( client, TAG_ATELIER, SSTAG_SERVEUR_ATELIER_ADD_SCENARIO_OK,
+                            (gchar *)result, sizeof(struct CMD_TYPE_SCENARIO) );
               g_free(result);
             }
          }
@@ -91,12 +91,11 @@
 /* Entrée: le client demandeur et le syn en question                                                                          */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
- void Proto_valider_editer_camera_sup_atelier ( struct CLIENT *client,
-                                                struct CMD_TYPE_CAMERASUP *rezo_camera_sup )
-  { if ( Modifier_camera_supDB ( rezo_camera_sup ) ==-1 )
+ void Proto_valider_editer_scenario_atelier ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_scenario )
+  { if ( Modifier_scenarioDB ( rezo_scenario ) ==-1 )
      { struct CMD_GTK_MESSAGE erreur;
        g_snprintf( erreur.message, sizeof(erreur.message),
-                   "Unable to save camera_sup %d", rezo_camera_sup->camera_src_id);
+                   "Unable to save scenario %d", rezo_scenario->num);
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
@@ -106,23 +105,23 @@
 /* Entrée: Néant                                                                                                              */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- void Envoyer_camera_sup_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
+ void Envoyer_scenario_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
   { struct CMD_ENREG nbr;
-    struct CMD_TYPE_CAMERASUP *camera_sup;
+    struct CMD_TYPE_SCENARIO *scenario;
     struct DB *db;
 
-    if ( ! Recuperer_camera_supDB( &db, client->syn_to_send->id ) ) return;
+    if ( ! Recuperer_scenarioDB( &db, client->syn_to_send->id ) ) return;
 
     nbr.num = db->nbr_result;
     if (nbr.num)
-     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d camera_sups", nbr.num );
+     { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d scenarios", nbr.num );
        Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG,
                       (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
 
-    while ( (camera_sup = Recuperer_camera_supDB_suite( &db )) != NULL )
-     { Envoi_client ( client, tag, sstag, (gchar *)camera_sup, sizeof(struct CMD_TYPE_CAMERASUP) );
-       g_free(camera_sup);
+    while ( (scenario = Recuperer_scenarioDB_suite( &db )) != NULL )
+     { Envoi_client ( client, tag, sstag, (gchar *)scenario, sizeof(struct CMD_TYPE_SCENARIO) );
+       g_free(scenario);
      }
     Libere_DB_SQL( &db );
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );

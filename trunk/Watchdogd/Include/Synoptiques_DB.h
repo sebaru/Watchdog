@@ -101,11 +101,11 @@
   extern struct CMD_TYPE_CAMERASUP *Rechercher_camera_supDB ( guint id );
 
  extern gboolean Retirer_scenarioDB ( guint id );
- extern gint Ajouter_scenarioDB ( struct SYN_SCENARIO *scenario );
+ extern gint Ajouter_scenarioDB ( struct CMD_TYPE_SCENARIO *scenario );
  extern gboolean Recuperer_scenarioDB ( struct DB **db, gint id_syn );
- extern struct SYN_SCENARIO *Recuperer_scenarioDB_suite( struct DB **db );
- extern struct SYN_SCENARIO *Rechercher_scenarioDB ( guint id );
- extern gboolean Modifier_scenarioDB( struct SYN_SCENARIO *scenario );
+ extern struct CMD_TYPE_SCENARIO *Recuperer_scenarioDB_suite( struct DB **db );
+ extern struct CMD_TYPE_SCENARIO *Rechercher_scenarioDB ( guint id );
+ extern gboolean Modifier_scenarioDB( struct CMD_TYPE_SCENARIO *scenario );
  
 #endif
 /*--------------------------------------------------------------------------------------------------------*/
