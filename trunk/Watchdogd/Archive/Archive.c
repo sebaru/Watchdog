@@ -149,10 +149,10 @@
           continue;
         }
 
-       db = Init_DB_SQL();       
+       db = Init_ArchDB_SQL();       
        if (!db)
         { Info_new( Config.log, Config.log_arch, LOG_ERR, 
-                   "Run_arch: Unable to open database %s", Config.db_database );
+                   "Run_arch: Unable to open database %s", Config.archdb_database );
           continue;
         }
 

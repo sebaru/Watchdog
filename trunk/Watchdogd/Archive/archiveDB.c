@@ -64,10 +64,10 @@
     localtime_r( &date, &tm );
     if ( !(tm.tm_mday == 1 && tm.tm_hour == 0 && tm.tm_min == 0) ) return;             /* Est-on le premier du mois minuit ?? */
 
-    db = Init_DB_SQL();       
+    db = Init_ArchDB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_arch, LOG_ERR, 
-                "%s: Unable to open database %s", __func__, Config.db_database );
+                "%s: Unable to open database %s", __func__, Config.archdb_database );
        return;
      }
 

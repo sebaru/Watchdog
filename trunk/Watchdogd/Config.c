@@ -108,6 +108,34 @@
        else
         { g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", DEFAUT_DB_USERNAME  ); }
 
+
+       Config.db_port            = g_key_file_get_integer ( gkf, "DATABASE", "arch_port", NULL );
+       if (!Config.archdb_port) Config.archdb_port = DEFAUT_DB_PORT;
+
+       chaine                    = g_key_file_get_string ( gkf, "DATABASE", "arch_host", NULL );
+       if (chaine)
+        { g_snprintf( Config.archdb_host, sizeof(Config.archdb_host), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.archdb_host, sizeof(Config.archdb_host), "%s", DEFAUT_DB_HOST  ); }
+
+       chaine                    = g_key_file_get_string ( gkf, "DATABASE", "arch_database", NULL );
+       if (chaine)
+        { g_snprintf( Config.archdb_database, sizeof(Config.archdb_database), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.archdb_database, sizeof(Config.archdb_database), "%s", DEFAUT_DB_DATABASE  ); }
+
+       chaine                    = g_key_file_get_string ( gkf, "DATABASE", "arch_password", NULL );
+       if (chaine)
+        { g_snprintf( Config.archdb_password, sizeof(Config.archdb_password), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.archdb_password, sizeof(Config.archdb_password), "%s", DEFAUT_DB_PASSWORD  ); }
+
+       chaine                    = g_key_file_get_string ( gkf, "DATABASE", "arch_username", NULL );
+       if (chaine)
+        { g_snprintf( Config.archdb_username, sizeof(Config.archdb_username), "%s", chaine ); g_free(chaine); }
+       else
+        { g_snprintf( Config.archdb_username, sizeof(Config.archdb_username), "%s", DEFAUT_DB_USERNAME  ); }
+
 /******************************************************** Partie LOG **********************************************************/
        Config.log_level = LOG_NOTICE;
        chaine = g_key_file_get_string ( gkf, "LOG", "log_level", NULL );

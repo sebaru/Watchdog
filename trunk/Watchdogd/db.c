@@ -71,20 +71,20 @@
 /* Entrée: toutes les infos necessaires a la connexion                                                                        */
 /* Sortie: une structure DB de référence                                                                                      */
 /******************************************************************************************************************************/
- struct DB *Init_DB_SQL ( void )
+ static struct DB *Init_DB_SQL_with ( host, username, password, database, port )
   { static gint id = 1, taille;
     struct DB *db;
     my_bool reconnect;
 
     db = (struct DB *)g_try_malloc0( sizeof(struct DB) );
     if (!db)                                                                              /* Si probleme d'allocation mémoire */
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "Init_DB_SQL: Memory error" );
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: Memory error", __func__ );
        return(NULL);
      }
 
     db->mysql = mysql_init(NULL);
     if (!db->mysql)
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "Init_DB_SQL: Mysql_init failed (%s)",
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: Mysql_init failed (%s)", __func__,
                               (char *) mysql_error(db->mysql)  );
        g_free(db);
        return (NULL);
@@ -92,10 +92,9 @@
 
     reconnect = 1;
     mysql_options( db->mysql, MYSQL_OPT_RECONNECT, &reconnect );
-    if ( ! mysql_real_connect( db->mysql, Config.db_host, Config.db_username,
-                               Config.db_password, Config.db_database, Config.db_port, NULL, 0 ) )
+    if ( ! mysql_real_connect( db->mysql, host, username, password, database, port, NULL, 0 ) )
      { Info_new( Config.log, Config.log_db, LOG_ERR,
-                 "Init_DB_SQL: mysql_real_connect failed (%s)",
+                 "%s: mysql_real_connect failed (%s)", __func__,
                  (char *) mysql_error(db->mysql)  );
        mysql_close( db->mysql );
        g_free(db);
@@ -108,9 +107,27 @@
     taille = g_slist_length ( Partage->com_db.Liste );
     pthread_mutex_unlock ( &Partage->com_db.synchro );
     Info_new( Config.log, Config.log_db, LOG_DEBUG,
-              "Init_DB_SQL: Database Connection OK with %s@%s:%d on %s (DB%07d). Nbr_requete_en_cours=%d",
-               Config.db_username, Config.db_host, Config.db_port, Config.db_database, db->id, taille );
+              "%s: Database Connection OK with %s@%s:%d on %s (DB%07d). Nbr_requete_en_cours=%d", __func__,
+               username, host, port, database, db->id, taille );
     return(db);
+  }
+/******************************************************************************************************************************/
+/* Init_DB_SQL: essai de connexion à la DataBase db                                                                           */
+/* Entrée: toutes les infos necessaires a la connexion                                                                        */
+/* Sortie: une structure DB de référence                                                                                      */
+/******************************************************************************************************************************/
+ struct DB *Init_DB_SQL ( void )
+  { return( Init_DB_SQL_with ( Config.db_host, Config.db_username,
+                               Config.db_password, Config.db_database, Config.db_port ) );
+  }
+/******************************************************************************************************************************/
+/* Init_DB_SQL: essai de connexion à la DataBase db                                                                           */
+/* Entrée: toutes les infos necessaires a la connexion                                                                        */
+/* Sortie: une structure DB de référence                                                                                      */
+/******************************************************************************************************************************/
+ struct DB *Init_ArchDB_SQL ( void )
+  { return( Init_DB_SQL_with ( Config.archdb_host, Config.archdb_username,
+                               Config.archdb_password, Config.archdb_database, Config.archdb_port ) );
   }
 /******************************************************************************************************************************/
 /* Libere_DB_SQL : Se deconnecte d'une base de données en parametre                                                           */
