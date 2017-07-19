@@ -63,40 +63,31 @@
 /* Entrée: une structure represantant le scenario et un flag d'edition                                                        */
 /* Sortie: -1 si erreur sinon, last_sql_id                                                                                    */
 /******************************************************************************************************************************/
- static gint Ajouter_modifier_scenarioDB ( struct SYN_SCENARIO *scenario, gboolean edition )
+ static gint Ajouter_modifier_scenarioDB ( struct CMD_TYPE_SCENARIO *scenario, gboolean edition )
   { gchar requete[1024];
-    gchar *libelle;
     gboolean retour;
     struct DB *db;
     gint id;
 
-    libelle = Normaliser_chaine ( scenario->libelle );                                       /* Formatage correct des chaines */
-    if (!libelle)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
-       return(-1);
-     }
-
     db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       g_free(libelle);
        return(-1);
      }
 
     if (edition==FALSE)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                  "INSERT INTO %s(id_syn, libelle, posx, posy, angle) VALUES "
-                  "('%d','%s','%d','%d','%f')",
-                   NOM_TABLE_SCENARIO, scenario->id_syn, libelle, scenario->posx, scenario->posy, scenario->angle );
+                  "INSERT INTO %s(id_syn, num, posx, posy) VALUES "
+                  "('%d','%d','%d','%d')",
+                   NOM_TABLE_SCENARIO, scenario->syn_id, scenario->num, scenario->posx, scenario->posy );
      }
     else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                   "UPDATE %s SET "             
-                  "libelle='%s',posx='%d',posy='%d',angle='%f'"
-                  " WHERE id=%d;", NOM_TABLE_SCENARIO, libelle, scenario->posx, scenario->posy, scenario->angle,
+                  "num='%d',posx='%d',posy='%d'"
+                  " WHERE id=%d;", NOM_TABLE_SCENARIO, scenario->num, scenario->posx, scenario->posy,
                   scenario->id );
      }
-    g_free(libelle);
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if ( retour == FALSE )
@@ -114,14 +105,14 @@
 /* Entrée: une structure represantant le scenario                                                                             */
 /* Sortie: -1 si erreur sinon, last_sql_id                                                                                    */
 /******************************************************************************************************************************/
- gint Ajouter_scenarioDB ( struct SYN_SCENARIO *scenario )
+ gint Ajouter_scenarioDB ( struct CMD_TYPE_SCENARIO *scenario )
   { return ( Ajouter_modifier_scenarioDB ( scenario, FALSE ) ); }
 /******************************************************************************************************************************/
 /* Modifier_scenarioDB: Ajout ou edition d'un scenario                                                                        */
 /* Entrée: une structure represantant le scenario                                                                             */
 /* Sortie: -1 si erreur sinon 0                                                                                               */
 /******************************************************************************************************************************/
- gint Modifier_scenarioDB ( struct SYN_SCENARIO *scenario )
+ gint Modifier_scenarioDB ( struct CMD_TYPE_SCENARIO *scenario )
   { return ( Ajouter_modifier_scenarioDB ( scenario, TRUE ) ); }
  /*****************************************************************************************************************************/
 /* Recuperer_scenarioDB: Recupération de la liste des scenario d'un synoptique                                                */
@@ -140,7 +131,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,id_syn,libelle,posx,posy,angle"
+                "SELECT id,id_syn,num,posx,posy"
                 " FROM %s WHERE id_syn='%d'", NOM_TABLE_SCENARIO, id_syn );
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
@@ -153,8 +144,8 @@
 /* Entrée: une database                                                                                                       */
 /* Sortie: une structure representant le scenario                                                                             */
 /******************************************************************************************************************************/
- struct SYN_SCENARIO *Recuperer_scenarioDB_suite( struct DB **db_orig )
-  { struct SYN_SCENARIO *scenario;
+ struct CMD_TYPE_SCENARIO *Recuperer_scenarioDB_suite( struct DB **db_orig )
+  { struct CMD_TYPE_SCENARIO *scenario;
     struct DB *db;
 
     db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
@@ -165,15 +156,14 @@
        return(NULL);
      }
 
-    scenario = (struct SYN_SCENARIO *)g_try_malloc0( sizeof(struct SYN_SCENARIO) );
+    scenario = (struct CMD_TYPE_SCENARIO *)g_try_malloc0( sizeof(struct CMD_TYPE_SCENARIO) );
     if (!scenario) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
     else
-     { memcpy( &scenario->libelle, db->row[2], sizeof(scenario->libelle) );                      /* Recopie dans la structure */
-       scenario->id     = atoi(db->row[0]);
-       scenario->id_syn = atoi(db->row[1]);
+     { scenario->id     = atoi(db->row[0]);
+       scenario->syn_id = atoi(db->row[1]);
+       scenario->num    = atoi(db->row[2]);
        scenario->posx   = atoi(db->row[3]);                                                      /* en abscisses et ordonnées */
        scenario->posy   = atoi(db->row[4]);
-       scenario->angle  = atof(db->row[5]);
      }
     return(scenario);
   }
@@ -182,13 +172,13 @@
 /* Entrée: un id de scenario                                                                                                  */
 /* Sortie: une structure representant le scenario                                                                             */
 /******************************************************************************************************************************/
- struct SYN_SCENARIO *Rechercher_scenarioDB ( guint id )
-  { struct SYN_SCENARIO *scenario;
+ struct CMD_TYPE_SCENARIO *Rechercher_scenarioDB ( guint id )
+  { struct CMD_TYPE_SCENARIO *scenario;
     gchar requete[512];
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,id_syn,libelle,posx,posy,angle"
+                "SELECT id,id_syn,num,posx,posy"
                 " FROM %s WHERE id='%d'", NOM_TABLE_SCENARIO, id );
 
     db = Init_DB_SQL();       

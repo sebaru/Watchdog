@@ -39,7 +39,7 @@
 /* Entrée: la connexion avec le serveur                                                                   */
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
- void Gerer_protocole_camera ( struct CONNEXION *connexion )
+ void Gerer_protocole_lowlevel ( struct CONNEXION *connexion )
   { static GList *Arrivee_camera = NULL;
            
     switch ( Reseau_ss_tag ( connexion ) )

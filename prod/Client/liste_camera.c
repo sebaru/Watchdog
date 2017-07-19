@@ -85,7 +85,7 @@
                memcpy( &rezo_camera.libelle, libelle, sizeof(rezo_camera.libelle) );
                g_free( libelle );
 
-               Envoi_serveur( TAG_CAMERA, SSTAG_CLIENT_DEL_CAMERA,
+               Envoi_serveur( TAG_LOWLEVEL, SSTAG_CLIENT_DEL_CAMERA,
                              (gchar *)&rezo_camera, sizeof(struct CMD_TYPE_CAMERA) );
                gtk_tree_selection_unselect_iter( selection, &iter );
                lignes = lignes->next;
@@ -156,7 +156,7 @@
 
     memcpy( &rezo_camera.libelle, libelle, sizeof(rezo_camera.libelle) );
     g_free( libelle );
-    Envoi_serveur( TAG_CAMERA, SSTAG_CLIENT_EDIT_CAMERA,
+    Envoi_serveur( TAG_LOWLEVEL, SSTAG_CLIENT_EDIT_CAMERA,
                   (gchar *)&rezo_camera, sizeof(struct CMD_TYPE_CAMERA) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                                               /* Liberation mémoire */

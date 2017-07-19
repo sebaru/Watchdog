@@ -59,6 +59,9 @@
     Envoyer_camera_sup_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP,
                                                   SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP_FIN );
 
+    Envoyer_scenario_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_SCENARIO,
+                                                SSTAG_SERVEUR_ADDPROGRESS_ATELIER_SCENARIO_FIN );
+
     g_free(client->syn_to_send);
     client->syn_to_send = NULL;
     Unref_client( client );                                                               /* Déréférence la structure cliente */
@@ -241,6 +244,25 @@
              { struct CMD_TYPE_CAMERASUP *camera_sup;
                camera_sup = (struct CMD_TYPE_CAMERASUP *)connexion->donnees;
                Proto_valider_editer_camera_sup_atelier( client, camera_sup );
+             }
+            break;
+/************************************************ Gestion des cameras synoptiques *********************************************/
+       case SSTAG_CLIENT_ATELIER_ADD_SCENARIO: 
+             { struct CMD_TYPE_SCENARIO *scenario;
+               scenario = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
+               Proto_ajouter_scenario_atelier( client, scenario );
+             }
+            break;
+       case SSTAG_CLIENT_ATELIER_DEL_SCENARIO:
+             { struct CMD_TYPE_SCENARIO *scenario;
+               scenario = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
+               Proto_effacer_scenario_atelier( client, scenario );
+             }
+            break;
+       case SSTAG_CLIENT_ATELIER_EDIT_SCENARIO:
+             { struct CMD_TYPE_SCENARIO *scenario;
+               scenario = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
+               Proto_valider_editer_scenario_atelier( client, scenario );
              }
             break;
 /******************************************* Gestion des passerelle synoptiques ***********************************************/

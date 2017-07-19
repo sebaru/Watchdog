@@ -10,12 +10,12 @@ libwatchdog_server_ssrv_la_SOURCES    = Serveur.c protocole.c ident.c envoi.c \
                         protocole_admin.c \
                         protocole_mnemonique.c protocole_supervision.c protocole_atelier.c \
                         protocole_icone.c protocole_histo.c \
-                        protocole_synoptique.c protocole_camera.c protocole_satellite.c \
+                        protocole_synoptique.c protocole_lowlevel.c protocole_satellite.c \
                         envoi_groupe.c envoi_util.c envoi_dls.c envoi_histo.c envoi_message.c \
                         envoi_synoptique.c envoi_synoptique_motifs.c envoi_synoptique_palettes.c \
                         envoi_synoptique_comments.c envoi_synoptique_passerelles.c \
                         envoi_synoptique_cadran.c envoi_synoptique_camera_sup.c envoi_camera.c \
-                        envoi_mnemonique.c envoi_classe.c envoi_icone.c \
+                        envoi_mnemonique.c envoi_classe.c envoi_icone.c envoi_synoptique_scenario.c \
                         accept.c \
                         cadran.c ecoute.c ssl.c handle_client.c \
                         Sous_serveur.h Client.h admin_serveur.c

@@ -269,7 +269,7 @@
     taille = 24;
     result = New_chaine( taille );
     if (Get_option_entier( options, T_EDGE_UP) == 1)
-     { Liste_edge_up_bi = g_slist_prepend ( Liste_edge_up_bi, GINT_TO_POINTER(num) );
+     { Liste_edge_up_entree = g_slist_prepend ( Liste_edge_up_entree, GINT_TO_POINTER(num) );
        if (barre) g_snprintf( result, taille, "!E%d_edge_up_value", num );
              else g_snprintf( result, taille, "E%d_edge_up_value", num );
      }

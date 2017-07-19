@@ -149,26 +149,27 @@
 /* Entrée: l'evenement à traiter                                                                                              */
 /* Sortie: le mnemo en question, ou NULL si non-trouvé (ou multi trouvailles)                                                 */
 /******************************************************************************************************************************/
- static struct CMD_TYPE_MNEMO_BASE *Map_event_to_mnemo( gchar *event )
+ struct CMD_TYPE_MNEMO_BASE *Map_event_to_mnemo( gchar *event, gint *retour_nbr )
   { struct CMD_TYPE_MNEMO_BASE *mnemo, *result_mnemo = NULL;
     gint nbr_result;
     struct DB *db;
 
     if ( ! Recuperer_mnemo_baseDB_by_command_text ( &db, event ) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                 "Map_event_to_mnemo: Error searching Database" );
+                 "%s: Error searching Database for '%s'", __func__, event );
        return(NULL);
      }
-    nbr_result = db->nbr_result;
+    *retour_nbr = nbr_result = db->nbr_result;
           
     if ( nbr_result == 0 )                                                                  /* Si pas d'enregistrement trouvé */
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Map_event_to_mnemo: No match found for %s", event );
+                "%s: No match found for '%s'", __func__, event );
+       return(NULL);
      }
 
     while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
      { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "Map_event_to_mnemo: Match found for %s Type %d Num %d - %s",
+                "%s: Match found for '%s' Type %d Num %d - %s", __func__,
                  event, mnemo->type, mnemo->num, mnemo->libelle );
        if (result_mnemo != NULL) { g_free(result_mnemo); }
        result_mnemo = mnemo;                                                                                /* Last result OK */
@@ -183,9 +184,10 @@
 /******************************************************************************************************************************/
  static void Gerer_Input_Event ( struct CMD_TYPE_MSRV_EVENT *event )
   { struct CMD_TYPE_MNEMO_BASE *mnemo;
+    gint nbr;
     gchar request[128];
     g_snprintf( request, sizeof(request), "%s:%s:%s", event->instance, event->thread, event->objet );
-    mnemo = Map_event_to_mnemo ( request );
+    mnemo = Map_event_to_mnemo ( request, &nbr );
     if (!mnemo)                                      /* Si pas trouvé, création d'un mnemo 'discovered' ? */
      { struct CMD_TYPE_MNEMO_FULL new_mnemo;
        memset( &new_mnemo, 0, sizeof(new_mnemo) );
