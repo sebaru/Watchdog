@@ -163,7 +163,8 @@
  extern void Send_Event ( gchar *instance, gchar *thread, guint type, gchar *objet, gfloat val_float );
  extern void Envoyer_Event_msrv( struct CMD_TYPE_MSRV_EVENT *event );
  extern void Gerer_arrive_Axxx_dls ( void );
- 
+ extern struct CMD_TYPE_MNEMO_BASE *Map_event_to_mnemo( gchar *event, gint *retour_nbr );
+
  extern void Gerer_arrive_MSGxxx_dls ( void );                                                       /* Dans distrib_MSGxxx.c */
  extern void Gerer_histo_repeat ( void );
  extern void Abonner_distribution_histo ( void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo) );
