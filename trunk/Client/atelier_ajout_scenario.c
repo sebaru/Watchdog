@@ -76,6 +76,7 @@
 
     add_scenario.posx   = TAILLE_SYNOPTIQUE_X/2;
     add_scenario.posy   = TAILLE_SYNOPTIQUE_Y/2;                            
+    add_scenario.num    = 0;
     add_scenario.syn_id = infos->syn.id;
     Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_SCENARIO,
                    (gchar *)&add_scenario, sizeof(struct CMD_TYPE_SCENARIO) );

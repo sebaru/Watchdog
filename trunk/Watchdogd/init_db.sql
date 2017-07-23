@@ -1026,7 +1026,7 @@ CREATE TABLE IF NOT EXISTS `syns_pass` (
 
 CREATE TABLE IF NOT EXISTS `syns_scenario` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_syn` int(11) NOT NULL DEFAULT '0',
+  `syn_id` int(11) NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `posx` int(11) NOT NULL DEFAULT '0',
   `posy` int(11) NOT NULL DEFAULT '0',
