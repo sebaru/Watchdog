@@ -429,13 +429,11 @@ printf("Afficher_propriete: debut\n");
        GNOMEUIINFO_ITEM_STOCK( N_("Delete selection"), NULL, Effacer_selection, GNOME_STOCK_PIXMAP_TRASH ),
        GNOMEUIINFO_END
      };
-printf("Clic sur pass \n");
     if (!(trame_pass && event)) return;
 
     page = Page_actuelle();                                               /* On recupere la page actuelle */
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;               /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;         /* Pointeur sur les infos de la page atelier */
-printf("Clic sur pass: page trouvée \n");
+    infos = (struct TYPE_INFO_ATELIER *)page->infos;                             /* Pointeur sur les infos de la page atelier */
 
     infos->Selection.type = TYPE_PASSERELLE;
     infos->Selection.groupe = trame_pass->groupe_dpl;
@@ -477,13 +475,11 @@ printf("Clic sur pass: page trouvée \n");
        GNOMEUIINFO_ITEM_STOCK( N_("Delete selection"), NULL, Effacer_selection, GNOME_STOCK_PIXMAP_TRASH ),
        GNOMEUIINFO_END
      };
-printf("Clic sur cadran \n");
     if (!(trame_cadran && event)) return;
 
     page = Page_actuelle();                                                                   /* On recupere la page actuelle */
     if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;                                   /* Verification des contraintes */
     infos = (struct TYPE_INFO_ATELIER *)page->infos;                             /* Pointeur sur les infos de la page atelier */
-printf("Clic sur cadran: page trouvée, %p \n", trame_cadran);
 
     infos->Selection.type = TYPE_CADRAN;
     infos->Selection.groupe = trame_cadran->groupe_dpl;

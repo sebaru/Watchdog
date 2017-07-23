@@ -86,8 +86,9 @@
   { struct TRAME_ITEM_MOTIF      *trame_motif;
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
-    struct TRAME_ITEM_CADRAN    *trame_cadran;
+    struct TRAME_ITEM_CADRAN     *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
+    struct TRAME_ITEM_SCENARIO   *trame_scenario;
     GList *objet;
 
     objet = infos->Selection.items;
@@ -121,6 +122,11 @@
                g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
                trame_camera_sup->selection = FALSE;
                break;
+          case TYPE_SCENARIO:
+               trame_scenario = (struct TRAME_ITEM_SCENARIO *)objet->data;
+               g_object_set( trame_scenario->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+               trame_scenario->selection = FALSE;
+               break;
           default: printf("Tout_deselectionner: type inconnu\n" );
         }
        objet=objet->next;
@@ -139,8 +145,9 @@
   { struct TRAME_ITEM_MOTIF      *trame_motif;
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
-    struct TRAME_ITEM_CADRAN    *trame_cadran;
+    struct TRAME_ITEM_CADRAN     *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
+    struct TRAME_ITEM_SCENARIO   *trame_scenario;
     GList *objet;
  printf("Selectionner groupe %d\n", groupe );   
     objet = infos->Trame_atelier->trame_items;
@@ -227,6 +234,21 @@
                    }
                 }
               break;
+          case TYPE_SCENARIO:
+               trame_scenario = (struct TRAME_ITEM_SCENARIO *)objet->data;
+               if (trame_scenario->groupe_dpl == groupe)
+                { if (!trame_scenario->selection)
+                   { g_object_set( trame_scenario->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                     trame_scenario->selection = TRUE;
+                     infos->Selection.items = g_list_append( infos->Selection.items, objet->data );
+                   }
+                  else if (deselect)
+                   { g_object_set( trame_scenario->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                     trame_scenario->selection = FALSE;
+                     infos->Selection.items = g_list_remove( infos->Selection.items, objet->data );
+                   }
+                }
+              break;
           default: printf("Selectionner: type inconnu\n" );
         }
        objet=objet->next;
@@ -242,8 +264,9 @@
   { struct TRAME_ITEM_MOTIF      *trame_motif;
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
-    struct TRAME_ITEM_CADRAN    *trame_cadran;
+    struct TRAME_ITEM_CADRAN     *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
+    struct TRAME_ITEM_SCENARIO   *trame_scenario;
     GList *selection;
     gint largeur_grille;
     gint dx, dy, new_x, new_y;
@@ -337,6 +360,22 @@
                 { trame_camera_sup->camera_sup->posy = new_y; }
                Trame_rafraichir_camera_sup(trame_camera_sup);                           /* Refresh visuel */
                break;
+          case TYPE_SCENARIO:
+               trame_scenario = ((struct TRAME_ITEM_SCENARIO *)(selection->data));
+               new_x = trame_scenario->scenario->posx+dx;
+               new_y = trame_scenario->scenario->posy+dy;
+
+               if (GTK_TOGGLE_BUTTON(infos->Check_grid)->active)
+                { new_x = new_x/largeur_grille * largeur_grille;
+                  new_y = new_y/largeur_grille * largeur_grille;
+                }
+
+               if ( 0<new_x && new_x<TAILLE_SYNOPTIQUE_X )
+                { trame_scenario->scenario->posx = new_x; }
+               if ( 0<new_y && new_y<TAILLE_SYNOPTIQUE_Y )
+                { trame_scenario->scenario->posy = new_y; }
+               Trame_rafraichir_scenario(trame_scenario);                                                   /* Refresh visuel */
+               break;
           default: printf("Deplacer_selection: type inconnu\n" );
         }
        selection = selection->next;
@@ -353,8 +392,9 @@
     struct TRAME_ITEM_MOTIF      *trame_motif;
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
-    struct TRAME_ITEM_CADRAN    *trame_cadran;
+    struct TRAME_ITEM_CADRAN     *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
+    struct TRAME_ITEM_SCENARIO   *trame_scenario;
     GList *selection;
 
     page = Page_actuelle();                                               /* On recupere la page actuelle */
@@ -389,6 +429,11 @@
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CAMERA_SUP,
                               (gchar *)trame_camera_sup->camera_sup, sizeof( struct CMD_TYPE_CAMERASUP ) );
                break;
+          case TYPE_SCENARIO:
+               trame_scenario = ((struct TRAME_ITEM_SCENARIO *)selection->data);
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_SCENARIO,
+                              (gchar *)trame_scenario->scenario, sizeof( struct CMD_TYPE_SCENARIO ) );
+               break;
           default: /*Selection = g_list_remove( Selection, Selection->data );*/
                    printf("Dupliquer_selection: type inconnu\n" );
         }
@@ -406,13 +451,15 @@
     struct TRAME_ITEM_MOTIF      *trame_motif;
     struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
-    struct TRAME_ITEM_CADRAN    *trame_cadran;
+    struct TRAME_ITEM_CADRAN     *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
+    struct TRAME_ITEM_SCENARIO   *trame_scenario;
     struct CMD_TYPE_MOTIF id_motif;
     struct CMD_TYPE_COMMENT id_comment;
     struct CMD_TYPE_CADRAN id_cadran;
     struct CMD_TYPE_PASSERELLE id_pass;
     struct CMD_TYPE_CAMERASUP id_camera_sup;
+    struct CMD_TYPE_SCENARIO id_scenario;
     GList *selection;
 
     page = Page_actuelle();                                               /* On recupere la page actuelle */
@@ -459,6 +506,12 @@
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_CAMERA_SUP,
                               (gchar *)&id_camera_sup, sizeof( struct CMD_TYPE_CAMERASUP ) );
                break;
+          case TYPE_SCENARIO:
+               trame_scenario = ((struct TRAME_ITEM_SCENARIO *)selection->data);
+               id_scenario.id = trame_scenario->scenario->id;
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_DEL_SCENARIO,
+                              (gchar *)&id_scenario, sizeof( struct CMD_TYPE_SCENARIO ) );
+               break;
           default: /*Selection = g_list_remove( Selection, Selection->data );*/
                    printf("Effacer_selection: type inconnu\n" );
         }
@@ -499,6 +552,9 @@
           case TYPE_CAMERA_SUP:
                ((struct TRAME_ITEM_CAMERA_SUP *)selection->data)->groupe_dpl = new_groupe;
                break;
+          case TYPE_SCENARIO:
+               ((struct TRAME_ITEM_SCENARIO *)selection->data)->groupe_dpl = new_groupe;
+               break;
           default: printf("Fusionner_selection: type inconnu\n" );
         }
        selection = selection->next;
@@ -533,6 +589,9 @@
               break;
          case TYPE_CAMERA_SUP:
               ((struct TRAME_ITEM_CAMERA_SUP *)infos->Selection.trame_camera_sup)->groupe_dpl = Nouveau_groupe();
+              break;
+         case TYPE_SCENARIO:
+              ((struct TRAME_ITEM_SCENARIO *)infos->Selection.trame_camera_sup)->groupe_dpl = Nouveau_groupe();
               break;
          default: printf("Detacher_selection: type inconnu\n" );
        }
