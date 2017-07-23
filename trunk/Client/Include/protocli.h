@@ -407,6 +407,8 @@
                                                GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
  extern void Clic_sur_cadran_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                             GdkEvent *event, struct TRAME_ITEM_CADRAN *trame_cadran );
+ extern void Clic_sur_scenario_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                             GdkEvent *event, struct TRAME_ITEM_SCENARIO *trame_scenario );
 
                                                                                                 /* Dans supervision_comment.c */
  extern void Proto_afficher_un_comment_supervision( struct CMD_TYPE_COMMENT *rezo_comment );
@@ -424,6 +426,9 @@
 
                                                                                                  /* Dans supervision_camera.c */
  extern void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
+
+                                                                                               /* Dans supervision_scenario.c */
+ extern void Proto_afficher_un_scenario_supervision( struct CMD_TYPE_SCENARIO *rezo_scenario );
 
                                                                                                    /* Dans option_entreetor.c */
  extern void Get_options_DI ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
