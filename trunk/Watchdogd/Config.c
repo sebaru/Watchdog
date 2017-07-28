@@ -110,31 +110,31 @@
 
 
        Config.db_port            = g_key_file_get_integer ( gkf, "DATABASE", "arch_port", NULL );
-       if (!Config.archdb_port) Config.archdb_port = DEFAUT_DB_PORT;
+       if (!Config.archdb_port) Config.archdb_port = Config.db_port;
 
        chaine                    = g_key_file_get_string ( gkf, "DATABASE", "arch_host", NULL );
        if (chaine)
         { g_snprintf( Config.archdb_host, sizeof(Config.archdb_host), "%s", chaine ); g_free(chaine); }
        else
-        { g_snprintf( Config.archdb_host, sizeof(Config.archdb_host), "%s", DEFAUT_DB_HOST  ); }
+        { g_snprintf( Config.archdb_host, sizeof(Config.archdb_host), "%s", Config.db_host ); }
 
        chaine                    = g_key_file_get_string ( gkf, "DATABASE", "arch_database", NULL );
        if (chaine)
         { g_snprintf( Config.archdb_database, sizeof(Config.archdb_database), "%s", chaine ); g_free(chaine); }
        else
-        { g_snprintf( Config.archdb_database, sizeof(Config.archdb_database), "%s", DEFAUT_DB_DATABASE  ); }
+        { g_snprintf( Config.archdb_database, sizeof(Config.archdb_database), "%s", Config.db_database ); }
 
        chaine                    = g_key_file_get_string ( gkf, "DATABASE", "arch_password", NULL );
        if (chaine)
         { g_snprintf( Config.archdb_password, sizeof(Config.archdb_password), "%s", chaine ); g_free(chaine); }
        else
-        { g_snprintf( Config.archdb_password, sizeof(Config.archdb_password), "%s", DEFAUT_DB_PASSWORD  ); }
+        { g_snprintf( Config.archdb_password, sizeof(Config.archdb_password), "%s", Config.db_password ); }
 
        chaine                    = g_key_file_get_string ( gkf, "DATABASE", "arch_username", NULL );
        if (chaine)
         { g_snprintf( Config.archdb_username, sizeof(Config.archdb_username), "%s", chaine ); g_free(chaine); }
        else
-        { g_snprintf( Config.archdb_username, sizeof(Config.archdb_username), "%s", DEFAUT_DB_USERNAME  ); }
+        { g_snprintf( Config.archdb_username, sizeof(Config.archdb_username), "%s", Config.db_username ); }
 
 /******************************************************** Partie LOG **********************************************************/
        Config.log_level = LOG_NOTICE;
