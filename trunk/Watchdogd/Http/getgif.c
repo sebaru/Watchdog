@@ -72,7 +72,7 @@
     id_s = lws_get_urlarg_by_name ( wsi, "id=", token_id, sizeof(token_id) );
     if (id_s) { id = atoi ( id_s ); } else { return(1); }
 
-    g_snprintf( nom_fichier, sizeof(nom_fichier), "Svg/%d.svg", id );
+    g_snprintf( nom_fichier, sizeof(nom_fichier), "Gif/%d.svg", id );
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
              "%s : (sid %s) Sending file '%s'", __func__, Http_get_session_id(session), nom_fichier );
