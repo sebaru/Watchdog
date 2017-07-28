@@ -1032,7 +1032,7 @@ CREATE TABLE IF NOT EXISTS `syns_scenario` (
   `posy` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  CONSTRAINT `id_syn` FOREIGN KEY (`id_syn`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+  CONSTRAINT `id_syn` FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 
