@@ -41,15 +41,6 @@
  #define NOM_TABLE_CAMERASUP      "syns_camerasup"
  #define NOM_TABLE_SCENARIO       "syns_scenario"
 
- struct SYN_SCENARIO
-  { guint id;
-    guint id_syn;
-    gchar libelle[80];
-    guint posx;
-    guint posy;
-    gfloat angle;
-  };
-
 /*************************************** Définitions des prototypes ***************************************/
  extern struct CMD_TYPE_SYNOPTIQUE *Rechercher_synoptiqueDB ( guint id );
  extern gboolean Recuperer_synoptiqueDB ( struct DB **db );
