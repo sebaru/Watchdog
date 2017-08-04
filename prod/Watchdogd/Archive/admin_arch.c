@@ -43,6 +43,12 @@
 
     g_snprintf( chaine, sizeof(chaine), " | Length of Arch list : %d\n", save_nbr );
     Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " | Archive Host : %s\n", Config.archdb_host );
+    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " | Archive DB   : %s\n", Config.archdb_database );
+    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " | Archive User : %s\n", Config.archdb_username );
+    Admin_write ( connexion, chaine );
     g_snprintf( chaine, sizeof(chaine), " -\n");
     Admin_write ( connexion, chaine );
   }

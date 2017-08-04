@@ -77,7 +77,7 @@
 
     if (edition==FALSE)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                  "INSERT INTO %s(id_syn, num, posx, posy) VALUES "
+                  "INSERT INTO %s(syn_id, num, posx, posy) VALUES "
                   "('%d','%d','%d','%d')",
                    NOM_TABLE_SCENARIO, scenario->syn_id, scenario->num, scenario->posx, scenario->posy );
      }
@@ -119,20 +119,20 @@
 /* Entrée: une database (retour) et un id synoptique                                                                          */
 /* Sortie: FALSE si probleme                                                                                                  */
 /******************************************************************************************************************************/
- gboolean Recuperer_scenarioDB ( struct DB **db_retour, gint id_syn )
+ gboolean Recuperer_scenarioDB ( struct DB **db_retour, gint syn_id )
   { gchar requete[512];
     gboolean retour;
     struct DB *db;
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed. Unable to load id '%d'", __func__, id_syn );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed. Unable to load id '%d'", __func__, syn_id );
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,id_syn,num,posx,posy"
-                " FROM %s WHERE id_syn='%d'", NOM_TABLE_SCENARIO, id_syn );
+                "SELECT id,syn_id,num,posx,posy"
+                " FROM %s WHERE syn_id='%d'", NOM_TABLE_SCENARIO, syn_id );
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if (retour == FALSE) Libere_DB_SQL (&db);
@@ -178,7 +178,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,id_syn,num,posx,posy"
+                "SELECT id,syn_id,num,posx,posy"
                 " FROM %s WHERE id='%d'", NOM_TABLE_SCENARIO, id );
 
     db = Init_DB_SQL();       

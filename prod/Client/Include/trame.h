@@ -217,6 +217,7 @@
  extern void Trame_rafraichir_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
  extern void Trame_rafraichir_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Trame_rafraichir_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
+ extern void Trame_rafraichir_scenario( struct TRAME_ITEM_SCENARIO *trame_scenario );
  extern void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num,
                                    guchar r, guchar v, guchar b );
  extern void Trame_peindre_motif ( struct TRAME_ITEM_MOTIF *trame_motif, guchar r, guchar v, guchar b );

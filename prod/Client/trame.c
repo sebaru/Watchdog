@@ -345,6 +345,24 @@ printf("Rafraichir camera : %d %d\n", trame_camera_sup->camera_sup->posx, trame_
 
     goo_canvas_item_set_transform ( trame_cadran->item_groupe, &trame_cadran->transform );
   }
+/******************************************************************************************************************************/
+/* Trame_rafraichir_scenario: remet à jour la position, rotation, echelle du scenario en parametre                            */
+/* Entrée: la structure graphique TRAME_ITEM_SCENARIO                                                                         */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Trame_rafraichir_scenario( struct TRAME_ITEM_SCENARIO *trame_scenario )
+  { if (!(trame_scenario && trame_scenario->scenario)) return;
+
+    cairo_matrix_init_identity ( &trame_scenario->transform );
+    cairo_matrix_translate ( &trame_scenario->transform,
+                             (gdouble)trame_scenario->scenario->posx,
+                             (gdouble)trame_scenario->scenario->posy
+                           );
+
+    cairo_matrix_scale  ( &trame_scenario->transform, 1.0, 1.0 );
+
+    goo_canvas_item_set_transform ( trame_scenario->item_groupe, &trame_scenario->transform );
+  }
 /**********************************************************************************************************/
 /* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                         */
 /* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                        */

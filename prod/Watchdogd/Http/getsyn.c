@@ -143,17 +143,15 @@
 
 /*-------------------------------------------------------- Dumping scenario --------------------------------------------------*/
     if ( Recuperer_scenarioDB( &db, id_syn ) )
-     { struct SYN_SCENARIO *scenario;
+     { struct CMD_TYPE_SCENARIO *scenario;
        json_builder_set_member_name  ( builder, "scenarios" );
        json_builder_begin_array (builder);                                                         /* Création du noeud Motif */
        while( (scenario = Recuperer_scenarioDB_suite( &db )) )
         { json_builder_begin_object (builder);                                                 /* Contenu du contenu du noeud */
           json_builder_set_member_name  ( builder, "id" );           json_builder_add_int_value    ( builder, scenario->id );
-          json_builder_set_member_name  ( builder, "libelle" );      json_builder_add_string_value ( builder, scenario->libelle );
-          json_builder_set_member_name  ( builder, "id_syn" );       json_builder_add_int_value    ( builder, scenario->id_syn );
+          json_builder_set_member_name  ( builder, "syn_id" );       json_builder_add_int_value    ( builder, scenario->syn_id );
           json_builder_set_member_name  ( builder, "posx" );         json_builder_add_int_value    ( builder, scenario->posx );
           json_builder_set_member_name  ( builder, "posy" );         json_builder_add_int_value    ( builder, scenario->posy );
-          json_builder_set_member_name  ( builder, "angle" );        json_builder_add_double_value ( builder, scenario->angle );
           json_builder_end_object (builder);                                                                /* End Passerelle */
           g_free(scenario);
         }

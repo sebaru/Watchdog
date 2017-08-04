@@ -46,6 +46,7 @@
  static struct TRAME_ITEM_MOTIF *appui = NULL;
  static struct TRAME_ITEM_CADRAN *appui_cadran = NULL;
  static struct TRAME_ITEM_CAMERA_SUP *appui_camera_sup = NULL;
+ static struct TRAME_ITEM_SCENARIO *appui_scenario = NULL;
 
  static GtkWidget *F_set_registre;                                                         /* Widget de l'interface graphique */
  static GtkWidget *Spin_valeur;                                                                         /* Valeur du registre */
@@ -282,6 +283,28 @@
        else if (event->button.button == 3)
         { if (!Popup) Popup = gnome_popup_menu_new( Popup_cadran );                     /* Creation menu */
           gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
+        }
+     }
+  }
+/******************************************************************************************************************************/
+/* Clic_sur_scenario_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision                    */
+/* Entrée: une structure Scenario                                                                                             */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Clic_sur_scenario_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                      GdkEvent *event, struct TRAME_ITEM_SCENARIO *trame_scenario )
+  { static GtkWidget *Popup = NULL;
+
+    if (!(trame_scenario && event)) return;
+    appui_scenario = trame_scenario;
+
+    if (event->type == GDK_BUTTON_PRESS)
+     { if ( ((GdkEventButton *)event)->button == 1 )                              /* Release sur le motif qui a été appuyé ?? */
+        { /*  */
+        }
+       else if (event->button.button == 3)
+        { /* if (!Popup) Popup = gnome_popup_menu_new( Popup_cadran );
+          gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client ); */
         }
      }
   }

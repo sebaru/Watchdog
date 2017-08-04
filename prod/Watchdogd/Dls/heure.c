@@ -31,6 +31,7 @@
 
  static int nbr_heure, nbr_minute;                                                     /* Gestion des demarrages à heure fixe */
  static int num_jour_semaine;                                                                 /* Numéro du jour de la semaine */
+ static int edge_up=0;
 /******************************************************************************************************************************/
 /* Prendre_heure: Prend la date/heure actuelle de la machine                                                                  */
 /* Entrée: rien                                                                                                               */
@@ -42,9 +43,12 @@
 
     time(&temps);
     localtime_r( &temps, &tm );
-    nbr_heure = tm.tm_hour;
+    if (nbr_heure == tm.tm_hour && nbr_minute == tm.tm_min)
+     { edge_up=0; return; }                                                          /* Pas bouger, on fait tomber le edge_up */
+    nbr_heure = tm.tm_hour;                    /* Sinon sauvegarde dans les variables, et edge_up=1 pendant un tour programme */
     nbr_minute = tm.tm_min;
     num_jour_semaine = tm.tm_wday;
+    edge_up = 1;
   }
 /******************************************************************************************************************************/
 /* Heure: renvoie TRUE si le jour actuel est celui en parametre                                                               */
@@ -59,13 +63,7 @@
 /* Sortie: TRUE / FALSE                                                                                                       */
 /******************************************************************************************************************************/
  int Heure ( int heure, int minute )
-  { static int hold_minute=-1;
-    if ( nbr_heure==heure && nbr_minute==minute && hold_minute!=nbr_minute )
-     { hold_minute = minute;
-       return(1);
-     }
-    return(0);
-  }
+  { return ( nbr_heure==heure && nbr_minute==minute && edge_up ); }
 /******************************************************************************************************************************/
 /* Heure: renvoie TRUE si l'heure actuelle est future à celle en parametre                                                    */
 /* Entrée: heure et minute attendue                                                                                           */
