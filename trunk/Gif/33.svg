@@ -27,7 +27,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="7.9195959"
      inkscape:cx="51.053917"
-     inkscape:cy="36.887802"
+     inkscape:cy="37.105027"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -35,10 +35,10 @@
      units="px"
      objecttolerance="10000"
      inkscape:window-width="1871"
-     inkscape:window-height="1032"
-     inkscape:window-x="41"
+     inkscape:window-height="1008"
+     inkscape:window-x="49"
      inkscape:window-y="48"
-     inkscape:window-maximized="0">
+     inkscape:window-maximized="1">
     <inkscape:grid
        type="xygrid"
        id="grid4863" />
@@ -51,7 +51,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -101,28 +101,53 @@
        d="M 6.6145832,286.41665 H 21.166666"
        id="path4904"
        inkscape:connector-curvature="0" />
-
-      <path
-         class="WTD-ActiveColor"
-         inkscape:connector-curvature="0"
-         id="path4902"
-         d="m 13.229167,279.80207 v 13.22917"
-         style="fill:none;stroke:#c8c8c8;stroke-width:0.79374999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1">
-      
-        <animateTransform attributeName="transform" attributeType="XML" type="translate" from="0 0" to="-5 0" begin="state_1" dur="0.3s" fill="freeze"/>
-        <animateTransform attributeName="transform" attributeType="XML" type="translate" from="-5 0" to="0 0" begin="state_0" dur="0.3s" fill="freeze"/>
-      </path>
-
-
-      <path
-         class="WTD-ActiveColor"
-         inkscape:connector-curvature="0"
-         id="path4902-5"
-         d="m 18.520833,279.80207 v 13.22917"
-         style="fill:none;stroke:#c8c8c8;stroke-width:0.79374999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1">
-
-        <animateTransform attributeName="transform" attributeType="XML" type="translate" from="0 0" to="-5 0" begin="state_1" dur="0.3s" fill="freeze"/>
-        <animateTransform attributeName="transform" attributeType="XML" type="translate" from="-5 0" to="0 0" begin="state_0" dur="0.3s" fill="freeze"/>
-      </path>
+    <rect
+       style="fill:#c8c8c8;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.3939344;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4287"
+       width="1.0583333"
+       height="15.875006"
+       x="12.7"
+       y="278.47916"
+       class="WTD-ActiveColor" />
+    <rect
+       style="fill:#c8c8c8;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.3939344;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4287-3"
+       width="1.0583333"
+       height="15.875006"
+       x="17.991667"
+       y="278.47916"
+       class="WTD-ActiveColor" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot4304"
+       style="fill:black;fill-opacity:1;stroke:none;font-family:sans-serif;font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;letter-spacing:0px;word-spacing:0px"><flowRegion
+         id="flowRegion4306"><rect
+           id="rect4308"
+           width="15"
+           height="45"
+           x="10"
+           y="20" /></flowRegion><flowPara
+         id="flowPara4310"></flowPara></flowRoot>    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:6.3499999px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="1.9981993"
+       y="286.18814"
+       id="text4318"><tspan
+         sodipodi:role="line"
+         id="tspan4316"
+         x="1.9981993"
+         y="286.18814"
+         style="font-size:6.3499999px;stroke-width:0.26458332">T</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:6.3499999px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="1.8974111"
+       y="291.50671"
+       id="text4322"><tspan
+         sodipodi:role="line"
+         id="tspan4320"
+         x="1.8974111"
+         y="291.50671"
+         style="font-size:6.3499999px;stroke-width:0.26458332">L</tspan></text>
   </g>
 </svg>
