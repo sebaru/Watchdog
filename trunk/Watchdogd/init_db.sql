@@ -205,28 +205,6 @@ INSERT INTO `groups` (`id`, `name`, `comment`) VALUES
 (10, 'Admin-CommandLineInterface', 'Command Line Interface Access'),
 (11, 'Satellite', 'Add Satellite Capabilities');
 
--- --------------------------------------------------------
-
---
--- Structure de la table `histo_bit`
---
-
-CREATE TABLE IF NOT EXISTS `histo_bit` (
-  `type` int(11) NOT NULL DEFAULT '0',
-  `num` int(11) NOT NULL DEFAULT '0',
-  `date_sec` int(11) NOT NULL DEFAULT '0',
-  `date_usec` int(11) NOT NULL DEFAULT '0',
-  `date_time` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `valeur` float NOT NULL DEFAULT '0.0',
-  PRIMARY KEY `key` (`type`,`num`,`date_time`)  
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
-  PARTITION BY RANGE COLUMNS (date_time) PARTITIONS 2
-   ( PARTITION p0 VALUES LESS THAN ('2016-01-01') ENGINE = InnoDB,
-     PARTITION p_MAX VALUES LESS THAN MAXVALUE
-   );
-
--- --------------------------------------------------------
-
 --
 -- Structure de la table `histo_msgs`
 --
