@@ -41,10 +41,36 @@
 /******************************************************************************************************************************/
  void Lire_config ( char *fichier_config )
   { gchar *chaine, *fichier;
+	gint num;
     GError *error = NULL;
     GKeyFile *gkf;
 
-    if (!fichier_config) fichier = DEFAUT_FICHIER_CONFIG_SRV;
+    g_snprintf( Config.home,          sizeof(Config.home), "%s", g_get_home_dir() );
+    g_snprintf( Config.instance_id,   sizeof(Config.instance_id), "%s", DEFAUT_GLOBAL_ID  );
+    g_snprintf( Config.run_as,        sizeof(Config.run_as), "%s", g_get_user_name() );
+    g_snprintf( Config.librairie_dir, sizeof(Config.librairie_dir), "%s", DEFAUT_LIBRAIRIE_DIR   );
+
+    Config.instance_is_master = TRUE;
+    Config.log_db             = FALSE;
+    Config.db_port            = DEFAUT_DB_PORT;
+
+    g_snprintf( Config.db_host,     sizeof(Config.db_host),     "%s", DEFAUT_DB_HOST  );
+    g_snprintf( Config.db_database, sizeof(Config.db_database), "%s", DEFAUT_DB_DATABASE  );
+    g_snprintf( Config.db_password, sizeof(Config.db_password), "%s", DEFAUT_DB_PASSWORD  );
+    g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", DEFAUT_DB_USERNAME  );
+    Config.archdb_port = Config.db_port;
+    g_snprintf( Config.archdb_host,     sizeof(Config.archdb_host),     "%s", Config.db_host );
+    g_snprintf( Config.archdb_database, sizeof(Config.archdb_database), "%s", Config.db_database );
+    g_snprintf( Config.archdb_password, sizeof(Config.archdb_password), "%s", Config.db_password );
+    g_snprintf( Config.archdb_username, sizeof(Config.archdb_username), "%s", Config.db_username );
+
+    Config.log_level = LOG_NOTICE;
+    Config.log_msrv  = FALSE;
+    Config.log_dls   = FALSE;
+    Config.log_arch  = FALSE;
+
+
+    if (!fichier_config) fichier = DEFAUT_FICHIER_CONFIG_SRV;                          /* Lecture du fichier de configuration */
                     else fichier = fichier_config;
     printf("Using config file %s\n", fichier );
     gkf = g_key_file_new();
@@ -56,88 +82,63 @@
        chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "home", NULL );
        if (chaine)
         { g_snprintf( Config.home, sizeof(Config.home), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.home, sizeof(Config.home), "%s", g_get_home_dir() ); }
 
        chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "instance_id", NULL );
        if (chaine)
         { g_snprintf( Config.instance_id, sizeof(Config.instance_id), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.instance_id, sizeof(Config.instance_id), "%s", DEFAUT_GLOBAL_ID  ); }
 
        chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "run_as", NULL );
        if (chaine)
         { g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", g_get_user_name() ); }
 
        chaine                    = g_key_file_get_string ( gkf, "GLOBAL", "library_dir", NULL );
        if (chaine)
         { g_snprintf( Config.librairie_dir, sizeof(Config.librairie_dir), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.librairie_dir, sizeof(Config.librairie_dir), "%s", DEFAUT_LIBRAIRIE_DIR   ); }
 
        Config.instance_is_master = g_key_file_get_boolean ( gkf, "GLOBAL", "instance_is_master", NULL );
 
 /******************************************************** Partie DATABASE *****************************************************/
-       Config.log_db             = g_key_file_get_boolean ( gkf, "DATABASE", "debug", NULL );
-       Config.db_port            = g_key_file_get_integer ( gkf, "DATABASE", "port", NULL );
-       if (!Config.db_port) Config.db_port = DEFAUT_DB_PORT;
+       Config.log_db = g_key_file_get_boolean ( gkf, "DATABASE", "debug", NULL );
+       num           = g_key_file_get_integer ( gkf, "DATABASE", "port", NULL );
+       if (num) Config.db_port = num;
 
        chaine                    = g_key_file_get_string ( gkf, "DATABASE", "host", NULL );
        if (chaine)
         { g_snprintf( Config.db_host, sizeof(Config.db_host), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.db_host, sizeof(Config.db_host), "%s", DEFAUT_DB_HOST  ); }
 
        chaine                    = g_key_file_get_string ( gkf, "DATABASE", "database", NULL );
        if (chaine)
         { g_snprintf( Config.db_database, sizeof(Config.db_database), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.db_database, sizeof(Config.db_database), "%s", DEFAUT_DB_DATABASE  ); }
 
        chaine                    = g_key_file_get_string ( gkf, "DATABASE", "password", NULL );
        if (chaine)
         { g_snprintf( Config.db_password, sizeof(Config.db_password), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.db_password, sizeof(Config.db_password), "%s", DEFAUT_DB_PASSWORD  ); }
 
        chaine                    = g_key_file_get_string ( gkf, "DATABASE", "username", NULL );
        if (chaine)
         { g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", DEFAUT_DB_USERNAME  ); }
 
 
-       Config.db_port            = g_key_file_get_integer ( gkf, "DATABASE", "arch_port", NULL );
-       if (!Config.archdb_port) Config.archdb_port = Config.db_port;
+       num = g_key_file_get_integer ( gkf, "DATABASE", "arch_port", NULL );
+       if (num) Config.archdb_port = num;
 
        chaine                    = g_key_file_get_string ( gkf, "DATABASE", "arch_host", NULL );
        if (chaine)
         { g_snprintf( Config.archdb_host, sizeof(Config.archdb_host), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.archdb_host, sizeof(Config.archdb_host), "%s", Config.db_host ); }
 
        chaine                    = g_key_file_get_string ( gkf, "DATABASE", "arch_database", NULL );
        if (chaine)
         { g_snprintf( Config.archdb_database, sizeof(Config.archdb_database), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.archdb_database, sizeof(Config.archdb_database), "%s", Config.db_database ); }
 
        chaine                    = g_key_file_get_string ( gkf, "DATABASE", "arch_password", NULL );
        if (chaine)
         { g_snprintf( Config.archdb_password, sizeof(Config.archdb_password), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.archdb_password, sizeof(Config.archdb_password), "%s", Config.db_password ); }
 
        chaine                    = g_key_file_get_string ( gkf, "DATABASE", "arch_username", NULL );
        if (chaine)
         { g_snprintf( Config.archdb_username, sizeof(Config.archdb_username), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.archdb_username, sizeof(Config.archdb_username), "%s", Config.db_username ); }
 
 /******************************************************** Partie LOG **********************************************************/
-       Config.log_level = LOG_NOTICE;
        chaine = g_key_file_get_string ( gkf, "LOG", "log_level", NULL );
        if (chaine)
         {      if ( ! strcmp( chaine, "debug"    ) ) Config.log_level = LOG_DEBUG;
@@ -152,10 +153,11 @@
        Config.log_msrv = g_key_file_get_boolean ( gkf, "LOG", "debug_msrv", NULL );
        Config.log_dls  = g_key_file_get_boolean ( gkf, "LOG", "debug_dls", NULL );
        Config.log_arch = g_key_file_get_boolean ( gkf, "LOG", "debug_arch", NULL );
-     } else 
-        { printf("Unable to parse config file %s, error %s\n", fichier, error->message );
-          g_error_free( error );
-        }
+     }
+    else 
+     { printf("Unable to parse config file %s, error %s\n", fichier, error->message );
+       g_error_free( error );
+     }
     g_key_file_free(gkf);
   }
 /******************************************************************************************************************************/
