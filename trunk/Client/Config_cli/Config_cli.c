@@ -39,48 +39,47 @@
 /******************************************************************************************************************************/
  void Lire_config_cli ( struct CONFIG_CLI *config_cli, char *fichier_config_cli )
   { gchar *chaine, *fichier;
+	gint num;
     GKeyFile *gkf;
     GError *error=NULL;
 
-    if (!config_cli) return;
+                           /* Chargement des paramètres par défaut avant d'essayer de lire la conf dans le fichier sur disque */
+    g_snprintf( config_cli->host,        sizeof(config_cli->host),        "%s", DEFAUT_SERVEUR  );
+    g_snprintf( config_cli->user,        sizeof(config_cli->user),        "%s", DEFAUT_USER  );
+    g_snprintf( config_cli->passwd,      sizeof(config_cli->passwd),      "%s", DEFAUT_PASSWD  );
+    g_snprintf( config_cli->ssl_file_ca, sizeof(config_cli->ssl_file_ca), "%s", DEFAUT_SSL_FILE_CA );
+    config_cli->port_ihm       = DEFAUT_PORT_IHM;
+    config_cli->log_level      = DEFAUT_LOG_LEVEL;
+    config_cli->log_override   = FALSE;
+    config_cli->gui_tech       = TRUE;
+    config_cli->gui_fullscreen = FALSE;
 
-    if (!fichier_config_cli) fichier = DEFAUT_FICHIER_CONFIG_CLI;
+    if (!fichier_config_cli) fichier = DEFAUT_FICHIER_CONFIG_CLI;                          /* Recherche du fichier et parsing */
                         else fichier = fichier_config_cli;
     printf("Using config file %s\n", fichier );
     gkf = g_key_file_new();
 
-    config_cli->log_level = DEFAUT_LOG_LEVEL;                                                     /* Niveau de log par défaut */
-    config_cli->log_override = TRUE;
     if (g_key_file_load_from_file( gkf, fichier, G_KEY_FILE_NONE, &error ))
      {
-
 /**************************************************** Partie SERVEUR **********************************************************/
        chaine = g_key_file_get_string ( gkf, "SERVER", "host", NULL );
        if (chaine)
         { g_snprintf( config_cli->host, sizeof(config_cli->host), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( config_cli->host, sizeof(config_cli->host), "%s", DEFAUT_SERVEUR  ); }
 
        chaine = g_key_file_get_string ( gkf, "SERVER", "user", NULL );
        if (chaine)
         { g_snprintf( config_cli->user, sizeof(config_cli->user), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( config_cli->user, sizeof(config_cli->user), "%s", DEFAUT_USER  ); }
 
        chaine = g_key_file_get_string ( gkf, "SERVER", "password", NULL );
        if (chaine)
         { g_snprintf( config_cli->passwd, sizeof(config_cli->passwd), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( config_cli->passwd, sizeof(config_cli->passwd), "%s", DEFAUT_PASSWD  ); }
 
        chaine = g_key_file_get_string ( gkf, "SERVER", "ssl_file_ca", NULL );
        if (chaine)
         { g_snprintf( config_cli->ssl_file_ca, sizeof(config_cli->ssl_file_ca), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( config_cli->ssl_file_ca, sizeof(config_cli->ssl_file_ca), "%s", DEFAUT_SSL_FILE_CA ); }
 
-       config_cli->port_ihm = g_key_file_get_integer ( gkf, "SERVER", "port_ihm", NULL );
-       if (!config_cli->port_ihm) config_cli->port_ihm = DEFAUT_PORT_IHM;
+       num = g_key_file_get_integer ( gkf, "SERVER", "port_ihm", NULL );
+       if (num) config_cli->port_ihm = num;
 
 /****************************************************** Partie LOG ************************************************************/
        chaine = g_key_file_get_string ( gkf, "LOG", "log_level", NULL );
@@ -99,10 +98,11 @@
 /***************************************************** Partie GUI *************************************************************/
        config_cli->gui_tech = g_key_file_get_boolean ( gkf, "GUI", "technical", NULL );
        config_cli->gui_fullscreen = g_key_file_get_boolean ( gkf, "GUI", "fullscreen", NULL );
-     } else 
-        { printf("Unable to parse config file %s, error %s\n", fichier, error->message );
-          g_error_free( error );
-        }
+     }
+    else 
+     { printf("Unable to parse config file %s, error %s\n", fichier, error->message );
+       g_error_free( error );
+     }
     g_key_file_free(gkf);
   }
 /******************************************************************************************************************************/
