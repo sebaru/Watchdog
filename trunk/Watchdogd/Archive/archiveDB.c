@@ -48,7 +48,7 @@
     Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s_%%03d_%06d(date_time,valeur) VALUES "
+                "INSERT INTO %s_%03d_%06d(date_time,valeur) VALUES "
                 "(FROM_UNIXTIME(%d.%d),'%f')",
                 NOM_TABLE_ARCH, arch->type, arch->num, arch->date_sec, arch->date_usec, arch->valeur );
 
