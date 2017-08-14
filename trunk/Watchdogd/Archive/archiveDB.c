@@ -39,9 +39,18 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s(date_time,type,num,valeur) VALUES "
-                "(FROM_UNIXTIME(%d.%d),%d,%d,'%f')", NOM_TABLE_ARCH, arch->date_sec, arch->date_usec,
-                arch->type, arch->num, arch->valeur );
+                "CREATE TABLE `%s_%d_%d` IF NOT EXIST("
+                "`date_time` datetime(6) DEFAULT NULL,"
+                "`valeur` float NOT NULL DEFAULT '0',"
+                "KEY `index_date` (`date_time`)"
+                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;",
+                NOM_TABLE_ARCH, arch->type, arch->num );
+    Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "INSERT INTO %s_%d_%d(date_time,valeur) VALUES "
+                "(FROM_UNIXTIME(%d.%d),'%f')",
+                NOM_TABLE_ARCH, arch->type, arch->num, arch->date_sec, arch->date_usec, arch->valeur );
 
     Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
   }
