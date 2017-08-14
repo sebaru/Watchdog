@@ -39,7 +39,7 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "CREATE TABLE `%s_%03d_%06d` IF NOT EXISTS("
+                "CREATE TABLE IF NOT EXISTS `%s_%03d_%06d`("
                 "`date_time` datetime(6) DEFAULT NULL,"
                 "`valeur` float NOT NULL DEFAULT '0',"
                 "KEY `index_date` (`date_time`)"
