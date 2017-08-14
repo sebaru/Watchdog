@@ -39,7 +39,7 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "CREATE TABLE `%s_%d_%d` IF NOT EXIST("
+                "CREATE TABLE `%s_%03d_%06d` IF NOT EXIST("
                 "`date_time` datetime(6) DEFAULT NULL,"
                 "`valeur` float NOT NULL DEFAULT '0',"
                 "KEY `index_date` (`date_time`)"
@@ -48,7 +48,7 @@
     Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s_%d_%d(date_time,valeur) VALUES "
+                "INSERT INTO %s_%%03d_%06d(date_time,valeur) VALUES "
                 "(FROM_UNIXTIME(%d.%d),'%f')",
                 NOM_TABLE_ARCH, arch->type, arch->num, arch->date_sec, arch->date_usec, arch->valeur );
 
