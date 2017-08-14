@@ -30,6 +30,7 @@
 
  #include <glib.h>
  #include <pthread.h>
+ #include <string.h>
  #include <errno.h>
 
  #include "Reseaux.h"

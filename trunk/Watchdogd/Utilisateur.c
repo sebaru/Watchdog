@@ -48,7 +48,7 @@
     memset ( salt, 0, sizeof(salt) );                                                                      /* RAZ des buffers */
     memset ( util->salt, 0, sizeof(util->salt) );
 
-    RAND_pseudo_bytes( (guchar *)salt, sizeof(salt) );                                      /* Récupération d'un nouveau SALT */
+    RAND_bytes( (guchar *)salt, sizeof(salt) );                                             /* Récupération d'un nouveau SALT */
     for (cpt=0; cpt<sizeof(salt); cpt++)                                                       /* Mise en forme au format HEX */
      { g_snprintf( &util->salt[2*cpt], 3, "%02X", (guchar)salt[cpt] ); }
   }
