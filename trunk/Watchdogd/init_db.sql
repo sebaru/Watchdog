@@ -1016,6 +1016,26 @@ CREATE TABLE IF NOT EXISTS `syns_scenario` (
 
 -- --------------------------------------------------------
 
+
+--
+-- Structure de la table `scenario_detail`
+--
+
+CREATE TABLE IF NOT EXISTS `scenario_detail` (
+  `num` int(11) NOT NULL,
+  `minute` int(11) NOT NULL,
+  `heure` int(11) NOT NULL,
+  `jour` int(11) NOT NULL,
+  `date` int(11) NOT NULL,
+  `mois` int(11) NOT NULL,
+  `mnemo_id` int(11) NOT NULL,
+  KEY (`num`),
+  CONSTRAINT `num` FOREIGN KEY (`num`) REFERENCES `syns_scenario` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `mnemo_id` FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
 --
 -- Structure de la table `users`
 --
