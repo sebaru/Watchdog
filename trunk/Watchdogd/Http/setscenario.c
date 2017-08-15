@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Http/setmessage.c       Gestion des request setmessage pour le thread HTTP de watchdog                           */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                                    22.09.2016 14:18:41 */
+/* Watchdogd/Http/setscenario.c       Gestion des request setscenario pour le thread HTTP de watchdog                         */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                                    15.08.2017 19:57:52 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * setmessage.c
+ * setscenario.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -30,14 +30,14 @@
  #include "Http.h"
 
 /******************************************************************************************************************************/
-/* Http_Traiter_request_body_completion_setmessage: le payload est arrivé, il faut traiter le message !                       */
+/* Http_Traiter_request_body_completion_setscenario: le payload est arrivé, il faut traiter le scenario !                     */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : 0 ou 1 selon si la transaction est completed                                                                      */
 /******************************************************************************************************************************/
- gint Http_Traiter_request_body_completion_setmessage ( struct lws *wsi )
+ gint Http_Traiter_request_body_completion_setscenario ( struct lws *wsi )
   { unsigned char header[512], *header_cur, *header_end;
     struct HTTP_PER_SESSION_DATA *pss;
-    struct CMD_TYPE_MESSAGE *msg;
+    struct SCENARIO_DETAIL *sce;
     JsonNode *root_node, *node;
     JsonParser *parser;
     JsonObject *object;
@@ -49,7 +49,7 @@
              "%s: (sid %s) HTTP request body completion", __func__, Http_get_session_id(pss->session) );
 
 
-    if ( pss->session==NULL || pss->session->util==NULL || Tester_groupe_util( pss->session->util, GID_MESSAGE)==FALSE)
+    if ( pss->session==NULL || pss->session->util==NULL /*|| Tester_groupe_util( pss->session->util, GID_MESSAGE)==FALSE */)
      { Http_Send_response_code ( wsi, HTTP_UNAUTHORIZED );
        pss->post_data_length = 0;
        g_free(pss->post_data);
@@ -96,8 +96,8 @@
              "%s: (sid %s) Received: object with %d members", __func__, Http_get_session_id(pss->session),
               json_object_get_size (object) );
 
-    msg = (struct CMD_TYPE_MESSAGE *)g_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
-    if (!msg)
+    sce = (struct SCENARIO_DETAIL *)g_malloc0( sizeof(struct SCENARIO_DETAIL) );
+    if (!sce)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                 "%s: (sid %s) Memory Error", __func__, Http_get_session_id(pss->session) );
        g_object_unref(parser);
@@ -107,8 +107,8 @@
        return(1);
      }
 
-    msg->id          = Http_json_get_int (object, "id");                           /* Récupération des valeurs des paramètres */
-    msg->num         = Http_json_get_int (object, "num");
+    sce->num         = Http_json_get_int (object, "num");                          /* Récupération des valeurs des paramètres */
+/*    msg->num         = Http_json_get_int (object, "num");
     msg->type        = Http_json_get_int (object, "type");
     msg->dls_id      = Http_json_get_int (object, "dls_id");
     msg->time_repeat = Http_json_get_int (object, "time_repeat");
@@ -116,20 +116,15 @@
     msg->enable      = Http_json_get_int (object, "enable");
     msg->audio       = Http_json_get_int (object, "audio");
     msg->bit_audio   = Http_json_get_int (object, "bit_audio");
-    msg->persist     = Http_json_get_int (object, "persist");
-    node = json_object_get_member (object, "libelle" );
-    if (node) g_snprintf( msg->libelle, sizeof(msg->libelle), "%s", json_node_get_string ( node ) );
-         else g_snprintf( msg->libelle, sizeof(msg->libelle), "undefined" );
+    msg->persist     = Http_json_get_int (object, "persist");*/
 
-    node = json_object_get_member (object, "libelle_sms" );
-    if (node) g_snprintf( msg->libelle_sms, sizeof(msg->libelle_sms), "%s", json_node_get_string ( node ) );
-         else g_snprintf( msg->libelle_sms, sizeof(msg->libelle_sms), "undefined" );
     g_object_unref(parser);                                                                      /* Libération du parser Json */
-    pss->post_data_length = 0;
     g_free(pss->post_data);
+    pss->post_data_length = 0;
 
+/*
     if (msg->id==-1)
-     { if ( (msg->id = Ajouter_messageDB(msg)) != -1)
+     { if ( (msg->id = Ajouter_scenarioDB(msg)) != -1)
         { gchar buf[80];
           g_snprintf( buf, sizeof(buf), "{ \"msg_id\" : %d }", msg->id );
           Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, strlen(buf) );
@@ -137,14 +132,14 @@
        else Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
      }          
     else
-     { if ( Modifier_messageDB(msg) == TRUE )
+     { if ( Modifier_scenarioDB(msg) == TRUE )
         { gchar buf[80];
           g_snprintf( buf, sizeof(buf), "{ \"msg_id\" : %d }", msg->id );
           Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, strlen(buf) );
         }
        else Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
-     }          
-    g_free(msg);
+     }          */
+    g_free(sce);
     return(lws_http_transaction_completed(wsi));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

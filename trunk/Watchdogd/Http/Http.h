@@ -109,10 +109,10 @@
  extern gint Http_Traiter_request_getsvg ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_getaudio ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gint Http_Traiter_request_getmessage ( struct lws *wsi, struct HTTP_SESSION *session );
- extern gint Http_Traiter_request_setmessage ( struct lws *wsi, struct HTTP_SESSION *session, gchar *remote_name, gchar *remote_ip );
- extern gint Http_Traiter_request_delmessage ( struct lws *wsi, struct HTTP_SESSION *session );
+ extern gint Http_Traiter_request_getscenario ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_body_completion_setmessage ( struct lws *wsi );
  extern gint Http_Traiter_request_body_completion_delmessage ( struct lws *wsi );
+ extern gint Http_Traiter_request_body_completion_setscenario ( struct lws *wsi );
  extern gint Http_Traiter_request_postfile ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_body_completion_postfile ( struct lws *wsi );
  extern gint Http_Traiter_request_getpluginsDLS ( struct lws *wsi, struct HTTP_SESSION *session );
