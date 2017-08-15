@@ -37,11 +37,10 @@
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
  gint Http_Traiter_request_getscenario ( struct lws *wsi, struct HTTP_SESSION *session )
-  { gchar token_id[12];
+  { struct SCENARIO_DETAIL *sce;
+    gchar token_id[12];
     const gchar *id_s;
-    gchar requete[1024], critere[512];
-    struct CMD_TYPE_MESSAGE *msg;
-    gint type, start, length;
+    gint id;
     struct DB *db;
     gint retour;
     JsonBuilder *builder;
@@ -49,7 +48,7 @@
     gchar *buf;
     gsize taille_buf;
 
-#idef bouh
+#ifdef bouh
     if ( session==NULL || session->util==NULL || Tester_groupe_util(session->util, GID_MESSAGE)==FALSE )
      { Http_Send_response_code ( wsi, HTTP_UNAUTHORIZED );
        return(1);
@@ -65,42 +64,39 @@
     builder = json_builder_new ();
     if (builder == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getscenario : JSon builder creation failed" );
+                 "%s: JSon builder creation failed", __func__ );
        Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
        return(1);
      }
-                                                                      /* Lancement de la requete de recuperation des scenarios */
-    if ( ! Recuperer_scenarioDB_with_conditions( &db, requete, start, length ) )
+                                              /* Lancement de la requete de recuperation des details du scenario en parametre */
+    if ( ! Recuperer_scenario_detailsDB( &db, id ) )
      { g_object_unref(builder);
        Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
        return(1);
      }
-/*------------------------------------------------------- Dumping scenario ----------------------------------------------------*/
+/*------------------------------------------------------ Dumping scenario ----------------------------------------------------*/
     json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-    json_builder_set_member_name  ( builder, "Messages" );
+    json_builder_set_member_name  ( builder, "Scenario" );
     json_builder_begin_array (builder);                                                        /* Création du noeud principal */
-    while ( (msg=Recuperer_scenarioDB_suite( &db )) != NULL )                     /* Mise en forme avant envoi au client léger */
+    while ( (sce=Recuperer_scenario_detailsDB_suite( &db )) != NULL )            /* Mise en forme avant envoi au client léger */
      { 
        json_builder_begin_object (builder);                                                             /* Contenu du Message */
 
-       json_builder_set_member_name  ( builder, "id" );            json_builder_add_int_value    ( builder, msg->id );
-       json_builder_set_member_name  ( builder, "type" );          json_builder_add_int_value    ( builder, msg->type );
-       json_builder_set_member_name  ( builder, "enable" );        json_builder_add_boolean_value( builder, msg->enable );
-       json_builder_set_member_name  ( builder, "num" );           json_builder_add_int_value    ( builder, msg->num );
-       json_builder_set_member_name  ( builder, "sms" );           json_builder_add_int_value    ( builder, msg->sms );
-       json_builder_set_member_name  ( builder, "audio" );         json_builder_add_boolean_value( builder, msg->audio );
-       json_builder_set_member_name  ( builder, "bit_audio" );     json_builder_add_int_value    ( builder, msg->bit_audio );
-       json_builder_set_member_name  ( builder, "time_repeat" );   json_builder_add_int_value    ( builder, msg->time_repeat );
-       json_builder_set_member_name  ( builder, "dls_id" );        json_builder_add_int_value    ( builder, msg->dls_id );
-       json_builder_set_member_name  ( builder, "libelle" );       json_builder_add_string_value ( builder, msg->libelle );
-       json_builder_set_member_name  ( builder, "libelle_sms" );   json_builder_add_string_value ( builder, msg->libelle_sms );
-       json_builder_set_member_name  ( builder, "syn_groupe" );    json_builder_add_string_value ( builder, msg->syn_groupe );
-       json_builder_set_member_name  ( builder, "syn_page" );      json_builder_add_string_value ( builder, msg->syn_page );
-       json_builder_set_member_name  ( builder, "syn_libelle" );   json_builder_add_string_value ( builder, msg->syn_libelle );
-       json_builder_set_member_name  ( builder, "dls_shortname" ); json_builder_add_string_value ( builder, msg->dls_shortname );
+       json_builder_set_member_name  ( builder, "num" );     json_builder_add_int_value   ( builder, sce->num );
+       json_builder_set_member_name  ( builder, "minute" );  json_builder_add_int_value   ( builder, sce->minute );
+       json_builder_set_member_name  ( builder, "heure" );   json_builder_add_int_value   ( builder, sce->heure );
+       json_builder_set_member_name  ( builder, "jour" );    json_builder_add_int_value   ( builder, sce->jour );
+       json_builder_set_member_name  ( builder, "date" );    json_builder_add_int_value   ( builder, sce->date );
+       json_builder_set_member_name  ( builder, "mois" );    json_builder_add_int_value   ( builder, sce->mois );
+       json_builder_set_member_name  ( builder, "libelle" ); json_builder_add_string_value( builder, sce->mnemo_libelle );
 
+#ifdef bouh
+if (habilitation technicien)
+       json_builder_set_member_name  ( builder, "monostable" ); json_builder_add_boolean_value( builder, sce->mnemo_num );
+       json_builder_set_member_name  ( builder, "libelle" );    json_builder_add_boolean_value( builder, sce->m );
+#endif
        json_builder_end_object (builder);                                                              /* Fin dump du scenario */
-       g_free(msg);
+       g_free(sce);
      }
     json_builder_end_array (builder);                                                                         /* End Document */
     json_builder_end_object (builder);                                                                        /* End Document */
