@@ -124,7 +124,6 @@
      { Envoi_client ( client, tag, sstag, (gchar *)camera_sup, sizeof(struct CMD_TYPE_CAMERASUP) );
        g_free(camera_sup);
      }
-    Libere_DB_SQL( &db );
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

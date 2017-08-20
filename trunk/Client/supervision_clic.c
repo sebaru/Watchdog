@@ -148,7 +148,6 @@
           else if (!pid)                                             /* Lancement de la ligne de commande */
            {
              execlp( "vlc", "vlc", trame_camera_sup->camera_sup->location, NULL );
-             printf("AUDIO: Lancement gst-launch failed\n");
              _exit(0);
            }
         }
@@ -300,7 +299,17 @@
 
     if (event->type == GDK_BUTTON_PRESS)
      { if ( ((GdkEventButton *)event)->button == 1 )                              /* Release sur le motif qui a été appuyé ?? */
-        { /*  */
+        { gint pid;
+
+          pid = fork();
+          if (pid<0) return;
+          else if (!pid)                                                                 /* Lancement de la ligne de commande */
+           {gchar chaine[256];
+            g_snprintf( chaine, sizeof(chaine),
+                        "http://%s/scenario.html?id=%d", Client.host, trame_scenario->scenario->id );
+             execlp( "firefox", "firefox", chaine, NULL );
+             _exit(0);
+           }
         }
        else if (event->button.button == 3)
         { /* if (!Popup) Popup = gnome_popup_menu_new( Popup_cadran );

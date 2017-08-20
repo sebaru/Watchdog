@@ -49,12 +49,14 @@
              "%s: (sid %s) HTTP request body completion", __func__, Http_get_session_id(pss->session) );
 
 
-    if ( pss->session==NULL || pss->session->util==NULL /*|| Tester_groupe_util( pss->session->util, GID_MESSAGE)==FALSE */)
+#ifdef bouh
+    if ( pss->session==NULL || pss->session->util==NULL || Tester_groupe_util( pss->session->util, GID_MESSAGE)==FALSE )
      { Http_Send_response_code ( wsi, HTTP_UNAUTHORIZED );
        pss->post_data_length = 0;
        g_free(pss->post_data);
        return(1);
      }
+#endif
 
     header_cur = header;                                                             /* Préparation des headers de la réponse */
     header_end = header + sizeof(header);
@@ -93,8 +95,13 @@
 
     object = json_node_get_object (root_node);
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %s) Received: object with %d members", __func__, Http_get_session_id(pss->session),
-              json_object_get_size (object) );
+             "%s: (sid %s) Received: '%s' with %d members", __func__, Http_get_session_id(pss->session),
+              json_node_type_name(root_node), json_object_get_size (object) );
+
+    node = json_object_get_member (object, "num1");
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+             "%s: (sid %s) Received: '%s'", __func__, Http_get_session_id(pss->session),
+              json_node_type_name(node) );
 
     sce = (struct SCENARIO_DETAIL *)g_malloc0( sizeof(struct SCENARIO_DETAIL) );
     if (!sce)

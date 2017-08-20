@@ -125,7 +125,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT s.num,s.minute,s.heure,s.jour,s.date,s.mois, mnemo.num, mnemo.libelle"
+                "SELECT s.id,s.num,s.minute,s.heure,s.jour,s.date,s.mois, mnemo.num, mnemo.libelle"
                 " FROM %s as s"
                 " INNER JOIN %s as mnemo ON mnemo.id=s.mnemo_id"
                 " WHERE mnemo.type=%d AND s.num=%d",
@@ -166,14 +166,15 @@
        return(NULL);
      }
                                                                                                  /* Recopie dans la structure */
-    g_snprintf( sce->mnemo_libelle, sizeof(sce->mnemo_libelle), "%s", db->row[7] );
-    sce->num       = atoi(db->row[0]);
-    sce->minute    = atoi(db->row[1]);
-    sce->heure     = atoi(db->row[2]);
-    sce->jour      = atoi(db->row[3]);
-    sce->date      = atoi(db->row[4]);
-    sce->mois      = atoi(db->row[5]);
-    sce->mnemo_num = atoi(db->row[6]);
+    g_snprintf( sce->mnemo_libelle, sizeof(sce->mnemo_libelle), "%s", db->row[8] );
+    sce->id        = atoi(db->row[0]);
+    sce->num       = atoi(db->row[1]);
+    sce->minute    = atoi(db->row[2]);
+    sce->heure     = atoi(db->row[3]);
+    sce->jour      = atoi(db->row[4]);
+    sce->date      = atoi(db->row[5]);
+    sce->mois      = atoi(db->row[6]);
+    sce->mnemo_num = atoi(db->row[7]);
     return(sce);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

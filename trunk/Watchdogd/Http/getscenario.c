@@ -82,6 +82,7 @@
      { 
        json_builder_begin_object (builder);                                                             /* Contenu du Message */
 
+       json_builder_set_member_name  ( builder, "id" );      json_builder_add_int_value   ( builder, sce->id );
        json_builder_set_member_name  ( builder, "num" );     json_builder_add_int_value   ( builder, sce->num );
        json_builder_set_member_name  ( builder, "minute" );  json_builder_add_int_value   ( builder, sce->minute );
        json_builder_set_member_name  ( builder, "heure" );   json_builder_add_int_value   ( builder, sce->heure );
@@ -89,12 +90,11 @@
        json_builder_set_member_name  ( builder, "date" );    json_builder_add_int_value   ( builder, sce->date );
        json_builder_set_member_name  ( builder, "mois" );    json_builder_add_int_value   ( builder, sce->mois );
        json_builder_set_member_name  ( builder, "libelle" ); json_builder_add_string_value( builder, sce->mnemo_libelle );
-
 #ifdef bouh
 if (habilitation technicien)
-       json_builder_set_member_name  ( builder, "monostable" ); json_builder_add_boolean_value( builder, sce->mnemo_num );
-       json_builder_set_member_name  ( builder, "libelle" );    json_builder_add_boolean_value( builder, sce->m );
 #endif
+       json_builder_set_member_name  ( builder, "monostable" ); json_builder_add_boolean_value( builder, sce->mnemo_num );
+
        json_builder_end_object (builder);                                                              /* Fin dump du scenario */
        g_free(sce);
      }

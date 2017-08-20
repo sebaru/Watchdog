@@ -690,7 +690,8 @@
      }
 
     if (database_version < 3247)
-     { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `scenario_detail` ("
+     { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `scenario_details` ("
+                                             "`id` int(11) NOT NULL,"
                                              "`num` int(11) NOT NULL,"
                                              "`minute` int(11) NOT NULL,"
                                              "`heure` int(11) NOT NULL,"
@@ -698,7 +699,7 @@
                                              "`date` int(11) NOT NULL,"
                                              "`mois` int(11) NOT NULL,"
                                              "`mnemo_id` int(11) NOT NULL,"
-                                             "KEY (`num`),"
+                                             "PRIMARY KEY (`id`), KEY(`num`),"
                                              "CONSTRAINT `num` FOREIGN KEY (`num`) REFERENCES `syns_scenario` (`id`) ON DELETE CASCADE,"
                                              "CONSTRAINT `mnemo_id` FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE"
                                              ") ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;" );

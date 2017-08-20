@@ -34,7 +34,8 @@
  #define NOM_TABLE_SCENARIO_DETAIL "scenario_details"
 
  struct SCENARIO_DETAIL
-  { gint num;
+  { gint id;
+    gint num;
     gint minute;
     gint heure;
     gint jour;
