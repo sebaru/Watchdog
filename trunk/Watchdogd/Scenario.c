@@ -91,7 +91,7 @@
        return(FALSE);
      }
 
-    g_snprintf( requete, sizeof(requete),  "DELETE FROM %s WHERE num=%d", NOM_TABLE_SCENARIO_DETAIL, num );    /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),  "DELETE FROM %s WHERE num=%d", NOM_TABLE_SCENARIO_TICK, num );    /* Requete SQL */
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Delete ScenarioDetail num '%d' failed", __func__, num );
        Libere_DB_SQL(&db);
@@ -99,12 +99,12 @@
      }
 
     while (Liste)
-     { struct SCENARIO_DETAIL *detail;
-       detail = (struct SCENARIO_DETAIL *)Liste->data;
+     { struct SCENARIO_TICK *detail;
+       detail = (struct SCENARIO_TICK *)Liste->data;
 
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "INSERT INTO %s(num,minute,heure,jour,date,mois,mnemo_id) VALUES "
-                   "('%d','%d','%d','%d','%d','%d')", NOM_TABLE_SCENARIO_DETAIL, num,
+                   "('%d','%d','%d','%d','%d','%d')", NOM_TABLE_SCENARIO_TICK, num,
                    detail->minute, detail->heure, detail->jour, detail->date, detail->mois, detail->mnemo_id
                  );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
@@ -129,7 +129,7 @@
                 " FROM %s as s"
                 " INNER JOIN %s as mnemo ON mnemo.id=s.mnemo_id"
                 " WHERE mnemo.type=%d AND s.num=%d",
-                NOM_TABLE_SCENARIO_DETAIL, NOM_TABLE_MNEMO, MNEMO_MONOSTABLE, num
+                NOM_TABLE_SCENARIO_TICK, NOM_TABLE_MNEMO, MNEMO_MONOSTABLE, num
               );
 
     db = Init_DB_SQL();       
@@ -146,10 +146,10 @@
 /******************************************************************************************************************************/
 /* Recuperer_scenario_detailDB_suite: Recupération de la liste des details du scenario                                        */
 /* Entrée: la base de données précédemment ouverte par la fonction ci dessus                                                  */
-/* Sortie: une structure SCENARIO_DETAIL                                                                                      */
+/* Sortie: une structure SCENARIO_TICK                                                                                      */
 /******************************************************************************************************************************/
- struct SCENARIO_DETAIL *Recuperer_scenario_detailsDB_suite( struct DB **db_orig )
-  { struct SCENARIO_DETAIL *sce;
+ struct SCENARIO_TICK *Recuperer_scenario_detailsDB_suite( struct DB **db_orig )
+  { struct SCENARIO_TICK *sce;
     struct DB *db;
 
     db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
@@ -160,7 +160,7 @@
        return(NULL);
      }
 
-    sce = (struct SCENARIO_DETAIL *)g_try_malloc0( sizeof(struct SCENARIO_DETAIL) );
+    sce = (struct SCENARIO_TICK *)g_try_malloc0( sizeof(struct SCENARIO_TICK) );
     if (!sce)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
        return(NULL);

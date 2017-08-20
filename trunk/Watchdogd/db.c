@@ -690,7 +690,7 @@
      }
 
     if (database_version < 3247)
-     { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `scenario_details` ("
+     { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `scenario_ticks` ("
                                              "`id` int(11) NOT NULL,"
                                              "`num` int(11) NOT NULL,"
                                              "`minute` int(11) NOT NULL,"

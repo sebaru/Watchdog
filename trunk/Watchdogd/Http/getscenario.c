@@ -37,7 +37,7 @@
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
  gint Http_Traiter_request_getscenario ( struct lws *wsi, struct HTTP_SESSION *session )
-  { struct SCENARIO_DETAIL *sce;
+  { struct SCENARIO_TICK *sce;
     gchar token_id[12];
     const gchar *id_s;
     gint id;
@@ -76,7 +76,7 @@
      }
 /*------------------------------------------------------ Dumping scenario ----------------------------------------------------*/
     json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-    json_builder_set_member_name  ( builder, "Scenario" );
+    json_builder_set_member_name  ( builder, "Ticks" );
     json_builder_begin_array (builder);                                                        /* Création du noeud principal */
     while ( (sce=Recuperer_scenario_detailsDB_suite( &db )) != NULL )            /* Mise en forme avant envoi au client léger */
      { 

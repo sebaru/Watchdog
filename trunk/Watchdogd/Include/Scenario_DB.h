@@ -31,9 +31,9 @@
  #include "Reseaux.h"
  #include "Db.h"
 
- #define NOM_TABLE_SCENARIO_DETAIL "scenario_details"
+ #define NOM_TABLE_SCENARIO_TICK "scenario_ticks"
 
- struct SCENARIO_DETAIL
+ struct SCENARIO_TICK
   { gint id;
     gint num;
     gint minute;
@@ -50,7 +50,7 @@
 /************************************************ Définitions des prototypes **************************************************/
  extern gboolean Set_scenario_detailsDB ( gint num, GSList *Liste );
  extern gboolean Recuperer_scenario_detailsDB ( struct DB **db_retour, gint num );
- extern struct SCENARIO_DETAIL *Recuperer_scenario_detailsDB_suite( struct DB **db_orig );
+ extern struct SCENARIO_TICK *Recuperer_scenario_detailsDB_suite( struct DB **db_orig );
  extern void Check_scenario_tick_thread ( void );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

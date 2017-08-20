@@ -37,7 +37,7 @@
  gint Http_Traiter_request_body_completion_setscenario ( struct lws *wsi )
   { unsigned char header[512], *header_cur, *header_end;
     struct HTTP_PER_SESSION_DATA *pss;
-    struct SCENARIO_DETAIL *sce;
+    struct SCENARIO_TICK *sce;
     JsonNode *root_node, *node;
     JsonParser *parser;
     JsonObject *object;
@@ -103,7 +103,7 @@
              "%s: (sid %s) Received: '%s'", __func__, Http_get_session_id(pss->session),
               json_node_type_name(node) );
 
-    sce = (struct SCENARIO_DETAIL *)g_malloc0( sizeof(struct SCENARIO_DETAIL) );
+    sce = (struct SCENARIO_TICK *)g_malloc0( sizeof(struct SCENARIO_TICK) );
     if (!sce)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                 "%s: (sid %s) Memory Error", __func__, Http_get_session_id(pss->session) );

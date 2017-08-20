@@ -1018,10 +1018,10 @@ CREATE TABLE IF NOT EXISTS `syns_scenario` (
 
 
 --
--- Structure de la table `scenario_detail`
+-- Structure de la table `scenario_ticks`
 --
 
-CREATE TABLE IF NOT EXISTS `scenario_details` (
+CREATE TABLE IF NOT EXISTS `scenario_ticks` (
   `id` int(11) NOT NULL,
   `num` int(11) NOT NULL,
   `minute` int(11) NOT NULL,
