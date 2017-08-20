@@ -38,9 +38,9 @@
 /******************************************************************************************************************************/
  gint Http_Traiter_request_getscenario ( struct lws *wsi, struct HTTP_SESSION *session )
   { struct SCENARIO_TICK *sce;
-    gchar token_id[12];
-    const gchar *id_s;
-    gint id;
+    gchar token_num[12];
+    const gchar *num_s;
+    gint num;
     struct DB *db;
     gint retour;
     JsonBuilder *builder;
@@ -55,10 +55,10 @@
      }
 #endif
 
-    id_s = lws_get_urlarg_by_name	( wsi, "id=", token_id, sizeof(token_id) );
-    if (id_s)
-     { id = atoi (id_s); }
-    else id=0;
+    num_s = lws_get_urlarg_by_name	( wsi, "num=", token_num, sizeof(token_num) );
+    if (num_s)
+     { num = atoi (num_s); }
+    else num=0;
 
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = json_builder_new ();
@@ -69,7 +69,7 @@
        return(1);
      }
                                               /* Lancement de la requete de recuperation des details du scenario en parametre */
-    if ( ! Recuperer_scenario_detailsDB( &db, id ) )
+    if ( ! Recuperer_scenario_detailsDB( &db, num ) )
      { g_object_unref(builder);
        Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
        return(1);
