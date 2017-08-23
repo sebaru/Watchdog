@@ -571,7 +571,7 @@
 /******************************************************************************************************************************/
  static gboolean Interroger_ups( struct MODULE_UPS *module )
   { gfloat valeur;
-    gint num_ea;
+    gint num_e, num_ea;
 
     num_ea = module->ups.map_EA;
 
@@ -624,6 +624,18 @@
      { SEA( num_ea, valeur ); }                                                              /* Numéro de l'EA pour la valeur */
     else return(FALSE);                                                                                   /* Retour si erreur */
 
+/*---------------------------------------------- Récupération des entrées TOR de l'UPS ---------------------------------------*/
+    num_e  = module->ups.map_E;
+    if ( Onduleur_get_var ( module, "outlet.1.status", &valeur ) )
+     { SE( num_e, valeur ); }                                                                /* Numéro de l'EA pour la valeur */
+    else return(FALSE);                                                                                   /* Retour si erreur */
+    num_e++;
+
+    if ( Onduleur_get_var ( module, "outlet.2.status", &valeur ) )
+     { SE( num_e, valeur ); }                                                                /* Numéro de l'EA pour la valeur */
+    else return(FALSE);                                                                                   /* Retour si erreur */
+    num_e++;
+    
     return(TRUE);
   }
 /******************************************************************************************************************************/
