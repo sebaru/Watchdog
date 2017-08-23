@@ -58,7 +58,7 @@
  enum                                                                                 /* Différente action associée à un item */
   { ACTION_SANS,
     ACTION_IMMEDIATE,
-    ACTION_PROGRAMME,
+    ACTION_CONFIRME,
     ACTION_NBR_ACTION                                                                             /* nombre d'action possible */
   };
 

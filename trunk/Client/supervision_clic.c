@@ -39,10 +39,6 @@
  extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
 
- static GnomeUIInfo Menu_popup[]=
-  { /*GNOMEUIINFO_ITEM_STOCK ( N_("Program"), NULL, Envoyer_action_programme, GNOME_STOCK_PIXMAP_EXEC ),*/
-    GNOMEUIINFO_END
-  };
  static struct TRAME_ITEM_MOTIF *appui = NULL;
  static struct TRAME_ITEM_CADRAN *appui_cadran = NULL;
  static struct TRAME_ITEM_CAMERA_SUP *appui_camera_sup = NULL;
@@ -79,8 +75,7 @@
 /**********************************************************************************************************/
  void Clic_sur_motif_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                    GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif )
-  { static GtkWidget *Popup=NULL;
-    if (!(trame_motif && event)) return;
+  { if (!(trame_motif && event)) return;
 
     if (event->type == GDK_BUTTON_PRESS)
      { appui = trame_motif;                                  /* Sauvegarde en attendant la release button */
@@ -96,17 +91,14 @@
         }
      }
     else if (event->type == GDK_BUTTON_RELEASE && appui)
-     {
-       if ( ((GdkEventButton *)event)->button == 3 &&
-             trame_motif->motif->type_dialog == ACTION_PROGRAMME)                     /* Gestion du popup */
-        { if (!Popup) Popup = gnome_popup_menu_new( Menu_popup );
-          gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
-        }
-
-       if (appui->motif->type_gestion == TYPE_BOUTON)                 /* On met la frame 1: bouton relevé */
+     { if (appui->motif->type_gestion == TYPE_BOUTON)                 /* On met la frame 1: bouton relevé */
         { if ( (trame_motif->num_image % 3) == 2 )
            { Trame_choisir_frame( appui, trame_motif->num_image - 1, appui->rouge, appui->vert, appui->bleu );
-             Envoyer_action_immediate( trame_motif );
+             switch ( trame_motif->motif->type_dialog )
+              { case ACTION_IMMEDIATE: Envoyer_action_immediate( trame_motif ); break;
+                case ACTION_CONFIRME : /* xxx */ break;
+                default: break;
+              }
            }
         }
        else if ( ((GdkEventButton *)event)->button == 1)           /* Release sur le motif qui a été appuyé ?? */
@@ -116,7 +108,7 @@
              case ACTION_IMMEDIATE: printf("action immediate !!\n");
                                     Envoyer_action_immediate( trame_motif );
                                     break;
-/*             case ACTION_PROGRAMME: printf("action programme !!\n");
+/*             case ACTION_CONFIRME: printf("action programme !!\n");
                                     Envoyer_action_programme( trame_motif );
                                     break;*/
 /*             case ACTION_DIFFERE:
