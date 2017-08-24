@@ -279,6 +279,7 @@
               { Jouer_google_speech( histo->msg.libelle_audio ); }
              else
               { Jouer_google_speech( histo->msg.libelle ); }
+           }
         }
        g_free(histo);
      }
