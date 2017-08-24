@@ -31,7 +31,8 @@
  #include <gnome.h>
  #include <openssl/ssl.h>
  #include <gtksourceview/gtksourceprintcompositor.h>
-
+ #include <curl/curl.h>
+ 
  #include "Reseaux.h"
  #include "trame.h"
 
@@ -44,6 +45,7 @@
  #define PRINT_HEADER_RIGHT         "page %N / %Q"
  #define PRINT_FONT_NAME            "Monospace 10"
  #define PRINT_NBR_CHAR_GROUPE_PAGE 30
+ #define WATCHDOG_USER_AGENT        "Watchdog Client - libcurl"
 
  enum
   { TYPE_PAGE_PLUGIN_DLS,                                                                         /* Listes des plugins D.L.S */
@@ -81,17 +83,6 @@
     GtkWidget *Option_zoom;                                                               /* Choix du zoom sur la supervision */
     GtkWidget *Box_palette;                                                                   /* Widget de la boite a palette */
     struct TRAME *Trame;                                                                   /* La trame de fond de supervision */
-  };
-
- enum                                       /* Numéro des colonnes dans les listes CAM (liste_camera et atelier_ajout_camera) */
-  {  COL_CAM_ID,
-     COL_CAM_NUM,
-     COL_CAM_TYPE,
-     COL_CAM_BIT,
-     COL_CAM_OBJET,
-     COL_CAM_LIBELLE,
-     COL_CAM_LOCATION,
-     NBR_COL_CAM
   };
 
  struct TYPE_INFO_SOURCE_DLS
@@ -135,6 +126,7 @@
                struct TRAME_ITEM_COMMENT *trame_comment;
                struct TRAME_ITEM_CADRAN *trame_cadran;
                struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
+               struct TRAME_ITEM_SCENARIO *trame_scenario;
              };
 
        GList *items;                                                          /* Tous les items faisant parti de la selection */
@@ -149,6 +141,14 @@
     GtkWidget *F_ajout_palette;                                                              /* Le fenetre d'ajout de palette */
     GtkWidget *Liste_syn;                                            /* La liste des synoptiques pour la fenetre des palettes */
     GtkWidget *Liste_palette;                                                /* La liste des palettes associées au synoptique */
+  };
+
+ enum                                       /* Numéro des colonnes dans les listes CAM (liste_camera et atelier_ajout_camera) */
+  {  COL_CAM_ID,
+     COL_CAM_NUM,
+     COL_CAM_LOCATION,
+     COL_CAM_LIBELLE,
+     NBR_COL_CAM
   };
 
 /*--------------------------------------- Déclarations des prototypes de fonctions -------------------------------------------*/
@@ -189,7 +189,7 @@
  extern void Gerer_protocole_atelier ( struct CONNEXION *connexion );
  extern void Gerer_protocole_fichier_connecte ( struct CONNEXION *connexion );
  extern void Gerer_protocole_connexion ( struct CONNEXION *connexion );
- extern void Gerer_protocole_camera ( struct CONNEXION *connexion );
+ extern void Gerer_protocole_lowlevel ( struct CONNEXION *connexion );
  extern void Gerer_protocole_admin ( struct CONNEXION *connexion );
  extern gint Get_icone_version( void );
 
@@ -308,9 +308,11 @@
  extern void Clic_sur_pass ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                              struct TRAME_ITEM_PASS *trame_pass );
  extern void Clic_sur_cadran ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
-                                struct TRAME_ITEM_CADRAN *trame_cadran );
+                               struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Clic_sur_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
-                            struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
+                                   struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
+ extern void Clic_sur_scenario ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
+                                 struct TRAME_ITEM_SCENARIO *trame_scenario );
  extern gint Nouveau_groupe ( void );
  
                                                                                                   /* Dans atelier_selection.c */
@@ -378,8 +380,14 @@
  extern struct TRAME_ITEM_CAMERA_SUP *Id_vers_trame_camera_sup ( struct TYPE_INFO_ATELIER *infos, gint id );
  extern void Menu_ajouter_camera_sup ( void );
  extern void Proto_afficher_un_camera_for_atelier( struct CMD_TYPE_CAMERA *camera );
- extern void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup );
- extern void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERA_SUP *camera_sup );
+ extern void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
+ extern void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *camera_sup );
+
+                                                                                             /* Dans atelier_ajout_scenario.c */
+/* extern struct TRAME_ITEM_SCENARIO *Id_vers_trame_camera_sup ( struct TYPE_INFO_ATELIER *infos, gint id );*/
+ extern void Menu_ajouter_scenario ( void );
+ extern void Proto_afficher_un_scenario_atelier( struct CMD_TYPE_SCENARIO *rezo_scenario );
+ extern void Proto_cacher_un_scenario_atelier( struct CMD_TYPE_SCENARIO *scenario );
 
  extern void Creer_page_liste_histo_msgs( void );                                                  /* Dans liste_histo_msgs.c */
  extern void Proto_effacer_liste_histo_msgs( gint page_id );
@@ -399,6 +407,8 @@
                                                GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
  extern void Clic_sur_cadran_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                             GdkEvent *event, struct TRAME_ITEM_CADRAN *trame_cadran );
+ extern void Clic_sur_scenario_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                             GdkEvent *event, struct TRAME_ITEM_SCENARIO *trame_scenario );
 
                                                                                                 /* Dans supervision_comment.c */
  extern void Proto_afficher_un_comment_supervision( struct CMD_TYPE_COMMENT *rezo_comment );
@@ -415,7 +425,10 @@
  extern void Proto_changer_etat_cadran( struct CMD_ETAT_BIT_CADRAN *etat_cadran );
 
                                                                                                  /* Dans supervision_camera.c */
- extern void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup );
+ extern void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
+
+                                                                                               /* Dans supervision_scenario.c */
+ extern void Proto_afficher_un_scenario_supervision( struct CMD_TYPE_SCENARIO *rezo_scenario );
 
                                                                                                    /* Dans option_entreetor.c */
  extern void Get_options_DI ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );

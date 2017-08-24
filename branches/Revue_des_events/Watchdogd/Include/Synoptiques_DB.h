@@ -37,8 +37,9 @@
  #define NOM_TABLE_COMMENT        "syns_comments"
  #define NOM_TABLE_PASSERELLE     "syns_pass"
  #define NOM_TABLE_PALETTE        "syns_palettes"
- #define NOM_TABLE_CADRAN        "syns_cadrans"
+ #define NOM_TABLE_CADRAN         "syns_cadrans"
  #define NOM_TABLE_CAMERASUP      "syns_camerasup"
+ #define NOM_TABLE_SCENARIO       "syns_scenario"
 
 /*************************************** Définitions des prototypes ***************************************/
  extern struct CMD_TYPE_SYNOPTIQUE *Rechercher_synoptiqueDB ( guint id );
@@ -83,11 +84,19 @@
  extern struct CMD_TYPE_CADRAN *Rechercher_cadranDB ( guint id );
  extern gboolean Modifier_cadranDB( struct CMD_TYPE_CADRAN *cadran );
 
- extern gboolean Retirer_camera_supDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA_SUP *camera_sup );
- extern gint Ajouter_camera_supDB ( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA_SUP *camera_sup );
- extern gboolean Recuperer_camera_supDB ( struct LOG *log, struct DB *db, gint id_syn );
- extern struct CMD_TYPE_CAMERA_SUP *Recuperer_camera_supDB_suite( struct LOG *log, struct DB *db );
- extern struct CMD_TYPE_CAMERA_SUP *Rechercher_camera_supDB ( struct LOG *log, struct DB *db, guint id );
- extern gboolean Modifier_camera_supDB( struct LOG *log, struct DB *db, struct CMD_TYPE_CAMERA_SUP *camera_sup );
+ extern gboolean Retirer_camera_supDB ( gint id );
+ extern gint Ajouter_camera_supDB ( struct CMD_TYPE_CAMERASUP *camera_sup );
+ extern gint Modifier_camera_supDB ( struct CMD_TYPE_CAMERASUP *camera_sup );
+ extern gboolean Recuperer_camera_supDB ( struct DB **db_retour, gint syn_id );
+ extern struct CMD_TYPE_CAMERASUP *Recuperer_camera_supDB_suite( struct DB **db_orig );
+  extern struct CMD_TYPE_CAMERASUP *Rechercher_camera_supDB ( guint id );
+
+ extern gboolean Retirer_scenarioDB ( guint id );
+ extern gint Ajouter_scenarioDB ( struct CMD_TYPE_SCENARIO *scenario );
+ extern gboolean Recuperer_scenarioDB ( struct DB **db, gint id_syn );
+ extern struct CMD_TYPE_SCENARIO *Recuperer_scenarioDB_suite( struct DB **db );
+ extern struct CMD_TYPE_SCENARIO *Rechercher_scenarioDB ( guint id );
+ extern gboolean Modifier_scenarioDB( struct CMD_TYPE_SCENARIO *scenario );
+ 
 #endif
 /*--------------------------------------------------------------------------------------------------------*/

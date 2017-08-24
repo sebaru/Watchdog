@@ -275,7 +275,11 @@
           Cfg_audio.last_audio = Partage->top;
 
           if (Jouer_mp3 ( &histo->msg ) == FALSE)                      /* Par priorité : mp3 d'abord, synthèse vocale ensuite */
-           { Jouer_google_speech( histo->msg.libelle_audio ); }
+           { if (strlen(histo->msg.libelle_audio))          /* Si libelle_audio, le jouer, sinon jouer le libelle tout court) */
+              { Jouer_google_speech( histo->msg.libelle_audio ); }
+             else
+              { Jouer_google_speech( histo->msg.libelle ); }
+           }
         }
        g_free(histo);
      }

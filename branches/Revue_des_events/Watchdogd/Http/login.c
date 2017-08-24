@@ -207,7 +207,7 @@
     g_snprintf( session->remote_name, sizeof(session->remote_name), "%s", remote_name );
     g_snprintf( session->remote_ip,   sizeof(session->remote_ip),   "%s", remote_ip   );
 
-    RAND_pseudo_bytes( (guchar *)cookie_bin, sizeof(cookie_bin) );                        /* Récupération d'un nouveau COOKIE */
+    RAND_bytes( (guchar *)cookie_bin, sizeof(cookie_bin) );                               /* Récupération d'un nouveau COOKIE */
     for (cpt=0; cpt<sizeof(cookie_bin); cpt++)                                                 /* Mise en forme au format HEX */
      { g_snprintf( &session->sid[2*cpt], 3, "%02X", (guchar)cookie_bin[cpt] ); }
 

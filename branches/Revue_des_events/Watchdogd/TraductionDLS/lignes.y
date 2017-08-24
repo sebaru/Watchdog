@@ -52,7 +52,7 @@
 %type  <val>    modulateur jour_semaine
 
 %token <val>    BI MONO ENTREE SORTIE T_TEMPO T_TYPE T_RETARD
-%token <val>    T_MSG ICONE CPT_H CPT_IMP EANA T_START T_REGISTRE
+%token <val>    T_MSG ICONE CPT_H T_CPT_IMP EANA T_START T_REGISTRE
 %type  <val>    alias_bit
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI T_EDGE_UP
@@ -97,7 +97,7 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                       case EANA  :
                       case MONO  :
                       case CPT_H :
-                      case CPT_IMP:
+                      case T_CPT_IMP:
                       case T_MSG :
                       case T_REGISTRE :
                       case ICONE : if ($3==1)                                             /* Barre = 1 ?? */
@@ -112,7 +112,7 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                     }
                 }}
                 ;
-alias_bit:      BI | MONO | ENTREE | SORTIE | T_MSG | T_TEMPO | ICONE | CPT_H | CPT_IMP | EANA | T_REGISTRE
+alias_bit:      BI | MONO | ENTREE | SORTIE | T_MSG | T_TEMPO | ICONE | CPT_H | T_CPT_IMP | EANA | T_REGISTRE
                 ;
 /**************************************************** Gestion des instructions ************************************************/
 listeInstr:     une_instr listeInstr
@@ -205,7 +205,12 @@ calcul_expr3:   VALF
                    taille = 15;
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "R(%d)", $2 );
-                   Check_ownership ( MNEMO_REGISTRE, $2 );
+                }}
+                | T_CPT_IMP ENTIER
+                {{ int taille;
+                   taille = 15;
+                   $$ = New_chaine( taille );
+                   g_snprintf( $$, taille, "CI(%d)", $2 );
                 }}
                 | T_POUV calcul_expr T_PFERM
                 {{ $$=$2; }}
@@ -226,7 +231,12 @@ calcul_expr3:   VALF
                           { taille = 15;
                             $$ = New_chaine( taille ); /* 10 caractères max */
                             g_snprintf( $$, taille, "R(%d)", alias->num );
-                            Check_ownership ( MNEMO_REGISTRE, alias->num );
+                            break;
+                          }
+                         case T_CPT_IMP:
+                          { taille = 15;
+                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            g_snprintf( $$, taille, "CI(%d)", alias->num );
                             break;
                           }
                          default: 
@@ -247,6 +257,7 @@ calcul_expr3:   VALF
 
 calcul_ea_result: T_REGISTRE ENTIER
                 {{ $$ = $2;
+                   Check_ownership ( MNEMO_REGISTRE, $2 );
                 }}
                 | ID
                 {{ struct ALIAS *alias;
@@ -257,6 +268,7 @@ calcul_ea_result: T_REGISTRE ENTIER
                     { switch(alias->bit)               /* On traite que ce qui peut passer en "condition" */
                        { case T_REGISTRE:
                           { $$ = alias->num;
+                            Check_ownership ( MNEMO_REGISTRE, alias->num );
                             break;
                           }
                          default: 
@@ -377,7 +389,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                       case T_EGAL     : g_snprintf( $$, taille, "R(%d)==%f", $2, $4 ); break;
                     }
                 }}
-                | CPT_IMP ordre VALF
+                | T_CPT_IMP ordre VALF
                 {{ int taille;
                    taille = 30;
                    $$ = New_chaine( taille ); /* 10 caractères max */
@@ -422,7 +434,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                        } else
                       if (!$4 && (alias->bit==EANA ||                    /* Vérification des bits obligatoirement comparables */
                                   alias->bit==T_REGISTRE ||
-                                  alias->bit==CPT_IMP ||
+                                  alias->bit==T_CPT_IMP ||
                                   alias->bit==CPT_H)
                          )
                        { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser qu'avec une comparaison", DlsScanner_get_lineno(), $2 );
@@ -485,7 +497,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                              }
                             break;
                            }
-                         case CPT_IMP:
+                         case T_CPT_IMP:
                           { taille = 30;
                             $$ = New_chaine( taille ); /* 10 caractères max */
                             switch($4->type)
@@ -568,7 +580,7 @@ une_action:     barre SORTIE ENTIER
                   {{ $$=New_action_cpt_h($2, $3);
                      Liberer_options($3);
                   }}
-                | CPT_IMP ENTIER liste_options
+                | T_CPT_IMP ENTIER liste_options
                   {{ $$=New_action_cpt_imp($2, $3);
                      Liberer_options($3);
                   }}
@@ -621,7 +633,7 @@ une_action:     barre SORTIE ENTIER
                                        break;
                          case MONO   : $$=New_action_mono( alias->num );        break;
                          case CPT_H  : $$=New_action_cpt_h( alias->num, options );   break;
-                         case CPT_IMP: $$=New_action_cpt_imp( alias->num, options ); break;
+                         case T_CPT_IMP: $$=New_action_cpt_imp( alias->num, options ); break;
                          case ICONE  : $$=New_action_icone( alias->num, options );   break;
                          default: { Emettre_erreur_new( "Ligne %d: '%s' syntax error", DlsScanner_get_lineno(), alias->nom );
                                     $$=New_action();

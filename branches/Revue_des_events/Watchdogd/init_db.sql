@@ -28,11 +28,7 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 CREATE TABLE IF NOT EXISTS `cameras` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `location` varchar(600) NOT NULL,
-  `type` int(11) NOT NULL,
-  `bit` int(11) NOT NULL,
-  `objet` text NOT NULL,
   `libelle` text NOT NULL,
-  `num` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
@@ -49,6 +45,7 @@ CREATE TABLE IF NOT EXISTS `class` (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `class` (`id`, `libelle`) VALUES
+(0, 'Systeme'),
 (1, 'Divers'),
 (4, 'Etats_des_Commandes'),
 (5, 'Plans du Site'),
@@ -208,28 +205,6 @@ INSERT INTO `groups` (`id`, `name`, `comment`) VALUES
 (10, 'Admin-CommandLineInterface', 'Command Line Interface Access'),
 (11, 'Satellite', 'Add Satellite Capabilities');
 
--- --------------------------------------------------------
-
---
--- Structure de la table `histo_bit`
---
-
-CREATE TABLE IF NOT EXISTS `histo_bit` (
-  `type` int(11) NOT NULL DEFAULT '0',
-  `num` int(11) NOT NULL DEFAULT '0',
-  `date_sec` int(11) NOT NULL DEFAULT '0',
-  `date_usec` int(11) NOT NULL DEFAULT '0',
-  `date_time` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `valeur` float NOT NULL DEFAULT '0.0',
-  PRIMARY KEY `key` (`type`,`num`,`date_time`)  
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
-  PARTITION BY RANGE COLUMNS (date_time) PARTITIONS 2
-   ( PARTITION p0 VALUES LESS THAN ('2016-01-01') ENGINE = InnoDB,
-     PARTITION p_MAX VALUES LESS THAN MAXVALUE
-   );
-
--- --------------------------------------------------------
-
 --
 -- Structure de la table `histo_msgs`
 --
@@ -268,6 +243,7 @@ CREATE TABLE IF NOT EXISTS `icons` (
 --
 
 INSERT INTO `icons` (`id`, `libelle`, `id_classe`) VALUES
+(1, 'Camera', 0),
 (7, 'Tournevis', 18),
 (8, 'Poterie', 0),
 (12, 'Boule_rouge', 7),
@@ -895,16 +871,34 @@ CREATE TABLE IF NOT EXISTS `syns_camerasup` (
   `camera_src_id` int(11) NOT NULL,
   `posx` int(11) NOT NULL,
   `posy` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+  PRIMARY KEY (`id`),
+  CONSTRAINT `id_camera` FOREIGN KEY (`camera_src_id`) REFERENCES `cameras` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `syns_capteurs`
+-- Structure de la table `syns_scenario`
 --
 
-CREATE TABLE IF NOT EXISTS `syns_capteurs` (
+CREATE TABLE IF NOT EXISTS `syns_camerasup` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `syn_id` int(11) NOT NULL,
+  `num` int(11) NOT NULL,
+  `posx` int(11) NOT NULL,
+  `posy` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `syns_cadrans`
+--
+
+CREATE TABLE IF NOT EXISTS `syns_cadrans` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `syn_id` int(11) NOT NULL DEFAULT '0',
   `bitctrl` int(11) NOT NULL DEFAULT '0',
@@ -912,7 +906,8 @@ CREATE TABLE IF NOT EXISTS `syns_capteurs` (
   `posy` int(11) NOT NULL DEFAULT '0',
   `type` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -933,7 +928,8 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
   `posx` int(11) NOT NULL DEFAULT '0',
   `posy` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -945,7 +941,7 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
 CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `icone` int(11) NOT NULL DEFAULT '0',
-  `syn` int(11) NOT NULL DEFAULT '0',
+  `syn_id` int(11) NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `gid` int(11) NOT NULL DEFAULT '0',
   `bitctrl` int(11) NOT NULL DEFAULT '0',
@@ -963,7 +959,8 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `vert` int(11) NOT NULL DEFAULT '0',
   `bleu` int(11) NOT NULL DEFAULT '0',
   `layer` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -977,7 +974,9 @@ CREATE TABLE IF NOT EXISTS `syns_palettes` (
   `syn_id` int(11) NOT NULL DEFAULT '0',
   `syn_cible_id` int(11) NOT NULL DEFAULT '0',
   `pos` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  CONSTRAINT `id_syn`       FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `id_cible syn` FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -995,6 +994,46 @@ CREATE TABLE IF NOT EXISTS `syns_pass` (
   `angle` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+
+--
+-- Structure de la table `syns_scenario`
+--
+
+CREATE TABLE IF NOT EXISTS `syns_scenario` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `syn_id` int(11) NOT NULL DEFAULT '0',
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
+  `posx` int(11) NOT NULL DEFAULT '0',
+  `posy` int(11) NOT NULL DEFAULT '0',
+  `angle` float NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  CONSTRAINT `id_syn` FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+
+-- --------------------------------------------------------
+
+
+--
+-- Structure de la table `scenario_ticks`
+--
+
+CREATE TABLE IF NOT EXISTS `scenario_ticks` (
+  `id` int(11) NOT NULL,
+  `num` int(11) NOT NULL,
+  `minute` int(11) NOT NULL,
+  `heure` int(11) NOT NULL,
+  `jour` int(11) NOT NULL,
+  `date` int(11) NOT NULL,
+  `mois` int(11) NOT NULL,
+  `mnemo_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`), KEY(`num`),
+  CONSTRAINT `num` FOREIGN KEY (`num`) REFERENCES `syns_scenario` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `mnemo_id` FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 

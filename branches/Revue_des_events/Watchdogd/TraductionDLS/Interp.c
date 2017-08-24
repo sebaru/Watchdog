@@ -101,7 +101,7 @@
 /* Entrée: le numéro de ligne, le format et les paramètres associés                                                           */
 /******************************************************************************************************************************/
  void Emettre_erreur_new( gchar *format, ... )
-  { static gchar *too_many="Too many errors...\n";
+  { static gchar *too_many="Too many events. Limiting output...\n";
     gchar log[256], chaine[256];
     va_list ap;
 
@@ -269,7 +269,7 @@
     taille = 24;
     result = New_chaine( taille );
     if (Get_option_entier( options, T_EDGE_UP) == 1)
-     { Liste_edge_up_bi = g_slist_prepend ( Liste_edge_up_bi, GINT_TO_POINTER(num) );
+     { Liste_edge_up_entree = g_slist_prepend ( Liste_edge_up_entree, GINT_TO_POINTER(num) );
        if (barre) g_snprintf( result, taille, "!E%d_edge_up_value", num );
              else g_snprintf( result, taille, "E%d_edge_up_value", num );
      }
@@ -621,7 +621,7 @@
                            " int Get_Tableau_msg(int n) { return(Tableau_msg[n]); }\n";
           gchar *Start_Go = " void Go ( int start )\n"
                             "  {\n"
-                            "    Update_B_edge_up_value();\n";
+                            "    Update_edge_up_value();\n";
           gchar *End_Go =   "  }\n";
           gchar chaine[1024];
           gint cpt=0;                                                                                   /* Compteur d'actions */
@@ -678,19 +678,20 @@
 
 
           g_snprintf(chaine, sizeof(chaine),
-                    "/*******************************************************/"
+                    "/*******************************************************/\n"
                     " static void Update_edge_up_value (void)\n"
-                    "  { int new_value;\n  {\n" );
+                    "  { int new_value;\n" );
           write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
 
           liste = Liste_edge_up_bi;                                /* Initialise les fonctions de gestion des fronts montants */
           while(liste)
            { gchar chaine[1024];
              g_snprintf(chaine, sizeof(chaine),
-                      " new_value = B(%d);"
+                      " new_value = B(%d);\n"
                       " if (new_value == 0) B%d_edge_up_value = 0;\n"
                       " else { if (B%d_edge_up_value==0 && new_value == 1) { B%d_edge_up_value=1; }\n"
-                      "                                               else { B%d_edge_up_value=0; }\n",
+                      "                                               else { B%d_edge_up_value=0; }\n"
+                      "      }\n",
                       GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
                       GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
                       GPOINTER_TO_INT(liste->data) );
@@ -701,10 +702,11 @@
           while(liste)
            { gchar chaine[1024];
              g_snprintf(chaine, sizeof(chaine),
-                      " new_value = E(%d);"
+                      " new_value = E(%d);\n"
                       " if (new_value == 0) E%d_edge_up_value = 0;\n"
                       " else { if (E%d_edge_up_value==0 && new_value == 1) { E%d_edge_up_value=1; }\n"
-                      "                                               else { E%d_edge_up_value=0; }\n",
+                      "                                               else { E%d_edge_up_value=0; }\n"
+                      "      }\n",
                       GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
                       GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
                       GPOINTER_TO_INT(liste->data) );

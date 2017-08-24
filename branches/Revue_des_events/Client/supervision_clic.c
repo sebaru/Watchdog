@@ -39,13 +39,10 @@
  extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
 
- static GnomeUIInfo Menu_popup[]=
-  { /*GNOMEUIINFO_ITEM_STOCK ( N_("Program"), NULL, Envoyer_action_programme, GNOME_STOCK_PIXMAP_EXEC ),*/
-    GNOMEUIINFO_END
-  };
  static struct TRAME_ITEM_MOTIF *appui = NULL;
  static struct TRAME_ITEM_CADRAN *appui_cadran = NULL;
  static struct TRAME_ITEM_CAMERA_SUP *appui_camera_sup = NULL;
+ static struct TRAME_ITEM_SCENARIO *appui_scenario = NULL;
 
  static GtkWidget *F_set_registre;                                                         /* Widget de l'interface graphique */
  static GtkWidget *Spin_valeur;                                                                         /* Valeur du registre */
@@ -53,11 +50,11 @@
  #include "protocli.h"
 
  extern struct TRAME *Trame_supervision;                               /* La trame de fond de supervision */
-/**********************************************************************************************************/
-/* Envoyer_action_immediate: Envoi d'une commande Mxxx au serveur                                         */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Envoyer_action_immediate: Envoi d'une commande Mxxx au serveur                                                             */
+/* Entrée: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
  static void Envoyer_action_immediate ( struct TRAME_ITEM_MOTIF *trame_motif )
   { struct CMD_SET_BIT_INTERNE bit;
     bit.type = MNEMO_MONOSTABLE;
@@ -71,51 +68,95 @@
                    (gchar *)&bit, sizeof(struct CMD_SET_BIT_INTERNE) );
     printf("Envoi M%d = 1 au serveur \n", bit.num );
   }
-/**********************************************************************************************************/
-/* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision   */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* CB_Envoyer_action_confirme: Callback appelé lors de l'appui sur un des boutons de la fenetre de validation                 */
+/* Entrée: la reponse de l'utilisateur et une structure MOTIF                                                                 */
+/* sortie: TRUE                                                                                                               */
+/******************************************************************************************************************************/
+ static gboolean CB_Envoyer_action_confirme ( GtkDialog *dialog, gint reponse, struct TRAME_ITEM_MOTIF *trame_motif )
+  { switch(reponse)
+     { case GTK_RESPONSE_OK:
+             { Envoyer_action_immediate( trame_motif );
+             }
+            break;
+       case GTK_RESPONSE_CANCEL:
+       default: break;
+     }
+    gtk_widget_destroy(dialog);
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Envoyer_action_confirme : Affiche une fenetre de confirmation avant d'envoyer une commande Mxxx au serveur                 */
+/* Entrée: Le motif qui vient d'etre cliqué                                                                                   */
+/* sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static Envoyer_action_confirme ( struct TRAME_ITEM_MOTIF *trame_motif )
+  { GtkWidget *dialog, *frame, *texte, *hboite;
+    gint cpt, ligne;
+
+    dialog = gtk_dialog_new_with_buttons( "Attention !",
+                                           GTK_WINDOW(F_client),
+                                           GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                           GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                           GTK_STOCK_OK, GTK_RESPONSE_OK,
+                                           NULL);
+    g_signal_connect( dialog, "response", G_CALLBACK(CB_Envoyer_action_confirme), trame_motif );
+
+    frame = gtk_frame_new("Confirmez-vous l'action suivante ?");                         /* Création de l'interface graphique */
+    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
+    gtk_container_set_border_width( GTK_CONTAINER(frame), 6 );
+    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(dialog)->vbox ), frame, TRUE, TRUE, 0 );
+
+    hboite = gtk_hbox_new( FALSE, 6 );
+    gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
+    gtk_container_add( GTK_CONTAINER(frame), hboite );
+
+    texte = gtk_label_new( trame_motif->motif->libelle );                                          /* Libelle du motif cliqué */
+    gtk_box_pack_start( GTK_BOX(hboite), texte, TRUE, TRUE, 0 );
+
+    gtk_widget_show_all(dialog);                                                         /* Affichage de l'interface complète */
+  }
+/******************************************************************************************************************************/
+/* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision                       */
+/* Entrée: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
  void Clic_sur_motif_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                    GdkEvent *event, struct TRAME_ITEM_MOTIF *trame_motif )
-  { static GtkWidget *Popup=NULL;
-    if (!(trame_motif && event)) return;
+  { if (!(trame_motif && event)) return;
 
     if (event->type == GDK_BUTTON_PRESS)
-     { appui = trame_motif;                                  /* Sauvegarde en attendant la release button */
+     { appui = trame_motif;                                                      /* Sauvegarde en attendant la release button */
        if (trame_motif->motif->type_gestion == TYPE_BOUTON && (trame_motif->last_clic + 1 <= time(NULL)) )
         { printf("Appui sur bouton num_image=%d\n", trame_motif->num_image );
           if ( (trame_motif->num_image % 3) == 1 )
-           { Trame_choisir_frame( trame_motif, trame_motif->num_image + 1,      /* Frame 2: bouton appuyé */
+           { Trame_choisir_frame( trame_motif, trame_motif->num_image + 1,                          /* Frame 2: bouton appuyé */
                                   trame_motif->rouge,
                                   trame_motif->vert,
                                   trame_motif->bleu );
            }
-          time(&appui->last_clic);                                     /* Mémorisation de la date de clic */
+          time(&appui->last_clic);                                                         /* Mémorisation de la date de clic */
         }
      }
     else if (event->type == GDK_BUTTON_RELEASE && appui)
-     {
-       if ( ((GdkEventButton *)event)->button == 3 &&
-             trame_motif->motif->type_dialog == ACTION_PROGRAMME)                     /* Gestion du popup */
-        { if (!Popup) Popup = gnome_popup_menu_new( Menu_popup );
-          gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
-        }
-
-       if (appui->motif->type_gestion == TYPE_BOUTON)                 /* On met la frame 1: bouton relevé */
+     { if (appui->motif->type_gestion == TYPE_BOUTON)                                     /* On met la frame 1: bouton relevé */
         { if ( (trame_motif->num_image % 3) == 2 )
            { Trame_choisir_frame( appui, trame_motif->num_image - 1, appui->rouge, appui->vert, appui->bleu );
-             Envoyer_action_immediate( trame_motif );
+             switch ( trame_motif->motif->type_dialog )
+              { case ACTION_IMMEDIATE: Envoyer_action_immediate( trame_motif ); break;
+                case ACTION_CONFIRME : Envoyer_action_confirme( trame_motif );  break;
+                default: break;
+              }
            }
         }
-       else if ( ((GdkEventButton *)event)->button == 1)           /* Release sur le motif qui a été appuyé ?? */
+       else if ( ((GdkEventButton *)event)->button == 1)                          /* Release sur le motif qui a été appuyé ?? */
         { switch( trame_motif->motif->type_dialog )
            { case ACTION_SANS:      printf("action sans !!\n");
                                     break;
              case ACTION_IMMEDIATE: printf("action immediate !!\n");
                                     Envoyer_action_immediate( trame_motif );
                                     break;
-/*             case ACTION_PROGRAMME: printf("action programme !!\n");
+/*             case ACTION_CONFIRME: printf("action programme !!\n");
                                     Envoyer_action_programme( trame_motif );
                                     break;*/
 /*             case ACTION_DIFFERE:
@@ -127,11 +168,11 @@
        appui = NULL;                          /* L'action est faite, on ne selectionne donc plus le motif */
      }
   }
-/**********************************************************************************************************/
-/* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision   */
-/* Entrée: une structure Event                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Clic_sur_motif_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision                       */
+/* Entrée: une structure Event                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
  void Clic_sur_camera_sup_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                         GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
   { if (!(trame_camera_sup && event)) return;
@@ -139,44 +180,32 @@
     if (event->type == GDK_BUTTON_PRESS)
      { appui_camera_sup = trame_camera_sup; }
     else if (event->type == GDK_BUTTON_RELEASE && appui_camera_sup)
-     { if ( ((GdkEventButton *)event)->button == 1)           /* Release sur le motif qui a été appuyé ?? */
+     { if ( ((GdkEventButton *)event)->button == 1)                               /* Release sur le motif qui a été appuyé ?? */
         { gint pid;
 
-          printf( "Clic_sur_camera_sup_supervision : Lancement d'un Gst %s\n",
-                  trame_camera_sup->camera_sup->location );
           pid = fork();
           if (pid<0) return;
-          else if (!pid)                                             /* Lancement de la ligne de commande */
+          else if (!pid)                                                                 /* Lancement de la ligne de commande */
            {
-#ifdef bouh
-             gchar chaine[sizeof(trame_camera_sup->camera_sup->location)+6];
-#endif
-
              execlp( "vlc", "vlc", trame_camera_sup->camera_sup->location, NULL );
-
-#ifdef bouh
-             g_snprintf( chaine, sizeof(chaine), "uri=%s", trame_camera_sup->camera_sup->location );
-             execlp( "gst-launch-0.10", "gst-launch-0.10", "playbin", chaine, NULL );
-#endif
-             printf("AUDIO: Lancement gst-launch failed\n");
              _exit(0);
            }
         }
-       appui_camera_sup = NULL;               /* L'action est faite, on ne selectionne donc plus le motif */
+       appui_camera_sup = NULL;                                   /* L'action est faite, on ne selectionne donc plus le motif */
      }
   }
-/**********************************************************************************************************/
-/* Clic_sur_cadran_supervision_action: Appelé pour lancer un firefox sur la periode en parametre         */
-/* Entrée: période d'affichage                                                                            */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Clic_sur_cadran_supervision_action: Appelé pour lancer un firefox sur la periode en parametre                              */
+/* Entrée: période d'affichage                                                                                                */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
  static void Clic_cadran_supervision_action ( gchar *period )
   { gint pid;
     printf( "Clic_sur_cadran_supervision : Lancement d'un firefox type=%d, num=%d\n",
              appui_cadran->cadran->type, appui_cadran->cadran->bit_controle );
     pid = fork();
     if (pid<0) return;
-    else if (!pid)                                                   /* Lancement de la ligne de commande */
+    else if (!pid)                                                                       /* Lancement de la ligne de commande */
      { gchar chaine[256];
        g_snprintf( chaine, sizeof(chaine),
                   "http://%s/getgraph.html?type=%d&num=%d&period=%s",
@@ -186,11 +215,11 @@
        _exit(0);
      }
   }
-/**********************************************************************************************************/
-/* Clic_sur_cadran_supervision_xxx: Appelé quand le menu last xxx est cliqué                              */
-/* Entrée: rien                                                                                           */
-/* Sortie :rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Clic_sur_cadran_supervision_xxx: Appelé quand le menu last xxx est cliqué                                                  */
+/* Entrée: rien                                                                                                               */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
  static void Clic_cadran_supervision_hour ( void )
   { Clic_cadran_supervision_action ( "hour" ); }
  static void Clic_cadran_supervision_day ( void )
@@ -291,10 +320,41 @@
            { Clic_cadran_set_registre ( trame_cadran ); }
         }
        else if (event->button.button == 3)
-        { if (!Popup) Popup = gnome_popup_menu_new( Popup_cadran );                     /* Creation menu */
+        { if (!Popup) Popup = gnome_popup_menu_new( Popup_cadran );                                          /* Creation menu */
           gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
         }
      }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/******************************************************************************************************************************/
+/* Clic_sur_scenario_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision                    */
+/* Entrée: une structure Scenario                                                                                             */
+/* Sortie :rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Clic_sur_scenario_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
+                                      GdkEvent *event, struct TRAME_ITEM_SCENARIO *trame_scenario )
+  { static GtkWidget *Popup = NULL;
 
+    if (!(trame_scenario && event)) return;
+    appui_scenario = trame_scenario;
+
+    if (event->type == GDK_BUTTON_PRESS)
+     { if ( ((GdkEventButton *)event)->button == 1 )                              /* Release sur le motif qui a été appuyé ?? */
+        { gint pid;
+
+          pid = fork();
+          if (pid<0) return;
+          else if (!pid)                                                                 /* Lancement de la ligne de commande */
+           {gchar chaine[256];
+            g_snprintf( chaine, sizeof(chaine),
+                        "http://%s/scenario.html?id=%d", Client.host, trame_scenario->scenario->id );
+             execlp( "firefox", "firefox", chaine, NULL );
+             _exit(0);
+           }
+        }
+       else if (event->button.button == 3)
+        { /* if (!Popup) Popup = gnome_popup_menu_new( Popup_cadran );
+          gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client ); */
+        }
+     }
+  }
+/*----------------------------------------------------------------------------------------------------------------------------*/

@@ -496,45 +496,43 @@
 /* Entrée : l'ups, le nom de variable, la variable a renseigner                                                               */
 /* Sortie : TRUE si pas de probleme, FALSE si erreur                                                                          */
 /******************************************************************************************************************************/
- gboolean Onduleur_get_var ( struct MODULE_UPS *module, gchar *nom_var, gfloat *retour )
-  { gchar buffer[80];
+ static gchar *Onduleur_get_var ( struct MODULE_UPS *module, gchar *nom_var )
+  { static gchar buffer[80];
     gint retour_read;
 
     g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->ups.ups, nom_var );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "Onduleur_get_var: Sending GET VAR failed (%s) error=%s",
+                "%s: Sending GET VAR failed (%s) error=%s", __func__,
                 buffer, (char *)upscli_strerror(&module->upsconn) );
-       return(FALSE);
+       return(NULL);
      }
 
     retour_read = upscli_readline( &module->upsconn, buffer, sizeof(buffer) );
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-             "Onduleur_get_var: Reading GET VAR %s ReadLine result = %d, upscli_upserror = %d, buffer = %s",
+             "%s: Reading GET VAR %s ReadLine result = %d, upscli_upserror = %d, buffer = %s", __func__,
               nom_var, retour_read, upscli_upserror(&module->upsconn), buffer );
     if ( retour_read == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-                "Onduleur_get_var: Reading GET VAR result failed (%s) error=%s",
+                "%s: Reading GET VAR result failed (%s) error=%s", __func__,
                  nom_var, (char *)upscli_strerror(&module->upsconn) );
-       return(FALSE);
+       return(NULL);
      }
 
     if ( ! strncmp ( buffer, "VAR", 3 ) )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
-                "Onduleur_get_var: Reading GET VAR %s OK = %s", nom_var, buffer );
-       *retour = atof ( buffer + 7 + strlen(module->ups.ups) + strlen(nom_var) );
-       return(TRUE);
+                "%s: Reading GET VAR %s OK = %s", __func__, nom_var, buffer );
+       return(buffer + 7 + strlen(module->ups.ups) + strlen(nom_var));
      }
 
     if ( ! strcmp ( buffer, "ERR VAR-NOT-SUPPORTED" ) )
-     { *retour = 0.0;
-       return(TRUE);                                                         /* Variable not supported... is not an error ... */
+     { return(NULL);                                                         /* Variable not supported... is not an error ... */
      }
 
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
-             "Onduleur_get_var: Reading GET VAR %s Failed : error %s (buffer %s)",
+             "%s: Reading GET VAR %s Failed : error %s (buffer %s)", __func__,
               nom_var, (char *)upscli_strerror(&module->upsconn), buffer );
-    return(FALSE);
+    return(NULL);
   }
 /******************************************************************************************************************************/
 /* Envoyer_sortie_ups: Envoi des sorties/InstantCommand à l'ups                                                               */
@@ -570,60 +568,63 @@
 /* Sortie: TRUE si pas de probleme, FALSE sinon                                                                               */
 /******************************************************************************************************************************/
  static gboolean Interroger_ups( struct MODULE_UPS *module )
-  { gfloat valeur;
-    gint num_ea;
+  { gchar *reponse;
+    gfloat valeur;
+    gint num_e, num_ea;
 
     num_ea = module->ups.map_EA;
-
-    if ( Onduleur_get_var ( module, "ups.load", &valeur ) )
-     { SEA( num_ea, valeur ); }                                                              /* Numéro de l'EA pour la valeur */
-    else return(FALSE);                                                                                   /* Retour si erreur */
+    if ( (reponse = Onduleur_get_var ( module, "ups.load" )) != NULL )
+     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
     
     num_ea++;
-    if ( Onduleur_get_var ( module, "ups.realpower", &valeur ) )
-     { SEA( num_ea, valeur ); }                                                              /* Numéro de l'EA pour la valeur */
-    else return(FALSE);                                                                                   /* Retour si erreur */
+    if ( (reponse = Onduleur_get_var ( module, "ups.realpower" )) != NULL )
+     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( Onduleur_get_var ( module, "battery.charge", &valeur ) )
-     { SEA( num_ea, valeur ); }                                                              /* Numéro de l'EA pour la valeur */
-    else return(FALSE);                                                                                   /* Retour si erreur */
+    if ( (reponse = Onduleur_get_var ( module, "battery.charge" )) != NULL )
+     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( Onduleur_get_var ( module, "input.voltage", &valeur ) )
-     { SEA( num_ea, valeur ); }                                                              /* Numéro de l'EA pour la valeur */
-    else return(FALSE);                                                                                   /* Retour si erreur */
+    if ( (reponse = Onduleur_get_var ( module, "input.voltage" )) != NULL )
+     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( Onduleur_get_var ( module, "battery.runtime", &valeur ) )
-     { SEA( num_ea, valeur ); }                                                              /* Numéro de l'EA pour la valeur */
-    else return(FALSE);                                                                                   /* Retour si erreur */
+    if ( (reponse = Onduleur_get_var ( module, "battery.runtime" )) != NULL )
+     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( Onduleur_get_var ( module, "battery.voltage", &valeur ) )
-     { SEA( num_ea, valeur ); }                                                              /* Numéro de l'EA pour la valeur */
-    else return(FALSE);                                                                                   /* Retour si erreur */
+    if ( (reponse = Onduleur_get_var ( module, "battery.voltage" )) != NULL )
+     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( Onduleur_get_var ( module, "input.frequency", &valeur ) )
-     { SEA( num_ea, valeur ); }                                                              /* Numéro de l'EA pour la valeur */
-    else return(FALSE);                                                                                   /* Retour si erreur */
+    if ( (reponse = Onduleur_get_var ( module, "input_frequency" )) != NULL )
+     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( Onduleur_get_var ( module, "output.current", &valeur ) )
-     { SEA( num_ea, valeur ); }                                                              /* Numéro de l'EA pour la valeur */
-    else return(FALSE);                                                                                   /* Retour si erreur */
+    if ( (reponse = Onduleur_get_var ( module, "output.current" )) != NULL )
+     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( Onduleur_get_var ( module, "output.frequency", &valeur ) )
-     { SEA( num_ea, valeur ); }                                                              /* Numéro de l'EA pour la valeur */
-    else return(FALSE);                                                                                   /* Retour si erreur */
+    if ( (reponse = Onduleur_get_var ( module, "output.frequency" )) != NULL )
+     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( Onduleur_get_var ( module, "output.voltage", &valeur ) )
-     { SEA( num_ea, valeur ); }                                                              /* Numéro de l'EA pour la valeur */
-    else return(FALSE);                                                                                   /* Retour si erreur */
+    if ( (reponse = Onduleur_get_var ( module, "output.voltage" )) != NULL )
+     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
 
+/*---------------------------------------------- Récupération des entrées TOR de l'UPS ---------------------------------------*/
+    num_e  = module->ups.map_E;
+    if ( (reponse = Onduleur_get_var ( module, "outlet.1.status" )) != NULL )
+     { SE( num_e, !strcmp(reponse, "on") ); }                                                 /* Numéro de l'E pour la valeur */
+
+    num_e++;
+    if ( (reponse = Onduleur_get_var ( module, "outlet.2.status" )) != NULL )
+     { SE( num_e, !strcmp(reponse, "on") ); }                                                 /* Numéro de l'E pour la valeur */
+
+    num_e++;
+    if ( (reponse = Onduleur_get_var ( module, "ups.status" )) != NULL )
+     { SE( num_e, !strcmp(reponse, "OL CHRG") ); }                                            /* Numéro de l'E pour la valeur */
+    
     return(TRUE);
   }
 /******************************************************************************************************************************/

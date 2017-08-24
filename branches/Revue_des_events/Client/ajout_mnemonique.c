@@ -332,6 +332,7 @@
        gtk_entry_set_text( GTK_ENTRY(Entry_tableau),  mnemo_full->mnemo_base.tableau );
        gtk_entry_set_text( GTK_ENTRY(Entry_acro_syn), mnemo_full->mnemo_base.acro_syn );
        gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type), mnemo_full->mnemo_base.type );
+       gtk_widget_set_sensitive( Option_type, FALSE );                          /* On ne peut changer le type d'un mnemonique */
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), (double)mnemo_full->mnemo_base.num );
 
 /***************************************************** Spécifique Options *****************************************************/

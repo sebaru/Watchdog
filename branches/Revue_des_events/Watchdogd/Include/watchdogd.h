@@ -30,6 +30,7 @@
 
  #include <glib.h>
  #include <pthread.h>
+ #include <string.h>
  #include <errno.h>
 
  #include "Reseaux.h"
@@ -42,6 +43,7 @@
  #include "Camera_DB.h"
  #include "Dls.h"
  #include "Histo_DB.h"
+ #include "Scenario_DB.h"
  #include "Synoptiques_DB.h"
  #include "Mnemonique_DB.h"
  #include "Icones_DB.h"
@@ -160,7 +162,8 @@
 
  extern gint Map_event_to_mnemo_new( struct DB **db, gchar *instance, gchar *thread, gchar *objet ); /* Dans distrib_Events.c */
  extern void Gerer_arrive_Axxx_dls ( void );
- 
+ extern struct CMD_TYPE_MNEMO_BASE *Map_event_to_mnemo( gchar *event, gint *retour_nbr );
+
  extern void Gerer_arrive_MSGxxx_dls ( void );                                                       /* Dans distrib_MSGxxx.c */
  extern void Gerer_histo_repeat ( void );
  extern void Abonner_distribution_histo ( void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo) );

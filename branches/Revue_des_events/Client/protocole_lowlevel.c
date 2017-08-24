@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
-/* Watchdogd/Serveur/protocole_camera.c    Gestion du protocole_camera pour Watchdog                      */
-/* Projet WatchDog version 2.0       Gestion d'habitat                   dim. 13 sept. 2009 11:59:10 CEST */
+/* Client/protocole_camera.c    Gestion du protocole_camera pour Watchdog                                 */
+/* Projet WatchDog version 2.0       Gestion d'habitat                   dim. 13 sept. 2009 11:55:51 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * protocole_camera.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,70 +24,70 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
-/******************************************** Prototypes de fonctions *************************************/
- #include "watchdogd.h"
- #include "Sous_serveur.h"
+ #include "Erreur.h"
+ #include "Reseaux.h"
+
+/********************************* Définitions des prototypes programme ***********************************/
+ #include "protocli.h"
+
+ extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
+
 /**********************************************************************************************************/
 /* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
 /* Entrée: la connexion avec le serveur                                                                   */
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
- void Gerer_protocole_camera( struct CLIENT *client )
-  { struct CONNEXION *connexion;
-    pthread_t tid;
-    connexion = client->connexion;
-
-#ifdef bouh
-    if ( ! Tester_groupe_util( client->util, GID_SYNOPTIQUE) )
-     { struct CMD_GTK_MESSAGE gtkmessage;
-       g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied" );
-       Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                     (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
-       return;
-     }
-
+ void Gerer_protocole_lowlevel ( struct CONNEXION *connexion )
+  { static GList *Arrivee_camera = NULL;
+           
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_CLIENT_WANT_PAGE_CAMERA:
-             { Envoi_client( client, TAG_CAMERA, SSTAG_SERVEUR_CREATE_PAGE_CAMERA_OK, NULL, 0 );
-               Ref_client( client );                             /* Indique que la structure est utilisée */
-               pthread_create( &tid, NULL, (void *)Envoyer_cameras_thread, client );
-               pthread_detach( tid );
+     { case SSTAG_SERVEUR_CREATE_PAGE_CAMERA_OK:
+             { if (!Tester_page_notebook(TYPE_PAGE_CAMERA)) { Creer_page_camera(); }
              }
             break;
-       case SSTAG_CLIENT_EDIT_CAMERA:
+       case SSTAG_SERVEUR_ADD_CAMERA_OK:
              { struct CMD_TYPE_CAMERA *camera;
                camera = (struct CMD_TYPE_CAMERA *)connexion->donnees;
-               Proto_editer_camera( client, camera );
+               Proto_afficher_un_camera( camera );
              }
             break;
-       case SSTAG_CLIENT_VALIDE_EDIT_CAMERA:
+       case SSTAG_SERVEUR_DEL_CAMERA_OK:
              { struct CMD_TYPE_CAMERA *camera;
                camera = (struct CMD_TYPE_CAMERA *)connexion->donnees;
-               Proto_valider_editer_camera( client, camera );
+               Proto_cacher_un_camera( camera );
              }
             break;
-       case SSTAG_CLIENT_ADD_CAMERA:
+       case SSTAG_SERVEUR_EDIT_CAMERA_OK:
              { struct CMD_TYPE_CAMERA *camera;
                camera = (struct CMD_TYPE_CAMERA *)connexion->donnees;
-               Proto_ajouter_camera( client, camera );
+               Menu_ajouter_editer_camera( camera );
              }
             break;
-       case SSTAG_CLIENT_DEL_CAMERA:
+       case SSTAG_SERVEUR_VALIDE_EDIT_CAMERA_OK:
              { struct CMD_TYPE_CAMERA *camera;
                camera = (struct CMD_TYPE_CAMERA *)connexion->donnees;
-               Proto_effacer_camera( client, camera );
+               Proto_rafraichir_un_camera( camera );
              }
             break;
-       case SSTAG_CLIENT_TYPE_NUM_MNEMO_MOTION:
-             { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
-               Proto_envoyer_type_num_mnemo_tag( TAG_CAMERA, SSTAG_SERVEUR_TYPE_NUM_MNEMO_MOTION,
-                                                 client, mnemo );
+       case SSTAG_SERVEUR_ADDPROGRESS_CAMERA:
+             { struct CMD_TYPE_CAMERA *camera;
+               Set_progress_plus(1);
+               camera = (struct CMD_TYPE_CAMERA *)g_try_malloc0( sizeof( struct CMD_TYPE_CAMERA ) );
+               if (!camera) return; 
+               memcpy( camera, connexion->donnees, sizeof(struct CMD_TYPE_CAMERA ) );
+               Arrivee_camera = g_list_append( Arrivee_camera, camera );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FIN:
+             { g_list_foreach( Arrivee_camera, (GFunc)Proto_afficher_un_camera, NULL );
+               g_list_foreach( Arrivee_camera, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_camera );
+               Arrivee_camera = NULL;
+               Chercher_page_notebook( TYPE_PAGE_CAMERA, 0, TRUE );
              }
             break;
      }
-#endif
   }
 /*--------------------------------------------------------------------------------------------------------*/

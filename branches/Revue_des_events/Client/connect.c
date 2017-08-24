@@ -159,11 +159,93 @@ one_again:
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Demander_cookie_thread: Envoi une demande de cookie au serveur (url légère)                                                */
+/* Entrée : Néant                                                                                                             */
+/* Sortie : Néant. Le cookie dans Client.ident est mis à jour si reponse                                                      */
+/******************************************************************************************************************************/
+ void Demander_cookie_thread ( void )
+  { gchar erreur[CURL_ERROR_SIZE+1], url[128];
+    struct curl_httppost *formpost;
+    struct curl_httppost *lastptr;
+    long http_response;
+    CURLcode res;
+    CURL *curl;
+
+    curl = curl_easy_init();
+    if (!curl)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "%s: cURL init failed", __func__ );
+       return;
+     }
+
+    g_snprintf( url, sizeof(url), "http://%s/ws/login", Client.host );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Trying to get %s", __func__, url );
+
+    formpost = lastptr = NULL;                         /* Envoi d'une requete sur l'url client léger pour récupérer le cookie */
+    curl_formadd( &formpost, &lastptr,
+                  CURLFORM_COPYNAME,     "version",
+                  CURLFORM_COPYCONTENTS, Client.ident.version,
+                  CURLFORM_END); 
+    curl_formadd( &formpost, &lastptr,
+                  CURLFORM_COPYNAME,     "username",
+                  CURLFORM_COPYCONTENTS, Client.ident.nom,
+                  CURLFORM_END); 
+    curl_formadd( &formpost, &lastptr,
+                  CURLFORM_COPYNAME,     "password",
+                  CURLFORM_COPYCONTENTS, Client.ident.passwd,
+                  CURLFORM_END); 
+    curl_easy_setopt(curl, CURLOPT_URL, url );
+    curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );
+    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");                        /* Active la gestion des cookies pour la connexion */
+    /*curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_gif_data );*/
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT );
+    res = curl_easy_perform(curl);
+    if (res)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
+                "%s: Could not connect to %s (%s)", __func__, url, erreur);
+     }
+    else if (curl_easy_getinfo( curl, CURLINFO_RESPONSE_CODE, &http_response ) != CURLE_OK)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
+                "%s: Wrong Credentials for %s", __func__, url );
+     }
+    else                                                                                            /* Récupération du cookie */
+     { /* extract all known cookies */
+       struct curl_slist *cookies = NULL;
+       res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
+       if(!res && cookies)
+        {
+          /* a linked list of cookies in cookie file format */
+          while(cookies)
+           { gchar domaine[80], subdomaine[10], path[80], secure[10], expiry[20], name[80], value[256];
+             if ( sscanf ( cookies->data, "%s %s %s %s %s %s %s", domaine, subdomaine, path, secure, expiry, name, value) != 7 )
+              { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "%s: sscanf failed", __func__ ); }
+             else
+              { if ( ! strcmp( name, "sid" ) )
+                 { Info_new( Config_cli.log, Config_cli.log_override, LOG_NOTICE, "%s: get SID '%s'", __func__, value );
+                   g_snprintf( Client.sid, sizeof(Client.sid), "%s", value );
+                 }
+              }
+             cookies = cookies->next;
+           }
+      /* we must free these cookies when we're done */
+         curl_slist_free_all(cookies);
+        }
+       Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
+                "%s: Connected to %s", __func__, url );
+     }
+    curl_easy_cleanup(curl);
+    curl_formfree(formpost);
+  }
+/******************************************************************************************************************************/
 /* Envoyer_authentification: envoi de l'authentification cliente au serveur                                                   */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Envoyer_authentification ( void )
-  { g_snprintf( Client.ident.version, sizeof(Client.ident.version), "%s", VERSION );
+  { pthread_t tid;
+    
+    g_snprintf( Client.ident.version, sizeof(Client.ident.version), "%s", VERSION );
     if (!Client.cli_certif)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, 
                 "Envoyer_identification: sending login(%s)/password(XX) and version number(%s)",
@@ -186,6 +268,10 @@ one_again:
     Client.mode = ATTENTE_AUTORISATION;
     Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
              "Envoyer_identification: Client en mode ATTENTE_AUTORISATION" );
+
+    pthread_create( &tid, NULL, (void *)Demander_cookie_thread, NULL );
+    pthread_detach( tid );
+
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
@@ -280,7 +366,7 @@ one_again:
     SSL_load_error_strings();                                                                        /* Initialisation de SSL */
     SSL_library_init();                                                                 /* Init SSL et PRNG: number générator */
 
-    ssl_ctx = SSL_CTX_new ( TLSv1_client_method() );                                            /* Création d'un contexte SSL */
+    ssl_ctx = SSL_CTX_new ( TLS_client_method() );                                              /* Création d'un contexte SSL */
     if (!ssl_ctx)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, 
                  "Init_ssl : Error creation SSL_CTX_new %s", ERR_error_string( ERR_get_error(), NULL ) );
@@ -297,7 +383,7 @@ one_again:
                  ERR_error_string( ERR_get_error(), NULL ), Config_cli.ssl_file_ca );
        SSL_CTX_free(ssl_ctx);
        return(NULL);
-     } else Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
+     } else Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
                      "Init_ssl : load verify locations OK (file %s)", Config_cli.ssl_file_ca );
        
     SSL_CTX_set_verify( ssl_ctx, SSL_VERIFY_PEER, NULL );                             /* Type de verification des certificats */

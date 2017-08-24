@@ -71,20 +71,20 @@
 /* Entrée: toutes les infos necessaires a la connexion                                                                        */
 /* Sortie: une structure DB de référence                                                                                      */
 /******************************************************************************************************************************/
- struct DB *Init_DB_SQL ( void )
+ static struct DB *Init_DB_SQL_with ( gchar *host, gchar *username, gchar *password, gchar *database, guint port )
   { static gint id = 1, taille;
     struct DB *db;
     my_bool reconnect;
 
     db = (struct DB *)g_try_malloc0( sizeof(struct DB) );
     if (!db)                                                                              /* Si probleme d'allocation mémoire */
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "Init_DB_SQL: Memory error" );
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: Memory error", __func__ );
        return(NULL);
      }
 
     db->mysql = mysql_init(NULL);
     if (!db->mysql)
-     { Info_new( Config.log, Config.log_db, LOG_ERR, "Init_DB_SQL: Mysql_init failed (%s)",
+     { Info_new( Config.log, Config.log_db, LOG_ERR, "%s: Mysql_init failed (%s)", __func__,
                               (char *) mysql_error(db->mysql)  );
        g_free(db);
        return (NULL);
@@ -92,10 +92,9 @@
 
     reconnect = 1;
     mysql_options( db->mysql, MYSQL_OPT_RECONNECT, &reconnect );
-    if ( ! mysql_real_connect( db->mysql, Config.db_host, Config.db_username,
-                               Config.db_password, Config.db_database, Config.db_port, NULL, 0 ) )
+    if ( ! mysql_real_connect( db->mysql, host, username, password, database, port, NULL, 0 ) )
      { Info_new( Config.log, Config.log_db, LOG_ERR,
-                 "Init_DB_SQL: mysql_real_connect failed (%s)",
+                 "%s: mysql_real_connect failed (%s)", __func__,
                  (char *) mysql_error(db->mysql)  );
        mysql_close( db->mysql );
        g_free(db);
@@ -108,9 +107,27 @@
     taille = g_slist_length ( Partage->com_db.Liste );
     pthread_mutex_unlock ( &Partage->com_db.synchro );
     Info_new( Config.log, Config.log_db, LOG_DEBUG,
-              "Init_DB_SQL: Database Connection OK with %s@%s:%d on %s (DB%07d). Nbr_requete_en_cours=%d",
-               Config.db_username, Config.db_host, Config.db_port, Config.db_database, db->id, taille );
+              "%s: Database Connection OK with %s@%s:%d on %s (DB%07d). Nbr_requete_en_cours=%d", __func__,
+               username, host, port, database, db->id, taille );
     return(db);
+  }
+/******************************************************************************************************************************/
+/* Init_DB_SQL: essai de connexion à la DataBase db                                                                           */
+/* Entrée: toutes les infos necessaires a la connexion                                                                        */
+/* Sortie: une structure DB de référence                                                                                      */
+/******************************************************************************************************************************/
+ struct DB *Init_DB_SQL ( void )
+  { return( Init_DB_SQL_with ( Config.db_host, Config.db_username,
+                               Config.db_password, Config.db_database, Config.db_port ) );
+  }
+/******************************************************************************************************************************/
+/* Init_DB_SQL: essai de connexion à la DataBase db                                                                           */
+/* Entrée: toutes les infos necessaires a la connexion                                                                        */
+/* Sortie: une structure DB de référence                                                                                      */
+/******************************************************************************************************************************/
+ struct DB *Init_ArchDB_SQL ( void )
+  { return( Init_DB_SQL_with ( Config.archdb_host, Config.archdb_username,
+                               Config.archdb_password, Config.archdb_database, Config.archdb_port ) );
   }
 /******************************************************************************************************************************/
 /* Libere_DB_SQL : Se deconnecte d'une base de données en parametre                                                           */
@@ -639,7 +656,57 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=3159;
+    if (database_version < 3178)
+     { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `syns_scenario` ("
+                                             "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                                             "`id_syn` int(11) NOT NULL DEFAULT '0',"
+                                             "`libelle` text COLLATE utf8_unicode_ci NOT NULL,"
+                                             "`posx` int(11) NOT NULL DEFAULT '0',"
+                                             "`posy` int(11) NOT NULL DEFAULT '0',"
+                                             "`angle` float NOT NULL DEFAULT '0',"
+                                             "PRIMARY KEY (`id`),"
+                                             "CONSTRAINT `id_syn` FOREIGN KEY (`id_syn`) REFERENCES `syns` (`id`) ON DELETE CASCADE"
+                                             ") ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 3209)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs CHANGE `syn` `syn_id` int(11) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 3215)
+     { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `syns_camerasup` ("
+                                             "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                                             "`syn_id` int(11) NOT NULL,"
+                                             "`num` int(11) NOT NULL,"
+                                             "`posx` int(11) NOT NULL,"
+                                             "`posy` int(11) NOT NULL,"
+                                             "PRIMARY KEY (`id`),"
+                                             "CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE"
+                                             ") ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;"
+                                             "ALTER TABLE syns_motifs CHANGE `syn` `syn_id` int(11) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 3247)
+     { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `scenario_ticks` ("
+                                             "`id` int(11) NOT NULL,"
+                                             "`num` int(11) NOT NULL,"
+                                             "`minute` int(11) NOT NULL,"
+                                             "`heure` int(11) NOT NULL,"
+                                             "`jour` int(11) NOT NULL,"
+                                             "`date` int(11) NOT NULL,"
+                                             "`mois` int(11) NOT NULL,"
+                                             "`mnemo_id` int(11) NOT NULL,"
+                                             "PRIMARY KEY (`id`), KEY(`num`),"
+                                             "CONSTRAINT `num` FOREIGN KEY (`num`) REFERENCES `syns_scenario` (`id`) ON DELETE CASCADE,"
+                                             "CONSTRAINT `mnemo_id` FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE"
+                                             ") ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    database_version=3247;
 
     Libere_DB_SQL(&db);
 

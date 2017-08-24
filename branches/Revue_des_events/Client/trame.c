@@ -37,7 +37,6 @@
  #include <sys/stat.h>
  #include <sys/types.h>
  #include <fcntl.h>
- #include <curl/curl.h>
 
  #include "trame.h"
  #define DEBUG_TRAME
@@ -114,6 +113,16 @@
   {
     if (trame_camera_sup->item_groupe) goo_canvas_item_remove( trame_camera_sup->item_groupe );
     if (trame_camera_sup->select_mi) goo_canvas_item_remove( trame_camera_sup->select_mi );
+  }
+/**********************************************************************************************************/
+/* Trame_del_item: Renvoi un nouveau item, completement vierge                                            */
+/* Entrée: un item                                                                                        */
+/* Sortie: rieng                                                                                          */
+/**********************************************************************************************************/
+ void Trame_del_scenario ( struct TRAME_ITEM_SCENARIO *trame_scenario )
+  {
+    if (trame_scenario->item_groupe) goo_canvas_item_remove( trame_scenario->item_groupe );
+    if (trame_scenario->select_mi) goo_canvas_item_remove( trame_scenario->select_mi );
   }
 /**********************************************************************************************************/
 /* Trame_del_item: Renvoi un nouveau item, completement vierge                                            */
@@ -212,18 +221,18 @@
        goo_canvas_item_set_transform ( trame_motif->select_bg, &trame_motif->transform_bg );
      }
   }
-/**********************************************************************************************************/
-/* Trame_rafraichir_motif: remet à jour la position, rotation, echelle du motif en parametre              */
-/* Entrée: la structure graphique TRAME_MOTIF                                                             */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Trame_rafraichir_motif: remet à jour la position, rotation, echelle du motif en parametre                                  */
+/* Entrée: la structure graphique TRAME_MOTIF                                                                                 */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  void Trame_rafraichir_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
   { if (!(trame_camera_sup && trame_camera_sup->camera_sup)) return;
-
+printf("Rafraichir camera : %d %d\n", trame_camera_sup->camera_sup->posx, trame_camera_sup->camera_sup->posy );
     cairo_matrix_init_identity ( &trame_camera_sup->transform );
     cairo_matrix_translate ( &trame_camera_sup->transform,
-                             (gdouble)trame_camera_sup->camera_sup->position_x,
-                             (gdouble)trame_camera_sup->camera_sup->position_y
+                             (gdouble)trame_camera_sup->camera_sup->posx,
+                             (gdouble)trame_camera_sup->camera_sup->posy
                            );
 
     cairo_matrix_rotate ( &trame_camera_sup->transform, 0.0 );
@@ -336,6 +345,24 @@
 
     goo_canvas_item_set_transform ( trame_cadran->item_groupe, &trame_cadran->transform );
   }
+/******************************************************************************************************************************/
+/* Trame_rafraichir_scenario: remet à jour la position, rotation, echelle du scenario en parametre                            */
+/* Entrée: la structure graphique TRAME_ITEM_SCENARIO                                                                         */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Trame_rafraichir_scenario( struct TRAME_ITEM_SCENARIO *trame_scenario )
+  { if (!(trame_scenario && trame_scenario->scenario)) return;
+
+    cairo_matrix_init_identity ( &trame_scenario->transform );
+    cairo_matrix_translate ( &trame_scenario->transform,
+                             (gdouble)trame_scenario->scenario->posx,
+                             (gdouble)trame_scenario->scenario->posy
+                           );
+
+    cairo_matrix_scale  ( &trame_scenario->transform, 1.0, 1.0 );
+
+    goo_canvas_item_set_transform ( trame_scenario->item_groupe, &trame_scenario->transform );
+  }
 /**********************************************************************************************************/
 /* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                         */
 /* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                        */
@@ -386,24 +413,18 @@
     trame_motif->en_cours_vert  = v;
     trame_motif->en_cours_bleu  = b;
   }
-/**********************************************************************************************************/
-/* Trame_choisir_frame: Choisit une frame parmi celles du motif                                           */
-/* Entrée: une structure TRAME_ITEM_MOTIF, le numero de frame voulue                                      */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Trame_choisir_frame: Choisit une frame parmi celles du motif                                                               */
+/* Entrée: une structure TRAME_ITEM_MOTIF, le numero de frame voulue                                                          */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num, guchar r, guchar v, guchar b )
   { GList *frame;
     
     if (!(trame_motif && trame_motif->motif)) { printf ("Niet\n"); return; }
 
-#ifdef bouh
- test le 11/11/12    if (trame_motif->num_image == num )                                         /* Frame deja affichée ?? */
-     { Trame_peindre_motif( trame_motif, r, v, b );
-       return;
-     }
-#endif
     frame = g_list_nth( trame_motif->images, num );
-    if (!frame) { frame = trame_motif->images;                                      /* Bouclage si erreur */
+    if (!frame) { frame = trame_motif->images;                                                          /* Bouclage si erreur */
                   num = 0;
                 }
 
@@ -505,7 +526,7 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_gif_data );
     curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "Watchdog Client - Trame libcurl");
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT);
 /*       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0 );*/
 /*     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0 );                                    Warning ! */
 /*       curl_easy_setopt(curl, CURLOPT_CAINFO, Cfg_satellite.https_file_ca );
@@ -516,6 +537,7 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
     res = curl_easy_perform(curl);
     if (res)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "Download_gif : Error : Could not connect" );
+       curl_easy_cleanup(curl);
        if (Gif_received_buffer) { g_free(Gif_received_buffer); }
        return(FALSE);
      }
@@ -674,81 +696,99 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
      }
     return(trame_motif);
   }
-/**********************************************************************************************************/
-/* Trame_ajout_camera_sup: Ajoute un camera_sup sur le visuel                                             */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference         */
-/* Sortie: reussite                                                                                       */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Trame_ajout_camera_sup: Ajoute un camera_sup sur le visuel                                                                 */
+/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* Sortie: la structure referencant la camera de supervision, ou NULL si erreur                                               */
+/******************************************************************************************************************************/
  struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
-                                                        struct CMD_TYPE_CAMERA_SUP *camera_sup )
+                                                        struct CMD_TYPE_CAMERASUP *camera_sup )
   { struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
+    GdkPixbuf *pixbuf;
 
     if (!(trame && camera_sup)) return(NULL);
 
     trame_camera_sup = g_try_malloc0( sizeof(struct TRAME_ITEM_CAMERA_SUP) );
     if (!trame_camera_sup) return(NULL);
-
     trame_camera_sup->camera_sup = camera_sup;
+printf("Test ajout cam\n");
+    pixbuf = gdk_pixbuf_new_from_file ( "1.gif", NULL );                                      /* Chargement du fichier Camera */
+    if (!pixbuf)
+     { Download_gif ( 1, 0 );
+printf("Download cam\n");
+       pixbuf = gdk_pixbuf_new_from_file ( "1.gif", NULL );                                   /* Chargement du fichier Camera */
+       if (!pixbuf) { g_free(trame_camera_sup); return(NULL); }
+     }
 
     trame_camera_sup->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );    /* Groupe MOTIF */
 
-    if ( flag )
-     { gchar chaine[256];
-       if ( camera_sup->type == CAMERA_MODE_ICONE )
-        { trame_camera_sup->item = goo_canvas_rect_new( trame_camera_sup->item_groupe,
-                                                        -55.0, -15.0, 110.0, 30.0,
-                                                        "fill-color", "blue",
-                                                        "stroke-color", "yellow",
-                                                        NULL);
+    trame_camera_sup->item = goo_canvas_image_new ( trame_camera_sup->item_groupe,
+                                                    pixbuf,
+                                                    -gdk_pixbuf_get_width(pixbuf)/2.0, -gdk_pixbuf_get_height(pixbuf)/2.0,
+                                                    NULL );
 
-        }
-       /*else if (camera_sup->type == CAMERA_MODE_INCRUSTATION )
-        { trame_camera_sup->item = goo_canvas_rect_new( trame_camera_sup->item_groupe,
-                                                        -DEFAULT_CAMERA_LARGEUR/2.0,
-                                                        -DEFAULT_CAMERA_HAUTEUR/2.0,
-                                                        DEFAULT_CAMERA_LARGEUR*1.0,
-                                                        DEFAULT_CAMERA_HAUTEUR*1.0,
-                                                        "fill-color", "blue",
-                                                        "stroke-color", "yellow",
-                                                        NULL);
-
-        }*/
-       g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->num );
+/*       g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->num );
        goo_canvas_text_new ( trame_camera_sup->item_groupe, chaine, 0.0, 0.0,
                                                          -1, GTK_ANCHOR_CENTER,
                                                          "fill-color", "yellow",
                                                          "font", "arial bold 14",
-                                                         NULL);
-       trame_camera_sup->select_mi = goo_canvas_rect_new (trame_camera_sup->item_groupe,
-                                                          -5.0, -5.0, 10.0, 10.0,
-                                                          "fill_color", "green",
-                                                          "stroke_color", "black", NULL);
-
-       g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-     }
-    else                                                                           /* Mode supersivion !! */
-     { gchar chaine[256];
-       if ( camera_sup->type == CAMERA_MODE_ICONE )
-        { trame_camera_sup->item = goo_canvas_rect_new( trame_camera_sup->item_groupe,
-                                                        -55.0, -15.0, 110.0, 30.0,
-                                                        "fill-color", "blue",
-                                                        "stroke-color", "yellow",
-                                                        NULL);
-
-          g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->num );
-          goo_canvas_text_new ( trame_camera_sup->item_groupe, chaine, 0.0, 0.0,
-                                                            -1, GTK_ANCHOR_CENTER,
-                                                            "fill-color", "yellow",
-                                                            "font", "arial bold 14",
-                                                         NULL);
-        }
-     }
-
+                                                         NULL);*/
     Trame_rafraichir_camera_sup ( trame_camera_sup );
 
     trame_camera_sup->type = TYPE_CAMERA_SUP;
     trame->trame_items = g_list_append( trame->trame_items, trame_camera_sup );
     return(trame_camera_sup);
+  }
+/******************************************************************************************************************************/
+/* Trame_ajout_camera_sup: Ajoute un camera_sup sur le visuel                                                                 */
+/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* Sortie: la structure referencant la camera de supervision, ou NULL si erreur                                               */
+/******************************************************************************************************************************/
+ struct TRAME_ITEM_SCENARIO *Trame_ajout_scenario ( gint flag, struct TRAME *trame,
+                                                    struct CMD_TYPE_SCENARIO *scenario )
+  { struct TRAME_ITEM_SCENARIO *trame_scenario;
+    GdkPixbuf *pixbuf;
+
+    if (!(trame && scenario)) return(NULL);
+
+    trame_scenario = g_try_malloc0( sizeof(struct TRAME_ITEM_SCENARIO) );
+    if (!trame_scenario) return(NULL);
+    trame_scenario->type = TYPE_SCENARIO;
+    trame_scenario->scenario = scenario;
+
+    pixbuf = gdk_pixbuf_new_from_file ( "2.gif", NULL );                                    /* Chargement du fichier Calendar */
+    if (!pixbuf)
+     { Download_gif ( 2, 0 );
+       pixbuf = gdk_pixbuf_new_from_file ( "2.gif", NULL );
+       if (!pixbuf) { g_free(trame_scenario); return(NULL); }
+     }
+
+    trame_scenario->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                          /* Groupe MOTIF */
+
+    trame_scenario->item = goo_canvas_image_new ( trame_scenario->item_groupe,
+                                                  pixbuf,
+                                                  -gdk_pixbuf_get_width(pixbuf)/2.0, -gdk_pixbuf_get_height(pixbuf)/2.0,
+                                                  NULL );
+
+/*       g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->num );
+       goo_canvas_text_new ( trame_camera_sup->item_groupe, chaine, 0.0, 0.0,
+                                                         -1, GTK_ANCHOR_CENTER,
+                                                         "fill-color", "yellow",
+                                                         "font", "arial bold 14",
+                                                         NULL);*/
+
+    cairo_matrix_init_identity ( &trame_scenario->transform );
+    cairo_matrix_translate ( &trame_scenario->transform,
+                             (gdouble)trame_scenario->scenario->posx,
+                             (gdouble)trame_scenario->scenario->posy
+                           );
+
+    cairo_matrix_rotate ( &trame_scenario->transform, 0.0 );
+    cairo_matrix_scale  ( &trame_scenario->transform, 1.0, 1.0 );
+
+    goo_canvas_item_set_transform ( trame_scenario->item_groupe, &trame_scenario->transform );
+    trame->trame_items = g_list_append( trame->trame_items, trame_scenario );
+    return(trame_scenario);
   }
 /**********************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                       */
@@ -981,20 +1021,21 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     return(trame);
   }
 
-/**********************************************************************************************************/
-/* Trame_effacer_trame: Efface la trame en parametre                                                      */
-/* Entrée: la trame voulue                                                                                */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Trame_effacer_trame: Efface la trame en parametre                                                                          */
+/* Entrée: la trame voulue                                                                                                    */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Trame_effacer_trame ( struct TRAME *trame )
   { struct TRAME_ITEM_MOTIF *trame_motif;
     struct TRAME_ITEM_COMMENT *trame_comm;
     struct TRAME_ITEM_PASS *trame_pass;
     struct TRAME_ITEM_CADRAN *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
+    struct TRAME_ITEM_SCENARIO *trame_scenario;
     GList *objet;
 
-    objet = trame->trame_items;                          /* Destruction des items du synoptique precedent */
+    objet = trame->trame_items;                                              /* Destruction des items du synoptique precedent */
     while(objet)
      { printf("Trame_effacer_trame: objet = %p data=%p  type=%d\n", objet, objet->data, *((gint *)objet->data) );
        switch ( *((gint *)objet->data) )
@@ -1021,6 +1062,11 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                             Trame_del_camera_sup( trame_camera_sup );
                             g_free(trame_camera_sup);
                             break;
+          case TYPE_SCENARIO:
+                            trame_scenario = (struct TRAME_ITEM_SCENARIO *)objet->data;
+                            Trame_del_scenario( trame_scenario );
+                            g_free(trame_scenario);
+                            break;
           default: printf("Trame_effacer_trame: type inconnu\n");
         }
        objet = objet->next;
@@ -1029,15 +1075,15 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     trame->trame_items = NULL;
   }
 
-/**********************************************************************************************************/
-/* Trame_detruire_trame: Destruction d'une trame                                                          */
-/* Entrée: la trame voulue                                                                                */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Trame_detruire_trame: Destruction d'une trame                                                                              */
+/* Entrée: la trame voulue                                                                                                    */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Trame_detruire_trame ( struct TRAME *trame )
   { if (!trame) return;
     Trame_effacer_trame ( trame );
     gtk_widget_destroy( trame->trame_widget );
     g_free(trame);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

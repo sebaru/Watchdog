@@ -94,14 +94,11 @@
 /******************************************************************************************************************************/
  void Detruire_page_atelier ( struct PAGE_NOTEBOOK *page )
   { struct TYPE_INFO_ATELIER *infos;
-printf("Detruire page atelier\n");
     infos = (struct TYPE_INFO_ATELIER *)page->infos;
-printf("milieu Detruire page atelier\n");
     if ( Nbr_page_type( TYPE_PAGE_ATELIER ) == 1 )                              /* S'il ne reste qu'1 page, c'est la derniere */
      { Detruire_fenetre_ajout_motif ();
        Detruire_fenetre_propriete_TOR ();
      }
-printf("fin Detruire page atelier\n");
   }
 /******************************************************************************************************************************/
 /* Menu_ajouter_message: Ajout d'un message                                                                                   */
@@ -127,7 +124,7 @@ printf("fin Detruire page atelier\n");
  static void Menu_ajouter_commentaire ( struct TYPE_INFO_ATELIER *infos )
   { Creer_fenetre_ajout_commentaire (); }
 /******************************************************************************************************************************/
-/* Menu_ajouter_cadran: Ajout d'un cadran                                                                                   */
+/* Menu_ajouter_cadran: Ajout d'un cadran                                                                                     */
 /* Entrée: rien                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
@@ -158,7 +155,7 @@ printf("fin Detruire page atelier\n");
     struct TRAME_ITEM_PASS *trame_pass;
     struct TRAME_ITEM_CADRAN *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
-
+    struct TRAME_ITEM_SCENARIO *trame_scenario;
     GList *objet;
     if ( !(infos && infos->Trame_atelier && infos->Trame_atelier->trame_items) )
      { printf("Erreur parametre Menu_enregistrer_synoptique\n"); return; }
@@ -192,9 +189,13 @@ printf("fin Detruire page atelier\n");
           case TYPE_CAMERA_SUP:
                trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_CAMERA_SUP,
-                              (gchar *)trame_camera_sup->camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
+                              (gchar *)trame_camera_sup->camera_sup, sizeof(struct CMD_TYPE_CAMERASUP) );
                break;
-
+          case TYPE_SCENARIO:
+               trame_scenario = (struct TRAME_ITEM_SCENARIO *)objet->data;
+               Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_EDIT_SCENARIO,
+                              (gchar *)trame_scenario->scenario, sizeof(struct CMD_TYPE_SCENARIO) );
+               break;
           default: printf("Enregistrer_synoptique: type inconnu\n" );
         }
        objet=objet->next;
@@ -369,6 +370,11 @@ printf("fin Detruire page atelier\n");
     menu_bouton = gtk_image_menu_item_new_with_label ( _("Cameras") );
     g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
                               G_CALLBACK(Menu_ajouter_camera_sup), infos );
+    gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
+
+    menu_bouton = gtk_image_menu_item_new_with_label ( _("Scenario") );
+    g_signal_connect_swapped( G_OBJECT(menu_bouton), "activate",
+                              G_CALLBACK(Menu_ajouter_scenario), infos );
     gtk_menu_shell_append ( GTK_MENU_SHELL(ssmenu), menu_bouton );
 
     gtk_menu_item_set_submenu (GTK_MENU_ITEM(menu_main), ssmenu );

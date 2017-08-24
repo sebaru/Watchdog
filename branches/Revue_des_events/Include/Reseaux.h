@@ -41,7 +41,7 @@
  #include "Reseaux_message.h"
  #include "Reseaux_mnemonique.h"
  #include "Reseaux_supervision.h"
- #include "Reseaux_camera.h"
+ #include "Reseaux_lowlevel.h"
  #include "Reseaux_histo.h"
  #include "Reseaux_atelier.h"
  #include "Reseaux_admin.h"
@@ -91,7 +91,7 @@
     TAG_SUPERVISION,                                                                     /* Gestions de la partie supervision */
     TAG_HISTO,                                                                                          /* Gestions des histo */
     TAG_ATELIER,                                                                                     /* Gestions de l'atelier */
-    TAG_CAMERA,                                                                                         /* Gestion des camera */
+    TAG_LOWLEVEL,                                                                                         /* Gestion des camera */
     TAG_ADMIN,                                                    /* Utilisation des commandes d'admin depuis le client lourd */
     TAG_SATELLITE,                                                                             /* Echange vers les satellites */
   };

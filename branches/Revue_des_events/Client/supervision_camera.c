@@ -45,19 +45,19 @@
 /* Entrée: une reference sur le camera_sup                                                                */
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
- void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERA_SUP *rezo_camera_sup )
+ void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERASUP *rezo_camera_sup )
   { struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     struct TYPE_INFO_SUPERVISION *infos;
-    struct CMD_TYPE_CAMERA_SUP *camera_sup;
+    struct CMD_TYPE_CAMERASUP *camera_sup;
 
     infos = Rechercher_infos_supervision_par_id_syn ( rezo_camera_sup->syn_id );
     if (!(infos && infos->Trame)) return;
-    camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_try_malloc0( sizeof(struct CMD_TYPE_CAMERA_SUP) );
+    camera_sup = (struct CMD_TYPE_CAMERASUP *)g_try_malloc0( sizeof(struct CMD_TYPE_CAMERASUP) );
     if (!camera_sup)
      { return;
      }
 
-    memcpy ( camera_sup, rezo_camera_sup, sizeof(struct CMD_TYPE_CAMERA_SUP) );
+    memcpy ( camera_sup, rezo_camera_sup, sizeof(struct CMD_TYPE_CAMERASUP) );
 
     trame_camera_sup = Trame_ajout_camera_sup ( FALSE, infos->Trame, camera_sup );
     g_signal_connect( G_OBJECT(trame_camera_sup->item_groupe), "button-press-event",

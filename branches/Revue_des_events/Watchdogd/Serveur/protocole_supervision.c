@@ -42,19 +42,25 @@
     prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
     Envoyer_motif_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,
-	                                             SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN );
+	                                                SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF_FIN );
 
     Envoyer_palette_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE,
                                                    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PALETTE_FIN );
 
     Envoyer_cadran_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CADRAN,
-                                                   SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CADRAN_FIN );
+                                                  SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CADRAN_FIN );
 
     Envoyer_passerelle_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS,
-	                                                  SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN );
+	                                                     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_PASS_FIN );
 
     Envoyer_comment_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT,
                                                    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_COMMENT_FIN );
+
+    Envoyer_camera_sup_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP,
+                                                      SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP_FIN );
+
+    Envoyer_scenario_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO,
+                                                    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO_FIN );
 
     g_free(client->syn_to_send);
     client->syn_to_send = NULL;

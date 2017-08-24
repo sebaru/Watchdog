@@ -43,6 +43,7 @@
   { static GList *Arrivee_comment = NULL;
     static GList *Arrivee_palette = NULL;
     static GList *Arrivee_camera_sup = NULL;
+    static GList *Arrivee_scenario = NULL;
     static int save_id = 0;
 
     switch ( Reseau_ss_tag ( connexion ) )
@@ -141,12 +142,12 @@
             break;
 /******************************************** Reception des cameras de supervision ********************************************/
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP:
-             { struct CMD_TYPE_CAMERA_SUP *camera_sup;
+             { struct CMD_TYPE_CAMERASUP *camera_sup;
                Set_progress_plus(1);
 
-               camera_sup = (struct CMD_TYPE_CAMERA_SUP *)g_try_malloc0( sizeof( struct CMD_TYPE_CAMERA_SUP ) );
+               camera_sup = (struct CMD_TYPE_CAMERASUP *)g_try_malloc0( sizeof( struct CMD_TYPE_CAMERASUP ) );
                if (!camera_sup) return; 
-               memcpy( camera_sup, connexion->donnees, sizeof(struct CMD_TYPE_CAMERA_SUP ) );
+               memcpy( camera_sup, connexion->donnees, sizeof(struct CMD_TYPE_CAMERASUP ) );
                Arrivee_camera_sup = g_list_append( Arrivee_camera_sup, camera_sup );
              }
             break;
@@ -155,6 +156,24 @@
                g_list_foreach( Arrivee_camera_sup, (GFunc)g_free, NULL );
                g_list_free( Arrivee_camera_sup );
                Arrivee_camera_sup = NULL;
+             }
+            break;
+/******************************************** Reception des Scenario **********************************************************/
+       case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO:
+             { struct CMD_TYPE_SCENARIO *scenario;
+               Set_progress_plus(1);
+
+               scenario = (struct CMD_TYPE_SCENARIO *)g_try_malloc0( sizeof( struct CMD_TYPE_SCENARIO ) );
+               if (!scenario) return; 
+               memcpy( scenario, connexion->donnees, sizeof(struct CMD_TYPE_SCENARIO ) );
+               Arrivee_scenario = g_list_append( Arrivee_scenario, scenario );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO_FIN:
+             { g_list_foreach( Arrivee_scenario, (GFunc)Proto_afficher_un_scenario_supervision, NULL );
+               g_list_foreach( Arrivee_scenario, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_scenario );
+               Arrivee_scenario = NULL;
              }
             break;
      }

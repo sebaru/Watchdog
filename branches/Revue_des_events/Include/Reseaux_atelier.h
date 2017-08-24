@@ -34,10 +34,6 @@
  #define NBR_CARAC_LIBELLE_COMMENT     50                               /* taille max du libelle du motif */
  #define NBR_CARAC_LIBELLE_COMMENT_UTF8  (2*NBR_CARAC_LIBELLE_COMMENT)
 
-/********************************************* Qu'est-ce qu'une camera de supervision ?? **************************************/
- #define DEFAULT_CAMERA_LARGEUR        160
- #define DEFAULT_CAMERA_HAUTEUR        120
-
  struct CMD_TYPE_MOTIF
   { gint    id;                                                                                   /* Id du motif dans la base */
     gint    syn_id;                                                                    /* Numéro du synoptique ou est l'icone */
@@ -113,39 +109,46 @@
     gfloat  angle;
   };
 
-/*********************************************** Gestion des cameras de supervision ***********************/
- struct CMD_TYPE_CAMERA_SUP
+/************************************************* Gestion des cameras de supervision *****************************************/
+ struct CMD_TYPE_CAMERASUP
   { gint  id;
     gint  syn_id;
-    gint  num;                                                       /* Némero (utilisateur) de la camera */
-    gchar libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                                             /* "ChSeb" */
     gint  camera_src_id;
-    gchar location[NBR_CARAC_LOCATION_CAMERA_UTF8];                               /* Libelle de la camera */
-    gint  position_x;
-    gint  position_y;
-    gint  type;
-    gchar objet[128];
-    gint  bit;                        /* Numéro du bistable a positioner en cas de detection de mouvement */
-
+    gchar libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                                                                 /* "ChSeb" */
+    gchar location[NBR_CARAC_LOCATION_CAMERA_UTF8];                                                   /* Libelle de la camera */
+    gint  posx;
+    gint  posy;
   };
-/************************************************* Tag de communication ***********************************/
+
+/************************************************* Gestion des Scenario *******************************************************/
+ struct CMD_TYPE_SCENARIO
+  { gint  id;
+    gint  syn_id;
+    gint  num;
+    gint  posx;
+    gint  posy;
+  };
+
+/******************************************************* Tag de communication *************************************************/
  enum 
   { SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE,  /* Envoi des groupes pour l'edition motif */
     SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE_FIN,            /* Le transfert est terminé */
 
-    SSTAG_CLIENT_ATELIER_SYNOPTIQUE,                 /* Le client desire editer par atelier le synoptique */
-    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF,         /* Le serveur envoi des motifs dans l'atelier client */
-    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF_FIN,     /* Le serveur envoi des motifs dans l'atelier client */
-    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT,     /* Le serveur envoi des comments dans l'atelier client */
-    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT_FIN, /* Le serveur envoi des comments dans l'atelier client */
-    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS,            /* Le serveur envoi des pass dans l'atelier client */
-    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS_FIN,        /* Le serveur envoi des pass dans l'atelier client */
-    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE,     /* Le serveur envoi des palettes dans l'atelier client */
-    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE_FIN, /* Le serveur envoi des palettes dans l'atelier client */
-    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CADRAN,       /* Le serveur envoi des cadrans dans l'atelier client */
-    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CADRAN_FIN,   /* Le serveur envoi des cadrans dans l'atelier client */
-    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP,    /* Le serveur envoi des camera dans l'atelier client */
-    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP_FIN,/* Le serveur envoi des camera dans l'atelier client */
+    SSTAG_CLIENT_ATELIER_SYNOPTIQUE,                                     /* Le client desire editer par atelier le synoptique */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF,                             /* Le serveur envoi des motifs dans l'atelier client */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF_FIN,                         /* Le serveur envoi des motifs dans l'atelier client */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT,                         /* Le serveur envoi des comments dans l'atelier client */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_COMMENT_FIN,                     /* Le serveur envoi des comments dans l'atelier client */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS,                                /* Le serveur envoi des pass dans l'atelier client */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PASS_FIN,                            /* Le serveur envoi des pass dans l'atelier client */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE,                         /* Le serveur envoi des palettes dans l'atelier client */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_PALETTE_FIN,                     /* Le serveur envoi des palettes dans l'atelier client */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CADRAN,                           /* Le serveur envoi des cadrans dans l'atelier client */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CADRAN_FIN,                       /* Le serveur envoi des cadrans dans l'atelier client */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP,                        /* Le serveur envoi des camera dans l'atelier client */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP_FIN,                    /* Le serveur envoi des camera dans l'atelier client */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_SCENARIO,                        /* Le serveur envoi des scenario dans l'atelier client */
+    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_SCENARIO_FIN,                    /* Le serveur envoi des scenario dans l'atelier client */
 
     SSTAG_CLIENT_ATELIER_DEL_MOTIF,                  /* Le client desire editer par atelier le synoptique */
     SSTAG_SERVEUR_ATELIER_DEL_MOTIF_OK,              /* Le client desire editer par atelier le synoptique */
@@ -198,6 +201,12 @@
     SSTAG_CLIENT_ATELIER_DEL_CAMERA_SUP,                        /* Le client veut detruire une camera_sup */
     SSTAG_SERVEUR_ATELIER_DEL_CAMERA_SUP_OK,                                          /* Destruction OKAY */
     SSTAG_CLIENT_ATELIER_EDIT_CAMERA_SUP,
+
+    SSTAG_CLIENT_ATELIER_ADD_SCENARIO,                        /* Le client veut ajouter un scenario au syn en cours d'edition */
+    SSTAG_SERVEUR_ATELIER_ADD_SCENARIO_OK,                                         /* Le serveur valide l'ajout d'un scenario */
+    SSTAG_CLIENT_ATELIER_DEL_SCENARIO,                                                 /* Le client veut detruire un scenario */
+    SSTAG_SERVEUR_ATELIER_DEL_SCENARIO_OK,                                                                /* Destruction OKAY */
+    SSTAG_CLIENT_ATELIER_EDIT_SCENARIO,
 
     SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER,    /* Le client veut les données classe pour l'atelier */
     SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER,

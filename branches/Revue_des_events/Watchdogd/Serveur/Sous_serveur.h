@@ -90,8 +90,8 @@
  extern void Gerer_protocole_supervision( struct CLIENT *client );
  extern void Gerer_protocole_histo( struct CLIENT *client );
  extern void Gerer_protocole_synoptique( struct CLIENT *client );
- extern void Gerer_protocole_camera( struct CLIENT *client );
  extern void Gerer_protocole_admin( struct CLIENT *client );
+ extern void Gerer_protocole_lowlevel( struct CLIENT *client );
  extern void Gerer_protocole_satellite( struct CLIENT *client );
 
                                                                                                               /* Dans envoi.c */
@@ -187,12 +187,6 @@
  extern void Proto_ajouter_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
  extern void Proto_valider_editer_motif_atelier ( struct CLIENT *client, struct CMD_TYPE_MOTIF *rezo_motif );
 
-                                                                                            /* Dans envoi_synoptique_motifs.c */
- extern void Proto_effacer_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERA_SUP *camera_sup );
- extern void Proto_ajouter_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERA_SUP *camera_sup );
- extern void Proto_valider_editer_camera_sup_atelier ( struct CLIENT *client,
-                                                       struct CMD_TYPE_CAMERA_SUP *camera_sup );
-
                                                                                           /* Dans envoi_synoptique_palettes.c */
  extern void Envoyer_palette_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
  extern void Proto_effacer_palette_atelier ( struct CLIENT *client, struct CMD_TYPE_PALETTE *rezo_palette );
@@ -233,6 +227,7 @@
  extern void Proto_ajouter_icone_deb_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone );
  extern void Proto_ajouter_icone_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone,
                                        gint taille, gchar *buffer );
+ extern void Proto_ajouter_icone_fin_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone );
  
  extern void *Proto_envoyer_histo_msgs_thread ( struct CLIENT *client );                           /* Dans envoi_histo_hard.c */
 
@@ -244,5 +239,16 @@
  extern void *Envoyer_cameras_thread ( struct CLIENT *client );
  extern void *Envoyer_cameras_for_atelier_thread ( struct CLIENT *client );
 
+                                                                                        /* Dans envoi_synoptique_camera_sup.c */
+ extern void Proto_effacer_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
+ extern void Proto_ajouter_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
+ extern void Proto_valider_editer_camera_sup_atelier ( struct CLIENT *client, struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
+ extern void Envoyer_camera_sup_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
+
+                                                                                          /* Dans envoi_synoptique_scenario.c */
+ extern void Proto_effacer_scenario_atelier ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_scenario );
+ extern void Proto_ajouter_scenario_atelier ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_scenario );
+ extern void Proto_valider_editer_scenario_atelier ( struct CLIENT *client, struct CMD_TYPE_SCENARIO *rezo_scenario );
+ extern void Envoyer_scenario_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin ); 
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
