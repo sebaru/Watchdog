@@ -784,7 +784,7 @@
           if (plugin_actuel->plugindb.on && plugin_actuel->go)
            { gettimeofday( &tv_avant, NULL );
              Partage->top_cdg_plugin_dls = 0;                                                   /* On reset le cdg plugin DLS */
-             plugin_actuel->go( plugin_actuel->starting, 0 );                                           /* On appel le plugin */
+             plugin_actuel->go( plugin_actuel->starting, plugin_actuel->debug );                        /* On appel le plugin */
              gettimeofday( &tv_apres, NULL );
              if (plugin_actuel->debug)
               { Info_new (Config.log, Config.log_dls, LOG_INFO,
