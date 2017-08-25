@@ -706,7 +706,13 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=3247;
+    if (database_version < 3252)
+     { g_snprintf( requete, sizeof(requete), "INSERT INTO mnemos (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `command_text`) VALUES "
+                                             "(111, 1,  7, 1, 'SYS_NEW_TICK', 'Default Command by Tick', '');" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    database_version=3252;
 
     Libere_DB_SQL(&db);
 

@@ -93,7 +93,7 @@
 #ifdef bouh
 if (habilitation technicien)
 #endif
-       json_builder_set_member_name  ( builder, "monostable" ); json_builder_add_boolean_value( builder, sce->mnemo_num );
+       json_builder_set_member_name  ( builder, "monostable" ); json_builder_add_int_value( builder, sce->mnemo_num );
 
        json_builder_end_object (builder);                                                              /* Fin dump du scenario */
        g_free(sce);

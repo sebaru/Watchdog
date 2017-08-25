@@ -131,6 +131,14 @@
                       "%s: Candidat %04d does not provide Get_Tableau_msg function", __func__, dls->plugindb.id ); 
              Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING );
            }
+
+          dls->Get_Debug_buffer = dlsym( dls->handle, "Get_Debug_buffer" );                       /* Recherche de la fonction */
+          if (!dls->Get_Debug_buffer)
+           { Info_new( Config.log, Config.log_dls, LOG_WARNING,
+                      "%s: Candidat %04d does not provide Get_Debug_buffer function", __func__, dls->plugindb.id ); 
+             Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING );
+           }
+
          }
        
        Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %04d loaded (%s)",
@@ -295,19 +303,25 @@
      { plugin = (struct PLUGIN_DLS *)plugins->data;
 
        if ( plugin->plugindb.id == id )
-        { if (Check_action_bit_use( plugin ) == TRUE )
-           { plugin->plugindb.on = actif;
+        { if (actif == FALSE)
+           { plugin->plugindb.on = FALSE;
+             plugin->conso = 0.0;
+             Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: id %04d stopped (%s)",
+                       __func__, plugin->plugindb.id, plugin->plugindb.nom );
+           }
+          else if (Check_action_bit_use( plugin ) == TRUE )
+           { plugin->plugindb.on = TRUE;
              plugin->conso = 0.0;
              plugin->starting = 1;
-             Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: id %04d %s (%s)",
-                       __func__, plugin->plugindb.id, (actif ? "started" : "stopped"), plugin->plugindb.nom );
+             Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: id %04d started (%s)",
+                       __func__, plugin->plugindb.id, plugin->plugindb.nom );
            }
           else
            { plugin->plugindb.on = 0;
              plugin->conso = 0.0;
              plugin->starting = 0;
              Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                      "%s: Candidat %04d -> bit(s) set but not owned by itself... Disabling", __func__, plugin ); 
+                      "%s: Candidat %04d -> bit(s) set but not owned by itself... Disabling", __func__, plugin->plugindb.id ); 
              Set_compil_status_plugin_dlsDB( plugin->plugindb.id, DLS_COMPIL_ERROR_BIT_SET_BUT_NOT_OWNED );
            }
           break;
