@@ -640,7 +640,7 @@
                             "    Update_edge_up_value();\n"
                             "    if (debug) Print_debug();\n";
           gchar *End_Go =   "  }\n";
-          gchar chaine[1024];
+          gchar chaine[4096];
           gint cpt=0;                                                                                   /* Compteur d'actions */
 
           write(fd, include, strlen(include));

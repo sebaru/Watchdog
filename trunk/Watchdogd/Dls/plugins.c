@@ -322,7 +322,6 @@
              plugin->starting = 0;
              Info_new( Config.log, Config.log_dls, LOG_WARNING,
                       "%s: Candidat %04d -> bit(s) set but not owned by itself... Disabling", __func__, plugin->plugindb.id ); 
-             Set_compil_status_plugin_dlsDB( plugin->plugindb.id, DLS_COMPIL_ERROR_BIT_SET_BUT_NOT_OWNED );
            }
           break;
         }
