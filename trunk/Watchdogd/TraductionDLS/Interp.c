@@ -634,7 +634,7 @@
           gchar *Fonction= " int Get_Tableau_bit(int n) { return(Tableau_bit[n]); }\n"
                            " int Get_Tableau_num(int n) { return(Tableau_num[n]); }\n"
                            " int Get_Tableau_msg(int n) { return(Tableau_msg[n]); }\n"
-                           " char *Get_Debug_buffer()   { return(&Debug_buffer); }\n";
+                           " char *Get_Debug_buffer()   { return((char *)&Debug_buffer); }\n";
           gchar *Start_Go = " void Go ( int start, int debug )\n"
                             "  {\n"
                             "    Update_edge_up_value();\n"
@@ -690,7 +690,7 @@
           liste = Liste_edge_up_bi;                                /* Initialise les fonctions de gestion des fronts montants */
           while(liste)
            { g_snprintf(chaine, sizeof(chaine),
-                      " static gint B%d_edge_up_value = 0\n", GPOINTER_TO_INT(liste->data) );
+                      " static gint B%d_edge_up_value = 0;\n", GPOINTER_TO_INT(liste->data) );
              write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
              liste = liste->next;
            }
@@ -698,7 +698,7 @@
           liste = Liste_edge_up_entree;                            /* Initialise les fonctions de gestion des fronts montants */
           while(liste)
            { g_snprintf(chaine, sizeof(chaine),
-                      " static gint E%d_edge_up_value = 0\n", GPOINTER_TO_INT(liste->data) );
+                      " static gint E%d_edge_up_value = 0;\n", GPOINTER_TO_INT(liste->data) );
              write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
              liste = liste->next;
            }
