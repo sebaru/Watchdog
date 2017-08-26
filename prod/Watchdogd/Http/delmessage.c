@@ -30,21 +30,6 @@
  #include "Http.h"
 
 /******************************************************************************************************************************/
-/* Http_Traiter_request_delmessage: Traite une requete sur l'URI message                                                      */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : FALSE si pb                                                                                                       */
-/******************************************************************************************************************************/
- gint Http_Traiter_request_delmessage ( struct lws *wsi, struct HTTP_SESSION *session )
-  { struct HTTP_PER_SESSION_DATA *pss;
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %s) HTTP request",
-              __func__, Http_get_session_id(session) );
-
-    pss = lws_wsi_user ( wsi );
-    g_snprintf( pss->url, sizeof(pss->url), "/ws/delmessage" );
-    return(0);               
-  }
-/******************************************************************************************************************************/
 /* Http_Traiter_request_body_completion_delmessage: le payload est arrivé, il faut traiter le message !                       */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : 0 ou 1 selon si la transaction est completed                                                                      */

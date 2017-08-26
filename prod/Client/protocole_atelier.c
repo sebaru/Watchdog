@@ -271,7 +271,7 @@
                Arrivee_synoptique_for_atelier_palette = NULL;
              }
             break;
-
+/**************************************************** Reception des motifs ****************************************************/
        case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF:
              { struct CMD_TYPE_MOTIFS *motifs;
                gint i;

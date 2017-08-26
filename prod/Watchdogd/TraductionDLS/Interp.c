@@ -298,17 +298,46 @@
 /******************************************************************************************************************************/
  struct ACTION *New_action_msg( int num )
   { struct ACTION *action;
+    GSList *liste;
     int taille;
 
     taille = 15;
-    Liste_Actions_msg = g_slist_prepend ( Liste_Actions_msg, GINT_TO_POINTER(num) );
-    Check_msg_ownership ( num );
+    liste = Liste_Actions_msg;
+    while (liste)
+     { if (GPOINTER_TO_INT(liste->data) == num) break;
+       liste=liste->next;
+     }
+    if(!liste)
+     { Liste_Actions_msg = g_slist_prepend ( Liste_Actions_msg, GINT_TO_POINTER(num) );
+       Check_msg_ownership ( num );
+     }
     action = New_action();
     action->alors = New_chaine( taille );
     g_snprintf( action->alors, taille, "MSG(%d,1);", num );
     action->sinon = New_chaine( taille );
     g_snprintf( action->sinon, taille, "MSG(%d,0);", num );
     return(action);
+  }
+/******************************************************************************************************************************/
+/* Add_bit_to_list: Ajoute un bit dans la liste des bits utilisé                                                              */
+/* Entrées: le type de bit et son numéro                                                                                      */
+/* Sortie: FALSE si le bit est deja dans la liste                                                                             */
+/******************************************************************************************************************************/
+ static gboolean Add_bit_to_list( int type, int num )
+  { GSList *liste_bit, *liste_num;
+    liste_bit = Liste_Actions_bit;
+    liste_num = Liste_Actions_num;
+    while (liste_bit)
+     { if ( GPOINTER_TO_INT(liste_bit->data) == type && GPOINTER_TO_INT(liste_num->data) == num ) break;
+       liste_bit=liste_bit->next;
+       liste_num=liste_num->next;
+     }
+    if(!liste_bit)
+     { Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(type) );
+       Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );
+       return(TRUE);
+     }
+    return(FALSE);
   }
 /******************************************************************************************************************************/
 /* New_action_sortie: Prepare une struct action avec une commande SA                                                          */
@@ -320,9 +349,7 @@
     int taille;
 
     taille = 20;
-    Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(MNEMO_SORTIE) );
-    Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );
-    Check_ownership ( MNEMO_SORTIE, num );
+    if (Add_bit_to_list(MNEMO_SORTIE, num)) Check_ownership ( MNEMO_SORTIE, num );
     action = New_action();
     action->alors = New_chaine( taille );
     g_snprintf( action->alors, taille, "SA(%d,%d);", num, !barre );
@@ -338,9 +365,7 @@
     int taille;
 
     taille = 15;
-    Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(MNEMO_MONOSTABLE) );
-    Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );
-    Check_ownership ( MNEMO_MONOSTABLE, num );
+    if (Add_bit_to_list(MNEMO_MONOSTABLE, num)) Check_ownership ( MNEMO_MONOSTABLE, num );
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
@@ -360,9 +385,7 @@
 
     reset = Get_option_entier ( options, RESET ); if (reset == -1) reset = 0;
     taille = 15;
-    Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(MNEMO_CPTH) );
-    Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );
-    Check_ownership ( MNEMO_CPTH, num );
+    if (Add_bit_to_list(MNEMO_CPTH, num)) Check_ownership ( MNEMO_CPTH, num );
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
@@ -383,9 +406,7 @@
     ratio = Get_option_entier ( options, RATIO ); if (ratio == -1) ratio = 1;
 
     taille = 20;
-    Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(MNEMO_CPT_IMP) );
-    Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );
-    Check_ownership ( MNEMO_CPT_IMP, num );
+    if (Add_bit_to_list(MNEMO_CPT_IMP, num)) Check_ownership ( MNEMO_CPT_IMP, num );
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
@@ -407,9 +428,7 @@
     coul   = Get_option_entier ( options, COLOR  ); if (coul   == -1) coul = 0;
     cligno = Get_option_entier ( options, CLIGNO ); if (cligno == -1) cligno = 0;
     taille = 40;
-    Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(MNEMO_MOTIF) );
-    Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );
-    Check_ownership ( MNEMO_MOTIF, num );
+    if (Add_bit_to_list(MNEMO_MOTIF, num)) Check_ownership ( MNEMO_MOTIF, num );
     action = New_action();
     action->alors = New_chaine( taille );
     switch (coul)
@@ -437,9 +456,7 @@
   { struct ACTION *action;
     int taille;
 
-    Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(MNEMO_TEMPO) );
-    Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );
-    Check_ownership ( MNEMO_TEMPO, num );
+    if (Add_bit_to_list(MNEMO_TEMPO, num)) Check_ownership ( MNEMO_TEMPO, num );
     action = New_action();
     taille = 40;
     action->alors = New_chaine( taille );
@@ -459,9 +476,7 @@
     int taille;
 
     taille = 20;
-    Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(MNEMO_BISTABLE) );
-    Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );
-    Check_ownership ( MNEMO_BISTABLE, num );
+    if (Add_bit_to_list(MNEMO_BISTABLE, num)) Check_ownership ( MNEMO_BISTABLE, num );
     action = New_action();
     action->alors = New_chaine( taille );
        
@@ -612,21 +627,30 @@
         }
        else
         { gchar *include = " #include <Module_dls.h>\n";
-          gchar *Chaine_bit= " static int Tableau_bit[]= { ";
-          gchar *Chaine_num= " static int Tableau_num[]= { ";
-          gchar *Chaine_msg= " static int Tableau_msg[]= { ";
+          gchar *Chaine_bit= " static gint Tableau_bit[]= { ";
+          gchar *Chaine_num= " static gint Tableau_num[]= { ";
+          gchar *Chaine_msg= " static gint Tableau_msg[]= { ";
           gchar *Tableau_end=" -1 };\n";
-          gchar *Fonction= " int Get_Tableau_bit(int n) { return(Tableau_bit[n]); }\n"
-                           " int Get_Tableau_num(int n) { return(Tableau_num[n]); }\n"
-                           " int Get_Tableau_msg(int n) { return(Tableau_msg[n]); }\n";
-          gchar *Start_Go = " void Go ( int start )\n"
+          gchar *Fonction= " gint Get_Tableau_bit(int n) { return(Tableau_bit[n]); }\n"
+                           " gint Get_Tableau_num(int n) { return(Tableau_num[n]); }\n"
+                           " gint Get_Tableau_msg(int n) { return(Tableau_msg[n]); }\n";
+          gchar *Start_Go = " void Go ( gint start, gint debug )\n"
                             "  {\n"
-                            "    Update_edge_up_value();\n";
+                            "    Update_edge_up_value();\n"
+                            "    if (debug) Dls_print_debug( Dls_id, (int *)&Tableau_bit, (int *)&Tableau_num, (float *)&Tableau_val );\n";
           gchar *End_Go =   "  }\n";
-          gchar chaine[1024];
+          gchar chaine[4096];
           gint cpt=0;                                                                                   /* Compteur d'actions */
 
           write(fd, include, strlen(include));
+
+          cpt = g_slist_length(Liste_Actions_bit);
+          if (cpt==0) cpt=1;
+          g_snprintf( chaine, sizeof(chaine), " static gfloat Tableau_val[%d];\n", cpt );
+          write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
+
+          g_snprintf( chaine, sizeof(chaine), " static gint Dls_id = %d;\n", id );
+          write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
 
           write(fd, Chaine_bit, strlen(Chaine_bit) );                                                 /* Ecriture du prologue */
           liste = Liste_Actions_bit;                                       /* Initialise les tableaux des actions rencontrées */
@@ -663,7 +687,7 @@
           liste = Liste_edge_up_bi;                                /* Initialise les fonctions de gestion des fronts montants */
           while(liste)
            { g_snprintf(chaine, sizeof(chaine),
-                      " static gint B%d_edge_up_value = 0\n", GPOINTER_TO_INT(liste->data) );
+                      " static int B%d_edge_up_value = 0;\n", GPOINTER_TO_INT(liste->data) );
              write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
              liste = liste->next;
            }
@@ -671,7 +695,7 @@
           liste = Liste_edge_up_entree;                            /* Initialise les fonctions de gestion des fronts montants */
           while(liste)
            { g_snprintf(chaine, sizeof(chaine),
-                      " static gint E%d_edge_up_value = 0\n", GPOINTER_TO_INT(liste->data) );
+                      " static int E%d_edge_up_value = 0;\n", GPOINTER_TO_INT(liste->data) );
              write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
              liste = liste->next;
            }
@@ -680,7 +704,7 @@
           g_snprintf(chaine, sizeof(chaine),
                     "/*******************************************************/\n"
                     " static void Update_edge_up_value (void)\n"
-                    "  { int new_value;\n" );
+                    "  { int new_value=0;\n" );
           write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
 
           liste = Liste_edge_up_bi;                                /* Initialise les fonctions de gestion des fronts montants */

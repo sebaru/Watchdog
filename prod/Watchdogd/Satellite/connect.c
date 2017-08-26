@@ -153,7 +153,7 @@
     SSL_load_error_strings();                                                    /* Initialisation de SSL */
     SSL_library_init();                                             /* Init SSL et PRNG: number générator */
 
-    ssl_ctx = SSL_CTX_new ( TLSv1_client_method() );                        /* Création d'un contexte SSL */
+    ssl_ctx = SSL_CTX_new ( TLS_client_method() );                        /* Création d'un contexte SSL */
     if (!ssl_ctx)
      { Info_new( Config.log, Cfg_satellite.lib->Thread_debug, LOG_ERR, 
                 "Satellite_Init_ssl: Error creation SSL_CTX_new %s", ERR_error_string( ERR_get_error(), NULL ) );

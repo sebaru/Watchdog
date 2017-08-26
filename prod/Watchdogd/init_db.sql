@@ -205,28 +205,6 @@ INSERT INTO `groups` (`id`, `name`, `comment`) VALUES
 (10, 'Admin-CommandLineInterface', 'Command Line Interface Access'),
 (11, 'Satellite', 'Add Satellite Capabilities');
 
--- --------------------------------------------------------
-
---
--- Structure de la table `histo_bit`
---
-
-CREATE TABLE IF NOT EXISTS `histo_bit` (
-  `type` int(11) NOT NULL DEFAULT '0',
-  `num` int(11) NOT NULL DEFAULT '0',
-  `date_sec` int(11) NOT NULL DEFAULT '0',
-  `date_usec` int(11) NOT NULL DEFAULT '0',
-  `date_time` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `valeur` float NOT NULL DEFAULT '0.0',
-  PRIMARY KEY `key` (`type`,`num`,`date_time`)  
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
-  PARTITION BY RANGE COLUMNS (date_time) PARTITIONS 2
-   ( PARTITION p0 VALUES LESS THAN ('2016-01-01') ENGINE = InnoDB,
-     PARTITION p_MAX VALUES LESS THAN MAXVALUE
-   );
-
--- --------------------------------------------------------
-
 --
 -- Structure de la table `histo_msgs`
 --
@@ -711,7 +689,8 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `com
 (107, 0, 11, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
 (108, 0, 10, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
 (109, 0, 09, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(110, 1, 07, 1, 'SYS_EVENT_NOT_FOUND', 'Event not found', '');
+(110, 1, 07, 1, 'SYS_EVENT_NOT_FOUND', 'Event not found', ''),
+(111, 1,  7, 1, 'SYS_NEW_TICK', 'Default Command by Tick', '');
 
 -- --------------------------------------------------------
 
@@ -1035,6 +1014,27 @@ CREATE TABLE IF NOT EXISTS `syns_scenario` (
   CONSTRAINT `id_syn` FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
+
+-- --------------------------------------------------------
+
+
+--
+-- Structure de la table `scenario_ticks`
+--
+
+CREATE TABLE IF NOT EXISTS `scenario_ticks` (
+  `id` int(11) NOT NULL,
+  `num` int(11) NOT NULL,
+  `minute` int(11) NOT NULL,
+  `heure` int(11) NOT NULL,
+  `jour` int(11) NOT NULL,
+  `date` int(11) NOT NULL,
+  `mois` int(11) NOT NULL,
+  `mnemo_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`), KEY(`num`),
+  CONSTRAINT `num` FOREIGN KEY (`num`) REFERENCES `syns_scenario` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `mnemo_id` FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 

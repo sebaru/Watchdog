@@ -55,7 +55,7 @@
      }
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "Init_ssl: SSL random ok" );
 
-    ssl_ctx = SSL_CTX_new ( TLSv1_server_method() );                        /* Création d'un contexte SSL */
+    ssl_ctx = SSL_CTX_new ( TLS_server_method() );                          /* Création d'un contexte SSL */
     if (!ssl_ctx)
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
                  "Init_ssl : set server method failed (%s)", ERR_error_string( ERR_get_error(), NULL ) );

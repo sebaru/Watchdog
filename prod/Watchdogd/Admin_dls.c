@@ -39,11 +39,11 @@
     while (Partage->com_dls.Thread_reload) sched_yield();
     Admin_write ( connexion, " DLS Reloading done\n" );
   }
-/**********************************************************************************************************/
-/* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
-/* Entrée: Néant                                                                                          */
-/* Sortie: FALSE si erreur                                                                                */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_dls_list: Print la liste des plugins dls actif ou non, mais chargés                                                  */
+/* Entrée: La connexion                                                                                                       */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  static void Admin_dls_list ( struct CONNEXION *connexion )
   { GSList *liste_dls;
     gchar chaine[128];
@@ -57,8 +57,8 @@
      { struct PLUGIN_DLS *dls;
        dls = (struct PLUGIN_DLS *)liste_dls->data;
 
-       g_snprintf( chaine, sizeof(chaine), " DLS[%06d] -> actif=%d, conso=%04.03f, nom=%s\n",
-                           dls->plugindb.id, dls->plugindb.on, dls->conso, dls->plugindb.nom );
+       g_snprintf( chaine, sizeof(chaine), " DLS[%06d] -> actif=%d, debug=%d, conso=%04.03f, nom=%s\n",
+                   dls->plugindb.id, dls->plugindb.on, dls->debug, dls->conso, dls->plugindb.nom );
        Admin_write ( connexion, chaine );
        liste_dls = liste_dls->next;
      }
@@ -136,6 +136,36 @@
     g_snprintf( chaine, sizeof(chaine), " Module DLS %d started\n", id );
     Admin_write ( connexion, chaine );
   }
+/******************************************************************************************************************************/
+/* Admin_dls_debug: Active ou non le debug du plugin                                                                          */
+/* Entrée: La connexion, le numéro du plugin, et le statut du debug                                                           */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Admin_dls_debug ( struct CONNEXION *connexion, gint id, gboolean debug )
+  { gchar chaine[128];
+    GSList *liste_dls;
+    struct DB *db;
+
+    g_snprintf( chaine, sizeof(chaine), " -- Modification du statut de debug d'un plugin D.L.S\n" );
+    Admin_write ( connexion, chaine );
+
+    pthread_mutex_lock( &Partage->com_dls.synchro );                                                         /* Lock du mutex */
+    liste_dls = Partage->com_dls.Plugins;
+    while ( liste_dls )                                                      /* Recherche du plugin et positionnement du flag */
+     { struct PLUGIN_DLS *dls;
+       dls = (struct PLUGIN_DLS *)liste_dls->data;
+
+       if (dls->plugindb.id == id)
+        { dls->debug = debug;
+          break;
+        }
+       liste_dls=liste_dls->next;
+     }
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+
+    g_snprintf( chaine, sizeof(chaine), " Module DLS: debug set to '%d'\n", debug );
+    Admin_write ( connexion, chaine );
+  }
 /**********************************************************************************************************/
 /* Activer_ecoute: Permettre les connexions distantes au serveur watchdog                                 */
 /* Entrée: Néant                                                                                          */
@@ -197,6 +227,16 @@
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
        Admin_dls_stop ( connexion, num );
      }
+    else if ( ! strcmp ( commande, "debug" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       Admin_dls_debug ( connexion, num, TRUE );
+     }
+    else if ( ! strcmp ( commande, "nodebug" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       Admin_dls_debug ( connexion, num, FALSE );
+     }
     else if ( ! strcmp ( commande, "reset" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
@@ -210,6 +250,8 @@
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'D.L.S'\n" );
+       Admin_write ( connexion, "  debug $id                              - Active le mode debug du plugin $id\n" );
+       Admin_write ( connexion, "  nodebug $id                            - Desactive le mode debug du plugin $id\n" );
        Admin_write ( connexion, "  start $id                              - Demarre le module $id\n" );
        Admin_write ( connexion, "  stop $id                               - Stop le module $id\n" );
        Admin_write ( connexion, "  reset $id                              - Stop/Unload/Load/Start module $id\n" );

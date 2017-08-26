@@ -30,6 +30,7 @@
 
  #include <glib.h>
  #include <pthread.h>
+ #include <string.h>
  #include <errno.h>
 
  #include "Reseaux.h"
@@ -42,6 +43,7 @@
  #include "Camera_DB.h"
  #include "Dls.h"
  #include "Histo_DB.h"
+ #include "Scenario_DB.h"
  #include "Synoptiques_DB.h"
  #include "Mnemonique_DB.h"
  #include "Icones_DB.h"

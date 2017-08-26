@@ -684,10 +684,35 @@
                                              "`posy` int(11) NOT NULL,"
                                              "PRIMARY KEY (`id`),"
                                              "CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE"
-                                             ") ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;ALTER TABLE syns_motifs CHANGE `syn` `syn_id` int(11) NOT NULL DEFAULT '0'" );
+                                             ") ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;"
+                                             "ALTER TABLE syns_motifs CHANGE `syn` `syn_id` int(11) NOT NULL DEFAULT '0'" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
-    database_version=3215;
+
+    if (database_version < 3247)
+     { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `scenario_ticks` ("
+                                             "`id` int(11) NOT NULL,"
+                                             "`num` int(11) NOT NULL,"
+                                             "`minute` int(11) NOT NULL,"
+                                             "`heure` int(11) NOT NULL,"
+                                             "`jour` int(11) NOT NULL,"
+                                             "`date` int(11) NOT NULL,"
+                                             "`mois` int(11) NOT NULL,"
+                                             "`mnemo_id` int(11) NOT NULL,"
+                                             "PRIMARY KEY (`id`), KEY(`num`),"
+                                             "CONSTRAINT `num` FOREIGN KEY (`num`) REFERENCES `syns_scenario` (`id`) ON DELETE CASCADE,"
+                                             "CONSTRAINT `mnemo_id` FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE"
+                                             ") ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 3252)
+     { g_snprintf( requete, sizeof(requete), "INSERT INTO mnemos (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `command_text`) VALUES "
+                                             "(111, 1,  7, 1, 'SYS_NEW_TICK', 'Default Command by Tick', '');" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    database_version=3252;
 
     Libere_DB_SQL(&db);
 

@@ -48,7 +48,7 @@
  static gchar *TYPE_DIALOG_CDE[]=                   /* Type de boite de dialogue lors d'un clic sur motif */
   { "Pas d'action",
     "immediate",
-    "programme",
+    "avec confirmation",
     NULL
   };
 
@@ -213,7 +213,7 @@
                                gtk_widget_set_sensitive( Entry_bit_clic2, FALSE );
                                gtk_widget_set_sensitive( Combo_groupe, TRUE );
                                break;
-       case ACTION_PROGRAMME : gtk_widget_set_sensitive( Spin_bit_clic, TRUE );
+       case ACTION_CONFIRME  : gtk_widget_set_sensitive( Spin_bit_clic, TRUE );
                                gtk_widget_set_sensitive( Entry_bit_clic, TRUE );
                                gtk_widget_set_sensitive( Spin_bit_clic2, TRUE );
                                gtk_widget_set_sensitive( Entry_bit_clic2, TRUE );
