@@ -627,9 +627,9 @@
         }
        else
         { gchar *include = " #include <Module_dls.h>\n";
-          gchar *Chaine_bit= " static int Tableau_bit[]= { ";
-          gchar *Chaine_num= " static int Tableau_num[]= { ";
-          gchar *Chaine_msg= " static int Tableau_msg[]= { ";
+          gchar *Chaine_bit= " static gint Tableau_bit[]= { ";
+          gchar *Chaine_num= " static gint Tableau_num[]= { ";
+          gchar *Chaine_msg= " static gint Tableau_msg[]= { ";
           gchar *Tableau_end=" -1 };\n";
           gchar *Fonction= " int Get_Tableau_bit(int n) { return(Tableau_bit[n]); }\n"
                            " int Get_Tableau_num(int n) { return(Tableau_num[n]); }\n"
@@ -646,10 +646,10 @@
 
           cpt = g_slist_length(Liste_Actions_bit);
           if (cpt==0) cpt=1;
-          g_snprintf( chaine, sizeof(chaine), " static float Tableau_val[%d];\n", cpt );
+          g_snprintf( chaine, sizeof(chaine), " static gfloat Tableau_val[%d];\n", cpt );
           write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
 
-          g_snprintf( chaine, sizeof(chaine), " static int Dls_id = %d;\n", id );
+          g_snprintf( chaine, sizeof(chaine), " static gint Dls_id = %d;\n", id );
           write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
 
           write(fd, Chaine_bit, strlen(Chaine_bit) );                                                 /* Ecriture du prologue */
