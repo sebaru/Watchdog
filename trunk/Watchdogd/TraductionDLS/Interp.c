@@ -633,8 +633,7 @@
           gchar *Tableau_end=" -1 };\n";
           gchar *Fonction= " int Get_Tableau_bit(int n) { return(Tableau_bit[n]); }\n"
                            " int Get_Tableau_num(int n) { return(Tableau_num[n]); }\n"
-                           " int Get_Tableau_msg(int n) { return(Tableau_msg[n]); }\n"
-                           " char *Get_Debug_buffer()   { return((char *)&Debug_buffer); }\n";
+                           " int Get_Tableau_msg(int n) { return(Tableau_msg[n]); }\n";
           gchar *Start_Go = " void Go ( int start, int debug )\n"
                             "  {\n"
                             "    Update_edge_up_value();\n"
