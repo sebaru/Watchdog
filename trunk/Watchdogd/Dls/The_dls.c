@@ -48,6 +48,7 @@
     gboolean change=FALSE;
     gint cpt, type;
     cpt=0;
+    result[0]=0;
     while( (type=Tableau_bit[cpt]) != -1)
      { switch (type)
         { case MNEMO_SORTIE:
