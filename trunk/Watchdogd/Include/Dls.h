@@ -41,12 +41,11 @@
     gint starting;                                      /* 1 si les bits internes "start" du plugins doivent etre positionnés */
     gboolean debug;                                                 /* TRUE si le plugin doit logguer ses changements de bits */
     void *handle;                                                                              /* Handle du fichier librairie */
-    void (*go)(int,int);                                                                  /* Fonction de traitement du module */
+    void (*go)(gint,gint);                                                                /* Fonction de traitement du module */
     float conso;                                                                         /* Consommation temporelle du plugin */
-    int (*Get_Tableau_bit)(int);                                               /* Fonction d'identification des bits utilisés */
-    int (*Get_Tableau_num)(int);                                               /* Fonction d'identification des bits utilisés */
-    int (*Get_Tableau_msg)(int);                                               /* Fonction d'identification des bits utilisés */
-    char *(*Get_Debug_buffer)(void);                                           /* Fonction de recupération du buffer de debug */
+    gint (*Get_Tableau_bit)(gint);                                             /* Fonction d'identification des bits utilisés */
+    gint (*Get_Tableau_num)(gint);                                             /* Fonction d'identification des bits utilisés */
+    gint (*Get_Tableau_msg)(gint);                                             /* Fonction d'identification des bits utilisés */
   };
 
  enum                                                                                  /* différent statut des temporisations */

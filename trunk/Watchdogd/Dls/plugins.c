@@ -127,14 +127,6 @@
                       "%s: Candidat %04d does not provide Get_Tableau_msg function", __func__, dls->plugindb.id ); 
              Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING );
            }
-
-          dls->Get_Debug_buffer = dlsym( dls->handle, "Get_Debug_buffer" );                       /* Recherche de la fonction */
-          if (!dls->Get_Debug_buffer)
-           { Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                      "%s: Candidat %04d does not provide Get_Debug_buffer function", __func__, dls->plugindb.id ); 
-             Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING );
-           }
-
          }
        
        Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %04d loaded (%s)",

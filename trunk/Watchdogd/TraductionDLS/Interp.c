@@ -631,10 +631,10 @@
           gchar *Chaine_num= " static gint Tableau_num[]= { ";
           gchar *Chaine_msg= " static gint Tableau_msg[]= { ";
           gchar *Tableau_end=" -1 };\n";
-          gchar *Fonction= " int Get_Tableau_bit(int n) { return(Tableau_bit[n]); }\n"
-                           " int Get_Tableau_num(int n) { return(Tableau_num[n]); }\n"
-                           " int Get_Tableau_msg(int n) { return(Tableau_msg[n]); }\n";
-          gchar *Start_Go = " void Go ( int start, int debug )\n"
+          gchar *Fonction= " gint Get_Tableau_bit(int n) { return(Tableau_bit[n]); }\n"
+                           " gint Get_Tableau_num(int n) { return(Tableau_num[n]); }\n"
+                           " gint Get_Tableau_msg(int n) { return(Tableau_msg[n]); }\n";
+          gchar *Start_Go = " void Go ( gint start, gint debug )\n"
                             "  {\n"
                             "    Update_edge_up_value();\n"
                             "    if (debug) Dls_print_debug( Dls_id, (int *)&Tableau_bit, (int *)&Tableau_num, (float *)&Tableau_val );\n";

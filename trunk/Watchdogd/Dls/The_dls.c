@@ -850,10 +850,6 @@
              Partage->top_cdg_plugin_dls = 0;                                                   /* On reset le cdg plugin DLS */
              plugin_actuel->go( plugin_actuel->starting, plugin_actuel->debug );                        /* On appel le plugin */
              gettimeofday( &tv_apres, NULL );
-             if (plugin_actuel->debug)
-              { Info_new (Config.log, Config.log_dls, LOG_INFO,
-                         "%s: Module %06d DEBUG : %s", __func__, plugin_actuel->plugindb.id, plugin_actuel->Get_Debug_buffer );
-              }
              plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
              plugin_actuel->starting = 0;
            }
