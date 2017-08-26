@@ -638,7 +638,7 @@
           gchar *Start_Go = " void Go ( int start, int debug )\n"
                             "  {\n"
                             "    Update_edge_up_value();\n"
-                            "    if (debug) Print_debug();\n";
+                            "    if (debug) Dls_print_debug( Dls_id, (int *)&Tableau_bit, (int *)&Tableau_num, (float *)&Tableau_val );\n";
           gchar *End_Go =   "  }\n";
           gchar chaine[4096];
           gint cpt=0;                                                                                   /* Compteur d'actions */
@@ -690,7 +690,7 @@
           liste = Liste_edge_up_bi;                                /* Initialise les fonctions de gestion des fronts montants */
           while(liste)
            { g_snprintf(chaine, sizeof(chaine),
-                      " static gint B%d_edge_up_value = 0;\n", GPOINTER_TO_INT(liste->data) );
+                      " static int B%d_edge_up_value = 0;\n", GPOINTER_TO_INT(liste->data) );
              write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
              liste = liste->next;
            }
@@ -698,7 +698,7 @@
           liste = Liste_edge_up_entree;                            /* Initialise les fonctions de gestion des fronts montants */
           while(liste)
            { g_snprintf(chaine, sizeof(chaine),
-                      " static gint E%d_edge_up_value = 0;\n", GPOINTER_TO_INT(liste->data) );
+                      " static int E%d_edge_up_value = 0;\n", GPOINTER_TO_INT(liste->data) );
              write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
              liste = liste->next;
            }
@@ -742,63 +742,6 @@
            }
           g_snprintf(chaine, sizeof(chaine), "  }\n" );
           write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
-
-          g_snprintf(chaine, sizeof(chaine),
-                     "/*******************************************************/\n"
-                     " static void Print_debug (void)\n"
-                     "  { char chaine[32];\n"
-                     "    int cpt, type;\n"
-                     "    cpt=0;\n"
-                     "    Debug_buffer[0]=0;\n"
-                     "    while( (type=Tableau_bit[cpt]) != -1)\n"
-                     "     { switch (type)\n"
-                     "         { case MNEMO_SORTIE:\n"
-                     "            { if (A(Tableau_num[cpt])!=Tableau_val[num])\n"
-                     "               { snprintf( chaine, sizeof(chaine), 'A[%04d]=%d, ', Tableau_num[cpt], A(Tableau_num[cpt]) );\n"
-                     "                 strcat(Debug_buffer, chaine);\n"
-                     "                 Tableau_val[num] = (float)A(Tableau_num[cpt])\n"
-                     "               }\n"
-                     "              break;\n"
-                     "            }\n"
-                     "           case MNEMO_MONOSTABLE:\n"
-                     "            { if (M(Tableau_num[cpt])!=Tableau_val[num])\n"
-                     "               { snprintf( chaine, sizeof(chaine), 'M[%04d]=%d, ', Tableau_num[cpt], M(Tableau_num[cpt]) );\n"
-                     "                 strcat(Debug_buffer, chaine);\n"
-                     "                 Tableau_val[num] = (float)M(Tableau_num[cpt])\n"
-                     "               }\n"
-                     "              break;\n"
-                     "            }\n"
-                     "           case MNEMO_BISTABLE:\n"
-                     "            { if (B(Tableau_num[cpt])!=Tableau_val[num])\n"
-                     "               { snprintf( chaine, sizeof(chaine), 'B[%04d]=%d, ', Tableau_num[cpt], B(Tableau_num[cpt]) );\n"
-                     "                 strcat(Debug_buffer, chaine);\n"
-                     "                 Tableau_val[num] = (float)B(Tableau_num[cpt])\n"
-                     "               }\n"
-                     "              break;\n"
-                     "            }\n"
-                     "           case MNEMO_CPTH:\n"
-                     "            { if (CH(Tableau_num[cpt])!=Tableau_val[num])\n"
-                     "               { snprintf( chaine, sizeof(chaine), 'CH[%04d]=%d, ', Tableau_num[cpt], CH(Tableau_num[cpt]) );\n"
-                     "                 strcat(Debug_buffer, chaine);\n"
-                     "                 Tableau_val[num] = (float)CH(Tableau_num[cpt])\n"
-                     "               }\n"
-                     "              break;\n"
-                     "            }\n"
-                     "           case MNEMO_CPT_IMP:\n"
-                     "            { if (CI(Tableau_num[cpt])!=Tableau_val[num])\n"
-                     "               { snprintf( chaine, sizeof(chaine), 'CI[%04d]=%d, ', Tableau_num[cpt], CI(Tableau_num[cpt]) );\n"
-                     "                 strcat(Debug_buffer, chaine);\n"
-                     "                 Tableau_val[num] = (float)CI(Tableau_num[cpt])\n"
-                     "               }\n"
-                     "              break;\n"
-                     "            }\n"
-                     "         }\n"
-                     "       cpt++;\n"
-                     "     }"
-                     "  }\n"
-                    );
-          write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
-
 
           write( fd, Start_Go, strlen(Start_Go) );
           write(fd, Buffer, Buffer_used );                                                     /* Ecriture du buffer resultat */

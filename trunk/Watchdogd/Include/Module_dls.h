@@ -27,7 +27,9 @@
  
  #ifndef _MODULE_DLS_H_
  #define _MODULE_DLS_H_
+ #include <glib.h>
 
+ extern void Dls_print_debug ( gint id, gint *Tableau_bit, gint *Tableau_num, gfloat *Tableau_val );
  extern int E( int num );
  extern int B( int num );
  extern int M( int num );
