@@ -93,7 +93,7 @@
         }
        cpt++;
      }
-   if (result[0]) Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : DLS[%06]->%s", __func__, id, result );
+   if (result[0]) Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : DLS[%06d]->%s", __func__, id, result );
  }
 /******************************************************************************************************************************/
 /* Chrono: renvoi la difference de temps entre deux structures timeval                                                        */

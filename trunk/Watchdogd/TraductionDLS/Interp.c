@@ -704,7 +704,7 @@
           g_snprintf(chaine, sizeof(chaine),
                     "/*******************************************************/\n"
                     " static void Update_edge_up_value (void)\n"
-                    "  { int new_value;\n" );
+                    "  { int new_value=0;\n" );
           write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
 
           liste = Liste_edge_up_bi;                                /* Initialise les fonctions de gestion des fronts montants */
