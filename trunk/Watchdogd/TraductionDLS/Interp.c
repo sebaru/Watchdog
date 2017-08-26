@@ -646,14 +646,12 @@
           write(fd, include, strlen(include));
 
           cpt = g_slist_length(Liste_Actions_bit);
-          if (cpt)
-           { g_snprintf( chaine, sizeof(chaine), " static float Tableau_val[%d];\n", cpt );
-             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
-           }
+          if (cpt==0) cpt=1;
+          g_snprintf( chaine, sizeof(chaine), " static float Tableau_val[%d];\n", cpt );
+          write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
+
           g_snprintf( chaine, sizeof(chaine), " static int Dls_id = %d;\n", id );
-          write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
-          g_snprintf( chaine, sizeof(chaine), " static char Debug_buffer[1024];\n" );
-          write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+          write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
 
           write(fd, Chaine_bit, strlen(Chaine_bit) );                                                 /* Ecriture du prologue */
           liste = Liste_Actions_bit;                                       /* Initialise les tableaux des actions rencontrées */

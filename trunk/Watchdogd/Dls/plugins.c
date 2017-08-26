@@ -39,10 +39,6 @@
 /************************************************** Prototypes de fonctions ***************************************************/
  #include "watchdogd.h"
 
- #ifndef REP_INCLUDE_GLIB
- #define REP_INCLUDE_GLIB  "/usr/include/glib-2.0"
- #endif
-
 /******************************************************************************************************************************/
 /* Check_action_bit_use: Vérifie que les bits d'actions positionnés par le module sont bien owné par celui-ci                 */
 /* Entrée: Le plugin D.L.S                                                                                                    */
@@ -396,7 +392,7 @@
        Info_new( Config.log, Config.log_dls, LOG_DEBUG,
                 "%s: GCC start (pid %d) source %s cible %s!",
                  __func__, pidgcc, source, cible );
-       execlp( "gcc", "gcc", "-I", REP_INCLUDE_GLIB, "-shared", "-o3",
+       execlp( "gcc", "gcc", "-I/usr/include/glib-2.0","-I/usr/lib/glib-2.0/include", "-shared", "-o3",
                "-Wall", "-lwatchdog-dls", source, "-fPIC", "-o", cible, NULL );
        Info_new( Config.log, Config.log_dls, LOG_DEBUG, "Compiler_source_dls_Fils: lancement GCC failed" );
        _exit(0);
