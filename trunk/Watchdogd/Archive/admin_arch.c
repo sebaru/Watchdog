@@ -29,6 +29,26 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Admin_arch_testdb: Test la connexion vers le serveur de base de données                                                    */
+/* Entrée: la connexion pour sortiee client et la ligne de commande                                                           */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Admin_arch_testdb ( struct CONNEXION *connexion )
+  { gchar chaine[80];
+    struct DB*db;
+    db = Init_ArchDB_SQL();       
+    if (!db)
+     { g_snprintf( chaine, sizeof(chaine), " Connexion to DB failed (Host=%s:%d, User=%s DB=%s)\n",
+                   Config.archdb_host, Config.archdb_port, Config.archdb_username, Config.archdb_database );
+       Admin_write ( connexion, chaine );
+       return;
+     }
+    g_snprintf( chaine, sizeof(chaine), " Connexion to DB OK (Host=%s:%d, User=%s DB=%s)\n",
+                Config.archdb_host, Config.archdb_port, Config.archdb_username, Config.archdb_database );
+    Admin_write ( connexion, chaine );
+    Libere_DB_SQL( &db );
+  }
+/******************************************************************************************************************************/
 /* Admin_arch_status: Print le statut du thread arch                                                                          */
 /* Entrée: la connexion pour sortiee client et la ligne de commande                                                           */
 /* Sortie: Néant                                                                                                              */
@@ -63,6 +83,8 @@
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "status" ) )
      { Admin_arch_status ( connexion ); }
+    else if ( ! strcmp ( commande, "testdb" ) )
+     { Admin_arch_testdb ( connexion ); }
     else if ( ! strcmp ( commande, "clear" ) )
      { gint nbr;
        nbr = Arch_Clear_list ();                            /* Clear de la list des archives à prendre en compte */
@@ -73,6 +95,7 @@
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'UPS'\n" );
        Admin_write ( connexion, "  status                                 - Get Status of Arch Thread\n");
        Admin_write ( connexion, "  clear                                  - Clear Archive List\n" );
+       Admin_write ( connexion, "  testdb                                 - Access Test to Database\n" );
      }
     else
      { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
