@@ -159,10 +159,7 @@
      }
 
     if (db->free==FALSE)
-     { Info_new( Config.log, Config.log_db, LOG_WARNING,
-                "Libere_DB_SQL: Reste un result a FREEer (DB%07d) -> %s !", db->id, db->requete );
-       Liberer_resultat_SQL ( db );
-     }
+     { Liberer_resultat_SQL ( db ); }
     mysql_close( db->mysql );
     pthread_mutex_lock ( &Partage->com_db.synchro );
     Partage->com_db.Liste = g_slist_remove ( Partage->com_db.Liste, db );

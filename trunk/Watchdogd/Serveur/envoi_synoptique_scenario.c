@@ -123,7 +123,6 @@
      { Envoi_client ( client, tag, sstag, (gchar *)scenario, sizeof(struct CMD_TYPE_SCENARIO) );
        g_free(scenario);
      }
-    Libere_DB_SQL( &db );
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

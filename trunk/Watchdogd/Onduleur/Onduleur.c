@@ -623,7 +623,7 @@
 
     num_e++;
     if ( (reponse = Onduleur_get_var ( module, "ups.status" )) != NULL )
-     { SE( num_e, !strcmp(reponse, "OL CHRG") ); }                                            /* Numéro de l'E pour la valeur */
+     { SE( num_e, !strcmp(reponse, "\"OL CHRG\"") ); }                                        /* Numéro de l'E pour la valeur */
     
     return(TRUE);
   }
