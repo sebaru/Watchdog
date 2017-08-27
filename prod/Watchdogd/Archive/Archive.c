@@ -143,7 +143,7 @@
        db = Init_ArchDB_SQL();       
        if (!db)
         { Info_new( Config.log, Config.log_arch, LOG_ERR, 
-                   "Run_arch: Unable to open database %s", Config.archdb_database );
+                   "%s: Unable to open database %s/%s/%s", __func__, Config.archdb_host, Config.archdb_username, Config.archdb_database );
           continue;
         }
 
@@ -153,7 +153,7 @@
           Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
           Partage->com_arch.taille_arch--;
           Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                   "Run_arch: Reste %03d a traiter", Partage->com_arch.taille_arch );
+                   "%s: Reste %03d a traiter", __func__, Partage->com_arch.taille_arch );
           pthread_mutex_unlock( &Partage->com_arch.synchro );
           Ajouter_archDB ( db, arch );
           g_free(arch);
@@ -163,7 +163,7 @@
        SEA ( NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );                                      /* pour historique */
      }
 
-    Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Run_arch: Down (%p)", pthread_self() );
+    Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Down (%p)", __func__, pthread_self() );
     Partage->com_arch.Thread_run  = FALSE;                                                              /* Le thread tourne ! */
     Partage->com_arch.TID = 0;                                                /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
