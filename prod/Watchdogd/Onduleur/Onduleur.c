@@ -597,7 +597,7 @@
      { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( (reponse = Onduleur_get_var ( module, "input_frequency" )) != NULL )
+    if ( (reponse = Onduleur_get_var ( module, "input.frequency" )) != NULL )
      { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
 
     num_ea++;
@@ -623,7 +623,7 @@
 
     num_e++;
     if ( (reponse = Onduleur_get_var ( module, "ups.status" )) != NULL )
-     { SE( num_e, !strcmp(reponse, "OL CHRG") ); }                                            /* Numéro de l'E pour la valeur */
+     { SE( num_e, !strcmp(reponse, "\"OL CHRG\"") ); }                                        /* Numéro de l'E pour la valeur */
     
     return(TRUE);
   }
