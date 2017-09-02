@@ -40,6 +40,7 @@
  static GtkWidget *Entry_unite;                                                           /* Unite correspondante au compteur */
  static GtkWidget *Spin_multi;                                                                  /* Multiplicateur d'affichage */
  static GtkWidget *Entry_valeur;                                                          /* Valeur actuelle du compteur (RO) */
+ static GtkWidget *Check_reset;                                                                /* Doit on reset le compteur ? */
  static GtkWidget *Option_type;                                                /* Type de capteur (totalisateur/moyenneur/..) */
 
 /******************************************************************************************************************************/
@@ -52,9 +53,9 @@
                      else return ( "Unknown" );
   }
 /******************************************************************************************************************************/
-/* CB_ajouter_editer_cpt_imp: Fonction appelée qd on appuie sur un des boutons de l'interface                                 */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
-/* sortie: TRUE                                                                                                               */
+/* Get_options_CPTIMP: met a jour la structure mnemo en parametre avec les infos dans l'interface graphique                   */
+/* Entrée: la structure mnemonique a modifier                                                                                 */
+/* sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Get_options_CPTIMP ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { struct CMD_TYPE_MNEMO_CPT_IMP *mnemo;
@@ -63,11 +64,12 @@
     g_snprintf( mnemo->unite, sizeof(mnemo->unite), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_unite) ) );
     mnemo->type  = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type ) );
     mnemo->multi = gtk_spin_button_get_value( GTK_SPIN_BUTTON(Spin_multi) );
+    mnemo->reset = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_reset) );
   }
 /******************************************************************************************************************************/
-/* Ajouter_cpt_imp: Ajoute un cpt_imp au systeme                                                                              */
+/* Get_options_CPTIMP_gtktable: fournie la table d'options pour un mnemonique de type CPTIMP                                  */
 /* Entrée: rien                                                                                                               */
-/* sortie: rien                                                                                                               */
+/* Sortie: la gtktable                                                                                                        */
 /******************************************************************************************************************************/
  GtkWidget *Get_options_CPTIMP_gtktable ( void )
   { GtkWidget *table, *texte;
@@ -106,8 +108,11 @@
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Entry_valeur = gtk_entry_new();
     gtk_entry_set_editable( GTK_ENTRY(Entry_valeur), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_valeur, 1, 4, i, i+1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_valeur, 1, 3, i, i+1 );
 
+    Check_reset = gtk_check_button_new_with_label( _("Check to Reset") );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_reset, 3, 4, i, i+1 );
+    
     gtk_widget_grab_focus( Entry_unite );
     return(table);
   }
@@ -135,4 +140,4 @@
        gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type),  0 );
      }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

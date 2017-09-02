@@ -116,6 +116,7 @@
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
+    if (mnemo_full->mnemo_cptimp.reset) Partage->ci[mnemo_full->mnemo_base.num].val_en_cours1 = 0;
     return(retour);
   }
 /******************************************************************************************************************************/
