@@ -36,6 +36,8 @@
  #include "watchdogd.h"
  #include "Sms.h"
 
+ static gboolean sending_is_disabled = FALSE;                      /* Variable permettant d'interdire l'envoi de sms si panic */
+
 /******************************************************************************************************************************/
 /* Sms_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                    */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
@@ -293,6 +295,20 @@
        return;
      }
 
+    if ( ! strcasecmp( texte, "smsoff" ) )                                                                      /* Smspanic ! */
+     { sending_is_disabled = TRUE;
+       Envoyer_sms_gsm_text ( "Sending SMS is off !" );
+       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE, "%s: Sending SMS is DISABLED", __func__ );
+       return;
+     }
+
+    if ( ! strcasecmp( texte, "smson" ) )                                                                       /* Smspanic ! */
+     { sending_is_disabled = FALSE;
+       Envoyer_sms_gsm_text ( "Sending SMS is on !" );
+       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE, "%s: Sending SMS is ENABLED", __func__ );
+       return;
+     }
+
     g_snprintf(chaine, sizeof(chaine), "%s:%s:%s", Config.instance_id, NOM_THREAD, texte );             /* Recherche du mnemo */
     mnemo = Map_event_to_mnemo( chaine, &nbr );
     if (nbr==0)
@@ -312,7 +328,7 @@
      { switch( mnemo->type )
         { case MNEMO_MONOSTABLE:
                Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                         "%s: From %s -> Mise a un du bit M%03d", __func__, from, mnemo->num );
+                         "%s: From %s -> Mise à un du bit M%03d", __func__, from, mnemo->num );
                Envoyer_commande_dls(mnemo->num);
                break;
           default:
@@ -339,16 +355,16 @@
     gn_sms sms;
     gint sms_index;
 
-    if ((error=gn_lib_phoneprofile_load("", &state)) != GN_ERR_NONE)               /* Read config file */
+    if ((error=gn_lib_phoneprofile_load("", &state)) != GN_ERR_NONE)                                      /* Read config file */
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "Lire_sms_gsm: Read Phone profile NOK (%s)", gn_error_print(error) );
+                "%s: Read Phone profile NOK (%s)", __func__, gn_error_print(error) );
        if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );
        return;
      }
 
     if ((error=gn_lib_phone_open(state)) != GN_ERR_NONE)
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "Lire_sms_gsm: Open Phone NOK (%s)", gn_error_print(error) );
+                "%s: Open Phone NOK (%s)", __func__, gn_error_print(error) );
        if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );
        gn_lib_phone_close(state);
        gn_lib_phoneprofile_free(&state);
@@ -371,13 +387,13 @@
 
        if ((error = gn_sms_get (&data, state)) == GN_ERR_NONE)                                          /* On recupere le SMS */
         { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
-                   "Lire_sms_gsm: Recu SMS %s de %s", (gchar *)sms.user_data[0].u.text, sms.remote.number );
+                   "%s: Recu SMS %s de %s", __func__, (gchar *)sms.user_data[0].u.text, sms.remote.number );
           Traiter_commande_sms ( sms.remote.number, (gchar *)sms.user_data[0].u.text );
           gn_sms_delete (&data, state);                                                   /* On l'a traité, on peut l'effacer */
         }
        else if (error == GN_ERR_INVALIDLOCATION) break;                           /* On regarde toutes les places de stockage */
        else  { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_DEBUG,
-                        "Lire_sms_gsm: error %s from %s (sms_index=%d)",
+                        "%s: error %s from %s (sms_index=%d)", __func__,
                         gn_error_print(error), sms.remote.number, sms_index );
                break;
              }
@@ -401,13 +417,13 @@
 
     if ((error=gn_lib_phoneprofile_load("", &state)) != GN_ERR_NONE)                                      /* Read config file */
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "Envoi_sms_gsm: Read Phone profile NOK (%s)", gn_error_print(error) );
+                "%s: Read Phone profile NOK (%s)", __func__, gn_error_print(error) );
        return(FALSE);
      }
 
     if ((error=gn_lib_phone_open(state)) != GN_ERR_NONE)
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "Envoi_sms_gsm: Open Phone NOK (%s)", gn_error_print(error) );
+                "%s: Open Phone NOK (%s)", __func__, gn_error_print(error) );
        return(FALSE);
      }
 
@@ -494,22 +510,12 @@
                   CURLFORM_COPYNAME,     "dest",
                   CURLFORM_COPYCONTENTS, telephone,
                   CURLFORM_END); 
-    if (Partage->top < TOP_MIN_ENVOI_SMS)
-     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
-                "Envoi_sms_smsbox: Envoi trop tot !! (%s)", msg->libelle_sms );
-       curl_formadd( &formpost, &lastptr,                           /* Pas de SMS les 2 premières minutes de vie du processus */
-                     CURLFORM_COPYNAME,     "origine",                              /* 'debugvar' pour lancer en mode semonce */
-                     CURLFORM_COPYCONTENTS, "debugvar",
-                     CURLFORM_END);
-     }
-    else
-     { curl_formadd( &formpost, &lastptr,                           /* Pas de SMS les 2 premières minutes de vie du processus */
-                     CURLFORM_COPYNAME,     "origine",                              /* 'debugvar' pour lancer en mode semonce */
-                     CURLFORM_COPYCONTENTS, VERSION,
-                     CURLFORM_END);
-     }
-
-
+    curl_formadd( &formpost, &lastptr,                              /* Pas de SMS les 2 premières minutes de vie du processus */
+                  CURLFORM_COPYNAME,     "origine",                                 /* 'debugvar' pour lancer en mode semonce */
+                  CURLFORM_COPYCONTENTS, VERSION,
+/*                     CURLFORM_COPYCONTENTS, "debugvar",*/
+                  CURLFORM_END);
+    
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "mode",
                   CURLFORM_COPYCONTENTS, "Economique",
@@ -524,33 +530,35 @@
        res = curl_easy_perform(curl);
        if (!res)
         { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
-                   "Envoi_sms_smsbox: Envoi SMS %s to %s", msg->libelle_sms, telephone );
+                   "%s: Envoi SMS '%s' to '%s'", __func__, msg->libelle_sms, telephone );
         }
        else
         { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                   "Envoi_sms_smsbox: Envoi SMS Nok - Pb cURL (%s)", erreur);
+                   "%s: Envoi SMS Nok - Pb cURL (%s)", __func__, erreur);
         }
        curl_easy_cleanup(curl);
      }
     else
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "Envoi_sms_smsbox: Envoi SMS Nok - Pb cURL Init");
+                "%s: Envoi SMS Nok - Pb cURL Init", __func__ );
      }
     curl_formfree(formpost);
   }
 /******************************************************************************************************************************/
-/* Sms_send_to_recipient_authorized : Envoi à tous les portables autorisés                                                    */
+/* Sms_send_to_all_authorized_recipients : Envoi à tous les portables autorisés                                               */
 /* Entrée: le message                                                                                                         */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Sms_send_to_recipient_authorized ( struct CMD_TYPE_MESSAGE *msg )
+ static void Sms_send_to_all_authorized_recipients ( struct CMD_TYPE_MESSAGE *msg )
   { struct SMSDB *sms;
     struct DB *db;
+
+    if (sending_is_disabled == TRUE) return;                           /* Si envoi désactivé, on sort de suite de la fonction */
 
     db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "Sms_send_to_recipient_authorized: Database Connection Failed" );
+                "%s: Database Connection Failed", __func__ );
        return;
      }
 
@@ -558,7 +566,7 @@
     if ( ! Sms_Recuperer_recipient_authorized_smsDB( db ) )
      { Libere_DB_SQL( &db );
        Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "Sms_send_to_recipient_authorized: Recuperer_sms Failed" );
+                "%s: Recuperer_sms Failed", __func__ );
        return;
      }
 
@@ -595,7 +603,7 @@
     Sms_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
+              "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
     Cfg_sms.lib->Thread_run = TRUE;                                                                     /* Le thread tourne ! */
 
     g_snprintf( Cfg_sms.lib->admin_prompt, sizeof(Cfg_sms.lib->admin_prompt), NOM_THREAD );
@@ -603,13 +611,12 @@
 
     if (!Cfg_sms.enable)
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
-                "Run_thread: Thread is not enabled in config. Shutting Down %p",
-                 pthread_self() );
+                "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
        goto end;
      }
 
     Abonner_distribution_histo ( Sms_Gerer_histo );                                 /* Abonnement à la diffusion des messages */
-
+    sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
     while(Cfg_sms.lib->Thread_run == TRUE)                                                   /* On tourne tant que necessaire */
      { usleep(10000);
        sched_yield();
@@ -617,17 +624,17 @@
        if (Cfg_sms.lib->Thread_sigusr1)                                                       /* A-t'on recu un signal USR1 ? */
         { int nbr;
 
-          Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Run_thread: SIGUSR1" );
+          Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "%s: SIGUSR1", __func__ );
           pthread_mutex_lock( &Cfg_sms.lib->synchro );                             /* On recupere le nombre de sms en attente */
           nbr = g_slist_length(Cfg_sms.Liste_histos);
           pthread_mutex_unlock( &Cfg_sms.lib->synchro );
-          Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Run_thread: Nbr SMS a envoyer = %d", nbr );
+          Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "%s: Nbr SMS a envoyer = %d", __func__, nbr );
           Cfg_sms.lib->Thread_sigusr1 = FALSE;
         }
 
        if (Cfg_sms.reload)                                       /* Prise en compte des reload conf depuis la console d'admin */
         { Cfg_sms.reload = FALSE;
-          Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "Run_thread: Reloading conf" );
+          Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "%s: Reloading conf", __func__ );
           Sms_Lire_config ();                                               /* Lecture de la configuration logiciel du thread */
         }          
 /****************************************************** Lecture de SMS ********************************************************/
@@ -635,7 +642,7 @@
 
 /********************************************************* Envoi de SMS *******************************************************/
        sleep(5);
-       if ( !Cfg_sms.Liste_histos )                                     /* Attente de demande d'envoi SMS */
+       if ( !Cfg_sms.Liste_histos )                                                         /* Attente de demande d'envoi SMS */
         { sched_yield();
           continue;
         }
@@ -644,19 +651,19 @@
        histo = Cfg_sms.Liste_histos->data;
        Cfg_sms.Liste_histos = g_slist_remove ( Cfg_sms.Liste_histos, histo );
        Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
-                "Run_thread: Reste %d a envoyer apres le msg %d",
+                "%s: Reste %d a envoyer apres le msg %d", __func__,
                  g_slist_length(Cfg_sms.Liste_histos), histo->msg.num );
        pthread_mutex_unlock( &Cfg_sms.lib->synchro );
-       if ( histo->alive == TRUE )                                      /* On n'envoie que si MSGnum == 1 */
+       if ( histo->alive == TRUE )                                                          /* On n'envoie que si MSGnum == 1 */
         { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
-                   "Run_thread : Sending msg %d (%s)", histo->msg.num, histo->msg.libelle_sms );
+                   "%s : Sending msg %d (%s)", __func__, histo->msg.num, histo->msg.libelle_sms );
       
 /*************************************************** Envoi en mode GSM ********************************************************/
           if (Partage->top < TOP_MIN_ENVOI_SMS)
            { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
-                      "Run_thread: Envoi trop tot !! (%s)", histo->msg.libelle_sms ); }
+                      "%s: Envoi trop tot !! (%s)", __func__, histo->msg.libelle_sms ); }
           else 
-           { Sms_send_to_recipient_authorized( &histo->msg ); }
+           { Sms_send_to_all_authorized_recipients( &histo->msg ); }
         }
        g_free( histo );
      }
@@ -664,7 +671,7 @@
 
 end:
     if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );                                /* Communication NOK */
-    Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
+    Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_sms.lib->Thread_run = FALSE;
     Cfg_sms.lib->TID = 0;                                                     /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
