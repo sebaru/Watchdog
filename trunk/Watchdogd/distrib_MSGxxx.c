@@ -146,6 +146,17 @@
 /************************************************** Gestion des repeat ********************************************************/
     if (histo.msg.time_repeat) 
      { struct CMD_TYPE_HISTO *dup_histo;
+       GSList *liste;
+       pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Vérification de la liste actuelle */
+       liste = Partage->com_msrv.liste_msg_repeat;
+       while (liste)
+        { dup_histo = (struct CMD_TYPE_HISTO *)liste->data;                                  /* Recuperation du numero de msg */
+          if (dup_histo->msg.num == histo.msg.num) break;
+          liste = liste->next;
+        }
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       if (liste) return;                                                         /* Si deja dans la liste, on ne fait rien ! */
+
        dup_histo = (struct CMD_TYPE_HISTO *)g_try_malloc0(sizeof(struct CMD_TYPE_HISTO));
        if (dup_histo)
         { memcpy ( dup_histo, &histo, sizeof(struct CMD_TYPE_HISTO) );
