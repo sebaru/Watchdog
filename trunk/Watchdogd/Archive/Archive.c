@@ -133,7 +133,14 @@
           Partage->com_arch.Thread_sigusr1 = FALSE;
         }
 
-       
+       if ( (Partage->top % 864000) == 0)                                                                /* Une fois par jour */
+        { pthread_t tid;
+          if (pthread_create( &tid, NULL, (void *)Arch_Update_SQL_Partitions_thread, NULL ))
+           { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: pthread_create failed for Update SQL Partitions", __func__ ); }
+          else
+           { pthread_detach( tid ); }                                /* On le detache pour qu'il puisse se terminer tout seul */
+        }
+
        if (!Partage->com_arch.liste_arch)                                                     /* Si pas de message, on tourne */
         { sched_yield();
           sleep(5);
@@ -143,7 +150,8 @@
        db = Init_ArchDB_SQL();       
        if (!db)
         { Info_new( Config.log, Config.log_arch, LOG_ERR, 
-                   "%s: Unable to open database %s/%s/%s", __func__, Config.archdb_host, Config.archdb_username, Config.archdb_database );
+                   "%s: Unable to open database %s/%s/%s", __func__,
+                    Config.archdb_host, Config.archdb_username, Config.archdb_database );
           continue;
         }
 
