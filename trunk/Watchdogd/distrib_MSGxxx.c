@@ -90,21 +90,23 @@
      { struct MESSAGES_EVENT *event;
        histo = (struct CMD_TYPE_HISTO *)liste->data;                                         /* Recuperation du numero de msg */
 
-       event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
-       if (event)
-        { event->num  = histo->msg.num;
-          event->etat = 0;
-          Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
-        }
+       if (Partage->g[histo->msg.num].next_repeat <= Partage->top)
+        { event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
+          if (event)
+           { event->num  = histo->msg.num;
+             event->etat = 0;
+             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
+           }
 
-       event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
-       if (event)
-        { event->num  = histo->msg.num;
-          event->etat = 1;
-          Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
-          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+          event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
+          if (event)
+           { event->num  = histo->msg.num;
+             event->etat = 1;
+             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
+             pthread_mutex_unlock( &Partage->com_msrv.synchro );
+           }
+          Partage->g[histo->msg.num].next_repeat = Partage->top + histo->msg.time_repeat*600;                   /* En minutes */
         }
-       Partage->g[histo->msg.num].next_repeat = Partage->top + histo->msg.time_repeat*600;                      /* En minutes */
        liste = liste->next;
      }
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
