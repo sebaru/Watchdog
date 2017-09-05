@@ -53,11 +53,12 @@
     gboolean Thread_sigusr1;                                                          /* TRUE si le thread doit gerer le USR1 */
   };
 
-/*************************************** Définitions des prototypes ***************************************/
- extern void Run_arch ( void );                                                         /* Dans Archive.c */
+/******************************************* Définitions des prototypes *******************************************************/
+ extern void Run_arch ( void );                                                                             /* Dans Archive.c */
  extern gint Arch_Clear_list ( void );
  extern void Ajouter_arch( gint type, gint num, gfloat valeur );
  extern void Ajouter_archDB ( struct DB *db, struct ARCHDB *arch );
  extern void Admin_arch ( struct CONNEXION *connexion, gchar *ligne );
+ extern void Arch_Update_SQL_Partitions_thread ( void );
 #endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

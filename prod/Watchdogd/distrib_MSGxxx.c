@@ -87,10 +87,24 @@
     pthread_mutex_lock( &Partage->com_msrv.synchro );
     liste = Partage->com_msrv.liste_msg_repeat;
     while (liste)
-     { histo = (struct CMD_TYPE_HISTO *)liste->data;                                         /* Recuperation du numero de msg */
+     { struct MESSAGES_EVENT *event;
+       histo = (struct CMD_TYPE_HISTO *)liste->data;                                         /* Recuperation du numero de msg */
 
        if (Partage->g[histo->msg.num].next_repeat <= Partage->top)
-        { Envoyer_histo_aux_abonnes ( histo );
+        { event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
+          if (event)
+           { event->num  = histo->msg.num;
+             event->etat = 0;
+             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
+           }
+
+          event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
+          if (event)
+           { event->num  = histo->msg.num;
+             event->etat = 1;
+             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
+             pthread_mutex_unlock( &Partage->com_msrv.synchro );
+           }
           Partage->g[histo->msg.num].next_repeat = Partage->top + histo->msg.time_repeat*600;                   /* En minutes */
         }
        liste = liste->next;
@@ -134,6 +148,17 @@
 /************************************************** Gestion des repeat ********************************************************/
     if (histo.msg.time_repeat) 
      { struct CMD_TYPE_HISTO *dup_histo;
+       GSList *liste;
+       pthread_mutex_lock( &Partage->com_msrv.synchro );                                 /* Vérification de la liste actuelle */
+       liste = Partage->com_msrv.liste_msg_repeat;
+       while (liste)
+        { dup_histo = (struct CMD_TYPE_HISTO *)liste->data;                                  /* Recuperation du numero de msg */
+          if (dup_histo->msg.num == histo.msg.num) break;
+          liste = liste->next;
+        }
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       if (liste) return;                                                         /* Si deja dans la liste, on ne fait rien ! */
+
        dup_histo = (struct CMD_TYPE_HISTO *)g_try_malloc0(sizeof(struct CMD_TYPE_HISTO));
        if (dup_histo)
         { memcpy ( dup_histo, &histo, sizeof(struct CMD_TYPE_HISTO) );
