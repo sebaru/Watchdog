@@ -172,6 +172,16 @@
      }
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Down (%p)", __func__, pthread_self() );
+    pthread_mutex_lock( &Partage->com_arch.synchro );               /* Suppression des enregistrements restants dans la liste */
+    while (Partage->com_arch.liste_arch)
+     { struct ARCHDB *arch;
+       arch = Partage->com_arch.liste_arch->data;                                                     /* Recuperation du arch */
+       Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
+       Partage->com_arch.taille_arch--;
+       g_free(arch);
+     }
+    pthread_mutex_unlock( &Partage->com_arch.synchro );
+
     Partage->com_arch.Thread_run  = FALSE;                                                              /* Le thread tourne ! */
     Partage->com_arch.TID = 0;                                                /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
