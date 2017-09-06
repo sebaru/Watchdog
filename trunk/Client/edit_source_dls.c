@@ -261,13 +261,14 @@
      { gchar chaine[16];
        gint taille;
        taille = Source_fin-source;                                                                     /* Combien il reste ?? */
-       if (taille>Client.connexion->taille_bloc) taille = taille_max;                /* Borne supérieure lié au paquet reseau */
+       if (taille>taille_max) taille = taille_max;                                   /* Borne supérieure lié au paquet reseau */
        memcpy( buffer_envoi, source, taille );                                                             /* Recopie mémoire */  
        edit_dls->taille = taille;
        if (!Envoi_serveur( TAG_DLS, SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS,
                            (gchar *)edit_dls, taille + sizeof(struct CMD_TYPE_SOURCE_DLS) ))
         { printf("erreur envoi au serveur\n"); }
-       printf("Octets sent: %d / %d\n", taille, taille_source);
+       printf("Octets sent: %d / %d (taille bloc=%d, taille_max=%d) source=%p source_fin=%p nb_car=%d\n",
+               taille, taille_source, Client.connexion->taille_bloc, taille_max, source, source_fin, nb_car );
        source += taille;
        taille_sent+=taille;
        gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR(progress), (gdouble)taille_sent/taille_source );
