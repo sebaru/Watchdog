@@ -267,8 +267,8 @@
        if (!Envoi_serveur( TAG_DLS, SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS,
                            (gchar *)edit_dls, taille + sizeof(struct CMD_TYPE_SOURCE_DLS) ))
         { printf("erreur envoi au serveur\n"); }
-       printf("Octets sent: %d / %d (taille bloc=%d, taille_max=%d) source=%p source_fin=%p nb_car=%d\n",
-               taille, taille_source, Client.connexion->taille_bloc, taille_max, source, source_fin, nb_car );
+       printf("Octets sent: %d / %d (taille bloc=%d, taille_max=%d) nb_car=%d\n",
+               taille, taille_source, Client.connexion->taille_bloc, taille_max, nb_car );
        source += taille;
        taille_sent+=taille;
        gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR(progress), (gdouble)taille_sent/taille_source );
