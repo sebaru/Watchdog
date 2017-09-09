@@ -76,7 +76,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT table_name FROM information_schema.tables WHERE table_schema='%s' "
-                "AND table_name like 'histo_bit_%%", Config.archdb_database );
+                "AND table_name like 'histo_bit_%%'", Config.archdb_database );
     if (Lancer_requete_SQL ( db, requete )==FALSE)                                             /* Execution de la requete SQL */
      { Libere_DB_SQL(&db);
 	      Info_new( Config.log, Config.log_arch, LOG_ERR,
