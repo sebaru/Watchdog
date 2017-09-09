@@ -626,6 +626,7 @@
      { SE( num_e, !strcmp(reponse, "\"OL CHRG\"") ); }                                        /* Numéro de l'E pour la valeur */
 
     num_e++;
+    if (reponse != NULL)
      { SE( num_e, !strcmp(reponse, "\"OB\"") ); }                                             /* Numéro de l'E pour la valeur */
     
     return(TRUE);

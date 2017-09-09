@@ -62,7 +62,7 @@
 /******************************************************************************************************************************/
  void Arch_Update_SQL_Partitions_thread ( void )
   { gchar requete[512];
-	GSList *Liste_tables;
+	   GSList *Liste_tables;
     struct DB *db;
     prctl(PR_SET_NAME, "W-ArchSQL", 0, 0, 0 );
     Liste_tables = NULL;
@@ -76,10 +76,10 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT table_name FROM information_schema.tables WHERE table_schema='%s' "
-                "AND table_name like 'histo_bit_%", Config.archdb_database );
+                "AND table_name like 'histo_bit_%%", Config.archdb_database );
     if (Lancer_requete_SQL ( db, requete )==FALSE)                                             /* Execution de la requete SQL */
      { Libere_DB_SQL(&db);
-	   Info_new( Config.log, Config.log_arch, LOG_ERR,
+	      Info_new( Config.log, Config.log_arch, LOG_ERR,
                 "%s: Searching table names failed", __func__ );
        return;
      }
@@ -94,18 +94,18 @@
                 "%s: Unable to open database %s for deleting", __func__, Config.archdb_database );
        while (Liste_tables)
         { gchar *table;
-	      table = Liste_tables->data;
-	      Liste_tables = g_slist_remove ( Liste_tables, table );
-	      g_free(table);
+	         table = Liste_tables->data;
+	         Liste_tables = g_slist_remove ( Liste_tables, table );
+   	      g_free(table);
         }
        return;
      }
 
     while (Liste_tables)
      { gchar *table;
-	   table = Liste_tables->data;
-	   Liste_tables = g_slist_remove ( Liste_tables, table );
-	   g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
+	      table = Liste_tables->data;
+	      Liste_tables = g_slist_remove ( Liste_tables, table );
+	      g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                   "DELETE FROM %s WHERE date_sec < NOW() - INTERVAL 400 DAY", table );
        if (Lancer_requete_SQL ( db, requete )==FALSE)                                          /* Execution de la requete SQL */
         { Info_new( Config.log, Config.log_arch, LOG_ERR,
