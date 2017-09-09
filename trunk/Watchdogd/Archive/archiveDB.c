@@ -106,7 +106,7 @@
 	      table = Liste_tables->data;
 	      Liste_tables = g_slist_remove ( Liste_tables, table );
 	      g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                  "DELETE FROM %s WHERE date_sec < NOW() - INTERVAL 400 DAY", table );
+                  "DELETE FROM %s WHERE date_time < NOW() - INTERVAL 400 DAY", table );
        if (Lancer_requete_SQL ( db, requete )==FALSE)                                          /* Execution de la requete SQL */
         { Info_new( Config.log, Config.log_arch, LOG_ERR,
                    "%s: Unable to delete from table '%s'", __func__, table );
