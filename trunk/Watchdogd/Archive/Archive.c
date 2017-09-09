@@ -167,7 +167,7 @@
           g_free(arch);
         }
        Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                "%s: Traitement en %06ds", __func__, (Partage->top-top)/10.0 );
+                "%s: Traitement en %06.1fs", __func__, (Partage->top-top)/10.0 );
        Libere_DB_SQL( &db );
        SEA ( NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );                                      /* pour historique */
      }
