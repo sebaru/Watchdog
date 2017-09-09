@@ -58,22 +58,21 @@
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                                    */
 /******************************************************************************************************************************/
  void Ajouter_arch( gint type, gint num, gfloat valeur )
-  { static gint last_log = 0;
+  { static gint last_log = 0, taille_buf = 500000;
     struct timeval tv;
     struct ARCHDB *arch;
 
     if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
-    else if (Partage->com_arch.taille_arch > 10000)
+    else if (Partage->com_arch.taille_arch > taille_buf)
      { if ( last_log + 60 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                   "Ajouter_arch: DROP arch (taille>10000) type=%d, num=%d", type, num );
+                   "Ajouter_arch: DROP arch (taille>%d) type=%d, num=%d", taille_buf, type, num );
           last_log = Partage->top;
         }
        return;
      }
-    else if (Partage->com_arch.Thread_run == FALSE)
-     { if (Config.instance_is_master == FALSE) return;                                   /* Si administratively DOWN, on sort */
-       if ( last_log + 60 < Partage->top )
+    else if (Partage->com_arch.Thread_run == FALSE)                                      /* Si administratively DOWN, on sort */
+     { if ( last_log + 60 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
                    "Ajouter_arch: Thread is down. Dropping type=%d, num=%d", type, num );
           last_log = Partage->top;
