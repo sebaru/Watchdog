@@ -105,6 +105,7 @@
 /******************************************************************************************************************************/
  void Run_arch ( void )
   { struct DB *db;
+    gint top;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
@@ -154,19 +155,20 @@
                     Config.archdb_host, Config.archdb_username, Config.archdb_database );
           continue;
         }
-
+       Info_new( Config.log, Config.log_arch, LOG_DEBUG,
+                "%s: Traitement de %05d archive(s)", __func__, Partage->com_arch.taille_arch );
+       top = Partage->top;
        while (Partage->com_arch.liste_arch)
         { pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
           arch = Partage->com_arch.liste_arch->data;                                                  /* Recuperation du arch */
           Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
           Partage->com_arch.taille_arch--;
-          Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                   "%s: Reste %03d a traiter", __func__, Partage->com_arch.taille_arch );
           pthread_mutex_unlock( &Partage->com_arch.synchro );
           Ajouter_archDB ( db, arch );
           g_free(arch);
-          Info_new( Config.log, Config.log_arch, LOG_DEBUG, "Run_arch: archive saved" );
         }
+       Info_new( Config.log, Config.log_arch, LOG_DEBUG,
+                "%s: Traitement en %03.1ds", __func__, (Partage->top-top)/10.0 );
        Libere_DB_SQL( &db );
        SEA ( NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );                                      /* pour historique */
      }
