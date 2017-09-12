@@ -118,7 +118,7 @@
        g_free(table);
      }
 
-    g_slist_foreach( Liste_tables, GFunc)g_free, NULL );                         /* Vidage de la liste si arret prematuré */
+    g_slist_foreach( Liste_tables, (GFunc)g_free, NULL );                            /* Vidage de la liste si arret prematuré */
     g_slist_free( Liste_tables );
 
     Libere_DB_SQL(&db);
