@@ -152,12 +152,13 @@
         { Info_new( Config.log, Config.log_arch, LOG_ERR, 
                    "%s: Unable to open database %s/%s/%s", __func__,
                     Config.archdb_host, Config.archdb_username, Config.archdb_database );
+          sleep(10);
           continue;
         }
        Info_new( Config.log, Config.log_arch, LOG_DEBUG,
                 "%s: Traitement de %05d archive(s)", __func__, Partage->com_arch.taille_arch );
        top = Partage->top;
-       while (Partage->com_arch.liste_arch)
+       while (Partage->com_arch.liste_arch && Partage->com_arch.Thread_run == TRUE)
         { pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
           arch = Partage->com_arch.liste_arch->data;                                                  /* Recuperation du arch */
           Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
@@ -173,6 +174,7 @@
      }
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Down (%p)", __func__, pthread_self() );
+
     pthread_mutex_lock( &Partage->com_arch.synchro );               /* Suppression des enregistrements restants dans la liste */
     while (Partage->com_arch.liste_arch)
      { struct ARCHDB *arch;

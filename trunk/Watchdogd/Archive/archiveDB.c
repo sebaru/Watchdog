@@ -103,7 +103,7 @@
        return;
      }
 
-    while (Liste_tables)
+    while (Liste_tables && Partage->com_arch.Thread_run == TRUE)
      { gchar *table;
 	      table = Liste_tables->data;
 	      Liste_tables = g_slist_remove ( Liste_tables, table );
@@ -117,6 +117,10 @@
         }
        g_free(table);
      }
+
+    g_slist_foreach( Liste_tables, GFunc)g_free, NULL );                         /* Vidage de la liste si arret prematuré */
+    g_slist_free( Liste_tables );
+
     Libere_DB_SQL(&db);
     Info_new( Config.log, Config.log_arch, LOG_NOTICE,
              "%s: Update SQL Partition end", __func__ );
