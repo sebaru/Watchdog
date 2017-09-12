@@ -58,22 +58,21 @@
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                                    */
 /******************************************************************************************************************************/
  void Ajouter_arch( gint type, gint num, gfloat valeur )
-  { static gint last_log = 0;
+  { static gint last_log = 0, taille_buf = 500000;
     struct timeval tv;
     struct ARCHDB *arch;
 
     if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
-    else if (Partage->com_arch.taille_arch > 10000)
+    else if (Partage->com_arch.taille_arch > taille_buf)
      { if ( last_log + 60 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                   "Ajouter_arch: DROP arch (taille>10000) type=%d, num=%d", type, num );
+                   "Ajouter_arch: DROP arch (taille>%d) type=%d, num=%d", taille_buf, type, num );
           last_log = Partage->top;
         }
        return;
      }
-    else if (Partage->com_arch.Thread_run == FALSE)
-     { if (Config.instance_is_master == FALSE) return;                                   /* Si administratively DOWN, on sort */
-       if ( last_log + 60 < Partage->top )
+    else if (Partage->com_arch.Thread_run == FALSE)                                      /* Si administratively DOWN, on sort */
+     { if ( last_log + 60 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
                    "Ajouter_arch: Thread is down. Dropping type=%d, num=%d", type, num );
           last_log = Partage->top;
@@ -153,12 +152,13 @@
         { Info_new( Config.log, Config.log_arch, LOG_ERR, 
                    "%s: Unable to open database %s/%s/%s", __func__,
                     Config.archdb_host, Config.archdb_username, Config.archdb_database );
+          sleep(10);
           continue;
         }
        Info_new( Config.log, Config.log_arch, LOG_DEBUG,
                 "%s: Traitement de %05d archive(s)", __func__, Partage->com_arch.taille_arch );
        top = Partage->top;
-       while (Partage->com_arch.liste_arch)
+       while (Partage->com_arch.liste_arch && Partage->com_arch.Thread_run == TRUE)
         { pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
           arch = Partage->com_arch.liste_arch->data;                                                  /* Recuperation du arch */
           Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
@@ -168,12 +168,13 @@
           g_free(arch);
         }
        Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                "%s: Traitement en %03.1ds", __func__, (Partage->top-top)/10.0 );
+                "%s: Traitement en %06.1fs", __func__, (Partage->top-top)/10.0 );
        Libere_DB_SQL( &db );
        SEA ( NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );                                      /* pour historique */
      }
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Down (%p)", __func__, pthread_self() );
+
     pthread_mutex_lock( &Partage->com_arch.synchro );               /* Suppression des enregistrements restants dans la liste */
     while (Partage->com_arch.liste_arch)
      { struct ARCHDB *arch;

@@ -85,6 +85,15 @@
      { Admin_arch_status ( connexion ); }
     else if ( ! strcmp ( commande, "testdb" ) )
      { Admin_arch_testdb ( connexion ); }
+    else if ( ! strcmp ( commande, "purge" ) )
+     { pthread_t tid;
+       if (pthread_create( &tid, NULL, (void *)Arch_Update_SQL_Partitions_thread, NULL ))
+        { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: pthread_create failed for Update SQL Partitions", __func__ ); }
+        else
+        { pthread_detach( tid ); }                                /* On le detache pour qu'il puisse se terminer tout seul */
+       g_snprintf( chaine, sizeof(chaine), " Purge of old data in progress\n" );
+       Admin_write ( connexion, chaine );
+     }
     else if ( ! strcmp ( commande, "clear" ) )
      { gint nbr;
        nbr = Arch_Clear_list ();                            /* Clear de la list des archives à prendre en compte */
@@ -95,6 +104,7 @@
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'UPS'\n" );
        Admin_write ( connexion, "  status                                 - Get Status of Arch Thread\n");
        Admin_write ( connexion, "  clear                                  - Clear Archive List\n" );
+       Admin_write ( connexion, "  purge                                  - Purge old data in database\n" );
        Admin_write ( connexion, "  testdb                                 - Access Test to Database\n" );
      }
     else

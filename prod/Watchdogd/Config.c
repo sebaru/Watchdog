@@ -41,7 +41,7 @@
 /******************************************************************************************************************************/
  void Lire_config ( char *fichier_config )
   { gchar *chaine, *fichier;
-	gint num;
+	   gint num;
     GError *error = NULL;
     GKeyFile *gkf;
 

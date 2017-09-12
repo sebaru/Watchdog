@@ -74,9 +74,11 @@
        return;
      }
 
+    Info_new( Config.log, Config.log_arch, LOG_NOTICE,
+                "%s: Starting Update SQL Partition on %s", __func__, Config.archdb_database );
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT table_name FROM information_schema.tables WHERE table_schema='%s' "
-                "AND table_name like 'histo_bit_%%", Config.archdb_database );
+                "AND table_name like 'histo_bit_%%'", Config.archdb_database );
     if (Lancer_requete_SQL ( db, requete )==FALSE)                                             /* Execution de la requete SQL */
      { Libere_DB_SQL(&db);
 	      Info_new( Config.log, Config.log_arch, LOG_ERR,
@@ -101,18 +103,26 @@
        return;
      }
 
-    while (Liste_tables)
+    while (Liste_tables && Partage->com_arch.Thread_run == TRUE)
      { gchar *table;
 	      table = Liste_tables->data;
 	      Liste_tables = g_slist_remove ( Liste_tables, table );
+       Info_new( Config.log, Config.log_arch, LOG_NOTICE,
+                "%s: Starting Update SQL Partition table %s", __func__, table );
 	      g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                  "DELETE FROM %s WHERE date_sec < NOW() - INTERVAL 400 DAY", table );
+                  "DELETE FROM %s WHERE date_time < NOW() - INTERVAL 400 DAY", table );
        if (Lancer_requete_SQL ( db, requete )==FALSE)                                          /* Execution de la requete SQL */
         { Info_new( Config.log, Config.log_arch, LOG_ERR,
                    "%s: Unable to delete from table '%s'", __func__, table );
         }
        g_free(table);
      }
+
+    g_slist_foreach( Liste_tables, GFunc)g_free, NULL );                         /* Vidage de la liste si arret prematuré */
+    g_slist_free( Liste_tables );
+
     Libere_DB_SQL(&db);
+    Info_new( Config.log, Config.log_arch, LOG_NOTICE,
+             "%s: Update SQL Partition end", __func__ );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
