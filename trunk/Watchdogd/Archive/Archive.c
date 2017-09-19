@@ -173,8 +173,7 @@
        SEA ( NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );                                      /* pour historique */
      }
 
-    Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Down (%p)", __func__, pthread_self() );
-
+    Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Cleaning Arch List before stop", __func__);
     pthread_mutex_lock( &Partage->com_arch.synchro );               /* Suppression des enregistrements restants dans la liste */
     while (Partage->com_arch.liste_arch)
      { struct ARCHDB *arch;
@@ -185,6 +184,7 @@
      }
     pthread_mutex_unlock( &Partage->com_arch.synchro );
 
+    Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Down (%p)", __func__, pthread_self() );
     Partage->com_arch.Thread_run  = FALSE;                                                              /* Le thread tourne ! */
     Partage->com_arch.TID = 0;                                                /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

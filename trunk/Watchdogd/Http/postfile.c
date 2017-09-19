@@ -115,7 +115,7 @@
              (type ? type : "none"), (name ? name : "none") );
 
     if ( ! (type && name) )
-     { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                             /* Bad Request */
+     { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
        g_free(pss->post_data);
        pss->post_data_length = 0;
        return(1);
@@ -132,7 +132,7 @@
       { /* Save_dls_to_disk */
      }
     else
-     { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                             /* Bad Request */
+     { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
        g_free(pss->post_data);
        pss->post_data_length = 0;
        return(1);

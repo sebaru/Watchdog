@@ -32,7 +32,8 @@
  #include <openssl/ssl.h>
  #include <gtksourceview/gtksourceprintcompositor.h>
  #include <curl/curl.h>
- 
+ #include <json-glib/json-glib.h>
+  
  #include "Reseaux.h"
  #include "trame.h"
 
