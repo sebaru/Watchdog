@@ -35,6 +35,45 @@
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
 
 /******************************************************************************************************************************/
+/* Arch_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ gboolean Arch_Lire_config ( void )
+  { gchar *nom, *valeur;
+    struct DB *db;
+
+    g_snprintf( Partage->com_arch.archdb_database, sizeof(Partage->com_arch.archdb_database), "%s", Config.db_database );
+    g_snprintf( Partage->com_arch.archdb_username, sizeof(Partage->com_arch.archdb_username), "%s", Config.db_username );
+    g_snprintf( Partage->com_arch.archdb_password, sizeof(Partage->com_arch.archdb_password), "%s", Config.db_password );
+    g_snprintf( Partage->com_arch.archdb_host, sizeof(Partage->com_arch.archdb_host), "%s", Config.db_host );
+    Partage->com_arch.archdb_port = Config.db_port;
+
+    if ( ! Recuperer_configDB( &db, "arch" ) )                                              /* Connexion a la base de données */
+     { Info_new( Config.log, Config.log_arch, LOG_WARNING,
+                "%s: Database connexion failed. Using Default Parameters", __func__ );
+       return(FALSE);
+     }
+
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
+     {      if ( ! g_ascii_strcasecmp ( nom, "database" ) )
+        { g_snprintf( Partage->com_arch.archdb_database, sizeof(Partage->com_arch.archdb_database), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "username" ) )
+        { g_snprintf( Partage->com_arch.archdb_username, sizeof(Partage->com_arch.archdb_username), "%s", Config.db_username ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "password" ) )
+        { g_snprintf( Partage->com_arch.archdb_password, sizeof(Partage->com_arch.archdb_password), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "host" ) )
+        { g_snprintf( Partage->com_arch.archdb_host, sizeof(Partage->com_arch.archdb_host), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "port" ) )
+        { Partage->com_arch.archdb_port = atoi(valeur);  }
+       else
+        { Info_new( Config.log, Config.log_arch, LOG_NOTICE,
+                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
+        }
+     }
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Arch_clear_list: efface la liste des archives a prendre en compte                                                          */
 /* Entrées: néant                                                                                                             */
 /* Sortie : le nombre d'archive detruites                                                                                     */
@@ -51,6 +90,8 @@
        Partage->com_arch.taille_arch--;
      }
     pthread_mutex_unlock( &Partage->com_arch.synchro );
+    Info_new( Config.log, Config.log_arch, LOG_DEBUG,
+             "%s: Clear %05d archive(s)", __func__, save_nbr );
     return(save_nbr);
  }
 /******************************************************************************************************************************/
@@ -151,7 +192,7 @@
        if (!db)
         { Info_new( Config.log, Config.log_arch, LOG_ERR, 
                    "%s: Unable to open database %s/%s/%s", __func__,
-                    Config.archdb_host, Config.archdb_username, Config.archdb_database );
+                    Partage->com_arch.archdb_host, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
           sleep(10);
           continue;
         }
@@ -174,15 +215,7 @@
      }
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Cleaning Arch List before stop", __func__);
-    pthread_mutex_lock( &Partage->com_arch.synchro );               /* Suppression des enregistrements restants dans la liste */
-    while (Partage->com_arch.liste_arch)
-     { struct ARCHDB *arch;
-       arch = Partage->com_arch.liste_arch->data;                                                     /* Recuperation du arch */
-       Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
-       Partage->com_arch.taille_arch--;
-       g_free(arch);
-     }
-    pthread_mutex_unlock( &Partage->com_arch.synchro );
+    Arch_Clear_list();                                              /* Suppression des enregistrements restants dans la liste */
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Down (%p)", __func__, pthread_self() );
     Partage->com_arch.Thread_run  = FALSE;                                                              /* Le thread tourne ! */

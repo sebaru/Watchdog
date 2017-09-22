@@ -126,8 +126,8 @@
 /* Sortie: une structure DB de référence                                                                                      */
 /******************************************************************************************************************************/
  struct DB *Init_ArchDB_SQL ( void )
-  { return( Init_DB_SQL_with ( Config.archdb_host, Config.archdb_username,
-                               Config.archdb_password, Config.archdb_database, Config.archdb_port ) );
+  { return( Init_DB_SQL_with ( Partage->com_arch.archdb_host, Partage->com_arch.archdb_username,
+                               Partage->com_arch.archdb_password, Partage->com_arch.archdb_database, Partage->com_arch.archdb_port ) );
   }
 /******************************************************************************************************************************/
 /* Libere_DB_SQL : Se deconnecte d'une base de données en parametre                                                           */
