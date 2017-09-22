@@ -218,6 +218,7 @@ CREATE TABLE IF NOT EXISTS `histo_msgs` (
   `date_create_usec` int(11) DEFAULT '0',
   `date_fixe` int(11) NOT NULL DEFAULT '0',
   `date_fin` int(11) NOT NULL DEFAULT '0',
+  `is_mp3` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `date_create_sec` (`date_create_sec`),
   KEY `alive` (`alive`),

@@ -106,7 +106,6 @@
  static gboolean CB_ajouter_editer_message ( GtkDialog *dialog, gint reponse, gboolean edition )
   { gint index;
 
-#ifdef bouh
     JsonBuilder *builder;
     JsonGenerator *gen;
     gchar *buf;
@@ -114,46 +113,41 @@
 
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = json_builder_new ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getmessage : JSon builder creation failed" );
-       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
-       return(1);
-     }
-                                                                      /* Lancement de la requete de recuperation des messages */
-    if ( ! Recuperer_messageDB_with_conditions( &db, requete, start, length ) )
-     { g_object_unref(builder);
-       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
-       return(1);
-     }
-/*------------------------------------------------------- Dumping message ----------------------------------------------------*/
+    if (builder == NULL) return(FALSE);
+
     json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-    json_builder_set_member_name  ( builder, "Messages" );
-    json_builder_begin_array (builder);                                                        /* Création du noeud principal */
-    while ( (msg=Recuperer_messageDB_suite( &db )) != NULL )                     /* Mise en forme avant envoi au client léger */
-     { 
-       json_builder_begin_object (builder);                                                             /* Contenu du Message */
-
-       json_builder_set_member_name  ( builder, "id" );            json_builder_add_int_value    ( builder, msg->id );
-       json_builder_set_member_name  ( builder, "type" );          json_builder_add_int_value    ( builder, msg->type );
-       json_builder_set_member_name  ( builder, "enable" );        json_builder_add_boolean_value( builder, msg->enable );
-       json_builder_set_member_name  ( builder, "num" );           json_builder_add_int_value    ( builder, msg->num );
-       json_builder_set_member_name  ( builder, "sms" );           json_builder_add_int_value    ( builder, msg->sms );
-       json_builder_set_member_name  ( builder, "audio" );         json_builder_add_boolean_value( builder, msg->audio );
-       json_builder_set_member_name  ( builder, "bit_audio" );     json_builder_add_int_value    ( builder, msg->bit_audio );
-       json_builder_set_member_name  ( builder, "time_repeat" );   json_builder_add_int_value    ( builder, msg->time_repeat );
-       json_builder_set_member_name  ( builder, "dls_id" );        json_builder_add_int_value    ( builder, msg->dls_id );
-       json_builder_set_member_name  ( builder, "libelle" );       json_builder_add_string_value ( builder, msg->libelle );
-       json_builder_set_member_name  ( builder, "libelle_sms" );   json_builder_add_string_value ( builder, msg->libelle_sms );
-       json_builder_set_member_name  ( builder, "syn_groupe" );    json_builder_add_string_value ( builder, msg->syn_groupe );
-       json_builder_set_member_name  ( builder, "syn_page" );      json_builder_add_string_value ( builder, msg->syn_page );
-       json_builder_set_member_name  ( builder, "syn_libelle" );   json_builder_add_string_value ( builder, msg->syn_libelle );
-       json_builder_set_member_name  ( builder, "dls_shortname" ); json_builder_add_string_value ( builder, msg->dls_shortname );
-
+    json_builder_set_member_name  ( builder, "Message" );
+     { json_builder_begin_object (builder);                                                             /* Contenu du Message */
+       json_builder_set_member_name  ( builder, "id" );
+       json_builder_add_int_value    ( builder, Msg.id );
+       json_builder_set_member_name  ( builder, "type" );
+       json_builder_add_int_value    ( builder, gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) ) );
+       json_builder_set_member_name  ( builder, "enable" );
+       json_builder_add_boolean_value( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_enable) ) );
+       json_builder_set_member_name  ( builder, "num" );
+       json_builder_add_int_value    ( builder, gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) ) );
+       json_builder_set_member_name  ( builder, "sms" );
+       json_builder_add_int_value    ( builder, gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_sms) ) );
+       json_builder_set_member_name  ( builder, "audio" );
+       json_builder_add_boolean_value( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_audio) ) );
+       json_builder_set_member_name  ( builder, "bit_audio" );
+       json_builder_add_int_value    ( builder, gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_audio) ) );
+       json_builder_set_member_name  ( builder, "time_repeat" );
+       json_builder_add_int_value    ( builder, gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_time_repeat) ) );
+       json_builder_set_member_name  ( builder, "persist" );
+       json_builder_add_int_value    ( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_persist) ) );
+       index = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls)) ));
+       if (index == 0) index = 1;                                                  /* Par défaut, pointe sur le premier D.L.S */
+       json_builder_set_member_name  ( builder, "dls_id" );
+       json_builder_add_int_value    ( builder, index );
+       json_builder_set_member_name  ( builder, "libelle" );
+       json_builder_add_string_value ( builder, gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
+       json_builder_set_member_name  ( builder, "libelle_sms" );
+       json_builder_add_string_value ( builder, gtk_entry_get_text( GTK_ENTRY(Entry_lib_sms) ) );
+       json_builder_set_member_name  ( builder, "libelle_audio" );
+       json_builder_add_string_value ( builder, gtk_entry_get_text( GTK_ENTRY(Entry_lib_audio) ) );
        json_builder_end_object (builder);                                                              /* Fin dump du message */
-       g_free(msg);
      }
-    json_builder_end_array (builder);                                                                         /* End Document */
     json_builder_end_object (builder);                                                                        /* End Document */
 
     gen = json_generator_new ();
@@ -162,46 +156,11 @@
     buf = json_generator_to_data (gen, &taille_buf);
     g_object_unref(builder);
     g_object_unref(gen);
-          
-/*************************************************** Envoi au client **********************************************************/
-    Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf );
-    g_free(buf);                                                      /* Libération du buffer dont nous n'avons plus besoin ! */
-    return(lws_http_transaction_completed(wsi));
 
-
-#endif
-    g_snprintf( Msg.libelle, sizeof(Msg.libelle),
-                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
-    g_snprintf( Msg.libelle_audio, sizeof(Msg.libelle_audio),
-                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib_audio) ) );
-    g_snprintf( Msg.libelle_sms, sizeof(Msg.libelle_sms),
-                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib_sms) ) );
-
-    Msg.type       = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) );
-    Msg.enable     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_enable) );
-    Msg.audio      = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_audio) );
-    Msg.persist    = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_persist) );
-    Msg.sms        = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_sms) );
-    Msg.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
-    index               = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls) );
-    Msg.dls_id   = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, index ) );
-    if (Msg.dls_id == 0) Msg.dls_id = 1;                                           /* Par défaut, pointe sur le premier D.L.S */
-    Msg.bit_audio  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_audio) );
-    Msg.time_repeat= gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_time_repeat) );
-
-    switch(reponse)
-     { case GTK_RESPONSE_OK:
-             { Envoi_serveur( TAG_MESSAGE, (edition ? SSTAG_CLIENT_VALIDE_EDIT_MESSAGE
-                                                    : SSTAG_CLIENT_ADD_MESSAGE),
-                              (gchar *)&Msg, sizeof( struct CMD_TYPE_MESSAGE ) );
-               Valider_fichier_mp3 ( &Msg,
+/*            Valider_fichier_mp3 ( &Msg,
                                      gnome_file_entry_get_full_path ( GNOME_FILE_ENTRY(Entry_mp3), TRUE )
-                                   );
-             }
-            break;
-       case GTK_RESPONSE_CANCEL:
-       default:              break;
-     }
+                                   );*/
+    WTD_Curl_post_request ( "ws/setmessage", TRUE, buf, taille_buf );
     g_list_free( Liste_index_dls );
     gtk_widget_destroy(F_ajout);
     return(TRUE);

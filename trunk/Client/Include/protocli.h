@@ -153,6 +153,8 @@
   };
 
 /*--------------------------------------- Déclarations des prototypes de fonctions -------------------------------------------*/
+ extern gboolean WTD_Curl_post_request ( gchar *uri, gint post, gchar *post_data, gint post_length );
+
  extern void Log( gchar *chaine );                                                                              /* Dans ihm.c */
  extern void Effacer_pages ( void );
  extern void Detruire_page ( struct PAGE_NOTEBOOK *page_a_virer );

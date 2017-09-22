@@ -181,7 +181,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,audio,bit_audio,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "time_repeat,dls.id,dls.shortname,syn.id,persist"
+                "time_repeat,dls.id,dls.shortname,syn.id,persist,is_mp3"
                 " FROM %s as msg"
                 " INNER JOIN %s as dls ON msg.dls_id=dls.id"
                 " INNER JOIN %s as syn ON dls.syn_id=syn.id"
@@ -236,7 +236,7 @@
      }
 
     msg = (struct CMD_TYPE_MESSAGE *)g_try_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
-    if (!msg) Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_messageDB_suite: Erreur allocation mémoire" );
+    if (!msg) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
     else
      { memcpy( &msg->libelle,       db->row[2],  sizeof(msg->libelle ) );    /* Recopie dans la structure */
        memcpy( &msg->syn_libelle,   db->row[4],  sizeof(msg->syn_libelle) );
@@ -256,6 +256,7 @@
        msg->dls_id      = atoi(db->row[14]);
        msg->syn_id      = atoi(db->row[16]);
        msg->persist     = atoi(db->row[17]);
+       msg->is_mp3      = atoi(db->row[18]);
      }
     return(msg);
   }
@@ -271,7 +272,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,audio,bit_audio,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "time_repeat,dls.id,dls.shortname,syn.id,persist"
+                "time_repeat,dls.id,dls.shortname,syn.id,persist,is_mp3"
                 " FROM %s as msg"
                 " INNER JOIN %s as dls ON msg.dls_id=dls.id"
                 " INNER JOIN %s as syn ON dls.syn_id=syn.id"
@@ -282,7 +283,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_messageDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
      }
 
@@ -307,13 +308,13 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_messageDB_par_id: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
      }
    
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,audio,bit_audio,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "time_repeat,dls.id,dls.shortname,syn.id,persist"
+                "time_repeat,dls.id,dls.shortname,syn.id,persist,is_mp3"
                 " FROM %s as msg"
                 " INNER JOIN %s as dls ON msg.dls_id=dls.id"
                 " INNER JOIN %s as syn ON dls.syn_id=syn.id"
@@ -343,20 +344,20 @@
   
     libelle = Normaliser_chaine ( msg->libelle );                   /* Formatage correct des chaines */
     if (!libelle)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_messageDB: Normalisation libelle impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle impossible", __func__ );
        return(-1);
      }
     libelle_audio = Normaliser_chaine ( msg->libelle_audio );       /* Formatage correct des chaines */
     if (!libelle_audio)
      { g_free(libelle);
-       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_messageDB: Normalisation libelle_audio impossible" );
+       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle_audio impossible", __func__ );
        return(-1);
      }
     libelle_sms = Normaliser_chaine ( msg->libelle_sms );           /* Formatage correct des chaines */
     if (!libelle_sms)
      { g_free(libelle);
        g_free(libelle_audio);
-       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_messageDB: Normalisation libelle_sms impossible" );
+       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle_sms impossible", __func__ );
        return(-1);
      }
 
@@ -375,7 +376,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_messageDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
