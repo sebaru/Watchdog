@@ -150,6 +150,7 @@
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
 
+    Arch_Lire_config ();                                                                       /* Lecture des données en base */
     Partage->com_arch.liste_arch  = NULL;                                                     /* Initialisation des variables */
     Partage->com_arch.Thread_run  = TRUE;                                                               /* Le thread tourne ! */
     Partage->com_arch.taille_arch = 0;
