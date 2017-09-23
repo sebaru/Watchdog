@@ -59,7 +59,7 @@
      {      if ( ! g_ascii_strcasecmp ( nom, "database" ) )
         { g_snprintf( Partage->com_arch.archdb_database, sizeof(Partage->com_arch.archdb_database), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "username" ) )
-        { g_snprintf( Partage->com_arch.archdb_username, sizeof(Partage->com_arch.archdb_username), "%s", Config.db_username ); }
+        { g_snprintf( Partage->com_arch.archdb_username, sizeof(Partage->com_arch.archdb_username), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "password" ) )
         { g_snprintf( Partage->com_arch.archdb_password, sizeof(Partage->com_arch.archdb_password), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "host" ) )

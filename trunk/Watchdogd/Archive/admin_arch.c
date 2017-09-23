@@ -63,11 +63,13 @@
 
     g_snprintf( chaine, sizeof(chaine), " | Length of Arch list : %d\n", save_nbr );
     Admin_write ( connexion, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | Archive Host : %s\n", Partage->com_arch.archdb_host );
+    g_snprintf( chaine, sizeof(chaine), " | Host : %s\n", Partage->com_arch.archdb_host );
     Admin_write ( connexion, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | Archive DB   : %s\n", Partage->com_arch.archdb_database );
+    g_snprintf( chaine, sizeof(chaine), " | Port : %d\n", Partage->com_arch.archdb_port );
     Admin_write ( connexion, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | Archive User : %s\n", Partage->com_arch.archdb_username );
+    g_snprintf( chaine, sizeof(chaine), " | DB   : %s\n", Partage->com_arch.archdb_database );
+    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " | User : %s\n", Partage->com_arch.archdb_username );
     Admin_write ( connexion, chaine );
     g_snprintf( chaine, sizeof(chaine), " -\n");
     Admin_write ( connexion, chaine );
