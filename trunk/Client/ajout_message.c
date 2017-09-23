@@ -51,6 +51,7 @@
  static GtkWidget *Check_audio;                                                                 /* Le message est-il vocal ?? */
  static GtkWidget *Entry_lib_audio;                                                               /* Libelle audio du message */
  static GtkWidget *Entry_lib_sms;                                                                   /* Libelle sms du message */
+ static GtkWidget *Check_mp3;                                                                /* checked si existence d'un mp3 */
  static GtkWidget *Entry_mp3;                                                                           /* nom de fichier mp3 */
  static GtkWidget *Combo_type;                                                                      /* Type actuel du message */
  static GtkWidget *Combo_dls;                                                                           /* Synoptique associé */
@@ -134,8 +135,10 @@
        json_builder_add_int_value    ( builder, gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_audio) ) );
        json_builder_set_member_name  ( builder, "time_repeat" );
        json_builder_add_int_value    ( builder, gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_time_repeat) ) );
+       json_builder_set_member_name  ( builder, "is_mp3" );
+       json_builder_add_boolean_value( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mp3) ) );
        json_builder_set_member_name  ( builder, "persist" );
-       json_builder_add_int_value    ( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_persist) ) );
+       json_builder_add_boolean_value( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_persist) ) );
        index = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls)) ));
        if (index == 0) index = 1;                                                  /* Par défaut, pointe sur le premier D.L.S */
        json_builder_set_member_name  ( builder, "dls_id" );
@@ -228,6 +231,7 @@
     gtk_widget_set_sensitive( Check_audio, enable );
     gtk_widget_set_sensitive( Entry_lib_audio, enable & audio);
     gtk_widget_set_sensitive( Entry_mp3, enable & audio);
+    gtk_widget_set_sensitive( Check_mp3, enable & audio);
     gtk_widget_set_sensitive( Spin_bit_audio, enable & audio);
     gtk_widget_set_sensitive( Entry_bit_audio, enable & audio);
   }
@@ -345,8 +349,8 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib_audio, 1, 4, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Mp3 upload") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Check_mp3 = gtk_check_button_new_with_label( _("Mp3 upload") );
+    gtk_table_attach_defaults( GTK_TABLE(table), Check_mp3, 0, 1, i, i+1 );
 
     Entry_mp3 = gnome_file_entry_new("Mp3Filename", _("Select a file for mp3") );
     gnome_file_entry_set_modal( GNOME_FILE_ENTRY(Entry_mp3), TRUE );
@@ -361,6 +365,7 @@
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_enable), edit_msg->enable );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_persist), edit_msg->persist );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_audio), edit_msg->audio );
+       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_mp3), edit_msg->is_mp3 );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), edit_msg->num );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_audio), edit_msg->bit_audio );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_time_repeat), edit_msg->time_repeat );
