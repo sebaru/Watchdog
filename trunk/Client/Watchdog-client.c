@@ -219,7 +219,7 @@
        return(FALSE);
      }
 
-    g_snprintf( url, sizeof(url), "http://%s/%s", Client.host, uri );
+    g_snprintf( url, sizeof(url), "%s/%s", Config_cli.target_url, uri );
     Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "Trying to get %s", url );
     curl_easy_setopt(curl, CURLOPT_URL, url );
     if (post == TRUE)

@@ -45,6 +45,7 @@
 
                            /* Chargement des paramètres par défaut avant d'essayer de lire la conf dans le fichier sur disque */
     g_snprintf( config_cli->host,        sizeof(config_cli->host),        "%s", DEFAUT_SERVEUR  );
+    g_snprintf( config_cli->target_url,  sizeof(config_cli->target_url),  "http://%s", DEFAUT_SERVEUR  );
     g_snprintf( config_cli->user,        sizeof(config_cli->user),        "%s", DEFAUT_USER  );
     g_snprintf( config_cli->passwd,      sizeof(config_cli->passwd),      "%s", DEFAUT_PASSWD  );
     g_snprintf( config_cli->ssl_file_ca, sizeof(config_cli->ssl_file_ca), "%s", DEFAUT_SSL_FILE_CA );
@@ -65,6 +66,10 @@
        chaine = g_key_file_get_string ( gkf, "SERVER", "host", NULL );
        if (chaine)
         { g_snprintf( config_cli->host, sizeof(config_cli->host), "%s", chaine ); g_free(chaine); }
+
+       chaine = g_key_file_get_string ( gkf, "SERVER", "target_url", NULL );
+       if (chaine)
+        { g_snprintf( config_cli->host, sizeof(config_cli->target_url), "%s", chaine ); g_free(chaine); }
 
        chaine = g_key_file_get_string ( gkf, "SERVER", "user", NULL );
        if (chaine)
