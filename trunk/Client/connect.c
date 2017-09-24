@@ -177,7 +177,7 @@ one_again:
        return;
      }
 
-    g_snprintf( url, sizeof(url), "http://%s/ws/login", Client.host );
+    g_snprintf( url, sizeof(url), "%s/ws/login", Config_cli.target_url );
     Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Trying to get %s", __func__, url );
 
     formpost = lastptr = NULL;                         /* Envoi d'une requete sur l'url client léger pour récupérer le cookie */
@@ -195,9 +195,9 @@ one_again:
                   CURLFORM_END); 
     curl_easy_setopt(curl, CURLOPT_URL, url );
     curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "" );                               /* Active le moteur de gestion des cookies */
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );
-    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");                        /* Active la gestion des cookies pour la connexion */
     /*curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_gif_data );*/
     curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
     curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT );
@@ -210,15 +210,16 @@ one_again:
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
                 "%s: Wrong Credentials for %s", __func__, url );
      }
-    else                                                                                            /* Récupération du cookie */
-     { /* extract all known cookies */
-       struct curl_slist *cookies = NULL;
+    else                                                                  
+     { struct curl_slist *cookies = NULL;
+       Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,                                 /* Récupération du cookie */
+                "%s: Connected to %s", __func__, url );
        res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
-       if(!res && cookies)
-        {
-          /* a linked list of cookies in cookie file format */
-          while(cookies)
+       if(res==0 && cookies!=NULL)
+        { while(cookies)
            { gchar domaine[80], subdomaine[10], path[80], secure[10], expiry[20], name[80], value[256];
+             Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
+                      "%s: Parsing cookie %s", __func__, cookies->data );
              if ( sscanf ( cookies->data, "%s %s %s %s %s %s %s", domaine, subdomaine, path, secure, expiry, name, value) != 7 )
               { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "%s: sscanf failed", __func__ ); }
              else
@@ -229,11 +230,8 @@ one_again:
               }
              cookies = cookies->next;
            }
-      /* we must free these cookies when we're done */
          curl_slist_free_all(cookies);
         }
-       Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
-                "%s: Connected to %s", __func__, url );
      }
     curl_easy_cleanup(curl);
     curl_formfree(formpost);

@@ -116,42 +116,38 @@
     builder = json_builder_new ();
     if (builder == NULL) return(FALSE);
 
-    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-    json_builder_set_member_name  ( builder, "Message" );
-     { json_builder_begin_object (builder);                                                             /* Contenu du Message */
-       json_builder_set_member_name  ( builder, "id" );
-       json_builder_add_int_value    ( builder, Msg.id );
-       json_builder_set_member_name  ( builder, "type" );
-       json_builder_add_int_value    ( builder, gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) ) );
-       json_builder_set_member_name  ( builder, "enable" );
-       json_builder_add_boolean_value( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_enable) ) );
-       json_builder_set_member_name  ( builder, "num" );
-       json_builder_add_int_value    ( builder, gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) ) );
-       json_builder_set_member_name  ( builder, "sms" );
-       json_builder_add_int_value    ( builder, gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_sms) ) );
-       json_builder_set_member_name  ( builder, "audio" );
-       json_builder_add_boolean_value( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_audio) ) );
-       json_builder_set_member_name  ( builder, "bit_audio" );
-       json_builder_add_int_value    ( builder, gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_audio) ) );
-       json_builder_set_member_name  ( builder, "time_repeat" );
-       json_builder_add_int_value    ( builder, gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_time_repeat) ) );
-       json_builder_set_member_name  ( builder, "is_mp3" );
-       json_builder_add_boolean_value( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mp3) ) );
-       json_builder_set_member_name  ( builder, "persist" );
-       json_builder_add_boolean_value( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_persist) ) );
-       index = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls)) ));
-       if (index == 0) index = 1;                                                  /* Par défaut, pointe sur le premier D.L.S */
-       json_builder_set_member_name  ( builder, "dls_id" );
-       json_builder_add_int_value    ( builder, index );
-       json_builder_set_member_name  ( builder, "libelle" );
-       json_builder_add_string_value ( builder, gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
-       json_builder_set_member_name  ( builder, "libelle_sms" );
-       json_builder_add_string_value ( builder, gtk_entry_get_text( GTK_ENTRY(Entry_lib_sms) ) );
-       json_builder_set_member_name  ( builder, "libelle_audio" );
-       json_builder_add_string_value ( builder, gtk_entry_get_text( GTK_ENTRY(Entry_lib_audio) ) );
-       json_builder_end_object (builder);                                                              /* Fin dump du message */
-     }
-    json_builder_end_object (builder);                                                                        /* End Document */
+    json_builder_begin_object (builder);                                                                /* Contenu du Message */
+    json_builder_set_member_name  ( builder, "id" );
+    json_builder_add_int_value    ( builder, Msg.id );
+    json_builder_set_member_name  ( builder, "type" );
+    json_builder_add_int_value    ( builder, gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) ) );
+    json_builder_set_member_name  ( builder, "enable" );
+    json_builder_add_boolean_value( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_enable) ) );
+    json_builder_set_member_name  ( builder, "num" );
+    json_builder_add_int_value    ( builder, gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) ) );
+    json_builder_set_member_name  ( builder, "sms" );
+    json_builder_add_int_value    ( builder, gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_sms) ) );
+    json_builder_set_member_name  ( builder, "audio" );
+    json_builder_add_boolean_value( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_audio) ) );
+    json_builder_set_member_name  ( builder, "bit_audio" );
+    json_builder_add_int_value    ( builder, gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_audio) ) );
+    json_builder_set_member_name  ( builder, "time_repeat" );
+    json_builder_add_int_value    ( builder, gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_time_repeat) ) );
+    json_builder_set_member_name  ( builder, "is_mp3" );
+    json_builder_add_boolean_value( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mp3) ) );
+    json_builder_set_member_name  ( builder, "persist" );
+    json_builder_add_boolean_value( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_persist) ) );
+    index = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls)) ));
+    if (index == 0) index = 1;                                                     /* Par défaut, pointe sur le premier D.L.S */
+    json_builder_set_member_name  ( builder, "dls_id" );
+    json_builder_add_int_value    ( builder, index );
+    json_builder_set_member_name  ( builder, "libelle" );
+    json_builder_add_string_value ( builder, gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
+    json_builder_set_member_name  ( builder, "libelle_sms" );
+    json_builder_add_string_value ( builder, gtk_entry_get_text( GTK_ENTRY(Entry_lib_sms) ) );
+    json_builder_set_member_name  ( builder, "libelle_audio" );
+    json_builder_add_string_value ( builder, gtk_entry_get_text( GTK_ENTRY(Entry_lib_audio) ) );
+    json_builder_end_object (builder);                                                                 /* Fin dump du message */
 
     gen = json_generator_new ();
     json_generator_set_root ( gen, json_builder_get_root(builder) );
@@ -211,11 +207,11 @@
     Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_TYPE_NUM_MNEMO_VOC,
                    (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
   }
-/**********************************************************************************************************/
-/* Rafraichir_sensibilite: met a jour la sensibilite des widgets de la fenetre propriete                  */
-/* Entrée: void                                                                                           */
-/* Sortie: void                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Rafraichir_sensibilite: met a jour la sensibilite des widgets de la fenetre propriete                                      */
+/* Entrée: void                                                                                                               */
+/* Sortie: void                                                                                                               */
+/******************************************************************************************************************************/
  static void Rafraichir_sensibilite_msg ( void )
   { gboolean enable, audio;
     enable = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_enable) );
@@ -230,8 +226,8 @@
     gtk_widget_set_sensitive( Combo_sms, enable );
     gtk_widget_set_sensitive( Check_audio, enable );
     gtk_widget_set_sensitive( Entry_lib_audio, enable & audio);
-    gtk_widget_set_sensitive( Entry_mp3, enable & audio);
     gtk_widget_set_sensitive( Check_mp3, enable & audio);
+    gtk_widget_set_sensitive( Entry_mp3, enable & audio & gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mp3) ) );
     gtk_widget_set_sensitive( Spin_bit_audio, enable & audio);
     gtk_widget_set_sensitive( Entry_bit_audio, enable & audio);
   }
@@ -327,7 +323,7 @@
 
 /******************************************************** Paragraphe Voix *****************************************************/
     i++;
-    Check_audio = gtk_check_button_new_with_label( _("Message Vocal") );
+    Check_audio = gtk_check_button_new_with_label( _("Profil Vocal") );
     gtk_table_attach_defaults( GTK_TABLE(table), Check_audio, 0, 1, i, i+1 );
     g_signal_connect( G_OBJECT( GTK_CHECK_BUTTON(Check_audio) ), "clicked",
                       G_CALLBACK( Rafraichir_sensibilite_msg ), NULL );
@@ -349,7 +345,12 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib_audio, 1, 4, i, i+1 );
 
     i++;
-    Check_mp3 = gtk_check_button_new_with_label( _("Mp3 upload") );
+    if (edit_msg->is_mp3)
+     { Check_mp3 = gtk_check_button_new_with_label( _("Change Mp3 to") ); }
+    else
+     { Check_mp3 = gtk_check_button_new_with_label( _("Add new Mp3") ); }
+    g_signal_connect( G_OBJECT( GTK_CHECK_BUTTON(Check_mp3) ), "clicked",
+                      G_CALLBACK( Rafraichir_sensibilite_msg ), NULL );
     gtk_table_attach_defaults( GTK_TABLE(table), Check_mp3, 0, 1, i, i+1 );
 
     Entry_mp3 = gnome_file_entry_new("Mp3Filename", _("Select a file for mp3") );
@@ -365,7 +366,7 @@
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_enable), edit_msg->enable );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_persist), edit_msg->persist );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_audio), edit_msg->audio );
-       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_mp3), edit_msg->is_mp3 );
+       gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_mp3), FALSE );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_num), edit_msg->num );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_audio), edit_msg->bit_audio );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_time_repeat), edit_msg->time_repeat );

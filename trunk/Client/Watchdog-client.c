@@ -205,6 +205,7 @@
   { gchar erreur[CURL_ERROR_SIZE+1];
     struct curl_slist *slist = NULL;
     long http_response;
+    gchar sid[256];
     gchar url[128];
     CURLcode res;
     CURL *curl;
@@ -222,6 +223,8 @@
     g_snprintf( url, sizeof(url), "%s/%s", Config_cli.target_url, uri );
     Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "Trying to get %s", url );
     curl_easy_setopt(curl, CURLOPT_URL, url );
+    g_snprintf( sid, sizeof(sid), "sid=%s", Client.sid );
+    curl_easy_setopt(curl, CURLOPT_COOKIE, sid);                           /* Active la gestion des cookies pour la connexion */
     if (post == TRUE)
      { curl_easy_setopt(curl, CURLOPT_POST, 1 );
        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (void *)post_data);
