@@ -197,6 +197,38 @@
     Arret = TRUE;
   }
 /******************************************************************************************************************************/
+/* WTD_Curl_init: Envoie une requete au serveur                                                                               */
+/* Entrée:                                                                                                                    */
+/* Sortie: FALSE si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ CURL *WTD_Curl_init ( gchar *uri, gchar *erreur )
+  { gchar url[128];
+    gchar sid[256];
+    CURL *curl;
+
+    curl = curl_easy_init();                                                                /* Preparation de la requete CURL */
+    if (!curl)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "%s: cURL init failed for %s", __func__, uri );
+       return(NULL);
+     }
+
+    g_snprintf( url, sizeof(url), "%s/%s", Config_cli.target_url, uri );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "Trying to get %s", url );
+    curl_easy_setopt(curl, CURLOPT_URL, url );
+    g_snprintf( sid, sizeof(sid), "sid=%s", Client.sid );
+    curl_easy_setopt(curl, CURLOPT_COOKIE, sid);                           /* Active la gestion des cookies pour la connexion */
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &erreur );
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT);
+/*     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0 );*/
+/*     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0 );                                    Warning ! */
+/*     curl_easy_setopt(curl, CURLOPT_CAINFO, Cfg_satellite.https_file_ca );
+       curl_easy_setopt(curl, CURLOPT_SSLKEY, Cfg_satellite.https_file_key );
+       g_snprintf( chaine, sizeof(chaine), "./%s", Cfg_satellite.https_file_cert );
+       curl_easy_setopt(curl, CURLOPT_SSLCERT, chaine );*/
+    return(curl);
+  }
+/******************************************************************************************************************************/
 /* WTD_Curl_request: Envoie une requete au serveur                                                                            */
 /* Entrée:                                                                                                                    */
 /* Sortie: FALSE si probleme                                                                                                  */
@@ -205,26 +237,18 @@
   { gchar erreur[CURL_ERROR_SIZE+1];
     struct curl_slist *slist = NULL;
     long http_response;
-    gchar sid[256];
     gchar url[128];
     CURLcode res;
     CURL *curl;
 
-/*    Gif_received_buffer = NULL;                                     /* Init du tampon de reception à NULL */
-/*    Gif_received_size = 0;                                          /* Init du tampon de reception à NULL */
     http_response = 0;
 
-    curl = curl_easy_init();                                            /* Preparation de la requete CURL */
+    curl = WTD_Curl_init ( uri, &erreur[0] );                                               /* Preparation de la requete CURL */
     if (!curl)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "%s: cURL init failed for %s", __func__, uri );
        return(FALSE);
      }
 
-    g_snprintf( url, sizeof(url), "%s/%s", Config_cli.target_url, uri );
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "Trying to get %s", url );
-    curl_easy_setopt(curl, CURLOPT_URL, url );
-    g_snprintf( sid, sizeof(sid), "sid=%s", Client.sid );
-    curl_easy_setopt(curl, CURLOPT_COOKIE, sid);                           /* Active la gestion des cookies pour la connexion */
     if (post == TRUE)
      { curl_easy_setopt(curl, CURLOPT_POST, 1 );
        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (void *)post_data);

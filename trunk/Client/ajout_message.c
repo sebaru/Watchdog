@@ -63,41 +63,80 @@
  static GList *Liste_index_dls;
  static struct CMD_TYPE_MESSAGE Msg;                                                            /* Message en cours d'édition */
 
+
 /******************************************************************************************************************************/
-/* Valider_fichier_mp3: Confirmation et envoi du fichier mp3 au serveur                                                       */
-/* Entrée: la page du notebook en cours d'edition                                                                             */
-/* Sortie: rien                                                                                                               */
+/* WTD_Curl_request: Envoie une requete au serveur                                                                            */
+/* Entrée:                                                                                                                    */
+/* Sortie: FALSE si probleme                                                                                                  */
 /******************************************************************************************************************************/
- static void Valider_fichier_mp3 ( struct CMD_TYPE_MESSAGE *msg, gchar *fichier )
-  { struct CMD_TYPE_MESSAGE_MP3 *msg_mp3;
-    gint taille, taille_max, id_source;
-    gchar *buffer_envoi;
+ static gboolean WTD_Curl_send_mp3 ( void )
+  { gchar erreur[CURL_ERROR_SIZE+1];
+    struct curl_slist *slist = NULL;
+    struct curl_httppost *formpost;
+    struct curl_httppost *lastptr;
+    long http_response;
+/*    curl_mime *mime;
+    curl_mimepart *part;*/
+    gchar url[128], chaine[64];
+    CURLcode res;
+    CURL *curl;
 
-    id_source = open ( fichier, O_RDONLY, 0 );
-    if (id_source<0) return;
+    http_response = 401;
 
-    msg_mp3 = (struct CMD_TYPE_MESSAGE_MP3 *)g_try_malloc0( Client.connexion->taille_bloc );
-    if (!msg_mp3) return;
-    buffer_envoi     = (gchar *)msg_mp3 + sizeof(struct CMD_TYPE_MESSAGE_MP3);
-    taille_max       = Client.connexion->taille_bloc - sizeof(struct CMD_TYPE_MESSAGE_MP3);
-    msg_mp3->num     = msg->num;
-    msg_mp3->taille  = 0;
-                                                          /* Demande de suppression du fichier source MP3 */
-    Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MP3_DEB,
-                   (gchar *)msg_mp3, sizeof(struct CMD_TYPE_MESSAGE_MP3) );
-
-    while( (taille = read ( id_source, buffer_envoi, taille_max ) ) > 0 )             /* Envoi du fichier */
-     { msg_mp3->taille = taille;
-       if (!Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MP3,
-                           (gchar *)msg_mp3, taille + sizeof(struct CMD_TYPE_MESSAGE_MP3) ))
-        { printf("erreur envoi au serveur\n"); }
-       printf("Octets envoyés: %d\n", taille);
+    curl = WTD_Curl_init( "ws/postfile", &erreur[0] );                                      /* Preparation de la requete CURL */
+    if (!curl)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "%s: cURL init failed for sending mp3", __func__ );
+       return(FALSE);
      }
 
-    Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MP3_FIN,                     /* Fin du transfert */
-                   (gchar *)msg_mp3, sizeof(struct CMD_TYPE_MESSAGE_MP3) );
-    close(id_source);
-    g_free(msg_mp3);
+    formpost = lastptr = NULL;                         /* Envoi d'une requete sur l'url client léger pour récupérer le cookie */
+    g_snprintf( chaine, sizeof(chaine), "%d", Msg.id );
+    curl_formadd( &formpost, &lastptr,
+                  CURLFORM_PTRNAME,     "type",
+                  CURLFORM_PTRCONTENTS, "mp3",
+                  CURLFORM_END); 
+    curl_formadd( &formpost, &lastptr,
+                  CURLFORM_PTRNAME,     "id",
+                  CURLFORM_PTRCONTENTS, chaine,
+                  CURLFORM_END); 
+    curl_formadd( &formpost, &lastptr,
+                  CURLFORM_FILE, Client.ident.nom,
+                  CURLFORM_CONTENTTYPE, "audio/mp3",
+                  CURLFORM_END); 
+
+    /*mime = curl_mime_init(easy);*/
+
+    /*part = curl_mime_addpart(mime);
+    curl_mime_name(part, "data");
+    curl_mime_filedata(part, gnome_file_entry_get_full_path (GNOME_FILE_ENTRY(Entry_mp3));
+
+    part = curl_mime_addpart(mime);
+    curl_mime_name(part, "msg_id");
+    g_snprintf( chaine, sizeof(chaine), "%d", Msg.id );
+    curl_mime_data(part, chaine, CURL_ZERO_TERMINATED);
+ 
+    curl_easy_setopt(easy, CURLOPT_MIMEPOST, mime);*/
+    curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+    res = curl_easy_perform(curl);
+    if (res)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
+                "%s : Error : Could not connect : %s", __func__, erreur );
+       curl_easy_cleanup(curl);
+       curl_formfree(formpost);
+       return(FALSE);
+     }
+
+    curl_easy_getinfo( curl, CURLINFO_RESPONSE_CODE, &http_response );
+    curl_easy_cleanup(curl);     
+    curl_formfree(formpost);
+    /*    curl_mime_free(mime);*/
+
+    if (http_response != 200)                                                                                /* HTTP 200 OK ? */
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
+                "%s : URL %s HTTP_CODE = %d!", __func__, url, http_response );
+       return(FALSE);
+     }
+    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* CB_ajouter_editer_message: Fonction appelée qd on appuie sur un des boutons de l'interface                                 */
@@ -133,8 +172,6 @@
     json_builder_add_int_value    ( builder, gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_audio) ) );
     json_builder_set_member_name  ( builder, "time_repeat" );
     json_builder_add_int_value    ( builder, gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_time_repeat) ) );
-    json_builder_set_member_name  ( builder, "is_mp3" );
-    json_builder_add_boolean_value( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mp3) ) );
     json_builder_set_member_name  ( builder, "persist" );
     json_builder_add_boolean_value( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_persist) ) );
     index = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls)) ));
@@ -155,11 +192,11 @@
     buf = json_generator_to_data (gen, &taille_buf);
     g_object_unref(builder);
     g_object_unref(gen);
+    WTD_Curl_post_request ( "ws/setmessage", TRUE, buf, taille_buf );                          /* Requete d'update du message */
 
-/*            Valider_fichier_mp3 ( &Msg,
-                                     gnome_file_entry_get_full_path ( GNOME_FILE_ENTRY(Entry_mp3), TRUE )
-                                   );*/
-    WTD_Curl_post_request ( "ws/setmessage", TRUE, buf, taille_buf );
+    if (gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mp3) ))         /* Validation et requete d'update mp3 si besoin */
+     { WTD_Curl_send_mp3(); }
+
     g_list_free( Liste_index_dls );
     gtk_widget_destroy(F_ajout);
     return(TRUE);
