@@ -33,6 +33,15 @@
  #include "watchdogd.h"
  #include "Http.h"
 
+ static const char *PARAM_POSTFILE[] =
+  { "type", "id", "file" };
+ enum
+  { PARAM_POSTFILE_TYPE,
+    PARAM_POSTFILE_ID,
+    PARAM_POSTFILE_FILE,
+    NBR_PARAM_POSTFILE
+  };
+  
 /******************************************************************************************************************************/
 /* Save_file_to_disk: Process le fichier recu et met a jour la base de données                                                 */
 /* Entrées: replace!=0 si remplacement, id=numéro de fichier, les XMLData, et XMLLength                                       */
@@ -78,16 +87,27 @@
 /* Entrées: la connexion MHD                                                                                                  */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- gint Http_Traiter_request_postfile ( struct lws *wsi, struct HTTP_SESSION *session )
+ gint Http_Traiter_request_body_postfile ( struct lws *wsi, void *data, size_t taille )
   { struct HTTP_PER_SESSION_DATA *pss;
-
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-             "%s: (sid %s) HTTP request", __func__, Http_get_session_id(session) );
 
     if (lws_hdr_total_length(wsi, WSI_TOKEN_GET_URI))                                 /* Header de type GET ?? Si oui, erreur */
      { Http_Send_response_code ( wsi, HTTP_BAD_METHOD );
        return(1);
      }
+
+#ifdef bouh
+    if (session == NULL) 
+     { Http_Send_response_code ( wsi, HTTP_UNAUTHORIZED );
+       return(1);
+     }
+#endif
+
+    pss = lws_wsi_user ( wsi );
+    if (!pss->spa)
+     {	pss->spa = lws_spa_create(wsi, PARAM_POSTFILE, NBR_PARAM_POSTFILE, 256, NULL, pss );
+    			if (!pss->spa)	return(1);
+     }
+    return(lws_spa_process(pss->spa, data, taille));
 
     pss = lws_wsi_user ( wsi );
     g_snprintf( pss->url, sizeof(pss->url), "/ws/postfile" );
@@ -101,32 +121,26 @@
  gint Http_Traiter_request_body_completion_postfile ( struct lws *wsi )
   { unsigned char header[512], *header_cur, *header_end;
     struct HTTP_PER_SESSION_DATA *pss;
-   	gchar token_type[12], token_name[20];
-    const gchar *type, *name;
-    gint retour, code;
+   	gchar token_id[12], type[40];
+    gint retour, code, id;
 
     pss = lws_wsi_user ( wsi );
+    lws_spa_finalize(pss->spa);
 
-    type = lws_get_urlarg_by_name	( wsi, "type=", token_type, sizeof(token_type) );
-    name = lws_get_urlarg_by_name	( wsi, "name=", token_name, sizeof(token_name) );
+    g_snprintf( type, sizeof(type), "%s", lws_spa_get_string ( pss->spa, PARAM_POSTFILE_TYPE ) );
+    g_snprintf( token_id, sizeof(token_id), "%s", lws_spa_get_string ( pss->spa, PARAM_POSTFILE_ID ) );
+    id = atoi(token_id);
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %s) HTTP request for type='%s', name='%s'", __func__, Http_get_session_id(pss->session),
-             (type ? type : "none"), (name ? name : "none") );
-
-    if ( ! (type && name) )
-     { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
-       g_free(pss->post_data);
-       pss->post_data_length = 0;
-       return(1);
-     }
+             "%s: (sid %s) HTTP request for type='%s', id='%s'", __func__, Http_get_session_id(pss->session),
+              type, token_id );
 
     code = HTTP_BAD_REQUEST;
     if (!strcasecmp(type,"dls"))
      { /* code = Save_dls_to_disk == FALSE); */
      }
     else if( !strcasecmp(type,"mp3"))
-     { code = Save_mp3_to_disk( pss->session, name, pss->post_data, pss->post_data_length);
+     { /*code = Save_mp3_to_disk( pss->session, name, pss->post_data, pss->post_data_length);*/
      }
     else if( !strcasecmp(type,"svg"))
       { /* Save_dls_to_disk */
@@ -138,9 +152,8 @@
        return(1);
      }
          
+    lws_spa_destroy ( pss->spa	);
     Http_Send_response_code ( wsi, code );
-    g_free(pss->post_data);
-    pss->post_data_length = 0;
     if (code==HTTP_200_OK) return( lws_http_transaction_completed(wsi) );
     return(1);                                                                                         /* si erreur, on coupe */
   }

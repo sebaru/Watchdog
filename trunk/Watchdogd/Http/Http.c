@@ -267,6 +267,8 @@
        case LWS_CALLBACK_HTTP_BODY:
              { if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
                 { return( Http_Traiter_request_body_login ( wsi, data, taille ) ); }                /* Utilisation ud lws_spa */
+               else if ( ! strcasecmp ( pss->url, "/ws/postfile" ) )
+                { return( Http_Traiter_request_body_postfile ( wsi, data, taille ) ); }             /* Utilisation ud lws_spa */
                return( Http_CB_file_upload( wsi, data, taille ) );          /* Sinon, c'est un buffer type json ou un fichier */
              }
             break;
@@ -293,7 +295,8 @@
               }
             break;
        case LWS_CALLBACK_HTTP:
-             { struct HTTP_SESSION *session;
+             { struct HTTP_PER_SESSION_DATA *pss;
+               struct HTTP_SESSION *session;
                gchar *url = (gchar *)data;
                gint retour;
                lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
@@ -302,12 +305,12 @@
                session = Http_get_session ( wsi, remote_name, remote_ip );
                if (session) session->last_top = Partage->top;                                             /* Tagging temporel */
 
+               pss = lws_wsi_user ( wsi );
                if ( ! strcasecmp ( url, "/favicon.ico" ) )
                 { retour = lws_serve_http_file ( wsi, "WEB/favicon.gif", "image/gif", NULL, 0);
                   if (retour != 0) return(1);                             /* Si erreur (<0) ou si ok (>0), on ferme la socket */
                   return(0);                    /* si besoin de plus de temps, on laisse la ws http ouverte pour libwebsocket */
                 }
-
                else if ( ! strcasecmp ( url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
                 { return( Http_Traiter_request_login ( session, wsi, remote_name, remote_ip ) ); }
                else if ( ! strcasecmp ( url, "/ws/logoff" ) )
@@ -339,7 +342,9 @@
                else if ( ! strcasecmp ( url, "/ws/postsvg" ) )
                 { return( Http_Traiter_request_postsvg ( wsi, session, remote_name, remote_ip ) ); }
                else if ( ! strcasecmp ( url, "/ws/postfile" ) )
-                { return( Http_Traiter_request_postfile ( wsi, session ) ); }
+                { g_snprintf( pss->url, sizeof(pss->url), "/ws/postfile" );
+                  return(0);
+                }
                else                                                                                             /* Par défaut */
                 { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Request from %s/%s (sid %s): %s",
                             __func__, remote_name, remote_ip, Http_get_session_id(session), url );

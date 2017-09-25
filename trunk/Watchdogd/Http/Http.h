@@ -113,7 +113,7 @@
  extern gint Http_Traiter_request_body_completion_setmessage ( struct lws *wsi );
  extern gint Http_Traiter_request_body_completion_delmessage ( struct lws *wsi );
  extern gint Http_Traiter_request_body_completion_setscenario ( struct lws *wsi );
- extern gint Http_Traiter_request_postfile ( struct lws *wsi, struct HTTP_SESSION *session );
+ extern gint Http_Traiter_request_body_postfile ( struct lws *wsi, void *data, size_t taille );
  extern gint Http_Traiter_request_body_completion_postfile ( struct lws *wsi );
  extern gint Http_Traiter_request_getpluginsDLS ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_getui ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
