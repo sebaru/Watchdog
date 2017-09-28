@@ -195,7 +195,7 @@
 /* Entrées : le contexte, le message, l'URL                                                                                   */
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
 /******************************************************************************************************************************/
- static gint Http_CB_file_upload( struct lws *wsi, char *buffer, int taille )
+ gint Http_CB_file_upload( struct lws *wsi, char *buffer, int taille )
   { struct HTTP_PER_SESSION_DATA *pss;
     pss = lws_wsi_user ( wsi );
    

@@ -152,6 +152,12 @@
              "%s: (sid %s) New file saved: '%s'", __func__, Http_get_session_id(session), filename );
     return(HTTP_200_OK);
   }
+
+ static int lws_fileupload_cb (void *data, const char *name, const char *filename, char *buf, int len, enum lws_spa_fileupload_states state)
+  { struct lws *wsi;
+    wsi = (struct lws *)data;
+    return(Http_CB_file_upload( wsi, buf, len )); }
+
 /******************************************************************************************************************************/
 /* Http_Traiter_request_postfile: Traite une requete de postfile                                                              */
 /* Entrées: la connexion MHD                                                                                                  */
@@ -172,7 +178,7 @@
      }
 
     if (!pss->spa)
-     {	pss->spa = lws_spa_create(wsi, PARAM_POSTFILE, NBR_PARAM_POSTFILE, 256, NULL, pss );
+     {	pss->spa = lws_spa_create(wsi, PARAM_POSTFILE, NBR_PARAM_POSTFILE, 256, lws_fileupload_cb, wsi );
     			if (!pss->spa)	return(1);
      }
     g_snprintf( pss->url, sizeof(pss->url), "/ws/postfile" );
@@ -187,7 +193,6 @@
   { unsigned char header[512], *header_cur, *header_end;
     struct HTTP_PER_SESSION_DATA *pss;
     gint retour, code, id;
-   	gchar token_id[12];
     const gchar *type;
 
     pss = lws_wsi_user ( wsi );
@@ -216,8 +221,8 @@
     if (sscanf ( lws_spa_get_string ( pss->spa, PARAM_POSTFILE_ID ), "%d", &id ) != 1) id=-1;
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %s) HTTP request for type='%s', id='%s'", __func__, Http_get_session_id(pss->session),
-              type, token_id );
+             "%s: (sid %s) HTTP request for type='%s', id='%d'", __func__, Http_get_session_id(pss->session),
+              type, id );
 
     code = HTTP_BAD_REQUEST;
     if (!strcasecmp(type,"dls"))

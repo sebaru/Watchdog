@@ -103,6 +103,7 @@
  extern gint Http_json_get_int ( JsonObject *object, gchar *name );
  extern void Http_Send_response_code ( struct lws *wsi, gint code );
  extern void Http_Send_response_code_with_buffer ( struct lws *wsi, gint code, gchar *content_type, gchar *buffer, gint taille_buf );
+ extern gint Http_CB_file_upload( struct lws *wsi, char *buffer, int taille );
  extern gboolean Http_Traiter_request_getsyn ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gboolean Http_Traiter_request_getstatus ( struct lws *wsi );
  extern gint Http_Traiter_request_getgif ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
