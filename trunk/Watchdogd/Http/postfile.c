@@ -193,10 +193,22 @@
     pss = lws_wsi_user ( wsi );
     lws_spa_finalize(pss->spa);
 
-    if (! (lws_spa_get_length(pss->spa, PARAM_POSTFILE_FILE)>0 &&
-           lws_spa_get_length(pss->spa, PARAM_POSTFILE_ID)>0 &&
-           lws_spa_get_length(pss->spa, PARAM_POSTFILE_TYPE)>0) )
-     { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
+    if (! (lws_spa_get_length(pss->spa, PARAM_POSTFILE_FILE)>0 ) )
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                "%s: (sid %s) 'FILE' parameter is missing", __func__, Http_get_session_id(pss->session) );
+       Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
+       return(1);
+     }
+    if (! (lws_spa_get_length(pss->spa, PARAM_POSTFILE_ID)>0 ) )
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                "%s: (sid %s) 'ID' parameter is missing", __func__, Http_get_session_id(pss->session) );
+       Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
+       return(1);
+     }
+    if (! (lws_spa_get_length(pss->spa, PARAM_POSTFILE_TYPE)>0) )
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                "%s: (sid %s) 'TYPE' parameter is missing", __func__, Http_get_session_id(pss->session) );
+       Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
        return(1);
      }
 
