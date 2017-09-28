@@ -175,10 +175,8 @@
      {	pss->spa = lws_spa_create(wsi, PARAM_POSTFILE, NBR_PARAM_POSTFILE, 256, NULL, pss );
     			if (!pss->spa)	return(1);
      }
-    return(lws_spa_process(pss->spa, data, taille));
-
     g_snprintf( pss->url, sizeof(pss->url), "/ws/postfile" );
-    return(0);
+    return(lws_spa_process(pss->spa, data, taille));
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_body_completion_postfile: le payload est arrivé, il faut traiter le fichier                           */

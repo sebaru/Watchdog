@@ -382,10 +382,9 @@
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */
     Cfg_http.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_http.lib->TID = pthread_self();                                                     /* Sauvegarde du TID pour le pere */
-    Http_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
-
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Demarrage . . . TID = %p", pthread_self() );
+    Http_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
 
     g_snprintf( Cfg_http.lib->admin_prompt, sizeof(Cfg_http.lib->admin_prompt), NOM_THREAD );
     g_snprintf( Cfg_http.lib->admin_help,   sizeof(Cfg_http.lib->admin_help),   "Manage Web Services with external Devices" );
