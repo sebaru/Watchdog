@@ -128,8 +128,5 @@
  extern gint Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip );
  extern gint Http_Traiter_request_body_login ( struct lws *wsi, void *data, size_t taille );
  extern gint Http_Traiter_request_body_completion_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
- 
- extern gint Http_Traiter_request_postsvg ( struct lws *wsi, struct HTTP_SESSION *session, gchar *remote_name, gchar *remote_ip );
- extern gint Http_Traiter_request_body_completion_postsvg ( struct lws *wsi );
-#endif
+ #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
