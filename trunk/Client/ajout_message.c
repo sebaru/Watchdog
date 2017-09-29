@@ -100,7 +100,8 @@
                   CURLFORM_PTRCONTENTS, chaine,
                   CURLFORM_END); 
     curl_formadd( &formpost, &lastptr,
-                  CURLFORM_FILE, Client.ident.nom,
+                  CURLFORM_PTRNAME,     "file",
+                  CURLFORM_FILE, gnome_file_entry_get_full_path (GNOME_FILE_ENTRY(Entry_mp3), TRUE),
                   CURLFORM_CONTENTTYPE, "audio/mp3",
                   CURLFORM_END); 
 

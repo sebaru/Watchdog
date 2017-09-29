@@ -148,7 +148,7 @@
        return(HTTP_SERVER_ERROR);
      }
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-             "%s: (sid %s) New file saved: '%s'", __func__, Http_get_session_id(session), filename );
+             "%s: (sid %s) New file saved: '%s' length=%d", __func__, Http_get_session_id(session), filename, taille );
     return(HTTP_200_OK);
   }
 /******************************************************************************************************************************/
