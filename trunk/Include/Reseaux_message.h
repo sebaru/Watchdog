@@ -105,11 +105,6 @@
 
     SSTAG_CLIENT_TYPE_NUM_MNEMO_VOC,
     SSTAG_SERVEUR_TYPE_NUM_MNEMO_VOC,
-
-    SSTAG_CLIENT_VALIDE_EDIT_MP3_DEB,                                            /* Le client commence l'envoi du fichier mp3 */
-    SSTAG_CLIENT_VALIDE_EDIT_MP3,                                                       /* Le client confitnue l'envoi du mp3 */
-    SSTAG_CLIENT_VALIDE_EDIT_MP3_FIN,                                           /* Le client a terminé l'envoi du fichier mp3 */
-
   };
 
 #endif

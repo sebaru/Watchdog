@@ -40,43 +40,6 @@
  #include "watchdogd.h"
  #include "Sous_serveur.h"
 /**********************************************************************************************************/
-/* Proto_effacer_message_mp3: Suppression du mp3 associé à un message avant reception du nouveau          */
-/* Entrée: le client demandeur et le numéro du fichier mp3                                                */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- void Proto_effacer_message_mp3 ( struct CLIENT *client, struct CMD_TYPE_MESSAGE_MP3 *msg_mp3 )
-  { gchar chaine[80];
-    gint id_fichier;
-    g_snprintf( chaine, sizeof(chaine), "Son/%d.mp3", msg_mp3->num );
-    unlink ( chaine );
-    id_fichier = open( chaine, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );       /* création du fichier vide */
-    close(id_fichier);
-  }
-/**********************************************************************************************************/
-/* Proto_valider_source_dls: Le client nous envoie un prg DLS qu'il nous faudra compiler ensuite          */
-/* Entrée: le client demandeur et le groupe en question                                                   */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- void Proto_valider_message_mp3( struct CLIENT *client, struct CMD_TYPE_MESSAGE_MP3 *msg_mp3,
-                                 gchar *buffer )
-  { gchar chaine[80];
-    gint nbr;
-    if (!client->id_creation_message_mp3)
-     { gint id_fichier;
-       g_snprintf( chaine, sizeof(chaine), "Son/%d.mp3", msg_mp3->num );
-       id_fichier = open( chaine, O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR );
-       if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
-        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
-                    "Proto_valider_message_mp3: append impossible for %d", msg_mp3->num );
-          return;
-        }
-       lockf( id_fichier, F_LOCK, 0 );
-       client->id_creation_message_mp3 = id_fichier;
-     }
-    nbr = write( client->id_creation_message_mp3, buffer, msg_mp3->taille );
-    if (nbr<0) Client_mode ( client, DECONNECTE );
-  }
-/**********************************************************************************************************/
 /* Proto_editer_msg: Le client desire editer un msg                                                       */
 /* Entrée: le client demandeur et le msg en question                                                      */
 /* Sortie: Niet                                                                                           */
