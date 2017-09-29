@@ -111,6 +111,29 @@
     return(retour);
   }
 /******************************************************************************************************************************/
+/* Retirer_messageDB: Elimination d'un message                                                                                */
+/* Entrée: une structure identifiant le message a retirer                                                                     */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ gboolean Modifier_messageDB_set_mp3 ( gint id, gboolean valeur )
+  { gchar requete[200];
+    gboolean retour;
+    struct DB *db;
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "UPDATE %s SET is_mp3='%d' WHERE id='%d'", NOM_TABLE_MSG, valeur, id );
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed" );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
+  }
+/******************************************************************************************************************************/
 /* Ajouter_messageDB: Ajout ou edition d'un message                                                                           */
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                                               */
 /* Sortie: false si probleme                                                                                                  */

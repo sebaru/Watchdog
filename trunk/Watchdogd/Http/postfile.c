@@ -151,12 +151,16 @@
              "%s: (sid %s) New file saved: '%s'", __func__, Http_get_session_id(session), filename );
     return(HTTP_200_OK);
   }
-
+/******************************************************************************************************************************/
+/* lws_fileupload_cb: Récupère petit a petit le fichier en cours d'upload                                                     */
+/* Entrées: la connexion WSI, le buffer, la taille, le statut                                                                 */
+/* Sortie : 1 si erreur, 0 si poursuite                                                                                       */
+/******************************************************************************************************************************/
  static int lws_fileupload_cb (void *data, const char *name, const char *filename, char *buf, int len, enum lws_spa_fileupload_states state)
   { struct lws *wsi;
     wsi = (struct lws *)data;
-    return(Http_CB_file_upload( wsi, buf, len )); }
-
+    return(Http_CB_file_upload( wsi, buf, len ));
+  }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_postfile: Traite une requete de postfile                                                              */
 /* Entrées: la connexion MHD                                                                                                  */
@@ -222,15 +226,15 @@
      { /* code = Save_dls_to_disk == FALSE); */
      }
     else if( !strcasecmp(type,"mp3"))
-     { gint id;
-       if ( pss->session==NULL || pss->session->util==NULL || Tester_groupe_util( pss->session->util, GID_MESSAGE )==FALSE )
+     { if ( pss->session->util==NULL || Tester_groupe_util( pss->session->util, GID_MESSAGE )==FALSE )
         { code = HTTP_UNAUTHORIZED; }
-       if (id==-1)
+       else if (id==-1)
         { code = HTTP_BAD_REQUEST; }
        else
         { gchar filename[80];
           g_snprintf( filename, sizeof(filename), "Son/%d.mp3", id );
           code = Save_file_to_disk( pss->session, filename, pss->post_data, pss->post_data_length);
+         if (code==HTTP_200_OK) Modifier_messageDB_set_mp3 ( id, TRUE );
         }
      }
     else if( !strcasecmp(type,"svg"))
