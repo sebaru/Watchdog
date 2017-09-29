@@ -195,13 +195,13 @@
 /* Entrées : le contexte, le message, l'URL                                                                                   */
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
 /******************************************************************************************************************************/
- static gint Http_CB_file_upload( struct lws *wsi, char *buffer, int taille )
-  {	struct HTTP_PER_SESSION_DATA *pss;
+ gint Http_CB_file_upload( struct lws *wsi, char *buffer, int taille )
+  { struct HTTP_PER_SESSION_DATA *pss;
     pss = lws_wsi_user ( wsi );
-    
+   
     if (pss->post_data_length >= Cfg_http.max_upload_bytes)                  /* Si taille de fichier trop importante, on vire */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Http_CB_file_upload: (sid %s) file too long (%d/%d), aborting",
+                "%s: (sid %s) file too long (%d/%d), aborting", __func__,
                  Http_get_session_id(pss->session), pss->post_data_length, Cfg_http.max_upload_bytes );
        return(1);
      }
@@ -211,7 +211,7 @@
     pss->post_data_length += taille;
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "Http_CB_file_upload: (sid %s) received %d bytes (total length=%d, max %d)",
+             "%s: (sid %s) received %d bytes (total length=%d, max %d)", __func__,
               Http_get_session_id(pss->session), taille, pss->post_data_length, Cfg_http.max_upload_bytes );
     return 0;
   }
@@ -221,7 +221,7 @@
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
  static gint Http_Preparer_request_post ( struct lws *wsi, struct HTTP_SESSION *session,
-                                                 gchar *remote_name, gchar *remote_ip, gchar *url )
+                                          gchar *remote_name, gchar *remote_ip, gchar *url )
   { struct HTTP_PER_SESSION_DATA *pss;
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
              "%s: (sid %s) HTTP request from %s(%s)",
@@ -267,6 +267,8 @@
        case LWS_CALLBACK_HTTP_BODY:
              { if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
                 { return( Http_Traiter_request_body_login ( wsi, data, taille ) ); }                /* Utilisation ud lws_spa */
+               else if ( ! strcasecmp ( pss->url, "/ws/postfile" ) )
+                { return( Http_Traiter_request_body_postfile ( wsi, data, taille ) ); }             /* Utilisation ud lws_spa */
                return( Http_CB_file_upload( wsi, data, taille ) );          /* Sinon, c'est un buffer type json ou un fichier */
              }
             break;
@@ -276,8 +278,6 @@
                                            (char *)&remote_ip, sizeof(remote_ip) );
                if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
                 { return( Http_Traiter_request_body_completion_login ( wsi, remote_name, remote_ip ) ); }
-               else if ( ! strcasecmp ( pss->url, "/ws/postsvg" ) )
-                { return( Http_Traiter_request_body_completion_postsvg ( wsi ) ); }
                else if ( ! strcasecmp ( pss->url, "/ws/setmessage" ) )
                 { return( Http_Traiter_request_body_completion_setmessage ( wsi ) ); }
                else if ( ! strcasecmp ( pss->url, "/ws/setscenario" ) )
@@ -293,7 +293,8 @@
               }
             break;
        case LWS_CALLBACK_HTTP:
-             { struct HTTP_SESSION *session;
+             { struct HTTP_PER_SESSION_DATA *pss;
+               struct HTTP_SESSION *session;
                gchar *url = (gchar *)data;
                gint retour;
                lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
@@ -302,12 +303,12 @@
                session = Http_get_session ( wsi, remote_name, remote_ip );
                if (session) session->last_top = Partage->top;                                             /* Tagging temporel */
 
+               pss = lws_wsi_user ( wsi );
                if ( ! strcasecmp ( url, "/favicon.ico" ) )
                 { retour = lws_serve_http_file ( wsi, "WEB/favicon.gif", "image/gif", NULL, 0);
                   if (retour != 0) return(1);                             /* Si erreur (<0) ou si ok (>0), on ferme la socket */
                   return(0);                    /* si besoin de plus de temps, on laisse la ws http ouverte pour libwebsocket */
                 }
-
                else if ( ! strcasecmp ( url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
                 { return( Http_Traiter_request_login ( session, wsi, remote_name, remote_ip ) ); }
                else if ( ! strcasecmp ( url, "/ws/logoff" ) )
@@ -336,10 +337,10 @@
                 { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+8 ) ); }
                else if ( ! strncasecmp ( url, "/ws/audio/", 10 ) )
                 { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
-               else if ( ! strcasecmp ( url, "/ws/postsvg" ) )
-                { return( Http_Traiter_request_postsvg ( wsi, session, remote_name, remote_ip ) ); }
                else if ( ! strcasecmp ( url, "/ws/postfile" ) )
-                { return( Http_Traiter_request_postfile ( wsi, session ) ); }
+                { g_snprintf( pss->url, sizeof(pss->url), "/ws/postfile" );
+                  return(0);
+                }
                else                                                                                             /* Par défaut */
                 { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Request from %s/%s (sid %s): %s",
                             __func__, remote_name, remote_ip, Http_get_session_id(session), url );
@@ -381,10 +382,9 @@
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */
     Cfg_http.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_http.lib->TID = pthread_self();                                                     /* Sauvegarde du TID pour le pere */
-    Http_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
-
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
               "Run_thread: Demarrage . . . TID = %p", pthread_self() );
+    Http_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
 
     g_snprintf( Cfg_http.lib->admin_prompt, sizeof(Cfg_http.lib->admin_prompt), NOM_THREAD );
     g_snprintf( Cfg_http.lib->admin_help,   sizeof(Cfg_http.lib->admin_help),   "Manage Web Services with external Devices" );

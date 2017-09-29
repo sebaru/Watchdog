@@ -51,10 +51,16 @@
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
     gboolean Thread_sigusr1;                                                          /* TRUE si le thread doit gerer le USR1 */
+    gint  archdb_port;
+    gchar archdb_host    [ TAILLE_DB_HOST+1 ];                                  /* Nom du host de la base de donnes d'archive */
+    gchar archdb_username[ TAILLE_DB_USERNAME+1 ];                           /* Nom de l'administrateur de la base de données */
+    gchar archdb_database[ TAILLE_DB_DATABASE+1 ];                                          /* Chemin d'acces aux DB watchdog */
+    gchar archdb_password[ TAILLE_DB_PASSWORD+1 ];                                          /* Mot de passe de connexion ODBC */
   };
 
 /******************************************* Définitions des prototypes *******************************************************/
  extern void Run_arch ( void );                                                                             /* Dans Archive.c */
+ extern gboolean Arch_Lire_config ( void );
  extern gint Arch_Clear_list ( void );
  extern void Ajouter_arch( gint type, gint num, gfloat valeur );
  extern void Ajouter_archDB ( struct DB *db, struct ARCHDB *arch );

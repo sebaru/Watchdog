@@ -38,13 +38,13 @@
     struct DB*db;
     db = Init_ArchDB_SQL();       
     if (!db)
-     { g_snprintf( chaine, sizeof(chaine), " Connexion to DB failed (Host=%s:%d, User=%s DB=%s)\n",
-                   Config.archdb_host, Config.archdb_port, Config.archdb_username, Config.archdb_database );
+     { g_snprintf( chaine, sizeof(chaine), " Connexion to DB failed (Host='%s':%d, User='%s' DB='%s')\n",
+                   Partage->com_arch.archdb_host, Partage->com_arch.archdb_port, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
        Admin_write ( connexion, chaine );
        return;
      }
     g_snprintf( chaine, sizeof(chaine), " Connexion to DB OK (Host=%s:%d, User=%s DB=%s)\n",
-                Config.archdb_host, Config.archdb_port, Config.archdb_username, Config.archdb_database );
+                Partage->com_arch.archdb_host, Partage->com_arch.archdb_port, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
     Admin_write ( connexion, chaine );
     Libere_DB_SQL( &db );
   }
@@ -63,11 +63,13 @@
 
     g_snprintf( chaine, sizeof(chaine), " | Length of Arch list : %d\n", save_nbr );
     Admin_write ( connexion, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | Archive Host : %s\n", Config.archdb_host );
+    g_snprintf( chaine, sizeof(chaine), " | Host : %s\n", Partage->com_arch.archdb_host );
     Admin_write ( connexion, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | Archive DB   : %s\n", Config.archdb_database );
+    g_snprintf( chaine, sizeof(chaine), " | Port : %d\n", Partage->com_arch.archdb_port );
     Admin_write ( connexion, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | Archive User : %s\n", Config.archdb_username );
+    g_snprintf( chaine, sizeof(chaine), " | DB   : %s\n", Partage->com_arch.archdb_database );
+    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " | User : %s\n", Partage->com_arch.archdb_username );
     Admin_write ( connexion, chaine );
     g_snprintf( chaine, sizeof(chaine), " -\n");
     Admin_write ( connexion, chaine );
@@ -85,6 +87,15 @@
      { Admin_arch_status ( connexion ); }
     else if ( ! strcmp ( commande, "testdb" ) )
      { Admin_arch_testdb ( connexion ); }
+    else if ( ! strcmp ( commande, "dbcfg" ) )                /* Appelle de la fonction dédiée à la gestion des parametres DB */
+     { if (Admin_dbcfg_thread ( connexion, "arch", ligne+6 ) == TRUE)                           /* Si changement de parametre */
+        { gboolean retour;
+          retour = Arch_Lire_config();
+          g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s\n",
+                      (retour ? "Success" : "Failed") );
+          Admin_write ( connexion, chaine );
+        }
+     }
     else if ( ! strcmp ( commande, "purge" ) )
      { pthread_t tid;
        if (pthread_create( &tid, NULL, (void *)Arch_Update_SQL_Partitions_thread, NULL ))
@@ -96,12 +107,13 @@
      }
     else if ( ! strcmp ( commande, "clear" ) )
      { gint nbr;
-       nbr = Arch_Clear_list ();                            /* Clear de la list des archives à prendre en compte */
+       nbr = Arch_Clear_list ();                                         /* Clear de la list des archives à prendre en compte */
        g_snprintf( chaine, sizeof(chaine), " ArchiveList cleared (%d components)\n", nbr );
        Admin_write ( connexion, chaine );
      }
     else if ( ! strcmp ( commande, "help" ) )
      { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'UPS'\n" );
+       Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
        Admin_write ( connexion, "  status                                 - Get Status of Arch Thread\n");
        Admin_write ( connexion, "  clear                                  - Clear Archive List\n" );
        Admin_write ( connexion, "  purge                                  - Purge old data in database\n" );

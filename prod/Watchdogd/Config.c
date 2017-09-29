@@ -58,11 +58,6 @@
     g_snprintf( Config.db_database, sizeof(Config.db_database), "%s", DEFAUT_DB_DATABASE  );
     g_snprintf( Config.db_password, sizeof(Config.db_password), "%s", DEFAUT_DB_PASSWORD  );
     g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", DEFAUT_DB_USERNAME  );
-    Config.archdb_port = Config.db_port;
-    g_snprintf( Config.archdb_host,     sizeof(Config.archdb_host),     "%s", DEFAUT_DB_HOST );
-    g_snprintf( Config.archdb_database, sizeof(Config.archdb_database), "%s", DEFAUT_DB_DATABASE );
-    g_snprintf( Config.archdb_password, sizeof(Config.archdb_password), "%s", DEFAUT_DB_PASSWORD );
-    g_snprintf( Config.archdb_username, sizeof(Config.archdb_username), "%s", DEFAUT_DB_USERNAME );
 
     Config.log_level = LOG_NOTICE;
     Config.log_msrv  = FALSE;
@@ -119,34 +114,6 @@
         { g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", chaine ); g_free(chaine); }
 
 
-       num = g_key_file_get_integer ( gkf, "DATABASE", "arch_port", NULL );
-       if (num) Config.archdb_port = num;
-       else Config.archdb_port = Config.db_port;
-       
-       chaine = g_key_file_get_string ( gkf, "DATABASE", "arch_host", NULL );
-       if (chaine)
-        { g_snprintf( Config.archdb_host, sizeof(Config.archdb_host), "%s", chaine ); g_free(chaine); }
-        else
-        { g_snprintf( Config.archdb_host,     sizeof(Config.archdb_host),     "%s", Config.db_host ); }
-
-       chaine = g_key_file_get_string ( gkf, "DATABASE", "arch_database", NULL );
-       if (chaine)
-        { g_snprintf( Config.archdb_database, sizeof(Config.archdb_database), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.archdb_database, sizeof(Config.archdb_database), "%s", Config.db_database ); }
-
-       chaine = g_key_file_get_string ( gkf, "DATABASE", "arch_password", NULL );
-       if (chaine)
-        { g_snprintf( Config.archdb_password, sizeof(Config.archdb_password), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.archdb_password, sizeof(Config.archdb_password), "%s", Config.db_password ); }
-
-       chaine = g_key_file_get_string ( gkf, "DATABASE", "arch_username", NULL );
-       if (chaine)
-        { g_snprintf( Config.archdb_username, sizeof(Config.archdb_username), "%s", chaine ); g_free(chaine); }
-       else
-        { g_snprintf( Config.archdb_username, sizeof(Config.archdb_username), "%s", Config.db_username ); }
-
 /******************************************************** Partie LOG **********************************************************/
        chaine = g_key_file_get_string ( gkf, "LOG", "log_level", NULL );
        if (chaine)
@@ -188,11 +155,6 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db username          %s", Config.db_username );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db password          *******" );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db port              %d", Config.db_port );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config archive db host      %s", Config.archdb_host );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config archive db database  %s", Config.archdb_database );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config archive db username  %s", Config.archdb_username );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config archive db password  *******" );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config archive db port      %d", Config.archdb_port );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db debug             %d", Config.log_db );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config compil               %d", Config.compil );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );

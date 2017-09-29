@@ -197,6 +197,124 @@
     Arret = TRUE;
   }
 /******************************************************************************************************************************/
+/* WTD_Curl_init: Envoie une requete au serveur                                                                               */
+/* Entrée:                                                                                                                    */
+/* Sortie: FALSE si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ CURL *WTD_Curl_init ( gchar *uri, gchar *erreur )
+  { gchar url[128];
+    gchar sid[256];
+    CURL *curl;
+
+    curl = curl_easy_init();                                                                /* Preparation de la requete CURL */
+    if (!curl)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "%s: cURL init failed for %s", __func__, uri );
+       return(NULL);
+     }
+
+    g_snprintf( url, sizeof(url), "%s/%s", Config_cli.target_url, uri );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "Trying to get %s", url );
+    curl_easy_setopt(curl, CURLOPT_URL, url );
+    g_snprintf( sid, sizeof(sid), "sid=%s", Client.sid );
+    curl_easy_setopt(curl, CURLOPT_COOKIE, sid);                           /* Active la gestion des cookies pour la connexion */
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &erreur );
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT);
+/*     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0 );*/
+/*     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0 );                                    Warning ! */
+/*     curl_easy_setopt(curl, CURLOPT_CAINFO, Cfg_satellite.https_file_ca );
+       curl_easy_setopt(curl, CURLOPT_SSLKEY, Cfg_satellite.https_file_key );
+       g_snprintf( chaine, sizeof(chaine), "./%s", Cfg_satellite.https_file_cert );
+       curl_easy_setopt(curl, CURLOPT_SSLCERT, chaine );*/
+    return(curl);
+  }
+/******************************************************************************************************************************/
+/* WTD_Curl_request: Envoie une requete au serveur                                                                            */
+/* Entrée:                                                                                                                    */
+/* Sortie: FALSE si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ gboolean WTD_Curl_post_request ( gchar *uri, gint post, gchar *post_data, gint post_length )
+  { gchar erreur[CURL_ERROR_SIZE+1];
+    struct curl_slist *slist = NULL;
+    long http_response;
+    gchar url[128];
+    CURLcode res;
+    CURL *curl;
+
+    http_response = 0;
+
+    curl = WTD_Curl_init ( uri, &erreur[0] );                                               /* Preparation de la requete CURL */
+    if (!curl)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "%s: cURL init failed for %s", __func__, uri );
+       return(FALSE);
+     }
+
+    if (post == TRUE)
+     { curl_easy_setopt(curl, CURLOPT_POST, 1 );
+       curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (void *)post_data);
+       curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, post_length);
+       slist = curl_slist_append(slist, "Content-Type: application/json");
+       curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
+       curl_easy_setopt(curl, CURLOPT_HEADER, 1);
+     }
+    else
+     { /*curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_gif_data );*/
+       curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT);
+     }
+     
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
+/*       curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0 );*/
+/*     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0 );                                    Warning ! */
+/*       curl_easy_setopt(curl, CURLOPT_CAINFO, Cfg_satellite.https_file_ca );
+       curl_easy_setopt(curl, CURLOPT_SSLKEY, Cfg_satellite.https_file_key );
+       g_snprintf( chaine, sizeof(chaine), "./%s", Cfg_satellite.https_file_cert );
+       curl_easy_setopt(curl, CURLOPT_SSLCERT, chaine );*/
+
+    res = curl_easy_perform(curl);
+    if (res)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
+                "%s : Error : Could not connect to %s : %s", __func__, uri, erreur );
+       curl_easy_cleanup(curl);
+       /*if (Gif_received_buffer) { g_free(Gif_received_buffer); }*/
+       return(FALSE);
+     }
+    if (curl_easy_getinfo( curl, CURLINFO_RESPONSE_CODE, &http_response ) != CURLE_OK) http_response = 401;
+    curl_easy_cleanup(curl);
+    curl_slist_free_all(slist);
+
+    if (http_response != 200)                                                                /* HTTP 200 OK ? */
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
+                "%s : URL %s not received (HTTP_CODE = %d)!", __func__, url, http_response );
+       /*if (Gif_received_buffer) { g_free(Gif_received_buffer); }*/
+       return(FALSE);
+     }
+/*    else
+     { gchar nom_fichier[80];
+       gint fd;
+       if (mode) g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif.%02d", id, mode );
+            else g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif", id );
+       Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
+                "Download_gif : Saving GIF id %d, mode %d, size %d -> %s", id, mode, Gif_received_size, nom_fichier );
+       unlink(nom_fichier);
+       fd = open( nom_fichier, O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR );
+       if (fd>0)
+        { write( fd, Gif_received_buffer, Gif_received_size );
+          close (fd);
+        }
+       else
+        { Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
+                   "Download_gif : Unable to save file %s", nom_fichier );
+        }
+       g_free(Gif_received_buffer);
+       Gif_received_buffer = FALSE;
+       if (fd<=0) return(FALSE);
+     }
+*/
+    return(TRUE);
+  }
+
+/******************************************************************************************************************************/
 /*!Main: Fonction principale du programme du client Watchdog
  ******************************************************************************************************************************/
  int main ( int argc,                                                       /*!< nombre d'argument dans la ligne de commande, */
