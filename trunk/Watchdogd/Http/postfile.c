@@ -34,11 +34,10 @@
  #include "Http.h"
 
  static const char *PARAM_POSTFILE[] =
-  { "type", "id", "file" };
+  { "type", "id" };
  enum
   { PARAM_POSTFILE_TYPE,
     PARAM_POSTFILE_ID,
-    PARAM_POSTFILE_FILE,
     NBR_PARAM_POSTFILE
   };
 /******************************************************************************************************************************/
@@ -121,7 +120,7 @@
     return(TRUE);
   }  
 /******************************************************************************************************************************/
-/* Save_file_to_disk: Process le fichier recu et met a jour la base de données                                                 */
+/* Save_file_to_disk: Process le fichier recu et met a jour la base de données                                                */
 /* Entrées: replace!=0 si remplacement, id=numéro de fichier, les XMLData, et XMLLength                                       */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
@@ -198,12 +197,6 @@
     pss = lws_wsi_user ( wsi );
     lws_spa_finalize(pss->spa);
 
-    if (! (lws_spa_get_length(pss->spa, PARAM_POSTFILE_FILE)>0 ) )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "%s: (sid %s) 'FILE' parameter is missing", __func__, Http_get_session_id(pss->session) );
-       Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
-       return(1);
-     }
     if (! (lws_spa_get_length(pss->spa, PARAM_POSTFILE_ID)>0 ) )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                 "%s: (sid %s) 'ID' parameter is missing", __func__, Http_get_session_id(pss->session) );
@@ -237,15 +230,11 @@
        else
         { gchar filename[80];
           g_snprintf( filename, sizeof(filename), "Son/%d.mp3", id );
-          code = Save_file_to_disk( pss->session, filename,
-                                    lws_spa_get_string(pss->spa, PARAM_POSTFILE_FILE),
-                                    lws_spa_get_length(pss->spa, PARAM_POSTFILE_FILE));
+          code = Save_file_to_disk( pss->session, filename, pss->post_data, pss->post_data_length);
         }
      }
     else if( !strcasecmp(type,"svg"))
-     { code = Save_file_to_disk( pss->session, "unused",
-                                 lws_spa_get_string(pss->spa, PARAM_POSTFILE_FILE),
-                                 lws_spa_get_length(pss->spa, PARAM_POSTFILE_FILE));
+     { code = Save_file_to_disk( pss->session, "unused", pss->post_data, pss->post_data_length);
      }
     else
      { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
@@ -254,6 +243,8 @@
          
     lws_spa_destroy ( pss->spa	);
     Http_Send_response_code ( wsi, code );
+    pss->post_data_length = 0;
+    g_free(pss->post_data);
     if (code==HTTP_200_OK) return( lws_http_transaction_completed(wsi) );
     return(1);                                                                                         /* si erreur, on coupe */
   }
