@@ -303,9 +303,9 @@
      }
 
     if ( ! strcasecmp( texte, "smson" ) )                                                                       /* Smspanic ! */
-     { sending_is_disabled = FALSE;
-       Envoyer_sms_gsm_text ( "Sending SMS is on !" );
+     { Envoyer_sms_gsm_text ( "Sending SMS is on !" );
        Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE, "%s: Sending SMS is ENABLED", __func__ );
+       sending_is_disabled = FALSE;
        return;
      }
 
