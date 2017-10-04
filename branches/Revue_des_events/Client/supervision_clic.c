@@ -82,7 +82,7 @@
        case GTK_RESPONSE_CANCEL:
        default: break;
      }
-    gtk_widget_destroy(dialog);
+    gtk_widget_destroy(GTK_WIDGET(dialog));
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -90,29 +90,14 @@
 /* Entrée: Le motif qui vient d'etre cliqué                                                                                   */
 /* sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static Envoyer_action_confirme ( struct TRAME_ITEM_MOTIF *trame_motif )
-  { GtkWidget *dialog, *frame, *texte, *hboite;
-    gint cpt, ligne;
+ static void Envoyer_action_confirme ( struct TRAME_ITEM_MOTIF *trame_motif )
+  { GtkWidget *dialog;
 
-    dialog = gtk_dialog_new_with_buttons( "Attention !",
-                                           GTK_WINDOW(F_client),
-                                           GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-                                           GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                           GTK_STOCK_OK, GTK_RESPONSE_OK,
-                                           NULL);
+    dialog = gtk_message_dialog_new ( GTK_WINDOW(F_client), GTK_DIALOG_DESTROY_WITH_PARENT,
+                                      GTK_MESSAGE_WARNING, GTK_BUTTONS_OK_CANCEL,
+                                      trame_motif->motif->libelle );
+
     g_signal_connect( dialog, "response", G_CALLBACK(CB_Envoyer_action_confirme), trame_motif );
-
-    frame = gtk_frame_new("Confirmez-vous l'action suivante ?");                         /* Création de l'interface graphique */
-    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
-    gtk_container_set_border_width( GTK_CONTAINER(frame), 6 );
-    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(dialog)->vbox ), frame, TRUE, TRUE, 0 );
-
-    hboite = gtk_hbox_new( FALSE, 6 );
-    gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
-    gtk_container_add( GTK_CONTAINER(frame), hboite );
-
-    texte = gtk_label_new( trame_motif->motif->libelle );                                          /* Libelle du motif cliqué */
-    gtk_box_pack_start( GTK_BOX(hboite), texte, TRUE, TRUE, 0 );
 
     gtk_widget_show_all(dialog);                                                         /* Affichage de l'interface complète */
   }

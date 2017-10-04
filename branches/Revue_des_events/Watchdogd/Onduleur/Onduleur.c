@@ -522,7 +522,7 @@
     if ( ! strncmp ( buffer, "VAR", 3 ) )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
                 "%s: Reading GET VAR %s OK = %s", __func__, nom_var, buffer );
-       return(buffer + 7 + strlen(module->ups.ups) + strlen(nom_var));
+       return(buffer + 6 + strlen(module->ups.ups) + strlen(nom_var));
      }
 
     if ( ! strcmp ( buffer, "ERR VAR-NOT-SUPPORTED" ) )
@@ -574,56 +574,60 @@
 
     num_ea = module->ups.map_EA;
     if ( (reponse = Onduleur_get_var ( module, "ups.load" )) != NULL )
-     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
     
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "ups.realpower" )) != NULL )
-     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "battery.charge" )) != NULL )
-     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "input.voltage" )) != NULL )
-     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "battery.runtime" )) != NULL )
-     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "battery.voltage" )) != NULL )
-     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
 
     num_ea++;
-    if ( (reponse = Onduleur_get_var ( module, "input_frequency" )) != NULL )
-     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
+    if ( (reponse = Onduleur_get_var ( module, "input.frequency" )) != NULL )
+     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "output.current" )) != NULL )
-     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "output.frequency" )) != NULL )
-     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
 
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "output.voltage" )) != NULL )
-     { SEA( num_ea, atof(reponse) ); }                                                       /* Numéro de l'EA pour la valeur */
+     { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
 
 /*---------------------------------------------- Récupération des entrées TOR de l'UPS ---------------------------------------*/
     num_e  = module->ups.map_E;
     if ( (reponse = Onduleur_get_var ( module, "outlet.1.status" )) != NULL )
-     { SE( num_e, !strcmp(reponse, "on") ); }                                                 /* Numéro de l'E pour la valeur */
+     { SE( num_e, !strcmp(reponse, "\"on\"") ); }                                             /* Numéro de l'E pour la valeur */
 
     num_e++;
     if ( (reponse = Onduleur_get_var ( module, "outlet.2.status" )) != NULL )
-     { SE( num_e, !strcmp(reponse, "on") ); }                                                 /* Numéro de l'E pour la valeur */
+     { SE( num_e, !strcmp(reponse, "\"on\"") ); }                                             /* Numéro de l'E pour la valeur */
 
     num_e++;
     if ( (reponse = Onduleur_get_var ( module, "ups.status" )) != NULL )
-     { SE( num_e, !strcmp(reponse, "OL CHRG") ); }                                            /* Numéro de l'E pour la valeur */
+     { SE( num_e, !strcmp(reponse, "\"OL CHRG\"") ); }                                        /* Numéro de l'E pour la valeur */
+
+    num_e++;
+    if (reponse != NULL)
+     { SE( num_e, !strcmp(reponse, "\"OB\"") ); }                                             /* Numéro de l'E pour la valeur */
     
     return(TRUE);
   }

@@ -38,7 +38,7 @@
  #define HTTP_DEFAUT_SSL_CIPHER        "HIGH:NORMAL"
  #define HTTP_DEFAUT_MAX_CONNEXION     16
  #define HTTP_DEFAUT_TCP_PORT          5560
- #define HTTP_DEFAUT_MAX_UPLOAD_BYTES  10240
+ #define HTTP_DEFAUT_MAX_UPLOAD_BYTES  10240000
  #define HTTP_DEFAUT_LWS_DEBUG_LEVEL   0
 
  #define HTTP_200_OK                   200
@@ -103,6 +103,7 @@
  extern gint Http_json_get_int ( JsonObject *object, gchar *name );
  extern void Http_Send_response_code ( struct lws *wsi, gint code );
  extern void Http_Send_response_code_with_buffer ( struct lws *wsi, gint code, gchar *content_type, gchar *buffer, gint taille_buf );
+ extern gint Http_CB_file_upload( struct lws *wsi, char *buffer, int taille );
  extern gboolean Http_Traiter_request_getsyn ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gboolean Http_Traiter_request_getstatus ( struct lws *wsi );
  extern gint Http_Traiter_request_getgif ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
@@ -113,7 +114,7 @@
  extern gint Http_Traiter_request_body_completion_setmessage ( struct lws *wsi );
  extern gint Http_Traiter_request_body_completion_delmessage ( struct lws *wsi );
  extern gint Http_Traiter_request_body_completion_setscenario ( struct lws *wsi );
- extern gint Http_Traiter_request_postfile ( struct lws *wsi, struct HTTP_SESSION *session );
+ extern gint Http_Traiter_request_body_postfile ( struct lws *wsi, void *data, size_t taille );
  extern gint Http_Traiter_request_body_completion_postfile ( struct lws *wsi );
  extern gint Http_Traiter_request_getpluginsDLS ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_getui ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
@@ -128,8 +129,5 @@
  extern gint Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip );
  extern gint Http_Traiter_request_body_login ( struct lws *wsi, void *data, size_t taille );
  extern gint Http_Traiter_request_body_completion_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
- 
- extern gint Http_Traiter_request_postsvg ( struct lws *wsi, struct HTTP_SESSION *session, gchar *remote_name, gchar *remote_ip );
- extern gint Http_Traiter_request_body_completion_postsvg ( struct lws *wsi );
-#endif
+ #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

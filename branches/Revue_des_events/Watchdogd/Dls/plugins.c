@@ -39,10 +39,6 @@
 /************************************************** Prototypes de fonctions ***************************************************/
  #include "watchdogd.h"
 
- #ifndef REP_INCLUDE_GLIB
- #define REP_INCLUDE_GLIB  "/usr/include/glib-2.0"
- #endif
-
 /******************************************************************************************************************************/
 /* Check_action_bit_use: Vérifie que les bits d'actions positionnés par le module sont bien owné par celui-ci                 */
 /* Entrée: Le plugin D.L.S                                                                                                    */
@@ -295,20 +291,25 @@
      { plugin = (struct PLUGIN_DLS *)plugins->data;
 
        if ( plugin->plugindb.id == id )
-        { if (Check_action_bit_use( plugin ) == TRUE )
-           { plugin->plugindb.on = actif;
+        { if (actif == FALSE)
+           { plugin->plugindb.on = FALSE;
+             plugin->conso = 0.0;
+             Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: id %04d stopped (%s)",
+                       __func__, plugin->plugindb.id, plugin->plugindb.nom );
+           }
+          else if (Check_action_bit_use( plugin ) == TRUE )
+           { plugin->plugindb.on = TRUE;
              plugin->conso = 0.0;
              plugin->starting = 1;
-             Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: id %04d %s (%s)",
-                       __func__, plugin->plugindb.id, (actif ? "started" : "stopped"), plugin->plugindb.nom );
+             Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: id %04d started (%s)",
+                       __func__, plugin->plugindb.id, plugin->plugindb.nom );
            }
           else
            { plugin->plugindb.on = 0;
              plugin->conso = 0.0;
              plugin->starting = 0;
              Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                      "%s: Candidat %04d -> bit(s) set but not owned by itself... Disabling", __func__, plugin ); 
-             Set_compil_status_plugin_dlsDB( plugin->plugindb.id, DLS_COMPIL_ERROR_BIT_SET_BUT_NOT_OWNED );
+                      "%s: Candidat %04d -> bit(s) set but not owned by itself... Disabling", __func__, plugin->plugindb.id ); 
            }
           break;
         }
@@ -383,7 +384,7 @@
        Info_new( Config.log, Config.log_dls, LOG_DEBUG,
                 "%s: GCC start (pid %d) source %s cible %s!",
                  __func__, pidgcc, source, cible );
-       execlp( "gcc", "gcc", "-I", REP_INCLUDE_GLIB, "-shared", "-o3",
+       execlp( "gcc", "gcc", "-I/usr/include/glib-2.0","-I/usr/lib/glib-2.0/include", "-shared", "-o3",
                "-Wall", "-lwatchdog-dls", source, "-fPIC", "-o", cible, NULL );
        Info_new( Config.log, Config.log_dls, LOG_DEBUG, "Compiler_source_dls_Fils: lancement GCC failed" );
        _exit(0);

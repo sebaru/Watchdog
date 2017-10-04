@@ -106,6 +106,7 @@
     guint  type;                                                                                    /* Totalisateur/Moyenneur */
     gfloat multi;                                                                                           /* Multiplicateur */
     gchar  unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                                          /* Km, h, ° ... */
+    gboolean reset;                                                             /* TRUE si le compteur doit etre resetter à 0 */
   };
 
 /************************************************ Pour les compteurs horaires *************************************************/

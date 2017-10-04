@@ -131,6 +131,8 @@
        json_builder_set_member_name  ( builder, "bit_audio" );     json_builder_add_int_value    ( builder, msg->bit_audio );
        json_builder_set_member_name  ( builder, "time_repeat" );   json_builder_add_int_value    ( builder, msg->time_repeat );
        json_builder_set_member_name  ( builder, "dls_id" );        json_builder_add_int_value    ( builder, msg->dls_id );
+       json_builder_set_member_name  ( builder, "persist" );       json_builder_add_int_value    ( builder, msg->persist );
+       json_builder_set_member_name  ( builder, "is_mp3" );        json_builder_add_int_value    ( builder, msg->is_mp3 );
        json_builder_set_member_name  ( builder, "libelle" );       json_builder_add_string_value ( builder, msg->libelle );
        json_builder_set_member_name  ( builder, "libelle_sms" );   json_builder_add_string_value ( builder, msg->libelle_sms );
        json_builder_set_member_name  ( builder, "syn_groupe" );    json_builder_add_string_value ( builder, msg->syn_groupe );

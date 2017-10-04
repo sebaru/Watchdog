@@ -39,6 +39,70 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Dls_print_debug: Affiche les valeurs des bits utilisés dans le plugin.                                                     */
+/* Entrée: Appelé directement par le plugin, avec ne parametre les tableaux de bit et de valeur                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Dls_print_debug ( gint id, gint *Tableau_bit, gint *Tableau_num, gfloat *Tableau_val )
+  { gchar chaine[32], result[1024];
+    gboolean change=FALSE;
+    gint cpt, type;
+    cpt=0;
+    result[0]=0;
+    while( (type=Tableau_bit[cpt]) != -1)
+     { switch (type)
+        { case MNEMO_SORTIE:
+           { if (A(Tableau_num[cpt])!=Tableau_val[cpt])
+              { g_snprintf( chaine, sizeof(chaine), "A[%04d]=%d, ", Tableau_num[cpt], A(Tableau_num[cpt]) );
+                g_strlcat(result, chaine, sizeof(result));
+                Tableau_val[cpt] = (float)A(Tableau_num[cpt]);
+                change=TRUE;
+              }
+             break;
+           }
+          case MNEMO_MONOSTABLE:
+           { if (M(Tableau_num[cpt])!=Tableau_val[cpt])
+              { g_snprintf( chaine, sizeof(chaine), "M[%04d]=%d, ", Tableau_num[cpt], M(Tableau_num[cpt]) );
+                g_strlcat(result, chaine, sizeof(result));
+                Tableau_val[cpt] = (float)M(Tableau_num[cpt]);
+                change=TRUE;
+              }
+             break;
+           }
+          case MNEMO_BISTABLE:
+           { if (B(Tableau_num[cpt])!=Tableau_val[cpt])
+              { g_snprintf( chaine, sizeof(chaine), "B[%04d]=%d, ", Tableau_num[cpt], B(Tableau_num[cpt]) );
+                g_strlcat(result, chaine, sizeof(result));
+                Tableau_val[cpt] = (float)B(Tableau_num[cpt]);
+                change=TRUE;
+              }
+             break;
+           }
+/*          case MNEMO_CPTH:
+           { if (CH(Tableau_num[cpt])!=Tableau_val[cpt])
+              { g_snprintf( chaine, sizeof(chaine), "CH[%04d]=%d, ", Tableau_num[cpt], CH(Tableau_num[cpt]) );
+                g_strlcat(result, chaine, sizeof(result));
+                Tableau_val[cpt] = (float)CH(Tableau_num[cpt]);
+                change=TRUE;
+              }
+             break;
+           }*/
+          case MNEMO_CPT_IMP:
+           { if (CI(Tableau_num[cpt])!=Tableau_val[cpt])
+              { g_snprintf( chaine, sizeof(chaine), "CI[%04d]=%d, ", Tableau_num[cpt], CI(Tableau_num[cpt]) );
+                g_strlcat(result, chaine, sizeof(result));
+                Tableau_val[cpt] = (float)CI(Tableau_num[cpt]);
+                change=TRUE;
+              }
+             break;
+           }
+        }
+       cpt++;
+     }
+   if (change)
+    { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : DLS[%06d]->%s", __func__, id, result ); }
+ }
+/******************************************************************************************************************************/
 /* Chrono: renvoi la difference de temps entre deux structures timeval                                                        */
 /* Entrée: le temps avant, et le temps apres l'action                                                                         */
 /* Sortie: un float                                                                                                           */
@@ -784,7 +848,7 @@
           if (plugin_actuel->plugindb.on && plugin_actuel->go)
            { gettimeofday( &tv_avant, NULL );
              Partage->top_cdg_plugin_dls = 0;                                                   /* On reset le cdg plugin DLS */
-             plugin_actuel->go( plugin_actuel->starting );                                              /* On appel le plugin */
+             plugin_actuel->go( plugin_actuel->starting, plugin_actuel->debug );                        /* On appel le plugin */
              gettimeofday( &tv_apres, NULL );
              plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
              plugin_actuel->starting = 0;

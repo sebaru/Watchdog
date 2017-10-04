@@ -236,6 +236,7 @@ search_again:
        if (session->last_top && Partage->top - session->last_top >= 864000 )
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
                    "%s: closing timeout for SID %.12s", __func__, session->sid );
+          break;
         }
        liste = liste->next;
      }
@@ -368,6 +369,7 @@ search_again:
           }
         }
      }
+    lws_spa_destroy ( pss->spa	);
     return(1);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

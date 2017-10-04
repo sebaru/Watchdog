@@ -32,7 +32,8 @@
  #include <openssl/ssl.h>
  #include <gtksourceview/gtksourceprintcompositor.h>
  #include <curl/curl.h>
- 
+ #include <json-glib/json-glib.h>
+  
  #include "Reseaux.h"
  #include "trame.h"
 
@@ -152,6 +153,9 @@
   };
 
 /*--------------------------------------- Déclarations des prototypes de fonctions -------------------------------------------*/
+ extern gboolean WTD_Curl_post_request ( gchar *uri, gint post, gchar *post_data, gint post_length );
+ extern CURL *WTD_Curl_init ( gchar *uri, gchar *erreur );
+
  extern void Log( gchar *chaine );                                                                              /* Dans ihm.c */
  extern void Effacer_pages ( void );
  extern void Detruire_page ( struct PAGE_NOTEBOOK *page_a_virer );

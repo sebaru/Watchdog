@@ -55,4 +55,74 @@
 
     Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
   }
+/******************************************************************************************************************************/
+/* Arch_Update_SQL_Partitions: Appelé une fois par jour pour faire des opérations de menage dans les tables d'archivages      */
+/* Entrée: néant                                                                                                              */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ void Arch_Update_SQL_Partitions_thread ( void )
+  { gchar requete[512];
+	   GSList *Liste_tables;
+    struct DB *db;
+    prctl(PR_SET_NAME, "W-ArchSQL", 0, 0, 0 );
+    Liste_tables = NULL;
+
+    db = Init_ArchDB_SQL();      
+    if (!db)
+     { Info_new( Config.log, Config.log_arch, LOG_ERR,
+                "%s: Unable to open database %s", __func__, Partage->com_arch.archdb_database );
+       return;
+     }
+
+    Info_new( Config.log, Config.log_arch, LOG_NOTICE,
+                "%s: Starting Update SQL Partition on %s", __func__, Partage->com_arch.archdb_database );
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT table_name FROM information_schema.tables WHERE table_schema='%s' "
+                "AND table_name like 'histo_bit_%%'", Partage->com_arch.archdb_database );
+    if (Lancer_requete_SQL ( db, requete )==FALSE)                                             /* Execution de la requete SQL */
+     { Libere_DB_SQL(&db);
+	      Info_new( Config.log, Config.log_arch, LOG_ERR,
+                "%s: Searching table names failed", __func__ );
+       return;
+     }
+
+    while ( Recuperer_ligne_SQL(db) )                                                      /* Chargement d'une ligne resultat */
+     { Liste_tables = g_slist_prepend ( Liste_tables, strdup(db->row[0]) ); }
+    Libere_DB_SQL(&db);
+
+    db = Init_ArchDB_SQL();      
+    if (!db)
+     { Info_new( Config.log, Config.log_arch, LOG_ERR,
+                "%s: Unable to open database %s for deleting", __func__, Partage->com_arch.archdb_database );
+       while (Liste_tables)
+        { gchar *table;
+	         table = Liste_tables->data;
+	         Liste_tables = g_slist_remove ( Liste_tables, table );
+   	      g_free(table);
+        }
+       return;
+     }
+
+    while (Liste_tables && Partage->com_arch.Thread_run == TRUE)
+     { gchar *table;
+	      table = Liste_tables->data;
+	      Liste_tables = g_slist_remove ( Liste_tables, table );
+       Info_new( Config.log, Config.log_arch, LOG_NOTICE,
+                "%s: Starting Update SQL Partition table %s", __func__, table );
+	      g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
+                  "DELETE FROM %s WHERE date_time < NOW() - INTERVAL 400 DAY", table );
+       if (Lancer_requete_SQL ( db, requete )==FALSE)                                          /* Execution de la requete SQL */
+        { Info_new( Config.log, Config.log_arch, LOG_ERR,
+                   "%s: Unable to delete from table '%s'", __func__, table );
+        }
+       g_free(table);
+     }
+
+    g_slist_foreach( Liste_tables, (GFunc)g_free, NULL );                            /* Vidage de la liste si arret prematuré */
+    g_slist_free( Liste_tables );
+
+    Libere_DB_SQL(&db);
+    Info_new( Config.log, Config.log_arch, LOG_NOTICE,
+             "%s: Update SQL Partition end", __func__ );
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

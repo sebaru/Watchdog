@@ -126,8 +126,8 @@
 /* Sortie: une structure DB de référence                                                                                      */
 /******************************************************************************************************************************/
  struct DB *Init_ArchDB_SQL ( void )
-  { return( Init_DB_SQL_with ( Config.archdb_host, Config.archdb_username,
-                               Config.archdb_password, Config.archdb_database, Config.archdb_port ) );
+  { return( Init_DB_SQL_with ( Partage->com_arch.archdb_host, Partage->com_arch.archdb_username,
+                               Partage->com_arch.archdb_password, Partage->com_arch.archdb_database, Partage->com_arch.archdb_port ) );
   }
 /******************************************************************************************************************************/
 /* Libere_DB_SQL : Se deconnecte d'une base de données en parametre                                                           */
@@ -159,10 +159,7 @@
      }
 
     if (db->free==FALSE)
-     { Info_new( Config.log, Config.log_db, LOG_WARNING,
-                "Libere_DB_SQL: Reste un result a FREEer (DB%07d) -> %s !", db->id, db->requete );
-       Liberer_resultat_SQL ( db );
-     }
+     { Liberer_resultat_SQL ( db ); }
     mysql_close( db->mysql );
     pthread_mutex_lock ( &Partage->com_db.synchro );
     Partage->com_db.Liste = g_slist_remove ( Partage->com_db.Liste, db );
@@ -706,7 +703,18 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=3247;
+    if (database_version < 3252)
+     { g_snprintf( requete, sizeof(requete), "INSERT INTO mnemos (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `command_text`) VALUES "
+                                             "(111, 1,  8, 1, 'SYS_NEW_TICK', 'Default Command by Tick', '');" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 3310)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs ADD `is_mp3` TINYINT(1) NOT NULL DEFAULT '0' AFTER `time_repeat`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    database_version=3310;
 
     Libere_DB_SQL(&db);
 

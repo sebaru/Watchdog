@@ -145,7 +145,7 @@
      } else
     if ( ! strcmp ( commande, "log_level" ) )
      { gchar debug[128], chaine [128];
-       sscanf ( ligne, "%s %s", commande, debug );
+       if (sscanf ( ligne, "%s %s", commande, debug ) != 2) return;
        g_snprintf( chaine, sizeof(chaine), " Log level set to %s\n", debug );
        if ( ! strcmp ( debug, "debug"    ) )
         { Info_change_log_level ( Config.log, LOG_DEBUG   ); }
@@ -165,7 +165,7 @@
     if ( ! strcmp ( commande, "debug" ) )
      { gchar debug[128];
 
-       sscanf ( ligne, "%s %s", commande, debug );
+       if (sscanf ( ligne, "%s %s", commande, debug ) != 2) return;
        g_snprintf( chaine, sizeof(chaine),
                        " Log level is %d\n", Config.log->log_level );
        Admin_write ( connexion, chaine );

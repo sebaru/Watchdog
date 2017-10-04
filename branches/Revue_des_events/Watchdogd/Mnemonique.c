@@ -257,7 +257,7 @@
 
     mnemo = (struct CMD_TYPE_MNEMO_BASE *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_BASE) );
     if (!mnemo) Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                         "Recuperer_mnemoDB_suite: Erreur allocation mémoire" );
+                         "%s: Erreur allocation mémoire", __func__ );
     else                                                                                /* Recopie dans la nouvelle structure */
      { g_snprintf( mnemo->acronyme,     sizeof(mnemo->acronyme),     "%s", db->row[4] );
        g_snprintf( mnemo->libelle,      sizeof(mnemo->libelle),      "%s", db->row[5] );
@@ -295,7 +295,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_mnemo_baseDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
      }
 
@@ -328,7 +328,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_mnemo_baseDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
      }
 

@@ -69,48 +69,43 @@
     gchar  libelle_audio[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     guint  time_repeat;                                               /* Temps entre deux répétitions (si non nul) en minutes */
     gboolean persist;                                                                               /* Persistence du message */
+    gboolean is_mp3;                                                            /* Un mp3 a-t'il été chargé pour ce message ? */
   };
 
  struct CMD_TYPE_MESSAGES
-  { guint nbr_messages;                                 /* Nombre de structure CMD_TYPE_MESSAGE suivantes */
+  { guint nbr_messages;                                                     /* Nombre de structure CMD_TYPE_MESSAGE suivantes */
     struct CMD_TYPE_MESSAGE msg[];
   };
  
- struct CMD_TYPE_MESSAGE_MP3                                   /* Structure pour l'échange du fichier mp3 */
+ struct CMD_TYPE_MESSAGE_MP3                                                       /* Structure pour l'échange du fichier mp3 */
   { guint num;
-    guint taille;                                 /* Taille des données qui suivent dans le paquet reseau */
+    guint taille;                                                     /* Taille des données qui suivent dans le paquet reseau */
   };
 
  enum 
   { SSTAG_CLIENT_WANT_PAGE_MESSAGE,
-    SSTAG_SERVEUR_CREATE_PAGE_MESSAGE_OK,                                /* Affichage de la page onduleur */
-    SSTAG_SERVEUR_ADDPROGRESS_MESSAGE,                         /* Ajout d'un groupe dans la liste cliente */
-    SSTAG_SERVEUR_ADDPROGRESS_MESSAGE_FIN,                     /* Ajout d'un groupe dans la liste cliente */
+    SSTAG_SERVEUR_CREATE_PAGE_MESSAGE_OK,                                                    /* Affichage de la page onduleur */
+    SSTAG_SERVEUR_ADDPROGRESS_MESSAGE,                                             /* Ajout d'un groupe dans la liste cliente */
+    SSTAG_SERVEUR_ADDPROGRESS_MESSAGE_FIN,                                         /* Ajout d'un groupe dans la liste cliente */
 
-    SSTAG_CLIENT_ADD_MESSAGE,                              /* Le client desire ajouter un groupe watchdog */
-    SSTAG_SERVEUR_ADD_MESSAGE_OK,                                      /* L'ajout du groupe est un succes */
+    SSTAG_CLIENT_ADD_MESSAGE,                                                  /* Le client desire ajouter un groupe watchdog */
+    SSTAG_SERVEUR_ADD_MESSAGE_OK,                                                          /* L'ajout du groupe est un succes */
 
-    SSTAG_CLIENT_DEL_MESSAGE,                                       /* Le client desire retirer un groupe */
-    SSTAG_SERVEUR_DEL_MESSAGE_OK,                                      /* L'ajout du groupe est un succes */
+    SSTAG_CLIENT_DEL_MESSAGE,                                                           /* Le client desire retirer un groupe */
+    SSTAG_SERVEUR_DEL_MESSAGE_OK,                                                          /* L'ajout du groupe est un succes */
 
-    SSTAG_CLIENT_EDIT_MESSAGE,                                 /* Le client demande l'edition d'un groupe */
-    SSTAG_SERVEUR_EDIT_MESSAGE_OK,             /* Le serveur accepte et envoi les données correspondantes */
-    SSTAG_CLIENT_VALIDE_EDIT_MESSAGE,                            /* Le client renvoie les données editées */
-    SSTAG_SERVEUR_VALIDE_EDIT_MESSAGE_OK,                      /* Le serveur valide les nouvelles données */
+    SSTAG_CLIENT_EDIT_MESSAGE,                                                     /* Le client demande l'edition d'un groupe */
+    SSTAG_SERVEUR_EDIT_MESSAGE_OK,                                 /* Le serveur accepte et envoi les données correspondantes */
+    SSTAG_CLIENT_VALIDE_EDIT_MESSAGE,                                                /* Le client renvoie les données editées */
+    SSTAG_SERVEUR_VALIDE_EDIT_MESSAGE_OK,                                          /* Le serveur valide les nouvelles données */
 
-    SSTAG_CLIENT_WANT_DLS_FOR_MESSAGE,                         /* Envoi des synoptiques pour les messages */
+    SSTAG_CLIENT_WANT_DLS_FOR_MESSAGE,                                             /* Envoi des synoptiques pour les messages */
     SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MESSAGE,
     SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MESSAGE_FIN,
 
     SSTAG_CLIENT_TYPE_NUM_MNEMO_VOC,
     SSTAG_SERVEUR_TYPE_NUM_MNEMO_VOC,
-
-    SSTAG_CLIENT_VALIDE_EDIT_MP3_DEB,                        /* Le client commence l'envoi du fichier mp3 */
-    SSTAG_CLIENT_VALIDE_EDIT_MP3,                                   /* Le client confitnue l'envoi du mp3 */
-    SSTAG_CLIENT_VALIDE_EDIT_MP3_FIN,                       /* Le client a terminé l'envoi du fichier mp3 */
-
   };
 
 #endif
-/*--------------------------------------------------------------------------------------------------------*/
-
+/*----------------------------------------------------------------------------------------------------------------------------*/

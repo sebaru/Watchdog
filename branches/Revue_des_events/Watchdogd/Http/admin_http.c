@@ -58,7 +58,7 @@
 /******************************************************************************************************************************/
  static void Admin_http_list ( struct CONNEXION *connexion )
   { struct HTTP_SESSION *session = NULL;
-    gchar chaine[128];
+    gchar chaine[256];
     GSList *liste;
 
     pthread_mutex_lock( &Cfg_http.lib->synchro );                        /* Ajout dans la liste a traiter */

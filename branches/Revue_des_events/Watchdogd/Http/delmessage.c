@@ -35,8 +35,7 @@
 /* Sortie : 0 ou 1 selon si la transaction est completed                                                                      */
 /******************************************************************************************************************************/
  gint Http_Traiter_request_body_completion_delmessage ( struct lws *wsi )
-  { unsigned char header[512], *header_cur, *header_end;
-    struct HTTP_PER_SESSION_DATA *pss;
+  { struct HTTP_PER_SESSION_DATA *pss;
     JsonNode *root_node;
     JsonParser *parser;
     gint retour, taille, code;
@@ -47,14 +46,9 @@
 
 
     if ( pss->session==NULL || pss->session->util==NULL || Tester_groupe_util( pss->session->util, GID_MESSAGE)==FALSE)
-     { Http_Send_response_code ( wsi, HTTP_UNAUTHORIZED );
-       return(TRUE);
-     }
+     { code = HTTP_UNAUTHORIZED; goto end; }
 
-    header_cur = header;                                                             /* Préparation des headers de la réponse */
-    header_end = header + sizeof(header);
-
-    code = 400;                                                                                                /* Bad Request */
+    code = HTTP_BAD_REQUEST;                                                                                   /* Bad Request */
     parser = json_parser_new();                                                                    /* Creation du parser JSON */
     if (!parser)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
@@ -91,11 +85,8 @@
     g_object_unref(parser);                                                                      /* Libération du parser Json */
 end:
     g_free(pss->post_data);
-    retour = lws_add_http_header_status( wsi, code, &header_cur, header_end );
-    retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
-    *header_cur='\0';                                                                               /* Caractere null d'arret */
-    lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
     pss->post_data_length = 0;
+    Http_Send_response_code ( wsi, code );
     return(1);                                         /* on clos direct la connexion -- lws_http_transaction_completed(wsi));*/
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

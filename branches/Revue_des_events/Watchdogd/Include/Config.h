@@ -45,12 +45,6 @@
     gchar db_database[ TAILLE_DB_DATABASE+1 ];                          /* Chemin d'acces aux DB watchdog */
     gchar db_password[ TAILLE_DB_PASSWORD+1 ];                          /* Mot de passe de connexion ODBC */
 
-    gint  archdb_port;
-    gchar archdb_host    [ TAILLE_DB_HOST+1 ];                                  /* Nom du host de la base de donnes d'archive */
-    gchar archdb_username[ TAILLE_DB_USERNAME+1 ];                           /* Nom de l'administrateur de la base de données */
-    gchar archdb_database[ TAILLE_DB_DATABASE+1 ];                                          /* Chemin d'acces aux DB watchdog */
-    gchar archdb_password[ TAILLE_DB_PASSWORD+1 ];                                          /* Mot de passe de connexion ODBC */
-
     gchar home [ TAILLE_HOME+1 ];                                          /* Repertoire maison du daemon */
     gchar librairie_dir [ TAILLE_HOME+1 ];               /* Repertoire de stockage des libraires watchdog */
     gchar instance_id [ TAILLE_HOME+1 ];                     /* Global ID, unique, de l'instance Watchdog */
