@@ -138,7 +138,7 @@
     arch->date_usec = tv.tv_usec;
 
     pthread_mutex_lock( &Partage->com_arch.synchro );                                /* Ajout dans la liste de arch a traiter */
-    Partage->com_arch.liste_arch = g_slist_append( Partage->com_arch.liste_arch, arch );
+    Partage->com_arch.liste_arch = g_slist_prepend( Partage->com_arch.liste_arch, arch );
     Partage->com_arch.taille_arch++;
     pthread_mutex_unlock( &Partage->com_arch.synchro );
   }
@@ -210,6 +210,8 @@
           pthread_mutex_unlock( &Partage->com_arch.synchro );
           Ajouter_archDB ( db, arch );
           g_free(arch);
+          Info_new( Config.log, Config.log_arch, LOG_DEBUG,
+                   "%s: Reste %d archives a traiter", __func__, Partage->com_arch.taille_arch );
         }
        Info_new( Config.log, Config.log_arch, LOG_DEBUG,
                 "%s: Traitement en %06.1fs", __func__, (Partage->top-top)/10.0 );
