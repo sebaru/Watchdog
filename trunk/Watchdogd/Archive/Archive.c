@@ -107,7 +107,7 @@
 
     if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
     else if (Partage->com_arch.taille_arch > taille_buf)
-     { if ( last_log + 60 < Partage->top )
+     { if ( last_log + 600 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
                    "Ajouter_arch: DROP arch (taille>%d) type=%d, num=%d", taille_buf, type, num );
           last_log = Partage->top;
@@ -115,7 +115,7 @@
        return;
      }
     else if (Partage->com_arch.Thread_run == FALSE)                                      /* Si administratively DOWN, on sort */
-     { if ( last_log + 60 < Partage->top )
+     { if ( last_log + 600 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
                    "Ajouter_arch: Thread is down. Dropping type=%d, num=%d", type, num );
           last_log = Partage->top;
