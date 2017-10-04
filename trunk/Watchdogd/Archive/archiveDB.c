@@ -36,24 +36,27 @@
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  void Ajouter_archDB ( struct DB *db, struct ARCHDB *arch )
-  { gchar requete[512];
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "CREATE TABLE IF NOT EXISTS `%s_%03d_%06d`("
-                "`date_time` datetime(6) DEFAULT NULL,"
-                "`valeur` float NOT NULL DEFAULT '0',"
-                "KEY `index_date` (`date_time`)"
-                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
-                "  PARTITION BY KEY (date_time) PARTITIONS 52;",
-                NOM_TABLE_ARCH, arch->type, arch->num );
-    Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
+  { gchar requete[512], table[512];
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s_%03d_%06d(date_time,valeur) VALUES "
                 "(FROM_UNIXTIME(%d.%d),'%f')",
                 NOM_TABLE_ARCH, arch->type, arch->num, arch->date_sec, arch->date_usec, arch->valeur );
 
-    Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
+    if (Lancer_requete_SQL ( db, requete )==FALSE)                                             /* Execution de la requete SQL */
+     {                               /* Si erreur, c'est peut etre parce que la table n'existe pas, on tente donc de la créer */
+       g_snprintf( table, sizeof(table),                                                                       /* Requete SQL */
+                   "CREATE TABLE `%s_%03d_%06d`("
+                   "`date_time` datetime(6) DEFAULT NULL,"
+                   "`valeur` float NOT NULL DEFAULT '0',"
+                   "KEY `index_date` (`date_time`)"
+                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
+                   "  PARTITION BY KEY (date_time) PARTITIONS 52;",
+                   NOM_TABLE_ARCH, arch->type, arch->num );
+       Lancer_requete_SQL ( db, table );                                                       /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                             /* Une fois la table créé, on peut y stocker l'archive */
+	 }
+
   }
 /******************************************************************************************************************************/
 /* Arch_Update_SQL_Partitions: Appelé une fois par jour pour faire des opérations de menage dans les tables d'archivages      */
