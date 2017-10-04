@@ -177,7 +177,8 @@
 /* Sortie: TRUE si pas de souci                                                                                               */
 /******************************************************************************************************************************/
  gboolean Lancer_requete_SQL ( struct DB *db, gchar *requete )
-  { if (!db) return(FALSE);
+  { gint top;
+    if (!db) return(FALSE);
 
     if (db->free==FALSE)
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
@@ -187,6 +188,7 @@
     g_snprintf( db->requete, sizeof(db->requete), "%s", requete );                                      /* Save for later use */
     Info_new( Config.log, Config.log_db, LOG_DEBUG,
              "Lancer_requete_SQL (DB%07d): NEW    (%s)", db->id, requete );
+    top = Partage->top;
     if ( mysql_query ( db->mysql, requete ) )
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
                 "Lancer_requete_SQL (DB%07d): FAILED (%s) for '%s'",
@@ -209,7 +211,7 @@
         }
      }
     Info_new( Config.log, Config.log_db, LOG_DEBUG,
-             "Lancer_requete_SQL (DB%07d): OK     (%s)", db->id, requete );
+             "Lancer_requete_SQL (DB%07d): OK in %05.1fs", db->id, (Partage->top - top)/10.0 );
     return(TRUE);
   }
 /******************************************************************************************************************************/
