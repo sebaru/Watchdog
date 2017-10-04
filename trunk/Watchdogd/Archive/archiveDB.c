@@ -110,7 +110,7 @@
        Info_new( Config.log, Config.log_arch, LOG_NOTICE,
                 "%s: Starting Update SQL Partition table %s", __func__, table );
 	      g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                  "DELETE FROM %s WHERE date_time < NOW() - INTERVAL 400 DAY", table );
+                  "DELETE FROM %s WHERE date_time < NOW() - INTERVAL %d DAY", table, Partage->com_arch.duree_retention );
        if (Lancer_requete_SQL ( db, requete )==FALSE)                                          /* Execution de la requete SQL */
         { Info_new( Config.log, Config.log_arch, LOG_ERR,
                    "%s: Unable to delete from table '%s'", __func__, table );

@@ -66,6 +66,8 @@
         { g_snprintf( Partage->com_arch.archdb_host, sizeof(Partage->com_arch.archdb_host), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "port" ) )
         { Partage->com_arch.archdb_port = atoi(valeur);  }
+       else if ( ! g_ascii_strcasecmp ( nom, "days" ) )
+        { Partage->com_arch.duree_retention = atoi(valeur);  }
        else
         { Info_new( Config.log, Config.log_arch, LOG_NOTICE,
                    "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
