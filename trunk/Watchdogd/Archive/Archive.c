@@ -48,6 +48,7 @@
     g_snprintf( Partage->com_arch.archdb_password, sizeof(Partage->com_arch.archdb_password), "%s", Config.db_password );
     g_snprintf( Partage->com_arch.archdb_host, sizeof(Partage->com_arch.archdb_host), "%s", Config.db_host );
     Partage->com_arch.archdb_port = Config.db_port;
+    Partage->com_arch.duree_retention = ARCHIVE_DEFAUT_RETENTION;
 
     if ( ! Recuperer_configDB( &db, "arch" ) )                                              /* Connexion a la base de données */
      { Info_new( Config.log, Config.log_arch, LOG_WARNING,

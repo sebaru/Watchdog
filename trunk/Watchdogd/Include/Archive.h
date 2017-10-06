@@ -30,6 +30,7 @@
 
  #define ARCHIVE_EA_TEMPS_SI_CONSTANT  3000                                    /* Si constant, archivage toutes les 5 minutes */
  #define ARCHIVE_EA_TEMPS_SI_VARIABLE    50                                   /* Si variable, archivage toutes les 5 secondes */
+ #define ARCHIVE_DEFAUT_RETENTION       400                              /* Nom de jours par défaut de retention des archives */
 
  #define NUM_EA_SYS_ARCHREQUEST         126                      /* Numéro d'EA de reference pour le nbr de request archivage */
 
