@@ -148,7 +148,7 @@
 /******************************************************************************************************************************/
  void Run_arch ( void )
   { struct DB *db;
-    gint top;
+    gint top, last_update;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
@@ -160,6 +160,7 @@
     Info_new( Config.log, Config.log_arch, LOG_NOTICE,
               "Run_arch: Demarrage . . . TID = %p", pthread_self() );
 
+    last_update = Partage->top;
     while(Partage->com_arch.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
      { struct ARCHDB *arch;
 
@@ -178,12 +179,13 @@
           Partage->com_arch.Thread_sigusr1 = FALSE;
         }
 
-       if ( (Partage->top % 864000) == 0)                                                                /* Une fois par jour */
+       if ( (Partage->top - last_update) >= 864000 )                                                     /* Une fois par jour */
         { pthread_t tid;
           if (pthread_create( &tid, NULL, (void *)Arch_Update_SQL_Partitions_thread, NULL ))
            { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: pthread_create failed for Update SQL Partitions", __func__ ); }
           else
            { pthread_detach( tid ); }                                /* On le detache pour qu'il puisse se terminer tout seul */
+          last_update=Partage->top;
         }
 
        if (!Partage->com_arch.liste_arch)                                                     /* Si pas de message, on tourne */
