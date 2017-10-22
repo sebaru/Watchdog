@@ -197,29 +197,37 @@
     Arret = TRUE;
   }
 /******************************************************************************************************************************/
+/* Curl_progress_callback: Callbakc d'affichage de la progression du download ou upload                                       */
+/* Entrée:                                                                                                                    */
+/* Sortie: 0                                                                                                                  */
+/******************************************************************************************************************************/
+ gint Curl_progress_callback ( void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
+  { Set_progress_ratio( dlnow + ulnow, dltotal + ultotal );
+    gtk_main_iteration_do ( TRUE );
+    return(0);
+  }
+/******************************************************************************************************************************/
 /* WTD_Curl_init: Envoie une requete au serveur                                                                               */
 /* Entrée:                                                                                                                    */
 /* Sortie: FALSE si probleme                                                                                                  */
 /******************************************************************************************************************************/
- CURL *WTD_Curl_init ( gchar *uri, gchar *erreur )
-  { gchar url[128];
-    gchar sid[256];
+ CURL *WTD_Curl_init ( gchar *erreur )
+  { gchar sid[256];
     CURL *curl;
 
     curl = curl_easy_init();                                                                /* Preparation de la requete CURL */
     if (!curl)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "%s: cURL init failed for %s", __func__, uri );
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "%s: cURL init failed", __func__ );
        return(NULL);
      }
 
-    g_snprintf( url, sizeof(url), "%s/%s", Config_cli.target_url, uri );
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "Trying to get %s", url );
-    curl_easy_setopt(curl, CURLOPT_URL, url );
     g_snprintf( sid, sizeof(sid), "sid=%s", Client.sid );
     curl_easy_setopt(curl, CURLOPT_COOKIE, sid);                           /* Active la gestion des cookies pour la connexion */
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &erreur );
     curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
     curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT);
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+    curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, Curl_progress_callback);
 /*     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0 );*/
 /*     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0 );                                    Warning ! */
 /*     curl_easy_setopt(curl, CURLOPT_CAINFO, Cfg_satellite.https_file_ca );
@@ -243,12 +251,14 @@
 
     http_response = 0;
 
-    curl = WTD_Curl_init ( uri, &erreur[0] );                                               /* Preparation de la requete CURL */
+    curl = WTD_Curl_init ( &erreur[0] );                                               /* Preparation de la requete CURL */
     if (!curl)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "%s: cURL init failed for %s", __func__, uri );
        return(FALSE);
      }
 
+    g_snprintf( url, sizeof(url), "%s/%s", Config_cli.target_url, uri );
+    curl_easy_setopt(curl, CURLOPT_URL, url );
     if (post == TRUE)
      { curl_easy_setopt(curl, CURLOPT_POST, 1 );
        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (void *)post_data);

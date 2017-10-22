@@ -154,7 +154,7 @@
 
 /*--------------------------------------- Déclarations des prototypes de fonctions -------------------------------------------*/
  extern gboolean WTD_Curl_post_request ( gchar *uri, gint post, gchar *post_data, gint post_length );
- extern CURL *WTD_Curl_init ( gchar *uri, gchar *erreur );
+ extern CURL *WTD_Curl_init ( gchar *erreur );
 
  extern void Log( gchar *chaine );                                                                              /* Dans ihm.c */
  extern void Effacer_pages ( void );
@@ -162,6 +162,7 @@
  extern GtkWidget *Creer_boite_travail ( void );
  extern void Set_progress_plus( gint plus );
  extern void Set_progress_text( gchar *cadran, gint max );
+ extern void Set_progress_ratio( gint nbr, gint max );
  extern void Set_progress_pulse( void );
  extern void Raz_progress_pulse( void );
  extern struct PAGE_NOTEBOOK *Chercher_page_notebook ( guint type, guint id, gboolean affiche );
