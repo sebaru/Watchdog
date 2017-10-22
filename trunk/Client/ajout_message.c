@@ -63,7 +63,6 @@
  static GList *Liste_index_dls;
  static struct CMD_TYPE_MESSAGE Msg;                                                            /* Message en cours d'édition */
 
-
 /******************************************************************************************************************************/
 /* WTD_Curl_request: Envoie une requete au serveur                                                                            */
 /* Entrée:                                                                                                                    */
@@ -83,11 +82,13 @@
 
     http_response = 401;
 
-    curl = WTD_Curl_init( "ws/postfile", &erreur[0] );                                      /* Preparation de la requete CURL */
+    g_snprintf( url, sizeof(url), "%s/ws/postfile", Config_cli.target_url );
+    curl = WTD_Curl_init( &erreur[0] );                                      /* Preparation de la requete CURL */
     if (!curl)
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "%s: cURL init failed for sending mp3", __func__ );
        return(FALSE);
      }
+    curl_easy_setopt(curl, CURLOPT_URL, url );
 
     formpost = lastptr = NULL;                         /* Envoi d'une requete sur l'url client léger pour récupérer le cookie */
     g_snprintf( chaine, sizeof(chaine), "%d", Msg.id );
@@ -145,7 +146,8 @@
 /* sortie: TRUE                                                                                                               */
 /******************************************************************************************************************************/
  static gboolean CB_ajouter_editer_message ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { gint index;
+  { gboolean mp3;
+    gint index;
 
     JsonBuilder *builder;
     JsonGenerator *gen;
@@ -195,11 +197,10 @@
     g_object_unref(gen);
     WTD_Curl_post_request ( "ws/setmessage", TRUE, buf, taille_buf );                          /* Requete d'update du message */
 
-    if (gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mp3) ))         /* Validation et requete d'update mp3 si besoin */
-     { WTD_Curl_send_mp3(); }
-
+    mp3 = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mp3) );
     g_list_free( Liste_index_dls );
     gtk_widget_destroy(F_ajout);
+    if (mp3) { WTD_Curl_send_mp3(); }                                         /* Validation et requete d'update mp3 si besoin */
     return(TRUE);
   }
 /******************************************************************************************************************************/

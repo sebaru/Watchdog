@@ -152,6 +152,24 @@
        gtk_progress_bar_set_text( GTK_PROGRESS_BAR (Barre_progress), chaine );
      }
   }
+/******************************************************************************************************************************/
+/* Set_progress: Positionne la barre de progression de la fenetre                                                             */
+/* Entrées: val, max                                                                                                          */
+/* Sortie: Kedal                                                                                                              */
+/******************************************************************************************************************************/
+ void Set_progress_ratio( gint nbr, gint max )
+  { gdouble fraction;
+    gchar chaine[20];
+
+    if (nbr >= max)
+     { Raz_progress_pulse(); }
+    else
+     { fraction = 1.0*nbr/max;
+       gtk_progress_bar_set_fraction ( GTK_PROGRESS_BAR (Barre_progress), fraction );
+       g_snprintf( chaine, sizeof(chaine), "%3.1f%%", 100.0*fraction );
+       gtk_progress_bar_set_text( GTK_PROGRESS_BAR (Barre_progress), chaine );
+     }
+  }
 /**********************************************************************************************************/
 /* Set_progress_text: Positionne le texte de la barre de progression de la fenetre                        */
 /* Entrées: un gchar *                                                                                    */
