@@ -561,8 +561,7 @@
         { Partage->a[num].changes = 0; }
 
        if ( Partage->a[num].changes <= 5 )                    /* Arbitraire : si plus de 5 changes dans la seconde, on bloque */
-        { Ajouter_arch( MNEMO_SORTIE, num, !etat );                           /* Sauvegarde etat n-1 pour courbes historiques */
-          Ajouter_arch( MNEMO_SORTIE, num, 1.0*etat );                                              /* Sauvegarde de l'etat n */
+        { Ajouter_arch( MNEMO_SORTIE, num, 1.0*etat );                                              /* Sauvegarde de l'etat n */
           if (etat == 1)
            { pthread_mutex_lock( &Partage->com_msrv.synchro );                  /* Ajout dans la liste des Events A a traiter */
              Partage->com_msrv.liste_a = g_slist_append( Partage->com_msrv.liste_a,
@@ -571,7 +570,7 @@
            }
           Partage->a[num].changes++;                                                                  /* Un change de plus !! */
         } else if ( ! (Partage->top % 50 ))                                    /* Si persistence on prévient toutes les 5 sec */
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SA: last_change trop tot pour A%d !", num ); }
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: last_change trop tot pour A%d !", __func__, num ); }
        Partage->a[num].last_change = Partage->top;
        Partage->audit_bit_interne_per_sec++;
      }
