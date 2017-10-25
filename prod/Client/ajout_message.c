@@ -384,7 +384,7 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_lib_audio, 1, 4, i, i+1 );
 
     i++;
-    if (edit_msg->is_mp3)
+    if (edit_msg && edit_msg->is_mp3)
      { Check_mp3 = gtk_check_button_new_with_label( _("Change Mp3 to") ); }
     else
      { Check_mp3 = gtk_check_button_new_with_label( _("Add new Mp3") ); }
