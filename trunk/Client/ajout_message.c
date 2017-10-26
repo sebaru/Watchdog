@@ -63,144 +63,86 @@
  static GList *Liste_index_dls;
  static struct CMD_TYPE_MESSAGE Msg;                                                            /* Message en cours d'édition */
 
+#ifdef bouh
 /******************************************************************************************************************************/
-/* WTD_Curl_request: Envoie une requete au serveur                                                                            */
-/* Entrée:                                                                                                                    */
-/* Sortie: FALSE si probleme                                                                                                  */
+/* Valider_fichier_mp3: Confirmation et envoi du fichier mp3 au serveur                                                       */
+/* Entrée: la page du notebook en cours d'edition                                                                             */
+/* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static gboolean WTD_Curl_send_mp3 ( void )
-  { gchar erreur[CURL_ERROR_SIZE+1];
-    struct curl_slist *slist = NULL;
-    struct curl_httppost *formpost;
-    struct curl_httppost *lastptr;
-    long http_response;
-/*    curl_mime *mime;
-    curl_mimepart *part;*/
-    gchar url[128], chaine[64];
-    CURLcode res;
-    CURL *curl;
+ static void Valider_fichier_mp3 ( struct CMD_TYPE_MESSAGE *msg, gchar *fichier )
+  { struct CMD_TYPE_MESSAGE_MP3 *msg_mp3;
+    gint taille, taille_max, id_source;
+    gchar *buffer_envoi;
 
-    http_response = 401;
+    id_source = open ( fichier, O_RDONLY, 0 );
+    if (id_source<0) return;
 
-    g_snprintf( url, sizeof(url), "%s/ws/postfile", Config_cli.target_url );
-    curl = WTD_Curl_init( &erreur[0] );                                      /* Preparation de la requete CURL */
-    if (!curl)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "%s: cURL init failed for sending mp3", __func__ );
-       return(FALSE);
-     }
-    curl_easy_setopt(curl, CURLOPT_URL, url );
+    msg_mp3 = (struct CMD_TYPE_MESSAGE_MP3 *)g_try_malloc0( Client.connexion->taille_bloc );
+    if (!msg_mp3) return;
+    buffer_envoi     = (gchar *)msg_mp3 + sizeof(struct CMD_TYPE_MESSAGE_MP3);
+    taille_max       = Client.connexion->taille_bloc - sizeof(struct CMD_TYPE_MESSAGE_MP3);
+    msg_mp3->num     = msg->num;
+    msg_mp3->taille  = 0;
+                                                          /* Demande de suppression du fichier source MP3 */
+    Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MP3_DEB,
+                   (gchar *)msg_mp3, sizeof(struct CMD_TYPE_MESSAGE_MP3) );
 
-    formpost = lastptr = NULL;                         /* Envoi d'une requete sur l'url client léger pour récupérer le cookie */
-    g_snprintf( chaine, sizeof(chaine), "%d", Msg.id );
-    curl_formadd( &formpost, &lastptr,
-                  CURLFORM_PTRNAME,     "type",
-                  CURLFORM_PTRCONTENTS, "mp3",
-                  CURLFORM_END); 
-    curl_formadd( &formpost, &lastptr,
-                  CURLFORM_PTRNAME,     "id",
-                  CURLFORM_PTRCONTENTS, chaine,
-                  CURLFORM_END); 
-    curl_formadd( &formpost, &lastptr,
-                  CURLFORM_PTRNAME,     "file",
-                  CURLFORM_FILE, gnome_file_entry_get_full_path (GNOME_FILE_ENTRY(Entry_mp3), TRUE),
-                  CURLFORM_CONTENTTYPE, "audio/mp3",
-                  CURLFORM_END); 
-
-    /*mime = curl_mime_init(easy);*/
-
-    /*part = curl_mime_addpart(mime);
-    curl_mime_name(part, "data");
-    curl_mime_filedata(part, gnome_file_entry_get_full_path (GNOME_FILE_ENTRY(Entry_mp3));
-
-    part = curl_mime_addpart(mime);
-    curl_mime_name(part, "msg_id");
-    g_snprintf( chaine, sizeof(chaine), "%d", Msg.id );
-    curl_mime_data(part, chaine, CURL_ZERO_TERMINATED);
- 
-    curl_easy_setopt(easy, CURLOPT_MIMEPOST, mime);*/
-    curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
-    res = curl_easy_perform(curl);
-    if (res)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                "%s : Error : Could not connect : %s", __func__, erreur );
-       curl_easy_cleanup(curl);
-       curl_formfree(formpost);
-       return(FALSE);
+    while( (taille = read ( id_source, buffer_envoi, taille_max ) ) > 0 )             /* Envoi du fichier */
+     { msg_mp3->taille = taille;
+       if (!Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MP3,
+                           (gchar *)msg_mp3, taille + sizeof(struct CMD_TYPE_MESSAGE_MP3) ))
+        { printf("erreur envoi au serveur\n"); }
+       printf("Octets envoyés: %d\n", taille);
      }
 
-    curl_easy_getinfo( curl, CURLINFO_RESPONSE_CODE, &http_response );
-    curl_easy_cleanup(curl);     
-    curl_formfree(formpost);
-    /*    curl_mime_free(mime);*/
-
-    if (http_response != 200)                                                                                /* HTTP 200 OK ? */
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
-                "%s : URL %s HTTP_CODE = %d!", __func__, url, http_response );
-       return(FALSE);
-     }
-    return(TRUE);
+    Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MP3_FIN,                     /* Fin du transfert */
+                   (gchar *)msg_mp3, sizeof(struct CMD_TYPE_MESSAGE_MP3) );
+    close(id_source);
+    g_free(msg_mp3);
   }
+#endif
 /******************************************************************************************************************************/
 /* CB_ajouter_editer_message: Fonction appelée qd on appuie sur un des boutons de l'interface                                 */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
 /* sortie: TRUE                                                                                                               */
 /******************************************************************************************************************************/
  static gboolean CB_ajouter_editer_message ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { gboolean mp3;
-    gint index;
+  { gint index;
 
-    JsonBuilder *builder;
-    JsonGenerator *gen;
-    gchar *buf;
-    gsize taille_buf;
+    g_snprintf( Msg.libelle, sizeof(Msg.libelle),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
+    g_snprintf( Msg.libelle_audio, sizeof(Msg.libelle_audio),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib_audio) ) );
+    g_snprintf( Msg.libelle_sms, sizeof(Msg.libelle_sms),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib_sms) ) );
 
-/************************************************ Préparation du buffer JSON **************************************************/
-    builder = json_builder_new ();
-    if (builder == NULL) return(FALSE);
+    Msg.type       = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) );
+    Msg.enable     = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_enable) );
+    Msg.audio      = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_audio) );
+    Msg.persist    = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_persist) );
+    Msg.sms        = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_sms) );
+    Msg.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
+    index               = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls) );
+    Msg.dls_id   = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, index ) );
+    if (Msg.dls_id == 0) Msg.dls_id = 1;                                           /* Par défaut, pointe sur le premier D.L.S */
+    Msg.bit_audio  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_audio) );
+    Msg.time_repeat= gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_time_repeat) );
 
-    json_builder_begin_object (builder);                                                                /* Contenu du Message */
-    json_builder_set_member_name  ( builder, "id" );
-    json_builder_add_int_value    ( builder, Msg.id );
-    json_builder_set_member_name  ( builder, "type" );
-    json_builder_add_int_value    ( builder, gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_type) ) );
-    json_builder_set_member_name  ( builder, "enable" );
-    json_builder_add_boolean_value( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_enable) ) );
-    json_builder_set_member_name  ( builder, "num" );
-    json_builder_add_int_value    ( builder, gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) ) );
-    json_builder_set_member_name  ( builder, "sms" );
-    json_builder_add_int_value    ( builder, gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_sms) ) );
-    json_builder_set_member_name  ( builder, "audio" );
-    json_builder_add_boolean_value( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_audio) ) );
-    json_builder_set_member_name  ( builder, "bit_audio" );
-    json_builder_add_int_value    ( builder, gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_audio) ) );
-    json_builder_set_member_name  ( builder, "time_repeat" );
-    json_builder_add_int_value    ( builder, gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_time_repeat) ) );
-    json_builder_set_member_name  ( builder, "persist" );
-    json_builder_add_boolean_value( builder, gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_persist) ) );
-    index = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls)) ));
-    if (index == 0) index = 1;                                                     /* Par défaut, pointe sur le premier D.L.S */
-    json_builder_set_member_name  ( builder, "dls_id" );
-    json_builder_add_int_value    ( builder, index );
-    json_builder_set_member_name  ( builder, "libelle" );
-    json_builder_add_string_value ( builder, gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
-    json_builder_set_member_name  ( builder, "libelle_sms" );
-    json_builder_add_string_value ( builder, gtk_entry_get_text( GTK_ENTRY(Entry_lib_sms) ) );
-    json_builder_set_member_name  ( builder, "libelle_audio" );
-    json_builder_add_string_value ( builder, gtk_entry_get_text( GTK_ENTRY(Entry_lib_audio) ) );
-    json_builder_end_object (builder);                                                                 /* Fin dump du message */
-
-    gen = json_generator_new ();
-    json_generator_set_root ( gen, json_builder_get_root(builder) );
-    json_generator_set_pretty ( gen, TRUE );
-    buf = json_generator_to_data (gen, &taille_buf);
-    g_object_unref(builder);
-    g_object_unref(gen);
-    WTD_Curl_post_request ( "ws/setmessage", TRUE, buf, taille_buf );                          /* Requete d'update du message */
-
-    mp3 = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_mp3) );
+    switch(reponse)
+     { case GTK_RESPONSE_OK:
+             { Envoi_serveur( TAG_MESSAGE, (edition ? SSTAG_CLIENT_VALIDE_EDIT_MESSAGE
+                                                    : SSTAG_CLIENT_ADD_MESSAGE),
+                              (gchar *)&Msg, sizeof( struct CMD_TYPE_MESSAGE ) );
+               /*Valider_fichier_mp3 ( &Msg,
+                                     gnome_file_entry_get_full_path ( GNOME_FILE_ENTRY(Entry_mp3), TRUE )
+                                   );*/
+             }
+            break;
+       case GTK_RESPONSE_CANCEL:
+       default:              break;
+     }
     g_list_free( Liste_index_dls );
     gtk_widget_destroy(F_ajout);
-    if (mp3) { WTD_Curl_send_mp3(); }                                         /* Validation et requete d'update mp3 si besoin */
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -246,11 +188,11 @@
     Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_TYPE_NUM_MNEMO_VOC,
                    (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
   }
-/******************************************************************************************************************************/
-/* Rafraichir_sensibilite: met a jour la sensibilite des widgets de la fenetre propriete                                      */
-/* Entrée: void                                                                                                               */
-/* Sortie: void                                                                                                               */
-/******************************************************************************************************************************/
+/**********************************************************************************************************/
+/* Rafraichir_sensibilite: met a jour la sensibilite des widgets de la fenetre propriete                  */
+/* Entrée: void                                                                                           */
+/* Sortie: void                                                                                           */
+/**********************************************************************************************************/
  static void Rafraichir_sensibilite_msg ( void )
   { gboolean enable, audio;
     enable = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_enable) );
@@ -362,7 +304,7 @@
 
 /******************************************************** Paragraphe Voix *****************************************************/
     i++;
-    Check_audio = gtk_check_button_new_with_label( _("Profil Vocal") );
+    Check_audio = gtk_check_button_new_with_label( _("Message Vocal") );
     gtk_table_attach_defaults( GTK_TABLE(table), Check_audio, 0, 1, i, i+1 );
     g_signal_connect( G_OBJECT( GTK_CHECK_BUTTON(Check_audio) ), "clicked",
                       G_CALLBACK( Rafraichir_sensibilite_msg ), NULL );
