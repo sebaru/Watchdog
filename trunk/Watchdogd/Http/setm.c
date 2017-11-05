@@ -33,9 +33,9 @@
 /******************************************************************************************************************************/
 /* Http_Traiter_request_setm: Traite une requete SETM                                                                         */
 /* Entrées: la connexion WSI                                                                                                  */
-/* Sortie : TRUE si OK                                                                                                        */
+/* Sortie : code de retour libwebsocket                                                                                       */
 /******************************************************************************************************************************/
- gboolean Http_Traiter_request_setm ( struct lws *wsi )
+ gint Http_Traiter_request_setm ( struct lws *wsi )
   { gchar token_num[12];
     const gchar *num_s;
     gint retour, num;
@@ -43,7 +43,7 @@
     num_s    = lws_get_urlarg_by_name	( wsi, "num=", token_num, sizeof(token_num) );
     if (num_s) { num = atoi (num_s); }
           else { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );
-                 return(FALSE);
+                 return(1);
                }
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,

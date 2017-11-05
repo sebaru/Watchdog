@@ -337,6 +337,8 @@
                 { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+8 ) ); }
                else if ( ! strncasecmp ( url, "/ws/audio/", 10 ) )
                 { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
+               else if ( ! strncasecmp ( url, "/setm", 5 ) )
+                { return( Http_Traiter_request_setm ( wsi ) ); }
                else if ( ! strcasecmp ( url, "/ws/postfile" ) )
                 { g_snprintf( pss->url, sizeof(pss->url), "/ws/postfile" );
                   return(0);
