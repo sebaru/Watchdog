@@ -1050,6 +1050,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `cansetpwd` tinyint(1) NOT NULL DEFAULT '0',
   `salt` varchar(130) COLLATE utf8_unicode_ci NOT NULL,
   `hash` varchar(130) COLLATE utf8_unicode_ci NOT NULL,
+  `phphash` VARCHAR(130) COLLATE utf8_unicode_ci NOT NULL,
   `comment` varchar(240) COLLATE utf8_unicode_ci DEFAULT NULL,
   `login_failed` int(11) NOT NULL DEFAULT '0',
   `enable` tinyint(1) NOT NULL DEFAULT '0',
