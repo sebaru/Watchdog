@@ -510,6 +510,10 @@
                   CURLFORM_COPYNAME,     "dest",
                   CURLFORM_COPYCONTENTS, telephone,
                   CURLFORM_END); 
+    curl_formadd( &formpost, &lastptr,
+                  CURLFORM_COPYNAME,     "strategy",
+                  CURLFORM_COPYCONTENTS, "2",
+                  CURLFORM_END); 
     curl_formadd( &formpost, &lastptr,                              /* Pas de SMS les 2 premières minutes de vie du processus */
                   CURLFORM_COPYNAME,     "origine",                                 /* 'debugvar' pour lancer en mode semonce */
                   CURLFORM_COPYCONTENTS, VERSION,
