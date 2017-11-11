@@ -51,6 +51,6 @@
     Envoyer_commande_dls ( num );
 
     Http_Send_response_code ( wsi, HTTP_200_OK );
-    return(lws_http_transaction_completed(wsi));
+    return(1);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
