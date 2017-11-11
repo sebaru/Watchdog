@@ -9,6 +9,6 @@ ProxyPassReverse "http://localhost:5560/ws"
 
 <Directory /var/www/html/WEB>
    AddDefaultCharset UTF-8
-
-       Require all granted
+   DirectoryIndex index.php
+   Require all granted
 </Directory>
