@@ -107,7 +107,6 @@
 /**********************************************************************************************************/
  static void Menu_ajouter_utilisateur ( void )
   { Menu_ajouter_editer_utilisateur( NULL );
-    Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_WANT_GROUPE_FOR_UTIL, NULL, 0 );
   }
 /**********************************************************************************************************/
 /* Menu_effacer_utilisateur: Retrait des utilisateurs selectionnés                                        */

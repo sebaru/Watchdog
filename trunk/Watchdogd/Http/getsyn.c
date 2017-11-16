@@ -73,7 +73,7 @@
      }
 
 #ifdef bouh
-    if ( Tester_groupe_util(session->util, syndb->access_groupe)==FALSE)
+    if ( Tester_level_util(session->util, syndb->access_groupe)==FALSE)
      { g_free(syndb);
        Http_Send_response_code ( wsi, 401 );
        return(TRUE);

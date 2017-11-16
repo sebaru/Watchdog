@@ -40,15 +40,14 @@
  static GtkWidget *Entry_lib;                                                    /* Libelle du synoptique */
  static GtkWidget *Entry_page;                                        /* Mnemonique du synoptique */
  static GtkWidget *Entry_groupe;                                                  /* Groupe du synoptique */
- static GtkWidget *Combo_access_groupe;        /* Pour le choix d'appartenance du synoptique à tel ou tel groupe */
- static GList *Liste_index_groupe; /* Pour correspondance index de l'option menu/Id du groupe en question */
- static struct CMD_TYPE_SYNOPTIQUE Edit_syn;                                /* Message en cours d'édition */
+ static GtkWidget *Spin_access_level;                                   /* Pour le choix du niveau de clearance du synoptique */
+ static struct CMD_TYPE_SYNOPTIQUE Edit_syn;                                                    /* Message en cours d'édition */
 
-/**********************************************************************************************************/
-/* CB_ajouter_editer_synoptique: Fonction appelée qd on appuie sur un des boutons de l'interface          */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
-/* sortie: TRUE                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* CB_ajouter_editer_synoptique: Fonction appelée qd on appuie sur un des boutons de l'interface                              */
+/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
+/* sortie: TRUE                                                                                                               */
+/******************************************************************************************************************************/
  static gboolean CB_ajouter_editer_synoptique ( GtkDialog *dialog, gint reponse, gboolean edition )
   { gint index_groupe;
     g_snprintf( Edit_syn.libelle, sizeof(Edit_syn.libelle),
@@ -57,11 +56,7 @@
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_page) ) );
     g_snprintf( Edit_syn.groupe, sizeof(Edit_syn.groupe),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_groupe) ) );
-    index_groupe = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_access_groupe) );
-    if (index_groupe == -1)
-     { Edit_syn.access_groupe = 1; }
-    else
-     { Edit_syn.access_groupe = GPOINTER_TO_INT((g_list_nth( Liste_index_groupe, index_groupe ))->data); }
+    Edit_syn.access_level = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_access_level) );
                   
     switch(reponse)
      { case GTK_RESPONSE_OK:
@@ -73,7 +68,6 @@
        case GTK_RESPONSE_CANCEL:
        default:              break;
      }
-    g_list_free( Liste_index_groupe );
     gtk_widget_destroy(F_ajout);
     return(TRUE);
   }
@@ -129,11 +123,10 @@
     gtk_editable_set_editable( GTK_EDITABLE(Entry_id), FALSE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_id, 1, 2, i, i+1 );
 
-    texte = gtk_label_new( _("Access Group") ); /* Création de l'option menu pour le choix du type de synoptique */
+    texte = gtk_label_new( _("Access Level") );                                    /* Création du spin du niveau de clearance */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
-    Combo_access_groupe = gtk_combo_box_new_text();
-    Liste_index_groupe = NULL;
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_access_groupe, 3, 4, i, i+1 );
+    Spin_access_level = gtk_spin_button_new_with_range( 0, 10, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_access_level, 3, 4, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("Groupe") );
@@ -160,6 +153,7 @@
     g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(CB_valider), NULL );
     if (edit_syn)                                                              /* Si edition d'un synoptique */
      { gchar chaine[10];
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_access_level), edit_syn->access_level );
        gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_syn->libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_page), edit_syn->page );
        gtk_entry_set_text( GTK_ENTRY(Entry_groupe), edit_syn->groupe );
@@ -172,46 +166,4 @@
     gtk_widget_grab_focus( Entry_lib );
     gtk_widget_show_all( F_ajout );
   }
-/**********************************************************************************************************/
-/* Proto_afficher_un_groupe_existant: ajoute un groupe dans la liste des groupes existants                */
-/* Entrée: rien                                                                                           */
-/* sortie: kedal                                                                                          */
-/**********************************************************************************************************/
- void Proto_afficher_les_groupes_pour_synoptique ( GList *liste )
-  { struct CMD_TYPE_GROUPE *groupe;
-
-printf(" Flag afficher groupe pour syn \n" );
-
-    while( liste )
-     { groupe = (struct CMD_TYPE_GROUPE *)liste->data;
-       gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_access_groupe), groupe->nom );
-       Liste_index_groupe = g_list_append( Liste_index_groupe, GINT_TO_POINTER(groupe->id) );
-       liste = liste->next;
-     }
-  }
-/**********************************************************************************************************/
-/* Proto_fin_affichage_groupes: Les groupes existants ont été envoyés par le serveur, nous pouvons faire  */
-/*                              apparaitre les groupes de l'utilisateur dans l'interface                  */
-/* les groupes de l'utilisateur en cours d'edition                                                        */
-/* Entrée: rien                                                                                           */
-/* sortie: kedal                                                                                          */
-/**********************************************************************************************************/
- void Proto_fin_affichage_groupes_pour_synoptique ( void )
-  { GList *liste;
-    gint cpt;
-
-    cpt = 0;
-printf("fin affichage groupe\n");
-    liste = Liste_index_groupe; 
-    while (liste)
-     { if ( liste->data == GINT_TO_POINTER(Edit_syn.access_groupe) ) break;
-       cpt++;
-       liste = liste->next;
-     }
-    if (liste)
-     { gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_access_groupe), cpt );
-       printf("Set history %d\n", cpt );
-     } else printf(" Groupe not %d found\n", Edit_syn.access_groupe );
-    gtk_widget_show_all(F_ajout);                                    /* Affichage de l'interface complète */
-  }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

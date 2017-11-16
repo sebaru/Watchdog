@@ -50,10 +50,10 @@
     gchar *buf;
     gsize taille_buf;
 
-    if ( session==NULL || session->util==NULL || Tester_groupe_util(session->util, GID_MNEMO)==FALSE )
+/*    if ( session==NULL || session->util==NULL || Tester_level_util(session->util, GID_MNEMO)==FALSE )
      { Http_Send_response_code ( wsi, HTTP_UNAUTHORIZED );
        return(TRUE);
-     }
+     }*/
 
     type_s   = lws_get_urlarg_by_name	( wsi, "type=",    token_type,    sizeof(token_type) );
     num_s    = lws_get_urlarg_by_name	( wsi, "num=",     token_num,     sizeof(token_num) );

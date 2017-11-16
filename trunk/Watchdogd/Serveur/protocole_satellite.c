@@ -38,11 +38,11 @@
   { struct CONNEXION *connexion;
     connexion = client->connexion;
 
-    if ( ! Tester_groupe_util( client->util, GID_SATELLITE) )
+    if ( ! Tester_level_util( client->util, ACCESS_LEVEL_SATELLITE) )
      { struct CMD_GTK_MESSAGE gtkmessage;
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
                 "Gerer_protocole_satellite: %s not allowed to send INTERNAL infos (not in group GID_SATELLITE=%d).",
-                 client->util->nom, GID_SATELLITE );
+                 client->util->nom, ACCESS_LEVEL_SATELLITE );
        g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied..." );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );

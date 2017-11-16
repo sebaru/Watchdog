@@ -226,7 +226,7 @@
      { /* code = Save_dls_to_disk == FALSE); */
      }
     else if( !strcasecmp(type,"mp3"))
-     { if ( pss->session->util==NULL || Tester_groupe_util( pss->session->util, GID_MESSAGE )==FALSE )
+     { if ( pss->session->util==NULL /*|| Tester_level_util( pss->session->util, GID_MESSAGE )*/==FALSE )
         { code = HTTP_UNAUTHORIZED; }
        else if (id==-1)
         { code = HTTP_BAD_REQUEST; }

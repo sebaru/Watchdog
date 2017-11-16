@@ -56,8 +56,6 @@
  GnomeUIInfo Menu_habilitation[]=                                                   /*!< Définition du menu des habilitations */
   { GNOMEUIINFO_ITEM_STOCK( N_("_Users"), N_("Edit users"),
                             Menu_want_util, GNOME_STOCK_TEXT_BULLETED_LIST ),
-    GNOMEUIINFO_ITEM_STOCK( N_("_Groups"), N_("Edit groups"),
-                            Menu_want_groupe, GNOME_STOCK_PIXMAP_ATTACH ),
     GNOMEUIINFO_END
   };
 

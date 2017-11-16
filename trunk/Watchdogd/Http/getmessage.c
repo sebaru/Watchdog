@@ -50,7 +50,7 @@
     gchar *buf;
     gsize taille_buf;
 
-    if ( session==NULL || session->util==NULL || Tester_groupe_util(session->util, GID_MESSAGE)==FALSE )
+    if ( session==NULL || session->util==NULL /*|| Tester_level_util(session->util, GID_MESSAGE)*/==FALSE )
      { Http_Send_response_code ( wsi, HTTP_UNAUTHORIZED );
        return(1);
      }

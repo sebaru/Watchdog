@@ -194,7 +194,7 @@
                                  g_snprintf( add_motif.libelle, sizeof(add_motif.libelle),
                                              "%s" , Motif_preview0.libelle );
                                  add_motif.syn_id = infos->syn.id;
-                                 add_motif.gid = 1;              /* Nom du groupe d'appartenance du motif */
+                                 add_motif.access_level = 0;     /* Nom du groupe d'appartenance du motif */
                                  add_motif.bit_controle = 0;                                /* Ixxx, Cxxx */
                                  add_motif.bit_clic = 0;        /* Bit à activer quand clic gauche souris */
                                  add_motif.bit_clic2 = 0;       /* Bit à activer quand clic gauche souris */

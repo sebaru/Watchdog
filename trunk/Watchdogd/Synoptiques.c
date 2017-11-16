@@ -146,9 +146,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
-                "INSERT INTO %s(libelle,page,access_groupe,groupe) VALUES "
-                "('%s','%s','%d','%s')", NOM_TABLE_SYNOPTIQUE, libelle, page,
-                syn->access_groupe, groupe );
+                "INSERT INTO %s(libelle,groupe,page,access_level) VALUES "
+                "('%s','%s','%d','%s')", NOM_TABLE_SYNOPTIQUE, libelle, groupe, page, syn->access_level );
     g_free(libelle);
     g_free(page);
     g_free(groupe);
@@ -216,8 +215,8 @@
      { memcpy( &syn->libelle, db->row[1], sizeof(syn->libelle) );            /* Recopie dans la structure */
        memcpy( &syn->page,    db->row[2], sizeof(syn->page   ) );            /* Recopie dans la structure */
        memcpy( &syn->groupe,  db->row[4], sizeof(syn->groupe ) );            /* Recopie dans la structure */
-       syn->id            = atoi(db->row[0]);
-       syn->access_groupe = atoi(db->row[3]);
+       syn->id           = atoi(db->row[0]);
+       syn->access_level = atoi(db->row[3]);
      }
     return(syn);
   }
@@ -284,9 +283,9 @@
 
     g_snprintf( requete, sizeof(requete),                                              /* Requete SQL */
                 "UPDATE %s SET "             
-                "libelle='%s',page='%s',access_groupe='%d',groupe='%s' "
+                "libelle='%s',page='%s',access_level='%d',groupe='%s' "
                 "WHERE id='%d'",
-                NOM_TABLE_SYNOPTIQUE, libelle, page, syn->access_groupe, groupe, syn->id );
+                NOM_TABLE_SYNOPTIQUE, libelle, page, syn->access_level, groupe, syn->id );
     g_free(libelle);
     g_free(page);
     g_free(groupe);

@@ -111,7 +111,6 @@
 /**********************************************************************************************************/
  static void Menu_ajouter_synoptique ( void )
   { Menu_ajouter_editer_synoptique(NULL);
-    Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_WANT_GROUPE_FOR_SYNOPTIQUE, NULL, 0 );
   }
 /**********************************************************************************************************/
 /* Menu_effacer_synoptique: Retrait des synoptiques selectionnés                                          */
@@ -167,7 +166,6 @@
 printf("on veut editer le synoptique num %d %s\n", rezo_synoptique.id, rezo_synoptique.libelle );
     Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_EDIT_SYNOPTIQUE,
                   (gchar *)&rezo_synoptique, sizeof(struct CMD_TYPE_SYNOPTIQUE) );
-    Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_WANT_GROUPE_FOR_SYNOPTIQUE, NULL, 0 );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                           /* Liberation mémoire */
   }

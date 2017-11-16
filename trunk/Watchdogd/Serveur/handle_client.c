@@ -96,7 +96,7 @@
     client->Liste_events = g_slist_remove ( client->Liste_events, event );
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
        
-    if ( Tester_groupe_util( client->util, GID_SATELLITE) )                    /* Il faut etre dans le bon groupe Satellite ! */
+    if ( Tester_level_util( client->util, ACCESS_LEVEL_SATELLITE) )           /* Il faut etre dans le bon groupe Satellite ! */
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_event_au_client: Event traite %s (instance %s, thread %s)",
                  event->objet, event->instance, event->thread );
