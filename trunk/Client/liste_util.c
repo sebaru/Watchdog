@@ -37,6 +37,7 @@
 
  enum
   {  COLONNE_ID,
+     COLONNE_ACCESS_LEVEL,
      COLONNE_NOM,
      COLONNE_COMMENTAIRE,
      NBR_COLONNE
@@ -231,6 +232,7 @@ printf("Want edit user %s %d\n", nom, rezo_util.id );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                         /* Id de l'utilisateur */
+                                              G_TYPE_UINT,                                /* Access level */
                                               G_TYPE_STRING,                                       /* Nom */
                                               G_TYPE_STRING                                /* Commentaire */
                                );
@@ -246,6 +248,14 @@ printf("Want edit user %s %d\n", nom, rezo_util.id );
                                                          "text", COLONNE_ID,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_ID);                     /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_util), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                          /* Colonne de l'id de l'access level */
+    g_object_set( renderer, "xalign", 0.5, NULL );
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Access Level"), renderer,
+                                                         "text", COLONNE_ACCESS_LEVEL,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_ACCESS_LEVEL);           /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_util), colonne );
 
     renderer = gtk_cell_renderer_text_new();                           /* Colonne du nom de l'utilisateur */

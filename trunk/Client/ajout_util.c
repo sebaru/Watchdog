@@ -251,7 +251,7 @@
     gtk_container_add( GTK_CONTAINER(frame), vboite );
 
 /******************************************** Paramètres de l'utilisateur *********************************/
-    table = gtk_table_new( 8, 4, FALSE );
+    table = gtk_table_new( 7, 4, FALSE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(vboite), table, FALSE, FALSE, 0 );
@@ -343,12 +343,12 @@
     texte = gtk_label_new( _("SSRV_bit_presence") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Spin_ssrv_bit_presence = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_ssrv_bit_presence, 1, 4, i, i+1 );;
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_ssrv_bit_presence, 1, 2, i, i+1 );;
 
-/***************************************** Gestion des groupes existants **********************************/
-    i++;
+    texte = gtk_label_new( _("Access Level") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
     Spin_access_level = gtk_spin_button_new_with_range( 0, 10, 1 );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_access_level, 2, 3, i, i+1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_access_level, 3, 4, i, i+1 );
 
     if (edit_util)                                                           /* Est-on en mode edition ?? */
      { gchar chaine[80], *date;
