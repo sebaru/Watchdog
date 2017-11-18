@@ -178,7 +178,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,libelle,page,access_groupe,groupe"
+                "SELECT id,libelle,page,access_level,groupe"
                 " FROM %s ORDER BY groupe,page,libelle", NOM_TABLE_SYNOPTIQUE );
 
     db = Init_DB_SQL();       
@@ -231,7 +231,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,libelle,page,access_groupe,groupe"
+                "SELECT id,libelle,page,access_level,groupe"
                 " FROM %s WHERE id=%d", NOM_TABLE_SYNOPTIQUE, id );
 
     db = Init_DB_SQL();       
