@@ -734,6 +734,12 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
        g_snprintf( requete, sizeof(requete), "DROP TABLE 'groups'" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `date_modif` `date_modif` DATETIME NOT NULL" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `date_expire` `date_expire` DATETIME NOT NULL" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `date_create` `date_create` DATETIME NOT NULL" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
     database_version=3353;
