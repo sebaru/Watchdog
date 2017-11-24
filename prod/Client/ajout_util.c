@@ -43,7 +43,6 @@
  extern struct CONFIG Config;                                          /* Configuration generale watchdog */
  extern struct CLIENT Client;                                    /* Identifiant de l'utilisateur en cours */
 
- static GtkWidget *Liste_grps, *Liste_grp_util;                            /* Liste des groupes existants */
  static GtkWidget *Check_expire;                                         /* Le bouton d'expiration ou non */
  static GtkWidget *Calendar;                                 /* Le calendrier pour l'expiration du compte */
  static GtkWidget *Entry_nom;                                                  /* Le nom de l'utilisateur */
@@ -61,6 +60,7 @@
  static GtkWidget *Check_imsg_allow_cde;            /* Peut-on recevoir des imsg de commande de sa part ? */
  static GtkWidget *Entry_pass1, *Entry_pass2;                            /* Acquisition des passwords ... */
  static GtkWidget *Spin_ssrv_bit_presence;                                       /* Bxxx de presence SSRV */
+ static GtkWidget *Spin_access_level;                                              /* Niveau de clearance */
  static GtkWidget *Check_imsg_enable;                                         /* Lui envoit-on des IMSG ? */
  static GtkWidget *F_ajout;                                /* Widget visuel de la fenetre d'ajout/edition */
  static struct CMD_TYPE_UTILISATEUR Edit_util;                          /* Utilisateur en cours d'edition */
@@ -103,72 +103,6 @@
     g_object_unref (G_OBJECT (store));                        /* nous n'avons plus besoin de notre modele */
 
     return( vue );
-  }
-/**********************************************************************************************************/
-/* Recuperer_groupes_util: Parcours la liste visuelle et renvoie un tableau de groupes                    */
-/* Entrée: rien                                                                                           */
-/* sortie: un tableau de groupes nouvellement alloué                                                      */
-/**********************************************************************************************************/
- static guint *Recuperer_groupes_util ( void )
-  { static guint gids[NBR_MAX_GROUPE_PAR_UTIL];
-    GtkTreeModel *store;
-    GtkTreeIter iter;
-    gboolean valide;
-    guint cpt, id;
-
-    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_grp_util) );
-    valide = gtk_tree_model_get_iter_first( store, &iter );
-    cpt = 0;
-    while ( cpt<NBR_MAX_GROUPE_PAR_UTIL && valide )      /* Parcours de la liste des groupes utilisateurs */
-     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
-       if (id) gids[cpt++] = id;                              /* on ne compte pas le groupe TOUT_LE_MONDE */
-       valide = gtk_tree_model_iter_next( store, &iter );
-     }
-    gids[cpt++] = 0;
-    return( gids );
-  }
-/**********************************************************************************************************/
-/* Positionner_groupes_util: Affiche à l'ecran les groupes de l'utilisateur                               */
-/* Entrée: le tableau des groupes utilisateurs                                                            */
-/* sortie: rien                                                                                           */
-/**********************************************************************************************************/
- static void Positionner_groupes_util ( guint *gids )
-  { GtkTreeModel *store, *cible;
-    GtkTreeIter iter, iter_cible;
-    gchar *nom, *comment;
-    gboolean valide;
-    guint cpt, id;
-
-    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_grps) );
-    cible  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_grp_util) );
-    valide = gtk_tree_model_get_iter_first( store, &iter );
-
-    cpt = 0;
-    while ( cpt<NBR_MAX_GROUPE_PAR_UTIL )                /* On parcours tous les groupes de l'utilisateur */
-     {
-       valide = gtk_tree_model_get_iter_first( store, &iter );
-       while ( valide )                                   /* On parcours l'ensemble des groupes existants */
-        { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
-          if (gids[cpt] == id)                                        /* Le groupe fait parti des gids ?? */
-           { gtk_tree_model_get( store, &iter, COLONNE_NOM, &nom, -1 );
-             gtk_tree_model_get( store, &iter, COLONNE_COMMENTAIRE, &comment, -1 );
-             gtk_list_store_append ( GTK_LIST_STORE(cible), &iter_cible );       /* Acquisition iterateur */
-             gtk_list_store_set ( GTK_LIST_STORE(cible), &iter_cible,
-                                  COLONNE_ID, id,
-                                  COLONNE_NOM, nom,
-                                  COLONNE_COMMENTAIRE, comment,
-                                  -1
-                                );
-             g_free(nom);
-             g_free(comment);
-             break;
-           }
-          if (!gids[cpt]) break;                                                        /* Fin de tableau */
-          valide = gtk_tree_model_iter_next( store, &iter );
-        }
-       if (!gids[cpt]) break;                                                           /* Fin de tableau */
-       cpt++;
-     }
   }
 /**********************************************************************************************************/
 /* Changer_compte_expire: Appelé quand l'utilisateur clique sur le toggle expire                          */
@@ -223,115 +157,13 @@
     gtk_widget_set_sensitive( Check_imsg_allow_cde, enable );
   }
 /**********************************************************************************************************/
-/* Proto_afficher_un_groupe_existant: ajoute un groupe dans la liste des groupes existants                */
-/* Entrée: rien                                                                                           */
-/* sortie: kedal                                                                                          */
-/**********************************************************************************************************/
- void Proto_afficher_un_groupe_existant ( struct CMD_TYPE_GROUPE *groupe )
-  { GtkTreeModel *store;
-    GtkTreeIter iter;
-    store = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_grps) );
-
-    gtk_list_store_append ( GTK_LIST_STORE(store), &iter );                      /* Acquisition iterateur */
-    gtk_list_store_set ( GTK_LIST_STORE(store), &iter,
-                         COLONNE_ID, groupe->id,
-                         COLONNE_NOM, groupe->nom,
-                         COLONNE_COMMENTAIRE, groupe->commentaire,
-                         -1
-                       );
-  }
-/**********************************************************************************************************/
-/* Proto_fin_affichage_groupes: Les groupes existants ont été envoyés par le serveur, nous pouvons faire  */
-/*                              apparaitre les groupes de l'utilisateur dans l'interface                  */
-/* les groupes de l'utilisateur en cours d'edition                                                        */
-/* Entrée: rien                                                                                           */
-/* sortie: kedal                                                                                          */
-/**********************************************************************************************************/
- void Proto_fin_affichage_groupes_existants ( void )
-  { Positionner_groupes_util ( Edit_util.gids );
-  }
-/**********************************************************************************************************/
-/* Ajouter_groupes: Ajout de la selection dans les groupes utilisateurs                                   */
-/* Entrée: rien                                                                                           */
-/* sortie: kedal                                                                                          */
-/**********************************************************************************************************/
- static void Ajouter_groupes ( void )
-  { GtkTreeSelection *selection;
-    GtkTreeModel *store, *store_new;
-    GtkTreeIter iter, iter_new;
-    GList *lignes;                                                            /* Les lignes selectionnées */
-    GList *liste;                                                          /* Parcours de la liste lignes */
-
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_grps) );
-    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_grps) );
-    store_new = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_grp_util) );
-    lignes    = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    if (!(lignes && lignes->data)) return;
-
-    for (liste = lignes; liste; liste=liste->next)
-     { gchar *nom, *comment;
-       guint id, id_new;
-       gboolean valide;
-       gtk_tree_model_get_iter( store, &iter, liste->data );     /* Recuperation de la ligne selectionnée */
-       gtk_tree_model_get( store, &iter,
-                           COLONNE_ID, &id,
-                           COLONNE_NOM, &nom,
-                           COLONNE_COMMENTAIRE, &comment,
-                           -1 );                                                       /* Recup du groupe */
-
-       valide = gtk_tree_model_get_iter_first( store_new, &iter_new );                /* Test de presence */
-       while ( valide )          /* Parcours de la liste des groupes utilisateurs pour tester la presence */
-        { gtk_tree_model_get( store_new, &iter_new, COLONNE_ID, &id_new, -1 );
-          if ( id == id_new ) break;
-          valide = gtk_tree_model_iter_next( store_new, &iter_new );
-        }
-     
-       if (!valide)                 /* Si nous sommes en bas de liste, c'est que l'item n'est pas présent */
-        { gtk_list_store_append ( GTK_LIST_STORE(store_new), &iter_new );        /* Acquisition iterateur */
-          gtk_list_store_set ( GTK_LIST_STORE(store_new), &iter_new,
-                               COLONNE_ID, id,
-                               COLONNE_NOM, nom,
-                               COLONNE_COMMENTAIRE, comment,
-                               -1
-                             );
-        }
-       g_free(nom);
-       g_free(comment);
-     }
-    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-    g_list_free (lignes);                                                           /* Liberation mémoire */
-    gtk_tree_selection_unselect_all( selection );                      /* On deselectionne tous nos items */
-  }
-/**********************************************************************************************************/
-/* Retirer_groupes: Retrait de la selection dans les groupes utilisateurs                                 */
-/* Entrée: rien                                                                                           */
-/* sortie: kedal                                                                                          */
-/**********************************************************************************************************/
- static void Retirer_groupes ( void )
-  { GtkTreeSelection *selection;
-    GtkTreeModel *store;
-    GtkTreeIter iter;
-    GList *lignes;                                                            /* Les lignes selectionnées */
-
-    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_grp_util) );
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_grp_util) );
-    while ( (lignes = gtk_tree_selection_get_selected_rows ( selection, NULL )) != NULL )
-     { gtk_tree_model_get_iter( store, &iter, lignes->data );    /* Recuperation de la ligne selectionnée */
-       gtk_list_store_remove( GTK_LIST_STORE(store), &iter );             /* Retrait de la liste visuelle */
-
-       g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-       g_list_free (lignes);                                                        /* Liberation mémoire */
-     }
-  }
-/**********************************************************************************************************/
 /* CB_ajouter_editer_utilisateur: Fonction appelée qd on appuie sur un des boutons de l'interface         */
 /* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_ajouter_editer_utilisateur ( GtkDialog *dialog, gint reponse,
                                                  gboolean edition )
-  { guint *gids;
-
+  { 
     g_snprintf( Edit_util.nom, sizeof(Edit_util.nom),
                 "%s", gtk_entry_get_text(GTK_ENTRY(Entry_nom) ) );
     g_snprintf( Edit_util.commentaire, sizeof(Edit_util.commentaire),
@@ -351,9 +183,7 @@
     Edit_util.imsg_enable       = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_imsg_enable));
     Edit_util.imsg_allow_cde    = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_imsg_allow_cde));
     Edit_util.ssrv_bit_presence = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_ssrv_bit_presence) );
-
-    gids = Recuperer_groupes_util();
-    memcpy( Edit_util.gids, gids, sizeof(Edit_util.gids) );
+    Edit_util.access_level      = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_access_level) );
 
     switch(reponse)
      { case GTK_RESPONSE_OK:
@@ -421,7 +251,7 @@
     gtk_container_add( GTK_CONTAINER(frame), vboite );
 
 /******************************************** Paramètres de l'utilisateur *********************************/
-    table = gtk_table_new( 8, 4, FALSE );
+    table = gtk_table_new( 7, 4, FALSE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(vboite), table, FALSE, FALSE, 0 );
@@ -513,48 +343,12 @@
     texte = gtk_label_new( _("SSRV_bit_presence") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
     Spin_ssrv_bit_presence = gtk_spin_button_new_with_range( 0, NBR_BIT_DLS, 1 );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_ssrv_bit_presence, 1, 4, i, i+1 );;
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_ssrv_bit_presence, 1, 2, i, i+1 );;
 
-/***************************************** Gestion des groupes ********************************************/
-    separateur = gtk_hseparator_new();
-    gtk_box_pack_start( GTK_BOX(vboite), separateur, FALSE, FALSE, 0 );
-
-    table = gtk_table_new( 3, 3, FALSE );
-    gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
-    gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
-    gtk_box_pack_start( GTK_BOX(vboite), table, TRUE, TRUE, 0 );
-
-    texte = gtk_label_new( _("User groups") );
-    gtk_table_attach( GTK_TABLE(table), texte, 0, 1, 0, 1, 0, 0, 0, 0 );
-
-    texte = gtk_label_new( _("All groups") );
-    gtk_table_attach( GTK_TABLE(table), texte, 2, 3, 0, 1, 0, 0, 0, 0 );
-
-    bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
-    gtk_table_attach( GTK_TABLE(table), bouton, 1, 2, 1, 2, 0, 0, 0, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Ajouter_groupes), NULL );
-
-    bouton = gtk_button_new_from_stock( GTK_STOCK_REMOVE );
-    gtk_table_attach( GTK_TABLE(table), bouton, 1, 2, 2, 3, 0, 0, 0, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Retirer_groupes), NULL );
-
-/***************************************** Gestion des groupes existants **********************************/
-    scroll = gtk_scrolled_window_new( NULL, NULL );
-    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
-    gtk_table_attach_defaults( GTK_TABLE(table), scroll, 2, 3, 1, 3 );
-
-    Liste_grps = Visu_groupe ();
-    gtk_container_add( GTK_CONTAINER(scroll), Liste_grps );
-
-/***************************************** Gestion des groupes de l'utilisateur ***************************/
-    scroll = gtk_scrolled_window_new( NULL, NULL );
-    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
-    gtk_table_attach_defaults( GTK_TABLE(table), scroll, 0, 1, 1, 3 );
-
-    Liste_grp_util = Visu_groupe();                                                 /* Creation de la vue */
-    gtk_container_add( GTK_CONTAINER(scroll), Liste_grp_util );
+    texte = gtk_label_new( _("Access Level") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
+    Spin_access_level = gtk_spin_button_new_with_range( 0, 10, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_access_level, 3, 4, i, i+1 );
 
     if (edit_util)                                                           /* Est-on en mode edition ?? */
      { gchar chaine[80], *date;
@@ -563,7 +357,7 @@
 
        g_snprintf( chaine, sizeof(chaine), "%d", edit_util->id );
        gtk_entry_set_text( GTK_ENTRY(Entry_comment), edit_util->commentaire );
-
+       gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_access_level), edit_util->access_level );
        gtk_entry_set_text( GTK_ENTRY(Entry_sms_phone), edit_util->sms_phone );
        gtk_entry_set_text( GTK_ENTRY(Entry_imsg_jabberid), edit_util->imsg_jabberid );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_enable),        edit_util->enable );

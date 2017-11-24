@@ -168,11 +168,11 @@
     Libere_DB_SQL(&db);
     return(retour);
   }
-/**********************************************************************************************************/
-/* Modifier_utilisateurDB: Modification d'u nutilisateur Watchdog                                         */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
-/* Sortie: -1 si pb, id sinon                                                                             */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Modifier_utilisateurDB: Modification d'u nutilisateur Watchdog                                                             */
+/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                                                */
+/* Sortie: -1 si pb, id sinon                                                                                                 */
+/******************************************************************************************************************************/
  static gint Ajouter_Modifier_utilisateurDB( gboolean ajout, struct CMD_TYPE_UTILISATEUR *util )
   { gchar requete[1024], chaine[512];
     gchar *nom, *comment, *phone, *jabberid;
@@ -215,11 +215,11 @@
     if (ajout)
      { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
                    "INSERT INTO %s"             
-                   "(name,mustchangepwd,cansetpwd,comment,login_failed,enable,"
+                   "(name,access_level,mustchangepwd,cansetpwd,comment,login_failed,enable,"
                    "date_create,enable_expire,date_expire,date_modif,sms_enable,sms_phone,sms_allow_cde,"
                    "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence)"
-                   "VALUES ('%s', 1, 1, '%s', 0, 1, %d, %d, '%d', '%d','%d','%s','%d','%d','%s','%d','%d','%d' );",
-                   NOM_TABLE_UTIL, nom,
+                   "VALUES ('%s', '%d', 1, 1, '%s', 0, 1, %d, %d, '%d', '%d','%d','%s','%d','%d','%s','%d','%d','%d' );",
+                   NOM_TABLE_UTIL, nom, util->access_level,
                    comment, (gint)time(NULL),
                    util->expire, (gint)util->date_expire, (gint)time(NULL),
                    util->sms_enable, phone, util->sms_allow_cde,
@@ -229,12 +229,12 @@
     else
      { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
                    "UPDATE %s SET "             
-                   "mustchangepwd=%d,comment='%s',enable=%d,enable_expire=%d,"
+                   "access_level='%d', mustchangepwd=%d,comment='%s',enable=%d,enable_expire=%d,"
                    "cansetpwd=%d,date_expire='%d',date_modif='%d',"
                    "sms_enable='%d',sms_phone='%s',sms_allow_cde='%d',"
                    "imsg_enable='%d',imsg_jabberid='%s',imsg_allow_cde='%d',imsg_available='%d',"
                    "ssrv_bit_presence='%d'",
-                   NOM_TABLE_UTIL, util->mustchangepwd, comment,
+                   NOM_TABLE_UTIL, util->access_level, util->mustchangepwd, comment,
                    util->enable, util->expire,
                    util->cansetpwd, (gint)util->date_expire, (gint)time(NULL),
                    util->sms_enable, phone, util->sms_allow_cde,
@@ -264,7 +264,6 @@
                }
     else id=1;                                          /* Retour = 1 pour une modification d'utilisateur */
     Libere_DB_SQL(&db);
-    Groupe_set_groupe_utilDB ( util->id, (guint *)&util->gids );            /* Positionnement des groupes */ 
     return(id);
   }
 /**********************************************************************************************************/
@@ -493,7 +492,6 @@
 
     util = Recuperer_utilisateurDB_suite( &db );
     Libere_DB_SQL( &db );
-    if (util) Groupe_get_groupe_utilDB ( util->id, (guint *)&util->gids );
     return( util );
   }
 /**********************************************************************************************************/
@@ -533,9 +531,7 @@
 
     util = Recuperer_utilisateurDB_suite( &db );
     if (util)
-     { Libere_DB_SQL( &db );
-       Groupe_get_groupe_utilDB ( util->id, (guint *)&util->gids );
-     }
+     { Libere_DB_SQL( &db ); }
     return( util );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

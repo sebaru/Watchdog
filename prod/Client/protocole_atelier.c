@@ -57,25 +57,7 @@
     static int save_id;
            
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE:
-             { struct CMD_TYPE_GROUPE *groupe;
-               Set_progress_plus(1);
-
-               groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
-               if (!groupe) return; 
-               memcpy( groupe, connexion->donnees, sizeof(struct CMD_TYPE_GROUPE ) );
-               Arrivee_groupe_propriete_syn = g_list_append( Arrivee_groupe_propriete_syn, groupe );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE_FIN:
-             { g_list_foreach( Arrivee_groupe, (GFunc)Proto_afficher_un_groupe_pour_propriete_synoptique, NULL );
-               g_list_foreach( Arrivee_groupe, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_groupe_propriete_syn );
-               Arrivee_groupe_propriete_syn = NULL;
-             }
-            break;
-/**********************************************************************************************************/
-       case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC:
+     { case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC:
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CLIC2:
        case SSTAG_SERVEUR_TYPE_NUM_MNEMO_CTRL:
              { struct CMD_TYPE_MNEMO_BASE *mnemo;

@@ -14,7 +14,6 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
                           protocole_atelier.c \
 			  protocole_synoptique.c protocole_admin.c \
                           menu.c timer.c admin.c \
-			  liste_groupe.c ajout_groupe.c \
 			  liste_util.c ajout_util.c \
 			  liste_plugin_dls.c ajout_plugin_dls.c edit_source_dls.c \
 			  liste_histo.c liste_histo_msgs.c \

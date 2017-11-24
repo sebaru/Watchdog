@@ -45,7 +45,7 @@
              "%s: (sid %s) Processing...", __func__, Http_get_session_id(pss->session) );
 
 
-    if ( pss->session==NULL || pss->session->util==NULL || Tester_groupe_util( pss->session->util, GID_MESSAGE)==FALSE)
+    if ( pss->session==NULL || pss->session->util==NULL/* || Tester_level_util( pss->session->util, GID_MESSAGE)*/==FALSE)
      { code = HTTP_UNAUTHORIZED; goto end; }
 
     code = HTTP_BAD_REQUEST;                                                                                   /* Bad Request */

@@ -77,12 +77,13 @@
        return(NULL);
      }
 
-    cpt=0;
+/*
+ *     cpt=0;
     while ( util->gids[cpt] )
      { xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"group", "%06d", util->gids[cpt] );
        cpt++;
      }
-
+*/
     if (xmlTextWriterEndDocument(writer)<0)                                                                   /* End document */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                  "%s: Failed to end Document", __func__ );

@@ -84,11 +84,11 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s(icone,syn_id,libelle,gid,bitctrl,bitclic,posx,posy,larg,haut,angle,"
+                "INSERT INTO %s(icone,syn_id,libelle,access_level,bitctrl,bitclic,posx,posy,larg,haut,angle,"
                 "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer) VALUES "
                 "('%d','%d','%s','%d','%d','%d','%d','%d','%f','%f','%f','%d','%d','%d','%d','%d','%d','%d','%d')",
                 NOM_TABLE_MOTIF,
-                motif->icone_id, motif->syn_id, libelle, motif->gid,
+                motif->icone_id, motif->syn_id, libelle, motif->access_level,
                 motif->bit_controle, motif->bit_clic,
                 motif->position_x, motif->position_y, motif->largeur, motif->hauteur, motif->angle,
                 motif->type_dialog, motif->type_gestion,
@@ -122,7 +122,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,libelle,icone,syn_id,gid,bitctrl,bitclic,posx,posy,larg,haut,angle,"
+                "SELECT id,libelle,icone,syn_id,access_level,bitctrl,bitclic,posx,posy,larg,haut,angle,"
                 "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer"
                 " FROM %s WHERE syn_id='%d' ORDER BY layer", NOM_TABLE_MOTIF, id_syn );
 
@@ -155,7 +155,7 @@
        motif->id           = atoi(db->row[0]);
        motif->icone_id     = atoi(db->row[2]);                                                  /* Correspond au fichier .gif */
        motif->syn_id       = atoi(db->row[3]);
-       motif->gid          = atoi(db->row[4]);                                       /* Nom du groupe d'appartenance du motif */
+       motif->access_level = atoi(db->row[4]);                                       /* Nom du groupe d'appartenance du motif */
        motif->bit_controle = atoi(db->row[5]);                                                                  /* Ixxx, Cxxx */
        motif->bit_clic     = atoi(db->row[6]);                    /* Bit à activer quand on clic avec le bouton gauche souris */
        motif->bit_clic2    = atoi(db->row[17]);                      /* Bit à activer quand on clic avec bouton gauche souris */
@@ -215,7 +215,7 @@
        motif->id           = atoi(db->row[0]);
        motif->icone_id     = atoi(db->row[2]);                                                  /* Correspond au fichier .gif */
        motif->syn_id       = atoi(db->row[3]);
-       motif->gid          = atoi(db->row[4]);                                       /* Nom du groupe d'appartenance du motif */
+       motif->access_level = atoi(db->row[4]);                                       /* Nom du groupe d'appartenance du motif */
        motif->bit_controle = atoi(db->row[5]);                                                                  /* Ixxx, Cxxx */
        motif->bit_clic     = atoi(db->row[6]);                    /* Bit à activer quand on clic avec le bouton gauche souris */
        motif->bit_clic2    = atoi(db->row[17]);                      /* Bit à activer quand on clic avec bouton gauche souris */
@@ -261,11 +261,11 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "             
-                "libelle='%s',gid='%d',bitctrl='%d',bitclic='%d',posx='%d',posy='%d',larg='%f',"
+                "libelle='%s',access_level='%d',bitctrl='%d',bitclic='%d',posx='%d',posy='%d',larg='%f',"
                 "haut='%f',angle='%f',dialog='%d',gestion='%d',rouge='%d',vert='%d',bleu='%d',bitclic2='%d',"
                 "rafraich='%d',layer='%d'"
                 " WHERE id=%d;", NOM_TABLE_MOTIF,
-                libelle, motif->gid,
+                libelle, motif->access_level,
                 motif->bit_controle, motif->bit_clic,
                 motif->position_x, motif->position_y, motif->largeur, motif->hauteur, motif->angle,
                 motif->type_dialog, motif->type_gestion,

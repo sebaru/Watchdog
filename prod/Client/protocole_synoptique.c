@@ -41,7 +41,6 @@
 /**********************************************************************************************************/
  void Gerer_protocole_synoptique ( struct CONNEXION *connexion )
   { static GList *Arrivee_synoptique = NULL;
-    static GList *Arrivee_groupe = NULL;
            
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_SYNOPTIQUE_OK:
@@ -90,23 +89,6 @@
                Chercher_page_notebook( TYPE_PAGE_SYNOPTIQUE, 0, TRUE );
              }
             break;
-       case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_SYNOPTIQUE:
-             { struct CMD_TYPE_GROUPE *groupe;
-               Set_progress_plus(1);
-
-               groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
-               if (!groupe) return; 
-               memcpy( groupe, connexion->donnees, sizeof(struct CMD_TYPE_GROUPE ) );
-               Arrivee_groupe = g_list_append( Arrivee_groupe, groupe );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_SYNOPTIQUE_FIN:
-             { Proto_afficher_les_groupes_pour_synoptique( Arrivee_groupe );
-               g_list_foreach( Arrivee_groupe, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_groupe );
-               Arrivee_groupe = NULL;
-               Proto_fin_affichage_groupes_pour_synoptique();
-             }
      }
   }
 /*--------------------------------------------------------------------------------------------------------*/

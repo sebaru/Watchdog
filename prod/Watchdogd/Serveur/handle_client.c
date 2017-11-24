@@ -96,7 +96,7 @@
     client->Liste_events = g_slist_remove ( client->Liste_events, event );
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
        
-    if ( Tester_groupe_util( client->util, GID_SATELLITE) )                    /* Il faut etre dans le bon groupe Satellite ! */
+    if ( Tester_level_util( client->util, ACCESS_LEVEL_SATELLITE) )           /* Il faut etre dans le bon groupe Satellite ! */
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                 "Envoyer_event_au_client: Event traite %s (instance %s, thread %s)",
                  event->objet, event->instance, event->thread );
@@ -147,24 +147,6 @@
                break;                 
           case ATTENTE_CONNEXION_SSL:
                Connecter_ssl ( client );                                                  /* Tentative de connexion securisée */
-               break;
-          case ENVOI_GROUPE_FOR_UTIL:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send groupe util" );
-               pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_util_thread, client );
-               pthread_detach( tid );
-               break;
-          case ENVOI_GROUPE_FOR_SYNOPTIQUE:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send groupe synoptique" );
-               pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_synoptique_thread, client );
-               pthread_detach( tid );
-               break;
-          case ENVOI_GROUPE_FOR_PROPRIETE_SYNOPTIQUE:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send groupe propriete syn" );
-               pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_propriete_synoptique_thread, client );
-               pthread_detach( tid );
                break;
           case ENVOI_ICONE_FOR_ATELIER:
                Client_mode( client, VALIDE );

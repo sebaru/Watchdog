@@ -41,8 +41,6 @@
 /**********************************************************************************************************/
  void Gerer_protocole_utilisateur ( struct CONNEXION *connexion )
   { static GList *Arrivee_util = NULL;
-    static GList *Arrivee_groupe = NULL;
-    static GList *Arrivee_groupe_for_util = NULL;
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_UTIL_OK:
@@ -89,67 +87,6 @@
                g_list_free( Arrivee_util );
                Arrivee_util = NULL;
                Chercher_page_notebook( TYPE_PAGE_UTIL, 0, TRUE );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_UTIL:
-             { struct CMD_TYPE_GROUPE *groupe;
-               Set_progress_plus(1);
-
-               groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof(struct CMD_TYPE_GROUPE) );
-               if (!groupe) return; 
-               memcpy( groupe, connexion->donnees, sizeof(struct CMD_TYPE_GROUPE) );
-               Arrivee_groupe_for_util = g_list_append( Arrivee_groupe_for_util, groupe );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_UTIL_FIN:
-             { g_list_foreach( Arrivee_groupe_for_util, (GFunc)Proto_afficher_un_groupe_existant, NULL );
-               g_list_foreach( Arrivee_groupe_for_util, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_groupe_for_util );
-               Arrivee_groupe_for_util = NULL;
-               Proto_fin_affichage_groupes_existants();
-             }
-            break;
-
-       case SSTAG_SERVEUR_ADD_GROUPE_OK:
-             { struct CMD_TYPE_GROUPE *groupe;
-               groupe = (struct CMD_TYPE_GROUPE *)connexion->donnees;
-               Proto_afficher_un_groupe( groupe );
-             }
-            break;
-       case SSTAG_SERVEUR_DEL_GROUPE_OK:
-             { struct CMD_TYPE_GROUPE *groupe;
-               groupe = (struct CMD_TYPE_GROUPE *)connexion->donnees;
-               Proto_cacher_un_groupe( groupe );
-             }
-            break;
-       case SSTAG_SERVEUR_EDIT_GROUPE_OK:
-             { struct CMD_TYPE_GROUPE *groupe;
-               groupe = (struct CMD_TYPE_GROUPE *)connexion->donnees;
-               Menu_ajouter_editer_groupe( groupe );
-             }
-            break;
-       case SSTAG_SERVEUR_VALIDE_EDIT_GROUPE_OK:
-             { struct CMD_TYPE_GROUPE *groupe;
-               groupe = (struct CMD_TYPE_GROUPE *)connexion->donnees;
-               Proto_rafraichir_un_groupe( groupe );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_GROUPE:
-             { struct CMD_TYPE_GROUPE *groupe;
-               Set_progress_plus(1);
-
-               groupe = (struct CMD_TYPE_GROUPE *)g_try_malloc0( sizeof( struct CMD_TYPE_GROUPE ) );
-               if (!groupe) return; 
-               memcpy( groupe, connexion->donnees, sizeof(struct CMD_TYPE_GROUPE ) );
-               Arrivee_groupe = g_list_append( Arrivee_groupe, groupe );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FIN:
-             { g_list_foreach( Arrivee_groupe, (GFunc)Proto_afficher_un_groupe, NULL );
-               g_list_foreach( Arrivee_groupe, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_groupe );
-               Arrivee_groupe = NULL;
-               Chercher_page_notebook( TYPE_PAGE_GROUPE, 0, TRUE );
              }
             break;
      }

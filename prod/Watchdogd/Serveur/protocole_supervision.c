@@ -76,7 +76,7 @@
   { struct CONNEXION *connexion;
     connexion = client->connexion;
 
-    if ( ! Tester_groupe_util( client->util, GID_TOUTLEMONDE ) )
+    if ( ! Tester_level_util( client->util, ACCESS_LEVEL_ALL ) )
      { struct CMD_GTK_MESSAGE gtkmessage;
        g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied for user..." );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
@@ -107,7 +107,7 @@
                   return;
                 }
 
-               if ( ! Tester_groupe_util( client->util, client->syn_to_send->access_groupe ) )
+               if ( ! Tester_level_util( client->util, client->syn_to_send->access_level ) )
                 { struct CMD_GTK_MESSAGE gtkmessage;
                   g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied for this syn..." );
                   Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,

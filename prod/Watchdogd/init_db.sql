@@ -177,34 +177,6 @@ CREATE TABLE IF NOT EXISTS `gids` (
   `gids` int(11) NOT NULL DEFAULT '0'
 ) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
--- --------------------------------------------------------
-
---
--- Structure de la table `groups`
---
-
-CREATE TABLE IF NOT EXISTS `groups` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(97) COLLATE utf8_unicode_ci NOT NULL,
-  `comment` varchar(241) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`)
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
-INSERT INTO `groups` (`id`, `name`, `comment`) VALUES
-(0, 'Everybody', 'The default group'),
-(1, 'Admin-UserDB', 'Members can add/remove/edit users/groups'),
-(2, 'Admin-MsgDB', 'Members can add/remove/edit Msgs'),
-(3, 'Admin-iconDB', 'Members can add/remove/edit icons'),
-(4, 'Admin-synopDB', 'Members can add/remove/edit syn'),
-(5, 'Admin-mnemos', 'Members can manage Mnemonique'),
-(6, 'Admin-dlsDB', 'Members can add/remove/edit DLS'),
-(7, 'Admin-histoDB', 'Members can ack/query histo'),
-(8, 'Admin-scenarioDB', 'Members can add/remove Scenario'),
-(9, 'Admin-Lowlevel I/O', 'Configuration MODBUS/RS485/ONDULEUR/...'),
-(10, 'Admin-CommandLineInterface', 'Command Line Interface Access'),
-(11, 'Satellite', 'Add Satellite Capabilities');
-
 --
 -- Structure de la table `histo_msgs`
 --
@@ -852,13 +824,13 @@ CREATE TABLE IF NOT EXISTS `syns` (
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `groupe` text COLLATE utf8_unicode_ci NOT NULL,
   `page` text COLLATE utf8_unicode_ci NOT NULL,
-  `access_groupe` int(11) NOT NULL DEFAULT '0',
+  `access_level` int(11) NOT NULL DEFAULT '0',
   `vignette_activite` int(11) NOT NULL DEFAULT '0',
   `vignette_secu_bien` int(11) NOT NULL DEFAULT '0',
   `vignette_secu_personne` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-INSERT INTO `syns` (`id`, `libelle`, `groupe`, `page`, `access_groupe` ) VALUES
+INSERT INTO `syns` (`id`, `libelle`, `groupe`, `page`, `access_level` ) VALUES
 (1, 'Accueil', 'Defaut Groupe', 'Defaut Page', 0);
 
 -- --------------------------------------------------------
@@ -945,7 +917,7 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `icone` int(11) NOT NULL DEFAULT '0',
   `syn_id` int(11) NOT NULL DEFAULT '0',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `gid` int(11) NOT NULL DEFAULT '0',
+  `access_level` int(11) NOT NULL DEFAULT '0',
   `bitctrl` int(11) NOT NULL DEFAULT '0',
   `bitclic` int(11) NOT NULL DEFAULT '0',
   `bitclic2` int(11) NOT NULL DEFAULT '0',
@@ -1046,6 +1018,7 @@ CREATE TABLE IF NOT EXISTS `scenario_ticks` (
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(96) COLLATE utf8_unicode_ci NOT NULL,
+  `access_level` int(11) NOT NULL DEFAULT '0',
   `mustchangepwd` tinyint(1) NOT NULL DEFAULT '0',
   `cansetpwd` tinyint(1) NOT NULL DEFAULT '0',
   `salt` varchar(130) COLLATE utf8_unicode_ci NOT NULL,
@@ -1070,8 +1043,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE KEY `name` (`name`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
-INSERT INTO `users` (`id`, `name`, `mustchangepwd`, `cansetpwd`, `salt`, `hash`, `comment`, `login_failed`, `enable`, `date_create`, `enable_expire`, `date_expire`, `date_modif`) VALUES
-(0, 'root', 1, 1, '9311D076CDB709623503B3D3461EA8E9DFE842076C8A6B348AA78215BF7B7B797ABBE33F29CDF86B88F1B2D6071D4916ACAD1C997B832AE774D3AB4186077386', '529612B992460427C7C6FF21F5AC6965C36A735B8AB813FC3FF083AA3D2D19190AB1A700BEE2ADFA9D797F301C2E3D491D12AA04C69C7652CE875721E1E6F1B4', 'Utilisateur Root', 0, 1, 0, 0, 0, 0),
-(1, 'guest', 0, 0, '0FE3B94BCC1E52AC4BEE0DE31D6306890854EAFC77F855FBD9D17BB0D7256A5E23ED8D58FA85E345FE71D046211745B6B50382CD939DC7FDAA2FBE6B7D586069', '6E14D7124DF5FC4C018D845F351553F751265C37834455B96EE3014BCA7CFE53B87CAD8FFA739B39C4A5BCD61E267560EAA7F2AEFFAB3C457B1E0F6BE5BCF8C4', 'Utilisateur Guest', 0, 1, 0, 0, 0, 0);
+INSERT INTO `users` (`id`, `access_level`, `name`, `phphash`, `mustchangepwd`, `cansetpwd`, `salt`, `hash`, `comment`, `login_failed`, `enable`, `date_create`, `enable_expire`, `date_expire`, `date_modif`) VALUES
+(0, 10, 'root', '$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a', 1, 1, '9311D076CDB709623503B3D3461EA8E9DFE842076C8A6B348AA78215BF7B7B797ABBE33F29CDF86B88F1B2D6071D4916ACAD1C997B832AE774D3AB4186077386', '529612B992460427C7C6FF21F5AC6965C36A735B8AB813FC3FF083AA3D2D19190AB1A700BEE2ADFA9D797F301C2E3D491D12AA04C69C7652CE875721E1E6F1B4', 'Utilisateur Root', 0, 1, 0, 0, 0, 0),
+(1, 0, 'guest', '$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a', 0, 0, '0FE3B94BCC1E52AC4BEE0DE31D6306890854EAFC77F855FBD9D17BB0D7256A5E23ED8D58FA85E345FE71D046211745B6B50382CD939DC7FDAA2FBE6B7D586069', '6E14D7124DF5FC4C018D845F351553F751265C37834455B96EE3014BCA7CFE53B87CAD8FFA739B39C4A5BCD61E267560EAA7F2AEFFAB3C457B1E0F6BE5BCF8C4', 'Utilisateur Guest', 0, 1, 0, 0, 0, 0);
 
 

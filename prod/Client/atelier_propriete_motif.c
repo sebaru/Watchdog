@@ -71,7 +71,7 @@
  static GtkWidget *F_propriete;                                      /* Pour acceder la fenetre graphique */
  static GtkWidget *Combo_gestion;                                            /* Type de gestion du motif */
  static GtkWidget *Option_dialog_cde;                      /* Type de boite de dialogue clic gauche motif */
- static GtkWidget *Combo_groupe;                                        /* groupe d'appartenance du motif */
+ static GtkWidget *Spin_access_level;                                   /* groupe d'appartenance du motif */
  static GtkWidget *Spin_rafraich;                    /* Frequence de refraichissement d'un motif cyclique */
  static GtkWidget *Couleur_inactive;                                       /* Parametres visuels du motif */
  static GtkWidget *Entry_libelle;                                  /* Libelle du motif en cours d'edition */
@@ -205,19 +205,19 @@
                                gtk_widget_set_sensitive( Entry_bit_clic, FALSE );
                                gtk_widget_set_sensitive( Spin_bit_clic2, FALSE );
                                gtk_widget_set_sensitive( Entry_bit_clic2, FALSE );
-                               gtk_widget_set_sensitive( Combo_groupe, FALSE );
+                               gtk_widget_set_sensitive( Spin_access_level, FALSE );
                                break;
        case ACTION_IMMEDIATE : gtk_widget_set_sensitive( Spin_bit_clic, TRUE );
                                gtk_widget_set_sensitive( Entry_bit_clic, TRUE );
                                gtk_widget_set_sensitive( Spin_bit_clic2, FALSE );
                                gtk_widget_set_sensitive( Entry_bit_clic2, FALSE );
-                               gtk_widget_set_sensitive( Combo_groupe, TRUE );
+                               gtk_widget_set_sensitive( Spin_access_level, TRUE );
                                break;
        case ACTION_CONFIRME  : gtk_widget_set_sensitive( Spin_bit_clic, TRUE );
                                gtk_widget_set_sensitive( Entry_bit_clic, TRUE );
                                gtk_widget_set_sensitive( Spin_bit_clic2, TRUE );
                                gtk_widget_set_sensitive( Entry_bit_clic2, TRUE );
-                               gtk_widget_set_sensitive( Combo_groupe, FALSE );
+                               gtk_widget_set_sensitive( Spin_access_level, TRUE );
                                break;
      }
   }
@@ -240,18 +240,6 @@
   { Trame_motif->motif->type_dialog = gtk_option_menu_get_history( GTK_OPTION_MENU(Option_dialog_cde) );
     printf("dialog = %s\n", Type_dialog_cde( Trame_motif->motif->type_gestion ) );
     Rafraichir_sensibilite();                           /* Pour mettre a jour les sensibility des widgets */
-  }
-/**********************************************************************************************************/
-/* Changer_groupe: Change le groupe du motif                                                              */
-/* Entrée: rien                                                                                           */
-/* Sortie: la base de données est mise à jour                                                             */
-/**********************************************************************************************************/
- static void Changer_groupe ( void )
-  { gint index_groupe;
-
-    index_groupe = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_groupe) );
-    Trame_motif->motif->gid = GPOINTER_TO_INT((g_list_nth( Liste_index_groupe, index_groupe ))->data);
-printf("Changer groupe = %d\n", Trame_motif->motif->gid );
   }
 /**********************************************************************************************************/
 /* Changer_rafraich: Changement du taux de rafraichissement du motif                                      */
@@ -383,6 +371,7 @@ printf("Changer_couleur %p\n", data);
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_clic), motif->bit_clic );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_clic2), motif->bit_clic2 );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_rafraich), motif->rafraich );
+    gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_access_level), motif->access_level );
     printf("Rafraichir_proprietes2:  ctrl=%d clic=%d\n", motif->bit_controle, motif->bit_clic );
 
     g_signal_handlers_block_by_func( G_OBJECT( GTK_COMBO_BOX(Combo_gestion) ),
@@ -413,32 +402,8 @@ printf("Changer_couleur %p\n", data);
     gtk_option_menu_set_history( GTK_OPTION_MENU(Option_dialog_cde), motif->type_dialog );
     printf("Rafraichir_proprietes8:  ctrl=%d clic=%d\n", motif->bit_controle, motif->bit_clic );
 
-    cpt = 0;
-    liste = Liste_index_groupe; 
-    while (liste)
-     { if ( liste->data == GINT_TO_POINTER(trame_motif->motif->gid) ) break;
-       cpt++;
-       liste = liste->next;
-     }
-    if (liste)
-     { gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_groupe), cpt );
-       printf("Set history %d\n", cpt );
-     }
-
     Rafraichir_sensibilite();  /* test 18/01/2006 */
     printf("rafraichir_propriete Oktimer = %d\n", ok_timer );
-  }
-/**********************************************************************************************************/
-/* Proto_afficher_un_groupe_existant: ajoute un groupe dans la liste des groupes existants                */
-/* Entrée: rien                                                                                           */
-/* sortie: kedal                                                                                          */
-/**********************************************************************************************************/
- void Proto_afficher_un_groupe_pour_propriete_synoptique ( struct CMD_TYPE_GROUPE *groupe )
-  {
-printf("Print groupe pour propriete synoptique \n");
-    gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_groupe), groupe->nom );
-    Liste_index_groupe = g_list_append( Liste_index_groupe, GINT_TO_POINTER(groupe->id) );
-printf("Print groupe pour propriete synoptique %s %d\n", groupe->nom, groupe->id);
   }
 /**********************************************************************************************************/
 /* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
@@ -687,13 +652,10 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     g_signal_connect( G_OBJECT(Couleur_inactive), "color_set",
                       G_CALLBACK(Changer_couleur), NULL );
 
-    texte = gtk_label_new( _("Control group") );                                  /* Combo du type d'acces */
+    texte = gtk_label_new( _("Access Level") );                                  /* Combo du type d'acces */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 2, 8, 9 );
-    Combo_groupe = gtk_combo_box_new_text();
-    g_signal_connect( G_OBJECT(Combo_groupe), "changed",
-                      G_CALLBACK(Changer_groupe), NULL );
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_groupe, 2, 4, 8, 9 );
-    Liste_index_groupe = NULL;
+    Spin_access_level = gtk_spin_button_new_with_range( 0, 10, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_access_level, 2, 4, 8, 9 );
 
     ok_timer = TIMER_OFF;                                                       /* Timer = OFF par défaut */
     Tag_timer = gtk_timeout_add( RESOLUTION_TIMER, Timer_preview, NULL );      /* Enregistrement du timer */

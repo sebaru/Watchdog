@@ -39,7 +39,7 @@
     gchar groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
     gchar page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar libelle[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
-    guint access_groupe;
+    guint access_level;
   };
 
 /************************************************* Tag de communication ***********************************/
@@ -48,9 +48,6 @@
     SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FIN,                  /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_CREATE_PAGE_SYNOPTIQUE_OK,                          /* OK pour creer la page synoptique */
     SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE,
-    SSTAG_CLIENT_WANT_GROUPE_FOR_SYNOPTIQUE,        /* Affichage des groupes pour appartenance synoptique */
-    SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_SYNOPTIQUE,      /* Envoi des groupes pour l'edition utilisateur */
-    SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_SYNOPTIQUE_FIN,                      /* Le transfert est terminé */
     SSTAG_CLIENT_ADD_SYNOPTIQUE,                           /* Le client desire ajouter un groupe watchdog */
     SSTAG_SERVEUR_ADD_SYNOPTIQUE_OK,                                   /* L'ajout du groupe est un succes */
 
