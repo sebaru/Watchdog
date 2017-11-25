@@ -468,6 +468,8 @@
  gboolean Onduleur_set_instcmd ( struct MODULE_UPS *module, gchar *nom_cmd )
   { gchar buffer[80];
 
+    if (module->started != TRUE) return(FALSE);
+    
     g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->ups.ups, nom_cmd );
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
              "Onduleur_set_instcmd: Sending '%s' to %s", buffer, module->ups.ups );
@@ -475,6 +477,7 @@
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                  "Onduleur_set_instcmd: Sending INSTCMD failed (%s) error %s",
                  buffer, (char *)upscli_strerror(&module->upsconn) );
+       Deconnecter_module ( module );
        return(FALSE);
      }
 
@@ -482,6 +485,7 @@
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "Onduleur_set_instcmd: Reading INSTCMD result failed (%s) error %s",
                  nom_cmd, (char *)upscli_strerror(&module->upsconn) );
+       Deconnecter_module ( module );
        return(FALSE);
      }
     else
@@ -500,11 +504,14 @@
   { static gchar buffer[80];
     gint retour_read;
 
+    if (module->started != TRUE) return(NULL);
+
     g_snprintf( buffer, sizeof(buffer), "GET VAR %s %s\n", module->ups.ups, nom_var );
     if ( upscli_sendline( &module->upsconn, buffer, strlen(buffer) ) == -1 )
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
                 "%s: Sending GET VAR failed (%s) error=%s", __func__,
                 buffer, (char *)upscli_strerror(&module->upsconn) );
+       Deconnecter_module ( module );
        return(NULL);
      }
 
