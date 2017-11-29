@@ -327,8 +327,6 @@
                 { return( Http_Preparer_request_post ( wsi, session, remote_name, remote_ip, url ) ); }
                else if ( ! strcasecmp ( url, "/ws/getpluginsDLS" ) )
                 { return( Http_Traiter_request_getpluginsDLS ( wsi, session ) ); }
-               else if ( ! strcasecmp ( url, "/ws/getmnemos" ) )
-                { return( Http_Traiter_request_getmnemos ( wsi, session ) ); }
                else if ( ! strncasecmp ( url, "/ws/getsyn", 11 ) )
                 { return( Http_Traiter_request_getsyn ( wsi, session ) ); }
                else if ( ! strcasecmp ( url, "/ws/getsvg" ) )
