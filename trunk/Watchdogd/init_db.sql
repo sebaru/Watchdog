@@ -997,17 +997,17 @@ CREATE TABLE IF NOT EXISTS `syns_scenario` (
 
 CREATE TABLE IF NOT EXISTS `scenario_ticks` (
   `id` int(11) NOT NULL,
-  `num` int(11) NOT NULL,
+  `syns_scenario_id` int(11) NOT NULL,
   `minute` int(11) NOT NULL,
   `heure` int(11) NOT NULL,
   `jour` int(11) NOT NULL,
   `date` int(11) NOT NULL,
   `mois` int(11) NOT NULL,
   `mnemo_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`), KEY(`num`),
-  CONSTRAINT `num` FOREIGN KEY (`num`) REFERENCES `syns_scenario` (`id`) ON DELETE CASCADE,
+  PRIMARY KEY (`id`), KEY(`syns_scenario_id`),
+  CONSTRAINT `syns_scenario_id` FOREIGN KEY (`syns_scenario_id`) REFERENCES `syns_scenario` (`id`) ON DELETE CASCADE,
   CONSTRAINT `mnemo_id` FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
 
 -- --------------------------------------------------------
 
