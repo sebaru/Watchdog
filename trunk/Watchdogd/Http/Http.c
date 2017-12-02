@@ -267,7 +267,7 @@
        case LWS_CALLBACK_HTTP_BODY:
              { if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
                 { return( Http_Traiter_request_body_login ( wsi, data, taille ) ); }                /* Utilisation ud lws_spa */
-               else if ( ! strcasecmp ( pss->url, "/ws/postfile" ) )
+               else if ( ! strcasecmp ( pss->url, "/postfile" ) )
                 { return( Http_Traiter_request_body_postfile ( wsi, data, taille ) ); }             /* Utilisation ud lws_spa */
                return( Http_CB_file_upload( wsi, data, taille ) );          /* Sinon, c'est un buffer type json ou un fichier */
              }
@@ -284,7 +284,7 @@
                 { return( Http_Traiter_request_body_completion_setscenario ( wsi ) ); }
                else if ( ! strcasecmp ( pss->url, "/ws/delmessage" ) )
                 { return( Http_Traiter_request_body_completion_delmessage ( wsi ) ); }
-               else if ( ! strcasecmp ( pss->url, "/ws/postfile" ) )
+               else if ( ! strcasecmp ( pss->url, "/postfile" ) )
                 { return( Http_Traiter_request_body_completion_postfile ( wsi ) ); }
                else
                 { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );
@@ -337,8 +337,8 @@
                 { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
                else if ( ! strncasecmp ( url, "/setm", 5 ) )
                 { return( Http_Traiter_request_setm ( wsi ) ); }
-               else if ( ! strcasecmp ( url, "/ws/postfile" ) )
-                { g_snprintf( pss->url, sizeof(pss->url), "/ws/postfile" );
+               else if ( ! strcasecmp ( url, "/postfile" ) )
+                { g_snprintf( pss->url, sizeof(pss->url), "/postfile" );
                   return(0);
                 }
                else                                                                                             /* Par défaut */

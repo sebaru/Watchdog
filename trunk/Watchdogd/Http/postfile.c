@@ -226,15 +226,12 @@
      { /* code = Save_dls_to_disk == FALSE); */
      }
     else if( !strcasecmp(type,"mp3"))
-     { if ( pss->session->util==NULL /*|| Tester_level_util( pss->session->util, GID_MESSAGE )*/==FALSE )
-        { code = HTTP_UNAUTHORIZED; }
-       else if (id==-1)
+     { if (id==-1)
         { code = HTTP_BAD_REQUEST; }
        else
         { gchar filename[80];
           g_snprintf( filename, sizeof(filename), "Son/%d.mp3", id );
           code = Save_file_to_disk( pss->session, filename, pss->post_data, pss->post_data_length);
-         if (code==HTTP_200_OK) Modifier_messageDB_set_mp3 ( id, TRUE );
         }
      }
     else if( !strcasecmp(type,"svg"))
