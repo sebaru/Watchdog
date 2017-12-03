@@ -109,7 +109,9 @@
 
                if ( ! Tester_level_util( client->util, client->syn_to_send->access_level ) )
                 { struct CMD_GTK_MESSAGE gtkmessage;
-                  g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied for this syn..." );
+                  g_snprintf( gtkmessage.message, sizeof(gtkmessage.message),
+                             "Permission denied for this syn (Access Level %d < %d)...",
+                             client->util->access_level, client->syn_to_send->access_level  );
                   Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                                 (gchar *)&gtkmessage, sizeof(struct CMD_GTK_MESSAGE) );
                   g_free(client->syn_to_send);
