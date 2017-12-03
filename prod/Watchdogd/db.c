@@ -92,6 +92,7 @@
 
     reconnect = 1;
     mysql_options( db->mysql, MYSQL_OPT_RECONNECT, &reconnect );
+    mysql_options( db->mysql, MYSQL_SET_CHARSET_NAME, (void *)"utf8" );
     if ( ! mysql_real_connect( db->mysql, host, username, password, database, port, NULL, 0 ) )
      { Info_new( Config.log, Config.log_db, LOG_ERR,
                  "%s: mysql_real_connect failed (%s)", __func__,
