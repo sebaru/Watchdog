@@ -216,7 +216,7 @@
        return;
      }
 /* conversion en Latin 1 ISO8859-1 20140626 */
-    new_libelle = g_convert ( histo->msg.libelle, -1, "ISO-8859-1", "UTF8", NULL, &bytes_written, NULL);
+    new_libelle = g_convert ( histo->msg.libelle, -1, "ISO-8859-1", "UTF-8", NULL, &bytes_written, NULL);
     g_snprintf( histo->msg.libelle, sizeof(histo->msg.libelle), "%s", new_libelle );
     g_free(new_libelle);
     pthread_mutex_lock ( &Cfg_sms.lib->synchro );
