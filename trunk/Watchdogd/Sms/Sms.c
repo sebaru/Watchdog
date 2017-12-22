@@ -61,7 +61,7 @@
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,                                             /* Print Config */
                 "%s: '%s' = %s", __func__, nom, valeur );
-            if ( ! g_ascii_strcasecmp ( nom, "smsbox_apikey" ) )
+            if ( ! g_ascii_strcasecmp ( nom, "apikey" ) )
         { g_snprintf( Cfg_sms.smsbox_apikey, sizeof(Cfg_sms.smsbox_apikey), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "bit_comm" ) )
         { Cfg_sms.bit_comm = atoi ( valeur ); }

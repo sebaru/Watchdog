@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Include/Admin.h        Déclaration structure internes pour admin                             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     mer 15 avr 2009 15:40:43 CEST  */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Include/Admin.h        Déclaration structure internes pour admin                                                 */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                         mer 15 avr 2009 15:40:43 CEST  */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Admin.h
  * This file is part of Watchdog
@@ -31,15 +31,15 @@
  #include <pthread.h>
  #define NOM_SOCKET "socket.wdg"
 
- struct COM_ADMIN                                                  /* Communication entre DLS et la RS485 */
-  { pthread_t TID;                                                               /* Identifiant du thread */
-    pthread_mutex_t synchro;                                          /* Bit de synchronisation processus */
-    gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
+ struct COM_ADMIN                                                                      /* Communication entre DLS et la RS485 */
+  { pthread_t TID;                                                                                   /* Identifiant du thread */
+    pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
+    gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
+    gboolean Thread_sigusr1;                                                          /* TRUE si le thread doit gerer le USR1 */
   };
 
-/*************************************** Définitions des prototypes ***************************************/
- extern void Run_admin ( void );                                                          /* Dans Admin.c */
+/*********************************************** Définitions des prototypes ***************************************************/
+ extern void Run_admin ( void );                                                                              /* Dans Admin.c */
  extern void Admin_running ( struct CONNEXION *connexion, gchar *ligne );
  extern void Admin_process ( struct CONNEXION *connexion, gchar *ligne );
  extern void Admin_dls ( struct CONNEXION *connexion, gchar *ligne );
@@ -47,8 +47,8 @@
  extern void Admin_get ( struct CONNEXION *connexion, gchar *ligne );
  extern void Admin_user ( struct CONNEXION *connexion, gchar *ligne );
  extern gboolean Admin_dbcfg_thread ( struct CONNEXION *connexion, gchar *thread, gchar *ligne );
- extern void Admin_write ( struct CONNEXION *connexion, gchar *chaine );
- extern void Processer_commande_admin ( struct CONNEXION *connexion, gchar *user, gchar *host, gchar *ligne );
-
+ extern gchar *Admin_write ( gchar *response, gchar *new_ligne );
+ extern gchar *Processer_commande_admin ( gchar *user, gchar *host, gchar *ligne );
+ 
 #endif
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
