@@ -78,7 +78,7 @@
 
     void (*Run_thread)( struct LIBRAIRIE *lib );                                  /* Fonction principale de gestion du thread */
                                                                                  /* Fonction de gestion des commandes d'admin */
-    void (*Admin_command)( struct CONNEXION *connexion, gchar *ligne );
+    gchar *(*Admin_command)( gchar *response, gchar *ligne );
   };
 
  struct COM_DB                                                                 /* Interfaçage avec le code de gestion des BDD */

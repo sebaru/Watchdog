@@ -44,21 +44,21 @@
 /* Entrée: La connexion connexion ADMIN et l'onduleur                                                     */
 /* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
 /**********************************************************************************************************/
- static void Admin_enocean_status ( struct CONNEXION *connexion )
+ static gchar *Admin_enocean_status ( gchar *response )
   { gchar chaine[1024];
     g_snprintf( chaine, sizeof(chaine),
-                " ENOCEAN status ------> %s (%02d) - %s\n"
-                "  | - retry_connect  = in %03.1f s\n"
-                "  | - date_last_view = %03.1f s ago\n"
-                "  | - nbr_oct_lu     = %03d bytes\n"
-                "  | - filedescriptor = %03d\n"
-                "  -\n",
+                " ENOCEAN status ------> %s (%02d) - %s"
+                "  | - retry_connect  = in %03.1f s"
+                "  | - date_last_view = %03.1f s ago"
+                "  | - nbr_oct_lu     = %03d bytes"
+                "  | - filedescriptor = %03d"
+                "  -",
                 ENOCEAN_COMM_STATUS[Cfg_enocean.comm_status], Cfg_enocean.comm_status, Cfg_enocean.port,
                 (Cfg_enocean.date_retry_connect ? (Partage->top - Cfg_enocean.date_retry_connect)/10.0 : 0.0),
                 (Cfg_enocean.date_last_view ? (Partage->top - Cfg_enocean.date_last_view)/10.0 : 0.0),
                 Cfg_enocean.nbr_oct_lu, Cfg_enocean.fd
               );
-    Admin_write ( connexion, chaine );
+    return(Admin_write ( response, chaine ));
   }
 #ifdef bouh
 /**********************************************************************************************************/
@@ -66,15 +66,15 @@
 /* Entrée: La connexion connexion ADMIN et l'onduleur                                                     */
 /* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
 /**********************************************************************************************************/
- static void Admin_enocean_print ( struct CONNEXION *connexion, struct MODULE_ENOCEAN *module )
+ static void Admin_enocean_print ( gchar *response, struct MODULE_ENOCEAN *module )
   { gchar chaine[1024];
     g_snprintf( chaine, sizeof(chaine),
-                " ENOCEAN[%02d] ------> date_last_view = %03ds - %s\n"
-                "  | - type = %02d (0x%02X), sous_type = %02d (0x%02X)\n"
-                "  | - IDs  = %03d %03d %03d %03d\n"
-                "  | - housecode = %03d, unitcode=%03d\n"
-                "  | - e_min = %03d, ea_min = %03d, a_min = %03d\n"
-                "  -\n",
+                " ENOCEAN[%02d] ------> date_last_view = %03ds - %s"
+                "  | - type = %02d (0x%02X), sous_type = %02d (0x%02X)"
+                "  | - IDs  = %03d %03d %03d %03d"
+                "  | - housecode = %03d, unitcode=%03d"
+                "  | - e_min = %03d, ea_min = %03d, a_min = %03d"
+                "  -",
                 module->enocean.id, (Partage->top - module->date_last_view)/10, module->enocean.libelle,
                 module->enocean.type, module->enocean.type,
                 module->enocean.sous_type, module->enocean.sous_type,
@@ -82,14 +82,14 @@
                 module->enocean.housecode, module->enocean.unitcode,
                 module->enocean.e_min, module->enocean.ea_min, module->enocean.a_min
               );
-    Admin_write ( connexion, chaine );
+    response = Admin_write ( response, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_enocean_list: Liste l'ensemble des capteurs enocean présent dans la conf                         */
 /* Entrée: le connexion                                                                                   */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_enocean_list ( struct CONNEXION *connexion )
+ static void Admin_enocean_list ( gchar *response )
   { GSList *liste_modules;
     pthread_mutex_lock ( &Cfg_enocean.lib->synchro );
     liste_modules = Cfg_enocean.Modules_ENOCEAN;
@@ -106,7 +106,7 @@
 /* Entrée: le connexion                                                                                   */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_enocean_show ( struct CONNEXION *connexion, gint id )
+ static void Admin_enocean_show ( gchar *response, gint id )
   { GSList *liste_modules;
     pthread_mutex_lock ( &Cfg_enocean.lib->synchro );
     liste_modules = Cfg_enocean.Modules_ENOCEAN;
@@ -126,53 +126,53 @@
 /* Entrée: le connexion et l'id                                                                           */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_enocean_del ( struct CONNEXION *connexion, gint id )
+ static void Admin_enocean_del ( gchar *response, gint id )
   { gchar chaine[128];
 
-    g_snprintf( chaine, sizeof(chaine), " -- Suppression du module enocean %03d\n", id );
-    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " -- Suppression du module enocean %03d", id );
+    response = Admin_write ( response, chaine );
 
     if ( Retirer_enoceanDB( id ) )
-     { g_snprintf( chaine, sizeof(chaine), " Module %03d erased.\n", id ); }
+     { g_snprintf( chaine, sizeof(chaine), " Module %03d erased.", id ); }
     else
-     { g_snprintf( chaine, sizeof(chaine), " Error. Module %03d NOT erased.\n", id ); }
-    Admin_write ( connexion, chaine );
+     { g_snprintf( chaine, sizeof(chaine), " Error. Module %03d NOT erased.", id ); }
+    response = Admin_write ( response, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_enocean_add: Ajoute un capteur/module ENOCEAN                                                    */
 /* Entrée: le connexion et la structure de reference du capteur                                           */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_enocean_add ( struct CONNEXION *connexion, struct ENOCEANDB *enocean )
+ static void Admin_enocean_add ( gchar *response, struct ENOCEANDB *enocean )
   { gchar chaine[128];
     gint last_id;
 
-    g_snprintf( chaine, sizeof(chaine), " -- Ajout d'un module enocean\n" );
-    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " -- Ajout d'un module enocean" );
+    response = Admin_write ( response, chaine );
 
     last_id = Ajouter_enoceanDB( enocean );
     if ( last_id != -1 )
-     { g_snprintf( chaine, sizeof(chaine), " Module added. New ID=%03d.\n", last_id ); }
+     { g_snprintf( chaine, sizeof(chaine), " Module added. New ID=%03d.", last_id ); }
     else
-     { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT added.\n" ); }
-    Admin_write ( connexion, chaine );
+     { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT added." ); }
+    response = Admin_write ( response, chaine );
   }
 /**********************************************************************************************************/
 /* Admin_enocean_change: Modifie la configuration d'un capteur ENOCEAN                                    */
 /* Entrée: le connexion et la structure de reference du capteur                                           */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- static void Admin_enocean_set ( struct CONNEXION *connexion, struct ENOCEANDB *enocean )
+ static void Admin_enocean_set ( gchar *response, struct ENOCEANDB *enocean )
   { gchar chaine[128];
 
-    g_snprintf( chaine, sizeof(chaine), " -- Modification du module enocean %03d\n", enocean->id );
-    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " -- Modification du module enocean %03d", enocean->id );
+    response = Admin_write ( response, chaine );
 
     if ( Modifier_enoceanDB( enocean ) )
-     { g_snprintf( chaine, sizeof(chaine), " Module %03d changed.\n", enocean->id ); }
+     { g_snprintf( chaine, sizeof(chaine), " Module %03d changed.", enocean->id ); }
     else
-     { g_snprintf( chaine, sizeof(chaine), " Error. Module %03d NOT changed.\n", enocean->id ); }
-    Admin_write ( connexion, chaine );
+     { g_snprintf( chaine, sizeof(chaine), " Error. Module %03d NOT changed.", enocean->id ); }
+    response = Admin_write ( response, chaine );
   }
 #endif
 /**********************************************************************************************************/
@@ -180,18 +180,18 @@
 /* Entrée: le connexion d'admin et la ligne de commande                                                   */
 /* Sortie: néant                                                                                          */
 /**********************************************************************************************************/
- void Admin_command( struct CONNEXION *connexion, gchar *ligne )
+ gchar *Admin_command( gchar *response, gchar *ligne )
   { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
 
     if ( ! strcmp ( commande, "status" ) )
-     { Admin_enocean_status ( connexion ); }
+     { response = Admin_enocean_status ( response ); }
 #ifdef bouh
     if ( ! strcmp ( commande, "add" ) )
      { struct ENOCEANDB enocean;
        memset( &enocean, 0, sizeof(struct ENOCEANDB) );                /* Découpage de la ligne de commande */
-       sscanf ( ligne, "%s %d,%d,(%d,%d,%d,%d),%d,%d,%d,%d,%d,%[^\n]", commande,
+       sscanf ( ligne, "%s %d,%d,(%d,%d,%d,%d),%d,%d,%d,%d,%d,%[^]", commande,
                 (gint *)&enocean.type, (gint *)&enocean.sous_type,
                 (gint *)&enocean.id1, (gint *)&enocean.id2, (gint *)&enocean.id3, (gint *)&enocean.id4,
                 (gint *)&enocean.housecode,(gint *)&enocean.unitcode,
@@ -201,7 +201,7 @@
     else if ( ! strcmp ( commande, "set" ) )
      { struct ENOCEANDB enocean;
        memset( &enocean, 0, sizeof(struct ENOCEANDB) );                /* Découpage de la ligne de commande */
-       sscanf ( ligne, "%s %d,%d,%d,(%d,%d,%d,%d),%d,%d,%d,%d,%d,%[^\n]", commande,
+       sscanf ( ligne, "%s %d,%d,%d,(%d,%d,%d,%d),%d,%d,%d,%d,%d,%[^]", commande,
                 &enocean.id, (gint *)&enocean.type, (gint *)&enocean.sous_type,
                 (gint *)&enocean.id1, (gint *)&enocean.id2, (gint *)&enocean.id3, (gint *)&enocean.id4,
                 (gint *)&enocean.housecode,(gint *)&enocean.unitcode,
@@ -229,14 +229,14 @@
        trame_send_AC[7] = 0x0; /* rssi */
        retour = write ( Cfg_enocean.fd, &trame_send_AC, trame_send_AC[0] + 1 );
        if (retour>0)
-        { g_snprintf( chaine, sizeof(chaine), " Sending Proto %d, housecode %d, unitcode %d, cmd %d OK\n",
+        { g_snprintf( chaine, sizeof(chaine), " Sending Proto %d, housecode %d, unitcode %d, cmd %d OK",
                       trame_send_AC[2], housecode, unitcode, cmd );
         }
        else
-        { g_snprintf( chaine, sizeof(chaine), " Sending Proto %d, housecode %d, unitcode %d, cmd %d Failed !\n",
+        { g_snprintf( chaine, sizeof(chaine), " Sending Proto %d, housecode %d, unitcode %d, cmd %d Failed !",
                       trame_send_AC[2], housecode, unitcode, cmd );
         }
-       Admin_write ( connexion, chaine );
+       response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "light_ac" ) )
      { gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
@@ -259,14 +259,14 @@
        trame_send_AC[11] = 0x0; /* rssi */
        retour = write ( Cfg_enocean.fd, &trame_send_AC, trame_send_AC[0] + 1 );
        if (retour>0)
-        { g_snprintf( chaine, sizeof(chaine), " Sending Proto AC ids=%d-%d-%d-%d, unitcode %d, cmd %d OK\n",
+        { g_snprintf( chaine, sizeof(chaine), " Sending Proto AC ids=%d-%d-%d-%d, unitcode %d, cmd %d OK",
                       id1, id2, id3, id4, unitcode, cmd );
         }
        else
-        { g_snprintf( chaine, sizeof(chaine), " Sending Proto AC ids=%d-%d-%d-%d, unitcode %d, cmd %d Failed\n",
+        { g_snprintf( chaine, sizeof(chaine), " Sending Proto AC ids=%d-%d-%d-%d, unitcode %d, cmd %d Failed",
                       id1, id2, id3, id4, unitcode, cmd );
         }
-       Admin_write ( connexion, chaine );
+       response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "del" ) )
      { gint num;
@@ -283,23 +283,23 @@
      }
 #endif
     else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)   /* Si changement de parametre */
-        { gboolean retour;
-          retour = Enocean_Lire_config();
-          g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s\n",
-                      (retour ? "Success" : "Failed") );
-          Admin_write ( connexion, chaine );
-        }
+     { gboolean retour;
+       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
+       retour = Enocean_Lire_config();
+       g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s",
+                   (retour ? "Success" : "Failed") );
+       response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'ENOCEAN'\n" );
-       Admin_write ( connexion, "  dbcfg ...      - Get/Set Database Parameters\n" );
-       Admin_write ( connexion, "  status         - Affiche les status de l'equipements ENOCEAN $id\n" );
+     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'ENOCEAN'" );
+       response = Admin_write ( response, "  dbcfg ...      - Get/Set Database Parameters" );
+       response = Admin_write ( response, "  status         - Affiche les status de l'equipements ENOCEAN $id" );
      }
     else
      { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), " Unknown ENOCEAN command : %s\n", ligne );
-       Admin_write ( connexion, chaine );
+       g_snprintf( chaine, sizeof(chaine), " Unknown ENOCEAN command : %s", ligne );
+       response = Admin_write ( response, chaine );
      }
+    return(response);
   }
 /*--------------------------------------------------------------------------------------------------------*/

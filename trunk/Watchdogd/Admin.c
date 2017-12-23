@@ -186,30 +186,30 @@
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
 
- /*           if ( ! strcmp ( commande, "process"   ) ) { Admin_process  ( connexion, ligne + 8 ); }*/
-/*       else if ( ! strcmp ( commande, "dls"       ) ) { Admin_dls      ( connexion, ligne + 4 ); }
-       else if ( ! strcmp ( commande, "set"       ) ) { Admin_set      ( connexion, ligne + 4);  }
-       else if ( ! strcmp ( commande, "get"       ) ) { Admin_get      ( connexion, ligne + 4);  }
-       else if ( ! strcmp ( commande, "user"      ) ) { Admin_user     ( connexion, ligne + 5);  }
-       else if ( ! strcmp ( commande, "arch"      ) ) { Admin_arch     ( connexion, ligne + 5);  }
+            if ( ! strcmp ( commande, "process"   ) ) { response = Admin_process  ( response, ligne + 8 ); }
+       else if ( ! strcmp ( commande, "dls"       ) ) { response = Admin_dls      ( response, ligne + 4 ); }
+       else if ( ! strcmp ( commande, "set"       ) ) { response = Admin_set      ( response, ligne + 4);  }
+       else if ( ! strcmp ( commande, "get"       ) ) { response = Admin_get      ( response, ligne + 4);  }
+       else if ( ! strcmp ( commande, "user"      ) ) { response = Admin_user     ( response, ligne + 5);  }
+       else if ( ! strcmp ( commande, "arch"      ) ) { response = Admin_arch     ( response, ligne + 5);  }
        else { gboolean found = FALSE;
               liste = Partage->com_msrv.Librairies;                                      /* Parcours de toutes les librairies */
-  /*            while(liste)
+              while(liste)
                { lib = (struct LIBRAIRIE *)liste->data;
                  if ( ! strcmp( commande, lib->admin_prompt ) )
                   { if (lib->Thread_run == FALSE)
-                     { Admin_write ( connexion, "\n" );
-                       Admin_write ( connexion, "  -- WARNING ----- Thread is not started -----\n");
-                       Admin_write ( connexion, "  -- WARNING -- Running config is not loaded !\n" );
-                       Admin_write ( connexion, "\n" );
+                     { response = Admin_write ( response, " -- WARNING --" );
+                       response = Admin_write ( response, " -- Thread is not started, Running config is not loaded --");
+                       response = Admin_write ( response, " -- WARNING --" );
                      }    
-                    lib->Admin_command ( connexion, ligne + strlen(lib->admin_prompt)+1 );                     /* Appel local */
-    /*                found = TRUE;
+                    response =  lib->Admin_command ( response, ligne + strlen(lib->admin_prompt)+1 );          /* Appel local */
+                    found = TRUE;
                   }
                  liste = liste->next;
                }
-              if (found == FALSE) { Admin_running ( connexion, ligne ); }        /* Si pas trouvé, rollback sur Admin_running */
-/*            }*/
+              if (found == FALSE)                                                /* Si pas trouvé, rollback sur Admin_running */
+               { response = Admin_running ( response, ligne ); }
+            }
     response = Admin_write ( response, " -\n" );
     return(response);                                                                                    /* Fin de la reponse */
   }

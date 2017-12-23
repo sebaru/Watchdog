@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Admin/admin_ups.c        Gestion des connexions Admin ONDULEUR au serveur watchdog      */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     mer. 11 nov. 2009 11:28:29 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Admin/admin_ups.c        Gestion des responses Admin ONDULEUR au serveur watchdog                               */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                         mer. 11 nov. 2009 11:28:29 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * admin_ups.c
  * This file is part of Watchdog
@@ -27,50 +27,50 @@
  
  #include "watchdogd.h"
  #include "Onduleur.h"
-/**********************************************************************************************************/
-/* Admin_ups_reload: Demande le rechargement des conf ONDULEUR                                            */
-/* Entrée: le connexion                                                                                   */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- static void Admin_ups_reload ( struct CONNEXION *connexion )
+/******************************************************************************************************************************/
+/* Admin_ups_reload: Demande le rechargement des conf ONDULEUR                                                                */
+/* Entrée: le response                                                                                                       */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static gchar *Admin_ups_reload ( gchar *response )
   { if (Cfg_ups.lib->Thread_run == FALSE)
-     { Admin_write ( connexion, " Thread ONDULEUR is not running\n" );
-       return;
+     { response = Admin_write ( response, " Thread ONDULEUR is not running" );
+       return(response);
      }
     
     Cfg_ups.reload = TRUE;
-    Admin_write ( connexion, " ONDULEUR Reloading in progress\n" );
     while (Cfg_ups.reload) sched_yield();
-    Admin_write ( connexion, " ONDULEUR Reloading done\n" );
+    response = Admin_write ( response, " ONDULEUR Reload done" );
+    return(response);
   }
-/**********************************************************************************************************/
-/* Admin_ups_print : Affiche en details les infos d'un onduleur en parametre                              */
-/* Entrée: La connexion connexion ADMIN et l'onduleur                                                     */
-/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
-/**********************************************************************************************************/
- static void Admin_ups_print ( struct CONNEXION *connexion, struct MODULE_UPS *module )
+/******************************************************************************************************************************/
+/* Admin_ups_print : Affiche en details les infos d'un onduleur en parametre                                                  */
+/* Entrée: La response response ADMIN et l'onduleur                                                                         */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                                           */
+/******************************************************************************************************************************/
+ static gchar *Admin_ups_print ( gchar *response, struct MODULE_UPS *module )
   { gchar chaine[1024];
     g_snprintf( chaine, sizeof(chaine),
                 " UPS[%02d] ------> %s@%s %s\n"
                 "  | - enable = %d, started = %d (bit B%04d=%d)\n"
                 "  | - map_EA = EA%03d, map_E = E%03d, map_A = A%03d\n"
                 "  | - username = %s, password = %s,\n"
-                "  | - date_next_connexion = in %03ds\n"
-                "  -\n",
+                "  | - date_next_response = in %03ds",
                 module->ups.id, module->ups.ups, module->ups.host, module->libelle,
                 module->ups.enable, module->started, module->ups.bit_comm, B(module->ups.bit_comm),
                 module->ups.map_EA, module->ups.map_E, module->ups.map_A,
                 module->ups.username, module->ups.password,
           (int)(module->date_next_connexion > Partage->top ? (module->date_next_connexion - Partage->top)/10 : -1)
               );
-    Admin_write ( connexion, chaine );
+    response = Admin_write ( response, chaine );
+    return(response);
   }
-/**********************************************************************************************************/
-/* Admin_ups_list : Affichage de toutes les infos opérationnelles de tous les onduleurs                   */
-/* Entrée: La connexion connexion ADMIN                                                                   */
-/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
-/**********************************************************************************************************/
- static void Admin_ups_list ( struct CONNEXION *connexion )
+/******************************************************************************************************************************/
+/* Admin_ups_list : Affichage de toutes les infos opérationnelles de tous les onduleurs                                       */
+/* Entrée: La response response ADMIN                                                                                       */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                                           */
+/******************************************************************************************************************************/
+ static gchar *Admin_ups_list ( gchar *response )
   { GSList *liste_modules;
        
     pthread_mutex_lock ( &Cfg_ups.lib->synchro );
@@ -78,17 +78,18 @@
     while ( liste_modules )
      { struct MODULE_UPS *module;
        module = (struct MODULE_UPS *)liste_modules->data;
-       Admin_ups_print ( connexion, module );
+       response = Admin_ups_print ( response, module );
        liste_modules = liste_modules->next;
      }
     pthread_mutex_unlock ( &Cfg_ups.lib->synchro );
+    return(response);
   }
-/**********************************************************************************************************/
-/* Admin_ups_show : Affichage des infos opérationnelles liées à l'onduleur en parametre                   */
-/* Entrée: La connexion connexion ADMIN et le numero de l'onduleur                                        */
-/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
-/**********************************************************************************************************/
- static void Admin_ups_show ( struct CONNEXION *connexion, gint num )
+/******************************************************************************************************************************/
+/* Admin_ups_show : Affichage des infos opérationnelles liées à l'onduleur en parametre                                       */
+/* Entrée: La response response ADMIN et le numero de l'onduleur                                                            */
+/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                                           */
+/******************************************************************************************************************************/
+ static gchar *Admin_ups_show ( gchar *response, gint num )
   { GSList *liste_modules;
        
     pthread_mutex_lock ( &Cfg_ups.lib->synchro );
@@ -96,49 +97,46 @@
     while ( liste_modules )
      { struct MODULE_UPS *module;
        module = (struct MODULE_UPS *)liste_modules->data;
-       if (module->ups.id == num) { Admin_ups_print ( connexion, module ); break; }
+       if (module->ups.id == num) { response = Admin_ups_print ( response, module ); break; }
        liste_modules = liste_modules->next;
      }
     pthread_mutex_unlock ( &Cfg_ups.lib->synchro );
+    return(response);
   }
-/**********************************************************************************************************/
-/* Admin_ups_start: Demande le demarrage d'un onduleur en parametre                                       */
-/* Entrée: La connexion et le numéro d'onduleur                                                           */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Admin_ups_start ( struct CONNEXION *connexion, gint id )
+/******************************************************************************************************************************/
+/* Admin_ups_start: Demande le demarrage d'un onduleur en parametre                                                           */
+/* Entrée: La response et le numéro d'onduleur                                                                               */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static gchar *Admin_ups_start ( gchar *response, gint id )
   { gchar chaine[128];
-
-    g_snprintf( chaine, sizeof(chaine), " -- Demarrage d'un module UPS\n" );
-    Admin_write ( connexion, chaine );
 
     Cfg_ups.admin_start = id;
 
-    g_snprintf( chaine, sizeof(chaine), " Module UPS %d started\n", id );
-    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " Module UPS %d started", id );
+    response = Admin_write ( response, chaine );
+    return(response);
   }
-/**********************************************************************************************************/
-/* Admin_ups_stop: Demande l'arret d'un onduleur en parametre                                             */
-/* Entrée: La connexion et le numéro d'onduleur                                                           */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Admin_ups_stop ( struct CONNEXION *connexion, gint id )
+/******************************************************************************************************************************/
+/* Admin_ups_stop: Demande l'arret d'un onduleur en parametre                                                                 */
+/* Entrée: La response et le numéro d'onduleur                                                                               */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static gchar *Admin_ups_stop ( gchar *response, gint id )
   { gchar chaine[128];
-
-    g_snprintf( chaine, sizeof(chaine), " -- Arret d'un module UPS\n" );
-    Admin_write ( connexion, chaine );
 
     Cfg_ups.admin_stop = id;
 
-    g_snprintf( chaine, sizeof(chaine), " Module UPS %d stopped\n", id );
-    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " Module UPS %d stopped", id );
+    response = Admin_write ( response, chaine );
+    return(response);
   }
-/**********************************************************************************************************/
-/* Admin_ups_set: Change un parametre dans la DB ups                                                      */
-/* Entrée: La connexion et la ligne de commande (champ valeur)                                            */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Admin_ups_set ( struct CONNEXION *connexion, gchar *ligne )
+/******************************************************************************************************************************/
+/* Admin_ups_set: Change un parametre dans la DB ups                                                                          */
+/* Entrée: La response et la ligne de commande (champ valeur)                                                                */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static gchar *Admin_ups_set ( gchar *response, gchar *ligne )
   { gchar id_char[16], param[32], valeur_char[64], chaine[128];
     struct MODULE_UPS *module = NULL;
     GSList *liste_modules;
@@ -146,29 +144,28 @@
     gint retour;
 
     if ( ! strcmp ( ligne, "list" ) )
-     { Admin_write ( connexion, " | Parameter can be:\n" );
-       Admin_write ( connexion, " | - enable, host, ups, username, password, bit_comm,\n" );
-       Admin_write ( connexion, " | - map_E, map_EA, map_A\n" );
-       Admin_write ( connexion, " -\n" );
-       return;
+     { response = Admin_write ( response, " | Parameter can be:\n" );
+       response = Admin_write ( response, " | - enable, host, ups, username, password, bit_comm,\n" );
+       response = Admin_write ( response, " | - map_E, map_EA, map_A\n" );
+       return(response);
      }
 
-    sscanf ( ligne, "%s %s %[^\n]", id_char, param, valeur_char );
+    if (sscanf ( ligne, "%s %s %[^\n]", id_char, param, valeur_char ) != 3) return(response);
     id     = atoi ( id_char     );
     valeur = atoi ( valeur_char );
 
-    pthread_mutex_lock( &Cfg_ups.lib->synchro );                        /* Recherche du module en mémoire */
+    pthread_mutex_lock( &Cfg_ups.lib->synchro );                                            /* Recherche du module en mémoire */
     liste_modules = Cfg_ups.Modules_UPS;
     while ( liste_modules )
      { module = (struct MODULE_UPS *)liste_modules->data;
        if (module->ups.id == id) break;
-       liste_modules = liste_modules->next;                                  /* Passage au module suivant */
+       liste_modules = liste_modules->next;                                                      /* Passage au module suivant */
      }
     pthread_mutex_unlock( &Cfg_ups.lib->synchro );
 
     if (!module)                                                                         /* Si non trouvé */
-     { Admin_write( connexion, " Module not found\n");
-       return;
+     { response = Admin_write( response, " Module not found\n");
+       return(response);
      }
 
     if ( ! strcmp( param, "enable" ) )
@@ -191,23 +188,24 @@
      { g_snprintf( module->ups.password, sizeof(module->ups.password), "%s", valeur_char ); }
     else
      { g_snprintf( chaine, sizeof(chaine),
-                 " Parameter %s not known for UPS id %s ('ups set list' can help)\n", param, id_char );
-       Admin_write ( connexion, chaine );
-       return;
+                 " Parameter %s not known for UPS id %s ('ups set list' can help)", param, id_char );
+       response = Admin_write ( response, chaine );
+       return(response);
      }
 
     retour = Modifier_upsDB ( &module->ups );
     if (retour)
-     { Admin_write ( connexion, " ERROR : UPS module NOT set\n" ); }
+     { response = Admin_write ( response, " ERROR : UPS module NOT set" ); }
     else
-     { Admin_write ( connexion, " UPS module parameter set\n" ); }
+     { response = Admin_write ( response, " UPS module parameter set" ); }
+    return(response);
   }
-/**********************************************************************************************************/
-/* Admin_command : Fonction principale de traitement des commandes du thread                              */
-/* Entrée: La connexion et la ligne de commande a parser                                                  */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
+/******************************************************************************************************************************/
+/* Admin_command : Fonction principale de traitement des commandes du thread                                                  */
+/* Entrée: La response et la ligne de commande a parser                                                                      */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ gchar *Admin_command ( gchar *response, gchar *ligne )
   { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
@@ -215,23 +213,23 @@
     if ( ! strcmp ( commande, "start" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_ups_start ( connexion, num );
+       response = Admin_ups_start ( response, num );
      }
     else if ( ! strcmp ( commande, "stop" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_ups_stop ( connexion, num );
+       response = Admin_ups_stop ( response, num );
      }
     else if ( ! strcmp ( commande, "show" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       Admin_ups_show ( connexion, num );
+       response = Admin_ups_show ( response, num );
      }
     else if ( ! strcmp ( commande, "list" ) )
-     { Admin_ups_list ( connexion );
+     { response = Admin_ups_list ( response );
      }
     else if ( ! strcmp ( commande, "reload" ) )
-     { Admin_ups_reload(connexion);
+     { response = Admin_ups_reload(response);
      }
     else if ( ! strcmp ( commande, "add" ) )
      { struct UPSDB ups;
@@ -240,16 +238,16 @@
        ups.enable = TRUE;
        retour = Ajouter_upsDB ( &ups );
        if (retour == -1)
-        { Admin_write ( connexion, "Error, UPS not added\n" ); }
+        { response = Admin_write ( response, "Error, UPS not added\n" ); }
        else
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), " UPS %s added. New ID=%d\n", ups.ups, retour );
-          Admin_write ( connexion, chaine );
+          response = Admin_write ( response, chaine );
           Cfg_ups.reload = TRUE;                    /* Rechargement des modules UPS en mémoire de travail */
         }
      }
     else if ( ! strcmp ( commande, "set" ) )
-     { Admin_ups_set ( connexion, ligne+4 );
+     { response = Admin_ups_set ( response, ligne+4 );
        Cfg_ups.reload = TRUE;                       /* Rechargement des modules UPS en mémoire de travail */
      }
     else if ( ! strcmp ( commande, "del" ) )
@@ -258,40 +256,39 @@
        sscanf ( ligne, "%s %d", commande, &ups.id );                 /* Découpage de la ligne de commande */
        retour = Retirer_upsDB ( &ups );
        if (retour == FALSE)
-        { Admin_write ( connexion, "Error, UPS not erased\n" ); }
+        { response = Admin_write ( response, "Error, UPS not erased\n" ); }
        else
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), " UPS %d erased\n", ups.id );
-          Admin_write ( connexion, chaine );
+          response = Admin_write ( response, chaine );
           Cfg_ups.reload = TRUE;                     /* Rechargement des modules RS en mémoire de travail */
         }
      }
     else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)   /* Si changement de parametre */
-        { gboolean retour;
-          retour = Ups_Lire_config();
-          g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s\n",
-                      (retour ? "Success" : "Failed") );
-          Admin_write ( connexion, chaine );
-        }
+     { gboolean retour;
+       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
+       retour = Ups_Lire_config();
+       g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s", (retour ? "Success" : "Failed") );
+          response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'UPS'\n" );
-       Admin_write ( connexion, "  dbcfg ...             - Get/Set Database Parameters\n" );
-       Admin_write ( connexion, "  add $ups              - Ajoute un UPS\n" );
-       Admin_write ( connexion, "  set $id $champ $val   - Set $val to $champ for module $id\n" );
-       Admin_write ( connexion, "  set list              - List parameter that can be set\n" );
-       Admin_write ( connexion, "  del $id               - Delete UPS id\n" );
-       Admin_write ( connexion, "  start $id             - Start UPS id\n" );
-       Admin_write ( connexion, "  stop $id              - Stop UPS id\n" );
-       Admin_write ( connexion, "  show $id              - Show UPS id\n" );
-       Admin_write ( connexion, "  list                  - Liste les modules ONDULEUR\n" );
-       Admin_write ( connexion, "  reload                - Recharge la configuration\n" );
+     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'UPS'" );
+       response = Admin_write ( response, "  dbcfg ...             - Get/Set Database Parameters" );
+       response = Admin_write ( response, "  add $ups              - Ajoute un UPS" );
+       response = Admin_write ( response, "  set $id $champ $val   - Set $val to $champ for module $id" );
+       response = Admin_write ( response, "  set list              - List parameter that can be set" );
+       response = Admin_write ( response, "  del $id               - Delete UPS id" );
+       response = Admin_write ( response, "  start $id             - Start UPS id" );
+       response = Admin_write ( response, "  stop $id              - Stop UPS id" );
+       response = Admin_write ( response, "  show $id              - Show UPS id" );
+       response = Admin_write ( response, "  list                  - Liste les modules ONDULEUR" );
+       response = Admin_write ( response, "  reload                - Recharge la configuration" );
      }
     else
      { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), " Unknown NUT command : %s\n", ligne );
-       Admin_write ( connexion, chaine );
+       g_snprintf( chaine, sizeof(chaine), " Unknown NUT command : %s", ligne );
+       response = Admin_write ( response, chaine );
      }
+    return(response);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

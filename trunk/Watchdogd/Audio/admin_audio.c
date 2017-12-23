@@ -33,42 +33,42 @@
 /* Entrée: Le connexion d'admin, la ligne a traiter                                                                           */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Admin_command( struct CONNEXION *connexion, gchar *ligne )
+ gchar *Admin_command( gchar *response, gchar *ligne )
   { gchar commande[128], chaine[80];
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
 
     if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'AUDIO'\n" );
-       Admin_write ( connexion, "  dbcfg ...             - Get/Set Database Parameters\n" );
-       Admin_write ( connexion, "  tell_mp3 $num         - Send message num with mp3 format\n" );
-       Admin_write ( connexion, "  tell_google $text     - Send $text with google_speech format\n" );
-       Admin_write ( connexion, "  help                  - This help\n" );
+     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'AUDIO'" );
+       response = Admin_write ( response, "  dbcfg ...             - Get/Set Database Parameters" );
+       response = Admin_write ( response, "  tell_mp3 $num         - Send message num with mp3 format" );
+       response = Admin_write ( response, "  tell_google $text     - Send $text with google_speech format" );
+       response = Admin_write ( response, "  help                  - This help" );
      } else
     if ( ! strcmp ( commande, "tell_mp3" ) )
      { struct CMD_TYPE_MESSAGE msg;
        sscanf ( ligne, "%s %d", commande, &msg.num );                                    /* Découpage de la ligne de commande */
        Jouer_mp3 ( &msg );
-       g_snprintf( chaine, sizeof(chaine), " Message id %d sent with mp3\n", msg.num );
-       Admin_write ( connexion, chaine );
+       g_snprintf( chaine, sizeof(chaine), " Message id %d sent with mp3", msg.num );
+       response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "tell_google" ) )
      { Jouer_google_speech ( ligne + 12 );
-       g_snprintf( chaine, sizeof(chaine), " Message sent with google_speech\n" );
-       Admin_write ( connexion, chaine );
+       g_snprintf( chaine, sizeof(chaine), " Message sent with google_speech" );
+       response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "dbcfg" ) )                     /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)                       /* Si changement de parametre */
-        { gboolean retour;
-          retour = Audio_Lire_config();
-          g_snprintf( chaine, sizeof(chaine), " Reloading Audio Thread Parameters from Database -> %s\n",
-                      (retour ? "Success" : "Failed") );
-          Admin_write ( connexion, chaine );
-        }
+     { gboolean retour;
+       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
+       retour = Audio_Lire_config();
+       g_snprintf( chaine, sizeof(chaine), " Reloading Audio Thread Parameters from Database -> %s",
+                   (retour ? "Success" : "Failed") );
+       response = Admin_write ( response, chaine );
      } else
      { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
-       Admin_write ( connexion, chaine );
+       g_snprintf( chaine, sizeof(chaine), " Unknown command : %s", ligne );
+       response = Admin_write ( response, chaine );
      }
+   return(response);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

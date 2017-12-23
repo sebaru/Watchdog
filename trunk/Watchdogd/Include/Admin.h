@@ -40,13 +40,13 @@
 
 /*********************************************** Définitions des prototypes ***************************************************/
  extern void Run_admin ( void );                                                                              /* Dans Admin.c */
- extern void Admin_running ( struct CONNEXION *connexion, gchar *ligne );
- extern void Admin_process ( struct CONNEXION *connexion, gchar *ligne );
- extern void Admin_dls ( struct CONNEXION *connexion, gchar *ligne );
- extern void Admin_set ( struct CONNEXION *connexion, gchar *ligne );
- extern void Admin_get ( struct CONNEXION *connexion, gchar *ligne );
- extern void Admin_user ( struct CONNEXION *connexion, gchar *ligne );
- extern gboolean Admin_dbcfg_thread ( struct CONNEXION *connexion, gchar *thread, gchar *ligne );
+ extern gchar *Admin_running ( gchar *response, gchar *ligne );
+ extern gchar *Admin_process ( gchar *response, gchar *ligne );
+ extern gchar *Admin_dls ( gchar *response, gchar *ligne );
+ extern gchar *Admin_set ( gchar *response, gchar *ligne );
+ extern gchar *Admin_get ( gchar *response, gchar *ligne );
+ extern gchar *Admin_user ( gchar *response, gchar *ligne );
+ extern gchar *Admin_dbcfg_thread ( gchar *response, gchar *thread, gchar *ligne );
  extern gchar *Admin_write ( gchar *response, gchar *new_ligne );
  extern gchar *Processer_commande_admin ( gchar *user, gchar *host, gchar *ligne );
  
