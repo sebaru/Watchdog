@@ -125,7 +125,7 @@
     while ( liste_modules )
      { struct MODULE_MODBUS *module;
        module = (struct MODULE_MODBUS *)liste_modules->data;
-       Admin_modbus_print ( response, module );
+       response = Admin_modbus_print ( response, module );
        liste_modules = liste_modules->next;                                                      /* Passage au module suivant */
      }
     pthread_mutex_unlock( &Cfg_modbus.lib->synchro );
@@ -144,7 +144,7 @@
     while ( liste_modules )
      { struct MODULE_MODBUS *module;
        module = (struct MODULE_MODBUS *)liste_modules->data;
-       if (module->modbus.id == num) { Admin_modbus_print ( response, module ); break; }
+       if (module->modbus.id == num) { response = Admin_modbus_print ( response, module ); break; }
        liste_modules = liste_modules->next;                                                      /* Passage au module suivant */
      }
     pthread_mutex_unlock( &Cfg_modbus.lib->synchro );

@@ -36,7 +36,7 @@
  static gchar *Admin_dls_reload ( gchar *response )
   { Partage->com_dls.Thread_reload = TRUE;
     while (Partage->com_dls.Thread_reload) sched_yield();
-    return(Admin_write ( response, " DLS Reload done" ));
+    return(Admin_write ( response, " | - DLS Reload done" ));
   }
 /******************************************************************************************************************************/
 /* Admin_dls_list: Print la liste des plugins dls actif ou non, mais chargés                                                  */
@@ -56,7 +56,7 @@
      { struct PLUGIN_DLS *dls;
        dls = (struct PLUGIN_DLS *)liste_dls->data;
 
-       g_snprintf( chaine, sizeof(chaine), " DLS[%06d] -> actif=%d, debug=%d, conso=%04.03f, nom=%s",
+       g_snprintf( chaine, sizeof(chaine), " | - DLS[%06d] -> actif=%d, debug=%d, conso=%04.03f, nom=%s",
                    dls->plugindb.id, dls->plugindb.on, dls->debug, dls->conso, dls->plugindb.nom );
        response = Admin_write ( response, chaine );
        liste_dls = liste_dls->next;
@@ -84,14 +84,14 @@
           dls = (struct PLUGIN_DLS *)liste_dls->data;
 
           Compiler_source_dls ( FALSE, FALSE, dls->plugindb.id, buffer, sizeof(buffer) );
-          g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%06d] done (no reset): %s", dls->plugindb.id, buffer );
+          g_snprintf( chaine, sizeof(chaine), " | - Compilation du DLS[%06d] done (no reset): %s", dls->plugindb.id, buffer );
           response = Admin_write ( response, chaine );
           liste_dls = liste_dls->next;
         }
        pthread_mutex_unlock( &Partage->com_dls.synchro );
      } else
         { Compiler_source_dls ( FALSE, FALSE, id, buffer, sizeof(buffer) );
-          g_snprintf( chaine, sizeof(chaine), " Compilation du DLS[%06d] done (no reset): %s", id, buffer );
+          g_snprintf( chaine, sizeof(chaine), " | - Compilation du DLS[%06d] done (no reset): %s", id, buffer );
           response = Admin_write ( response, chaine );
         }
     return(response);
@@ -113,7 +113,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Admin_dls_start: impossible d'ouvrir la Base de données %s",
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: impossible d'ouvrir la Base de données %s", __func__,
                  Config.db_database );
        return(response);
      }
@@ -126,7 +126,7 @@
      }
     Libere_DB_SQL( &db );
 
-    g_snprintf( chaine, sizeof(chaine), " Module DLS %d started", id );
+    g_snprintf( chaine, sizeof(chaine), " | - Module DLS %d started", id );
     return(Admin_write ( response, chaine ));
   }
 /******************************************************************************************************************************/
@@ -156,7 +156,7 @@
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
 
-    g_snprintf( chaine, sizeof(chaine), " Module DLS: debug set to '%d'", debug );
+    g_snprintf( chaine, sizeof(chaine), " | - Module DLS: debug set to '%d'", debug );
     return(Admin_write ( response, chaine ));
   }
 /******************************************************************************************************************************/
@@ -176,7 +176,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Admin_dls_stop: impossible d'ouvrir la Base de données %s",
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: impossible d'ouvrir la Base de données %s", __func__,
                  Config.db_database );
        return(response);
      }
@@ -189,7 +189,7 @@
      }
     Libere_DB_SQL( &db );
 
-    g_snprintf( chaine, sizeof(chaine), " Module DLS %d stopped", id );
+    g_snprintf( chaine, sizeof(chaine), " | - Module DLS %d stopped", id );
     return(Admin_write ( response, chaine ));
   }
 /******************************************************************************************************************************/
@@ -232,7 +232,7 @@
        int num;
        sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
        Reseter_un_plugin ( num );
-       g_snprintf( chaine, sizeof(chaine), " Module DLS: Plugin %d resetted", num );
+       g_snprintf( chaine, sizeof(chaine), " | - Module DLS: Plugin %d resetted", num );
        response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "list" ) )
