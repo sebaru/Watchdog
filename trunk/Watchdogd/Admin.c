@@ -182,7 +182,7 @@
              "%s: Commande Received from %s@%s : %s", __func__, user, host, ligne );
 
     g_snprintf( chaine, sizeof(chaine), "At %010.1f, processing %s\n", (gdouble)Partage->top/10.0, ligne );
-    response = Admin_write ( chaine, NULL );
+    response = Admin_write ( g_strdup(chaine), NULL );
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
 
