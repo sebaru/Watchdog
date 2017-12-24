@@ -36,13 +36,13 @@
 /******************************************************************************************************************************/
  static gchar *Admin_sms_reload ( gchar *response )
   { if (Cfg_sms.lib->Thread_run == FALSE)
-     { response = Admin_write ( response, " Thread SMS is not running\n" );
+     { response = Admin_write ( response, " Thread SMS is not running" );
        return(response);
      }
     
     Cfg_sms.reload = TRUE;
     while (Cfg_sms.reload) sched_yield();
-    response = Admin_write ( response, " SMS Reload done\n" );
+    response = Admin_write ( response, " SMS Reload done" );
     return(response);
   }
 /******************************************************************************************************************************/
@@ -76,19 +76,19 @@
     gchar chaine[80];
     struct DB *db;
 
-    g_snprintf( chaine, sizeof(chaine), " -- Liste des contacts SMS\n" );
+    g_snprintf( chaine, sizeof(chaine), " -- Liste des contacts SMS" );
     response = Admin_write ( response, chaine );
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING, "Admin_sms_list: Database Connection Failed" );
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
        return(response);
      }
 
 /********************************************* Chargement des informations en bases *******************************************/
     if ( ! Sms_Recuperer_smsDB( db ) )
      { Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING, "Admin_sms_list: Recuperer_sms Failed" );
+       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING, "%s: Recuperer_sms Failed", __func__ );
        return(response);
      }
 
@@ -99,7 +99,7 @@
     return(response);
   }
 /******************************************************************************************************************************/
-/* Admin_sms: Gere une commande 'admin sms' depuis une response admin                                                        */
+/* Admin_sms: Gere une commande 'admin sms' depuis une response admin                                                         */
 /* Entrée: Le buffer d'entrée a compléter                                                                                     */
 /* Sortie: Le buffer de sortie complété                                                                                       */
 /******************************************************************************************************************************/
@@ -108,13 +108,13 @@
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'SMS'\n" );
-       response = Admin_write ( response, "  dbcfg ...             - Get/Set Database Parameters\n" );
-       response = Admin_write ( response, "  reload                - Reload contacts from Database\n" );
-       response = Admin_write ( response, "  sms smsbox message    - Send 'message' via smsbox\n" );
-       response = Admin_write ( response, "  sms gsm    message    - Send 'message' via gsm\n" );
-       response = Admin_write ( response, "  list                  - Liste les contacts SMS\n" );
-       response = Admin_write ( response, "  help                  - This help\n" );
+     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'SMS'" );
+       response = Admin_write ( response, "  dbcfg ...             - Get/Set Database Parameters" );
+       response = Admin_write ( response, "  reload                - Reload contacts from Database" );
+       response = Admin_write ( response, "  sms smsbox message    - Send 'message' via smsbox" );
+       response = Admin_write ( response, "  sms gsm    message    - Send 'message' via gsm" );
+       response = Admin_write ( response, "  list                  - Liste les contacts SMS" );
+       response = Admin_write ( response, "  help                  - This help" );
      }
     else if ( ! strcmp ( commande, "list" ) )
      { response = Admin_sms_list ( response );
