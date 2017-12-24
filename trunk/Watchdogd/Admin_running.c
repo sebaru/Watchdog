@@ -72,14 +72,19 @@
        response = Admin_write ( response, "  help                  - This help" );
      } else
     if ( ! strcmp ( commande, "ident" ) )
-     { char nom[128];
+     { gchar date[128], nom[128];
+       struct tm *temps;
+       gint num;
+       temps = localtime( (time_t *)&Partage->start_time );
+       if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
+       else       { g_snprintf( date, sizeof(date), "Erreur" ); }
        gethostname( nom, sizeof(nom) );
        g_snprintf( chaine, sizeof(chaine),
-                   " | - Watchdogd %s Instance '%s' (PID=%d)\n"
+                   " | - Watchdogd %s Instance '%s' started on '%s' (PID=%d)\n"
                    " | - Version (%s) running on %s\n"
                    " | - run as '%s' (uid=%d)\n"
                    " | - home = '%s'",
-                   (Config.instance_is_master ? "Master" : "Slave"), Config.instance_id, getpid(),
+                   (Config.instance_is_master ? "Master" : "Slave"), Config.instance_id, date, getpid(),
                    VERSION, nom, 
                    Config.run_as, getuid(),
                    Config.home );
@@ -90,62 +95,57 @@
      } else
     if ( ! strcmp ( commande, "clear_histo" ) )
      { Clear_histoDB ();                                                                   /* Clear de la table histo au boot */
-       g_snprintf( chaine, sizeof(chaine), " HistoDB cleared" );
+       g_snprintf( chaine, sizeof(chaine), " | - HistoDB cleared" );
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "update_schemaDB" ) )
      { Update_database_schema ();
-       g_snprintf( chaine, sizeof(chaine), " Update Schema done" );
+       g_snprintf( chaine, sizeof(chaine), " | - Update Schema done" );
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "reload_confDB" ) )
      { Charger_config_bit_interne ();                         /* Chargement des configurations des bits internes depuis la DB */
-       g_snprintf( chaine, sizeof(chaine), " Reload done" );
+       g_snprintf( chaine, sizeof(chaine), " | - Reload done" );
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "audit" ) )
-     { struct tm *temps;
-       gchar date[128];
-       gint num;
-       temps = localtime( (time_t *)&Partage->start_time );
-       if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
-       else       { g_snprintf( date, sizeof(date), "Erreur" ); }
+     { gint num;
 
-       g_snprintf( chaine, sizeof(chaine), " -- Audit de performance -- Instance started on %s", date );
+       g_snprintf( chaine, sizeof(chaine), " -- Audit de performance -- " );
        response = Admin_write ( response, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " | Bit/s                : %d", Partage->audit_bit_interne_per_sec_hold );
+       g_snprintf( chaine, sizeof(chaine), " | - Bit/s                : %d", Partage->audit_bit_interne_per_sec_hold );
        response = Admin_write ( response, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " | Tour/s               : %d", Partage->audit_tour_dls_per_sec_hold );
+       g_snprintf( chaine, sizeof(chaine), " | - Tour/s               : %d", Partage->audit_tour_dls_per_sec_hold );
        response = Admin_write ( response, chaine );
 
-       g_snprintf( chaine, sizeof(chaine), " | Archive to Proceed   : %d", Partage->com_arch.taille_arch );
+       g_snprintf( chaine, sizeof(chaine), " | - Archive to Proceed   : %d", Partage->com_arch.taille_arch );
        response = Admin_write ( response, chaine );
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
        num = g_slist_length( Partage->com_msrv.liste_i );                  /* Recuperation du numero de i */
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       g_snprintf( chaine, sizeof(chaine), " | Distribution des I   : reste %d", num );
+       g_snprintf( chaine, sizeof(chaine), " | - Distribution des I   : reste %d", num );
        response = Admin_write ( response, chaine );
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
        num = g_slist_length( Partage->com_msrv.liste_msg );                /* Recuperation du numero de i */
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       g_snprintf( chaine, sizeof(chaine), " | Distribution des Msg : reste %d", num );
+       g_snprintf( chaine, sizeof(chaine), " | - Distribution des Msg : reste %d", num );
        response = Admin_write ( response, chaine );
 
        pthread_mutex_lock( &Partage->com_msrv.synchro );                /* Parcours de la liste a traiter */
        num = g_slist_length( Partage->com_msrv.liste_msg_repeat );                    /* liste des repeat */
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
-       g_snprintf( chaine, sizeof(chaine), " | MSgs en REPEAT       : reste %d", num );
+       g_snprintf( chaine, sizeof(chaine), " | - MSgs en REPEAT       : reste %d", num );
        response = Admin_write ( response, chaine );
 
      } else
     if ( ! strcmp ( commande, "log_level" ) )
      { gchar debug[128], chaine [128];
        if (sscanf ( ligne, "%s %s", commande, debug ) != 2) return(response);
-       g_snprintf( chaine, sizeof(chaine), " Log level set to %s", debug );
+       g_snprintf( chaine, sizeof(chaine), " | - Log level set to %s", debug );
        if ( ! strcmp ( debug, "debug"    ) )
         { Info_change_log_level ( Config.log, LOG_DEBUG   ); }
        else if ( ! strcmp ( debug, "info"  ) )
@@ -263,19 +263,19 @@
              liste = liste->next;
            }
           if ( liste == NULL )                                       /* Si l'on a pas trouve de librairie */
-           { g_snprintf( chaine, sizeof(chaine), " -- Unknown debug switch" );
+           { g_snprintf( chaine, sizeof(chaine), " | - Unknown debug switch" );
              response = Admin_write ( response, chaine );
            }
         }
      } else
     if ( ! strcmp ( commande, "ping" ) )
-     { response = Admin_write ( response, " Pong !" );
+     { response = Admin_write ( response, " | - Pong !" );
      } else
     if ( ! strcmp ( commande, "nocde" ) )
      { g_snprintf( chaine, sizeof(chaine), "" );
        response = Admin_write ( response, chaine );
      } else
-     { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s", ligne );
+     { g_snprintf( chaine, sizeof(chaine), " | - Unknown command : %s", ligne );
        response = Admin_write ( response, chaine );
      }
    return(response);

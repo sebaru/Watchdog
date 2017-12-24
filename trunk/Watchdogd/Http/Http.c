@@ -66,7 +66,7 @@
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                "Http_Lire_config: Database connexion failed. Using Default Parameters" );
+                "%s: Database connexion failed. Using Default Parameters", __func__ );
        return(FALSE);
      }
 
@@ -95,7 +95,7 @@
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.lib->Thread_debug = TRUE;  }
        else
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                   "Http_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
+                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
         }
      }
     return(TRUE);
@@ -313,7 +313,7 @@
                 { return( Http_Traiter_request_login ( session, wsi, remote_name, remote_ip ) ); }
                else if ( ! strcasecmp ( url, "/ws/logoff" ) )
                 { if (session) Http_Close_session ( wsi, session ); }
-               else if ( ! strcasecmp ( url, "/ws/status" ) )
+               else if ( ! strcasecmp ( url, "/status" ) )
                 { Http_Traiter_request_getstatus ( wsi ); }
                else if ( ! strcasecmp ( url, "/ws/messages" ) )
                 { return( Http_Traiter_request_getmessage ( wsi, session ) ); }
@@ -404,19 +404,19 @@
     if (Cfg_http.ssl_enable)                                                                           /* Configuration SSL ? */
      { if ( stat ( Cfg_http.ssl_cert_filepath, &sbuf ) == -1)                                     /* Test présence du fichier */
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Run_thread: unable to load '%s' (error '%s'). Setting ssl=FALSE",
+                   "%s: unable to load '%s' (error '%s'). Setting ssl=FALSE", __func__,
                     Cfg_http.ssl_cert_filepath, strerror(errno) );
           Cfg_http.ssl_enable=FALSE;
         }
        else if ( stat ( Cfg_http.ssl_private_key_filepath, &sbuf ) == -1)                         /* Test présence du fichier */
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Run_thread: unable to load '%s' (error '%s'). Setting ssl=FALSE",
+                   "%s: unable to load '%s' (error '%s'). Setting ssl=FALSE", __func__,
                     Cfg_http.ssl_private_key_filepath, strerror(errno) );
           Cfg_http.ssl_enable=FALSE;
         }
        else if ( stat ( Cfg_http.ssl_ca_filepath, &sbuf ) == -1)                                  /* Test présence du fichier */
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Run_thread: unable to load '%s' (error '%s'). Setting ssl=FALSE",
+                   "%s: unable to load '%s' (error '%s'). Setting ssl=FALSE", __func__,
                     Cfg_http.ssl_ca_filepath, strerror(errno) );
           Cfg_http.ssl_enable=FALSE;
         }
@@ -429,11 +429,11 @@
           /*Cfg_http.ws_info.options |= LWS_SERVER_OPTION_REDIRECT_HTTP_TO_HTTPS;*/
           /*Cfg_http.ws_info.options |= LWS_SERVER_OPTION_REQUIRE_VALID_OPENSSL_CLIENT_CERT;*/
           Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                   "Run_thread: Stat '%s' OK", Cfg_http.ws_info.ssl_cert_filepath );
+                   "%s: Stat '%s' OK", __func__, Cfg_http.ws_info.ssl_cert_filepath );
           Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                   "Run_thread: Stat '%s' OK", Cfg_http.ws_info.ssl_private_key_filepath );
+                   "%s: Stat '%s' OK", __func__, Cfg_http.ws_info.ssl_private_key_filepath );
           Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                   "Run_thread: Stat '%s' OK", Cfg_http.ws_info.ssl_ca_filepath );
+                   "%s: Stat '%s' OK", __func__, Cfg_http.ws_info.ssl_ca_filepath );
         }
      }
 
@@ -441,13 +441,13 @@
  
     if (!Cfg_http.ws_context)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Run_thread: WebSocket Create Context creation error (%s). Shutting Down %p",
+                "%s: WebSocket Create Context creation error (%s). Shutting Down %p", __func__,
                  strerror(errno), pthread_self() );
        goto end;
      }
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-             "Run_thread: WebSocket Create OK. Listening on port %d with ssl=%d", Cfg_http.tcp_port, Cfg_http.ssl_enable );
+             "%s: WebSocket Create OK. Listening on port %d with ssl=%d", __func__, Cfg_http.tcp_port, Cfg_http.ssl_enable );
 
 #ifdef bouh
     Abonner_distribution_message ( Http_Gerer_message );                            /* Abonnement à la diffusion des messages */
@@ -460,8 +460,8 @@
        usleep(10000);
        sched_yield();
 
-       if (Cfg_http.lib->Thread_sigusr1)                                  /* A-t'on recu un signal USR1 ? */
-        { pthread_mutex_lock( &Cfg_http.lib->synchro );                  /* Ajout dans la liste a traiter */
+       if (Cfg_http.lib->Thread_sigusr1)                                                      /* A-t'on recu un signal USR1 ? */
+        { pthread_mutex_lock( &Cfg_http.lib->synchro );                                      /* Ajout dans la liste a traiter */
           pthread_mutex_unlock( &Cfg_http.lib->synchro );
           /*Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
                    "Run_thread: SIGUSR1. %03d sessions", nbr );*/
@@ -483,7 +483,7 @@
 
 end:
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-             "Run_thread: Down . . . TID = %p", pthread_self() );
+             "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_http.lib->Thread_run = FALSE;                                                           /* Le thread ne tourne plus ! */
     Cfg_http.lib->TID = 0;                                                    /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
