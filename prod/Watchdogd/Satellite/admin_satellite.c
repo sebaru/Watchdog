@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/admin_master.c        Gestion des connexions Admin du thread "Master" de watchdog            */
-/* Projet WatchDog version 2.0       Gestion d'habitat                    sam. 02 févr. 2013 14:04:58 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/admin_master.c        Gestion des responses Admin du thread "Master" de watchdog                                */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                        sam. 02 févr. 2013 14:04:58 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * admin_master.c
  * This file is part of Watchdog
@@ -25,15 +25,15 @@
  * Boston, MA  02110-1301  USA
  */
  
- #include <unistd.h>                                                                  /* Pour gethostname */
+ #include <unistd.h>                                                                                      /* Pour gethostname */
  #include "watchdogd.h"
  #include "Satellite.h"
 
-/**********************************************************************************************************/
-/* Admin_Satellite_Mode_vers_string: convertir le statut numérique en chaine de caractere                 */
-/* Entrée: le mode a convertir                                                                            */
-/* Sortie: la chaine de caractere                                                                         */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Admin_Satellite_Mode_vers_string: convertir le statut numérique en chaine de caractere                                     */
+/* Entrée: Le buffer d'entrée a compléter                                                                                     */
+/* Sortie: Le buffer de sortie complété                                                                                       */
+/******************************************************************************************************************************/
  static gchar *Admin_Satellite_Mode_vers_string ( gint mode )
   { switch ( mode )
      { case SAT_DISCONNECTED          : return ("DISCONNECTED");
@@ -44,80 +44,78 @@
      }
     return("Unknown");
   };
-/**********************************************************************************************************/
-/* Admin_Satellite_status: Affiche le statut du satellite                                                 */
-/* Entrée: le connexion                                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Admin_Satellite_status ( struct CONNEXION *connexion )
+/******************************************************************************************************************************/
+/* Admin_Satellite_status: Affiche le statut du satellite                                                                     */
+/* Entrée: Le buffer d'entrée a compléter                                                                                     */
+/* Sortie: Le buffer de sortie complété                                                                                       */
+/******************************************************************************************************************************/
+ static gchar *Admin_Satellite_status ( gchar *response )
   { gchar chaine[128];
     gfloat next;
     next = (Cfg_satellite.date_next_retry - Partage->top)/10.0;
-    g_snprintf( chaine, sizeof(chaine), " -- Satellite Status -- %s (%02d)\n",
+    g_snprintf( chaine, sizeof(chaine), " -- Satellite Status -- %s (%02d)",
                 Admin_Satellite_Mode_vers_string( Cfg_satellite.Mode ),
                 Cfg_satellite.Mode );
-    Admin_write( connexion, chaine );
+    response = Admin_write ( response, chaine );
     if (Cfg_satellite.Mode == SAT_RETRY_CONNECT)
-     { g_snprintf( chaine, sizeof(chaine), " | - Retry in %02.1fs\n", next );
-       Admin_write( connexion, chaine );
+     { g_snprintf( chaine, sizeof(chaine), " | - Retry in %02.1fs", next );
+       response = Admin_write ( response, chaine );
      }
 
-    g_snprintf( chaine, sizeof(chaine), " | - master = %s:%d - %s\n",
+    g_snprintf( chaine, sizeof(chaine), " | - master = %s:%d - %s",
                 Cfg_satellite.master_host, Cfg_satellite.master_port,
                 (Cfg_satellite.master_certif ? Nom_certif( Cfg_satellite.master_certif ) : "Unknown") );
-    Admin_write( connexion, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | - issuer = %s\n",
+    response = Admin_write ( response, chaine );
+    g_snprintf( chaine, sizeof(chaine), " | - issuer = %s",
                 (Cfg_satellite.master_certif ? Nom_certif_signataire( Cfg_satellite.master_certif ) : "Unknown") );
-    Admin_write( connexion, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | - local master = cert %s, key %s, ca %s\n",
+    response = Admin_write ( response, chaine );
+    g_snprintf( chaine, sizeof(chaine), " | - local master = cert %s, key %s, ca %s",
                 Cfg_satellite.ssl_file_cert, Cfg_satellite.ssl_file_key, Cfg_satellite.ssl_file_ca );
-    Admin_write( connexion, chaine );
+    response = Admin_write ( response, chaine );
 
     pthread_mutex_lock ( &Cfg_satellite.lib->synchro );
-    g_snprintf( chaine, sizeof(chaine), " | - processing %03d Events\n",
+    g_snprintf( chaine, sizeof(chaine), " | - processing %03d Events",
                 g_slist_length ( Cfg_satellite.liste_Events ) );
     pthread_mutex_unlock ( &Cfg_satellite.lib->synchro );
-    Admin_write( connexion, chaine );
-    Admin_write( connexion, " -\n" );
+    response = Admin_write ( response, chaine );
+    return(response);
   }
-/**********************************************************************************************************/
-/* Admin_master: Gere une commande 'admin masterdepuis une connexion admin                                */
-/* Entrée: le connexion et la ligne de commande                                                           */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
+/******************************************************************************************************************************/
+/* Admin_master: Gere une commande 'admin masterdepuis une response admin                                                    */
+/* Entrée: Le buffer d'entrée a compléter                                                                                     */
+/* Sortie: Le buffer de sortie complété                                                                                       */
+/******************************************************************************************************************************/
+ gchar *Admin_command ( gchar *response, gchar *ligne )
   { gchar commande[128], chaine[128];
 
-    sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
+    sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'Satellite'\n" );
-       Admin_write ( connexion, "  dbcfg ...          - Get/Set Database Parameters\n" );
-       Admin_write ( connexion, "  status             - Show connection status\n" );
-       Admin_write ( connexion, "  reload             - Reload config from Database\n" );
-       Admin_write ( connexion, "  help               - This help\n" );
+     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'Satellite'" );
+       response = Admin_write ( response, "  dbcfg ...          - Get/Set Database Parameters" );
+       response = Admin_write ( response, "  status             - Show connection status" );
+       response = Admin_write ( response, "  reload             - Reload config from Database" );
+       response = Admin_write ( response, "  help               - This help" );
      } else
-    if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)
-        { gboolean retour;
-          retour = Satellite_Lire_config();
-          g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s\n",
-                      (retour ? "Success" : "Failed") );
-          Admin_write ( connexion, chaine );
-        }
+    if ( ! strcmp ( commande, "dbcfg" ) )                     /* Appelle de la fonction dédiée à la gestion des parametres DB */
+     { gboolean retour;
+       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
+       retour = Satellite_Lire_config();
+       g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s", (retour ? "Success" : "Failed") );
+       response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "status" ) )
-     { Admin_Satellite_status ( connexion );
+     { response = Admin_Satellite_status ( response );
      } else
-    if ( ! strcmp ( commande, "reload" ) )                /* Rechargement de la configuration en Database */
+    if ( ! strcmp ( commande, "reload" ) )                                    /* Rechargement de la configuration en Database */
      { gboolean retour;
        retour = Satellite_Lire_config();
-       g_snprintf( chaine, sizeof(chaine), " Reloading Satellite Parameters -> %s\n",
+       g_snprintf( chaine, sizeof(chaine), " Reloading Satellite Parameters -> %s",
                    (retour ? "Success" : "Failed") );
-       Admin_write ( connexion, chaine );
+       response = Admin_write ( response, chaine );
      } else
-     { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
-       Admin_write ( connexion, chaine );
+     { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s", ligne );
+       response = Admin_write ( response, chaine );
      }
-
+    return(response);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

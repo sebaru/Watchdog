@@ -1048,3 +1048,18 @@ INSERT INTO `users` (`id`, `access_level`, `name`, `phphash`, `mustchangepwd`, `
 (1, 0, 'guest', '$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a', 0, 0, '0FE3B94BCC1E52AC4BEE0DE31D6306890854EAFC77F855FBD9D17BB0D7256A5E23ED8D58FA85E345FE71D046211745B6B50382CD939DC7FDAA2FBE6B7D586069', '6E14D7124DF5FC4C018D845F351553F751265C37834455B96EE3014BCA7CFE53B87CAD8FFA739B39C4A5BCD61E267560EAA7F2AEFFAB3C457B1E0F6BE5BCF8C4', 'Utilisateur Guest', 0, 1, 0, 0, 0, 0);
 
 
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `users_sessions`
+--
+
+CREATE TABLE `users_sessions` (
+  `id` varchar(128) NOT NULL,
+  `login` varchar(32) NOT NULL,
+  `last_date` datetime NOT NULL,
+  `remote_addr` varchar(50) NOT NULL,
+  `x_forwarded_for` varchar(50) NOT NULL,
+  `data` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Serveur/protocole_admin.c    Gestion du protocole_admin pour Watchdog              */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 04 avr 2009 11:13:22 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Serveur/protocole_admin.c    Gestion du protocole_admin pour Watchdog                                            */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          sam 04 avr 2009 11:13:22 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * protocole_admin.c
  * This file is part of Watchdog
@@ -26,14 +26,14 @@
  */
 
  #include <glib.h>
-/******************************************** Prototypes de fonctions *************************************/
+/****************************************************** Prototypes de fonctions ***********************************************/
  #include "watchdogd.h"
  #include "Sous_serveur.h"
-/**********************************************************************************************************/
-/* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
-/* Entrée: la connexion avec le serveur                                                                   */
-/* Sortie: Kedal                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Gerer_protocole: Gestion de la communication entre le serveur et le client                                                 */
+/* Entrée: la connexion avec le serveur                                                                                       */
+/* Sortie: Kedal                                                                                                              */
+/******************************************************************************************************************************/
  void Gerer_protocole_admin( struct CLIENT *client )
   { struct CONNEXION *connexion;
     connexion = client->connexion;
@@ -56,9 +56,14 @@
             break;
        case SSTAG_CLIENT_REQUEST:
              { struct CMD_TYPE_ADMIN *admin;
+               gchar *response;
                admin = (struct CMD_TYPE_ADMIN *)connexion->donnees;
-               Processer_commande_admin ( client->connexion, client->util->nom, client->machine, admin->buffer );
-             }
+               Envoyer_reseau ( connexion, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_START, NULL, 0 );         /* Debut de la reponse */
+               response = Processer_commande_admin ( client->util->nom, client->machine, admin->buffer );
+               Envoyer_reseau ( connexion, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_BUFFER, response, strlen(response)+1 );
+               g_free(response);
+               Envoyer_reseau ( connexion, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_STOP, NULL, 0 );            /* Fin de la reponse */
+              }
             break;
 
      }

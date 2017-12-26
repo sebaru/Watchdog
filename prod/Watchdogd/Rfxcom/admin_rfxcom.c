@@ -35,7 +35,7 @@
 /* Entrée: le connexion d'admin et la ligne de commande                                                                       */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Admin_command( struct CONNEXION *connexion, gchar *ligne )
+ gchar *Admin_command( gchar *response, gchar *ligne )
   { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
@@ -45,8 +45,8 @@
        gint housecode, unitcode, cmd, retour;
        gchar proto[32];
 
-       sscanf ( ligne, "%s %[^,],%d,%d,%d", commande,                                       /* Découpage de la ligne de commande */
-                proto, &housecode, &unitcode, &cmd );
+       if (sscanf ( ligne, "%s %[^,],%d,%d,%d", commande,                                /* Découpage de la ligne de commande */
+                    proto, &housecode, &unitcode, &cmd ) != 5) return(response);
 
        trame_send_AC[0] = 0x07; /* Taille */
        trame_send_AC[1] = 0x10; /* lightning 1 */
@@ -61,14 +61,14 @@
        trame_send_AC[7] = 0x0; /* rssi */
        retour = write ( Cfg_rfxcom.fd, &trame_send_AC, trame_send_AC[0] + 1 );
        if (retour>0)
-        { g_snprintf( chaine, sizeof(chaine), " Sending Proto %d, housecode %d, unitcode %d, cmd %d OK\n",
+        { g_snprintf( chaine, sizeof(chaine), " Sending Proto %d, housecode %d, unitcode %d, cmd %d OK",
                       trame_send_AC[2], housecode, unitcode, cmd );
         }
        else
-        { g_snprintf( chaine, sizeof(chaine), " Sending Proto %d, housecode %d, unitcode %d, cmd %d Failed !\n",
+        { g_snprintf( chaine, sizeof(chaine), " Sending Proto %d, housecode %d, unitcode %d, cmd %d Failed !",
                       trame_send_AC[2], housecode, unitcode, cmd );
         }
-       Admin_write ( connexion, chaine );
+       response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "light_ac" ) )
      { gchar trame_send_AC[] = { 0x0B, 0x11, 00, 01, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
@@ -91,50 +91,49 @@
        trame_send_AC[11] = 0x0; /* rssi */
        retour = write ( Cfg_rfxcom.fd, &trame_send_AC, trame_send_AC[0] + 1 );
        if (retour>0)
-        { g_snprintf( chaine, sizeof(chaine), " Sending Proto AC ids=%d-%d-%d-%d, unitcode %d, cmd %d OK\n",
+        { g_snprintf( chaine, sizeof(chaine), " Sending Proto AC ids=%d-%d-%d-%d, unitcode %d, cmd %d OK",
                       id1, id2, id3, id4, unitcode, cmd );
         }
        else
-        { g_snprintf( chaine, sizeof(chaine), " Sending Proto AC ids=%d-%d-%d-%d, unitcode %d, cmd %d Failed\n",
+        { g_snprintf( chaine, sizeof(chaine), " Sending Proto AC ids=%d-%d-%d-%d, unitcode %d, cmd %d Failed",
                       id1, id2, id3, id4, unitcode, cmd );
         }
-       Admin_write ( connexion, chaine );
+       response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "status" ) )
      { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), " RFXCOM Status:\n" );
-       Admin_write ( connexion, chaine );
-       g_snprintf( chaine, sizeof(chaine), " | mode = %d\n", Cfg_rfxcom.mode );
-       Admin_write ( connexion, chaine );
-       g_snprintf( chaine, sizeof(chaine), " | fd = %d\n", Cfg_rfxcom.fd );
-       Admin_write ( connexion, chaine );
-       g_snprintf( chaine, sizeof(chaine), " | date_next_retry = in %02.1fs\n",
+       g_snprintf( chaine, sizeof(chaine), " RFXCOM Status:" );
+       response = Admin_write ( response, chaine );
+       g_snprintf( chaine, sizeof(chaine), " | mode = %d", Cfg_rfxcom.mode );
+       response = Admin_write ( response, chaine );
+       g_snprintf( chaine, sizeof(chaine), " | fd = %d", Cfg_rfxcom.fd );
+       response = Admin_write ( response, chaine );
+       g_snprintf( chaine, sizeof(chaine), " | date_next_retry = in %02.1fs",
                    (Partage->top - Cfg_rfxcom.date_next_retry) / 10.0 );
-       Admin_write ( connexion, chaine );
-       Admin_write ( connexion, " -\n" );
+       response = Admin_write ( response, chaine );
+       response = Admin_write ( response, " -" );
      }
     else if ( ! strcmp ( commande, "dbcfg" ) )                /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)                       /* Si changement de parametre */
-        { gboolean retour;
-          retour = Rfxcom_Lire_config();
-          g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s\n",
-                      (retour ? "Success" : "Failed") );
-          Admin_write ( connexion, chaine );
-        }
+     { gboolean retour;
+       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
+       retour = Rfxcom_Lire_config();
+       g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s", (retour ? "Success" : "Failed") );
+       response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'RFXCOM'\n" );
-       Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
-       Admin_write ( connexion, "  light proto,housecode,unitcode,cmdnumber\n" );
-       Admin_write ( connexion, "                                         - Envoie une commande RFXCOM proto = x10 or arc\n" );
-       Admin_write ( connexion, "  light_ac (id1,id2,id3,id4),unitcode,cmdnumber,level\n" );
-       Admin_write ( connexion, "                                         - Envoie une commande RFXCOM Protocol AC, HomeEasy EU, ANSLUT\n" );
-       Admin_write ( connexion, "  status                                 - Affiche le statut de la connexion\n" );
+     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'RFXCOM'" );
+       response = Admin_write ( response, "  dbcfg ...                              - Get/Set Database Parameters" );
+       response = Admin_write ( response, "  light proto,housecode,unitcode,cmdnumber" );
+       response = Admin_write ( response, "                                         - Envoie une commande RFXCOM proto = x10 or arc" );
+       response = Admin_write ( response, "  light_ac (id1,id2,id3,id4),unitcode,cmdnumber,level" );
+       response = Admin_write ( response, "                                         - Envoie une commande RFXCOM Protocol AC, HomeEasy EU, ANSLUT" );
+       response = Admin_write ( response, "  status                                 - Affiche le statut de la connexion" );
      }
     else
      { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), " Unknown RFXCOM command : %s\n", ligne );
-       Admin_write ( connexion, chaine );
+       g_snprintf( chaine, sizeof(chaine), " Unknown RFXCOM command : %s", ligne );
+       response = Admin_write ( response, chaine );
      }
+    return(response);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

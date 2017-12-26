@@ -36,7 +36,7 @@
 /* Entrée: un certificat x509                                                                             */
 /* Sortie: une chaine non freeable                                                                        */
 /**********************************************************************************************************/
- gchar *Nom_certif_signataire( X509 *certif )
+ const gchar *Nom_certif_signataire( X509 *certif )
   { X509_NAME_ENTRY *entry;
     X509_NAME *name;
     gint pos;
@@ -47,14 +47,14 @@
     pos = X509_NAME_get_index_by_NID( name, NID_commonName, -1 );
     entry = X509_NAME_get_entry( name, pos );
     if (!entry) return(NOT_FOUND);
-    return ( ASN1_STRING_data( X509_NAME_ENTRY_get_data( entry ) ) );
+    return ( ASN1_STRING_get0_data( X509_NAME_ENTRY_get_data( entry ) ) );
   }
 /**********************************************************************************************************/
 /* Nom_certif: renvoie le common name du sujet du certificat en parametre                                 */
 /* Entrée: un certificat x509                                                                             */
 /* Sortie: une chaine non freeable                                                                        */
 /**********************************************************************************************************/
- gchar *Nom_certif( X509 *certif )
+ const gchar *Nom_certif( X509 *certif )
   { X509_NAME_ENTRY *entry;
     X509_NAME *name;
     gint pos;
@@ -65,7 +65,7 @@
     pos = X509_NAME_get_index_by_NID( name, NID_commonName, -1 );
     entry = X509_NAME_get_entry( name, pos );
     if (!entry) return(NOT_FOUND);
-    return ( ASN1_STRING_data( X509_NAME_ENTRY_get_data( entry ) ) );
+    return ( ASN1_STRING_get0_data( X509_NAME_ENTRY_get_data( entry ) ) );
   }
 
 /**********************************************************************************************************/

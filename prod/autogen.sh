@@ -7,4 +7,4 @@ aclocal --force
 automake --add-missing
 autoconf --force
 ./configure
-make -j 4
+make -j 8
