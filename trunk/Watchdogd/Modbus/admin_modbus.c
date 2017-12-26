@@ -84,11 +84,11 @@
     g_snprintf( chaine, sizeof(chaine),
                 " |---------------------------\n"
                 " | MODBUS[%02d] ------> %s - %s\n"
-                " | - enable = %d, started = %d (bit B%04d=%d), watchdog = %03d, IP = %s"
-                " | - %03d Digital Input,  map_E = E%03d(->E%03d), %03d Analog  Input,  map_EA = EA%03d(->EA%03d)"
-                " | - %03d Digital Output, map_A = A%03d(->A%03d), %03d Analog  Output, map_AA = AA%03d(->AA%03d)"
-                " | - transaction_id = %06d, nbr_deconnect = %02d"
-                " | - last_reponse = %03ds ago, date_next_eana = in %03ds"
+                " | - enable = %d, started = %d (bit B%04d=%d), watchdog = %03d, IP = %s\n"
+                " | - %03d Digital Input,  map_E = E%03d(->E%03d), %03d Analog  Input,  map_EA = EA%03d(->EA%03d)\n"
+                " | - %03d Digital Output, map_A = A%03d(->A%03d), %03d Analog  Output, map_AA = AA%03d(->AA%03d)\n"
+                " | - transaction_id = %06d, nbr_deconnect = %02d\n"
+                " | - last_reponse = %03ds ago, date_next_eana = in %03ds\n"
                 " | - retente = in %03ds\n",
                 module->modbus.id, module->modbus.libelle,  Modbus_mode_to_string(module),
                 module->modbus.enable, module->started, module->modbus.bit, B(module->modbus.bit),
@@ -183,7 +183,7 @@
     pthread_mutex_unlock( &Cfg_modbus.lib->synchro );
 
     if (!module)                                                                                             /* Si non trouvé */
-     { response = Admin_write ( response, " Module not found" );
+     { response = Admin_write ( response, " | - Module not found" );
        return(response);
      }
 
@@ -219,9 +219,9 @@
 
     retour = Modifier_modbusDB ( &module->modbus );
     if (retour)
-     { snprintf( chaine, sizeof(chaine), " ERROR : MODBUS module parameter '%s' NOT set", param ); }
+     { snprintf( chaine, sizeof(chaine), " | - ERROR : MODBUS module parameter '%s' NOT set", param ); }
     else
-     { snprintf( chaine, sizeof(chaine), " MODBUS module parameter '%s' set", param ); }
+     { snprintf( chaine, sizeof(chaine), " | - MODBUS module parameter '%s' set", param ); }
     response = Admin_write ( response, chaine );
     return(response);
   }
@@ -269,10 +269,10 @@
        modbus.watchdog = 40;
        retour = Ajouter_modbusDB ( &modbus );
        if (retour == -1)
-        { response = Admin_write ( response, "Error, MODBUS not added" ); }
+        { response = Admin_write ( response, " | - Error, MODBUS not added" ); }
        else
         { gchar chaine[80];
-          g_snprintf( chaine, sizeof(chaine), " MODBUS %s added. New ID=%d", modbus.ip, retour );
+          g_snprintf( chaine, sizeof(chaine), " | - MODBUS %s added. New ID=%d", modbus.ip, retour );
           response = Admin_write ( response, chaine );
         }
      }
@@ -285,10 +285,10 @@
        if (sscanf ( ligne, "%s %d", commande, &modbus.id ) != 2) return(response);       /* Découpage de la ligne de commande */
        retour = Retirer_modbusDB ( &modbus );
        if (retour == FALSE)
-        { response = Admin_write ( response, "Error, MODBUS not erased" ); }
+        { response = Admin_write ( response, " | - Error, MODBUS not erased" ); }
        else
         { gchar chaine[80];
-          g_snprintf( chaine, sizeof(chaine), " MODBUS %d erased", modbus.id );
+          g_snprintf( chaine, sizeof(chaine), " | -MODBUS %d erased", modbus.id );
           response = Admin_write ( response, chaine );
         }
      }
@@ -296,7 +296,7 @@
      { gboolean retour;
        response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
        retour = Modbus_Lire_config();
-       g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s", (retour ? "Success" : "Failed") );
+       g_snprintf( chaine, sizeof(chaine), " | - Reloading Thread Parameters from Database -> %s", (retour ? "Success" : "Failed") );
        response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "help" ) )
@@ -314,7 +314,7 @@
      }
     else
      { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), " Unknown MODBUS command : %s", ligne );
+       g_snprintf( chaine, sizeof(chaine), " | - Unknown MODBUS command : %s", ligne );
        response = Admin_write ( response, chaine );
      }
     return(response);
