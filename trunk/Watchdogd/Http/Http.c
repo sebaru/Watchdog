@@ -216,22 +216,6 @@
     return 0;
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_request_setmessage: Traite une requete sur l'URI message                                                      */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : FALSE si pb                                                                                                       */
-/******************************************************************************************************************************/
- static gint Http_Preparer_request_post ( struct lws *wsi, struct HTTP_SESSION *session,
-                                          gchar *remote_name, gchar *remote_ip, gchar *url )
-  { struct HTTP_PER_SESSION_DATA *pss;
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-             "%s: (sid %s) HTTP request from %s(%s)",
-              __func__, Http_get_session_id(session), remote_name, remote_ip );
-
-    pss = lws_wsi_user ( wsi );
-    g_snprintf( pss->url, sizeof(pss->url), url );
-    return(0);               
-  }
-/******************************************************************************************************************************/
 /* CB_http : Gere les connexion HTTP pures (appellée par libwebsockets)                                                       */
 /* Entrées : le contexte, le message, l'URL                                                                                   */
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
@@ -269,6 +253,8 @@
                 { return( Http_Traiter_request_body_login ( wsi, data, taille ) ); }                /* Utilisation ud lws_spa */
                else if ( ! strcasecmp ( pss->url, "/postfile" ) )
                 { return( Http_Traiter_request_body_postfile ( wsi, data, taille ) ); }             /* Utilisation ud lws_spa */
+               else if ( ! strcasecmp ( pss->url, "/cli" ) )
+                { return( Http_Traiter_request_body_cli ( wsi, data, taille ) ); }                  /* Utilisation ud lws_spa */
                return( Http_CB_file_upload( wsi, data, taille ) );          /* Sinon, c'est un buffer type json ou un fichier */
              }
             break;
@@ -278,14 +264,10 @@
                                            (char *)&remote_ip, sizeof(remote_ip) );
                if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
                 { return( Http_Traiter_request_body_completion_login ( wsi, remote_name, remote_ip ) ); }
-               else if ( ! strcasecmp ( pss->url, "/ws/setmessage" ) )
-                { return( Http_Traiter_request_body_completion_setmessage ( wsi ) ); }
-               else if ( ! strcasecmp ( pss->url, "/ws/setscenario" ) )
-                { return( Http_Traiter_request_body_completion_setscenario ( wsi ) ); }
-               else if ( ! strcasecmp ( pss->url, "/ws/delmessage" ) )
-                { return( Http_Traiter_request_body_completion_delmessage ( wsi ) ); }
                else if ( ! strcasecmp ( pss->url, "/postfile" ) )
                 { return( Http_Traiter_request_body_completion_postfile ( wsi ) ); }
+               else if ( ! strcasecmp ( pss->url, "/cli" ) )
+                { return( Http_Traiter_request_body_completion_cli ( wsi ) ); }
                else
                 { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );
                   return(1);
@@ -315,18 +297,6 @@
                 { if (session) Http_Close_session ( wsi, session ); }
                else if ( ! strcasecmp ( url, "/status" ) )
                 { Http_Traiter_request_getstatus ( wsi ); }
-               else if ( ! strcasecmp ( url, "/ws/messages" ) )
-                { return( Http_Traiter_request_getmessage ( wsi, session ) ); }
-               else if ( ! strcasecmp ( url, "/ws/setmessage" ) )
-                { return( Http_Preparer_request_post ( wsi, session, remote_name, remote_ip, url ) ); }
-               else if ( ! strcasecmp ( url, "/ws/delmessage" ) )
-                { return( Http_Preparer_request_post ( wsi, session, remote_name, remote_ip, url ) ); }
-               else if ( ! strcasecmp ( url, "/ws/getscenario" ) )
-                { return( Http_Traiter_request_getscenario ( wsi, session ) ); }
-               else if ( ! strcasecmp ( url, "/ws/setscenario" ) )
-                { return( Http_Preparer_request_post ( wsi, session, remote_name, remote_ip, url ) ); }
-               else if ( ! strcasecmp ( url, "/ws/getpluginsDLS" ) )
-                { return( Http_Traiter_request_getpluginsDLS ( wsi, session ) ); }
                else if ( ! strncasecmp ( url, "/ws/getsyn", 11 ) )
                 { return( Http_Traiter_request_getsyn ( wsi, session ) ); }
                else if ( ! strcasecmp ( url, "/ws/getsvg" ) )
@@ -337,6 +307,10 @@
                 { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
                else if ( ! strncasecmp ( url, "/setm", 5 ) )
                 { return( Http_Traiter_request_setm ( wsi ) ); }
+               else if ( ! strcasecmp ( url, "/cli" ) )
+                { g_snprintf( pss->url, sizeof(pss->url), "/cli" );
+                  return(0);
+                }
                else if ( ! strcasecmp ( url, "/postfile" ) )
                 { g_snprintf( pss->url, sizeof(pss->url), "/postfile" );
                   return(0);

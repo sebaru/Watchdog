@@ -179,7 +179,6 @@
      {	pss->spa = lws_spa_create(wsi, PARAM_POSTFILE, NBR_PARAM_POSTFILE, 256, lws_fileupload_cb, wsi );
     			if (!pss->spa)	return(1);
      }
-    g_snprintf( pss->url, sizeof(pss->url), "/postfile" );
     return(lws_spa_process(pss->spa, data, taille));
   }
 /******************************************************************************************************************************/
