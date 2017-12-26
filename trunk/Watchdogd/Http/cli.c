@@ -106,9 +106,6 @@
     id       = lws_spa_get_string ( pss->spa, PARAM_CLI_ID );
     host     = lws_spa_get_string ( pss->spa, PARAM_CLI_HOST );
     commande = lws_spa_get_string ( pss->spa, PARAM_CLI_COMMANDE );
-    lws_spa_destroy ( pss->spa	);
-    pss->post_data_length = 0;
-    g_free(pss->post_data);
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
              "%s: HTTP/CLI request for user '%s' ('%s') from '%s' : '%s'", __func__, user, id, host, commande );
@@ -116,6 +113,10 @@
     buffer = Processer_commande_admin ( user, host, commande );
     Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, "text/plain", buffer, strlen(buffer) );
     g_free(buffer);
+
+    lws_spa_destroy ( pss->spa	);
+    pss->post_data_length = 0;
+    g_free(pss->post_data);
     return(1);                                                                                         /* si erreur, on coupe */
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
