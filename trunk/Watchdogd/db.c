@@ -743,7 +743,21 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=3353;
+    if (database_version < 3380)
+     { g_snprintf( requete, sizeof(requete), "CREATE TABLE `users_sessions` ("
+                                             "`id` varchar(128) NOT NULL,"
+                                             "`login` varchar(32) NOT NULL,"
+                                             "`last_date` datetime NOT NULL,"
+                                             "`remote_addr` varchar(50) NOT NULL,"
+                                             "`x_forwarded_for` varchar(50) NOT NULL,"
+                                             "`data` text NOT NULL,"
+                                             "PRIMARY KEY (`id`)"
+                                             ") ENGINE=InnoDB DEFAULT CHARSET=utf8"
+                 );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    database_version=3380;
 
     Libere_DB_SQL(&db);
 
