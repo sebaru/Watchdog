@@ -38,12 +38,12 @@
     struct DB*db;
     db = Init_ArchDB_SQL();       
     if (!db)
-     { g_snprintf( chaine, sizeof(chaine), " response to DB failed (Host='%s':%d, User='%s' DB='%s')",
+     { g_snprintf( chaine, sizeof(chaine), " | - Response to DB failed (Host='%s':%d, User='%s' DB='%s')",
                    Partage->com_arch.archdb_host, Partage->com_arch.archdb_port, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
        response = Admin_write ( response, chaine );
        return(response);
      }
-    g_snprintf( chaine, sizeof(chaine), " response to DB OK (Host=%s:%d, User=%s DB=%s)",
+    g_snprintf( chaine, sizeof(chaine), " | - Response to DB OK (Host=%s:%d, User=%s DB=%s)",
                 Partage->com_arch.archdb_host, Partage->com_arch.archdb_port, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
     response = Admin_write ( response, chaine );
     Libere_DB_SQL( &db );
@@ -62,17 +62,17 @@
     save_nbr = g_slist_length(Partage->com_arch.liste_arch);
     pthread_mutex_unlock( &Partage->com_arch.synchro );
 
-    g_snprintf( chaine, sizeof(chaine), " | Length of Arch list : %d", save_nbr );
+    g_snprintf( chaine, sizeof(chaine), " | - Length of Arch list : %d", save_nbr );
     response = Admin_write ( response, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | Host     : %s", Partage->com_arch.archdb_host );
+    g_snprintf( chaine, sizeof(chaine), " | - Host     : %s", Partage->com_arch.archdb_host );
     response = Admin_write ( response, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | Port     : %d", Partage->com_arch.archdb_port );
+    g_snprintf( chaine, sizeof(chaine), " | - Port     : %d", Partage->com_arch.archdb_port );
     response = Admin_write ( response, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | Database : %s", Partage->com_arch.archdb_database );
+    g_snprintf( chaine, sizeof(chaine), " | - Database : %s", Partage->com_arch.archdb_database );
     response = Admin_write ( response, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | Username : %s", Partage->com_arch.archdb_username );
+    g_snprintf( chaine, sizeof(chaine), " | - Username : %s", Partage->com_arch.archdb_username );
     response = Admin_write ( response, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | Purge    : %d", Partage->com_arch.duree_retention );
+    g_snprintf( chaine, sizeof(chaine), " | - Purge    : %d", Partage->com_arch.duree_retention );
     response = Admin_write ( response, chaine );
     return(response);
   }
@@ -93,7 +93,7 @@
      { gboolean retour;
        response = Admin_dbcfg_thread ( response, "arch", ligne+6 );                             /* Si changement de parametre */
        retour = Arch_Lire_config();
-       g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s",
+       g_snprintf( chaine, sizeof(chaine), " | - Reloading Thread Parameters from Database -> %s",
                    (retour ? "Success" : "Failed") );
        response = Admin_write ( response, chaine );
      }
@@ -103,13 +103,13 @@
         { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: pthread_create failed for Update SQL Partitions", __func__ ); }
         else
         { pthread_detach( tid ); }                                /* On le detache pour qu'il puisse se terminer tout seul */
-       g_snprintf( chaine, sizeof(chaine), " Purge of old data in progress" );
+       g_snprintf( chaine, sizeof(chaine), " | - Purge of old data in progress" );
        response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "clear" ) )
      { gint nbr;
        nbr = Arch_Clear_list ();                                         /* Clear de la list des archives à prendre en compte */
-       g_snprintf( chaine, sizeof(chaine), " ArchiveList cleared (%d components)", nbr );
+       g_snprintf( chaine, sizeof(chaine), " | - ArchiveList cleared (%d components)", nbr );
        response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "help" ) )
@@ -121,7 +121,7 @@
        response = Admin_write ( response, "  testdb                                 - Access Test to Database" );
      }
     else
-     { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s", ligne );
+     { g_snprintf( chaine, sizeof(chaine), " | - Unknown command : %s", ligne );
        response = Admin_write ( response, chaine );
      }
    return(response);
