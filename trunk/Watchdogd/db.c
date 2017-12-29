@@ -757,7 +757,12 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=3380;
+    if (database_version < 3386)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls ADD `sourcecode` TEXT NOT NULL AFTER `nbr_compil`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    database_version=3386;
 
     Libere_DB_SQL(&db);
 
