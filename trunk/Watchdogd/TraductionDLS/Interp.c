@@ -558,11 +558,11 @@
   }
 /******************************************************************************************************************************/
 /* Traduire: Traduction du fichier en paramètre du langage DLS vers le langage C                                              */
-/* Entrée: l'id du modul, new = true si il faut compiler le .dls.new                                                          */
+/* Entrée: l'id du modul                                                                                                      */
 /* Sortie: TRAD_DLS_OK, _WARNING ou _ERROR                                                                                    */
 /******************************************************************************************************************************/
- gint Traduire_DLS( gboolean new, gint id )
-  { gchar source[80], source_ok[80], log[80];
+ gint Traduire_DLS( int id )
+  { gchar source[80], cible[80], log[80];
     struct ALIAS *alias;
     GSList *liste;
     gint retour;
@@ -573,17 +573,16 @@
     if (!Buffer) return ( TRAD_DLS_ERROR );
     Buffer_used = 0;
     
-    g_snprintf( source,    sizeof(source),    "Dls/%d.dls.new", id );
-    g_snprintf( source_ok, sizeof(source_ok), "Dls/%d.dls", id );
-    g_snprintf( log,       sizeof(log),       "Dls/%d.log", id );
+    g_snprintf( source, sizeof(source), "Dls/%06d.dls", id );
+    g_snprintf( log,    sizeof(log),    "Dls/%06d.log", id );
+    g_snprintf( cible,  sizeof(cible),  "Dls/%06d.c", id );
     unlink ( log );
-    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "Traduire_DLS: new=%d, id=%d, source=%s, source_ok=%s, log=%s",
-              new, id, source, source_ok, log );
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: id=%d, source=%s, log=%s", __func__, id, source, log );
 
     Id_log = open( log, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (Id_log<0)
      { Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                "Traduire_DLS: Log creation failed %s (%s)", log, strerror(errno) ); 
+                "%s: Log creation failed %s (%s)", __func__, log, strerror(errno) ); 
        close(Id_log);
        return(TRAD_DLS_ERROR_FILE);
      }
@@ -598,7 +597,7 @@
     Liste_edge_up_bi  = NULL;                                               /* Liste des bits B utilisé avec l'option EDGE UP */
     DlsScanner_set_lineno(1);                                                                     /* Reset du numéro de ligne */
     nbr_erreur = 0;                                                                   /* Au départ, nous n'avons pas d'erreur */
-    rc = fopen( (new ? source : source_ok), "r" );
+    rc = fopen( source, "r" );
     if (!rc) retour = TRAD_DLS_ERROR;
     else
      { DlsScanner_debug = 0;                                                                     /* Debug de la traduction ?? */
@@ -612,14 +611,12 @@
        retour = TRAD_DLS_ERROR;
      }
     else
-     { gchar cible[80];
-       gint fd;
+     { gint fd;
        Emettre_erreur_new( "No error found" );                        /* Pas d'erreur rencontré (mais peu etre des warning !) */
        retour = TRAD_DLS_OK;
 
-       g_snprintf( cible, sizeof(cible), "Dls/%d.c", id );                    /* Enregistrement du buffer resultat sur disque */
        unlink ( cible );
-       fd = open( cible, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+       fd = open( cible, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );             /* Enregistrement du buffer resultat sur disque */
        if (fd<0)
         { Info_new( Config.log, Config.log_dls, LOG_WARNING,
                    "%s: Target creation failed %s (%s)", __func__, cible, strerror(errno) ); 
@@ -760,12 +757,6 @@
     Liberer_memoire();
     g_free(Buffer);
     Buffer = NULL;
-    if (retour != TRAD_DLS_ERROR && new)
-     { Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-                "%s: Renaming '%s' to '%s'", __func__, source, source_ok );
-       unlink ( source_ok );                                                   /* Recopie sur le fichier "officiel" du plugin */
-       rename( source, source_ok );
-     }
     pthread_mutex_unlock( &Partage->com_dls.synchro_traduction );                                         /* Libération Mutex */
     return(retour);
   }

@@ -152,13 +152,15 @@
  extern struct CMD_TYPE_PLUGIN_DLS *Rechercher_plugin_dlsDB( gint id );
  extern gboolean Modifier_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls );
  extern gboolean Set_compil_status_plugin_dlsDB( gint id, gint status );
- 
+ extern gboolean Get_source_dls_from_DB ( gint id, gchar **result_buffer, gint *result_taille );
+ extern gboolean Save_source_dls_to_DB( gint id, gchar *buffer, gint taille );
+
  extern void Reseter_un_plugin ( gint id );                                                                 /* Dans plugins.c */
  extern void Decharger_un_plugin_by_id ( gint id );
  extern void Decharger_plugins ( void );
  extern void Charger_plugins ( void );
  extern void Activer_plugin_by_id ( gint id, gboolean actif );
- extern gint Compiler_source_dls( gboolean new, gboolean reset, gint id, gchar *buffer, gint taille_buffer );
+ extern gint Compiler_source_dls( gboolean reset, gint id, gchar *buffer, gint taille_buffer );
  
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
  extern int EA_inrange( int num );

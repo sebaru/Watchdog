@@ -83,14 +83,14 @@
         { struct PLUGIN_DLS *dls;
           dls = (struct PLUGIN_DLS *)liste_dls->data;
 
-          Compiler_source_dls ( FALSE, FALSE, dls->plugindb.id, buffer, sizeof(buffer) );
+          Compiler_source_dls ( FALSE, dls->plugindb.id, buffer, sizeof(buffer) );
           g_snprintf( chaine, sizeof(chaine), " | - Compilation du DLS[%06d] done (no reset): %s", dls->plugindb.id, buffer );
           response = Admin_write ( response, chaine );
           liste_dls = liste_dls->next;
         }
        pthread_mutex_unlock( &Partage->com_dls.synchro );
      } else
-        { Compiler_source_dls ( FALSE, FALSE, id, buffer, sizeof(buffer) );
+        { Compiler_source_dls ( FALSE, id, buffer, sizeof(buffer) );
           g_snprintf( chaine, sizeof(chaine), " | - Compilation du DLS[%06d] done (no reset): %s", id, buffer );
           response = Admin_write ( response, chaine );
         }

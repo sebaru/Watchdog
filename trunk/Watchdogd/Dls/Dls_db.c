@@ -276,4 +276,91 @@
     Libere_DB_SQL(&db);
     return(retour);
   }
+/******************************************************************************************************************************/
+/* Get_source_dls_from_DB: Recupere le source code DLS dont l'id est en parametre                                             */
+/* Entrée: l'id associé et deux variables de retour: le buffer et sa taille                                                   */
+/* Sortie: FALSE si PB                                                                                                        */
+/******************************************************************************************************************************/
+ gboolean Get_source_dls_from_DB ( gint id, gchar **result_buffer, gint *result_taille )
+  { gchar requete[200];
+    gchar *buffer;
+    gint taille;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed" );
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT sourcecode,LENGTH(sourcecode) FROM %s WHERE id='%d'",
+                NOM_TABLE_DLS, id
+              );
+
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
+     { Libere_DB_SQL( &db );
+       return(FALSE);
+     }
+
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       return(FALSE);
+     }
+    taille = atoi(db->row[1]);
+    buffer = (gchar *)g_malloc0( taille + 1 );
+    if (!buffer)
+     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: Memory Error", __func__ ); }
+    else
+     { memcpy( buffer, db->row[0], taille ); }                                                   /* Recopie dans la structure */
+    *result_buffer = buffer;
+    *result_taille = taille;
+    Libere_DB_SQL( &db );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Save_source_dls_to_DB: Sauvegarde en base le source dls en parametre                                                       */
+/* Entrées: l'id du plugin associé, le sourcecode et sa taille                                                                */
+/* Sortie: FALSE si PB                                                                                                        */
+/******************************************************************************************************************************/
+ gboolean Save_source_dls_to_DB( gint id, gchar *buffer, gint taille )
+  { gchar *source, *requete;
+    gint taille_requete;
+    gboolean retour;
+    struct DB *db;
+
+    taille_requete = taille+256;
+    requete = (gchar *)g_malloc( taille_requete );
+    if (!requete)
+     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: Memory Error", __func__ );
+       return(FALSE);
+     }
+    
+    source = Normaliser_chaine ( buffer );                                                   /* Formatage correct des chaines */
+    if (!source)
+     { Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: Normalisation source impossible", __func__ );
+       g_free(requete);
+       return(FALSE);
+     }
+
+
+    g_snprintf( requete, taille_requete,                                                                       /* Requete SQL */
+               "UPDATE %s SET sourcecode='%s' WHERE id='%d'",
+                NOM_TABLE_DLS, source, id );
+
+    g_free(source);
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       g_free(requete);
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    g_free(requete);
+    return(retour);
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/
