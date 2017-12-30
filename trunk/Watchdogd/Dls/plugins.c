@@ -87,7 +87,7 @@
   { gchar nom_fichier_absolu[60];
     gboolean retour;
 
-    g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%d.so", dls->plugindb.id );
+    g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%06d.so", dls->plugindb.id );
     strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );                 /* Init des variables communes */
     dls->starting = 1;                                                             /* au chargement, le bit de start vaut 1 ! */
     dls->conso    = 0.0;
@@ -160,7 +160,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_dls, LOG_ERR, "Charger_un_plugin_by_id: Unable to open database" );
+     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: Unable to open database", __func__ );
        return(FALSE);
      }
 
@@ -168,13 +168,13 @@
     Libere_DB_SQL( &db );
 
     if (!plugin_dls)
-     { Info_new( Config.log, Config.log_dls, LOG_WARNING, "Charger_un_plugin_by_id: Plugin %06d non trouvé", id );
+     { Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: Plugin %06d non trouvé", __func__, id );
        return(FALSE);
      }
 
     dls = (struct PLUGIN_DLS *)g_try_malloc0( sizeof(struct PLUGIN_DLS) );
     if (!dls)
-     { Info_new( Config.log, Config.log_dls, LOG_ERR, "Charger_un_plugin_by_id: out of memory for id=%06d", id );
+     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: out of memory for id=%06d", __func__, id );
        g_free(plugin_dls);
        return(FALSE);
      }
@@ -203,7 +203,7 @@
           Partage->com_dls.Plugins = g_slist_remove( Partage->com_dls.Plugins, plugin );
           g_free( plugin );
           Info_new( Config.log, Config.log_dls, LOG_INFO,
-                   "Decharger_un_plugin_by_id: plugin %06d unloaded", plugin->plugindb.id );
+                   "%s: plugin %06d unloaded", __func__, plugin->plugindb.id );
           break;
         }
        plugins = plugins->next;
@@ -211,7 +211,7 @@
     pthread_mutex_unlock( &Partage->com_dls.synchro );
     if (plugins == NULL)
      { Info_new( Config.log, Config.log_dls, LOG_INFO,
-                "Decharger_un_plugin_by_id: plugin %06d not found", id );
+                "%s: plugin %06d not found", __func__, id );
      }
   }
 /******************************************************************************************************************************/
@@ -408,7 +408,7 @@
      }
     else if (!pidgcc)
      { gchar source[80], cible[80];
-       g_snprintf( source, sizeof(source), "Dls/%d.c", id );
+       g_snprintf( source, sizeof(source), "Dls/%06d.c", id );
        g_snprintf( cible,  sizeof(cible),  "Dls/libdls%06d.so", id );
        Info_new( Config.log, Config.log_dls, LOG_DEBUG,
                 "%s: GCC start (pid %d) source %s cible %s!",
