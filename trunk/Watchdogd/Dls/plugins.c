@@ -96,13 +96,13 @@
     dls->handle = dlopen( nom_fichier_absolu, RTLD_GLOBAL | RTLD_NOW );                     /* Ouverture du fichier librairie */
     if (!dls->handle)
      { Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                "Charger_un_plugin: Candidat %06d failed (%s)", dls->plugindb.id, dlerror() );
+                "%s: Candidat %06d failed (%s)", __func__, dls->plugindb.id, dlerror() );
      }
     else
      { dls->go = dlsym( dls->handle, "Go" );                                                 /* Recherche de la fonction 'Go' */
        if (!dls->go)
         { Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                    "Charger_un_plugin: Candidat %06d failed sur absence GO", dls->plugindb.id ); 
+                    "%s: Candidat %06d failed sur absence GO", __func__, dls->plugindb.id ); 
           dlclose( dls->handle );
           dls->handle = NULL;
         }
@@ -142,6 +142,7 @@
                      "%s: Candidat %06d -> bit(s) ownership OK", __func__, dls->plugindb.id ); 
 
      }
+    if (dls->plugindb.on) dls->start_date = time(NULL);
     pthread_mutex_lock( &Partage->com_dls.synchro );                                  /* Ajout dans la liste de travail D.L.S */
     Partage->com_dls.Plugins = g_slist_append( Partage->com_dls.Plugins, dls );
     pthread_mutex_unlock( &Partage->com_dls.synchro );

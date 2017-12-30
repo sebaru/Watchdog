@@ -122,14 +122,12 @@
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if (ajout)
      { if ( retour == FALSE )
-        { Libere_DB_SQL(&db); 
-          return(-1);
-        }
-       id = Recuperer_last_ID_SQL ( db );
+            { id=-1; }
+       else { id = Recuperer_last_ID_SQL ( db ); }
        Libere_DB_SQL(&db);
        return(id);
      }
-
+    Libere_DB_SQL(&db);
     if (retour==FALSE) return(-1);
     return(0);
   }
@@ -199,7 +197,7 @@
 
     dls = (struct CMD_TYPE_PLUGIN_DLS *)g_try_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     if (!dls) Info_new( Config.log, Config.log_dls, LOG_ERR,
-                       "Recuperer_plugins_dlsDB_suite: Erreur allocation mémoire" );
+                       "%s: Erreur allocation mémoire", __func__ );
     else
      { memcpy( &dls->nom,      db->row[1], sizeof(dls->nom       ) );                            /* Recopie dans la structure */
        memcpy( &dls->shortname,db->row[2], sizeof(dls->shortname ) );                            /* Recopie dans la structure */
