@@ -353,8 +353,7 @@
          return(DLS_COMPIL_EXPORT_DB_FAILED);
         }
        else
-        { Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-                   "%d: Write %d bytes to file '%s' OK for %06d",
+        { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: Write %d bytes to file '%s' OK for %06d", __func__,
                     taille_source, chaine, id );
           close(id_fichier);
         }
