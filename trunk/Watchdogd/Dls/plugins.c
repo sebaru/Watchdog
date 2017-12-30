@@ -129,8 +129,7 @@
            }
          }
        
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d loaded (%s)",
-                 __func__, dls->plugindb.id, dls->plugindb.nom );
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d loaded (%s)", __func__, dls->plugindb.id, dls->plugindb.nom );
        retour = TRUE;
 
        if (Check_action_bit_use( dls ) == FALSE )
@@ -220,7 +219,7 @@
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Reseter_un_plugin ( gint id )
-  { Info_new( Config.log, Config.log_dls, LOG_INFO, "Reseter_un_plugin: Reset plugin %06d", id );
+  { Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: Reset plugin %06d", __func__, id );
 
     Decharger_un_plugin_by_id ( id );
     Charger_un_plugin_by_id ( id );
@@ -239,7 +238,7 @@
        if (plugin->handle) dlclose( plugin->handle );
        Partage->com_dls.Plugins = g_slist_remove( Partage->com_dls.Plugins, plugin );
                                                                              /* Destruction de l'entete associé dans la GList */
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "Decharger_plugins: plugin %06d unloaded (%s)",
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d unloaded (%s)", __func__,
                  plugin->plugindb.id, plugin->plugindb.nom );
        g_free( plugin );
      }
@@ -294,15 +293,14 @@
         { if (actif == FALSE)
            { plugin->plugindb.on = FALSE;
              plugin->conso = 0.0;
-             Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: id %06d stopped (%s)",
-                       __func__, plugin->plugindb.id, plugin->plugindb.nom );
+             Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: id %06d stopped (%s)", __func__, plugin->plugindb.id, plugin->plugindb.nom );
            }
           else if (Check_action_bit_use( plugin ) == TRUE )
            { plugin->plugindb.on = TRUE;
              plugin->conso = 0.0;
              plugin->starting = 1;
-             Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: id %06d started (%s)",
-                       __func__, plugin->plugindb.id, plugin->plugindb.nom );
+             plugin->start_date = time(NULL);
+             Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: id %06d started (%s)", __func__, plugin->plugindb.id, plugin->plugindb.nom );
            }
           else
            { plugin->plugindb.on = 0;

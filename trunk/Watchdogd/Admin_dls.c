@@ -54,10 +54,15 @@
     liste_dls = Partage->com_dls.Plugins;
     while ( liste_dls )
      { struct PLUGIN_DLS *dls;
+       struct tm *temps;
+       gchar date[80];
        dls = (struct PLUGIN_DLS *)liste_dls->data;
+       temps = localtime( (time_t *)&dls->start_date );
+       if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
+       else       { g_snprintf( date, sizeof(date), "Erreur" ); }
 
-       g_snprintf( chaine, sizeof(chaine), " | - DLS[%06d] -> actif=%d, debug=%d, conso=%08.03f, nom=%s",
-                   dls->plugindb.id, dls->plugindb.on, dls->debug, dls->conso, dls->plugindb.nom );
+       g_snprintf( chaine, sizeof(chaine), " | - DLS[%06d] -> actif=%d, start=%s, debug=%d, conso=%08.03f, nom=%s",
+                   dls->plugindb.id, dls->plugindb.on, date, dls->debug, dls->conso, dls->plugindb.nom );
        response = Admin_write ( response, chaine );
        liste_dls = liste_dls->next;
      }
