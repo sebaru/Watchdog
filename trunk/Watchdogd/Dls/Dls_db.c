@@ -361,6 +361,7 @@
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     g_free(requete);
+    Libere_DB_SQL( &db );
     return(retour);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
