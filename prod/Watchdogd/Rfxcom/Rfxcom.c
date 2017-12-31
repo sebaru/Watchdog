@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Rfxcom/Rfxcom.c  Gestion des capteurs RFXCOM Watchdog 2.0                                    */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     dim. 27 mai 2012 12:52:37 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Rfxcom/Rfxcom.c  Gestion des capteurs RFXCOM Watchdog 2.0                                                        */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                         dim. 27 mai 2012 12:52:37 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Rfxcom.c
  * This file is part of Watchdog
@@ -35,30 +35,30 @@
  #include <fcntl.h>
  #include <unistd.h>
 
- #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
+ #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Rfxcom.h"
 
-/**********************************************************************************************************/
-/* Rfxcom_Lire_config : Lit la config Watchdog et rempli la structure mémoire                             */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Rfxcom_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  gboolean Rfxcom_Lire_config ( void )
   { gchar *nom, *valeur;
     struct DB *db;
 
-    Cfg_rfxcom.lib->Thread_debug = FALSE;                                  /* Settings default parameters */
+    Cfg_rfxcom.lib->Thread_debug = FALSE;                                                      /* Settings default parameters */
     Cfg_rfxcom.enable            = FALSE; 
     g_snprintf( Cfg_rfxcom.port, sizeof(Cfg_rfxcom.port), "%s", DEFAUT_PORT_RFXCOM );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                      /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
                 "Rfxcom_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,                      /* Print Config */
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,                                          /* Print Config */
                 "Rfxcom_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "port" ) )
         { g_snprintf( Cfg_rfxcom.port, sizeof(Cfg_rfxcom.port), "%s", valeur ); }
@@ -73,10 +73,10 @@
      }
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Init_rfxcom: Initialisation de la ligne RFXCOM                                                         */
-/* Sortie: l'identifiant de la connexion                                                                  */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Init_rfxcom: Initialisation de la ligne RFXCOM                                                                             */
+/* Sortie: l'identifiant de la connexion                                                                                      */
+/******************************************************************************************************************************/
  static int Init_rfxcom ( void )
   { gchar trame_reset[] = { 0x0D, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
     gchar trame_get_status[] = { 0x0D, 00, 00, 01, 02, 00, 00, 00, 00, 00, 00, 00, 00, 00 };
@@ -183,11 +183,11 @@
         }
      }
   }
-/**********************************************************************************************************/
-/* Processer_trame: traitement de la trame recue par un microcontroleur                                   */
-/* Entrée: la trame a recue                                                                               */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Processer_trame: traitement de la trame recue par un microcontroleur                                                       */
+/* Entrée: la trame a recue                                                                                                   */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  static int Processer_trame( struct TRAME_RFXCOM *trame )
   { 
     Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_DEBUG,
@@ -402,8 +402,8 @@
     Abonner_distribution_events ( Rfxcom_Gerer_event, NOM_THREAD );              /* Desabonnement de la diffusion des sorties */
     nbr_oct_lu = 0;
     Cfg_rfxcom.mode = RFXCOM_RETRING;
-    while( lib->Thread_run == TRUE)                                      /* On tourne tant que necessaire */
-     { usleep(1);
+    while( lib->Thread_run == TRUE)                                                          /* On tourne tant que necessaire */
+     { usleep(1000);
        sched_yield();
 
        if (lib->Thread_sigusr1 == TRUE)

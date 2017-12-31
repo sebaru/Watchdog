@@ -69,6 +69,7 @@
 
  enum                                                                                  /* Code retour de la compilation D.L.S */
   { DLS_COMPIL_NEVER_COMPILED_YET,
+    DLS_COMPIL_EXPORT_DB_FAILED,
     DLS_COMPIL_ERROR_LOAD_SOURCE,
     DLS_COMPIL_ERROR_LOAD_LOG,
     DLS_COMPIL_ERROR_TRAD,

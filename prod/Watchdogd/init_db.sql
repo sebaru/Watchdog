@@ -84,10 +84,11 @@ CREATE TABLE IF NOT EXISTS `dls` (
   `compil_date` int(11) NOT NULL,
   `compil_status` int(11) NOT NULL,
   `nbr_compil` int(11) NOT NULL DEFAULT '0',
+  `sourcecode` TEXT COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 INSERT INTO `dls` (`id`, `type`, `syn_id`, `name`, `shortname`, `actif`, `compil_date`, `compil_status` ) VALUES
-(1, 0, 1, 'Systeme', 'Systeme', FALSE, 0, 0);
+(1, 0, 1, 'Système', 'Système', FALSE, 0, 0);
 
 -- --------------------------------------------------------
 

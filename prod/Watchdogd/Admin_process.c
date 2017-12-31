@@ -36,20 +36,20 @@
  static gchar *Admin_start ( gchar *response, gchar *thread )
   { gchar chaine[128];
 
-    g_snprintf( chaine, sizeof(chaine), " Trying to start %s", thread );
+    g_snprintf( chaine, sizeof(chaine), " | - Trying to start %s", thread );
     response = Admin_write ( response, chaine );
 
     if ( ! strcmp ( thread, "archive" ) )
      { if (!Demarrer_arch())                                                                   /* Demarrage gestion Archivage */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Admin: Pb ARCH -> Arret" ); }
-       else { g_snprintf( chaine, sizeof(chaine), " ARCH started" );
+       else { g_snprintf( chaine, sizeof(chaine), " | - ARCH started" );
               response = Admin_write ( response, chaine );
             }
      } else
     if ( ! strcmp ( thread, "dls" ) )
      { if (!Demarrer_dls())                                                                               /* Démarrage D.L.S. */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Admin: Pb DLS -> Arret" ); }
-       else { g_snprintf( chaine, sizeof(chaine), " D.L.S started" );
+       else { g_snprintf( chaine, sizeof(chaine), " | - D.L.S started" );
               response = Admin_write ( response, chaine );
             }
      }
@@ -63,16 +63,16 @@
           lib = (struct LIBRAIRIE *)liste->data;
           if ( ! strcmp( lib->admin_prompt, thread ) )
            { if (Start_librairie(lib))
-              { g_snprintf( chaine, sizeof(chaine), " Library %s started", lib->admin_prompt );
+              { g_snprintf( chaine, sizeof(chaine), " | - Library %s started", lib->admin_prompt );
                 found++;
               }
              else
-              { g_snprintf( chaine, sizeof(chaine), " Error while starting library %s", lib->admin_prompt ); }
+              { g_snprintf( chaine, sizeof(chaine), " | - Error while starting library %s", lib->admin_prompt ); }
              response = Admin_write ( response, chaine );
            }
           liste = liste->next;
         }
-       g_snprintf( chaine, sizeof(chaine), " Number of librairie(s) started : %d", found );
+       g_snprintf( chaine, sizeof(chaine), " | - Number of librairie(s) started : %d", found );
        response = Admin_write ( response, chaine );
      }
    return(response);
@@ -85,7 +85,7 @@
  static gchar *Admin_stop ( gchar *response, gchar *thread )
   { gchar chaine[128];
 
-    g_snprintf( chaine, sizeof(chaine), " Trying to stop %s", thread );
+    g_snprintf( chaine, sizeof(chaine), "  | - Trying to stop %s", thread );
     response = Admin_write ( response, chaine );
 
     if ( ! strcmp ( thread, "all" ) )
@@ -104,18 +104,18 @@
           lib = (struct LIBRAIRIE *)liste->data;
           if ( ! strcmp( lib->admin_prompt, thread ) )
            { if (Stop_librairie(lib))
-              { g_snprintf( chaine, sizeof(chaine), " Library %s (%s) stopped", lib->admin_prompt, lib->nom_fichier );
+              { g_snprintf( chaine, sizeof(chaine), " | - Library %s (%s) stopped", lib->admin_prompt, lib->nom_fichier );
                 found++;
               }
              else
-              { g_snprintf( chaine, sizeof(chaine), " Error while stopping library %s (%s) ",
+              { g_snprintf( chaine, sizeof(chaine), " | - Error while stopping library %s (%s) ",
                             lib->admin_prompt, lib->nom_fichier );
               }
              response = Admin_write ( response, chaine );
            }
           liste = liste->next;
         }
-       g_snprintf( chaine, sizeof(chaine), " Number of librairie(s) stopped : %d", found );
+       g_snprintf( chaine, sizeof(chaine), " | - Number of librairie(s) stopped : %d", found );
        response = Admin_write ( response, chaine );
      }
    return(response);
@@ -155,23 +155,23 @@
        struct LIBRAIRIE *lib;
        sscanf ( ligne, "%s %s", commande, thread );
        if ( (lib = Charger_librairie_par_prompt( thread )) )      /* Chargement de la librairie dynamique */
-        { g_snprintf( chaine, sizeof(chaine), " Library %s loaded", thread );
+        { g_snprintf( chaine, sizeof(chaine), " | - Library %s loaded", thread );
           if (Start_librairie(lib))
-           { g_snprintf( chaine, sizeof(chaine), " Library %s started", thread ); }
+           { g_snprintf( chaine, sizeof(chaine), " | - Library %s started", thread ); }
            else
-           { g_snprintf( chaine, sizeof(chaine), " Error while starting library %s", thread ); }
+           { g_snprintf( chaine, sizeof(chaine), " | - Error while starting library %s", thread ); }
         }
        else
-        { g_snprintf( chaine, sizeof(chaine), " Error while loading library %s", thread ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - Error while loading library %s", thread ); }
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "unload" ) )
      { gchar thread[128], chaine[128];
        sscanf ( ligne, "%s %s", commande, thread );
        if (Decharger_librairie_par_prompt( thread ))               /* Déchargement de la librairie dynamique */
-        { g_snprintf( chaine, sizeof(chaine), " Library %s stopped and unloaded", thread ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - Library %s stopped and unloaded", thread ); }
        else
-        { g_snprintf( chaine, sizeof(chaine), " Error while unloading library %s", thread ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - Error while unloading library %s", thread ); }
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "list" ) )
@@ -181,13 +181,13 @@
        response = Admin_write ( response, chaine );
 
        g_snprintf( chaine, sizeof(chaine),
-                  " Built-in D.L.S        -> running = %s, TID = %p",
+                  " | - Built-in D.L.S          -> running = %s, TID = %p",
                    (Partage->com_dls.Thread_run ? "YES" : " NO"), (void *)Partage->com_dls.TID
                  );
        response = Admin_write ( response, chaine );
 
        g_snprintf( chaine, sizeof(chaine),
-                  " Built-in ARCHIVE      -> running = %s, TID = %p",
+                  " | - Built-in ARCHIVE        -> running = %s, TID = %p",
                    (Partage->com_arch.Thread_run ? "YES" : " NO"), (void *)Partage->com_arch.TID
                  );
        response = Admin_write ( response, chaine );
@@ -197,14 +197,14 @@
         { gchar result[256];
           lib = (struct LIBRAIRIE *)liste->data;
           memset ( result, ' ', sizeof(result) );
-          memcpy ( result + 0, " Library ", 9 );
-          memcpy ( result + 9, lib->admin_prompt, strlen(lib->admin_prompt) );
+          memcpy ( result + 0, " | - Library ", 13 );
+          memcpy ( result + 13, lib->admin_prompt, strlen(lib->admin_prompt) );
           if (lib->Thread_run == TRUE)
-           { memcpy ( result + 25, "-> running YES, TID = ", 22 ); }
+           { memcpy ( result + 29, "-> running YES, TID = ", 22 ); }
           else
-           { memcpy ( result + 25, "-> running  NO, TID = ", 22 ); }
+           { memcpy ( result + 29, "-> running  NO, TID = ", 22 ); }
           g_snprintf( chaine, sizeof(chaine), "%p (%s)", (void *)lib->TID, lib->nom_fichier );
-          memcpy( result + 47, chaine, strlen(chaine) + 1 );                       /* +1 pour choper le \0 de fin de chaine ! */
+          memcpy( result + 51, chaine, strlen(chaine) + 1 );                       /* +1 pour choper le \0 de fin de chaine ! */
           response = Admin_write ( response, result );
           liste = liste->next;
         }
@@ -216,7 +216,7 @@
        sleep(5);
        Partage->com_msrv.Thread_run = FALSE;
        SB_SYS( 7, FALSE );                                                                    /* Message audio avant Shutdown */
-       response = Admin_write ( response, "SHUTDOWN in progress" );
+       response = Admin_write ( response, " | - SHUTDOWN in progress" );
      } else
     if ( ! strcmp ( commande, "REBOOT" ) )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Admin_process : REBOOT demandé" );
@@ -225,7 +225,7 @@
        Partage->com_msrv.Thread_reboot = TRUE;
        Partage->com_msrv.Thread_run = FALSE;
        SB_SYS( 8, FALSE );                                                                      /* Message audio avant Reboot */
-       response = Admin_write ( response, "REBOOT in progress" );
+       response = Admin_write ( response, " | - REBOOT in progress" );
      } else
     if ( ! strcmp ( commande, "CLEAR-REBOOT" ) )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Admin_process : CLEAR-REBOOT demandé" );
@@ -235,12 +235,12 @@
        Partage->com_msrv.Thread_reboot = TRUE;
        Partage->com_msrv.Thread_run = FALSE;
        SB_SYS( 8, FALSE );                                                                      /* Message audio avant Reboot */
-       response = Admin_write ( response, "CLEAR-REBOOT in progress" );
+       response = Admin_write ( response, " | - CLEAR-REBOOT in progress" );
      } else
     if ( ! strcmp ( commande, "RELOAD" ) )
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Admin_process : RELOAD demandé" );
        Partage->com_msrv.Thread_reload = TRUE;
-       response = Admin_write ( response, "RELOAD in progress" );
+       response = Admin_write ( response, " | - RELOAD in progress" );
      } else
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'PROCESS'" );
@@ -257,7 +257,7 @@
      }
     else
      { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), " Unknown PROCESS command : %s", ligne );
+       g_snprintf( chaine, sizeof(chaine), " | - Unknown PROCESS command : %s", ligne );
        response = Admin_write ( response, chaine );
      }
     return(response);

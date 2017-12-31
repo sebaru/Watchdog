@@ -108,7 +108,7 @@
              { struct CMD_TYPE_SOURCE_DLS *edit_dls;
                edit_dls = (struct CMD_TYPE_SOURCE_DLS *)connexion->donnees;
                memcpy( &client->dls, edit_dls, sizeof( client->dls ) );
-               Save_source_dls_to_disk ( edit_dls, client->Source_DLS_new, client->taille_Source_DLS_new );
+               Save_source_dls_to_DB ( edit_dls->id, client->Source_DLS_new, client->taille_Source_DLS_new );
                g_free(client->Source_DLS_new);
                client->Source_DLS_new = NULL;
 

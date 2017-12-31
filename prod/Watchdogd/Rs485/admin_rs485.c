@@ -118,14 +118,14 @@
 
     module = Chercher_module_rs485_by_id ( id );
     if (!module)
-     { g_snprintf( chaine, sizeof(chaine), " Module not found.\n" ); }
+     { g_snprintf( chaine, sizeof(chaine), " | - Module not found." ); }
     else if (module->started)
-     { g_snprintf( chaine, sizeof(chaine), " Module %02d is not stopped. Stop it before deleting.\n", id ); }
+     { g_snprintf( chaine, sizeof(chaine), " | - Module %02d is not stopped. Stop it before deleting.", id ); }
     else
      { if (Retirer_rs485DB( &module->rs485 ))
-        { g_snprintf( chaine, sizeof(chaine), " Module %02d is erased.\n", id ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - Module %02d is erased.", id ); }
        else
-        { g_snprintf( chaine, sizeof(chaine), " Error. Module %02d is NOT erased.\n", id ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - Error. Module %02d is NOT erased.", id ); }
      }
     response = Admin_write ( response, chaine );
     return(response);
@@ -141,9 +141,9 @@
 
     last_id = Ajouter_rs485DB( rs485 );
     if ( last_id != -1 )
-     { g_snprintf( chaine, sizeof(chaine), " Module added. New ID=%d.\n", last_id ); }
+     { g_snprintf( chaine, sizeof(chaine), " | - Module added. New ID=%d.", last_id ); }
     else
-     { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT added.\n" ); }
+     { g_snprintf( chaine, sizeof(chaine), " | - Error. Module NOT added." ); }
     response = Admin_write ( response, chaine );
     return(response);
   }
@@ -156,9 +156,9 @@
   { gchar chaine[128];
 
     if ( Modifier_rs485DB( rs485 ) )
-     { g_snprintf( chaine, sizeof(chaine), " Module %d set.\n", rs485->id ); }
+     { g_snprintf( chaine, sizeof(chaine), " | - Module %d set.", rs485->id ); }
     else
-     { g_snprintf( chaine, sizeof(chaine), " Error. Module NOT setd.\n" ); }
+     { g_snprintf( chaine, sizeof(chaine), " | - Error. Module NOT set." ); }
     response = Admin_write ( response, chaine );
     return(response);
   }
@@ -172,7 +172,7 @@
 
     Cfg_rs485.admin_start = id;
 
-    g_snprintf( chaine, sizeof(chaine), " Module RS485 %d started\n", id );
+    g_snprintf( chaine, sizeof(chaine), " | - Module RS485 %d started", id );
     response = Admin_write ( response, chaine );
     return(response);
   }
@@ -186,7 +186,7 @@
 
     Cfg_rs485.admin_stop = id;
 
-    g_snprintf( chaine, sizeof(chaine), " Module RS485 %d stopped\n", id );
+    g_snprintf( chaine, sizeof(chaine), " | - Module RS485 %d stopped", id );
     response = Admin_write ( response, chaine );
     return(response);
   }

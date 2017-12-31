@@ -56,7 +56,7 @@
         { g_snprintf(chaine, sizeof(chaine), " | Instance_id '%s', Thread '%s'", Config.instance_id, thread );
           response = Admin_write ( response, chaine );
           while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                     /* Récupération d'une config dans la DB */
-           { g_snprintf(chaine, sizeof(chaine), " | - '%_20s' = '%s'", nom, valeur );
+           { g_snprintf(chaine, sizeof(chaine), " | - '%20s' = '%s'", nom, valeur );
              response = Admin_write ( response, chaine );
            }
         }
