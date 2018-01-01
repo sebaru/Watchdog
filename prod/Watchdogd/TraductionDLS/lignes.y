@@ -558,7 +558,7 @@ une_action:     barre SORTIE ENTIER
                        { $$=New_action_bi($3, $1); }
                      else
                        { guint taille;
-                         Emettre_erreur_new( "Ligne %d: '%B05d' could not be set (system bit)", DlsScanner_get_lineno(), $3 );
+                         Emettre_erreur_new( "Ligne %d: 'B%04d' could not be set (system bit)", DlsScanner_get_lineno(), $3 );
                          $$=New_action();
                          taille = 2;
                          $$->alors = New_chaine( taille );
@@ -623,7 +623,7 @@ une_action:     barre SORTIE ENTIER
                          case BI     : if (alias->num >= NBR_BIT_BISTABLE_RESERVED)
                                         { $$=New_action_bi( alias->num, $1 ); }
                                        else
-                                        { Emettre_erreur_new( "Ligne %d: '%B05d' could not be set (system bit)", DlsScanner_get_lineno(), alias->bit );
+                                        { Emettre_erreur_new( "Ligne %d: 'B%04d' could not be set (system bit)", DlsScanner_get_lineno(), alias->bit );
                                           $$=New_action();
                                           taille = 2;
                                           $$->alors = New_chaine( taille );

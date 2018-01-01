@@ -323,26 +323,33 @@
 /* Entrées: l'id du plugin associé, le sourcecode et sa taille                                                                */
 /* Sortie: FALSE si PB                                                                                                        */
 /******************************************************************************************************************************/
- gboolean Save_source_dls_to_DB( gint id, gchar *buffer, gint taille )
-  { gchar *source, *requete;
+ gboolean Save_source_dls_to_DB( gint id, gchar *buffer_raw, gint taille )
+  { gchar *source, *requete, *buffer;
     gint taille_requete;
     gboolean retour;
     struct DB *db;
+
+    buffer = (gchar *)g_malloc0( taille+1 );
+    if (!buffer)
+     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: Memory Error", __func__ );
+       return(FALSE);
+     }
+    memcpy ( buffer, buffer_raw, taille );                                            /* On s'assure du caractere nul d'arret */
+
+    source = Normaliser_chaine ( buffer );                                                   /* Formatage correct des chaines */
+    g_free(buffer);
+    if (!source)
+     { Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: Normalisation source impossible", __func__ );
+       return(FALSE);
+     }
 
     taille_requete = taille+256;
     requete = (gchar *)g_malloc( taille_requete );
     if (!requete)
      { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: Memory Error", __func__ );
+       g_free(source);
        return(FALSE);
      }
-    
-    source = Normaliser_chaine ( buffer );                                                   /* Formatage correct des chaines */
-    if (!source)
-     { Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: Normalisation source impossible", __func__ );
-       g_free(requete);
-       return(FALSE);
-     }
-
 
     g_snprintf( requete, taille_requete,                                                                       /* Requete SQL */
                "UPDATE %s SET sourcecode='%s' WHERE id='%d'",
