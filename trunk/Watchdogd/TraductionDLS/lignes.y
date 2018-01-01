@@ -449,11 +449,17 @@ unite:          modulateur ENTIER HEURE ENTIER
                             break;
                           }
                          case ENTREE:
-                          { $$ = New_condition_entree( $1, alias->num, $3 );
+                          { if ( (alias->barre && $1) || (!alias->barre && !$1))
+                             { $$ = New_condition_entree( 0, alias->num, $3 ); }
+                            else
+                             { $$ = New_condition_entree( 1, alias->num, $3 ); }
                             break;
                           }
                          case BI:
-                          { $$ = New_condition_bi( $1, alias->num, $3 );
+                          { if ( (alias->barre && $1) || (!alias->barre && !$1))
+                             { $$ = New_condition_bi( 0, alias->num, $3 ); }
+                            else
+                             { $$ = New_condition_bi( 1, alias->num, $3 ); }
                             break;
                           }
                          case MONO:
