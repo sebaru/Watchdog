@@ -78,7 +78,7 @@
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
        if (num<NBR_BIT_CONTROLE)
-        { g_snprintf( chaine, sizeof(chaine), " | - I%03d = etat=%d, rouge=%d, vert=%d, bleu=%d, cligno=%d,"
+        { g_snprintf( chaine, sizeof(chaine), " | - I%03d = etat=%d, rouge=%d, vert=%d, bleu=%d, cligno=%d,\n"
                                               " |   changes=%d, last_change=%d, top=%d",
                       num, Partage->i[num].etat,
                       Partage->i[num].rouge, Partage->i[num].vert, Partage->i[num].bleu,
