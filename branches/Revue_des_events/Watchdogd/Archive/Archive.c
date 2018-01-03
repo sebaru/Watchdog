@@ -48,6 +48,7 @@
     g_snprintf( Partage->com_arch.archdb_password, sizeof(Partage->com_arch.archdb_password), "%s", Config.db_password );
     g_snprintf( Partage->com_arch.archdb_host, sizeof(Partage->com_arch.archdb_host), "%s", Config.db_host );
     Partage->com_arch.archdb_port = Config.db_port;
+    Partage->com_arch.duree_retention = ARCHIVE_DEFAUT_RETENTION;
 
     if ( ! Recuperer_configDB( &db, "arch" ) )                                              /* Connexion a la base de données */
      { Info_new( Config.log, Config.log_arch, LOG_WARNING,
@@ -66,6 +67,8 @@
         { g_snprintf( Partage->com_arch.archdb_host, sizeof(Partage->com_arch.archdb_host), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "port" ) )
         { Partage->com_arch.archdb_port = atoi(valeur);  }
+       else if ( ! g_ascii_strcasecmp ( nom, "days" ) )
+        { Partage->com_arch.duree_retention = atoi(valeur);  }
        else
         { Info_new( Config.log, Config.log_arch, LOG_NOTICE,
                    "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
@@ -105,7 +108,7 @@
 
     if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
     else if (Partage->com_arch.taille_arch > taille_buf)
-     { if ( last_log + 60 < Partage->top )
+     { if ( last_log + 600 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
                    "Ajouter_arch: DROP arch (taille>%d) type=%d, num=%d", taille_buf, type, num );
           last_log = Partage->top;
@@ -113,7 +116,7 @@
        return;
      }
     else if (Partage->com_arch.Thread_run == FALSE)                                      /* Si administratively DOWN, on sort */
-     { if ( last_log + 60 < Partage->top )
+     { if ( last_log + 600 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
                    "Ajouter_arch: Thread is down. Dropping type=%d, num=%d", type, num );
           last_log = Partage->top;
@@ -136,7 +139,7 @@
     arch->date_usec = tv.tv_usec;
 
     pthread_mutex_lock( &Partage->com_arch.synchro );                                /* Ajout dans la liste de arch a traiter */
-    Partage->com_arch.liste_arch = g_slist_append( Partage->com_arch.liste_arch, arch );
+    Partage->com_arch.liste_arch = g_slist_prepend( Partage->com_arch.liste_arch, arch );
     Partage->com_arch.taille_arch++;
     pthread_mutex_unlock( &Partage->com_arch.synchro );
   }
@@ -145,7 +148,7 @@
 /******************************************************************************************************************************/
  void Run_arch ( void )
   { struct DB *db;
-    gint top;
+    gint top, last_update;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
@@ -157,6 +160,7 @@
     Info_new( Config.log, Config.log_arch, LOG_NOTICE,
               "Run_arch: Demarrage . . . TID = %p", pthread_self() );
 
+    last_update = Partage->top;
     while(Partage->com_arch.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
      { struct ARCHDB *arch;
 
@@ -175,12 +179,13 @@
           Partage->com_arch.Thread_sigusr1 = FALSE;
         }
 
-       if ( (Partage->top % 864000) == 0)                                                                /* Une fois par jour */
+       if ( (Partage->top - last_update) >= 864000 )                                                     /* Une fois par jour */
         { pthread_t tid;
           if (pthread_create( &tid, NULL, (void *)Arch_Update_SQL_Partitions_thread, NULL ))
            { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: pthread_create failed for Update SQL Partitions", __func__ ); }
           else
            { pthread_detach( tid ); }                                /* On le detache pour qu'il puisse se terminer tout seul */
+          last_update=Partage->top;
         }
 
        if (!Partage->com_arch.liste_arch)                                                     /* Si pas de message, on tourne */
@@ -208,6 +213,8 @@
           pthread_mutex_unlock( &Partage->com_arch.synchro );
           Ajouter_archDB ( db, arch );
           g_free(arch);
+          Info_new( Config.log, Config.log_arch, LOG_DEBUG,
+                   "%s: Reste %d archives a traiter", __func__, Partage->com_arch.taille_arch );
         }
        Info_new( Config.log, Config.log_arch, LOG_DEBUG,
                 "%s: Traitement en %06.1fs", __func__, (Partage->top-top)/10.0 );

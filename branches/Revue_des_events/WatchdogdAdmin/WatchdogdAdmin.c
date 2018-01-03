@@ -74,7 +74,7 @@
      }
 
     if (connect (connexion, (struct sockaddr *)&src, sizeof(src)) == -1)
-     { printf("Connexion impossible\n");
+     { printf("Connexion to '%s' failed\n", Socket_file);
        close(connexion);
        return(FALSE);
      }
@@ -206,7 +206,11 @@
     read_history ( NULL );                                               /* Lecture de l'historique des commandes précédentes */
 
     printf("  --  WatchdogdAdmin  v%s ('quit' to end session).\n", VERSION );
-    if ( Connecter_au_serveur () == FALSE ) _exit(-1); 
+    if ( Connecter_au_serveur () == FALSE )
+     { g_snprintf( Socket_file, sizeof(Socket_file), "%s/socket.wdg", g_get_home_dir() );                       /* Par défaut */
+       if ( Connecter_au_serveur () == FALSE )
+        { printf("exiting...\n"); _exit(-1); }
+     }
     rl_callback_handler_install ( PROMPT, &CB_envoyer_commande_admin );
     for (Arret=FALSE;Arret!=TRUE; )
      { FD_ZERO(&fd);

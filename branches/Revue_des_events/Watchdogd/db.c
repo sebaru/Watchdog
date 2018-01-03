@@ -92,6 +92,7 @@
 
     reconnect = 1;
     mysql_options( db->mysql, MYSQL_OPT_RECONNECT, &reconnect );
+    mysql_options( db->mysql, MYSQL_SET_CHARSET_NAME, (void *)"utf8" );
     if ( ! mysql_real_connect( db->mysql, host, username, password, database, port, NULL, 0 ) )
      { Info_new( Config.log, Config.log_db, LOG_ERR,
                  "%s: mysql_real_connect failed (%s)", __func__,
@@ -177,7 +178,8 @@
 /* Sortie: TRUE si pas de souci                                                                                               */
 /******************************************************************************************************************************/
  gboolean Lancer_requete_SQL ( struct DB *db, gchar *requete )
-  { if (!db) return(FALSE);
+  { gint top;
+    if (!db) return(FALSE);
 
     if (db->free==FALSE)
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
@@ -187,6 +189,7 @@
     g_snprintf( db->requete, sizeof(db->requete), "%s", requete );                                      /* Save for later use */
     Info_new( Config.log, Config.log_db, LOG_DEBUG,
              "Lancer_requete_SQL (DB%07d): NEW    (%s)", db->id, requete );
+    top = Partage->top;
     if ( mysql_query ( db->mysql, requete ) )
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
                 "Lancer_requete_SQL (DB%07d): FAILED (%s) for '%s'",
@@ -209,7 +212,7 @@
         }
      }
     Info_new( Config.log, Config.log_db, LOG_DEBUG,
-             "Lancer_requete_SQL (DB%07d): OK     (%s)", db->id, requete );
+             "Lancer_requete_SQL (DB%07d): OK in %05.1fs", db->id, (Partage->top - top)/10.0 );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -714,7 +717,52 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=3310;
+    if (database_version < 3348)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE users ADD `phphash` VARCHAR(130) NOT NULL AFTER `hash`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 3353)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE users ADD `access_level` INT(11) NOT NULL AFTER `enable`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "UPDATE users SET phphash='$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a' WHERE id=0" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "UPDATE users SET access_level=10 WHERE id=0;" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns CHANGE `access_groupe` `access_level` int(11) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs CHANGE `gid` `access_level` int(11) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "DROP TABLE 'groups'" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `date_modif` `date_modif` DATETIME NOT NULL" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `date_expire` `date_expire` DATETIME NOT NULL" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `date_create` `date_create` DATETIME NOT NULL" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 3380)
+     { g_snprintf( requete, sizeof(requete), "CREATE TABLE `users_sessions` ("
+                                             "`id` varchar(128) NOT NULL,"
+                                             "`login` varchar(32) NOT NULL,"
+                                             "`last_date` datetime NOT NULL,"
+                                             "`remote_addr` varchar(50) NOT NULL,"
+                                             "`x_forwarded_for` varchar(50) NOT NULL,"
+                                             "`data` text NOT NULL,"
+                                             "PRIMARY KEY (`id`)"
+                                             ") ENGINE=InnoDB DEFAULT CHARSET=utf8"
+                 );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 3386)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls ADD `sourcecode` MEDIUMTEXT NOT NULL AFTER `nbr_compil`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    database_version=3386;
 
     Libere_DB_SQL(&db);
 

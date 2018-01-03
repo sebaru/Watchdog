@@ -49,24 +49,20 @@
 
     Cfg_sms.lib->Thread_debug = FALSE;                                                         /* Settings default parameters */
     Cfg_sms.enable            = FALSE; 
-    g_snprintf( Cfg_sms.smsbox_username, sizeof(Cfg_sms.smsbox_username),
-               "%s", DEFAUT_SMSBOX_USERNAME );
-    g_snprintf( Cfg_sms.smsbox_password, sizeof(Cfg_sms.smsbox_password),
-               "%s", DEFAUT_SMSBOX_PASSWORD );
+    g_snprintf( Cfg_sms.smsbox_apikey, sizeof(Cfg_sms.smsbox_apikey),
+               "%s", DEFAUT_SMSBOX_APIKEY );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "Sms_Lire_config: Database connexion failed. Using Default Parameters" );
+                "%s: Database connexion failed. Using Default Parameters", __func__ );
        return(FALSE);
      }
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,                                             /* Print Config */
-                "Sms_Lire_config: '%s' = %s", nom, valeur );
-            if ( ! g_ascii_strcasecmp ( nom, "smsbox_username" ) )
-        { g_snprintf( Cfg_sms.smsbox_username, sizeof(Cfg_sms.smsbox_username), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "smsbox_password" ) )
-        { g_snprintf( Cfg_sms.smsbox_password, sizeof(Cfg_sms.smsbox_password), "%s", valeur ); }
+                "%s: '%s' = %s", __func__, nom, valeur );
+            if ( ! g_ascii_strcasecmp ( nom, "smsbox_apikey" ) )
+        { g_snprintf( Cfg_sms.smsbox_apikey, sizeof(Cfg_sms.smsbox_apikey), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "bit_comm" ) )
         { Cfg_sms.bit_comm = atoi ( valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
@@ -75,15 +71,15 @@
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_sms.lib->Thread_debug = TRUE;  }
        else
         { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
-                   "Sms_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
+                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
         }
      }
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Sms_Recuperer_smsDB: Recupération des infos SMS dans la base Users                                                         */
-/* Entrée: une struct DB qui servira de reference en sortie                                                                   */
-/* Sortie: False si problème                                                                                                  */
+/* Recuperer_smsDB: récupère la liste des utilisateurs et de leur numéro de téléphone                                         */
+/* Entrée: une structure DB                                                                                                   */
+/* Sortie: FALSE si pb                                                                                                        */
 /******************************************************************************************************************************/
  gboolean Sms_Recuperer_smsDB ( struct DB *db )
   { gchar requete[512];
@@ -96,9 +92,9 @@
     return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
   }
 /******************************************************************************************************************************/
-/* Sms_Recuperer_recipient_authorized_smsDB: Recupération des infos SMS de la base Users pour ceux ayant le sms_enable        */
-/* Entrée: une struct DB qui servira de reference en sortie                                                                   */
-/* Sortie: False si problème                                                                                                  */
+/* Recuperer_recipient_authorized: Recupere la liste des users habilité a recevoir des SMS                                    */
+/* Entrée: une structure DB                                                                                                   */
+/* Sortie: FALSE si pb                                                                                                        */
 /******************************************************************************************************************************/
  static gboolean Sms_Recuperer_recipient_authorized_smsDB( struct DB *db )
   { gchar requete[512];
@@ -111,9 +107,9 @@
     return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
   }
 /******************************************************************************************************************************/
-/* Sms_Recuperer_smsDB_suite: Recupération de l'enregistrement suivant, d'après la DB en parametre                            */
-/* Entrée: la base de données                                                                                                 */
-/* Sortie: la structure SMSDB, ou NULL si c'est le dernier                                                                    */
+/* Recuperer_liste_id_smsDB: Recupération de la liste des ids des smss                                                        */
+/* Entrée: une structure DB                                                                                                   */
+/* Sortie: FALSE si pb                                                                                                        */
 /******************************************************************************************************************************/
  struct SMSDB *Sms_Recuperer_smsDB_suite( struct DB *db )
   { struct SMSDB *sms;
@@ -138,8 +134,8 @@
     return(sms);
   }
 /******************************************************************************************************************************/
-/* Envoyer_sms_smsbox_text: Envoi un sms par sms box                                                                          */
-/* Entrée: le texte a envoyer                                                                                                 */
+/* Envoyer_sms: Envoi un sms                                                                                                  */
+/* Entrée: un texte au format UTF8 si possible                                                                                */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Envoyer_sms_smsbox_text ( gchar *texte )
@@ -163,8 +159,8 @@
     pthread_mutex_unlock( &Cfg_sms.lib->synchro );
   }
 /******************************************************************************************************************************/
-/* Envoyer_sms_gsm_text: Envoi un sms par gsm                                                                                 */
-/* Entrée: le texte a envoyer                                                                                                 */
+/* Envoyer_sms: Envoi un sms                                                                                                  */
+/* Entrée: un texte au format UTF8 si possible                                                                                */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Envoyer_sms_gsm_text ( gchar *texte )
@@ -194,7 +190,6 @@
 /******************************************************************************************************************************/
  static void Sms_Gerer_histo ( struct CMD_TYPE_HISTO *histo )
   { gsize bytes_written;
-    gchar *new_libelle;
     gint taille;
     
     if ( ! histo->msg.sms ) { g_free(histo); return; }                                       /* Si flag = 0; on return direct */
@@ -215,16 +210,15 @@
        g_free(histo);
        return;
      }
-/* conversion en Latin 1 ISO8859-1 20140626 */
-    new_libelle = g_convert ( histo->msg.libelle, -1, "ISO-8859-1", "UTF8", NULL, &bytes_written, NULL);
-    g_snprintf( histo->msg.libelle, sizeof(histo->msg.libelle), "%s", new_libelle );
-    g_free(new_libelle);
+/* conversion en Latin 1 ISO8859-1 20140626 -- Abandon 20171214 en passant par API 1.1 smsbox */
+/*    new_libelle = g_convert ( histo->msg.libelle, -1, "ISO-8859-1", "UTF-8", NULL, &bytes_written, NULL);*/
+    g_snprintf( histo->msg.libelle, sizeof(histo->msg.libelle), "%s", histo->msg.libelle );
     pthread_mutex_lock ( &Cfg_sms.lib->synchro );
     Cfg_sms.Liste_histos = g_slist_append ( Cfg_sms.Liste_histos, histo );                                /* Ajout a la liste */
     pthread_mutex_unlock ( &Cfg_sms.lib->synchro );
   }
 /******************************************************************************************************************************/
-/* Sms_is_recipient_authorized : Renvoi une struct SMS si le tel en parametre est autorisé a envoyer des commandes            */
+/* Sms_is_recipient_authorized : Renvoi TRUE si le telephone en parametre peut set ou reset un bit interne                    */
 /* Entrée: le nom du destinataire                                                                                             */
 /* Sortie : la structure SMSDB si le tel est autorisé                                                                         */
 /******************************************************************************************************************************/
@@ -267,7 +261,7 @@
   }
 /******************************************************************************************************************************/
 /* Traiter_commande_sms: Fonction appelée pour traiter la commande sms recu par le telephone                                  */
-/* Entrée: le message text à traiter ainsi que l'emetteur                                                                     */
+/* Entrée: le message text à traiter                                                                                          */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Traiter_commande_sms ( gchar *from, gchar *texte )
@@ -510,20 +504,32 @@
     
     formpost = lastptr = NULL;
     curl_formadd( &formpost, &lastptr,
+                  CURLFORM_COPYNAME,     "apikey",
+                  CURLFORM_COPYCONTENTS, Cfg_sms.smsbox_apikey,
+                  CURLFORM_END); 
+/*    curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "login",
                   CURLFORM_COPYCONTENTS, Cfg_sms.smsbox_username,
                   CURLFORM_END); 
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "pass",
                   CURLFORM_COPYCONTENTS, Cfg_sms.smsbox_password,
-                  CURLFORM_END); 
+                  CURLFORM_END); */
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "msg",
                   CURLFORM_COPYCONTENTS, msg->libelle_sms,
                   CURLFORM_END); 
     curl_formadd( &formpost, &lastptr,
+                  CURLFORM_COPYNAME,     "charset",
+                  CURLFORM_COPYCONTENTS, "utf-8",
+                  CURLFORM_END); 
+    curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "dest",
                   CURLFORM_COPYCONTENTS, telephone,
+                  CURLFORM_END); 
+    curl_formadd( &formpost, &lastptr,
+                  CURLFORM_COPYNAME,     "strategy",
+                  CURLFORM_COPYCONTENTS, "2",
                   CURLFORM_END); 
     curl_formadd( &formpost, &lastptr,                              /* Pas de SMS les 2 premières minutes de vie du processus */
                   CURLFORM_COPYNAME,     "origine",                                 /* 'debugvar' pour lancer en mode semonce */
@@ -533,12 +539,12 @@
     
     curl_formadd( &formpost, &lastptr,
                   CURLFORM_COPYNAME,     "mode",
-                  CURLFORM_COPYCONTENTS, "Economique",
+                  CURLFORM_COPYCONTENTS, "Standard",
                   CURLFORM_END);
 
     curl = curl_easy_init();
     if (curl)
-     { curl_easy_setopt(curl, CURLOPT_URL, "https://api.smsbox.fr/api.php" );
+     { curl_easy_setopt(curl, CURLOPT_URL, "https://api.smsbox.fr/1.1/api.php" );
        curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );

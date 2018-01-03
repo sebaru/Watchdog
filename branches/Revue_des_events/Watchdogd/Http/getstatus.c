@@ -39,100 +39,70 @@
 /******************************************************************************************************************************/
  gboolean Http_Traiter_request_getstatus ( struct lws *wsi )
   { unsigned char header[256], *header_cur, *header_end;
-   	const char *content_type = "application/xml";
-    xmlTextWriterPtr writer;
-    xmlBufferPtr buf;
+	   gchar host[128], date[64], *buf;
+    JsonBuilder *builder;
+    JsonGenerator *gen;
+    gsize taille_buf;
+    struct tm *temps;
     gint retour, num;
-	   gchar host[128];
 
-    buf = xmlBufferCreate();                                                                        /* Creation du buffer xml */
-    if (buf == NULL)
+/************************************************ Préparation du buffer JSON **************************************************/
+    builder = json_builder_new ();
+    if (builder == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getstatus : XML Buffer creation failed" );
-       return(FALSE);
+                 "%s : JSon builder creation failed", __func__ );
+       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
+       return(1);
      }
-
-    writer = xmlNewTextWriterMemory(buf, 0);                                                         /* Creation du write XML */
-    if (writer == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getstatus : XML Writer creation failed" );
-       xmlBufferFree(buf);
-       return(FALSE);
-     }
-
-    retour = xmlTextWriterStartDocument(writer, NULL, "UTF-8", "yes" );                               /* Creation du document */
-    if (retour < 0)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getstatus : XML Start document failed" );
-       xmlBufferFree(buf);
-       return(FALSE);
-     }
-
+                                                                      /* Lancement de la requete de recuperation des messages */
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
-    retour = xmlTextWriterStartElement(writer, (const unsigned char *) "Status");
-    if (retour < 0)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getstatus : XML Failed to Start element status" );
-       xmlBufferFree(buf);
-       return(FALSE);
-     }
+    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+    json_builder_set_member_name  ( builder, "Status" );
+    json_builder_begin_object (builder);                                                                 /* Contenu du Status */
 
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"Start dumping Status !!");
-
-/*---------------------------------------------------- Dumping Identification ------------------------------------------------*/
     gethostname( host, sizeof(host) );
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Host",     "%s", host);
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Version",  "%s", VERSION);
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Instance", "%s", Config.instance_id);
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Start_time","%d", (int)Partage->start_time);
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Licence",  "GPLv2 or newer");
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Author_Name", "%s",
-                                    "Sébastien LEFEVRE");
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Author_Email", "%s",
-                                    "sebastien.lefevre@abls-habitat.fr");
+    json_builder_set_member_name  ( builder, "host" );         json_builder_add_string_value ( builder, host );
+    json_builder_set_member_name  ( builder, "version" );      json_builder_add_string_value ( builder, VERSION );
+    json_builder_set_member_name  ( builder, "instance" );     json_builder_add_string_value ( builder, Config.instance_id );
+    localtime( (time_t *)&Partage->start_time );
+    if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
+    else       { g_snprintf( date, sizeof(date), "Erreur" ); }
+    json_builder_set_member_name  ( builder, "started" );      json_builder_add_string_value ( builder, date );
+    json_builder_set_member_name  ( builder, "license" );      json_builder_add_string_value ( builder, "GPLv2 or newer" );
+    json_builder_set_member_name  ( builder, "author_name" );  json_builder_add_string_value ( builder, "Sébastien LEFEVRE" );
+    json_builder_set_member_name  ( builder, "author_email" ); json_builder_add_string_value ( builder, "sebastien.lefevre@abls-habitat.fr" );
+
 /*------------------------------------------------------- Dumping Running config ---------------------------------------------*/
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Top",
-                                     "%d", Partage->top);
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Bit_par_sec",
-                                     "%d", Partage->audit_bit_interne_per_sec_hold);
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"Tour_par_sec",
-                                     "%d", Partage->audit_tour_dls_per_sec_hold );
+    json_builder_set_member_name  ( builder, "top" );          json_builder_add_int_value  ( builder, Partage->top );
+    json_builder_set_member_name  ( builder, "bit_par_sec" );  json_builder_add_int_value  ( builder, Partage->audit_bit_interne_per_sec_hold );
+    json_builder_set_member_name  ( builder, "tour_par_sec" ); json_builder_add_int_value  ( builder, Partage->audit_tour_dls_per_sec_hold );
     pthread_mutex_lock( &Partage->com_msrv.synchro );                                                              /* Synchro */
     num = g_slist_length( Partage->com_msrv.liste_i );                                            /* Recuperation du nbr de i */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
-
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"I_a_traiter", "%d", num );
+    json_builder_set_member_name  ( builder, "length_i" );     json_builder_add_int_value  ( builder, num );
     pthread_mutex_lock( &Partage->com_msrv.synchro );                                                              /* Synchro */
     num = g_slist_length( Partage->com_msrv.liste_msg );                                       /* Recuperation du numero de i */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"MSG_a_traiter", "%d", num );
+    json_builder_set_member_name  ( builder, "length_msg" );   json_builder_add_int_value  ( builder, num );
     pthread_mutex_lock( &Partage->com_msrv.synchro );                                                              /* Synchro */
     num = g_slist_length( Partage->com_msrv.liste_msg_repeat );                                           /* liste des repeat */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
-    xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"MSG_en_repeat", "%d", num );
-/*------------------------------------------------------- End dumping Status -------------------------------------------------*/
-    xmlTextWriterWriteComment(writer, (const unsigned char *)"End dumping Status !!");
-    retour = xmlTextWriterEndElement(writer);                                                                   /* End Status */
-    if (retour < 0)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getstatus : Failed to end element Status" );
-       xmlBufferFree(buf);
-       return(FALSE);
-     }
+    json_builder_set_member_name  ( builder, "length_msg_repeat" ); json_builder_add_int_value  ( builder, num );
 
-    retour = xmlTextWriterEndDocument(writer);                                                                /* End document */
-    if (retour < 0)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "Http_Traiter_request_getstatus : Failed to end Document" );
-       xmlFreeTextWriter(writer);                                                                 /* Libération du writer XML */
-       xmlBufferFree(buf);
-       return(FALSE);
-     }
+    json_builder_end_object (builder);                                                                  /* Fin dump du status */
 
-    xmlFreeTextWriter(writer);                                                                    /* Libération du writer XML */
+    json_builder_end_object (builder);                                                                        /* End Document */
 
-    Http_Send_response_code_with_buffer( wsi, HTTP_200_OK, HTTP_CONTENT_XML, buf->content, buf->use );
-    xmlBufferFree(buf);                                               /* Libération du buffer dont nous n'avons plus besoin ! */
-    return(TRUE);
+    gen = json_generator_new ();
+    json_generator_set_root ( gen, json_builder_get_root(builder) );
+    json_generator_set_pretty ( gen, TRUE );
+    buf = json_generator_to_data (gen, &taille_buf);
+    g_object_unref(builder);
+    g_object_unref(gen);
+          
+/*************************************************** Envoi au client **********************************************************/
+    Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf );
+    g_free(buf);                                                      /* Libération du buffer dont nous n'avons plus besoin ! */
+    return(lws_http_transaction_completed(wsi));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

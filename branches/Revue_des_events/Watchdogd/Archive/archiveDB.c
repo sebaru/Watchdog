@@ -36,24 +36,27 @@
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  void Ajouter_archDB ( struct DB *db, struct ARCHDB *arch )
-  { gchar requete[512];
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "CREATE TABLE IF NOT EXISTS `%s_%03d_%06d`("
-                "`date_time` datetime(6) DEFAULT NULL,"
-                "`valeur` float NOT NULL DEFAULT '0',"
-                "KEY `index_date` (`date_time`)"
-                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
-                "  PARTITION BY KEY (date_time) PARTITIONS 52;",
-                NOM_TABLE_ARCH, arch->type, arch->num );
-    Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
+  { gchar requete[512], table[512];
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s_%03d_%06d(date_time,valeur) VALUES "
                 "(FROM_UNIXTIME(%d.%d),'%f')",
                 NOM_TABLE_ARCH, arch->type, arch->num, arch->date_sec, arch->date_usec, arch->valeur );
 
-    Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
+    if (Lancer_requete_SQL ( db, requete )==FALSE)                                             /* Execution de la requete SQL */
+     {                               /* Si erreur, c'est peut etre parce que la table n'existe pas, on tente donc de la créer */
+       g_snprintf( table, sizeof(table),                                                                       /* Requete SQL */
+                   "CREATE TABLE `%s_%03d_%06d`("
+                   "`date_time` datetime(6) DEFAULT NULL,"
+                   "`valeur` float NOT NULL DEFAULT '0',"
+                   "KEY `index_date` (`date_time`)"
+                   ") ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
+                   "  PARTITION BY LINEAR KEY (date_time) PARTITIONS 52;",
+                   NOM_TABLE_ARCH, arch->type, arch->num );
+       Lancer_requete_SQL ( db, table );                                                       /* Execution de la requete SQL */
+       Lancer_requete_SQL ( db, requete );                             /* Une fois la table créé, on peut y stocker l'archive */
+	 }
+
   }
 /******************************************************************************************************************************/
 /* Arch_Update_SQL_Partitions: Appelé une fois par jour pour faire des opérations de menage dans les tables d'archivages      */
@@ -75,7 +78,8 @@
      }
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE,
-                "%s: Starting Update SQL Partition on %s", __func__, Partage->com_arch.archdb_database );
+             "%s: Starting Update SQL Partition on %s with days=%d", __func__,
+              Partage->com_arch.archdb_database, Partage->com_arch.duree_retention );
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT table_name FROM information_schema.tables WHERE table_schema='%s' "
                 "AND table_name like 'histo_bit_%%'", Partage->com_arch.archdb_database );
@@ -105,16 +109,20 @@
 
     while (Liste_tables && Partage->com_arch.Thread_run == TRUE)
      { gchar *table;
+       gint top;
 	      table = Liste_tables->data;
 	      Liste_tables = g_slist_remove ( Liste_tables, table );
-       Info_new( Config.log, Config.log_arch, LOG_NOTICE,
+       Info_new( Config.log, Config.log_arch, LOG_DEBUG,
                 "%s: Starting Update SQL Partition table %s", __func__, table );
 	      g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                  "DELETE FROM %s WHERE date_time < NOW() - INTERVAL 400 DAY", table );
+                  "DELETE FROM %s WHERE date_time < NOW() - INTERVAL %d DAY", table, Partage->com_arch.duree_retention );
+       top = Partage->top;
        if (Lancer_requete_SQL ( db, requete )==FALSE)                                          /* Execution de la requete SQL */
         { Info_new( Config.log, Config.log_arch, LOG_ERR,
                    "%s: Unable to delete from table '%s'", __func__, table );
         }
+       Info_new( Config.log, Config.log_arch, LOG_NOTICE,
+                "%s: Update SQL Partition table %s OK in %05.1fs", __func__, table, (Partage->top-top)/10.0 );
        g_free(table);
      }
 

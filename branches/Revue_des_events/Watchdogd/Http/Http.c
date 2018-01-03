@@ -66,7 +66,7 @@
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                "Http_Lire_config: Database connexion failed. Using Default Parameters" );
+                "%s: Database connexion failed. Using Default Parameters", __func__ );
        return(FALSE);
      }
 
@@ -95,7 +95,7 @@
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_http.lib->Thread_debug = TRUE;  }
        else
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                   "Http_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
+                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
         }
      }
     return(TRUE);
@@ -216,22 +216,6 @@
     return 0;
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_request_setmessage: Traite une requete sur l'URI message                                                      */
-/* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : FALSE si pb                                                                                                       */
-/******************************************************************************************************************************/
- static gint Http_Preparer_request_post ( struct lws *wsi, struct HTTP_SESSION *session,
-                                          gchar *remote_name, gchar *remote_ip, gchar *url )
-  { struct HTTP_PER_SESSION_DATA *pss;
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-             "%s: (sid %s) HTTP request from %s(%s)",
-              __func__, Http_get_session_id(session), remote_name, remote_ip );
-
-    pss = lws_wsi_user ( wsi );
-    g_snprintf( pss->url, sizeof(pss->url), url );
-    return(0);               
-  }
-/******************************************************************************************************************************/
 /* CB_http : Gere les connexion HTTP pures (appellée par libwebsockets)                                                       */
 /* Entrées : le contexte, le message, l'URL                                                                                   */
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
@@ -267,8 +251,10 @@
        case LWS_CALLBACK_HTTP_BODY:
              { if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
                 { return( Http_Traiter_request_body_login ( wsi, data, taille ) ); }                /* Utilisation ud lws_spa */
-               else if ( ! strcasecmp ( pss->url, "/ws/postfile" ) )
+               else if ( ! strcasecmp ( pss->url, "/postfile" ) )
                 { return( Http_Traiter_request_body_postfile ( wsi, data, taille ) ); }             /* Utilisation ud lws_spa */
+               else if ( ! strcasecmp ( pss->url, "/cli" ) )
+                { return( Http_Traiter_request_body_cli ( wsi, data, taille ) ); }                  /* Utilisation ud lws_spa */
                return( Http_CB_file_upload( wsi, data, taille ) );          /* Sinon, c'est un buffer type json ou un fichier */
              }
             break;
@@ -278,14 +264,10 @@
                                            (char *)&remote_ip, sizeof(remote_ip) );
                if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
                 { return( Http_Traiter_request_body_completion_login ( wsi, remote_name, remote_ip ) ); }
-               else if ( ! strcasecmp ( pss->url, "/ws/setmessage" ) )
-                { return( Http_Traiter_request_body_completion_setmessage ( wsi ) ); }
-               else if ( ! strcasecmp ( pss->url, "/ws/setscenario" ) )
-                { return( Http_Traiter_request_body_completion_setscenario ( wsi ) ); }
-               else if ( ! strcasecmp ( pss->url, "/ws/delmessage" ) )
-                { return( Http_Traiter_request_body_completion_delmessage ( wsi ) ); }
-               else if ( ! strcasecmp ( pss->url, "/ws/postfile" ) )
+               else if ( ! strcasecmp ( pss->url, "/postfile" ) )
                 { return( Http_Traiter_request_body_completion_postfile ( wsi ) ); }
+               else if ( ! strcasecmp ( pss->url, "/cli" ) )
+                { return( Http_Traiter_request_body_completion_cli ( wsi ) ); }
                else
                 { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );
                   return(1);
@@ -313,22 +295,8 @@
                 { return( Http_Traiter_request_login ( session, wsi, remote_name, remote_ip ) ); }
                else if ( ! strcasecmp ( url, "/ws/logoff" ) )
                 { if (session) Http_Close_session ( wsi, session ); }
-               else if ( ! strcasecmp ( url, "/ws/status" ) )
+               else if ( ! strcasecmp ( url, "/status" ) )
                 { Http_Traiter_request_getstatus ( wsi ); }
-               else if ( ! strcasecmp ( url, "/ws/messages" ) )
-                { return( Http_Traiter_request_getmessage ( wsi, session ) ); }
-               else if ( ! strcasecmp ( url, "/ws/setmessage" ) )
-                { return( Http_Preparer_request_post ( wsi, session, remote_name, remote_ip, url ) ); }
-               else if ( ! strcasecmp ( url, "/ws/delmessage" ) )
-                { return( Http_Preparer_request_post ( wsi, session, remote_name, remote_ip, url ) ); }
-               else if ( ! strcasecmp ( url, "/ws/getscenario" ) )
-                { return( Http_Traiter_request_getscenario ( wsi, session ) ); }
-               else if ( ! strcasecmp ( url, "/ws/setscenario" ) )
-                { return( Http_Preparer_request_post ( wsi, session, remote_name, remote_ip, url ) ); }
-               else if ( ! strcasecmp ( url, "/ws/getpluginsDLS" ) )
-                { return( Http_Traiter_request_getpluginsDLS ( wsi, session ) ); }
-               else if ( ! strcasecmp ( url, "/ws/getmnemos" ) )
-                { return( Http_Traiter_request_getmnemos ( wsi, session ) ); }
                else if ( ! strncasecmp ( url, "/ws/getsyn", 11 ) )
                 { return( Http_Traiter_request_getsyn ( wsi, session ) ); }
                else if ( ! strcasecmp ( url, "/ws/getsvg" ) )
@@ -337,8 +305,14 @@
                 { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+8 ) ); }
                else if ( ! strncasecmp ( url, "/ws/audio/", 10 ) )
                 { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
-               else if ( ! strcasecmp ( url, "/ws/postfile" ) )
-                { g_snprintf( pss->url, sizeof(pss->url), "/ws/postfile" );
+               else if ( ! strncasecmp ( url, "/setm", 5 ) )
+                { return( Http_Traiter_request_setm ( wsi ) ); }
+               else if ( ! strcasecmp ( url, "/cli" ) )
+                { g_snprintf( pss->url, sizeof(pss->url), "/cli" );
+                  return(0);
+                }
+               else if ( ! strcasecmp ( url, "/postfile" ) )
+                { g_snprintf( pss->url, sizeof(pss->url), "/postfile" );
                   return(0);
                 }
                else                                                                                             /* Par défaut */
@@ -404,19 +378,19 @@
     if (Cfg_http.ssl_enable)                                                                           /* Configuration SSL ? */
      { if ( stat ( Cfg_http.ssl_cert_filepath, &sbuf ) == -1)                                     /* Test présence du fichier */
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Run_thread: unable to load '%s' (error '%s'). Setting ssl=FALSE",
+                   "%s: unable to load '%s' (error '%s'). Setting ssl=FALSE", __func__,
                     Cfg_http.ssl_cert_filepath, strerror(errno) );
           Cfg_http.ssl_enable=FALSE;
         }
        else if ( stat ( Cfg_http.ssl_private_key_filepath, &sbuf ) == -1)                         /* Test présence du fichier */
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Run_thread: unable to load '%s' (error '%s'). Setting ssl=FALSE",
+                   "%s: unable to load '%s' (error '%s'). Setting ssl=FALSE", __func__,
                     Cfg_http.ssl_private_key_filepath, strerror(errno) );
           Cfg_http.ssl_enable=FALSE;
         }
        else if ( stat ( Cfg_http.ssl_ca_filepath, &sbuf ) == -1)                                  /* Test présence du fichier */
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                   "Run_thread: unable to load '%s' (error '%s'). Setting ssl=FALSE",
+                   "%s: unable to load '%s' (error '%s'). Setting ssl=FALSE", __func__,
                     Cfg_http.ssl_ca_filepath, strerror(errno) );
           Cfg_http.ssl_enable=FALSE;
         }
@@ -429,11 +403,11 @@
           /*Cfg_http.ws_info.options |= LWS_SERVER_OPTION_REDIRECT_HTTP_TO_HTTPS;*/
           /*Cfg_http.ws_info.options |= LWS_SERVER_OPTION_REQUIRE_VALID_OPENSSL_CLIENT_CERT;*/
           Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                   "Run_thread: Stat '%s' OK", Cfg_http.ws_info.ssl_cert_filepath );
+                   "%s: Stat '%s' OK", __func__, Cfg_http.ws_info.ssl_cert_filepath );
           Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                   "Run_thread: Stat '%s' OK", Cfg_http.ws_info.ssl_private_key_filepath );
+                   "%s: Stat '%s' OK", __func__, Cfg_http.ws_info.ssl_private_key_filepath );
           Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                   "Run_thread: Stat '%s' OK", Cfg_http.ws_info.ssl_ca_filepath );
+                   "%s: Stat '%s' OK", __func__, Cfg_http.ws_info.ssl_ca_filepath );
         }
      }
 
@@ -441,13 +415,13 @@
  
     if (!Cfg_http.ws_context)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Run_thread: WebSocket Create Context creation error (%s). Shutting Down %p",
+                "%s: WebSocket Create Context creation error (%s). Shutting Down %p", __func__,
                  strerror(errno), pthread_self() );
        goto end;
      }
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-             "Run_thread: WebSocket Create OK. Listening on port %d with ssl=%d", Cfg_http.tcp_port, Cfg_http.ssl_enable );
+             "%s: WebSocket Create OK. Listening on port %d with ssl=%d", __func__, Cfg_http.tcp_port, Cfg_http.ssl_enable );
 
 #ifdef bouh
     Abonner_distribution_message ( Http_Gerer_message );                            /* Abonnement à la diffusion des messages */
@@ -460,8 +434,8 @@
        usleep(10000);
        sched_yield();
 
-       if (Cfg_http.lib->Thread_sigusr1)                                  /* A-t'on recu un signal USR1 ? */
-        { pthread_mutex_lock( &Cfg_http.lib->synchro );                  /* Ajout dans la liste a traiter */
+       if (Cfg_http.lib->Thread_sigusr1)                                                      /* A-t'on recu un signal USR1 ? */
+        { pthread_mutex_lock( &Cfg_http.lib->synchro );                                      /* Ajout dans la liste a traiter */
           pthread_mutex_unlock( &Cfg_http.lib->synchro );
           /*Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
                    "Run_thread: SIGUSR1. %03d sessions", nbr );*/
@@ -483,7 +457,7 @@
 
 end:
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-             "Run_thread: Down . . . TID = %p", pthread_self() );
+             "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_http.lib->Thread_run = FALSE;                                                           /* Le thread ne tourne plus ! */
     Cfg_http.lib->TID = 0;                                                    /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

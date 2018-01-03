@@ -240,12 +240,11 @@
 /* Sortie: Néant                                                                                          */
 /**********************************************************************************************************/
  static void Changer_etat_motif( struct TRAME_ITEM_MOTIF *trame_motif, struct CMD_ETAT_BIT_CTRL *etat_motif )
-  { printf("Changer_etat_motif: %s %d = %d %d %d etat %d (type %d) cligno=%d\n",
-            trame_motif->motif->libelle,
+  { printf("Changer_etat_motif: %d = %d %d %d etat %d (type %d) cligno=%d %s\n",
             trame_motif->motif->bit_controle,
             etat_motif->rouge,
             etat_motif->vert,
-            etat_motif->bleu, etat_motif->etat, trame_motif->motif->type_gestion, etat_motif->cligno );
+            etat_motif->bleu, etat_motif->etat, trame_motif->motif->type_gestion, etat_motif->cligno, trame_motif->motif->libelle );
     trame_motif->rouge  = etat_motif->rouge;                                     /* Sauvegarde etat motif */
     trame_motif->vert   = etat_motif->vert;                                      /* Sauvegarde etat motif */
     trame_motif->bleu   = etat_motif->bleu;                                      /* Sauvegarde etat motif */
@@ -348,7 +347,7 @@
     GList *liste;
     gint cpt;
 
-printf("Recu changement etat motif: %d = r%d v%d b%d\n", etat_motif->num, etat_motif->rouge,
+printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, etat_motif->etat, etat_motif->rouge,
                                                          etat_motif->vert, etat_motif->bleu );
     cpt = 0;                                                 /* Nous n'avons encore rien fait au debut !! */
     liste = Liste_pages;

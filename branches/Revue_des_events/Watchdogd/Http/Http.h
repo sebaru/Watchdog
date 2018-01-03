@@ -109,17 +109,13 @@
  extern gint Http_Traiter_request_getgif ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gint Http_Traiter_request_getsvg ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_getaudio ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
- extern gint Http_Traiter_request_getmessage ( struct lws *wsi, struct HTTP_SESSION *session );
- extern gint Http_Traiter_request_getscenario ( struct lws *wsi, struct HTTP_SESSION *session );
- extern gint Http_Traiter_request_body_completion_setmessage ( struct lws *wsi );
- extern gint Http_Traiter_request_body_completion_delmessage ( struct lws *wsi );
- extern gint Http_Traiter_request_body_completion_setscenario ( struct lws *wsi );
+ extern gint Http_Traiter_request_body_cli ( struct lws *wsi, void *data, size_t taille );
+ extern gint Http_Traiter_request_body_completion_cli ( struct lws *wsi );
  extern gint Http_Traiter_request_body_postfile ( struct lws *wsi, void *data, size_t taille );
  extern gint Http_Traiter_request_body_completion_postfile ( struct lws *wsi );
- extern gint Http_Traiter_request_getpluginsDLS ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_getui ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
- extern gint Http_Traiter_request_getmnemos ( struct lws *wsi, struct HTTP_SESSION *session );
- 
+ extern gint Http_Traiter_request_setm ( struct lws *wsi );
+  
  extern struct HTTP_SESSION *Http_get_session ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
  extern gchar *Http_get_session_id ( struct HTTP_SESSION *session );
  extern void Http_Check_sessions ( void );

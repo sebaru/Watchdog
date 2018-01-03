@@ -51,7 +51,6 @@
  enum
   { TYPE_PAGE_PLUGIN_DLS,                                                                         /* Listes des plugins D.L.S */
     TYPE_PAGE_HISTO,                                                               /* Page de garde: messages au fil de l'eau */
-    TYPE_PAGE_GROUPE,                                                                      /* Edition des groupes de Watchdog */
     TYPE_PAGE_UTIL,                                                                        /* Liste des utilisateurs Watchdog */
     TYPE_PAGE_MESSAGE,                                                                       /* Edition des messages Watchdog */
     TYPE_PAGE_SYNOPTIQUE,                                                     /* Edition des noms/mnémoniques des synoptiques */
@@ -154,7 +153,7 @@
 
 /*--------------------------------------- Déclarations des prototypes de fonctions -------------------------------------------*/
  extern gboolean WTD_Curl_post_request ( gchar *uri, gint post, gchar *post_data, gint post_length );
- extern CURL *WTD_Curl_init ( gchar *uri, gchar *erreur );
+ extern CURL *WTD_Curl_init ( gchar *erreur );
 
  extern void Log( gchar *chaine );                                                                              /* Dans ihm.c */
  extern void Effacer_pages ( void );
@@ -162,6 +161,7 @@
  extern GtkWidget *Creer_boite_travail ( void );
  extern void Set_progress_plus( gint plus );
  extern void Set_progress_text( gchar *cadran, gint max );
+ extern void Set_progress_ratio( gint nbr, gint max );
  extern void Set_progress_pulse( void );
  extern void Raz_progress_pulse( void );
  extern struct PAGE_NOTEBOOK *Chercher_page_notebook ( guint type, guint id, gboolean affiche );
@@ -184,7 +184,6 @@
  extern void Gerer_protocole_icone ( struct CONNEXION *connexion );
  extern void Gerer_protocole_dls ( struct CONNEXION *connexion );
  extern void Gerer_protocole_utilisateur ( struct CONNEXION *connexion );
- extern void Gerer_protocole_groupe ( struct CONNEXION *connexion );
  extern void Gerer_protocole_message ( struct CONNEXION *connexion );
  extern void Gerer_protocole_synoptique ( struct CONNEXION *connexion );
  extern void Gerer_protocole_mnemonique ( struct CONNEXION *connexion );
@@ -202,21 +201,12 @@
  extern void Proto_afficher_un_admin( struct CMD_TYPE_ADMIN *admin );                                         /* Dans admin.c */ 
  extern void Creer_page_admin( void );
 
- extern void Proto_afficher_un_groupe( struct CMD_TYPE_GROUPE *groupe );                               /* Dans liste_groupe.c */ 
- extern void Proto_cacher_un_groupe( struct CMD_TYPE_GROUPE *groupe );
- extern void Proto_rafraichir_un_groupe( struct CMD_TYPE_GROUPE *groupe );
- extern void Creer_page_groupe( void );
-
- extern void Menu_ajouter_editer_groupe ( struct CMD_TYPE_GROUPE *edit_groupe );                       /* Dans ajout_groupe.c */
-
  extern void Proto_afficher_un_utilisateur( struct CMD_TYPE_UTILISATEUR *util );                         /* Dans liste_util.c */ 
  extern void Proto_cacher_un_utilisateur( struct CMD_TYPE_UTILISATEUR *util );
  extern void Proto_rafraichir_un_utilisateur( struct CMD_TYPE_UTILISATEUR *util );
  extern void Creer_page_utilisateur( void );
 
- extern void Proto_afficher_un_groupe_existant ( struct CMD_TYPE_GROUPE *groupe );                            /* ajout_util.c */
- extern void Proto_fin_affichage_groupes_existants ( void );
- extern void Menu_ajouter_editer_utilisateur ( struct CMD_TYPE_UTILISATEUR *edit_util );
+ extern void Menu_ajouter_editer_utilisateur ( struct CMD_TYPE_UTILISATEUR *edit_util );                      /* ajout_util.c */
 
  extern void Proto_afficher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );                      /* Dans liste_plugin_dls.c */ 
  extern void Proto_cacher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );
@@ -254,9 +244,6 @@
  extern void Creer_page_synoptique( void );
 
  extern void Menu_ajouter_editer_synoptique ( struct CMD_TYPE_SYNOPTIQUE *edit_syn );                    /* ajout_synoptique.c*/
- extern void Proto_afficher_un_groupe_pour_propriete_synoptique ( struct CMD_TYPE_GROUPE *groupe );
- extern void Proto_fin_affichage_groupes_pour_synoptique ( void );
- extern void Proto_afficher_les_groupes_pour_synoptique ( GList *liste );
  extern void Proto_afficher_un_dls_for_mnemonique ( struct CMD_TYPE_PLUGIN_DLS *dls );
 
  extern void Proto_cacher_un_mnemonique( struct CMD_TYPE_MNEMO_BASE *mnemonique );                  /* Dans liste_mnemonique.c*/
@@ -285,7 +272,6 @@
  extern void Menu_want_plugin_dls ( void );                                                                    /* Dans menu.c */
  extern void Menu_want_client_leger ( void );
  extern void Menu_want_util ( void );
- extern void Menu_want_groupe ( void );
  extern void Menu_want_message ( void );
  extern void Menu_want_icone ( void );
  extern void Menu_want_synoptique ( void );

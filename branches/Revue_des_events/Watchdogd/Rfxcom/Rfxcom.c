@@ -175,48 +175,6 @@
      }
   }
 /******************************************************************************************************************************/
-/* Rfxcom_handle_input_event: En fonction de l'event en parametre, soit positionne les bits internes si Instance Master soit  */
-/*                            Transfert l'evenement au Master                                                                 */
-/* Entrée : L'evenement à traiter et la valeur recu par le capteur                                                            */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Rfxcom_handle_input_event ( gchar *event, gfloat val )
-  { struct CMD_TYPE_MNEMO_BASE *mnemo;
-    gchar response[160];
-    struct SMSDB *sms;
-    gint nbr_result;
-    struct DB *db;
-    
-    nbr_result =  Map_event_to_mnemo_new ( &db, Config.instance_id, NOM_THREAD, event );         /* Evenement pour ce texte ? */
-    if (nbr_result == 0)
-     { Envoyer_commande_dls( 7 );                                                      /* Met à un le bit SYS_EVENT_NOT_FOUND */
-       Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
-	               "%s: event '%s' not found", __func__, event );
-     }
-    else 
-	    { while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
-        { Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_NOTICE,
-                   "%s: Match found for event '%s' -> Type %d Num %d - %s",
-                    event, mnemo->type, mnemo->num, mnemo->libelle );
-          switch (mnemo->type)
-           { case MNEMO_ENTREE_ANA:
-              { if (Config.instance_is_master==TRUE)                         /* Si Instance Master, on gere directe en locale */
-                 { SEA( mnemo->num, val ); }
-                else
-                 { /* Envoyer_event_to_librairie("http", "setea?num=1&val=1.0" );
-                   Send EAnum=val via thread requete http vers le master */
-                 } 
-                break;
-              }
-           		default: Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_WARNING,
-                                "%s: Event '%s' not handled -> Type %d Num %d - %s",
-                                 __func__, event, mnemo->type, mnemo->num, mnemo->libelle );
-           }
-          g_free(mnemo);
-        }
-     }
-  }
-/******************************************************************************************************************************/
 /* Processer_trame: traitement de la trame recue par un microcontroleur                                                       */
 /* Entrée: la trame a recue                                                                                                   */
 /* Sortie: néant                                                                                                              */
@@ -436,8 +394,8 @@
 
     nbr_oct_lu = 0;
     Cfg_rfxcom.mode = RFXCOM_RETRING;
-    while( lib->Thread_run == TRUE)                                      /* On tourne tant que necessaire */
-     { usleep(1);
+    while( lib->Thread_run == TRUE)                                                          /* On tourne tant que necessaire */
+     { usleep(1000);
        sched_yield();
 
        if (lib->Thread_sigusr1 == TRUE)

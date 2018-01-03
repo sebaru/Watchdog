@@ -79,14 +79,6 @@
     Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_WANT_PAGE_UTIL, NULL, 0 );
   }
 /**********************************************************************************************************/
-/* Menu_want_groupe: l'utilisateur desire editer les bases groups                                         */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
- void Menu_want_groupe ( void )
-  { if (Chercher_page_notebook( TYPE_PAGE_GROUPE, 0, TRUE )) return;
-    Envoi_serveur( TAG_UTILISATEUR, SSTAG_CLIENT_WANT_PAGE_GROUPE, NULL, 0 );
-  }
-/**********************************************************************************************************/
 /* Menu_want_message: l'utilisateur desire editer la base msgs                                            */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/

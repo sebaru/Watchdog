@@ -64,7 +64,7 @@
   { struct CMD_TYPE_MOTIF *result;
     gint id;
 
-    rezo_motif->gid = GID_TOUTLEMONDE;                                   /* Par défaut, tout le monde peut acceder a ce motif */
+    rezo_motif->access_level = ACCESS_LEVEL_ALL;                         /* Par défaut, tout le monde peut acceder a ce motif */
     id = Ajouter_motifDB ( rezo_motif );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;

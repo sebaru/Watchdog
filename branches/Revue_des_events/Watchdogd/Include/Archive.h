@@ -30,6 +30,7 @@
 
  #define ARCHIVE_EA_TEMPS_SI_CONSTANT  3000                                    /* Si constant, archivage toutes les 5 minutes */
  #define ARCHIVE_EA_TEMPS_SI_VARIABLE    50                                   /* Si variable, archivage toutes les 5 secondes */
+ #define ARCHIVE_DEFAUT_RETENTION       400                              /* Nom de jours par défaut de retention des archives */
 
  #define NUM_EA_SYS_ARCHREQUEST         126                      /* Numéro d'EA de reference pour le nbr de request archivage */
 
@@ -51,6 +52,7 @@
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
     gboolean Thread_sigusr1;                                                          /* TRUE si le thread doit gerer le USR1 */
+    gint  duree_retention;                                              /* Duree de retention des données d'archive, en jours */
     gint  archdb_port;
     gchar archdb_host    [ TAILLE_DB_HOST+1 ];                                  /* Nom du host de la base de donnes d'archive */
     gchar archdb_username[ TAILLE_DB_USERNAME+1 ];                           /* Nom de l'administrateur de la base de données */
@@ -64,7 +66,7 @@
  extern gint Arch_Clear_list ( void );
  extern void Ajouter_arch( gint type, gint num, gfloat valeur );
  extern void Ajouter_archDB ( struct DB *db, struct ARCHDB *arch );
- extern void Admin_arch ( struct CONNEXION *connexion, gchar *ligne );
+ extern gchar *Admin_arch ( gchar *responose, gchar *ligne );
  extern void Arch_Update_SQL_Partitions_thread ( void );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

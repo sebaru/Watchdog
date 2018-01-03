@@ -42,26 +42,22 @@
     NBR_UTILISATEUR_RESERVE
   };
 
- enum                                                         /* Enumeration des groupes de base Watchdog */
-  { GID_TOUTLEMONDE,
-    GID_USERS,
-    GID_MESSAGE,
-    GID_ICONE,
-    GID_SYNOPTIQUE,
-    GID_MNEMO,
-    GID_DLS,
-    GID_HISTO,
-    GID_SCENARIO,
-    GID_LOWLEVEL_IO,
-    GID_ADMIN_CLI,
-    GID_SATELLITE,
-    NBR_GROUPE_RESERVE
-  };
+                                                                                  /* Enumeration des groupes de base Watchdog */
 
-/************************************** Prototypes de fonctions *******************************************/
+ #define ACCESS_LEVEL_DLS       6
+ #define ACCESS_LEVEL_CLI       6
+ #define ACCESS_LEVEL_MSG       6
+ #define ACCESS_LEVEL_USER      6
+ #define ACCESS_LEVEL_SATELLITE 6
+ #define ACCESS_LEVEL_ATELIER   6
+ #define ACCESS_LEVEL_HISTO     6
+ #define ACCESS_LEVEL_ICONE     6
+ #define ACCESS_LEVEL_ALL       0
+
+/************************************************ Prototypes de fonctions *****************************************************/
  extern gboolean Recuperer_groupesDB( struct DB **db );                                  /* Dans groupe.c */
  extern struct CMD_TYPE_GROUPE *Recuperer_groupesDB_suite( struct DB **db );
- extern gboolean Tester_groupe_util( struct CMD_TYPE_UTILISATEUR *util, guint id_groupe );
+ extern gboolean Tester_level_util( struct CMD_TYPE_UTILISATEUR *util, guint id_groupe );
  extern gboolean Retirer_groupeDB( struct CMD_TYPE_GROUPE *groupe );
  extern gint Ajouter_groupeDB ( struct CMD_TYPE_GROUPE *groupe );
  extern struct CMD_TYPE_GROUPE *Rechercher_groupeDB( gint id );

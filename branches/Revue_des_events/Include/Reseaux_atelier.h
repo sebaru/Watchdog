@@ -39,7 +39,7 @@
     gint    syn_id;                                                                    /* Numéro du synoptique ou est l'icone */
     gint    icone_id;                                                                           /* Correspond au fichier .gif */
     gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                                                 /* "Vanne gaz chaudière" */
-    guint   gid;                                                                     /* Nom du groupe d'appartenance du motif */
+    guint   access_level;                                                            /* Nom du groupe d'appartenance du motif */
     gint    bit_controle;                                                                                       /* Ixxx, Cxxx */
     gint    bit_clic;                                             /* Bit à activer quand on clic avec le bouton gauche souris */
     gint    bit_clic2;                                            /* Bit à activer quand on clic avec le bouton gauche souris */

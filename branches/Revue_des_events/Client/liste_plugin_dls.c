@@ -66,6 +66,7 @@
 
  static gchar *DLS_COMPIL_STATUS[]=                                          /* Status en français de la derniere compilation */
   { "Never compiled yet",
+    "Export from Database failed",
     "Error loading source file",
     "Error loading log file",
     "Syntax error",

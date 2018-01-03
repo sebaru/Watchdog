@@ -92,11 +92,11 @@
      } 
     if ( log != NULL && (override == TRUE || (priority <= log->log_level)) )                      /* LOG_EMERG = 0, DEBUG = 7 */
      { prctl( PR_GET_NAME, &nom_thread, 0, 0, 0);
-       g_snprintf( chaine, sizeof(chaine), "[%s] %s : %s", prio_string, nom_thread, format );
+       g_snprintf( chaine, sizeof(chaine), "[%s] %10s - %s", prio_string, nom_thread, format );
 
        va_start( ap, format );
        vsyslog ( priority, chaine, ap );
        va_end ( ap );
      }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

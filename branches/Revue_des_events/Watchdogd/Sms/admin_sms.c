@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Admin/admin_sms.c        Gestion des connexions Admin SET au serveur watchdog                */
-/* Projet WatchDog version 2.0       Gestion d'habitat                    sam. 19 mai 2012 11:03:52 CEST  */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Admin/admin_sms.c        Gestion des responses Admin SET au serveur watchdog                                    */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                        sam. 19 mai 2012 11:03:52 CEST  */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * admin_sms.c
  * This file is part of Watchdog
@@ -25,127 +25,127 @@
  * Boston, MA  02110-1301  USA
  */
  
- #include <unistd.h>                                                                  /* Pour gethostname */
+ #include <unistd.h>                                                                                      /* Pour gethostname */
  #include "watchdogd.h"
  #include "Sms.h"
 
-/**********************************************************************************************************/
-/* Admin_sms_reload: Demande le rechargement des conf SMS                                                 */
-/* Entrée: le connexion                                                                                   */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- static void Admin_sms_reload ( struct CONNEXION *connexion )
+/******************************************************************************************************************************/
+/* Admin_sms_reload: Demande le rechargement des conf SMS                                                                     */
+/* Entrée: Le buffer d'entrée a compléter                                                                                     */
+/* Sortie: Le buffer de sortie complété                                                                                       */
+/******************************************************************************************************************************/
+ static gchar *Admin_sms_reload ( gchar *response )
   { if (Cfg_sms.lib->Thread_run == FALSE)
-     { Admin_write ( connexion, " Thread SMS is not running\n" );
-       return;
+     { response = Admin_write ( response, " Thread SMS is not running" );
+       return(response);
      }
     
     Cfg_sms.reload = TRUE;
-    Admin_write ( connexion, " SMS Reloading in progress\n" );
     while (Cfg_sms.reload) sched_yield();
-    Admin_write ( connexion, " SMS Reloading done\n" );
+    response = Admin_write ( response, " SMS Reload done" );
+    return(response);
   }
-/**********************************************************************************************************/
-/* Admin_print_sms : Affiche le parametre sur la console d'admin CLI                                      */
-/* Entrée: La connexion connexion ADMIN                                                                   */
-/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
-/**********************************************************************************************************/
- static void Admin_print_sms ( struct CONNEXION *connexion, struct SMSDB *sms )
+/******************************************************************************************************************************/
+/* Admin_print_sms : Affiche le parametre sur la console d'admin CLI                                                          */
+/* Entrée: Le buffer d'entrée a compléter                                                                                     */
+/* Sortie: Le buffer de sortie complété                                                                                       */
+/******************************************************************************************************************************/
+ static gchar *Admin_print_sms ( gchar *response, struct SMSDB *sms )
   { gchar chaine[256];
 
     g_snprintf( chaine, sizeof(chaine),
-              " [%03d]%12s -> user_enable   = %d\n"
-              "   |               -> sms_enable    = %d\n"
-              "   |               -> sms_phone     = %s\n"
-              "   |               -> sms_allow_cde = %d\n"
-              "   |----------------> %s\n",
+              " | ---------------------------------\n"
+              " | [%03d]%12s -> user_enable   = %d\n"
+              " |               -> sms_enable    = %d\n"
+              " |               -> sms_phone     = %s\n"
+              " |               -> sms_allow_cde = %d\n"
+              " |----------------> %s",
                 sms->user_id, sms->user_name, sms->user_enable, sms->user_sms_enable, sms->user_sms_phone,
                 sms->user_sms_allow_cde, sms->user_comment
               );
-    Admin_write ( connexion, chaine );
+    response = Admin_write ( response, chaine );
+    return(response);
   }
-/**********************************************************************************************************/
-/* Admin_sms_list : L'utilisateur admin lance la commande "list" en mode sms                              */
-/* Entrée: La connexion connexion ADMIN                                                                   */
-/* Sortie: Rien, tout est envoyé dans le pipe Admin                                                       */
-/**********************************************************************************************************/
- static void Admin_sms_list ( struct CONNEXION *connexion )
+/******************************************************************************************************************************/
+/* Admin_sms_list : L'utilisateur admin lance la commande "list" en mode sms                                                  */
+/* Entrée: Le buffer d'entrée a compléter                                                                                     */
+/* Sortie: Le buffer de sortie complété                                                                                       */
+/******************************************************************************************************************************/
+ static gchar *Admin_sms_list ( gchar *response )
   { struct SMSDB *sms;
     gchar chaine[80];
     struct DB *db;
 
-    g_snprintf( chaine, sizeof(chaine), " -- Liste des contacts SMS\n" );
-    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " -- Liste des contacts SMS" );
+    response = Admin_write ( response, chaine );
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "Admin_sms_list: Database Connection Failed" );
-       return;
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
+       return(response);
      }
 
-/************************************* Chargement des informations en bases *******************************/
+/********************************************* Chargement des informations en bases *******************************************/
     if ( ! Sms_Recuperer_smsDB( db ) )
      { Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "Admin_sms_list: Recuperer_sms Failed" );
-       return;
+       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING, "%s: Recuperer_sms Failed", __func__ );
+       return(response);
      }
 
     while ( (sms = Sms_Recuperer_smsDB_suite( db )) != NULL)
-     { Admin_print_sms ( connexion, sms ); }
+     { response = Admin_print_sms ( response, sms ); }
 
     Libere_DB_SQL( &db );
+    return(response);
   }
-/**********************************************************************************************************/
-/* Admin_sms: Gere une commande 'admin sms' depuis une connexion admin                                    */
-/* Entrée: le connexion et la ligne de commande                                                           */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Admin_command ( struct CONNEXION *connexion, gchar *ligne )
+/******************************************************************************************************************************/
+/* Admin_sms: Gere une commande 'admin sms' depuis une response admin                                                         */
+/* Entrée: Le buffer d'entrée a compléter                                                                                     */
+/* Sortie: Le buffer de sortie complété                                                                                       */
+/******************************************************************************************************************************/
+ gchar *Admin_command ( gchar *response, gchar *ligne )
   { gchar commande[128], chaine[128];
 
-    sscanf ( ligne, "%s", commande );                             /* Découpage de la ligne de commande */
+    sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'SMS'\n" );
-       Admin_write ( connexion, "  dbcfg ...             - Get/Set Database Parameters\n" );
-       Admin_write ( connexion, "  reload                - Reload contacts from Database\n" );
-       Admin_write ( connexion, "  sms smsbox message    - Send 'message' via smsbox\n" );
-       Admin_write ( connexion, "  sms gsm    message    - Send 'message' via gsm\n" );
-       Admin_write ( connexion, "  list                  - Liste les contacts SMS\n" );
-       Admin_write ( connexion, "  help                  - This help\n" );
+     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'SMS'" );
+       response = Admin_write ( response, "  dbcfg ...             - Get/Set Database Parameters" );
+       response = Admin_write ( response, "  reload                - Reload contacts from Database" );
+       response = Admin_write ( response, "  sms smsbox message    - Send 'message' via smsbox" );
+       response = Admin_write ( response, "  sms gsm    message    - Send 'message' via gsm" );
+       response = Admin_write ( response, "  list                  - Liste les contacts SMS" );
+       response = Admin_write ( response, "  help                  - This help" );
      }
     else if ( ! strcmp ( commande, "list" ) )
-     { Admin_sms_list ( connexion );
+     { response = Admin_sms_list ( response );
      }
     else if ( ! strcmp ( commande, "reload" ) )
-     { Admin_sms_reload ( connexion ); }
+     { response = Admin_sms_reload ( response ); }
     else if ( ! strcmp ( commande, "gsm" ) )
      { gchar message[80];
-       sscanf ( ligne, "%s %s", commande, message );                 /* Découpage de la ligne de commande */
-       Envoyer_sms_gsm_text ( ligne + 4 ); /* On envoie le reste de la liste, pas seulement le mot suivant. */
+       sscanf ( ligne, "%s %s", commande, message );                                     /* Découpage de la ligne de commande */
+       Envoyer_sms_gsm_text ( ligne + 4 );                   /* On envoie le reste de la liste, pas seulement le mot suivant. */
        g_snprintf( chaine, sizeof(chaine), " Sms sent\n" );
-       Admin_write ( connexion, chaine );
+       response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "smsbox" ) )
      { gchar message[80];
-       sscanf ( ligne, "%s %s", commande, message );                 /* Découpage de la ligne de commande */
-       Envoyer_sms_smsbox_text ( ligne + 7 ); /* On envoie le reste de la liste, pas seulement le mot suivant. */
+       sscanf ( ligne, "%s %s", commande, message );                                     /* Découpage de la ligne de commande */
+       Envoyer_sms_smsbox_text ( ligne + 7 );                /* On envoie le reste de la liste, pas seulement le mot suivant. */
        g_snprintf( chaine, sizeof(chaine), " Sms sent\n" );
-       Admin_write ( connexion, chaine );
+       response = Admin_write ( response, chaine );
      }
-    else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { if (Admin_dbcfg_thread ( connexion, NOM_THREAD, ligne+6 ) == TRUE)   /* Si changement de parametre */
-        { gboolean retour;
-          retour = Sms_Lire_config();
-          g_snprintf( chaine, sizeof(chaine), " Reloading Sms Thread Parameters from Database -> %s\n",
-                      (retour ? "Success" : "Failed") );
-          Admin_write ( connexion, chaine );
-        }
+    else if ( ! strcmp ( commande, "dbcfg" ) )                /* Appelle de la fonction dédiée à la gestion des parametres DB */
+     { gboolean retour;
+       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
+       retour = Sms_Lire_config();
+       g_snprintf( chaine, sizeof(chaine), " Reloading Sms Thread Parameters from Database -> %s", (retour ? "Success" : "Failed") );
+       response = Admin_write ( response, chaine );
      }
     else
      { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
-       Admin_write ( connexion, chaine );
+       response = Admin_write ( response, chaine );
      }
+    return(response);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

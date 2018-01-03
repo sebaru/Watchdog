@@ -1,3 +1,4 @@
+
 /******************************************************************************************************************************/
 /* Watchdogd/Serveur/serveur.c                Comportement d'un sous-serveur Watchdog                                         */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                           jeu 02 fév 2006 13:01:57 CET */
@@ -165,8 +166,6 @@
        case WAIT_FOR_IDENT              : return("WAIT_FOR_IDENT");
        case WAIT_FOR_NEWPWD             : return("WAIT_FOR_NEWPWD");
 
-       case ENVOI_GROUPE_FOR_UTIL       : return("ENVOI_GROUPE_FOR_UTIL");
-       case ENVOI_GROUPE_FOR_SYNOPTIQUE : return("ENVOI_GROUPE_FOR_SYNOPTIQUE");
        case ENVOI_CLASSE_FOR_ATELIER    : return("ENVOI_CLASSE_FOR_ATELIER");
        case ENVOI_ICONE_FOR_ATELIER     : return("ENVOI_ICONE_FOR_ATELIER");
 

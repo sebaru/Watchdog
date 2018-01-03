@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Archive/admin_arch.c  Gestion des connexions Admin du thread "Archive" de watchdog                               */
+/* Watchdogd/Archive/admin_arch.c  Gestion des responses Admin du thread "Archive" de watchdog                               */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                                    17.03.2017 08:37:09 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -29,31 +29,32 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Admin_arch_testdb: Test la connexion vers le serveur de base de données                                                    */
-/* Entrée: la connexion pour sortiee client et la ligne de commande                                                           */
+/* Admin_arch_testdb: Test la response vers le serveur de base de données                                                    */
+/* Entrée: la response pour sortiee client et la ligne de commande                                                           */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Admin_arch_testdb ( struct CONNEXION *connexion )
+ static gchar *Admin_arch_testdb ( gchar *response )
   { gchar chaine[80];
     struct DB*db;
     db = Init_ArchDB_SQL();       
     if (!db)
-     { g_snprintf( chaine, sizeof(chaine), " Connexion to DB failed (Host='%s':%d, User='%s' DB='%s')\n",
+     { g_snprintf( chaine, sizeof(chaine), " | - Response to DB failed (Host='%s':%d, User='%s' DB='%s')",
                    Partage->com_arch.archdb_host, Partage->com_arch.archdb_port, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
-       Admin_write ( connexion, chaine );
-       return;
+       response = Admin_write ( response, chaine );
+       return(response);
      }
-    g_snprintf( chaine, sizeof(chaine), " Connexion to DB OK (Host=%s:%d, User=%s DB=%s)\n",
+    g_snprintf( chaine, sizeof(chaine), " | - Response to DB OK (Host=%s:%d, User=%s DB=%s)",
                 Partage->com_arch.archdb_host, Partage->com_arch.archdb_port, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
-    Admin_write ( connexion, chaine );
+    response = Admin_write ( response, chaine );
     Libere_DB_SQL( &db );
+    return(response);
   }
 /******************************************************************************************************************************/
 /* Admin_arch_status: Print le statut du thread arch                                                                          */
-/* Entrée: la connexion pour sortiee client et la ligne de commande                                                           */
+/* Entrée: la response pour sortiee client et la ligne de commande                                                           */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Admin_arch_status ( struct CONNEXION *connexion )
+ static gchar *Admin_arch_status ( gchar *response )
   { gchar chaine[128];
     gint save_nbr;
 
@@ -61,40 +62,40 @@
     save_nbr = g_slist_length(Partage->com_arch.liste_arch);
     pthread_mutex_unlock( &Partage->com_arch.synchro );
 
-    g_snprintf( chaine, sizeof(chaine), " | Length of Arch list : %d\n", save_nbr );
-    Admin_write ( connexion, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | Host : %s\n", Partage->com_arch.archdb_host );
-    Admin_write ( connexion, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | Port : %d\n", Partage->com_arch.archdb_port );
-    Admin_write ( connexion, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | DB   : %s\n", Partage->com_arch.archdb_database );
-    Admin_write ( connexion, chaine );
-    g_snprintf( chaine, sizeof(chaine), " | User : %s\n", Partage->com_arch.archdb_username );
-    Admin_write ( connexion, chaine );
-    g_snprintf( chaine, sizeof(chaine), " -\n");
-    Admin_write ( connexion, chaine );
+    g_snprintf( chaine, sizeof(chaine), " | - Length of Arch list : %d", save_nbr );
+    response = Admin_write ( response, chaine );
+    g_snprintf( chaine, sizeof(chaine), " | - Host     : %s", Partage->com_arch.archdb_host );
+    response = Admin_write ( response, chaine );
+    g_snprintf( chaine, sizeof(chaine), " | - Port     : %d", Partage->com_arch.archdb_port );
+    response = Admin_write ( response, chaine );
+    g_snprintf( chaine, sizeof(chaine), " | - Database : %s", Partage->com_arch.archdb_database );
+    response = Admin_write ( response, chaine );
+    g_snprintf( chaine, sizeof(chaine), " | - Username : %s", Partage->com_arch.archdb_username );
+    response = Admin_write ( response, chaine );
+    g_snprintf( chaine, sizeof(chaine), " | - Purge    : %d", Partage->com_arch.duree_retention );
+    response = Admin_write ( response, chaine );
+    return(response);
   }
 /******************************************************************************************************************************/
-/* Admin_command: Gere une commande liée au thread arch depuis une connexion admin                                            */
+/* Admin_command: Gere une commande liée au thread arch depuis une response admin                                            */
 /* Entrée: le client et la ligne de commande                                                                                  */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- void Admin_arch ( struct CONNEXION *connexion, gchar *ligne )
+ gchar *Admin_arch ( gchar *response, gchar *ligne )
   { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "status" ) )
-     { Admin_arch_status ( connexion ); }
+     { return(Admin_arch_status ( response )); }
     else if ( ! strcmp ( commande, "testdb" ) )
-     { Admin_arch_testdb ( connexion ); }
+     { return(Admin_arch_testdb ( response )); }
     else if ( ! strcmp ( commande, "dbcfg" ) )                /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { if (Admin_dbcfg_thread ( connexion, "arch", ligne+6 ) == TRUE)                           /* Si changement de parametre */
-        { gboolean retour;
-          retour = Arch_Lire_config();
-          g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s\n",
-                      (retour ? "Success" : "Failed") );
-          Admin_write ( connexion, chaine );
-        }
+     { gboolean retour;
+       response = Admin_dbcfg_thread ( response, "arch", ligne+6 );                             /* Si changement de parametre */
+       retour = Arch_Lire_config();
+       g_snprintf( chaine, sizeof(chaine), " | - Reloading Thread Parameters from Database -> %s",
+                   (retour ? "Success" : "Failed") );
+       response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "purge" ) )
      { pthread_t tid;
@@ -102,26 +103,27 @@
         { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: pthread_create failed for Update SQL Partitions", __func__ ); }
         else
         { pthread_detach( tid ); }                                /* On le detache pour qu'il puisse se terminer tout seul */
-       g_snprintf( chaine, sizeof(chaine), " Purge of old data in progress\n" );
-       Admin_write ( connexion, chaine );
+       g_snprintf( chaine, sizeof(chaine), " | - Purge of old data in progress" );
+       response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "clear" ) )
      { gint nbr;
        nbr = Arch_Clear_list ();                                         /* Clear de la list des archives à prendre en compte */
-       g_snprintf( chaine, sizeof(chaine), " ArchiveList cleared (%d components)\n", nbr );
-       Admin_write ( connexion, chaine );
+       g_snprintf( chaine, sizeof(chaine), " | - ArchiveList cleared (%d components)", nbr );
+       response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "help" ) )
-     { Admin_write ( connexion, "  -- Watchdog ADMIN -- Help du mode 'UPS'\n" );
-       Admin_write ( connexion, "  dbcfg ...                              - Get/Set Database Parameters\n" );
-       Admin_write ( connexion, "  status                                 - Get Status of Arch Thread\n");
-       Admin_write ( connexion, "  clear                                  - Clear Archive List\n" );
-       Admin_write ( connexion, "  purge                                  - Purge old data in database\n" );
-       Admin_write ( connexion, "  testdb                                 - Access Test to Database\n" );
+     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'UPS'" );
+       response = Admin_write ( response, "  dbcfg ...                              - Get/Set Database Parameters" );
+       response = Admin_write ( response, "  status                                 - Get Status of Arch Thread");
+       response = Admin_write ( response, "  clear                                  - Clear Archive List" );
+       response = Admin_write ( response, "  purge                                  - Purge old data in database" );
+       response = Admin_write ( response, "  testdb                                 - Access Test to Database" );
      }
     else
-     { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
-       Admin_write ( connexion, chaine );
+     { g_snprintf( chaine, sizeof(chaine), " | - Unknown command : %s", ligne );
+       response = Admin_write ( response, chaine );
      }
+   return(response);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

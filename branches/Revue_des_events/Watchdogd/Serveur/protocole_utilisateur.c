@@ -39,7 +39,7 @@
     pthread_t tid;
     connexion = client->connexion;
 
-    if ( ! Tester_groupe_util( client->util, GID_USERS) )
+    if ( ! Tester_level_util( client->util, ACCESS_LEVEL_USER ) )
      { struct CMD_GTK_MESSAGE gtkmessage;
        g_snprintf( gtkmessage.message, sizeof(gtkmessage.message), "Permission denied..." );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
@@ -48,47 +48,10 @@
      }
 
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_CLIENT_EDIT_GROUPE:
-             { struct CMD_TYPE_GROUPE *groupe;
-               groupe = (struct CMD_TYPE_GROUPE *)connexion->donnees;
-               Proto_editer_groupe( client, groupe );
-             }
-            break;
-       case SSTAG_CLIENT_WANT_PAGE_GROUPE:
-             { Ref_client( client, "Send Groupe" );
-               pthread_create( &tid, NULL, (void *)Envoyer_groupes_thread, client );
-               pthread_detach( tid );
-             }
-            break;
-       case SSTAG_CLIENT_ADD_GROUPE:
-             { struct CMD_TYPE_GROUPE *groupe;
-               groupe = (struct CMD_TYPE_GROUPE *)connexion->donnees;
-               Proto_ajouter_groupe( client, groupe );
-             }
-            break;
-       case SSTAG_CLIENT_DEL_GROUPE:
-             { struct CMD_TYPE_GROUPE *groupe;
-               groupe = (struct CMD_TYPE_GROUPE *)connexion->donnees;
-               Proto_effacer_groupe( client, groupe );
-             }
-            break;
-       case SSTAG_CLIENT_VALIDE_EDIT_GROUPE:
-             { struct CMD_TYPE_GROUPE *groupe;
-               groupe = (struct CMD_TYPE_GROUPE *)connexion->donnees;
-               Proto_valider_editer_groupe( client, groupe );
-             }
-            break;
-
-       case SSTAG_CLIENT_WANT_PAGE_UTIL:
+     { case SSTAG_CLIENT_WANT_PAGE_UTIL:
              { Envoi_client( client, TAG_UTILISATEUR, SSTAG_SERVEUR_CREATE_PAGE_UTIL_OK, NULL, 0 );
                Ref_client( client, "Send Util" );
                pthread_create( &tid, NULL, (void *)Envoyer_utilisateurs_thread, client );
-               pthread_detach( tid );
-             }
-            break;
-       case SSTAG_CLIENT_WANT_GROUPE_FOR_UTIL:
-             { Ref_client( client, "Send Groupe for util" );
-               pthread_create( &tid, NULL, (void *)Envoyer_groupes_pour_util_thread, client );
                pthread_detach( tid );
              }
             break;

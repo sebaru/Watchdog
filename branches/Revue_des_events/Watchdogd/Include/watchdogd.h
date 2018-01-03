@@ -77,8 +77,8 @@
     gboolean Thread_sigusr1;                                                          /* TRUE si le thread doit gerer le USR1 */
 
     void (*Run_thread)( struct LIBRAIRIE *lib );                                  /* Fonction principale de gestion du thread */
-    void (*Admin_command)( struct CONNEXION *connexion, gchar *ligne );          /* Fonction de gestion des commandes d'admin */
-    void (*Send_Output_Event)( gchar *event );          /* Fonction appelé par le master pour deposer un event dans le thread */
+                                                                                 /* Fonction de gestion des commandes d'admin */
+    gchar *(*Admin_command)( gchar *response, gchar *ligne );
   };
 
  struct COM_DB                                                                 /* Interfaçage avec le code de gestion des BDD */
