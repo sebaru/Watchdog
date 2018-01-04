@@ -123,7 +123,7 @@
     msg = Rechercher_messageDB( num );
     if (!msg)
      { Info_new( Config.log, Config.log_msrv, LOG_INFO, 
-                "Gerer_arrive_message_dls_on: Message %03d not found", num );
+                "%s: Message %03d not found", __func__, num );
        return;                                                            /* On n'a pas trouvé le message, alors on s'en va ! */
      }
     memset( &histo, 0, sizeof(histo) );
@@ -132,7 +132,7 @@
 
     if (!histo.msg.enable)                                                       /* Distribution du message aux sous serveurs */
      { Info_new( Config.log, Config.log_msrv, LOG_INFO, 
-                "Gerer_arrive_message_dls_on: Message %03d not enabled !", num );
+                "%s: Message %03d not enabled !", __func__, num );
        return;
      }
 /***************************************** Création de la structure interne de stockage ***************************************/
@@ -145,6 +145,8 @@
 
 /******************************************************* Envoi du message aux librairies abonnées *****************************/
     Envoyer_histo_aux_abonnes ( &histo );
+    if (zmq_send( Partage->com_msrv.zmq_socket_msg, &histo, sizeof(struct CMD_TYPE_HISTO), 0 ) == -1)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ live-msgs socket failed (%s)", __func__, zmq_strerror(errno) ); }
 /************************************************** Gestion des repeat ********************************************************/
     if (histo.msg.time_repeat) 
      { struct CMD_TYPE_HISTO *dup_histo;
@@ -213,7 +215,7 @@
        event = Partage->com_msrv.liste_msg->data;                        /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg, event );
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "Gerer_arrive_message_dls: Handle MSG%03d=%d, Reste a %d a traiter",
+                "%s: Handle MSG%03d=%d, Reste a %d a traiter", __func__,
                  event->num, event->etat, g_slist_length(Partage->com_msrv.liste_msg) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
 

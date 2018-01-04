@@ -32,6 +32,7 @@
  #include <pthread.h>
  #include <string.h>
  #include <errno.h>
+ #include <zmq.h>
 
  #include "Reseaux.h"
  #include "config.h"
@@ -62,7 +63,7 @@
  #define NUM_EA_SYS_TOUR_DLS_PER_SEC    124                   /* Numéro d'EA de reference pour le nbr de tour dls par seconde */
  #define NUM_EA_SYS_DLS_WAIT            123                      /* Numéro d'EA de reference pour le temps d'attente par tour */
 
- #define MAX_ENREG_QUEUE               1500                /* Nombre maximum d'enregistrement dans une queue de communication */
+ #define MAX_ENREG_QUEUE               1500      /* (a virer) Nombre maximum d'enregistrement dans une queue de communication */
 
  struct LIBRAIRIE
   { pthread_t TID;                                                                                   /* Identifiant du thread */
@@ -100,6 +101,7 @@
     GSList *liste_i;                                                             /* liste de I a traiter dans la distribution */
     GSList *liste_a;                                                             /* liste de A a traiter dans la distribution */
     GSList *liste_Event;                                                     /* liste de Event a traiter dans la distribution */
+    void *zmq_socket_msg;                                                              /* Message Queue des messages Watchdog */
 
     pthread_mutex_t synchro_Liste_abonne_msg;                                             /* Bit de synchronisation processus */
     GSList *Liste_abonne_msg;                                                          /* liste de struct MSGDB msg a envoyer */
@@ -112,6 +114,7 @@
     gint  shmid;
     gchar version[16];
     time_t start_time;                                                                         /* Date de start de l'instance */
+    void *zmq_ctx;                                                    /* Contexte d'échange inter-thread et message queue ZMQ */
     guint top;                                                                         /* Gestion des contraintes temporelles */
     guint top_cdg_plugin_dls;                                                        /* Top de chien de garde des plugins DLS */
     guint audit_bit_interne_per_sec;     

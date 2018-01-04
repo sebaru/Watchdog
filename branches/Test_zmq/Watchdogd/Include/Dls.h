@@ -38,7 +38,7 @@
  struct PLUGIN_DLS
   { struct CMD_TYPE_PLUGIN_DLS plugindb;
     gchar nom_fichier[60];                                                                                  /* Nom du fichier */
-    gint start_date;                                                                    /* time_t date de demarrage du plugin */
+    time_t start_date;                                                                  /* time_t date de demarrage du plugin */
     gint starting;                                      /* 1 si les bits internes "start" du plugins doivent etre positionnés */
     gboolean debug;                                                 /* TRUE si le plugin doit logguer ses changements de bits */
     void *handle;                                                                              /* Handle du fichier librairie */

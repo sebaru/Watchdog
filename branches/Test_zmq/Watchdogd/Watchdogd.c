@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Watchdogd.c        Démarrage/Arret du systeme Watchdog, gestion des connexions clientes      */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       mar 14 fév 2006 15:56:40 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Watchdogd.c        Démarrage/Arret du systeme Watchdog, gestion des connexions clientes                          */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                           mar 14 fév 2006 15:56:40 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Watchdogd.c
  * This file is part of Watchdog
@@ -41,19 +41,19 @@
  #include <pthread.h>
  #include <locale.h>
  #include <pwd.h>
- #include <gcrypt.h>                                  /* Pour assurer le multithreading avec IMSG et HTTP */
- #include <curl/curl.h>                                      /* Pour le multithreading avec Master et SMS */
+ #include <gcrypt.h>                                                      /* Pour assurer le multithreading avec IMSG et HTTP */
+ #include <curl/curl.h>                                                          /* Pour le multithreading avec Master et SMS */
 
  #include "watchdogd.h"
 
- struct CONFIG Config;                   /* Parametre de configuration du serveur via /etc/watchdogd.conf */
- struct PARTAGE *Partage;                                    /* Accès aux données partagées des processes */
+ struct CONFIG Config;                                       /* Parametre de configuration du serveur via /etc/watchdogd.conf */
+ struct PARTAGE *Partage;                                                        /* Accès aux données partagées des processes */
 
-/**********************************************************************************************************/
-/* Exporter : Exporte les données de base Watchdog pour préparer le RELOAD                                */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Exporter : Exporte les données de base Watchdog pour préparer le RELOAD                                                    */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  static void Exporter ( void )
   { int fd;
     unlink ( FICHIER_EXPORT );
@@ -61,7 +61,7 @@
     g_snprintf( Partage->version, sizeof(Partage->version), "%s", VERSION );
     fd = open( FICHIER_EXPORT, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
 
-    if ( fd < 0 )                                                               /* Traitement des erreurs */
+    if ( fd < 0 )                                                                                   /* Traitement des erreurs */
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "Exporter: Open Error on %s. Could not export (%s)",
                  FICHIER_EXPORT, strerror(errno) );
@@ -103,15 +103,15 @@
     close (fd);
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Exporter: Export successfull" );
   }
-/**********************************************************************************************************/
-/* Importe : Tente d'importer les données de base Watchdog juste apres le reload                         */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Importe : Tente d'importer les données de base Watchdog juste apres le reload                                              */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  static gboolean Importer ( void )
   { int fd;
 
-    fd = open( FICHIER_EXPORT, O_RDONLY );                                        /* Ouverture du fichier */
+    fd = open( FICHIER_EXPORT, O_RDONLY );                                                            /* Ouverture du fichier */
     if ( fd <= 0 )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "Importer : Open Errort %s (%s).", FICHIER_EXPORT, strerror(errno) );
@@ -165,10 +165,10 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Importer: Size OK, import OK" );
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Charger_config_bit_interne: Chargement des configs bit interne depuis la base de données               */
-/* Entrée: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Charger_config_bit_interne: Chargement des configs bit interne depuis la base de données                                   */
+/* Entrée: néant                                                                                                              */
+/******************************************************************************************************************************/
  void Charger_config_bit_interne( void )
   { Charger_analogInput();
     Charger_cpth();
@@ -177,16 +177,16 @@
     Charger_messages();
     Charger_registre();
   }
-/**********************************************************************************************************/
-/* Traitement_signaux: Gestion des signaux de controle du systeme                                         */
-/* Entrée: numero du signal à gerer                                                                       */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Traitement_signaux: Gestion des signaux de controle du systeme                                                             */
+/* Entrée: numero du signal à gerer                                                                                           */
+/******************************************************************************************************************************/
  static void Traitement_signaux( int num )
   { char chaine[50];
     if (num == SIGALRM)
      { Partage->top++;
-       if (!Partage->top)                         /* Si on passe par zero, on le dit (DEBUG interference) */
-        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Traitement Signaux: Timer: Partage->top = 0 !!" ); }
+       if (!Partage->top)                                             /* Si on passe par zero, on le dit (DEBUG interference) */
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Timer: Partage->top = 0 !!", __func__ ); }
        if (!(Partage->top%5))                                                              /* Cligno toutes les demi-secondes */
         { SB_SYS(5, !B(5)); }
        if (!(Partage->top%3))                                                                 /* Cligno toutes les 3 dixièmes */
@@ -211,22 +211,22 @@
 
        Partage->top_cdg_plugin_dls++;                                                            /* Chien de garde plugin DLS */
        if (Partage->top_cdg_plugin_dls>200)                                         /* Si pas de réponse D.L.S en 20 secondes */
-        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Traitement signaux: CDG plugin DLS !!" );
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CDG plugin DLS !!", __func__ );
           Partage->top_cdg_plugin_dls = 0;
         }
        return;
      }
 
     prctl(PR_GET_NAME, chaine, 0, 0, 0 );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Traitement_signaux: handled by %s", chaine );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: handled by %s", __func__, chaine );
 
     switch (num)
      { case SIGQUIT:
        case SIGINT:  Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGINT" );
-                     Partage->com_msrv.Thread_run = FALSE;   /* On demande l'arret de la boucle programme */
+                     Partage->com_msrv.Thread_run = FALSE;                       /* On demande l'arret de la boucle programme */
                      break;
        case SIGTERM: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGTERM" );
-                     Partage->com_msrv.Thread_run = FALSE;   /* On demande l'arret de la boucle programme */
+                     Partage->com_msrv.Thread_run = FALSE;                       /* On demande l'arret de la boucle programme */
                      break;
        case SIGABRT: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGABRT" );
                      break;
@@ -244,110 +244,121 @@
        default: Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Recu signal", num ); break;
      }
   }
-/**********************************************************************************************************/
-/* Sauver_compteur : Envoie les infos Compteurs à la base de données pour sauvegarde !                    */
-/* Entrée : Néant                                                                                         */
-/* Sortie : Néant                                                                                         */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Sauver_compteur : Envoie les infos Compteurs à la base de données pour sauvegarde !                                        */
+/* Entrée : Néant                                                                                                             */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
  static void Sauver_compteur ( void )
-  { if (Config.instance_is_master == FALSE) return;            /* Seul le master sauvegarde les compteurs */
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Sauver_compteur: Saving CPT" );
-    Updater_cpthDB();                                                 /* Sauvegarde des compteurs Horaire */
-    Updater_cpt_impDB();                                          /* Sauvegarde des compteurs d'impulsion */
+  { if (Config.instance_is_master == FALSE) return;                                /* Seul le master sauvegarde les compteurs */
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Saving CPT", __func__ );
+    Updater_cpthDB();                                                                     /* Sauvegarde des compteurs Horaire */
+    Updater_cpt_impDB();                                                              /* Sauvegarde des compteurs d'impulsion */
   }
-/**********************************************************************************************************/
-/* Tatiter_sigusr1 : Print les variable importante dans les lgos                                          */
-/* Entrée : Néant                                                                                         */
-/* Sortie : Néant                                                                                         */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Tatiter_sigusr1 : Print les variable importante dans les lgos                                                              */
+/* Entrée : Néant                                                                                                             */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
  static void Traiter_sigusr1 ( void )
   { guint nbr_i, nbr_msg, nbr_msg_repeat;
     gchar chaine[256];
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );
     nbr_i          = g_slist_length( Partage->com_msrv.liste_i );
-    nbr_msg        = g_slist_length( Partage->com_msrv.liste_msg );        /* Recuperation du numero de i */
-    nbr_msg_repeat = g_slist_length( Partage->com_msrv.liste_msg_repeat );            /* liste des repeat */
+    nbr_msg        = g_slist_length( Partage->com_msrv.liste_msg );                            /* Recuperation du numero de i */
+    nbr_msg_repeat = g_slist_length( Partage->com_msrv.liste_msg_repeat );                                /* liste des repeat */
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-    g_snprintf( chaine, sizeof(chaine), "Reste %d I, %d MSG, %d MSG_REPEAT",
+    g_snprintf( chaine, sizeof(chaine), "%s: Reste %d I, %d MSG, %d MSG_REPEAT", __func__, 
                 nbr_i, nbr_msg, nbr_msg_repeat );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, chaine );
   }
-/**********************************************************************************************************/
-/* Boucle_pere: boucle de controle du pere de tous les serveurs                                           */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  static void *Boucle_pere ( void )
   { gint cpt_5_minutes, cpt_1_minute;
 
     prctl(PR_SET_NAME, "W-MSRV", 0, 0, 0 );
 
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: Debut boucle sans fin" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
+
+    if ( (Partage->com_msrv.zmq_socket_msg = zmq_socket ( Partage->zmq_ctx, ZMQ_PUB )) == NULL)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Socket MSG Failed (%s)", __func__, zmq_strerror(errno) ); }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Socket MSG OK", __func__ ); }
+
+    if ( zmq_bind (Partage->com_msrv.zmq_socket_msg, "inproc://live-msgs") == -1 ) 
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Bind live-msgs Failed (%s)", __func__, zmq_strerror(errno) ); }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Bind live-msgs OK", __func__ ); }
 
     cpt_5_minutes = Partage->top + 3000;
     cpt_1_minute  = Partage->top + 600;
 
     sleep(1);
-    Partage->com_msrv.Thread_run = TRUE;                         /* On dit au maitre que le thread tourne */
-    while(Partage->com_msrv.Thread_run == TRUE)                       /* On tourne tant que l'on a besoin */
-     { Gerer_arrive_MSGxxx_dls();             /* Redistrib des messages DLS vers les clients + Historique */ 
-       Gerer_arrive_Ixxx_dls();                             /* Distribution des changements d'etats motif */
-       Gerer_arrive_Axxx_dls();                       /* Distribution des changements d'etats sorties TOR */
-       Gerer_arrive_Events();                   /* Gestion des evenements entre Thread, DLS, et satellite */
+    Partage->com_msrv.Thread_run = TRUE;                                             /* On dit au maitre que le thread tourne */
+    while(Partage->com_msrv.Thread_run == TRUE)                                           /* On tourne tant que l'on a besoin */
+     { Gerer_arrive_MSGxxx_dls();                                 /* Redistrib des messages DLS vers les clients + Historique */ 
+       Gerer_arrive_Ixxx_dls();                                                 /* Distribution des changements d'etats motif */
+       Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
+       Gerer_arrive_Events();                                       /* Gestion des evenements entre Thread, DLS, et satellite */
 
-       if (Partage->com_msrv.Thread_reload)                                           /* On a recu RELOAD */
-        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: RELOAD" );
+       if (Partage->com_msrv.Thread_reload)                                                               /* On a recu RELOAD */
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: RELOAD", __func__ );
           Partage->com_dls.Thread_reload       = TRUE;
           Partage->com_arch.Thread_reload      = TRUE;
 
-          Lire_config( NULL );                              /* Lecture sur le fichier /etc/watchdogd.conf */
+          Lire_config( NULL );                                                  /* Lecture sur le fichier /etc/watchdogd.conf */
           Print_config();
           Info_change_log_level ( Config.log, Config.log_level );
-          Charger_config_bit_interne();                         /* Rechargement des configs bits internes */
-          Partage->com_msrv.Thread_reload      = FALSE;                             /* signal traité. RAZ */
+          Charger_config_bit_interne();                                             /* Rechargement des configs bits internes */
+          Partage->com_msrv.Thread_reload      = FALSE;                                                 /* signal traité. RAZ */
         }
 
-       if (Partage->com_msrv.Thread_sigusr1)                                      /* On a recu sigusr1 ?? */
+       if (Partage->com_msrv.Thread_sigusr1)                                                          /* On a recu sigusr1 ?? */
         { struct LIBRAIRIE *lib;
           GSList *liste;
 
-          Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: SIGUSR1" );
+          Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: SIGUSR1", __func__ );
           Partage->com_dls.Thread_sigusr1       = TRUE;
           Partage->com_arch.Thread_sigusr1      = TRUE;
           Partage->com_admin.Thread_sigusr1     = TRUE;
 
-          liste = Partage->com_msrv.Librairies;                      /* Parcours de toutes les librairies */
+          liste = Partage->com_msrv.Librairies;                                          /* Parcours de toutes les librairies */
           while(liste)
            { lib = (struct LIBRAIRIE *)liste->data;
              lib->Thread_sigusr1 = TRUE;
              liste = liste->next;
            }
 
-          Traiter_sigusr1();                     /* Appel de la fonction pour traiter le signal pour MSRV */
+          Traiter_sigusr1();                                         /* Appel de la fonction pour traiter le signal pour MSRV */
           Partage->com_msrv.Thread_sigusr1      = FALSE;
         }
 
-       if (cpt_5_minutes < Partage->top)                                /* Update DB toutes les 5 minutes */
+       if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
         { Sauver_compteur();
           Exporter();
-          cpt_5_minutes = Partage->top + 3000;                         /* Sauvegarde toutes les 5 minutes */
+          cpt_5_minutes = Partage->top + 3000;                                             /* Sauvegarde toutes les 5 minutes */
         }
 
-       if (cpt_1_minute < Partage->top)                                   /* Update DB toutes les minutes */
+       if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
         { Gerer_histo_repeat();
-          Print_SQL_status();                                         /* Print SQL status for debugging ! */
-          cpt_1_minute = Partage->top + 600;                             /* Sauvegarde toutes les minutes */
+          Print_SQL_status();                                                             /* Print SQL status for debugging ! */
+          cpt_1_minute = Partage->top + 600;                                                 /* Sauvegarde toutes les minutes */
         }
 
        usleep(1000);
        sched_yield();
      }
 
-/**************************** Terminaison: Deconnexion DB et kill des serveurs ****************************/ 
+/*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/ 
     Sauver_compteur();                                                 /* Dernière sauvegarde avant arret */
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Boucle_pere: fin boucle sans fin" );
+    zmq_close ( Partage->com_msrv.zmq_socket_msg );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
     pthread_exit( NULL );
   }
 /******************************************************************************************************************************/
@@ -469,54 +480,54 @@
     gint import=0;
     gboolean fg;
 
-    umask(022);                                                          /* Masque de creation de fichier */
-    fg = Lire_ligne_commande( argc, argv );                   /* Lecture du fichier conf et des arguments */
+    umask(022);                                                                              /* Masque de creation de fichier */
+    fg = Lire_ligne_commande( argc, argv );                                       /* Lecture du fichier conf et des arguments */
 
-    if (fg == FALSE)                                                   /* On tourne en tant que daemon ?? */
+    if (fg == FALSE)                                                                       /* On tourne en tant que daemon ?? */
      { gint pid;
        pid = fork();
-       if (pid<0) { printf("Fork 1 failed\n"); exit(EXIT_ERREUR); }                       /* On daemonize */
-       if (pid>0) exit(EXIT_OK);                                                       /* On kill le père */
+       if (pid<0) { printf("Fork 1 failed\n"); exit(EXIT_ERREUR); }                                           /* On daemonize */
+       if (pid>0) exit(EXIT_OK);                                                                           /* On kill le père */
       
        pid = fork();
-       if (pid<0) { printf("Fork 2 failed\n"); exit(EXIT_ERREUR); }     /* Evite des pb (linuxmag 44 p78) */
-       if (pid>0) exit(EXIT_OK);                                                       /* On kill le père */
+       if (pid<0) { printf("Fork 2 failed\n"); exit(EXIT_ERREUR); }                         /* Evite des pb (linuxmag 44 p78) */
+       if (pid>0) exit(EXIT_OK);                                                                           /* On kill le père */
 
-       setsid();                                                             /* Indépendance du processus */
-    }
-                                                                  /* Verification de l'unicité du process */
+       setsid();                                                                                 /* Indépendance du processus */
+     }
+                                                                                      /* Verification de l'unicité du process */
     fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT | O_SYNC, 0640 );
     if (fd_lock<0)
      { printf( "Lock file creation failed: %s/%s\n", Config.home, VERROU_SERVEUR );
        exit(EXIT_ERREUR);
      }
-    if (flock( fd_lock, LOCK_EX | LOCK_NB )<0)                     /* Creation d'un verrou sur le fichier */
+    if (flock( fd_lock, LOCK_EX | LOCK_NB )<0)                                         /* Creation d'un verrou sur le fichier */
      { printf( "Cannot lock %s/%s. Probably another daemon is running : %s\n",
                 Config.home, VERROU_SERVEUR, strerror(errno) );
        close(fd_lock);
        exit(EXIT_ERREUR);
      }
-    fcntl(fd_lock, F_SETFD, FD_CLOEXEC );                                       /* Set close on exec flag */
-    g_snprintf( strpid, sizeof(strpid), "%d\n", getpid() );            /* Enregistrement du pid au cas ou */
+    fcntl(fd_lock, F_SETFD, FD_CLOEXEC );                                                           /* Set close on exec flag */
+    g_snprintf( strpid, sizeof(strpid), "%d\n", getpid() );                                /* Enregistrement du pid au cas ou */
     if (write( fd_lock, strpid, strlen(strpid) )<0)
      { printf( "Cannot write PID on %s/%s (%s)\n", Config.home, VERROU_SERVEUR, strerror(errno) ); }
 
-    Config.log = Info_init( "Watchdogd", Config.log_level );                       /* Init msgs d'erreurs */
+    Config.log = Info_init( "Watchdogd", Config.log_level );                                           /* Init msgs d'erreurs */
 
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Start v%s", VERSION );
     Print_config();
 
-    setlocale( LC_ALL, "C" );                        /* Pour le formattage correct des , . dans les float */
-    gcry_check_version(NULL);                                    /* Initialisation de la librairie GCRYPT */
-    curl_global_init (CURL_GLOBAL_ALL);                             /* Initialisation de la libraire CURL */
-    Partage = NULL;                                                                     /* Initialisation */
-    Partage = Shm_init();                                        /* Initialisation de la mémoire partagée */
+    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
+    gcry_check_version(NULL);                                                        /* Initialisation de la librairie GCRYPT */
+    curl_global_init (CURL_GLOBAL_ALL);                                                 /* Initialisation de la libraire CURL */
+    Partage = NULL;                                                                                         /* Initialisation */
+    Partage = Shm_init();                                                            /* Initialisation de la mémoire partagée */
     if (!Partage)
      { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "Shared memory failed to allocate" ); }
     else
-     { pthread_mutexattr_t attr;                                   /* Initialisation des mutex de synchro */
-       memset( Partage, 0, sizeof(struct PARTAGE) );                             /* RAZ des bits internes */
-       import = Importer();                         /* Tente d'importer les données juste après un reload */
+     { pthread_mutexattr_t attr;                                                       /* Initialisation des mutex de synchro */
+       memset( Partage, 0, sizeof(struct PARTAGE) );                                                 /* RAZ des bits internes */
+       import = Importer();                                             /* Tente d'importer les données juste après un reload */
        time ( &Partage->start_time );
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
@@ -540,7 +551,13 @@
        Update_database_schema();                                /* Update du schéma de Database si besoin */
        Charger_config_bit_interne ();     /* Chargement des configurations des bits internes depuis la DB */
 
-       if (Config.single == FALSE)                                             /* Si demarrage des thread */
+       Partage->zmq_ctx = zmq_ctx_new ();                                                   /* Initialisation du context d'echange ZMQ */
+       if (!Partage->zmq_ctx)
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Context Failed (%s)", __func__, zmq_strerror(errno) ); }
+       else
+        { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Context OK", __func__ ); }
+
+       if (Config.single == FALSE)                                                                 /* Si demarrage des thread */
         { if (!Config.instance_is_master)
            { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Arch Thread is administratively DOWN (instance is not Master)" ); }
           else if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
@@ -554,7 +571,7 @@
           Charger_librairies();                           /* Chargement de toutes les librairies Watchdog */
         }
        else
-        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "NOT starting thread (single mode=true)" ); }
+        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "NOT starting threads (single mode=true)" ); }
 
        if (!Demarrer_admin())                                                          /* Démarrage ADMIN */
         { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Pb Admin -> Arret" ); }
@@ -564,17 +581,17 @@
                    "Demarrage boucle sans fin pthread_create failed %s", strerror(errno) );
         }
 
-                                     /********** Mise en place de la gestion des signaux ******************/
-       sig.sa_handler = Traitement_signaux;                     /* Gestionnaire de traitement des signaux */
-       sig.sa_flags = SA_RESTART;     /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
-       sigaction( SIGALRM, &sig, NULL );                                         /* Reinitialisation soft */
-       sigaction( SIGUSR1, &sig, NULL );                               /* Reinitialisation DLS uniquement */
-       sigaction( SIGUSR2, &sig, NULL );                               /* Reinitialisation DLS uniquement */
-       sigaction( SIGINT,  &sig, NULL );                                         /* Reinitialisation soft */
+                                                         /********** Mise en place de la gestion des signaux ******************/
+       sig.sa_handler = Traitement_signaux;                                         /* Gestionnaire de traitement des signaux */
+       sig.sa_flags = SA_RESTART;                         /* Voir Linux mag de novembre 2002 pour le flag anti cut read/write */
+       sigaction( SIGALRM, &sig, NULL );                                                             /* Reinitialisation soft */
+       sigaction( SIGUSR1, &sig, NULL );                                                   /* Reinitialisation DLS uniquement */
+       sigaction( SIGUSR2, &sig, NULL );                                                   /* Reinitialisation DLS uniquement */
+       sigaction( SIGINT,  &sig, NULL );                                                             /* Reinitialisation soft */
        sigaction( SIGTERM, &sig, NULL );
        sigaction( SIGABRT, &sig, NULL );
-       sigaction( SIGPIPE, &sig, NULL );                           /* Pour prevenir un segfault du client */
-       sigfillset (&sig.sa_mask);                             /* Par défaut tous les signaux sont bloqués */
+       sigaction( SIGPIPE, &sig, NULL );                                               /* Pour prevenir un segfault du client */
+       sigfillset (&sig.sa_mask);                                                 /* Par défaut tous les signaux sont bloqués */
        sigdelset ( &sig.sa_mask, SIGALRM );
        sigdelset ( &sig.sa_mask, SIGUSR1 );
        sigdelset ( &sig.sa_mask, SIGUSR2 );
@@ -584,13 +601,15 @@
        sigdelset ( &sig.sa_mask, SIGPIPE );
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
-       timer.it_value.tv_sec = timer.it_interval.tv_sec = 0;                /* Tous les 100 millisecondes */
-       timer.it_value.tv_usec = timer.it_interval.tv_usec = 100000;             /* = 10 fois par secondes */
-       setitimer( ITIMER_REAL, &timer, NULL );                                         /* Active le timer */
+       timer.it_value.tv_sec = timer.it_interval.tv_sec = 0;                                    /* Tous les 100 millisecondes */
+       timer.it_value.tv_usec = timer.it_interval.tv_usec = 100000;                                 /* = 10 fois par secondes */
+       setitimer( ITIMER_REAL, &timer, NULL );                                                             /* Active le timer */
 
-       pthread_join( TID, NULL );                                   /* Attente fin de la boucle pere MSRV */
-       Decharger_librairies();                            /* Déchargement de toutes les librairies filles */
-       Stopper_fils(TRUE);                                             /* Arret de tous les fils watchdog */
+       pthread_join( TID, NULL );                                                       /* Attente fin de la boucle pere MSRV */
+       Decharger_librairies();                                                /* Déchargement de toutes les librairies filles */
+       Stopper_fils(TRUE);                                                                 /* Arret de tous les fils watchdog */
+       zmq_ctx_term( Partage->zmq_ctx );
+       zmq_ctx_destroy( Partage->zmq_ctx );
      }
 
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
@@ -601,19 +620,19 @@
     pthread_mutex_destroy( &Partage->com_admin.synchro );
     pthread_mutex_destroy( &Partage->com_db.synchro );
 
-    close(fd_lock);                       /* Fermeture du FileDescriptor correspondant au fichier de lock */
+    close(fd_lock);                                           /* Fermeture du FileDescriptor correspondant au fichier de lock */
 
-    if (Partage->com_msrv.Thread_clear_reboot == FALSE) Exporter();       /* Tente d'exporter les données */
+    if (Partage->com_msrv.Thread_clear_reboot == FALSE) Exporter();                           /* Tente d'exporter les données */
     else { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "CLEAR-REBOOT : Erasing export file %s", FICHIER_EXPORT );
            unlink ( FICHIER_EXPORT );
          }
 
-    if (Partage->com_msrv.Thread_reboot == TRUE)                     /* Devons-nous rebooter le process ? */
+    if (Partage->com_msrv.Thread_reboot == TRUE)                                         /* Devons-nous rebooter le process ? */
      { gint pid;
        Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Rebooting in progress cmd = %s", argv[0] );
        pid = fork();
        if (pid<0) { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "Fork Failed on reboot" );
-                    printf("Fork 1 failed\n"); exit(EXIT_ERREUR); }                       /* On daemonize */
+                    printf("Fork 1 failed\n"); exit(EXIT_ERREUR); }                                           /* On daemonize */
        if (pid==0)
         { sleep(5);
           execvp ( argv[0], argv );
@@ -622,11 +641,11 @@
         }
      }
 
-    sigfillset (&sig.sa_mask);                                /* Par défaut tous les signaux sont bloqués */
+    sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
     pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
     curl_global_cleanup();
-    Shm_stop( Partage );                                                   /* Libération mémoire partagée */
+    Shm_stop( Partage );                                                                       /* Libération mémoire partagée */
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Stopped" );
     return(EXIT_OK);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/
