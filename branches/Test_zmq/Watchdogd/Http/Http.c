@@ -351,6 +351,7 @@
        { NULL, NULL, 0, 0 } /* terminator */
      };
     struct stat sbuf;
+    void *zmq_socket_msg;
 
     prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */
@@ -412,7 +413,6 @@
      }
 
 	   Cfg_http.ws_context = lws_create_context(&Cfg_http.ws_info);
- 
     if (!Cfg_http.ws_context)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                 "%s: WebSocket Create Context creation error (%s). Shutting Down %p", __func__,
@@ -423,14 +423,22 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
              "%s: WebSocket Create OK. Listening on port %d with ssl=%d", __func__, Cfg_http.tcp_port, Cfg_http.ssl_enable );
 
-#ifdef bouh
-    Abonner_distribution_message ( Http_Gerer_message );                            /* Abonnement à la diffusion des messages */
-    Abonner_distribution_sortie  ( Http_Gerer_sortie );                              /* Abonnement à la diffusion des sorties */
+    if ( (zmq_socket_msg = zmq_socket ( Partage->zmq_ctx, ZMQ_SUB )) == NULL)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Socket MSG Failed (%s)", __func__, zmq_strerror(errno) ); }
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Socket MSG OK", __func__ );
 
-#endif
+    if ( zmq_connect (zmq_socket_msg, "inproc://live-msgs") == -1 ) 
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ connect live-msgs Failed (%s)", __func__, zmq_strerror(errno) ); }
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect live-msgs OK", __func__ );
+
+    if ( zmq_setsockopt ( zmq_socket_msg, ZMQ_SUBSCRIBE, "", 0 ) == -1 )                         /* Subscribe to all messages */
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ subscription failed (%s)", __func__, zmq_strerror(errno) ); }
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect subscription OK", __func__ );
+
     Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
     while(Cfg_http.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */
      { static gint last_top = 0;
+       struct CMD_TYPE_HISTO histo;
        usleep(10000);
        sched_yield();
 
@@ -442,7 +450,9 @@
           Cfg_http.lib->Thread_sigusr1 = FALSE;
         }
 
-   	   lws_service( Cfg_http.ws_context, 1000);                                 /* On lance l'écoute des connexions websocket */
+   	   lws_service( Cfg_http.ws_context, 100);                                  /* On lance l'écoute des connexions websocket */
+       if ( zmq_recv ( zmq_socket_msg, &histo, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) == sizeof(struct CMD_TYPE_HISTO) )
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Recu 1 msg du master !", __func__ ); }
 
        if ( last_top + 600 <= Partage->top )                                                            /* Toutes les minutes */
         { Http_Check_sessions ();
@@ -454,6 +464,7 @@
     
     lws_context_destroy(Cfg_http.ws_context);                                                   /* Arret du serveur WebSocket */
     Cfg_http.ws_context = NULL;
+    zmq_close ( zmq_socket_msg );
 
 end:
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,

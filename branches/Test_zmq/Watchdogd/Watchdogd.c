@@ -356,7 +356,7 @@
      }
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/ 
-    Sauver_compteur();                                                 /* Dernière sauvegarde avant arret */
+    Sauver_compteur();                                                                     /* Dernière sauvegarde avant arret */
     zmq_close ( Partage->com_msrv.zmq_socket_msg );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
     pthread_exit( NULL );

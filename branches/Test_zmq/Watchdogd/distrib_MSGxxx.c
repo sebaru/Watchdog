@@ -147,6 +147,8 @@
     Envoyer_histo_aux_abonnes ( &histo );
     if (zmq_send( Partage->com_msrv.zmq_socket_msg, &histo, sizeof(struct CMD_TYPE_HISTO), 0 ) == -1)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ live-msgs socket failed (%s)", __func__, zmq_strerror(errno) ); }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Send to ZMQ live-msgs OK", __func__ ); }
 /************************************************** Gestion des repeat ********************************************************/
     if (histo.msg.time_repeat) 
      { struct CMD_TYPE_HISTO *dup_histo;
