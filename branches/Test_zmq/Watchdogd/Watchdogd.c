@@ -298,7 +298,7 @@
 /***************************************** Socket de subscription au master ***************************************************/
     if (Config.instance_is_master == FALSE)                                                  /* Connexion au master si besoin */
      { zmq_socket_master = New_zmq_socket ( ZMQ_SUB, "listen-to-master" );
-       Bind_zmq_socket ( zmq_socket_master, "tcp", Config.master_host, 5555 );
+       Connect_zmq_socket ( zmq_socket_master, "tcp", Config.master_host, 5555 );
        Subscribe_zmq_socket ( zmq_socket_master, "" );                                           /* Subscribe to all messages */
      }
 

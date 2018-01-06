@@ -48,7 +48,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                  "%s: New ZMQ Socket '%s' Failed (%s)", __func__, name, zmq_strerror(errno) );
      }
-    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: New ZMQ Socket '%s' MSG OK", __func__, name );
+    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: New ZMQ Socket '%s' OK", __func__, name );
     return(zmq);
   }
 /******************************************************************************************************************************/
