@@ -203,7 +203,8 @@
 /* Main: Fonction principale du Thread Audio                                                                                  */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct CMD_TYPE_HISTO *histo;
+  { struct CMD_TYPE_HISTO *histo, histo_buf;
+    void *zmq_socket_msg;
     static gboolean audio_stop = TRUE;
 
     prctl(PR_SET_NAME, "W-Audio", 0, 0, 0 );
@@ -226,36 +227,24 @@
        goto end;
      }
 
-    Abonner_distribution_histo ( Audio_Gerer_histo );                              /* Abonnement de la diffusion des messages */
     while(Cfg_audio.lib->Thread_run == TRUE)                                                 /* On tourne tant que necessaire */
      {
+       sched_yield();
        if (Cfg_audio.lib->Thread_sigusr1)                                                             /* On a recu sigusr1 ?? */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "Run_audio: SIGUSR1" );
-          pthread_mutex_lock( &Cfg_audio.lib->synchro );                                                     /* lockage futex */
-          Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,
-                    "Run_audio: Reste %03d a traiter",
-                    g_slist_length(Cfg_audio.Liste_histos) );
-          pthread_mutex_unlock( &Cfg_audio.lib->synchro );
           Cfg_audio.lib->Thread_sigusr1 = FALSE;
         }
 
-       if (!Cfg_audio.Liste_histos)                                                           /* Si pas de message, on tourne */
-        { if (Cfg_audio.last_audio + 100 < Partage->top)                             /* Au bout de 10 secondes sans diffusion */
-           { if (audio_stop == TRUE)                             /* Avons-nous deja envoyé une commande de STOP AUDIO a DLS ? */
-              { audio_stop = FALSE;                                      /* Positionné quand il n'y a plus de diffusion audio */
-                if (Config.instance_is_master) Envoyer_commande_dls( NUM_BIT_M_AUDIO_END );
-              }
-           } else audio_stop = TRUE;
-          sched_yield();
-          sleep(1);
-          continue;
-        }
+       if (Cfg_audio.last_audio + 100 < Partage->top)                             /* Au bout de 10 secondes sans diffusion */
+        { if (audio_stop == TRUE)                             /* Avons-nous deja envoyé une commande de STOP AUDIO a DLS ? */
+           { audio_stop = FALSE;                                      /* Positionné quand il n'y a plus de diffusion audio */
+             if (Config.instance_is_master) Envoyer_commande_dls( NUM_BIT_M_AUDIO_END );
+           }
+        } else audio_stop = TRUE;
 
-       pthread_mutex_lock( &Cfg_audio.lib->synchro );                                                        /* lockage futex */
-       histo = Cfg_audio.Liste_histos->data;                                                         /* Recuperation du audio */
-       Cfg_audio.Liste_histos = g_slist_remove ( Cfg_audio.Liste_histos, histo );
-       pthread_mutex_unlock( &Cfg_audio.lib->synchro );
-
+       if ( zmq_recv ( zmq_socket_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) != sizeof(struct CMD_TYPE_HISTO) )
+        { sleep(1); continue; }
+       histo = &histo_buf;
        if ( histo->alive == 1 &&                                                                    /* Si le message apparait */
             (M(NUM_BIT_M_AUDIO_INHIB) == 0 || histo->msg.type == MSG_ALERTE
                                            || histo->msg.type == MSG_DANGER 
@@ -281,9 +270,7 @@
               { Jouer_google_speech( histo->msg.libelle ); }
            }
         }
-       g_free(histo);
      }
-    Desabonner_distribution_histo ( Audio_Gerer_histo );                        /* Desabonnement de la diffusion des messages */
 
 end:
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );

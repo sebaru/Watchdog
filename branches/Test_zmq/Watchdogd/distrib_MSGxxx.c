@@ -34,49 +34,6 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Abonner_distribution_message: Abonnement d'un thread aux diffusions d'un message                                           */
-/* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                                             */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- void Abonner_distribution_histo ( void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo) )
-  { pthread_mutex_lock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
-    Partage->com_msrv.Liste_abonne_msg = g_slist_prepend( Partage->com_msrv.Liste_abonne_msg, Gerer_histo );
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
-  }
-/******************************************************************************************************************************/
-/* Desabonner_distribution_message: Desabonnement d'un thread aux diffusions d'un message                                     */
-/* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                                             */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- void Desabonner_distribution_histo ( void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo) )
-  { pthread_mutex_lock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
-    Partage->com_msrv.Liste_abonne_msg = g_slist_remove( Partage->com_msrv.Liste_abonne_msg, Gerer_histo );
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
-  }
-/******************************************************************************************************************************/
-/* Envoyer_message_aux_abonnes: Envoi le message en parametre aux abonnes                                                     */
-/* Entrée : le message a envoyer                                                                                              */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Envoyer_histo_aux_abonnes ( struct CMD_TYPE_HISTO *histo )
-  { GSList *liste;
-
-    pthread_mutex_lock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
-    liste = Partage->com_msrv.Liste_abonne_msg;
-    while (liste)                                                                                  /* Pour chacun des abonnes */
-     { void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo);
-       struct CMD_TYPE_HISTO *dup_histo;
-       dup_histo = (struct CMD_TYPE_HISTO *)g_try_malloc0(sizeof(struct CMD_TYPE_HISTO));
-       if (dup_histo)
-        { Gerer_histo = liste->data;
-          memcpy ( dup_histo, histo, sizeof(struct CMD_TYPE_HISTO) );
-          Gerer_histo (dup_histo);
-        }
-       liste = liste->next;
-     }
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
-  }
-/******************************************************************************************************************************/
 /* Gerer_message_repeat: Gestion de la répétition des messages                                                                */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
@@ -144,7 +101,6 @@
     Ajouter_histo_msgsDB( &histo );                                                                    /* Si ajout dans DB OK */
 
 /******************************************************* Envoi du message aux librairies abonnées *****************************/
-    Envoyer_histo_aux_abonnes ( &histo );
     if (zmq_send( Partage->com_msrv.zmq_socket_msg, &histo, sizeof(struct CMD_TYPE_HISTO), 0 ) == -1)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ live-msgs socket failed (%s)", __func__, zmq_strerror(errno) ); }
     else
@@ -203,7 +159,10 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
     Modifier_histo_msgsDB ( &histo );
-    Envoyer_histo_aux_abonnes ( &histo );
+    if (zmq_send( Partage->com_msrv.zmq_socket_msg, &histo, sizeof(struct CMD_TYPE_HISTO), 0 ) == -1)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ live-msgs socket failed (%s)", __func__, zmq_strerror(errno) ); }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Send to ZMQ live-msgs OK", __func__ ); }
   }
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */

@@ -135,9 +135,6 @@
                                     { g_slist_foreach( client->Liste_bit_cadrans, (GFunc) g_free, NULL );
                                       g_slist_free(client->Liste_bit_cadrans);
                                     }
-       if (client->Liste_histo)     { g_slist_foreach( client->Liste_histo, (GFunc) g_free, NULL );
-                                      g_slist_free ( client->Liste_histo );
-                                    }
        g_free(client);
      }
   }
@@ -273,73 +270,6 @@
      }
     pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
     g_free(event);                                                          /* On a plus besoin de la structure, on la libere */
-  }
-/******************************************************************************************************************************/
-/* Ssrv_Gerer_message: Ajoute une demande d'envoi des messages aux thread                                                     */
-/* Entrées: le numéro de la sortie                                                                                            */
-/******************************************************************************************************************************/
- static void Ssrv_Gerer_histo( struct CMD_TYPE_HISTO *histo )
-  { gint taille;
-
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );                                    /* Ajout dans la liste de tell a traiter */
-    taille = g_slist_length( Cfg_ssrv.Liste_histo );
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-
-    if (taille > MAX_ENREG_QUEUE)
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
-                "Ssrv_Gerer_histo: DROP (taille>MAX_ENREG_QUEUE(%d)) msg=%d", MAX_ENREG_QUEUE, histo->msg.num );
-       g_free(histo);
-       return;
-     }
-
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "Ssrv_Gerer_histo: Message a traiter : msg=%d", histo->msg.num );
-       
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );                                    /* Ajout dans la liste de tell a traiter */
-    Cfg_ssrv.Liste_histo = g_slist_append( Cfg_ssrv.Liste_histo, histo );                   /* Append pour l'ordre d'arrive ! */
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-  }
-/******************************************************************************************************************************/
-/* Envoyer_histo_aux_thread: duplique l'histo recu et en envoi la copie a chacun des threads                                  */
-/* Entrée : néant                                                                                                             */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Envoyer_histo_aux_threads ( void )
-  { struct CMD_TYPE_HISTO *histo;
-    GSList *liste;
-    
-    if ( Cfg_ssrv.Liste_histo == NULL ) return;
-
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-    histo = (struct CMD_TYPE_HISTO *) Cfg_ssrv.Liste_histo->data;
-    Cfg_ssrv.Liste_histo = g_slist_remove ( Cfg_ssrv.Liste_histo, histo );
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-       
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-    liste = Cfg_ssrv.Clients;
-    while (liste && Cfg_ssrv.lib->Thread_run)
-     { struct CLIENT *client;
-       struct CMD_TYPE_HISTO *dup_histo;
-       client = (struct CLIENT *)liste->data;
-
-       if (client->mode == VALIDE)
-        { dup_histo = (struct CMD_TYPE_HISTO *)g_try_malloc0( sizeof ( struct CMD_TYPE_HISTO ) );
-          if (!dup_histo)
-           { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                      "Envoyer_histo_aux_threads: Memory error" );
-             break;
-           }
-          else memcpy ( dup_histo, histo, sizeof(struct CMD_TYPE_HISTO) );
-
-          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                   "Envoyer_histo_aux_threads: Envoi du MSG%d=%d au thread %06d (client %s)",
-                   dup_histo->msg.num, dup_histo->alive, client->ssrv_id, client->machine );
-          client->Liste_histo = g_slist_append ( client->Liste_histo, dup_histo );
-        }
-       liste = g_slist_next( liste );
-     }
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-    g_free(histo);                                                          /* On a plus besoin de la structure, on la libere */
   }
 /******************************************************************************************************************************/
 /* Ssrv_Gerer_motif: Ajoute une demande d'envoi des motif Ixxx aux thread                                                     */
@@ -514,7 +444,6 @@
      }
 
     Abonner_distribution_motif ( Ssrv_Gerer_motif );                                    /* Abonnement a la liste de diffusion */
-    Abonner_distribution_histo ( Ssrv_Gerer_histo );                                    /* Abonnement a la liste de diffusion */
     Abonner_distribution_events ( Ssrv_Gerer_events, NOM_THREAD );                      /* Abonnement a la liste de diffusion */
 
     while(lib->Thread_run == TRUE)                                                           /* On tourne tant que necessaire */
@@ -535,7 +464,6 @@
           pthread_detach( tid );
         }
 
-       Envoyer_histo_aux_threads();                                                /* Envoi les histos aux thread s'il y en a */
        Envoyer_motif_aux_threads();                                                /* Envoi les motifs aux thread s'il y en a */
        Envoyer_events_aux_threads();                                               /* Envoi les events aux thread s'il y en a */
       }                                                                                        /* Fin du while partage->arret */
@@ -546,11 +474,6 @@
        g_slist_free ( Cfg_ssrv.Liste_events );
      }
 
-    Desabonner_distribution_histo ( Ssrv_Gerer_histo );                                 /* Abonnement a la liste de diffusion */
-    if (Cfg_ssrv.Liste_histo)                                                                /* Si la liste est encore pleine */
-     { g_slist_foreach( Cfg_ssrv.Liste_histo, (GFunc) g_free, NULL );
-       g_slist_free ( Cfg_ssrv.Liste_histo );
-     }
     Desabonner_distribution_motif ( Ssrv_Gerer_motif );                                 /* Abonnement a la liste de diffusion */
 
 end:

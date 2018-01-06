@@ -150,6 +150,11 @@
  extern void *w_malloc0( gint size, gchar *justification );
  extern void w_free( void *ptr, gchar *justification );
 
+ extern void *New_zmq_socket ( gint pattern );                                                                  /* Dans zmq.c */
+ extern gboolean Bind_zmq_socket ( void *socket, gchar *type, gchar *nom, gint port );
+ extern gboolean Connect_zmq_socket ( void *socket, gchar *type, gchar *nom, gint port );
+
+
  extern void Stopper_fils ( gint flag );                                                                    /* Dans process.c */
  extern gboolean Demarrer_dls ( void );
  extern gboolean Demarrer_arch ( void );
@@ -171,8 +176,6 @@
 
  extern void Gerer_arrive_MSGxxx_dls ( void );                                                       /* Dans distrib_MSGxxx.c */
  extern void Gerer_histo_repeat ( void );
- extern void Abonner_distribution_histo ( void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo) );
- extern void Desabonner_distribution_histo ( void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo) );
 
  extern void Gerer_arrive_Ixxx_dls ( void );                                                           /* Dans distrib_Ixxx.c */
  extern void Abonner_distribution_motif ( void (*Gerer_motif) (gint num) );

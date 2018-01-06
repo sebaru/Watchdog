@@ -576,6 +576,7 @@
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct CMD_TYPE_HISTO *histo, histo_buf;
+    void *zmq_socket_admin;
     void *zmq_socket_msg;
     
     prctl(PR_SET_NAME, "W-SMS", 0, 0, 0 );
@@ -599,15 +600,15 @@
 
     if ( (zmq_socket_msg = zmq_socket ( Partage->zmq_ctx, ZMQ_SUB )) == NULL)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Socket MSG Failed (%s)", __func__, zmq_strerror(errno) ); }
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Socket MSG OK", __func__ );
+    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Socket MSG OK", __func__ );
 
     if ( zmq_connect (zmq_socket_msg, "inproc://live-msgs") == -1 ) 
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ connect live-msgs Failed (%s)", __func__, zmq_strerror(errno) ); }
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect live-msgs OK", __func__ );
+    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect live-msgs OK", __func__ );
 
     if ( zmq_setsockopt ( zmq_socket_msg, ZMQ_SUBSCRIBE, "", 0 ) == -1 )                         /* Subscribe to all messages */
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ subscription failed (%s)", __func__, zmq_strerror(errno) ); }
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect subscription OK", __func__ );
+    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect subscription OK", __func__ );
 
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
     while(Cfg_sms.lib->Thread_run == TRUE)                                                   /* On tourne tant que necessaire */
