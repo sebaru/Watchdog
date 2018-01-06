@@ -111,7 +111,6 @@
 
  struct PARTAGE                                                                            /* Structure des données partagées */
   { gint  taille_partage;
-    gint  shmid;
     gchar version[16];
     time_t start_time;                                                                         /* Date de start de l'instance */
     void *zmq_ctx;                                                    /* Contexte d'échange inter-thread et message queue ZMQ */

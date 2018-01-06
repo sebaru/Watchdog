@@ -281,20 +281,55 @@
 /******************************************************************************************************************************/
  static void *Boucle_pere ( void )
   { gint cpt_5_minutes, cpt_1_minute;
+    void *zmq_socket_master;
+    struct CMD_TYPE_HISTO histo;
+    gchar master[80];
 
     prctl(PR_SET_NAME, "W-MSRV", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
+    if (Config.instance_is_master == TRUE)
+     { g_snprintf(master, sizeof(master), "tcp://*:5555" ); }
+    else
+     { g_snprintf(master, sizeof(master), "tcp://%s:5555", Config.master_host ); }
+
+/**************************************** Socket interne/externe de publication ***********************************************/
     if ( (Partage->com_msrv.zmq_socket_msg = zmq_socket ( Partage->zmq_ctx, ZMQ_PUB )) == NULL)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Socket MSG Failed (%s)", __func__, zmq_strerror(errno) ); }
-    else
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Socket MSG OK", __func__ ); }
+    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Socket MSG OK", __func__ );
 
     if ( zmq_bind (Partage->com_msrv.zmq_socket_msg, "inproc://live-msgs") == -1 ) 
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Bind live-msgs Failed (%s)", __func__, zmq_strerror(errno) ); }
-    else
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Bind live-msgs OK", __func__ ); }
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: ZMQ inproc Bind live-msgs Failed (%s)", __func__, zmq_strerror(errno) ); }
+    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: ZMQ inproc Bind live-msgs OK", __func__ );
+
+    if (Config.instance_is_master == TRUE)
+     { if ( zmq_bind (Partage->com_msrv.zmq_socket_msg, master) == -1 ) 
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: ZMQ tcp Bind %s Failed (%s)",
+                    __func__, master, zmq_strerror(errno) ); }
+       else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: ZMQ tcp Bind live-msgs OK", __func__ );
+     }
+
+/***************************************** Socket de subscription au master ***************************************************/
+    if (Config.instance_is_master == FALSE)                                                  /* Connexion au master si besoin */
+     { if ( (zmq_socket_master = zmq_socket ( Partage->zmq_ctx, ZMQ_SUB )) == NULL)
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Socket MASTER Failed (%s)",
+                    __func__, zmq_strerror(errno) );
+        }
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Socket MASTER OK", __func__ );
+
+       if ( zmq_bind (zmq_socket_master, master) == -1 ) 
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Bind MASTER Failed (%s)",
+                    __func__, zmq_strerror(errno) );
+        }
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Bind MASTER OK", __func__ );
+
+       if ( zmq_setsockopt (zmq_socket_master, ZMQ_SUBSCRIBE, "", 0 ) == -1 )                    /* Subscribe to all messages */
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ subscription failed (%s)",
+                    __func__, zmq_strerror(errno) );
+        }
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect subscription OK", __func__ );
+     }
 
     cpt_5_minutes = Partage->top + 3000;
     cpt_1_minute  = Partage->top + 600;
@@ -306,6 +341,13 @@
        Gerer_arrive_Ixxx_dls();                                                 /* Distribution des changements d'etats motif */
        Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
        Gerer_arrive_Events();                                       /* Gestion des evenements entre Thread, DLS, et satellite */
+
+       if ( zmq_recv ( zmq_socket_master, &histo, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) == sizeof(struct CMD_TYPE_HISTO) )
+        { if (zmq_send( Partage->com_msrv.zmq_socket_msg, &histo, sizeof(struct CMD_TYPE_HISTO), 0 ) == -1)
+           { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ live-msgs socket failed (%s)",
+                       __func__, zmq_strerror(errno) );
+           }
+        }
 
        if (Partage->com_msrv.Thread_reload)                                                               /* On a recu RELOAD */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: RELOAD", __func__ );

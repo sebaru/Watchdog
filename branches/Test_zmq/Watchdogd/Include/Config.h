@@ -49,12 +49,13 @@
     gchar librairie_dir [ TAILLE_HOME+1 ];               /* Repertoire de stockage des libraires watchdog */
     gchar instance_id [ TAILLE_HOME+1 ];                     /* Global ID, unique, de l'instance Watchdog */
     gboolean instance_is_master;                           /* TRUE si l'instance est l'instance maitresse */
+    gchar master_host[ TAILLE_DB_HOST+1 ];
     guint log_level;                                                      /* Niveau de debug du programme */
     gboolean log_msrv;                                                            /* TRUE si log_override */
     gboolean log_dls;                                                             /* TRUE si log_override */
     gboolean log_arch;                                                            /* TRUE si log_override */
     gboolean log_db;                                                          /* TRUE si log des acces DB */
-    guint max_login_failed;                                            /* Nombre maximum d'echec de login */
+    guint max_login_failed;   /* a virer */                            /* Nombre maximum d'echec de login */
     struct LOG *log;                                                         /* Pour l'affichage des logs */
     gint single;                                                                /* Demarrage des thread ? */
     gint compil;                                            /* Compilation des plugins DLS au demarrage ? */
