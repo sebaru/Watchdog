@@ -281,7 +281,7 @@
 /******************************************************************************************************************************/
  static void *Boucle_pere ( void )
   { gint cpt_5_minutes, cpt_1_minute;
-    void *zmq_socket_master;
+    struct ZMQUEUE *zmq_socket_master;
     struct CMD_TYPE_HISTO histo;
 
     prctl(PR_SET_NAME, "W-MSRV", 0, 0, 0 );
@@ -313,8 +313,8 @@
        Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
        Gerer_arrive_Events();                                       /* Gestion des evenements entre Thread, DLS, et satellite */
 
-       if ( zmq_recv ( zmq_socket_master, &histo, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) == sizeof(struct CMD_TYPE_HISTO) )
-        { if (zmq_send( Partage->com_msrv.zmq_socket_msg, &histo, sizeof(struct CMD_TYPE_HISTO), 0 ) == -1)
+       if ( zmq_recv ( zmq_socket_master->socket, &histo, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) == sizeof(struct CMD_TYPE_HISTO) )
+        { if (Send_zmq_socket( Partage->com_msrv.zmq_socket_msg, &histo, sizeof(struct CMD_TYPE_HISTO)) == -1)
            { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ live-msgs socket failed (%s)",
                        __func__, zmq_strerror(errno) );
            }
