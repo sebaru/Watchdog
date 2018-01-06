@@ -101,7 +101,7 @@
     GSList *liste_i;                                                             /* liste de I a traiter dans la distribution */
     GSList *liste_a;                                                             /* liste de A a traiter dans la distribution */
     GSList *liste_Event;                                                     /* liste de Event a traiter dans la distribution */
-    void *zmq_socket_msg;                                                              /* Message Queue des messages Watchdog */
+    struct ZMQUEUE *zmq_socket_msg;                                                    /* Message Queue des messages Watchdog */
 
     pthread_mutex_t synchro_Liste_abonne_msg;                                             /* Bit de synchronisation processus */
     GSList *Liste_abonne_msg;                                                          /* liste de struct MSGDB msg a envoyer */
@@ -140,6 +140,12 @@
     struct REGISTRE registre[NBR_REGISTRE];
   };
 
+ struct ZMQUEUE
+  { void *socket;
+    gint pattern;
+    gchar name[32];
+    gchar endpoint[32];
+  };
 /************************************************ Définitions des prototypes **************************************************/
  extern void Charger_config_bit_interne( void );                                                          /* Dans Watchdogd.c */
  extern gint Activer_ecoute ( void );                                                                        /* Dans ecoute.c */
@@ -150,10 +156,12 @@
  extern void *w_malloc0( gint size, gchar *justification );
  extern void w_free( void *ptr, gchar *justification );
 
- extern void *New_zmq_socket ( gint pattern );                                                                  /* Dans zmq.c */
- extern gboolean Bind_zmq_socket ( void *socket, gchar *type, gchar *nom, gint port );
- extern gboolean Connect_zmq_socket ( void *socket, gchar *type, gchar *nom, gint port );
-
+ extern struct ZMQUEUE *New_zmq_socket ( gint pattern, gchar *name );                                           /* Dans zmq.c */
+ extern gboolean Bind_zmq_socket ( struct ZMQUEUE *zmq, gchar *type, gchar *nom, gint port );
+ extern gboolean Connect_zmq_socket ( struct ZMQUEUE *zmq, gchar *type, gchar *nom, gint port );
+ extern gboolean Subscribe_zmq_socket ( struct ZMQUEUE *zmq, gchar *topic );
+ extern void Close_zmq_socket ( struct ZMQUEUE *zmq );
+ extern gboolean Send_zmq_socket ( struct ZMQUEUE *zmq, void *buf, gint taille );
 
  extern void Stopper_fils ( gint flag );                                                                    /* Dans process.c */
  extern gboolean Demarrer_dls ( void );

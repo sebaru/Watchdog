@@ -283,52 +283,23 @@
   { gint cpt_5_minutes, cpt_1_minute;
     void *zmq_socket_master;
     struct CMD_TYPE_HISTO histo;
-    gchar master[80];
 
     prctl(PR_SET_NAME, "W-MSRV", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
-    if (Config.instance_is_master == TRUE)
-     { g_snprintf(master, sizeof(master), "tcp://*:5555" ); }
-    else
-     { g_snprintf(master, sizeof(master), "tcp://%s:5555", Config.master_host ); }
-
 /**************************************** Socket interne/externe de publication ***********************************************/
-    if ( (Partage->com_msrv.zmq_socket_msg = zmq_socket ( Partage->zmq_ctx, ZMQ_PUB )) == NULL)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Socket MSG Failed (%s)", __func__, zmq_strerror(errno) ); }
-    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Socket MSG OK", __func__ );
-
-    if ( zmq_bind (Partage->com_msrv.zmq_socket_msg, "inproc://live-msgs") == -1 ) 
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: ZMQ inproc Bind live-msgs Failed (%s)", __func__, zmq_strerror(errno) ); }
-    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: ZMQ inproc Bind live-msgs OK", __func__ );
+    Partage->com_msrv.zmq_socket_msg = New_zmq_socket ( ZMQ_PUB, "pub-internal-events" );
+    Bind_zmq_socket ( Partage->com_msrv.zmq_socket_msg, "inproc", "live-msgs", 0 );
 
     if (Config.instance_is_master == TRUE)
-     { if ( zmq_bind (Partage->com_msrv.zmq_socket_msg, master) == -1 ) 
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: ZMQ tcp Bind %s Failed (%s)",
-                    __func__, master, zmq_strerror(errno) ); }
-       else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: ZMQ tcp Bind live-msgs OK", __func__ );
-     }
+     { Bind_zmq_socket ( Partage->com_msrv.zmq_socket_msg, "tcp", "*", 5555 ); }
 
 /***************************************** Socket de subscription au master ***************************************************/
     if (Config.instance_is_master == FALSE)                                                  /* Connexion au master si besoin */
-     { if ( (zmq_socket_master = zmq_socket ( Partage->zmq_ctx, ZMQ_SUB )) == NULL)
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Socket MASTER Failed (%s)",
-                    __func__, zmq_strerror(errno) );
-        }
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Socket MASTER OK", __func__ );
-
-       if ( zmq_bind (zmq_socket_master, master) == -1 ) 
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Bind MASTER Failed (%s)",
-                    __func__, zmq_strerror(errno) );
-        }
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Bind MASTER OK", __func__ );
-
-       if ( zmq_setsockopt (zmq_socket_master, ZMQ_SUBSCRIBE, "", 0 ) == -1 )                    /* Subscribe to all messages */
-        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ subscription failed (%s)",
-                    __func__, zmq_strerror(errno) );
-        }
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect subscription OK", __func__ );
+     { zmq_socket_master = New_zmq_socket ( ZMQ_SUB, "listen-to-master" );
+       Bind_zmq_socket ( zmq_socket_master, "tcp", Config.master_host, 5555 );
+       Subscribe_zmq_socket ( zmq_socket_master, "" );                                           /* Subscribe to all messages */
      }
 
     cpt_5_minutes = Partage->top + 3000;
@@ -399,7 +370,7 @@
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/ 
     Sauver_compteur();                                                                     /* Dernière sauvegarde avant arret */
-    zmq_close ( Partage->com_msrv.zmq_socket_msg );
+    Close_zmq_socket ( Partage->com_msrv.zmq_socket_msg );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
     pthread_exit( NULL );
   }

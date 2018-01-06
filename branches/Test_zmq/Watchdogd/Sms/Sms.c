@@ -598,17 +598,9 @@
        goto end;
      }
 
-    if ( (zmq_socket_msg = zmq_socket ( Partage->zmq_ctx, ZMQ_SUB )) == NULL)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Socket MSG Failed (%s)", __func__, zmq_strerror(errno) ); }
-    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Socket MSG OK", __func__ );
-
-    if ( zmq_connect (zmq_socket_msg, "inproc://live-msgs") == -1 ) 
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ connect live-msgs Failed (%s)", __func__, zmq_strerror(errno) ); }
-    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect live-msgs OK", __func__ );
-
-    if ( zmq_setsockopt ( zmq_socket_msg, ZMQ_SUBSCRIBE, "", 0 ) == -1 )                         /* Subscribe to all messages */
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ subscription failed (%s)", __func__, zmq_strerror(errno) ); }
-    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect subscription OK", __func__ );
+    zmq_socket_msg = New_zmq_socket ( ZMQ_SUB, "listen-to-MSRV" );
+    Connect_zmq_socket (zmq_socket_msg, "inproc", "live-msgs", 0 );
+    Subscribe_zmq_socket ( zmq_socket_msg, "" );                                                 /* Subscribe to all messages */
 
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
     while(Cfg_sms.lib->Thread_run == TRUE)                                                   /* On tourne tant que necessaire */
@@ -665,7 +657,7 @@
         }
        g_free( histo );
      }
-    zmq_close ( zmq_socket_msg );
+    Close_zmq_socket ( zmq_socket_msg );
 
 end:
     if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );                                /* Communication NOK */
