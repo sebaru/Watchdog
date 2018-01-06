@@ -576,8 +576,7 @@
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct CMD_TYPE_HISTO *histo, histo_buf;
-    void *zmq_socket_admin;
-    void *zmq_socket_msg;
+    struct ZMQUEUE *zmq_socket_msg;
     
     prctl(PR_SET_NAME, "W-SMS", 0, 0, 0 );
     memset( &Cfg_sms, 0, sizeof(Cfg_sms) );                                         /* Mise a zero de la structure de travail */
@@ -624,7 +623,7 @@
           Sms_Lire_config ();                                               /* Lecture de la configuration logiciel du thread */
         }          
 
-       if ( zmq_recv ( zmq_socket_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) == sizeof(struct CMD_TYPE_HISTO) )
+       if ( zmq_recv ( zmq_socket_msg->socket, &histo_buf, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) == sizeof(struct CMD_TYPE_HISTO) )
         { Sms_Gerer_histo ( &histo_buf ); }
 
 /****************************************************** Lecture de SMS ********************************************************/
