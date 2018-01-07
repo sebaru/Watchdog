@@ -315,8 +315,8 @@
 
        if ( zmq_recv ( zmq_socket_master->socket, &histo, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) == sizeof(struct CMD_TYPE_HISTO) )
         { if (Send_zmq_socket( Partage->com_msrv.zmq_socket_msg, &histo, sizeof(struct CMD_TYPE_HISTO)) == -1)
-           { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ live-msgs socket failed (%s)",
-                       __func__, zmq_strerror(errno) );
+           { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ '%s' socket failed (%s)",
+                       __func__, Partage->com_msrv.zmq_socket_msg->name, zmq_strerror(errno) );
            }
         }
 

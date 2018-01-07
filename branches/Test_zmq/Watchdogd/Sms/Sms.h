@@ -29,6 +29,7 @@
  #define _SMS_H_
 
  #define NOM_THREAD                     "sms"
+ #define NOM_LOCAL_ZMQUEUE              NOM_THREAD "-admin"
 
  #define TOP_MIN_ENVOI_SMS              1200                                      /* 2 minutes sans envoi de SMS au démarrage */
  #define TAILLE_SMSBOX_APIKEY           64                                     /* Nombre de caractere dans la clef API SMSBOX */
@@ -39,7 +40,6 @@
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
     gboolean enable;                                                                    /* Is this tread is enabled at boot ? */
     gboolean reload;                                                      /* Demande rechargement des SMS en bases de données */
-    GSList *Liste_histos;                                                              /* liste de struct MSGDB msg a envoyer */
     gchar smsbox_apikey[TAILLE_SMSBOX_APIKEY+1];                                                           /* Clef API SMSBOX */
     guint bit_comm;                                                           /* Bit B d'état de la communication avec le GSM */
   } Cfg_sms;

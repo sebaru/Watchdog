@@ -139,26 +139,13 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Sms_Gerer_histo ( struct CMD_TYPE_HISTO *histo )
-  { gsize bytes_written;
-    gint taille;
-    
-    pthread_mutex_lock( &Cfg_sms.lib->synchro );                                             /* Ajout dans la liste a traiter */
-    taille = g_slist_length( Cfg_sms.Liste_histos );
-    pthread_mutex_unlock( &Cfg_sms.lib->synchro );
-
-    if (taille > 150)
-     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "%s: DROP message %d (length = %d > 150)", __func__, histo->msg.num, taille);
-       return;
-     }
-    else if (Cfg_sms.lib->Thread_run == FALSE)
-     { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                "%s: Thread is down. Dropping msg %d", __func__, histo->msg.num );
-       return;
-     }
-    pthread_mutex_lock ( &Cfg_sms.lib->synchro );                                                         /* Ajout a la liste */
-    Cfg_sms.Liste_histos = g_slist_append ( Cfg_sms.Liste_histos, g_memdup(histo, sizeof(struct CMD_TYPE_HISTO)) );
-    pthread_mutex_unlock ( &Cfg_sms.lib->synchro );
+  { struct ZMQUEUE *zmq;
+    gchar response[16];
+    zmq = New_zmq_socket ( ZMQ_REQ, "send-to-local" );
+    Connect_zmq_socket ( zmq, "inproc", NOM_LOCAL_ZMQUEUE, 0 );
+    Send_zmq_socket ( zmq, histo, sizeof(struct CMD_TYPE_HISTO ) );
+    zmq_recv ( zmq->socket, &response, sizeof(response), 0 );
+    Close_zmq_socket ( zmq );
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -576,7 +563,8 @@
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct CMD_TYPE_HISTO *histo, histo_buf;
-    struct ZMQUEUE *zmq_socket_msg;
+    struct ZMQUEUE *zmq_internals;
+    struct ZMQUEUE *zmq_admin;
     
     prctl(PR_SET_NAME, "W-SMS", 0, 0, 0 );
     memset( &Cfg_sms, 0, sizeof(Cfg_sms) );                                         /* Mise a zero de la structure de travail */
@@ -597,9 +585,13 @@
        goto end;
      }
 
-    zmq_socket_msg = New_zmq_socket ( ZMQ_SUB, "listen-to-MSRV" );
-    Connect_zmq_socket (zmq_socket_msg, "inproc", "live-msgs", 0 );
-    Subscribe_zmq_socket ( zmq_socket_msg, "" );                                                 /* Subscribe to all messages */
+    zmq_internals = New_zmq_socket ( ZMQ_SUB, "listen-to-MSRV" );
+    Connect_zmq_socket (zmq_internals, "inproc", "live-msgs", 0 );
+    Subscribe_zmq_socket ( zmq_internals, "" );                                                  /* Subscribe to all messages */
+
+    zmq_admin = New_zmq_socket ( ZMQ_REP, "listen-to-local" );
+    Bind_zmq_socket (zmq_admin, "inproc", NOM_LOCAL_ZMQUEUE, 0 );
+    Subscribe_zmq_socket ( zmq_admin, "" );                                                      /* Subscribe to all messages */
 
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
     while(Cfg_sms.lib->Thread_run == TRUE)                                                   /* On tourne tant que necessaire */
@@ -610,10 +602,6 @@
         { int nbr;
 
           Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "%s: SIGUSR1", __func__ );
-          pthread_mutex_lock( &Cfg_sms.lib->synchro );                             /* On recupere le nombre de sms en attente */
-          nbr = g_slist_length(Cfg_sms.Liste_histos);
-          pthread_mutex_unlock( &Cfg_sms.lib->synchro );
-          Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "%s: Nbr SMS a envoyer = %d", __func__, nbr );
           Cfg_sms.lib->Thread_sigusr1 = FALSE;
         }
 
@@ -623,26 +611,20 @@
           Sms_Lire_config ();                                               /* Lecture de la configuration logiciel du thread */
         }          
 
-       if ( zmq_recv ( zmq_socket_msg->socket, &histo_buf, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) == sizeof(struct CMD_TYPE_HISTO) )
-        { Sms_Gerer_histo ( &histo_buf ); }
-
 /****************************************************** Lecture de SMS ********************************************************/
        Lire_sms_gsm();
 
 /********************************************************* Envoi de SMS *******************************************************/
        sleep(2);
-       if ( !Cfg_sms.Liste_histos )                                                         /* Attente de demande d'envoi SMS */
-        { sched_yield();
-          continue;
+       if ( zmq_recv ( zmq_internals->socket, &histo_buf, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) != sizeof(struct CMD_TYPE_HISTO) )
+        { if (zmq_recv ( zmq_admin->socket, &histo_buf, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) != sizeof(struct CMD_TYPE_HISTO) )
+           { sched_yield();
+             continue;
+           }
+          Send_zmq_socket( zmq_admin, "OK", 2 );
         }
+       histo = &histo_buf;
 
-       pthread_mutex_lock( &Cfg_sms.lib->synchro );
-       histo = Cfg_sms.Liste_histos->data;
-       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
-                "%s: %03d msg dans la liste à traiter", __func__,
-                 g_slist_length(Cfg_sms.Liste_histos) );
-       Cfg_sms.Liste_histos = g_slist_remove ( Cfg_sms.Liste_histos, histo );
-       pthread_mutex_unlock( &Cfg_sms.lib->synchro );
        if ( histo && histo->alive == TRUE && histo->msg.sms != MSG_SMS_NONE)                /* On n'envoie que si MSGnum == 1 */
         { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
                    "%s : Sending msg %d (%s)", __func__, histo->msg.num, histo->msg.libelle_sms );
@@ -654,12 +636,18 @@
           else 
            { Sms_send_to_all_authorized_recipients( &histo->msg ); }
         }
-       g_free( histo );
+       else
+        { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_DEBUG,
+                    "%s : msg %d not sent (alive=%d, msg.sms = %d) (%s)", __func__,
+                    histo->msg.num, histo->alive, histo->msg.sms, histo->msg.libelle_sms );
+        }
+
      }
-    Close_zmq_socket ( zmq_socket_msg );
+    Close_zmq_socket ( zmq_internals );
+    Close_zmq_socket ( zmq_admin );
 
 end:
-    if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );                                /* Communication NOK */
+    if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );                                                    /* Communication NOK */
     Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_sms.lib->Thread_run = FALSE;
     Cfg_sms.lib->TID = 0;                                                     /* On indique au master que le thread est mort. */

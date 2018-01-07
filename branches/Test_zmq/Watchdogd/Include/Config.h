@@ -31,7 +31,7 @@
  #define NOM_TABLE_CONFIG         "config"                          /* Nom de la table en base de données */
 
  #define TAILLE_HOME              80                                           /* Chemin HOME de watchdog */
- #define TAILLE_CRYPTO_KEY        16      /* 16 octets (128bits) pour le cryptage BlowFish. Multiple de 8 */
+ #define TAILLE_INSTANCE_ID       12                                           /* Chemin HOME de watchdog */
 
  extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 
@@ -47,7 +47,7 @@
 
     gchar home [ TAILLE_HOME+1 ];                                          /* Repertoire maison du daemon */
     gchar librairie_dir [ TAILLE_HOME+1 ];               /* Repertoire de stockage des libraires watchdog */
-    gchar instance_id [ TAILLE_HOME+1 ];                     /* Global ID, unique, de l'instance Watchdog */
+    gchar instance_id [ TAILLE_INSTANCE_ID+1 ];              /* Global ID, unique, de l'instance Watchdog */
     gboolean instance_is_master;                           /* TRUE si l'instance est l'instance maitresse */
     gchar master_host[ TAILLE_DB_HOST+1 ];
     guint log_level;                                                      /* Niveau de debug du programme */
