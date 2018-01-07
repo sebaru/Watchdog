@@ -140,6 +140,7 @@
     struct REGISTRE registre[NBR_REGISTRE];
   };
 
+#define ZMQUEUE_LIVE_EVENTS  "live-events"
  struct ZMQUEUE
   { void *socket;
     gint pattern;

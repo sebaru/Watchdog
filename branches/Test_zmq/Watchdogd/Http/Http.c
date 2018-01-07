@@ -427,9 +427,9 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Socket MSG Failed (%s)", __func__, zmq_strerror(errno) ); }
     Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Socket MSG OK", __func__ );
 
-    if ( zmq_connect (zmq_socket_msg, "inproc://live-msgs") == -1 ) 
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ connect live-msgs Failed (%s)", __func__, zmq_strerror(errno) ); }
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect live-msgs OK", __func__ );
+    if ( zmq_connect (zmq_socket_msg, "inproc://ZMQUEUE_LIVE_EVENTS") == -1 ) 
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ connect ZMQUEUE_LIVE_EVENTS Failed (%s)", __func__, zmq_strerror(errno) ); }
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect ZMQUEUE_LIVE_EVENTS OK", __func__ );
 
     if ( zmq_setsockopt ( zmq_socket_msg, ZMQ_SUBSCRIBE, "", 0 ) == -1 )                         /* Subscribe to all messages */
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ subscription failed (%s)", __func__, zmq_strerror(errno) ); }

@@ -290,7 +290,7 @@
 
 /**************************************** Socket interne/externe de publication ***********************************************/
     Partage->com_msrv.zmq_socket_msg = New_zmq_socket ( ZMQ_PUB, "pub-internal-events" );
-    Bind_zmq_socket ( Partage->com_msrv.zmq_socket_msg, "inproc", "live-msgs", 0 );
+    Bind_zmq_socket ( Partage->com_msrv.zmq_socket_msg, "inproc", "ZMQUEUE_LIVE_EVENTS", 0 );
 
     if (Config.instance_is_master == TRUE)
      { Bind_zmq_socket ( Partage->com_msrv.zmq_socket_msg, "tcp", "*", 5555 ); }

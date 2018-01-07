@@ -29,7 +29,7 @@
  #define _SMS_H_
 
  #define NOM_THREAD                     "sms"
- #define NOM_LOCAL_ZMQUEUE              NOM_THREAD "-admin"
+ #define ZMQUEUE_LOCAL                  NOM_THREAD "-admin"
 
  #define TOP_MIN_ENVOI_SMS              1200                                      /* 2 minutes sans envoi de SMS au démarrage */
  #define TAILLE_SMSBOX_APIKEY           64                                     /* Nombre de caractere dans la clef API SMSBOX */

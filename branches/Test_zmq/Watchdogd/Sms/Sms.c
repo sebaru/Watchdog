@@ -142,7 +142,7 @@
   { struct ZMQUEUE *zmq;
     gchar response[16];
     zmq = New_zmq_socket ( ZMQ_REQ, "send-to-local" );
-    Connect_zmq_socket ( zmq, "inproc", NOM_LOCAL_ZMQUEUE, 0 );
+    Connect_zmq_socket ( zmq, "inproc", ZMQUEUE_LOCAL, 0 );
     Send_zmq_socket ( zmq, histo, sizeof(struct CMD_TYPE_HISTO ) );
     zmq_recv ( zmq->socket, &response, sizeof(response), 0 );
     Close_zmq_socket ( zmq );
@@ -586,12 +586,11 @@
      }
 
     zmq_internals = New_zmq_socket ( ZMQ_SUB, "listen-to-MSRV" );
-    Connect_zmq_socket (zmq_internals, "inproc", "live-msgs", 0 );
+    Connect_zmq_socket (zmq_internals, "inproc", "ZMQUEUE_LIVE_EVENTS", 0 );
     Subscribe_zmq_socket ( zmq_internals, "" );                                                  /* Subscribe to all messages */
 
     zmq_admin = New_zmq_socket ( ZMQ_REP, "listen-to-local" );
-    Bind_zmq_socket (zmq_admin, "inproc", NOM_LOCAL_ZMQUEUE, 0 );
-    Subscribe_zmq_socket ( zmq_admin, "" );                                                      /* Subscribe to all messages */
+    Bind_zmq_socket (zmq_admin, "inproc", ZMQUEUE_LOCAL, 0 );
 
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
     while(Cfg_sms.lib->Thread_run == TRUE)                                                   /* On tourne tant que necessaire */
