@@ -101,7 +101,7 @@
     Ajouter_histo_msgsDB( &histo );                                                                    /* Si ajout dans DB OK */
 
 /******************************************************* Envoi du message aux librairies abonnées *****************************/
-    Send_zmq_socket ( Partage->com_msrv.zmq_socket_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
+    Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
 /************************************************** Gestion des repeat ********************************************************/
     if (histo.msg.time_repeat) 
      { struct CMD_TYPE_HISTO *dup_histo;
@@ -156,7 +156,7 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
     Modifier_histo_msgsDB ( &histo );
-    Send_zmq_socket ( Partage->com_msrv.zmq_socket_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
+    Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
   }
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */

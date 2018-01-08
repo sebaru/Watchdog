@@ -29,11 +29,11 @@
 
  #include "watchdogd.h"
 /******************************************************************************************************************************/
-/* New_zmq_socket: Initialise une socket dont le pattern                                                                      */
+/* New_zmq: Initialise une socket dont le pattern                                                                      */
 /* Entrée: le pattern                                                                                                         */
 /* Sortie: une socket ZMQ ou NUL si erreur                                                                                    */
 /******************************************************************************************************************************/
- struct ZMQUEUE *New_zmq_socket ( gint pattern, gchar *name )
+ struct ZMQUEUE *New_zmq ( gint pattern, gchar *name )
   { struct ZMQUEUE *zmq;
     zmq = (struct ZMQUEUE *)g_malloc0( sizeof(struct ZMQUEUE) );
     if (!zmq)
@@ -52,11 +52,26 @@
     return(zmq);
   }
 /******************************************************************************************************************************/
-/* Bind_zmq_socket: Bind la socket en parametre                                                                               */
+/* Subscribe_zmq: Souscris au topic en parametre                                                                       */
+/* Entrée: la queue, le topic                                                                                                 */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ static gboolean Subscribe_zmq ( struct ZMQUEUE *zmq )
+  { if ( zmq_setsockopt ( zmq->socket, ZMQ_SUBSCRIBE, "", 0 ) == -1 )                            /* Subscribe to all messages */
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                 "%s: ZMQ subscript to all for '%s' failed (%s)",
+                 __func__, zmq->name, zmq_strerror(errno) );
+       return(FALSE);
+     }
+    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: ZMQ subscript for '%s' OK", __func__, zmq->name );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Bind_zmq: Bind la socket en parametre                                                                               */
 /* Entrée: le type, le nom et le port                                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Bind_zmq_socket ( struct ZMQUEUE *zmq, gchar *type, gchar *nom, gint port )
+ gboolean Bind_zmq ( struct ZMQUEUE *zmq, gchar *type, gchar *nom, gint port )
   { g_snprintf( zmq->endpoint, sizeof(zmq->endpoint), "%s://%s:%d", type, nom, port );
     if ( zmq_bind (zmq->socket, zmq->endpoint) == -1 ) 
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
@@ -64,14 +79,15 @@
        return(FALSE);
      }
     else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: ZMQ Bind '%s' to '%s' OK", __func__, zmq->name, zmq->endpoint );
+    if (zmq->pattern == ZMQ_SUB) return(Subscribe_zmq ( zmq ));
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Bind_zmq_socket: Bind la socket en parametre                                                                               */
+/* Bind_zmq: Bind la socket en parametre                                                                               */
 /* Entrée: le type, le nom et le port                                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Connect_zmq_socket ( struct ZMQUEUE *zmq, gchar *type, gchar *nom, gint port )
+ gboolean Connect_zmq ( struct ZMQUEUE *zmq, gchar *type, gchar *nom, gint port )
   { g_snprintf( zmq->endpoint, sizeof(zmq->endpoint), "%s://%s:%d", type, nom, port );
     if ( zmq_connect (zmq->socket, zmq->endpoint) == -1 ) 
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
@@ -79,40 +95,26 @@
        return(FALSE);
      }
     else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: ZMQ Connect '%s' to '%s' OK", __func__, zmq->name, zmq->endpoint );
+    if (zmq->pattern == ZMQ_SUB) return(Subscribe_zmq ( zmq ));
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Subscribe_zmq_socket: Souscris au topic en parametre                                                                       */
-/* Entrée: la queue, le topic                                                                                                 */
-/* Sortie: FALSE si erreur                                                                                                    */
-/******************************************************************************************************************************/
- gboolean Subscribe_zmq_socket ( struct ZMQUEUE *zmq, gchar *topic )
-  { if ( zmq_setsockopt ( zmq->socket, ZMQ_SUBSCRIBE, topic, strlen(topic) ) == -1 )             /* Subscribe to all messages */
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                 "%s: ZMQ subscript '%s' to '%s' failed (%s)",
-                 __func__, zmq->name, topic, zmq_strerror(errno) );
-       return(FALSE);
-     }
-    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: ZMQ subscript '%s' to '%s' OK", __func__, zmq->name, topic );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Close_zmq_socket: Ferme une socket ZMQ                                                                                     */
+/* Close_zmq: Ferme une socket ZMQ                                                                                     */
 /* Entrée: la queue                                                                                                           */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- void Close_zmq_socket ( struct ZMQUEUE *zmq )
+ void Close_zmq ( struct ZMQUEUE *zmq )
   { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
               "%s: ZMQ closing '%s'", __func__, zmq->name );
     zmq_close ( zmq->socket );
     g_free(zmq);
   }
 /******************************************************************************************************************************/
-/* Send_zmq_socket: Envoie un message dans la socket                                                                          */
+/* Send_zmq: Envoie un message dans la socket                                                                          */
 /* Entrée: le type de message, le message, sa longueur                                                                        */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Send_zmq_socket ( struct ZMQUEUE *zmq, void *buf, gint taille )
+ gboolean Send_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille )
   { if (zmq_send( zmq->socket, buf, taille, 0 ) == -1)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "%s: Send to ZMQ '%s' ('%s')failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
@@ -123,5 +125,19 @@
                 "%s: Send %d bytes to ZMQ '%s' ('%s') OK", __func__, taille, zmq->name, zmq->endpoint );
      }
     return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Recv_zmq: Receptionne un message sur le file en paremetre (sans attendre)                                                  */
+/* Entrée: la file, le buffer d'accueil, la taille du buffer                                                                  */
+/* Sortie: Nombre de caractere lu, -1 si erreur                                                                               */
+/******************************************************************************************************************************/
+ gint Recv_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille_buf )
+  { gint byte;
+    byte = zmq_recv ( zmq, buf, taille_buf, ZMQ_DONTWAIT );
+    if (byte>0)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "%s: Recv %d bytes from ZMQ '%s' ('%s')", __func__, byte, zmq->name, zmq->endpoint );
+     }
+    return(byte);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

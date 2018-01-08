@@ -281,7 +281,7 @@
 /******************************************************************************************************************************/
  static void *Boucle_pere ( void )
   { gint cpt_5_minutes, cpt_1_minute;
-    struct ZMQUEUE *zmq_socket_master;
+    struct ZMQUEUE *zmq_master;
     struct CMD_TYPE_HISTO histo;
 
     prctl(PR_SET_NAME, "W-MSRV", 0, 0, 0 );
@@ -289,17 +289,16 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
 /**************************************** Socket interne/externe de publication ***********************************************/
-    Partage->com_msrv.zmq_socket_msg = New_zmq_socket ( ZMQ_PUB, "pub-internal-events" );
-    Bind_zmq_socket ( Partage->com_msrv.zmq_socket_msg, "inproc", "ZMQUEUE_LIVE_EVENTS", 0 );
+    Partage->com_msrv.zmq_msg = New_zmq ( ZMQ_PUB, "pub-msgs" );
+    Bind_zmq ( Partage->com_msrv.zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
 
     if (Config.instance_is_master == TRUE)
-     { Bind_zmq_socket ( Partage->com_msrv.zmq_socket_msg, "tcp", "*", 5555 ); }
+     { Bind_zmq ( Partage->com_msrv.zmq_msg, "tcp", "*", 5555 ); }
 
 /***************************************** Socket de subscription au master ***************************************************/
     if (Config.instance_is_master == FALSE)                                                  /* Connexion au master si besoin */
-     { zmq_socket_master = New_zmq_socket ( ZMQ_SUB, "listen-to-master" );
-       Connect_zmq_socket ( zmq_socket_master, "tcp", Config.master_host, 5555 );
-       Subscribe_zmq_socket ( zmq_socket_master, "" );                                           /* Subscribe to all messages */
+     { zmq_master = New_zmq ( ZMQ_SUB, "listen-to-master" );
+       Connect_zmq ( zmq_master, "tcp", Config.master_host, 5555 );
      }
 
     cpt_5_minutes = Partage->top + 3000;
@@ -313,10 +312,10 @@
        Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
        Gerer_arrive_Events();                                       /* Gestion des evenements entre Thread, DLS, et satellite */
 
-       if ( zmq_recv ( zmq_socket_master->socket, &histo, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) == sizeof(struct CMD_TYPE_HISTO) )
-        { if (Send_zmq_socket( Partage->com_msrv.zmq_socket_msg, &histo, sizeof(struct CMD_TYPE_HISTO)) == -1)
+       if ( zmq_recv ( zmq_master->socket, &histo, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) == sizeof(struct CMD_TYPE_HISTO) )
+        { if (Send_zmq( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO)) == -1)
            { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ '%s' socket failed (%s)",
-                       __func__, Partage->com_msrv.zmq_socket_msg->name, zmq_strerror(errno) );
+                       __func__, Partage->com_msrv.zmq_msg->name, zmq_strerror(errno) );
            }
         }
 
@@ -370,7 +369,7 @@
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/ 
     Sauver_compteur();                                                                     /* Dernière sauvegarde avant arret */
-    Close_zmq_socket ( Partage->com_msrv.zmq_socket_msg );
+    Close_zmq ( Partage->com_msrv.zmq_msg );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
     pthread_exit( NULL );
   }

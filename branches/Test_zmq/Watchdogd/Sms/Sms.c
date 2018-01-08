@@ -141,11 +141,11 @@
  static void Sms_Gerer_histo ( struct CMD_TYPE_HISTO *histo )
   { struct ZMQUEUE *zmq;
     gchar response[16];
-    zmq = New_zmq_socket ( ZMQ_REQ, "send-to-local" );
-    Connect_zmq_socket ( zmq, "inproc", ZMQUEUE_LOCAL, 0 );
-    Send_zmq_socket ( zmq, histo, sizeof(struct CMD_TYPE_HISTO ) );
+    zmq = New_zmq ( ZMQ_REQ, "send-to-local" );
+    Connect_zmq ( zmq, "inproc", ZMQUEUE_LOCAL, 0 );
+    Send_zmq ( zmq, histo, sizeof(struct CMD_TYPE_HISTO ) );
     zmq_recv ( zmq->socket, &response, sizeof(response), 0 );
-    Close_zmq_socket ( zmq );
+    Close_zmq ( zmq );
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -563,7 +563,7 @@
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct CMD_TYPE_HISTO *histo, histo_buf;
-    struct ZMQUEUE *zmq_internals;
+    struct ZMQUEUE *zmq_msg;
     struct ZMQUEUE *zmq_admin;
     
     prctl(PR_SET_NAME, "W-SMS", 0, 0, 0 );
@@ -585,12 +585,11 @@
        goto end;
      }
 
-    zmq_internals = New_zmq_socket ( ZMQ_SUB, "listen-to-MSRV" );
-    Connect_zmq_socket (zmq_internals, "inproc", "ZMQUEUE_LIVE_EVENTS", 0 );
-    Subscribe_zmq_socket ( zmq_internals, "" );                                                  /* Subscribe to all messages */
+    zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-MSRV" );
+    Connect_zmq (zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
 
-    zmq_admin = New_zmq_socket ( ZMQ_REP, "listen-to-local" );
-    Bind_zmq_socket (zmq_admin, "inproc", ZMQUEUE_LOCAL, 0 );
+    zmq_admin = New_zmq ( ZMQ_REP, "listen-to-local" );
+    Bind_zmq (zmq_admin, "inproc", ZMQUEUE_LOCAL, 0 );
 
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
     while(Cfg_sms.lib->Thread_run == TRUE)                                                   /* On tourne tant que necessaire */
@@ -615,12 +614,12 @@
 
 /********************************************************* Envoi de SMS *******************************************************/
        sleep(2);
-       if ( zmq_recv ( zmq_internals->socket, &histo_buf, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) != sizeof(struct CMD_TYPE_HISTO) )
+       if ( zmq_recv ( zmq_msg->socket, &histo_buf, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) != sizeof(struct CMD_TYPE_HISTO) )
         { if (zmq_recv ( zmq_admin->socket, &histo_buf, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) != sizeof(struct CMD_TYPE_HISTO) )
            { sched_yield();
              continue;
            }
-          Send_zmq_socket( zmq_admin, "OK", 2 );
+          Send_zmq( zmq_admin, "OK", 2 );
         }
        histo = &histo_buf;
 
@@ -642,8 +641,8 @@
         }
 
      }
-    Close_zmq_socket ( zmq_internals );
-    Close_zmq_socket ( zmq_admin );
+    Close_zmq ( zmq_msg );
+    Close_zmq ( zmq_admin );
 
 end:
     if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );                                                    /* Communication NOK */

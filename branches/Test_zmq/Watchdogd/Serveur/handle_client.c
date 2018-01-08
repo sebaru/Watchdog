@@ -105,27 +105,17 @@
   { static gint thread_count = 0;
     pthread_t tid;
     gchar nom[16];
-    void *zmq_socket_msg;
+    struct ZMQUEUE *zmq_msg;
 
     client->ssrv_id = thread_count++;
     g_snprintf(nom, sizeof(nom), "W-SSRV-%06d", client->ssrv_id );
     prctl(PR_SET_NAME, nom, 0, 0, 0 );
 
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
-              "Run_handle_client: Demarrage . . . TID = %p", pthread_self() );
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
-    if ( (zmq_socket_msg = zmq_socket ( Partage->zmq_ctx, ZMQ_SUB )) == NULL)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Socket MSG Failed (%s)", __func__, zmq_strerror(errno) ); }
-    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Socket MSG OK", __func__ );
-
-    if ( zmq_connect (zmq_socket_msg, "inproc://ZMQUEUE_LIVE_EVENTS") == -1 ) 
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ connect ZMQUEUE_LIVE_EVENTS Failed (%s)", __func__, zmq_strerror(errno) ); }
-    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect ZMQUEUE_LIVE_EVENTS OK", __func__ );
-
-    if ( zmq_setsockopt ( zmq_socket_msg, ZMQ_SUBSCRIBE, "", 0 ) == -1 )                         /* Subscribe to all messages */
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ subscription failed (%s)", __func__, zmq_strerror(errno) ); }
-    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect subscription OK", __func__ );
-
+    zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
+    Connect_zmq ( zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+     
     while( Cfg_ssrv.lib->Thread_run == TRUE )                                                /* On tourne tant que necessaire */
      { usleep(1000);
        sched_yield();
@@ -187,7 +177,7 @@
 /********************************************** Envoi des histos et des motifs ************************************************/
        if (client->mode == VALIDE)                                                /* Envoi au suppression des histo au client */
         { struct CMD_TYPE_HISTO histo;
-          if ( zmq_recv ( zmq_socket_msg, &histo, sizeof(histo), ZMQ_DONTWAIT ) == sizeof(histo) )
+          if ( Recv_zmq ( zmq_msg, &histo, sizeof(histo) ) == sizeof(histo) )
            { Envoyer_histo_au_client ( client, &histo ); }
           Envoyer_new_motif_au_client (client);
           Envoyer_event_au_client (client);
@@ -202,7 +192,7 @@
      }
 
 /**************************************************** Arret du hangle_client **************************************************/
-    zmq_close ( zmq_socket_msg );
+    Close_zmq ( zmq_msg );
     Deconnecter(client);
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
               "%s: Down . . . TID = %p", __func__, pthread_self() );
