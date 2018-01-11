@@ -185,10 +185,14 @@
   { gint byte;
     byte = zmq_recv ( zmq, buf, taille_buf, ZMQ_DONTWAIT );
     if (byte>=0)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                 "%s: Recv %d bytes from ZMQ '%s' ('%s')", __func__, byte, zmq->name, zmq->endpoint );
        *event = buf;
        *payload = buf+sizeof(struct MSRV_EVENT);
+     }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "%s: Error from ZMQ '%s' ('%s')", __func__, zmq->name, zmq->endpoint );
      }
     return(byte);
   }
