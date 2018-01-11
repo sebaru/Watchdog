@@ -29,7 +29,7 @@
 
  #include "watchdogd.h"
 /******************************************************************************************************************************/
-/* New_zmq: Initialise une socket dont le pattern                                                                      */
+/* New_zmq: Initialise une socket dont le pattern et le nom sont en parametre                                                 */
 /* Entrée: le pattern                                                                                                         */
 /* Sortie: une socket ZMQ ou NUL si erreur                                                                                    */
 /******************************************************************************************************************************/
@@ -57,7 +57,7 @@
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  static gboolean Subscribe_zmq ( struct ZMQUEUE *zmq )
-  { if ( zmq_setsockopt ( zmq->socket, ZMQ_SUBSCRIBE, "", 0 ) == -1 )                            /* Subscribe to all messages */
+  { if ( zmq_setsockopt ( zmq->socket, ZMQ_SUBSCRIBE, NULL, 0 ) == -1 )                          /* Subscribe to all messages */
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                  "%s: ZMQ subscript to all for '%s' failed (%s)",
                  __func__, zmq->name, zmq_strerror(errno) );
@@ -99,7 +99,7 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Close_zmq: Ferme une socket ZMQ                                                                                     */
+/* Close_zmq: Ferme une socket ZMQ                                                                                            */
 /* Entrée: la queue                                                                                                           */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
