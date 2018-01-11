@@ -119,12 +119,14 @@
      }
     poptFreeContext( context );                                                     /* Liberation memoire */
  }
-/**********************************************************************************************************/
-/* CB_envoyer_commande_admin: appelé par la librairie readline lorsque une ligne est prete                */
-/* Entrée: la ligne a envoyer au serveur                                                                  */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* CB_envoyer_commande_admin: appelé par la librairie readline lorsque une ligne est prete                                    */
+/* Entrée: la ligne a envoyer au serveur                                                                                      */
+/******************************************************************************************************************************/
  static void CB_envoyer_commande_admin ( char *ligne )
   { gchar commande_old[128];
+    gchar buffer[2048];
+    gint recu;
 
     if (strlen(ligne) == 0) return;
 
@@ -133,10 +135,15 @@
     else
      { if ( strcmp ( ligne, commande_old ) )
         { g_snprintf( commande_old, sizeof(commande_old), "%s", ligne );
-          add_history(ligne);                                        /* Ajoute la commande à l'historique */
+          add_history(ligne);                                                            /* Ajoute la commande à l'historique */
         }
 
-       zmq_send( socket, ligne, strlen(ligne), 0 );
+       zmq_send( socket, ligne, strlen(ligne)+1, 0 );
+       recu = zmq_recv ( socket, &buffer, sizeof(buffer), 0 );                             /* Ecoute de ce que dit le serveur */
+       if (recu>0)
+        { printf("%s", buffer );
+          fflush(stdout);
+        }
      }
   }
 /******************************************************************************************************************************/
@@ -147,8 +154,7 @@
  int main ( int argc, char *argv[] )
   { struct timeval tv;
     fd_set fd;
-    gint retour, recu;
-    struct sigaction sig;
+    gint retour;
 
     g_snprintf( Socket_file, sizeof(Socket_file), "%s/socket.wdg", g_get_home_dir() );                          /* Par défaut */
     Lire_ligne_commande( argc, argv );                                            /* Lecture du fichier conf et des arguments */
@@ -165,9 +171,7 @@
 
     rl_callback_handler_install ( PROMPT, &CB_envoyer_commande_admin );
     for (Arret=FALSE;Arret!=TRUE; )
-     { gchar buffer[2048];
-
-       FD_ZERO(&fd);
+     { FD_ZERO(&fd);
        FD_SET( 0, &fd );
        tv.tv_sec=0;
        tv.tv_usec=10000;
@@ -181,12 +185,6 @@
 
        if (retour==1 && FD_ISSET(0, &fd))
         { rl_callback_read_char(); }                                                     /* Lecture du character qui est pret */
-
-       recu = zmq_recv ( socket, &buffer, sizeof(buffer), ZMQ_DONTWAIT );                  /* Ecoute de ce que dit le serveur */
-       if (recu>0)
-        { printf("%s", buffer );
-          printf("%s", PROMPT ); fflush(stdout);
-        }
      }
     Deconnecter_admin ();
     rl_callback_handler_remove();

@@ -204,7 +204,8 @@
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct CMD_TYPE_HISTO *histo, histo_buf;
-    void *zmq_socket_msg;
+    struct ZMQUEUE *zmq_msg;
+    struct ZMQUEUE *zmq_admin;
     static gboolean audio_stop = TRUE;
 
     prctl(PR_SET_NAME, "W-Audio", 0, 0, 0 );
@@ -227,23 +228,37 @@
        goto end;
      }
 
+    zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
+    Connect_zmq (zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+
+    zmq_admin = New_zmq ( ZMQ_REP, "listen-to-admin" );
+    Bind_zmq (zmq_admin, "inproc", NOM_THREAD "-admin", 0 );
+
     while(Cfg_audio.lib->Thread_run == TRUE)                                                 /* On tourne tant que necessaire */
-     {
-       sched_yield();
+     { gchar buffer[2048];
+
        if (Cfg_audio.lib->Thread_sigusr1)                                                             /* On a recu sigusr1 ?? */
-        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "Run_audio: SIGUSR1" );
+        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
           Cfg_audio.lib->Thread_sigusr1 = FALSE;
         }
 
-       if (Cfg_audio.last_audio + 100 < Partage->top)                             /* Au bout de 10 secondes sans diffusion */
-        { if (audio_stop == TRUE)                             /* Avons-nous deja envoyé une commande de STOP AUDIO a DLS ? */
-           { audio_stop = FALSE;                                      /* Positionné quand il n'y a plus de diffusion audio */
+       if (Cfg_audio.last_audio + 100 < Partage->top)                                /* Au bout de 10 secondes sans diffusion */
+        { if (audio_stop == TRUE)                                /* Avons-nous deja envoyé une commande de STOP AUDIO a DLS ? */
+           { audio_stop = FALSE;                                         /* Positionné quand il n'y a plus de diffusion audio */
              if (Config.instance_is_master) Envoyer_commande_dls( NUM_BIT_M_AUDIO_END );
            }
         } else audio_stop = TRUE;
 
-       if ( zmq_recv ( zmq_socket_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) != sizeof(struct CMD_TYPE_HISTO) )
+       if (Recv_zmq ( zmq_admin, &buffer, sizeof(buffer)) > 0 )                           /* As-t'on recu un paquet d'admin ? */
+        { gchar *response;
+          response = Admin_response ( buffer );
+          Send_zmq ( zmq_admin, response, strlen(response)+1 );
+          g_free(response);
+        }
+
+       if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) )
         { sleep(1); continue; }
+
        histo = &histo_buf;
        if ( histo->alive == 1 &&                                                                    /* Si le message apparait */
             (M(NUM_BIT_M_AUDIO_INHIB) == 0 || histo->msg.type == MSG_ALERTE
@@ -271,7 +286,8 @@
            }
         }
      }
-
+    Close_zmq ( zmq_msg );
+    Close_zmq ( zmq_admin );
 end:
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
     Cfg_audio.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */

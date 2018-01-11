@@ -174,8 +174,26 @@
   { gint byte;
     byte = zmq_recv ( zmq->socket, buf, taille_buf, ZMQ_DONTWAIT );
     if (byte>0)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                 "%s: Recv %d bytes from ZMQ '%s' ('%s')", __func__, byte, zmq->name, zmq->endpoint );
+     }
+    return(byte);
+  }
+/******************************************************************************************************************************/
+/* Recv_zmq: Receptionne un message sur le file en paremetre (sans attendre)                                                  */
+/* Entrée: la file, le buffer d'accueil, la taille du buffer                                                                  */
+/* Sortie: Nombre de caractere lu, -1 si erreur                                                                               */
+/******************************************************************************************************************************/
+ gint Recv_zmq_block ( struct ZMQUEUE *zmq, void *buf, gint taille_buf )
+  { gint byte;
+    byte = zmq_recv ( zmq->socket, buf, taille_buf, 0 );
+    if (byte>0)
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+                "%s: Recv %d bytes from ZMQ '%s' ('%s')", __func__, byte, zmq->name, zmq->endpoint );
+     }
+    else 
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "%s: Error for ZMQ '%s' ('%s'): %s", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
      }
     return(byte);
   }

@@ -14,6 +14,6 @@ WatchdogdAdmin_CFLAGS = `pkg-config --cflags glib-2.0 libczmq`
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/WatchdogdAdmin/Include
 
-WatchdogdAdmin_LDFLAGS = `pkg-config --libs glib-2.0 libczmq popt readline`
+WatchdogdAdmin_LDFLAGS = -lreadline `pkg-config --libs glib-2.0 libczmq popt`
 
 MAINTAINERCLEANFILES = Makefile.in

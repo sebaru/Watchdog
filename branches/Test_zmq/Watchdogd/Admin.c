@@ -62,6 +62,8 @@
 /******************************************************************************************************************************/
  gchar *Admin_write ( gchar *response, gchar *new_ligne )
   { gchar *new;
+    if (response == NULL)
+     { return (g_strdup(new_ligne)); }
     new = g_strconcat( response, new_ligne, "\n", NULL );
     g_free(response);
     return(new);
@@ -103,7 +105,20 @@
                        response = Admin_write ( response, " -- Thread is not started, Running config is not loaded --");
                        response = Admin_write ( response, " -- WARNING --" );
                      }    
-                    response =  lib->Admin_command ( response, ligne + strlen(lib->admin_prompt)+1 );          /* Appel local */
+                    if (lib->Admin_command)                        /* Ancienne mode, via appel de fonction intégrée au thread */
+                     { response =  lib->Admin_command ( response, ligne + strlen(lib->admin_prompt)+1 ); }     /* Appel local */
+                    else                                                      /* Nouvelle méthode, en utilisant les files ZMQ */
+                     { gchar endpoint[128], buffer[2048];
+                       struct ZMQUEUE *zmq_admin;
+                       zmq_admin = New_zmq ( ZMQ_REQ, "send-to-admin" );
+                       g_snprintf(endpoint, sizeof(endpoint), "%s-admin", lib->admin_prompt );
+                       Connect_zmq (zmq_admin, "inproc", endpoint, 0 );
+                       Send_zmq ( zmq_admin, ligne + strlen(lib->admin_prompt)+1, strlen(ligne) - strlen(lib->admin_prompt) );
+                       Recv_zmq_block ( zmq_admin, &buffer, sizeof(buffer) );
+                       buffer[sizeof(buffer)-1]=0;                                    /* caractere NULL de fin si depassement */
+                       response = Admin_write ( response, buffer );                                    /* Appel via zmq local */
+                       Close_zmq ( zmq_admin );
+                     }
                     found = TRUE;
                   }
                  liste = liste->next;
@@ -143,7 +158,7 @@
        if ( Recv_zmq ( Socket, &buffer, sizeof(buffer) ) > 0 )
         { gchar *response;
           response = Processer_commande_admin ( "localuser", "localhost", buffer );
-          Send_zmq ( Socket, response, strlen(response) );
+          Send_zmq ( Socket, response, strlen(response)+1 );
           g_free(response);
         }
 
