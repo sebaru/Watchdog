@@ -148,7 +148,7 @@
     if (target_thread) g_snprintf( event.thread, sizeof(event.thread), target_thread);
                   else g_snprintf( event.thread, sizeof(event.thread), "*" );
 
-    memcpy ( buffer, event, sizeof(struct MSRV_EVENT) );                                                    /* Recopie entete */
+    memcpy ( buffer, &event, sizeof(struct MSRV_EVENT) );                                                   /* Recopie entete */
     memcpy ( buffer + sizeof(struct MSRV_EVENT), source, taille );                                  /* Recopie buffer payload */
     retour = Send_zmq( zmq, buffer, taille + sizeof(struct MSRV_EVENT) );
     g_free(buffer);
@@ -190,9 +190,6 @@
                 "%s: Recv %d bytes from ZMQ '%s' ('%s')", __func__, byte, zmq->name, zmq->endpoint );
        *event = buf;
        *payload = buf+sizeof(struct MSRV_EVENT);
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "%s: Recv tag %d, instance %s, thread %s", __func__, event->tag, event->instance, event->thread );
-       
      }
     return(byte);
   }
