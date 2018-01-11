@@ -192,7 +192,7 @@
      }
     else
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "%s: Error from ZMQ '%s' ('%s')", __func__, zmq->name, zmq->endpoint );
+                "%s: Error from ZMQ '%s' ('%s') %s", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
      }
     return(byte);
   }
