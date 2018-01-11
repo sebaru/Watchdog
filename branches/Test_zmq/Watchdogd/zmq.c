@@ -169,7 +169,7 @@
 /******************************************************************************************************************************/
  gint Recv_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille_buf )
   { gint byte;
-    byte = zmq_recv ( zmq, buf, taille_buf, ZMQ_DONTWAIT );
+    byte = zmq_recv ( zmq->socket, buf, taille_buf, ZMQ_DONTWAIT );
     if (byte>0)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "%s: Recv %d bytes from ZMQ '%s' ('%s')", __func__, byte, zmq->name, zmq->endpoint );
@@ -183,16 +183,12 @@
 /******************************************************************************************************************************/
  gint Recv_zmq_with_tag ( struct ZMQUEUE *zmq, void *buf, gint taille_buf, struct MSRV_EVENT **event, void **payload )
   { gint byte;
-    byte = zmq_recv ( zmq, buf, taille_buf, ZMQ_DONTWAIT );
+    byte = zmq_recv ( zmq->socket, buf, taille_buf, ZMQ_DONTWAIT );
     if (byte>=0)
      { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                 "%s: Recv %d bytes from ZMQ '%s' ('%s')", __func__, byte, zmq->name, zmq->endpoint );
        *event = buf;
        *payload = buf+sizeof(struct MSRV_EVENT);
-     }
-    else
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "%s: Error from ZMQ '%s' ('%s') %s", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
      }
     return(byte);
   }
