@@ -296,12 +296,12 @@
      { Partage->com_msrv.zmq_to_slave = New_zmq ( ZMQ_PUB, "pub-to-slave" );
        Bind_zmq ( Partage->com_msrv.zmq_to_slave, "tcp", "*", 5556 );
        Partage->com_msrv.zmq_from_slave = New_zmq ( ZMQ_SUB, "listen-to-slave" );
-       Bind_zmq ( Partage->com_msrv.zmq_from_slave, "tcp", Config.master_host, 5555 );
+       Bind_zmq ( Partage->com_msrv.zmq_from_slave, "tcp", "*", 5555 );
      }
 /***************************************** Socket de subscription au master ***************************************************/
     else                                                                                     /* Connexion au master si besoin */
      { Partage->com_msrv.zmq_to_master = New_zmq ( ZMQ_PUB, "pub-to-master" );
-       Connect_zmq ( Partage->com_msrv.zmq_to_master, "tcp", "*", 5556 );
+       Connect_zmq ( Partage->com_msrv.zmq_to_master, "tcp", Config.master_host, 5556 );
        Partage->com_msrv.zmq_from_master = New_zmq ( ZMQ_SUB, "listen-to-master" );
        Connect_zmq ( Partage->com_msrv.zmq_from_master, "tcp", Config.master_host, 5555 );
      }
