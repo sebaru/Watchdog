@@ -294,9 +294,9 @@
 /***************************************** Socket pour une instance master ****************************************************/
     if (Config.instance_is_master == TRUE)
      { Partage->com_msrv.zmq_to_slave = New_zmq ( ZMQ_PUB, "pub-to-slave" );
-       Bind_zmq ( Partage->com_msrv.zmq_to_slave, "tcp", "*", 5556 );
+       Bind_zmq ( Partage->com_msrv.zmq_to_slave, "tcp", "*", 5555 );
        Partage->com_msrv.zmq_from_slave = New_zmq ( ZMQ_SUB, "listen-to-slave" );
-       Bind_zmq ( Partage->com_msrv.zmq_from_slave, "tcp", "*", 5555 );
+       Bind_zmq ( Partage->com_msrv.zmq_from_slave, "tcp", "*", 5556 );
      }
 /***************************************** Socket de subscription au master ***************************************************/
     else                                                                                     /* Connexion au master si besoin */
