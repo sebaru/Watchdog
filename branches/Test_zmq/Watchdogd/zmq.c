@@ -52,7 +52,7 @@
     return(zmq);
   }
 /******************************************************************************************************************************/
-/* Subscribe_zmq: Souscris au topic en parametre                                                                       */
+/* Subscribe_zmq: Souscris au topic en parametre                                                                              */
 /* Entrée: la queue, le topic                                                                                                 */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
@@ -67,7 +67,7 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Bind_zmq: Bind la socket en parametre                                                                               */
+/* Bind_zmq: Bind la socket en parametre                                                                                      */
 /* Entrée: le type, le nom et le port                                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
@@ -83,7 +83,7 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Bind_zmq: Bind la socket en parametre                                                                               */
+/* Bind_zmq: Bind la socket en parametre                                                                                      */
 /* Entrée: le type, le nom et le port                                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
@@ -184,7 +184,7 @@
  gint Recv_zmq_with_tag ( struct ZMQUEUE *zmq, void *buf, gint taille_buf, struct MSRV_EVENT **event, void **payload )
   { gint byte;
     byte = zmq_recv ( zmq, buf, taille_buf, ZMQ_DONTWAIT );
-    if (byte>0)
+    if (byte>=0)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "%s: Recv %d bytes from ZMQ '%s' ('%s')", __func__, byte, zmq->name, zmq->endpoint );
        *event = buf;
