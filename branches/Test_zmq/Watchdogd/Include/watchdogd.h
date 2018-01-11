@@ -102,9 +102,14 @@
     GSList *liste_a;                                                             /* liste de A a traiter dans la distribution */
     GSList *liste_Event;                                                     /* liste de Event a traiter dans la distribution */
     struct ZMQUEUE *zmq_msg;                                                           /* Message Queue des messages Watchdog */
-
-    pthread_mutex_t synchro_Liste_abonne_msg;                                             /* Bit de synchronisation processus */
-    GSList *Liste_abonne_msg;                                                          /* liste de struct MSGDB msg a envoyer */
+    union
+     { struct ZMQUEUE *zmq_to_slave;                                                         /* Message Queue vers les slaves */
+       struct ZMQUEUE *zmq_to_master;
+     };
+    union
+     { struct ZMQUEUE *zmq_from_slave;                                                     /* Message Queue depuis les slaves */
+       struct ZMQUEUE *zmq_from_master;
+     };
 
     GSList *Librairies;                                                        /* Liste des librairies chargées pour Watchdog */
   };

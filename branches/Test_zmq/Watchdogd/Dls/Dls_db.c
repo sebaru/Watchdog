@@ -308,7 +308,7 @@
        return(FALSE);
      }
     taille = atoi(db->row[1]);
-    buffer = (gchar *)g_malloc0( taille + 1 );
+    buffer = (gchar *)g_try_malloc0( taille + 1 );
     if (!buffer)
      { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: Memory Error", __func__ ); }
     else
@@ -329,7 +329,7 @@
     gboolean retour;
     struct DB *db;
 
-    buffer = (gchar *)g_malloc0( taille+1 );
+    buffer = (gchar *)g_try_malloc0( taille+1 );
     if (!buffer)
      { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: Memory Error", __func__ );
        return(FALSE);
@@ -344,7 +344,7 @@
      }
 
     taille_requete = taille+256;
-    requete = (gchar *)g_malloc( taille_requete );
+    requete = (gchar *)g_try_malloc( taille_requete );
     if (!requete)
      { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: Memory Error", __func__ );
        g_free(source);

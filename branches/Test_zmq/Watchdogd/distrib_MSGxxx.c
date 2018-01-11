@@ -102,6 +102,7 @@
 
 /******************************************************* Envoi du message aux librairies abonnées *****************************/
     Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, TAG_ZMQ_HISTO, NULL, NULL, &histo, sizeof(struct CMD_TYPE_HISTO) );
 /************************************************** Gestion des repeat ********************************************************/
     if (histo.msg.time_repeat) 
      { struct CMD_TYPE_HISTO *dup_histo;
@@ -157,6 +158,7 @@
 
     Modifier_histo_msgsDB ( &histo );
     Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, TAG_ZMQ_HISTO, NULL, NULL, &histo, sizeof(struct CMD_TYPE_HISTO) );
   }
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */

@@ -35,7 +35,7 @@
 /******************************************************************************************************************************/
  struct ZMQUEUE *New_zmq ( gint pattern, gchar *name )
   { struct ZMQUEUE *zmq;
-    zmq = (struct ZMQUEUE *)g_malloc0( sizeof(struct ZMQUEUE) );
+    zmq = (struct ZMQUEUE *)g_try_malloc0( sizeof(struct ZMQUEUE) );
     if (!zmq)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: New ZMQ Socket '%s' Failed. Memory Error (%s)",
                  __func__, name, zmq_strerror(errno) );
@@ -110,14 +110,50 @@
     g_free(zmq);
   }
 /******************************************************************************************************************************/
-/* Send_zmq: Envoie un message dans la socket                                                                          */
-/* Entrée: le type de message, le message, sa longueur                                                                        */
+/* Send_zmq: Envoie un message dans la socket                                                                                 */
+/* Entrée: la socket, le message, sa longueur                                                                                 */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Send_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille )
   { if (zmq_send( zmq->socket, buf, taille, 0 ) == -1)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "%s: Send to ZMQ '%s' ('%s')failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
+                "%s: Send to ZMQ '%s' ('%s') failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
+       return(FALSE);
+     }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+                "%s: Send %d bytes to ZMQ '%s' ('%s') OK", __func__, taille, zmq->name, zmq->endpoint );
+     }
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Send_zmq_with_tag: Envoie un message dans la socket avec le tag en prefixe                                                 */
+/* Entrée: la socket, le tag, le message, sa longueur                                                                         */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag, gchar *target_instance, gchar *target_thread, void *source, gint taille )
+  { struct MSRV_EVENT event;
+    void *buffer;
+    gboolean retour;
+    buffer = g_try_malloc( taille + sizeof(struct MSRV_EVENT) );
+    if (!buffer)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "%s: Send to ZMQ '%s' ('%s') failed (Memory Error)", __func__, zmq->name, zmq->endpoint );
+       return(FALSE);
+     }
+    
+    event.tag = tag;
+    if (target_instance) g_snprintf( event.instance, sizeof(event.instance), target_instance );
+                    else g_snprintf( event.instance, sizeof(event.instance), "*" );
+    if (target_thread) g_snprintf( event.thread, sizeof(event.thread), target_thread);
+                  else g_snprintf( event.thread, sizeof(event.thread), "*" );
+
+    memcpy ( buffer + sizeof(struct MSRV_EVENT), source, taille );
+    retour = Send_zmq( zmq, buffer, taille + sizeof(struct MSRV_EVENT) );
+    g_free(buffer);
+    if (retour==FALSE)    
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "%s: Send to ZMQ '%s' ('%s') failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
        return(FALSE);
      }
     else
@@ -137,6 +173,22 @@
     if (byte>0)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "%s: Recv %d bytes from ZMQ '%s' ('%s')", __func__, byte, zmq->name, zmq->endpoint );
+     }
+    return(byte);
+  }
+/******************************************************************************************************************************/
+/* Recv_zmq: Receptionne un message sur le file en paremetre (sans attendre)                                                  */
+/* Entrée: la file, le buffer d'accueil, la taille du buffer                                                                  */
+/* Sortie: Nombre de caractere lu, -1 si erreur                                                                               */
+/******************************************************************************************************************************/
+ gint Recv_zmq_with_tag ( struct ZMQUEUE *zmq, void *buf, gint taille_buf, struct MSRV_EVENT **event, void **payload )
+  { gint byte;
+    byte = zmq_recv ( zmq, buf, taille_buf, ZMQ_DONTWAIT );
+    if (byte>0)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "%s: Recv %d bytes from ZMQ '%s' ('%s')", __func__, byte, zmq->name, zmq->endpoint );
+       *event = buf;
+       *payload = buf+sizeof(struct MSRV_EVENT);
      }
     return(byte);
   }
