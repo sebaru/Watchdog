@@ -585,7 +585,7 @@
        goto end;
      }
 
-    zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-MSRV" );
+    zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
     Connect_zmq (zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
 
     zmq_admin = New_zmq ( ZMQ_REP, "listen-to-local" );
@@ -614,8 +614,8 @@
 
 /********************************************************* Envoi de SMS *******************************************************/
        sleep(2);
-       if ( zmq_recv ( zmq_msg->socket, &histo_buf, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) != sizeof(struct CMD_TYPE_HISTO) )
-        { if (zmq_recv ( zmq_admin->socket, &histo_buf, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) != sizeof(struct CMD_TYPE_HISTO) )
+       if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) )
+        { if (Recv_zmq ( zmq_admin, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) )
            { sched_yield();
              continue;
            }

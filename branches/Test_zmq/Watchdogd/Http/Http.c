@@ -423,17 +423,13 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
              "%s: WebSocket Create OK. Listening on port %d with ssl=%d", __func__, Cfg_http.tcp_port, Cfg_http.ssl_enable );
 
-    if ( (zmq_socket_msg = zmq_socket ( Partage->zmq_ctx, ZMQ_SUB )) == NULL)
+    if ( (zmq_socket_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" )) == NULL)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Socket MSG Failed (%s)", __func__, zmq_strerror(errno) ); }
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Socket MSG OK", __func__ );
+    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Socket MSG OK", __func__ );
 
-    if ( zmq_connect (zmq_socket_msg, "inproc://ZMQUEUE_LIVE_EVENTS") == -1 ) 
+    if ( Connect_zmq ( zmq_socket_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 ) == -1 ) 
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ connect ZMQUEUE_LIVE_EVENTS Failed (%s)", __func__, zmq_strerror(errno) ); }
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect ZMQUEUE_LIVE_EVENTS OK", __func__ );
-
-    if ( zmq_setsockopt ( zmq_socket_msg, ZMQ_SUBSCRIBE, "", 0 ) == -1 )                         /* Subscribe to all messages */
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ subscription failed (%s)", __func__, zmq_strerror(errno) ); }
-    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect subscription OK", __func__ );
+    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect ZMQUEUE_LIVE_EVENTS OK", __func__ );
 
     Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
     while(Cfg_http.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */
@@ -451,8 +447,9 @@
         }
 
    	   lws_service( Cfg_http.ws_context, 100);                                  /* On lance l'écoute des connexions websocket */
-       if ( zmq_recv ( zmq_socket_msg, &histo, sizeof(struct CMD_TYPE_HISTO), ZMQ_DONTWAIT ) == sizeof(struct CMD_TYPE_HISTO) )
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Recu 1 msg du master !", __func__ ); }
+       if ( Recv_zmq ( zmq_socket_msg, &histo, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Recu 1 msg du master !", __func__ );
+        }
 
        if ( last_top + 600 <= Partage->top )                                                            /* Toutes les minutes */
         { Http_Check_sessions ();
@@ -464,7 +461,7 @@
     
     lws_context_destroy(Cfg_http.ws_context);                                                   /* Arret du serveur WebSocket */
     Cfg_http.ws_context = NULL;
-    zmq_close ( zmq_socket_msg );
+    Close_zmq ( zmq_socket_msg );
 
 end:
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,

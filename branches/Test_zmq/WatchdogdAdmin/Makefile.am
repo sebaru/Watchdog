@@ -9,11 +9,11 @@ bin_PROGRAMS = WatchdogdAdmin
 WatchdogdAdmin_SOURCES = WatchdogdAdmin.c
 WatchdogdAdmin_LDADD   = $(top_builddir)/Commun/libwatchdog.la
 
-WatchdogdAdmin_CFLAGS = `pkg-config --cflags glib-2.0`
+WatchdogdAdmin_CFLAGS = `pkg-config --cflags glib-2.0 libczmq`
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/WatchdogdAdmin/Include
 
-WatchdogdAdmin_LDFLAGS = -lpopt -lreadline `pkg-config --libs glib-2.0`
+WatchdogdAdmin_LDFLAGS = `pkg-config --libs glib-2.0 libczmq popt readline`
 
 MAINTAINERCLEANFILES = Makefile.in

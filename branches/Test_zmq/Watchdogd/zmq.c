@@ -72,7 +72,8 @@
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Bind_zmq ( struct ZMQUEUE *zmq, gchar *type, gchar *nom, gint port )
-  { g_snprintf( zmq->endpoint, sizeof(zmq->endpoint), "%s://%s:%d", type, nom, port );
+  { if (port) g_snprintf( zmq->endpoint, sizeof(zmq->endpoint), "%s://%s:%d", type, nom, port );
+         else g_snprintf( zmq->endpoint, sizeof(zmq->endpoint), "%s://%s", type, nom );
     if ( zmq_bind (zmq->socket, zmq->endpoint) == -1 ) 
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                  "%s: ZMQ Bind '%s' to '%s' Failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
@@ -88,7 +89,8 @@
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Connect_zmq ( struct ZMQUEUE *zmq, gchar *type, gchar *nom, gint port )
-  { g_snprintf( zmq->endpoint, sizeof(zmq->endpoint), "%s://%s:%d", type, nom, port );
+  { if (port) g_snprintf( zmq->endpoint, sizeof(zmq->endpoint), "%s://%s:%d", type, nom, port );
+         else g_snprintf( zmq->endpoint, sizeof(zmq->endpoint), "%s://%s", type, nom );
     if ( zmq_connect (zmq->socket, zmq->endpoint) == -1 ) 
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                  "%s: ZMQ Connect '%s' to '%s' Failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
