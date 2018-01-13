@@ -106,10 +106,6 @@
      { struct ZMQUEUE *zmq_to_slave;                                                         /* Message Queue vers les slaves */
        struct ZMQUEUE *zmq_to_master;
      };
-    union
-     { struct ZMQUEUE *zmq_from_slave;                                                     /* Message Queue depuis les slaves */
-       struct ZMQUEUE *zmq_from_master;
-     };
 
     GSList *Librairies;                                                        /* Liste des librairies chargées pour Watchdog */
   };

@@ -29,7 +29,6 @@
  #define _SMS_H_
 
  #define NOM_THREAD                     "sms"
- #define ZMQUEUE_LOCAL                  NOM_THREAD "-admin"
 
  #define TOP_MIN_ENVOI_SMS              1200                                      /* 2 minutes sans envoi de SMS au démarrage */
  #define TAILLE_SMSBOX_APIKEY           64                                     /* Nombre de caractere dans la clef API SMSBOX */
@@ -55,12 +54,11 @@
   };
 
 /*********************************************** Définitions des prototypes ***************************************************/
- extern void Envoyer_sms_smsbox_text ( gchar *texte );                                                          /* Dans Sms.c */
- extern gboolean Sms_Lire_config ( void );
- extern void Envoyer_sms_gsm_text ( gchar *texte );
-
+ extern gboolean Sms_Lire_config ( void );                                                                      /* Dans Sms.c */
+ extern gchar *Admin_response ( gchar *ligne );
  extern gboolean Sms_Recuperer_smsDB ( struct DB *db );
  extern struct SMSDB *Sms_Recuperer_smsDB_suite( struct DB *db );
-
+ extern void Envoyer_sms_smsbox_text ( gchar *texte );
+ extern void Envoyer_sms_gsm_text ( gchar *texte );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

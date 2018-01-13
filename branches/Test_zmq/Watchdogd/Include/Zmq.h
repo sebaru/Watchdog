@@ -31,7 +31,8 @@
  #include <glib.h>
  #include <zmq.h>
 
- #define ZMQUEUE_LIVE_MSGS  "live-msgs"
+ #define ZMQUEUE_LIVE_MSGS     "live-msgs"
+ #define ZMQUEUE_LIVE_THREADS  "live-threads"
 
  struct ZMQUEUE
   { void *socket;
@@ -47,7 +48,8 @@
   };
 
  enum
-  { TAG_ZMQ_HISTO,
+  { TAG_ZMQ_TO_HISTO,
+    TAG_ZMQ_TO_THREADS,
     NBR_ZMQ_TAG
   };
 /************************************************ Définitions des prototypes **************************************************/

@@ -205,6 +205,7 @@
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct CMD_TYPE_HISTO *histo, histo_buf;
     struct ZMQUEUE *zmq_msg;
+    struct ZMQUEUE *zmq_master;
     struct ZMQUEUE *zmq_admin;
     static gboolean audio_stop = TRUE;
 
@@ -231,11 +232,16 @@
     zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
     Connect_zmq (zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
 
+    zmq_master = New_zmq ( ZMQ_SUB, "listen-to-MSRV" );
+    Connect_zmq (zmq_msg, "inproc", ZMQUEUE_LIVE_THREADS, 0 );
+
     zmq_admin = New_zmq ( ZMQ_REP, "listen-to-admin" );
     Bind_zmq (zmq_admin, "inproc", NOM_THREAD "-admin", 0 );
 
     while(Cfg_audio.lib->Thread_run == TRUE)                                                 /* On tourne tant que necessaire */
-     { gchar buffer[2048];
+     { gchar buffer[256];
+       struct MSRV_EVENT *event;
+       void *payload;
 
        if (Cfg_audio.lib->Thread_sigusr1)                                                             /* On a recu sigusr1 ?? */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
@@ -249,11 +255,19 @@
            }
         } else audio_stop = TRUE;
 
-       if (Recv_zmq ( zmq_admin, &buffer, sizeof(buffer)) > 0 )                           /* As-t'on recu un paquet d'admin ? */
+       if (Recv_zmq (zmq_admin, &buffer, sizeof(buffer)) > 0)                             /* As-t'on recu un paquet d'admin ? */
         { gchar *response;
           response = Admin_response ( buffer );
           Send_zmq ( zmq_admin, response, strlen(response)+1 );
           g_free(response);
+        }
+
+       if (Recv_zmq_with_tag ( zmq_master, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
+        { if ( strcmp( event->instance, Config.instance_id ) && strcmp (event->instance, "*") ) break;
+          if ( strcmp( event->thread, NOM_THREAD ) && strcmp ( event->thread, "*" ) ) break;
+
+          Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
+                   "%s : Reception d'un message du master : %s", (gchar *)payload );
         }
 
        if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) )
@@ -287,6 +301,7 @@
         }
      }
     Close_zmq ( zmq_msg );
+    Close_zmq ( zmq_master );
     Close_zmq ( zmq_admin );
 end:
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
