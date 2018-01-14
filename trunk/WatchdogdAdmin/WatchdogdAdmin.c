@@ -84,6 +84,7 @@
      { printf("Not enough memory to open connexion\n");
        return(FALSE);       
      }
+    printf("Connexion to '%s' OK\n", Socket_file);
 
     return(TRUE);
   }

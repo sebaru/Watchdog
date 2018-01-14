@@ -183,12 +183,21 @@
     lws_write ( wsi, buffer, taille_buf, LWS_WRITE_HTTP);                                                   /* Send to client */
   }
 /******************************************************************************************************************************/
-/* CB_ws_login : Gere le protocole WS status (appellée par libwebsockets)                                                     */
+/* CB_ws_histos : Gere le protocole WS histos (appellée par libwebsockets)                                                    */
 /* Entrées : le contexte, le message, l'URL                                                                                   */
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
 /******************************************************************************************************************************/
- static gint CB_ws_login ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
-  { return(1);
+ static gint CB_ws_histos ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
+  { switch (tag)
+     { case LWS_CALLBACK_ESTABLISHED: lws_callback_on_writable(wsi);
+            break;
+
+       case LWS_CALLBACK_SERVER_WRITEABLE:
+            lws_write(wsi, "test", strlen("test"), 0 );
+            lws_callback_on_writable(wsi);
+            break;
+     }
+    return(0);
   }
 /******************************************************************************************************************************/
 /* Http_CB_file_upload : Récupère les data de la requete POST en cours                                                        */
@@ -347,7 +356,7 @@
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct lws_protocols WS_PROTOS[] =
      { { "http-only", CB_http, sizeof(struct HTTP_PER_SESSION_DATA), 0 },       /* first protocol must always be HTTP handler */
-       { "ws-login", CB_ws_login, 0, 0 },
+       { "histos", CB_ws_histos, 0, 0 },
        { NULL, NULL, 0, 0 } /* terminator */
      };
     struct stat sbuf;
