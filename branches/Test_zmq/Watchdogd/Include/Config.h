@@ -31,7 +31,7 @@
  #define NOM_TABLE_CONFIG         "config"                          /* Nom de la table en base de données */
 
  #define TAILLE_HOME              80                                           /* Chemin HOME de watchdog */
- #define TAILLE_INSTANCE_ID       12                                           /* Chemin HOME de watchdog */
+ #define TAILLE_INSTANCE_ID       24                                           /* Chemin HOME de watchdog */
 
  extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 
@@ -67,12 +67,8 @@
  #define DEFAUT_DB_USERNAME             "watchdog"    /* Ne pas depasser TAILLE_ADMIN_USERNAME caracteres */
  #define DEFAUT_DB_PASSWORD             "seb"            /* Ne pas depasser TAILLE_DB_PASSWORD caractères */
  #define DEFAUT_DB_PORT                 3306
- #define DEFAUT_GLOBAL_ID               "MASTER"                /* Ne pas depasser TAILLE_HOME caracteres */
  #define DEFAUT_LIBRAIRIE_DIR           "/usr/local/lib"        /* Ne pas depasser TAILLE_HOME caracteres */
- #define DEFAUT_TELLSTICK_A_MIN         -1
- #define DEFAUT_TELLSTICK_A_MAX         -1
- #define DEFAUT_ASTERISK_M_MIN          -1
- #define DEFAUT_ASTERISK_M_MAX          -1
+
 /******************************************* Prototypes de fonctions **************************************/
  extern void Lire_config ( char *fichier_config );
  extern void Print_config ( void );

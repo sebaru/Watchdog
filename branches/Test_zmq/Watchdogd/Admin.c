@@ -84,8 +84,9 @@
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
              "%s: Commande Received from %s@%s : %s", __func__, user, host, ligne );
 
-    g_snprintf( chaine, sizeof(chaine), "At %010.1f, processing '%s'", (gdouble)Partage->top/10.0, ligne );
-    response = Admin_write ( g_strdup(chaine), "" );
+    g_snprintf( chaine, sizeof(chaine), "At %010.1f, processing '%s' on instance '%s'",
+                (gdouble)Partage->top/10.0, ligne, Config.instance_id );
+    response = Admin_write ( g_strdup(chaine), "\n" );
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
 

@@ -177,7 +177,7 @@
 /********************************************** Envoi des histos et des motifs ************************************************/
        if (client->mode == VALIDE)                                                /* Envoi au suppression des histo au client */
         { struct CMD_TYPE_HISTO histo;
-          if ( Recv_zmq ( zmq_msg, &histo, sizeof(histo) ) == sizeof(histo) )
+          if ( Recv_zmq ( zmq_msg, &histo, sizeof(histo) ) == sizeof(struct CMD_TYPE_HISTO) )
            { Envoyer_histo_au_client ( client, &histo ); }
           Envoyer_new_motif_au_client (client);
           Envoyer_event_au_client (client);

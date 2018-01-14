@@ -350,8 +350,8 @@
        { "ws-login", CB_ws_login, 0, 0 },
        { NULL, NULL, 0, 0 } /* terminator */
      };
-    struct stat sbuf;
     void *zmq_socket_msg;
+    struct stat sbuf;
 
     prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */

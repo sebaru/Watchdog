@@ -289,10 +289,10 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
 /************************************************* Socket ZMQ interne *********************************************************/
-    Partage->com_msrv.zmq_msg = New_zmq ( ZMQ_PUB, "pub-msgs" );
+    Partage->com_msrv.zmq_msg = New_zmq ( ZMQ_PUB, "pub-int-msgs" );
     Bind_zmq ( Partage->com_msrv.zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
 
-    zmq_to_threads = New_zmq ( ZMQ_PUB, "pub-threads" );
+    zmq_to_threads = New_zmq ( ZMQ_PUB, "pub-int-threads" );
     Bind_zmq ( zmq_to_threads, "inproc", ZMQUEUE_LIVE_THREADS, 0 );
 
 /***************************************** Socket pour une instance master ****************************************************/
