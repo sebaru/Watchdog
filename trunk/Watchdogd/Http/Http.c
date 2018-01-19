@@ -189,22 +189,35 @@
 /******************************************************************************************************************************/
  static gint CB_ws_histos ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
   { struct WS_PER_SESSION_DATA *pss;
-    pss = lws_wsi_user ( wsi );
+    gchar *util;
 
+    pss = lws_wsi_user ( wsi );
     switch (tag)
      { case LWS_CALLBACK_ESTABLISHED: lws_callback_on_writable(wsi);
-            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback established", __func__ );
+            if (Get_phpsessionid_cookie(wsi)==FALSE)                                              /* Recupere le PHPSessionID */
+             { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: No PHPSESSID. Killing.", __func__ );
+               return(1);
+             }
+            util = Rechercher_util_by_phpsessionid ( pss->sid );
+            if (!util)
+             { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: No user found for session %s.", __func__, pss->sid );
+               return(1);
+             }
+            g_snprintf( pss->util, sizeof(pss->util), "%s", util );
+            g_free(util);
+            
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback established for %s", __func__, pss->util );
             pss->zmq = New_zmq ( ZMQ_SUB, "listen-to_msgs" );
             Connect_zmq ( pss->zmq, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
             break;
        case LWS_CALLBACK_CLOSED:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback closed", __func__ );
-            Close_zmq(pss->zmq);
+            if (pss->zmq) Close_zmq(pss->zmq);
             break;
        case LWS_CALLBACK_SERVER_WRITEABLE:
              { struct CMD_TYPE_HISTO histo_buf;
                gchar buf[LWS_PRE+128];
-               if ( Recv_zmq ( pss->zmq, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )
+               if ( pss->zmq && Recv_zmq ( pss->zmq, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )
                 { struct CMD_TYPE_HISTO *histo = &histo_buf;
                   g_snprintf( &buf[LWS_PRE], 128, "%s", histo->msg.libelle );
                   lws_write(wsi, &buf[LWS_PRE], strlen(histo->msg.libelle), LWS_WRITE_TEXT );
@@ -307,8 +320,6 @@
                lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
                                         (char *)&remote_name, sizeof(remote_name),
                                         (char *)&remote_ip, sizeof(remote_ip) );
-               session = Http_get_session ( wsi, remote_name, remote_ip );
-               if (session) session->last_top = Partage->top;                                             /* Tagging temporel */
 
                pss = lws_wsi_user ( wsi );
                if ( ! strcasecmp ( url, "/favicon.ico" ) )

@@ -233,7 +233,7 @@
     Connect_zmq (zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
 
     zmq_master = New_zmq ( ZMQ_SUB, "listen-to-MSRV" );
-    Connect_zmq (zmq_msg, "inproc", ZMQUEUE_LIVE_THREADS, 0 );
+    Connect_zmq (zmq_master, "inproc", ZMQUEUE_LIVE_THREADS, 0 );
 
     zmq_admin = New_zmq ( ZMQ_REP, "listen-to-admin" );
     Bind_zmq (zmq_admin, "inproc", NOM_THREAD "-admin", 0 );

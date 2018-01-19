@@ -108,14 +108,13 @@
 /* Entrées: le SID a tester                                                                                                   */
 /* Sortie : la session, ou NULL si non trouvée                                                                                */
 /******************************************************************************************************************************/
- struct HTTP_SESSION *Http_get_session ( struct lws *wsi, gchar *remote_name, gchar *remote_ip )
-  { struct HTTP_SESSION *session = NULL;
-	   struct HTTP_PER_SESSION_DATA *pss;
-    gchar buffer[4096], *sid = NULL;
-    GSList *liste;
+ gboolean Get_phpsessionid_cookie ( struct lws *wsi )
+  { struct WS_PER_SESSION_DATA *pss;
+    gchar buffer[4096];
 
     pss = lws_wsi_user ( wsi );
-    if ( lws_hdr_total_length( wsi, WSI_TOKEN_HTTP_COOKIE ) <= 0) return(NULL);
+    g_snprintf( pss->sid, sizeof(pss->sid), "none" );
+    if ( lws_hdr_total_length( wsi, WSI_TOKEN_HTTP_COOKIE ) <= 0) return(FALSE);
     if ( lws_hdr_copy( wsi, buffer, sizeof(buffer), WSI_TOKEN_HTTP_COOKIE ) != -1 )     /* Récupération de la valeur du token */
      { gchar *cookies, *cookie, *savecookies;
        gchar *cookie_name, *cookie_value, *savecookie;
@@ -125,30 +124,17 @@
           cookie_name=strtok_r( cookie, "=", &savecookie);                                               /* Découpage par "=" */
           if (cookie_name)
            { cookie_value = strtok_r ( NULL, "=", &savecookie );
-             if ( ! strcmp( cookie_name, "sid" ) )
-              { sid = cookie_value;
-                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "Http_get_session : Searching for sid %s", sid );
-                pthread_mutex_lock( &Cfg_http.lib->synchro );                         /* Recherche dans la liste des sessions */
-                liste = Cfg_http.Liste_sessions;
-                while ( liste )
-                 { session = (struct HTTP_SESSION *)liste->data;
-                   if ( ! g_strcmp0 ( session->sid, sid ) )
-                    { pss->session = session;
-                      break;
-                    }
-                   liste = liste->next;
-                 }
-                pthread_mutex_unlock( &Cfg_http.lib->synchro );
-                if (liste) return(session);
-                return(NULL);
+             if (!strcmp(cookie_name, "PHPSESSID"))
+              { g_snprintf( pss->sid, sizeof(pss->sid), "%s", cookie_value );
+                return(TRUE);
               }
-             else Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                           "%s: Cookie found for %s(%s): %s=%s", __func__,
-                            remote_name, remote_ip, (cookie_name ? cookie_name : "none"), (cookie_value ? cookie_value : "none") );
+             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                      "%s: Cookie found for: %s=%s", __func__,
+                      (cookie_name ? cookie_name : "none"), (cookie_value ? cookie_value : "none") );
            }
         }       
      }
-    return(NULL);                                                                          /* il n'y a pas de session trouvée */
+    return(FALSE);
   }
 /******************************************************************************************************************************/
 /* Http Liberer_session : Libere la mémoire réservée par la structure session                                                 */

@@ -752,7 +752,7 @@
                                              "`x_forwarded_for` varchar(50) NOT NULL,"
                                              "`data` text NOT NULL,"
                                              "PRIMARY KEY (`id`)"
-                                             ") ENGINE=InnoDB DEFAULT CHARSET=utf8"
+                                             ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
                  );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
