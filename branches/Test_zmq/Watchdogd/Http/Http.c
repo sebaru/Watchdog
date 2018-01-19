@@ -183,12 +183,37 @@
     lws_write ( wsi, buffer, taille_buf, LWS_WRITE_HTTP);                                                   /* Send to client */
   }
 /******************************************************************************************************************************/
-/* CB_ws_login : Gere le protocole WS status (appellée par libwebsockets)                                                     */
+/* CB_ws_histos : Gere le protocole WS histos (appellée par libwebsockets)                                                    */
 /* Entrées : le contexte, le message, l'URL                                                                                   */
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
 /******************************************************************************************************************************/
- static gint CB_ws_login ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
-  { return(1);
+ static gint CB_ws_histos ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
+  { struct WS_PER_SESSION_DATA *pss;
+    pss = lws_wsi_user ( wsi );
+
+    switch (tag)
+     { case LWS_CALLBACK_ESTABLISHED: lws_callback_on_writable(wsi);
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback established", __func__ );
+            pss->zmq = New_zmq ( ZMQ_SUB, "listen-to_msgs" );
+            Connect_zmq ( pss->zmq, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+            break;
+       case LWS_CALLBACK_CLOSED:
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback closed", __func__ );
+            Close_zmq(pss->zmq);
+            break;
+       case LWS_CALLBACK_SERVER_WRITEABLE:
+             { struct CMD_TYPE_HISTO histo_buf;
+               gchar buf[LWS_PRE+128];
+               if ( Recv_zmq ( pss->zmq, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )
+                { struct CMD_TYPE_HISTO *histo = &histo_buf;
+                  g_snprintf( &buf[LWS_PRE], 128, "%s", histo->msg.libelle );
+                  lws_write(wsi, &buf[LWS_PRE], strlen(histo->msg.libelle), LWS_WRITE_TEXT );
+                }
+             }
+            lws_callback_on_writable(wsi);
+            break;
+     }
+    return(0);
   }
 /******************************************************************************************************************************/
 /* Http_CB_file_upload : Récupère les data de la requete POST en cours                                                        */
@@ -347,10 +372,9 @@
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct lws_protocols WS_PROTOS[] =
      { { "http-only", CB_http, sizeof(struct HTTP_PER_SESSION_DATA), 0 },       /* first protocol must always be HTTP handler */
-       { "ws-login", CB_ws_login, 0, 0 },
+       { "histos", CB_ws_histos, sizeof(struct WS_PER_SESSION_DATA), 0 },
        { NULL, NULL, 0, 0 } /* terminator */
      };
-    void *zmq_socket_msg;
     struct stat sbuf;
 
     prctl(PR_SET_NAME, "W-HTTP", 0, 0, 0 );
@@ -413,6 +437,7 @@
      }
 
 	   Cfg_http.ws_context = lws_create_context(&Cfg_http.ws_info);
+ 
     if (!Cfg_http.ws_context)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                 "%s: WebSocket Create Context creation error (%s). Shutting Down %p", __func__,
@@ -423,18 +448,14 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
              "%s: WebSocket Create OK. Listening on port %d with ssl=%d", __func__, Cfg_http.tcp_port, Cfg_http.ssl_enable );
 
-    if ( (zmq_socket_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" )) == NULL)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Socket MSG Failed (%s)", __func__, zmq_strerror(errno) ); }
-    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Socket MSG OK", __func__ );
+#ifdef bouh
+    Abonner_distribution_message ( Http_Gerer_message );                            /* Abonnement à la diffusion des messages */
+    Abonner_distribution_sortie  ( Http_Gerer_sortie );                              /* Abonnement à la diffusion des sorties */
 
-    if ( Connect_zmq ( zmq_socket_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 ) == -1 ) 
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ connect ZMQUEUE_LIVE_EVENTS Failed (%s)", __func__, zmq_strerror(errno) ); }
-    else Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ connect ZMQUEUE_LIVE_EVENTS OK", __func__ );
-
+#endif
     Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
     while(Cfg_http.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */
      { static gint last_top = 0;
-       struct CMD_TYPE_HISTO histo;
        usleep(10000);
        sched_yield();
 
@@ -446,10 +467,7 @@
           Cfg_http.lib->Thread_sigusr1 = FALSE;
         }
 
-   	   lws_service( Cfg_http.ws_context, 100);                                  /* On lance l'écoute des connexions websocket */
-       if ( Recv_zmq ( zmq_socket_msg, &histo, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )
-        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Recu 1 msg du master !", __func__ );
-        }
+   	   lws_service( Cfg_http.ws_context, 1000);                                 /* On lance l'écoute des connexions websocket */
 
        if ( last_top + 600 <= Partage->top )                                                            /* Toutes les minutes */
         { Http_Check_sessions ();
@@ -461,7 +479,6 @@
     
     lws_context_destroy(Cfg_http.ws_context);                                                   /* Arret du serveur WebSocket */
     Cfg_http.ws_context = NULL;
-    Close_zmq ( zmq_socket_msg );
 
 end:
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,

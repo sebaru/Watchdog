@@ -86,6 +86,10 @@
     gint post_data_length;
   };
 
+ struct WS_PER_SESSION_DATA
+  { struct ZMQUEUE *zmq;
+  };
+
  struct HTTP_SESSION
   { /*gint     type;*/
     gchar    sid[2*EVP_MAX_MD_SIZE+1];
