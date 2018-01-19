@@ -188,12 +188,28 @@
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
 /******************************************************************************************************************************/
  static gint CB_ws_histos ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
-  { switch (tag)
-     { case LWS_CALLBACK_ESTABLISHED: lws_callback_on_writable(wsi);
-            break;
+  { struct WS_PER_SESSION_DATA *pss;
+    pss = lws_wsi_user ( wsi );
 
+    switch (tag)
+     { case LWS_CALLBACK_ESTABLISHED: lws_callback_on_writable(wsi);
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback established", __func__ );
+            pss->zmq = New_zmq ( ZMQ_SUB, "listen-to_msgs" );
+            Connect_zmq ( pss->zmq, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+            break;
+       case LWS_CALLBACK_CLOSED:
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback closed", __func__ );
+            Close_zmq(pss->zmq);
+            break;
        case LWS_CALLBACK_SERVER_WRITEABLE:
-            lws_write(wsi, "test", strlen("test"), 0 );
+             { struct CMD_TYPE_HISTO histo_buf;
+               gchar buf[LWS_PRE+128];
+               if ( Recv_zmq ( pss->zmq, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )
+                { struct CMD_TYPE_HISTO *histo = &histo_buf;
+                  g_snprintf( &buf[LWS_PRE], 128, "%s", histo->msg.libelle );
+                  lws_write(wsi, &buf[LWS_PRE], strlen(histo->msg.libelle), LWS_WRITE_TEXT );
+                }
+             }
             lws_callback_on_writable(wsi);
             break;
      }
@@ -356,7 +372,7 @@
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct lws_protocols WS_PROTOS[] =
      { { "http-only", CB_http, sizeof(struct HTTP_PER_SESSION_DATA), 0 },       /* first protocol must always be HTTP handler */
-       { "histos", CB_ws_histos, 0, 0 },
+       { "histos", CB_ws_histos, sizeof(struct WS_PER_SESSION_DATA), 0 },
        { NULL, NULL, 0, 0 } /* terminator */
      };
     struct stat sbuf;

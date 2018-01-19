@@ -63,23 +63,13 @@
 /* Entrée : le client a gerer                                                                                                 */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Envoyer_histo_au_client ( struct CLIENT *client )
-  { struct CMD_TYPE_HISTO *histo;
-    
-    if ( client->Liste_histo == NULL ) return;
-
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-    histo = (struct CMD_TYPE_HISTO *) client->Liste_histo->data;
-    client->Liste_histo = g_slist_remove ( client->Liste_histo, histo );
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-       
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "Envoyer_histo_au_client: Histo traite : id = %06d, msg=%04d, libelle=%s",
-              histo->id, histo->msg.num, histo->msg.libelle );
+ static void Envoyer_histo_au_client ( struct CLIENT *client, struct CMD_TYPE_HISTO *histo )
+  { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+             "%s: Histo traite : id = %06d, alive = %d, msg=%04d, libelle=%s", __func__,
+              histo->id, histo->alive, histo->msg.num, histo->msg.libelle );
 
     Envoi_client( client, TAG_HISTO, (histo->alive ? SSTAG_SERVEUR_SHOW_HISTO : SSTAG_SERVEUR_DEL_HISTO),
                   (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
-    g_free(histo);
   }
 /******************************************************************************************************************************/
 /* Envoyer_event_au_client: Parcours la liste des events et les envoi                                                         */
@@ -115,15 +105,17 @@
   { static gint thread_count = 0;
     pthread_t tid;
     gchar nom[16];
+    struct ZMQUEUE *zmq_msg;
 
     client->ssrv_id = thread_count++;
     g_snprintf(nom, sizeof(nom), "W-SSRV-%06d", client->ssrv_id );
     prctl(PR_SET_NAME, nom, 0, 0, 0 );
 
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
-              "Run_handle_client: Demarrage . . . TID = %p", pthread_self() );
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
-
+    zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
+    Connect_zmq ( zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+     
     while( Cfg_ssrv.lib->Thread_run == TRUE )                                                /* On tourne tant que necessaire */
      { usleep(1000);
        sched_yield();
@@ -184,7 +176,9 @@
         }
 /********************************************** Envoi des histos et des motifs ************************************************/
        if (client->mode == VALIDE)                                                /* Envoi au suppression des histo au client */
-        { Envoyer_histo_au_client (client);
+        { struct CMD_TYPE_HISTO histo;
+          if ( Recv_zmq ( zmq_msg, &histo, sizeof(histo) ) == sizeof(struct CMD_TYPE_HISTO) )
+           { Envoyer_histo_au_client ( client, &histo ); }
           Envoyer_new_motif_au_client (client);
           Envoyer_event_au_client (client);
         }
@@ -198,9 +192,10 @@
      }
 
 /**************************************************** Arret du hangle_client **************************************************/
+    Close_zmq ( zmq_msg );
     Deconnecter(client);
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
-              "Run_handle_client: Down . . . TID = %p", pthread_self() );
+              "%s: Down . . . TID = %p", __func__, pthread_self() );
     pthread_exit( NULL );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

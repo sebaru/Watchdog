@@ -250,8 +250,8 @@
   { struct CMD_TYPE_MESSAGE *msg;
     struct DB *db;
 
-    db = *db_orig;                      /* Récupération du pointeur initialisé par la fonction précédente */
-    Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
+    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
@@ -261,13 +261,13 @@
     msg = (struct CMD_TYPE_MESSAGE *)g_try_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
     if (!msg) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
     else
-     { memcpy( &msg->libelle,       db->row[2],  sizeof(msg->libelle ) );    /* Recopie dans la structure */
-       memcpy( &msg->syn_libelle,   db->row[4],  sizeof(msg->syn_libelle) );
-       memcpy( &msg->syn_groupe,    db->row[8],  sizeof(msg->syn_groupe  ) );
-       memcpy( &msg->syn_page,      db->row[9],  sizeof(msg->syn_page    ) );
-       memcpy( &msg->libelle_audio, db->row[11], sizeof(msg->libelle_audio) );
-       memcpy( &msg->libelle_sms,   db->row[12], sizeof(msg->libelle_sms  ) );
-       memcpy( &msg->dls_shortname, db->row[15], sizeof(msg->dls_shortname) );
+     { g_snprintf( msg->libelle,       sizeof(msg->libelle      ), "%s", db->row[2]  );          /* Recopie dans la structure */
+       g_snprintf( msg->syn_libelle,   sizeof(msg->syn_libelle  ), "%s", db->row[4]  );
+       g_snprintf( msg->syn_groupe,    sizeof(msg->syn_groupe   ), "%s", db->row[8]  );
+       g_snprintf( msg->syn_page,      sizeof(msg->syn_page     ), "%s", db->row[9]  );
+       g_snprintf( msg->libelle_audio, sizeof(msg->libelle_audio), "%s", db->row[11] );
+       g_snprintf( msg->libelle_sms,   sizeof(msg->libelle_sms  ), "%s", db->row[12] );
+       g_snprintf( msg->dls_shortname, sizeof(msg->dls_shortname), "%s", db->row[15] );
        msg->id          = atoi(db->row[0]);
        msg->num         = atoi(db->row[1]);
        msg->type        = atoi(db->row[3]);

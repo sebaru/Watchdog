@@ -8,7 +8,7 @@ SUBDIRS = Include Serveur Dls TraductionDLS Archive Enocean \
 
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
-                    shm.c Config.c Mnemo_Registre.c \
+                    zmq.c shm.c Config.c Mnemo_Registre.c \
                     db.c Mnemonique.c Mnemo_AI.c Mnemo_CPT_IMP.c Mnemo_CPT_H.c Message.c \
 		    Icones.c classe.c \
 		    Mnemo_Tempo.c Histo_msgs.c Camera.c distrib_Events.c \
@@ -25,11 +25,11 @@ Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
 
 # rdynamic pour autoriser l'utilsation des fonctions du thread principal par les librairies dlopened
 Watchdogd_LDFLAGS = -rdynamic -lpopt \
-                   `pkg-config --libs glib-2.0 gthread-2.0 libcurl openssl libxml-2.0` \
+                   `pkg-config --libs glib-2.0 gthread-2.0 libcurl openssl libxml-2.0 libczmq` \
                    `libgcrypt-config --libs` \
                    `mysql_config --libs`
 
-Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libcurl openssl libxml-2.0` \
+Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libcurl openssl libxml-2.0 libczmq` \
                    `libgcrypt-config --cflags` \
                    `mysql_config --cflags`
 

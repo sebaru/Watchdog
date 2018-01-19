@@ -34,49 +34,6 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Abonner_distribution_message: Abonnement d'un thread aux diffusions d'un message                                           */
-/* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                                             */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- void Abonner_distribution_histo ( void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo) )
-  { pthread_mutex_lock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
-    Partage->com_msrv.Liste_abonne_msg = g_slist_prepend( Partage->com_msrv.Liste_abonne_msg, Gerer_histo );
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
-  }
-/******************************************************************************************************************************/
-/* Desabonner_distribution_message: Desabonnement d'un thread aux diffusions d'un message                                     */
-/* Entrée : une fonction permettant de gerer l'arrivée d'un histo                                                             */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- void Desabonner_distribution_histo ( void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo) )
-  { pthread_mutex_lock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
-    Partage->com_msrv.Liste_abonne_msg = g_slist_remove( Partage->com_msrv.Liste_abonne_msg, Gerer_histo );
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
-  }
-/******************************************************************************************************************************/
-/* Envoyer_message_aux_abonnes: Envoi le message en parametre aux abonnes                                                     */
-/* Entrée : le message a envoyer                                                                                              */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Envoyer_histo_aux_abonnes ( struct CMD_TYPE_HISTO *histo )
-  { GSList *liste;
-
-    pthread_mutex_lock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
-    liste = Partage->com_msrv.Liste_abonne_msg;
-    while (liste)                                                                                  /* Pour chacun des abonnes */
-     { void (*Gerer_histo) (struct CMD_TYPE_HISTO *histo);
-       struct CMD_TYPE_HISTO *dup_histo;
-       dup_histo = (struct CMD_TYPE_HISTO *)g_try_malloc0(sizeof(struct CMD_TYPE_HISTO));
-       if (dup_histo)
-        { Gerer_histo = liste->data;
-          memcpy ( dup_histo, histo, sizeof(struct CMD_TYPE_HISTO) );
-          Gerer_histo (dup_histo);
-        }
-       liste = liste->next;
-     }
-    pthread_mutex_unlock ( &Partage->com_msrv.synchro_Liste_abonne_msg );
-  }
-/******************************************************************************************************************************/
 /* Gerer_message_repeat: Gestion de la répétition des messages                                                                */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
@@ -123,7 +80,7 @@
     msg = Rechercher_messageDB( num );
     if (!msg)
      { Info_new( Config.log, Config.log_msrv, LOG_INFO, 
-                "Gerer_arrive_message_dls_on: Message %03d not found", num );
+                "%s: Message %03d not found", __func__, num );
        return;                                                            /* On n'a pas trouvé le message, alors on s'en va ! */
      }
     memset( &histo, 0, sizeof(histo) );
@@ -132,7 +89,7 @@
 
     if (!histo.msg.enable)                                                       /* Distribution du message aux sous serveurs */
      { Info_new( Config.log, Config.log_msrv, LOG_INFO, 
-                "Gerer_arrive_message_dls_on: Message %03d not enabled !", num );
+                "%s: Message %03d not enabled !", __func__, num );
        return;
      }
 /***************************************** Création de la structure interne de stockage ***************************************/
@@ -144,7 +101,8 @@
     Ajouter_histo_msgsDB( &histo );                                                                    /* Si ajout dans DB OK */
 
 /******************************************************* Envoi du message aux librairies abonnées *****************************/
-    Envoyer_histo_aux_abonnes ( &histo );
+    Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, TAG_ZMQ_TO_HISTO, NULL, NULL, &histo, sizeof(struct CMD_TYPE_HISTO) );
 /************************************************** Gestion des repeat ********************************************************/
     if (histo.msg.time_repeat) 
      { struct CMD_TYPE_HISTO *dup_histo;
@@ -199,7 +157,8 @@
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
     Modifier_histo_msgsDB ( &histo );
-    Envoyer_histo_aux_abonnes ( &histo );
+    Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, TAG_ZMQ_TO_HISTO, NULL, NULL, &histo, sizeof(struct CMD_TYPE_HISTO) );
   }
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
@@ -213,7 +172,7 @@
        event = Partage->com_msrv.liste_msg->data;                        /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg, event );
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "Gerer_arrive_message_dls: Handle MSG%03d=%d, Reste a %d a traiter",
+                "%s: Handle MSG%03d=%d, Reste a %d a traiter", __func__,
                  event->num, event->etat, g_slist_length(Partage->com_msrv.liste_msg) );
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
 

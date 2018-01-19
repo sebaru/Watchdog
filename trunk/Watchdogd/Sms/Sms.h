@@ -39,7 +39,6 @@
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
     gboolean enable;                                                                    /* Is this tread is enabled at boot ? */
     gboolean reload;                                                      /* Demande rechargement des SMS en bases de données */
-    GSList *Liste_histos;                                                              /* liste de struct MSGDB msg a envoyer */
     gchar smsbox_apikey[TAILLE_SMSBOX_APIKEY+1];                                                           /* Clef API SMSBOX */
     guint bit_comm;                                                           /* Bit B d'état de la communication avec le GSM */
   } Cfg_sms;
@@ -55,12 +54,11 @@
   };
 
 /*********************************************** Définitions des prototypes ***************************************************/
- extern void Envoyer_sms_smsbox_text ( gchar *texte );                                                          /* Dans Sms.c */
- extern gboolean Sms_Lire_config ( void );
- extern void Envoyer_sms_gsm_text ( gchar *texte );
-
+ extern gboolean Sms_Lire_config ( void );                                                                      /* Dans Sms.c */
+ extern gchar *Admin_response ( gchar *ligne );
  extern gboolean Sms_Recuperer_smsDB ( struct DB *db );
  extern struct SMSDB *Sms_Recuperer_smsDB_suite( struct DB *db );
-
+ extern void Envoyer_sms_smsbox_text ( gchar *texte );
+ extern void Envoyer_sms_gsm_text ( gchar *texte );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

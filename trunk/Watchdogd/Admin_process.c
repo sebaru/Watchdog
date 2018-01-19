@@ -177,17 +177,17 @@
     if ( ! strcmp ( commande, "list" ) )
      { gchar chaine[128];
 
-       g_snprintf( chaine, sizeof(chaine), " -- Liste des process" );
+       g_snprintf( chaine, sizeof(chaine), " | -- Liste des process" );
        response = Admin_write ( response, chaine );
 
        g_snprintf( chaine, sizeof(chaine),
-                  " | - Built-in D.L.S          -> running = %s, TID = %p",
+                  " | - Built-in D.L.S          -> running %s, TID = %p",
                    (Partage->com_dls.Thread_run ? "YES" : " NO"), (void *)Partage->com_dls.TID
                  );
        response = Admin_write ( response, chaine );
 
        g_snprintf( chaine, sizeof(chaine),
-                  " | - Built-in ARCHIVE        -> running = %s, TID = %p",
+                  " | - Built-in ARCHIVE        -> running %s, TID = %p",
                    (Partage->com_arch.Thread_run ? "YES" : " NO"), (void *)Partage->com_arch.TID
                  );
        response = Admin_write ( response, chaine );
