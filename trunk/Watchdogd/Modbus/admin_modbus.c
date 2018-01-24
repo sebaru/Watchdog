@@ -83,14 +83,14 @@
   { gchar chaine[512];
     g_snprintf( chaine, sizeof(chaine),
                 " |---------------------------\n"
-                " | MODBUS[%02d] ------> %s - %s\n"
+                " | MODBUS[%02d] ------> %s - %s (%s)\n"
                 " | - enable = %d, started = %d (bit B%04d=%d), watchdog = %03d, IP = %s\n"
                 " | - %03d Digital Input,  map_E = E%03d(->E%03d), %03d Analog  Input,  map_EA = EA%03d(->EA%03d)\n"
                 " | - %03d Digital Output, map_A = A%03d(->A%03d), %03d Analog  Output, map_AA = AA%03d(->AA%03d)\n"
                 " | - transaction_id = %06d, nbr_deconnect = %02d\n"
                 " | - last_reponse = %03ds ago, date_next_eana = in %03ds\n"
                 " | - retente = in %03ds\n",
-                module->modbus.id, module->modbus.libelle,  Modbus_mode_to_string(module),
+                module->modbus.id, module->modbus.libelle,  Modbus_mode_to_string(module), module->modbus.date_create,
                 module->modbus.enable, module->started, module->modbus.bit, B(module->modbus.bit),
                 module->modbus.watchdog, module->modbus.ip,
                 module->nbr_entree_tor, module->modbus.map_E,

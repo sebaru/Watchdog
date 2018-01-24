@@ -762,7 +762,14 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=3386;
+    if (database_version < 3444)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE modbus_module ADD `date_create` DATETIME NOT NULL AFTER `id`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE modbus_module DROP `instance_id`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version=3444;
 
     Libere_DB_SQL(&db);
 

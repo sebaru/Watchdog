@@ -673,7 +673,7 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `com
 
 CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `instance_id` text NOT NULL,
+  `date_create` datetime NOT NULL,
   `enable` tinyint(1) NOT NULL,
   `ip` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `watchdog` int(11) NOT NULL,
