@@ -763,9 +763,9 @@
      }
 
     if (database_version < 3444)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE modbus_module ADD `date_create` DATETIME NOT NULL AFTER `id`" );
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE modbus_modules ADD `date_create` DATETIME NOT NULL AFTER `id`" );
        Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE modbus_module DROP `instance_id`" );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE modbus_modules DROP `instance_id`" );
        Lancer_requete_SQL ( db, requete );
      }
 
