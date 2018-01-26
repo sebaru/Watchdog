@@ -76,9 +76,6 @@
 /* Communication des Evenements depuis SSRV vers les clients */
     GSList *Liste_events;                                                                       /* Liste des evenements recus */
 
-/* Communication des Histo depuis SSRV vers les clients */
-    GSList *Liste_histo;
-
 /* Communication des fichiers de travail vers les clients */
     GSList *Liste_file;
 
