@@ -673,7 +673,7 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `com
 
 CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `instance_id` text NOT NULL,
+  `date_create` datetime NOT NULL,
   `enable` tinyint(1) NOT NULL,
   `ip` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `watchdog` int(11) NOT NULL,
@@ -1018,7 +1018,7 @@ CREATE TABLE IF NOT EXISTS `scenario_ticks` (
 
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(96) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `access_level` int(11) NOT NULL DEFAULT '0',
   `mustchangepwd` tinyint(1) NOT NULL DEFAULT '0',
   `cansetpwd` tinyint(1) NOT NULL DEFAULT '0',
@@ -1063,4 +1063,4 @@ CREATE TABLE `users_sessions` (
   `x_forwarded_for` varchar(50) NOT NULL,
   `data` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

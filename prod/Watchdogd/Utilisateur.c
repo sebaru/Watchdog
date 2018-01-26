@@ -535,4 +535,46 @@
      { Libere_DB_SQL( &db ); }
     return( util );
   }
+/******************************************************************************************************************************/
+/* Rechercher_util_by_phpsessionid: Recuperation de l'utilisateur dont le PHPSESSID est en parametre                          */
+/* Entrées: un log, une db et un id d'utilisateur                                                                             */
+/* Sortie: une structure utilisateur, ou null si erreur                                                                       */
+/******************************************************************************************************************************/
+ gchar *Rechercher_util_by_phpsessionid( gchar *ssid )
+  { gchar requete[512], *sid, result[80];
+    struct DB *db;
+
+    sid = Normaliser_chaine ( ssid );                                                        /* Formatage correct des chaines */
+    if (!sid)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
+       return(NULL);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT name FROM %s AS user JOIN users_sessions AS session ON user.name = session.login"
+                " AND user.enable=1 AND user.mustchangepwd=0 AND session.id='%s'", NOM_TABLE_UTIL, sid );
+    g_free(sid);
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(NULL);
+     }
+
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
+
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       return(NULL);
+     }
+
+    g_snprintf( result, sizeof(result), "%s", db->row[0] );                                      /* Recopie dans la structure */
+    Libere_DB_SQL( &db );
+    return( g_strdup(result) );
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

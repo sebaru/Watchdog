@@ -92,6 +92,7 @@
 /************************************************** Gestion des modbus ********************************************************/
  struct MODBUSDB
   { guint id;                                                                     /* Numéro du module dans la base de données */
+    gchar date_create[20];
     gboolean enable;                                                                           /* Le module doit-il tourner ? */
     guint watchdog;                                           /* Le module doit-il etre auto-supervisé ? en dixeme de seconde */
     guint bit;                                                           /* Bit interne B d'etat communication avec le module */

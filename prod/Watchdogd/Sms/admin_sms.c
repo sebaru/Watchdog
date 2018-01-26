@@ -103,18 +103,19 @@
 /* Entrée: Le buffer d'entrée a compléter                                                                                     */
 /* Sortie: Le buffer de sortie complété                                                                                       */
 /******************************************************************************************************************************/
- gchar *Admin_command ( gchar *response, gchar *ligne )
+ gchar *Admin_response ( gchar *ligne )
   { gchar commande[128], chaine[128];
+    gchar *response = NULL;
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'SMS'" );
-       response = Admin_write ( response, "  dbcfg ...             - Get/Set Database Parameters" );
-       response = Admin_write ( response, "  reload                - Reload contacts from Database" );
-       response = Admin_write ( response, "  sms smsbox message    - Send 'message' via smsbox" );
-       response = Admin_write ( response, "  sms gsm    message    - Send 'message' via gsm" );
-       response = Admin_write ( response, "  list                  - Liste les contacts SMS" );
-       response = Admin_write ( response, "  help                  - This help" );
+     { response = Admin_write ( response, "  | -- Watchdog ADMIN -- Help du mode 'SMS'" );
+       response = Admin_write ( response, "  | - dbcfg ...             - Get/Set Database Parameters" );
+       response = Admin_write ( response, "  | - reload                - Reload contacts from Database" );
+       response = Admin_write ( response, "  | - sms smsbox message    - Send 'message' via smsbox" );
+       response = Admin_write ( response, "  | - sms gsm    message    - Send 'message' via gsm" );
+       response = Admin_write ( response, "  | - list                  - Liste les contacts SMS" );
+       response = Admin_write ( response, "  | - help                  - This help" );
      }
     else if ( ! strcmp ( commande, "list" ) )
      { response = Admin_sms_list ( response );
@@ -125,25 +126,25 @@
      { gchar message[80];
        sscanf ( ligne, "%s %s", commande, message );                                     /* Découpage de la ligne de commande */
        Envoyer_sms_gsm_text ( ligne + 4 );                   /* On envoie le reste de la liste, pas seulement le mot suivant. */
-       g_snprintf( chaine, sizeof(chaine), " Sms sent\n" );
+       g_snprintf( chaine, sizeof(chaine), " | - Sms sent\n" );
        response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "smsbox" ) )
      { gchar message[80];
        sscanf ( ligne, "%s %s", commande, message );                                     /* Découpage de la ligne de commande */
        Envoyer_sms_smsbox_text ( ligne + 7 );                /* On envoie le reste de la liste, pas seulement le mot suivant. */
-       g_snprintf( chaine, sizeof(chaine), " Sms sent\n" );
+       g_snprintf( chaine, sizeof(chaine), " | - Sms sent\n" );
        response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "dbcfg" ) )                /* Appelle de la fonction dédiée à la gestion des parametres DB */
      { gboolean retour;
        response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
        retour = Sms_Lire_config();
-       g_snprintf( chaine, sizeof(chaine), " Reloading Sms Thread Parameters from Database -> %s", (retour ? "Success" : "Failed") );
+       g_snprintf( chaine, sizeof(chaine), " | - Reloading Sms Thread Parameters from Database -> %s", (retour ? "Success" : "Failed") );
        response = Admin_write ( response, chaine );
      }
     else
-     { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s\n", ligne );
+     { g_snprintf( chaine, sizeof(chaine), " | - Unknown command : %s\n", ligne );
        response = Admin_write ( response, chaine );
      }
     return(response);

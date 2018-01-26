@@ -31,7 +31,7 @@
  #define NOM_TABLE_CONFIG         "config"                          /* Nom de la table en base de données */
 
  #define TAILLE_HOME              80                                           /* Chemin HOME de watchdog */
- #define TAILLE_CRYPTO_KEY        16      /* 16 octets (128bits) pour le cryptage BlowFish. Multiple de 8 */
+ #define TAILLE_INSTANCE_ID       24                                           /* Chemin HOME de watchdog */
 
  extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 
@@ -47,14 +47,15 @@
 
     gchar home [ TAILLE_HOME+1 ];                                          /* Repertoire maison du daemon */
     gchar librairie_dir [ TAILLE_HOME+1 ];               /* Repertoire de stockage des libraires watchdog */
-    gchar instance_id [ TAILLE_HOME+1 ];                     /* Global ID, unique, de l'instance Watchdog */
+    gchar instance_id [ TAILLE_INSTANCE_ID+1 ];              /* Global ID, unique, de l'instance Watchdog */
     gboolean instance_is_master;                           /* TRUE si l'instance est l'instance maitresse */
+    gchar master_host[ TAILLE_DB_HOST+1 ];
     guint log_level;                                                      /* Niveau de debug du programme */
     gboolean log_msrv;                                                            /* TRUE si log_override */
     gboolean log_dls;                                                             /* TRUE si log_override */
     gboolean log_arch;                                                            /* TRUE si log_override */
     gboolean log_db;                                                          /* TRUE si log des acces DB */
-    guint max_login_failed;                                            /* Nombre maximum d'echec de login */
+    guint max_login_failed;   /* a virer */                            /* Nombre maximum d'echec de login */
     struct LOG *log;                                                         /* Pour l'affichage des logs */
     gint single;                                                                /* Demarrage des thread ? */
     gint compil;                                            /* Compilation des plugins DLS au demarrage ? */
@@ -66,12 +67,8 @@
  #define DEFAUT_DB_USERNAME             "watchdog"    /* Ne pas depasser TAILLE_ADMIN_USERNAME caracteres */
  #define DEFAUT_DB_PASSWORD             "seb"            /* Ne pas depasser TAILLE_DB_PASSWORD caractères */
  #define DEFAUT_DB_PORT                 3306
- #define DEFAUT_GLOBAL_ID               "MASTER"                /* Ne pas depasser TAILLE_HOME caracteres */
  #define DEFAUT_LIBRAIRIE_DIR           "/usr/local/lib"        /* Ne pas depasser TAILLE_HOME caracteres */
- #define DEFAUT_TELLSTICK_A_MIN         -1
- #define DEFAUT_TELLSTICK_A_MAX         -1
- #define DEFAUT_ASTERISK_M_MIN          -1
- #define DEFAUT_ASTERISK_M_MAX          -1
+
 /******************************************* Prototypes de fonctions **************************************/
  extern void Lire_config ( char *fichier_config );
  extern void Print_config ( void );

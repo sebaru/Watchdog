@@ -694,7 +694,7 @@
     Cfg_imsg.date_retente = Partage->top + 100;                      /* On se connectera dans 10 secondes */
     MainLoop = g_main_context_new();
 
-    Abonner_distribution_histo ( Imsg_Gerer_histo );              /* Abonnement à la diffusion des histos */
+/*    Abonner_distribution_histo ( Imsg_Gerer_histo );              /* Abonnement à la diffusion des histos */
     while( Cfg_imsg.lib->Thread_run == TRUE )                            /* On tourne tant que necessaire */
      { usleep(10000);
        sched_yield();
@@ -744,7 +744,7 @@
        g_main_context_iteration ( MainLoop, FALSE );
 
      }                                                                     /* Fin du while partage->arret */
-    Desabonner_distribution_histo ( Imsg_Gerer_histo );       /* Desabonnement de la diffusion des histos */
+/*    Desabonner_distribution_histo ( Imsg_Gerer_histo );       /* Desabonnement de la diffusion des histos */
     Imsg_Fermer_connexion ();                              /* Fermeture de la connexion au serveur Jabber */
     g_main_context_unref (MainLoop);
 end:

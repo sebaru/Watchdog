@@ -86,6 +86,12 @@
     gint post_data_length;
   };
 
+ struct WS_PER_SESSION_DATA
+  { struct ZMQUEUE *zmq;
+    gchar sid[40];
+    gchar util[40];
+  };
+
  struct HTTP_SESSION
   { /*gint     type;*/
     gchar    sid[2*EVP_MAX_MD_SIZE+1];
@@ -115,8 +121,8 @@
  extern gint Http_Traiter_request_body_completion_postfile ( struct lws *wsi );
  extern gint Http_Traiter_request_getui ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gint Http_Traiter_request_setm ( struct lws *wsi );
+ extern gboolean Get_phpsessionid_cookie ( struct lws *wsi );
   
- extern struct HTTP_SESSION *Http_get_session ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
  extern gchar *Http_get_session_id ( struct HTTP_SESSION *session );
  extern void Http_Check_sessions ( void );
  extern void Http_Liberer_session ( struct HTTP_SESSION *session );

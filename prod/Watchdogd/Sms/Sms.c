@@ -134,90 +134,6 @@
     return(sms);
   }
 /******************************************************************************************************************************/
-/* Envoyer_sms: Envoi un sms                                                                                                  */
-/* Entrée: un texte au format UTF8 si possible                                                                                */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Envoyer_sms_smsbox_text ( gchar *texte )
-  { struct CMD_TYPE_HISTO *histo;
-
-    histo = (struct CMD_TYPE_HISTO *) g_try_malloc0( sizeof(struct CMD_TYPE_HISTO) );
-    if (!histo) { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_ERR,
-                           "%s: pas assez de mémoire pour copie", __func__ );
-                  return;
-                }
-
-    g_snprintf(histo->msg.libelle_sms, sizeof(histo->msg.libelle_sms), "%s", texte );
-    histo->id         = 0;
-    histo->alive      = TRUE;
-    histo->msg.num    = 0;
-    histo->msg.enable = TRUE;
-    histo->msg.sms    = MSG_SMS_SMSBOX_ONLY;
-
-    pthread_mutex_lock( &Cfg_sms.lib->synchro );
-    Cfg_sms.Liste_histos = g_slist_append ( Cfg_sms.Liste_histos, histo );
-    pthread_mutex_unlock( &Cfg_sms.lib->synchro );
-  }
-/******************************************************************************************************************************/
-/* Envoyer_sms: Envoi un sms                                                                                                  */
-/* Entrée: un texte au format UTF8 si possible                                                                                */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- void Envoyer_sms_gsm_text ( gchar *texte )
-  { struct CMD_TYPE_HISTO *histo;
-
-    histo = (struct CMD_TYPE_HISTO *) g_try_malloc0( sizeof(struct CMD_TYPE_HISTO) );
-    if (!histo) { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_ERR,
-                           "%s: pas assez de mémoire pour copie", __func__ );
-                  return;
-                }
-
-    g_snprintf(histo->msg.libelle_sms, sizeof(histo->msg.libelle_sms), "%s", texte );
-    histo->id         = 0;
-    histo->alive      = TRUE;
-    histo->msg.num    = 0;
-    histo->msg.enable = TRUE;
-    histo->msg.sms    = MSG_SMS_GSM_ONLY;
-
-    pthread_mutex_lock( &Cfg_sms.lib->synchro );
-    Cfg_sms.Liste_histos = g_slist_append ( Cfg_sms.Liste_histos, histo );
-    pthread_mutex_unlock( &Cfg_sms.lib->synchro );
-  }
-/******************************************************************************************************************************/
-/* Sms_Gerer_histo: Fonction d'abonné appellé lorsqu'un message est disponible.                                               */
-/* Entrée: une structure CMD_TYPE_HISTO                                                                                       */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Sms_Gerer_histo ( struct CMD_TYPE_HISTO *histo )
-  { gsize bytes_written;
-    gint taille;
-    
-    if ( ! histo->msg.sms ) { g_free(histo); return; }                                       /* Si flag = 0; on return direct */
-
-    pthread_mutex_lock( &Cfg_sms.lib->synchro );                                             /* Ajout dans la liste a traiter */
-    taille = g_slist_length( Cfg_sms.Liste_histos );
-    pthread_mutex_unlock( &Cfg_sms.lib->synchro );
-
-    if (taille > 150)
-     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "%s: DROP message %d (length = %d > 150)", __func__, histo->msg.num, taille);
-       g_free(histo);
-       return;
-     }
-    else if (Cfg_sms.lib->Thread_run == FALSE)
-     { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                "%s: Thread is down. Dropping msg %d", __func__, histo->msg.num );
-       g_free(histo);
-       return;
-     }
-/* conversion en Latin 1 ISO8859-1 20140626 -- Abandon 20171214 en passant par API 1.1 smsbox */
-/*    new_libelle = g_convert ( histo->msg.libelle, -1, "ISO-8859-1", "UTF-8", NULL, &bytes_written, NULL);*/
-    g_snprintf( histo->msg.libelle, sizeof(histo->msg.libelle), "%s", histo->msg.libelle );
-    pthread_mutex_lock ( &Cfg_sms.lib->synchro );
-    Cfg_sms.Liste_histos = g_slist_append ( Cfg_sms.Liste_histos, histo );                                /* Ajout a la liste */
-    pthread_mutex_unlock ( &Cfg_sms.lib->synchro );
-  }
-/******************************************************************************************************************************/
 /* Sms_is_recipient_authorized : Renvoi TRUE si le telephone en parametre peut set ou reset un bit interne                    */
 /* Entrée: le nom du destinataire                                                                                             */
 /* Sortie : booléen, TRUE/FALSE                                                                                               */
@@ -258,145 +174,6 @@
     sms = Sms_Recuperer_smsDB_suite( db );
     Libere_DB_SQL( &db );
     return(sms);
-  }
-/******************************************************************************************************************************/
-/* Traiter_commande_sms: Fonction appelée pour traiter la commande sms recu par le telephone                                  */
-/* Entrée: le message text à traiter                                                                                          */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Traiter_commande_sms ( gchar *from, gchar *texte )
-  { struct CMD_TYPE_MNEMO_BASE *mnemo;
-    struct SMSDB *sms;
-    gchar chaine[160];
-    gint nbr;
-
-    sms = Sms_is_recipient_authorized ( from );
-    if ( sms == NULL )
-     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
-                "%s : unknown sender %s. Dropping message %s...", __func__, from, texte );
-       return;
-     }
-     
-    Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
-             "%s : Received %s from %s(%s). Processing...", __func__,
-              texte, sms->user_name, sms->user_sms_phone );
-    g_free(sms);
-    g_snprintf(chaine, sizeof(chaine), "Processing: %s", texte );                           /* Envoi de l'acquit de reception */
-    Envoyer_sms_gsm_text ( chaine );
-
-    if ( ! strcasecmp( texte, "ping" ) )                                                               /* Interfacage de test */
-     { Envoyer_sms_gsm_text ( "Pong !" );
-       return;
-     }
-
-    if ( ! strcasecmp( texte, "smsoff" ) )                                                                      /* Smspanic ! */
-     { sending_is_disabled = TRUE;
-       Envoyer_sms_gsm_text ( "Sending SMS is off !" );
-       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE, "%s: Sending SMS is DISABLED", __func__ );
-       return;
-     }
-
-    if ( ! strcasecmp( texte, "smson" ) )                                                                       /* Smspanic ! */
-     { Envoyer_sms_gsm_text ( "Sending SMS is on !" );
-       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE, "%s: Sending SMS is ENABLED", __func__ );
-       sending_is_disabled = FALSE;
-       return;
-     }
-
-    g_snprintf(chaine, sizeof(chaine), "%s:%s:%s", Config.instance_id, NOM_THREAD, texte );             /* Recherche du mnemo */
-    mnemo = Map_event_to_mnemo( chaine, &nbr );
-    if (nbr==0)
-     { g_snprintf(chaine, sizeof(chaine), "No event found for '%s'", texte );              /* Envoi de l'erreur si pas trouvé */
-       Envoyer_sms_gsm_text ( chaine );
-       return;
-     }
-     
-    if (nbr>1)
-     { g_snprintf(chaine, sizeof(chaine), "Too many events found for '%s'", texte );             /* Envoi de l'erreur si trop */
-       Envoyer_sms_gsm_text ( chaine );
-       g_free(mnemo);
-       return;
-     }
-
-    if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
-     { switch( mnemo->type )
-        { case MNEMO_MONOSTABLE:
-               Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                         "%s: From %s -> Mise à un du bit M%03d", __func__, from, mnemo->num );
-               Envoyer_commande_dls(mnemo->num);
-               break;
-          default:
-          Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                    "%s: From %s -> Error, type of mnemo not handled", __func__, from );
-        }
-     }
-    else /* Envoi au master vi thread HTTP */
-     {
-     }
-    g_free(mnemo);
-  }
-/******************************************************************************************************************************/
-/* Lire_sms_gsm: Lecture de tous les SMS du GSM                                                                               */
-/* Entrée: Rien                                                                                                               */
-/* Sortie: Niet                                                                                                               */
-/******************************************************************************************************************************/
- static void Lire_sms_gsm ( void )
-  { struct gn_statemachine *state;
-    gn_sms_folder folder;
-    gn_sms_folder_list folderlist;
-    gn_error error;
-    gn_data data;
-    gn_sms sms;
-    gint sms_index;
-
-    if ((error=gn_lib_phoneprofile_load("", &state)) != GN_ERR_NONE)                                      /* Read config file */
-     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "%s: Read Phone profile NOK (%s)", __func__, gn_error_print(error) );
-       if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );
-       return;
-     }
-
-    if ((error=gn_lib_phone_open(state)) != GN_ERR_NONE)
-     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "%s: Open Phone NOK (%s)", __func__, gn_error_print(error) );
-       if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );
-       gn_lib_phone_close(state);
-       gn_lib_phoneprofile_free(&state);
-       gn_lib_library_free();
-       return;
-     }
-
-    gn_data_clear(&data);
-
-    folder.folder_id = 0;
-    data.sms_folder_list = &folderlist;
-    data.sms_folder = &folder;
-
-    memset ( &sms, 0, sizeof(gn_sms) );
-    sms.memory_type = gn_str2memory_type("ME");                           /* On recupere les SMS du Mobile equipment (pas SM) */
-    data.sms = &sms;
-
-    for (sms_index=1; ;sms_index++)
-     { sms.number = sms_index;
-
-       if ((error = gn_sms_get (&data, state)) == GN_ERR_NONE)                                          /* On recupere le SMS */
-        { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
-                   "%s: Recu SMS %s de %s", __func__, (gchar *)sms.user_data[0].u.text, sms.remote.number );
-          Traiter_commande_sms ( sms.remote.number, (gchar *)sms.user_data[0].u.text );
-          gn_sms_delete (&data, state);                                                   /* On l'a traité, on peut l'effacer */
-        }
-       else if (error == GN_ERR_INVALIDLOCATION) break;                           /* On regarde toutes les places de stockage */
-       else  { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_DEBUG,
-                        "%s: error %s from %s (sms_index=%d)", __func__,
-                        gn_error_print(error), sms.remote.number, sms_index );
-               break;
-             }
-     }
-
-    gn_lib_phone_close(state);
-    gn_lib_phoneprofile_free(&state);
-    gn_lib_library_free();
-    if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 1 );                                                     /* Communication OK */
   }
 /******************************************************************************************************************************/
 /* Envoi_sms_gsm: Envoi un sms par le gsm                                                                                     */
@@ -555,7 +332,7 @@
 /* Entrée: le message                                                                                                         */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Sms_send_to_all_authorized_recipients ( struct CMD_TYPE_MESSAGE *msg )
+ void Sms_send_to_all_authorized_recipients ( struct CMD_TYPE_MESSAGE *msg )
   { struct SMSDB *sms;
     struct DB *db;
 
@@ -563,16 +340,14 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "%s: Database Connection Failed", __func__ );
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
        return;
      }
 
 /********************************************* Chargement des informations en bases *******************************************/
     if ( ! Sms_Recuperer_recipient_authorized_smsDB( db ) )
      { Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
-                "%s: Recuperer_sms Failed", __func__ );
+       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING, "%s: Recuperer_sms Failed", __func__ );
        return;
      }
 
@@ -596,11 +371,183 @@
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
+/* Entrée: un texte au format UTF8 si possible                                                                                */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Envoyer_sms_smsbox_text ( gchar *texte )
+  { struct CMD_TYPE_MESSAGE msg;
+
+    g_snprintf(msg.libelle_sms, sizeof(msg.libelle_sms), "%s", texte );
+    msg.num    = 0;
+    msg.enable = TRUE;
+    msg.sms    = MSG_SMS_SMSBOX_ONLY;
+
+    Sms_send_to_all_authorized_recipients( &msg );
+  }
+/******************************************************************************************************************************/
+/* Envoyer_sms: Envoi un sms                                                                                                  */
+/* Entrée: un texte au format UTF8 si possible                                                                                */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ void Envoyer_sms_gsm_text ( gchar *texte )
+  { struct CMD_TYPE_MESSAGE msg;
+
+    g_snprintf(msg.libelle_sms, sizeof(msg.libelle_sms), "%s", texte );
+    msg.num    = 0;
+    msg.enable = TRUE;
+    msg.sms    = MSG_SMS_GSM_ONLY;
+
+    Sms_send_to_all_authorized_recipients( &msg );
+  }
+/******************************************************************************************************************************/
+/* Traiter_commande_sms: Fonction appelée pour traiter la commande sms recu par le telephone                                  */
+/* Entrée: le message text à traiter                                                                                          */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Traiter_commande_sms ( gchar *from, gchar *texte )
+  { struct CMD_TYPE_MNEMO_BASE *mnemo;
+    struct SMSDB *sms;
+    gchar chaine[160];
+    gint nbr;
+
+    sms = Sms_is_recipient_authorized ( from );
+    if ( sms == NULL )
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
+                "%s : unknown sender %s. Dropping message %s...", __func__, from, texte );
+       return;
+     }
+     
+    Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
+             "%s : Received %s from %s(%s). Processing...", __func__,
+              texte, sms->user_name, sms->user_sms_phone );
+    g_free(sms);
+    g_snprintf(chaine, sizeof(chaine), "Processing: %s", texte );                           /* Envoi de l'acquit de reception */
+    Envoyer_sms_gsm_text ( chaine );
+
+    if ( ! strcasecmp( texte, "ping" ) )                                                               /* Interfacage de test */
+     { Envoyer_sms_gsm_text ( "Pong !" );
+       return;
+     }
+
+    if ( ! strcasecmp( texte, "smsoff" ) )                                                                      /* Smspanic ! */
+     { sending_is_disabled = TRUE;
+       Envoyer_sms_gsm_text ( "Sending SMS is off !" );
+       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE, "%s: Sending SMS is DISABLED", __func__ );
+       return;
+     }
+
+    if ( ! strcasecmp( texte, "smson" ) )                                                                       /* Smspanic ! */
+     { Envoyer_sms_gsm_text ( "Sending SMS is on !" );
+       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE, "%s: Sending SMS is ENABLED", __func__ );
+       sending_is_disabled = FALSE;
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "%s:%s:%s", Config.instance_id, NOM_THREAD, texte );             /* Recherche du mnemo */
+    mnemo = Map_event_to_mnemo( chaine, &nbr );
+    if (nbr==0)
+     { g_snprintf(chaine, sizeof(chaine), "No event found for '%s'", texte );              /* Envoi de l'erreur si pas trouvé */
+       Envoyer_sms_gsm_text ( chaine );
+       return;
+     }
+     
+    if (nbr>1)
+     { g_snprintf(chaine, sizeof(chaine), "Too many events found for '%s'", texte );             /* Envoi de l'erreur si trop */
+       Envoyer_sms_gsm_text ( chaine );
+       g_free(mnemo);
+       return;
+     }
+
+    if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
+     { switch( mnemo->type )
+        { case MNEMO_MONOSTABLE:
+               Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                         "%s: From %s -> Mise à un du bit M%03d", __func__, from, mnemo->num );
+               Envoyer_commande_dls(mnemo->num);
+               break;
+          default:
+          Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                    "%s: From %s -> Error, type of mnemo not handled", __func__, from );
+        }
+     }
+    else /* Envoi au master vi thread HTTP */
+     {
+     }
+    g_free(mnemo);
+  }
+/******************************************************************************************************************************/
+/* Lire_sms_gsm: Lecture de tous les SMS du GSM                                                                               */
+/* Entrée: Rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static void Lire_sms_gsm ( void )
+  { struct gn_statemachine *state;
+    gn_sms_folder folder;
+    gn_sms_folder_list folderlist;
+    gn_error error;
+    gn_data data;
+    gn_sms sms;
+    gint sms_index;
+
+    if ((error=gn_lib_phoneprofile_load("", &state)) != GN_ERR_NONE)                                      /* Read config file */
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
+                "%s: Read Phone profile NOK (%s)", __func__, gn_error_print(error) );
+       if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );
+       return;
+     }
+
+    if ((error=gn_lib_phone_open(state)) != GN_ERR_NONE)
+     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
+                "%s: Open Phone NOK (%s)", __func__, gn_error_print(error) );
+       if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );
+       gn_lib_phone_close(state);
+       gn_lib_phoneprofile_free(&state);
+       gn_lib_library_free();
+       sleep(5);
+       return;
+     }
+
+    gn_data_clear(&data);
+
+    folder.folder_id = 0;
+    data.sms_folder_list = &folderlist;
+    data.sms_folder = &folder;
+
+    memset ( &sms, 0, sizeof(gn_sms) );
+    sms.memory_type = gn_str2memory_type("ME");                           /* On recupere les SMS du Mobile equipment (pas SM) */
+    data.sms = &sms;
+
+    for (sms_index=1; ;sms_index++)
+     { sms.number = sms_index;
+
+       if ((error = gn_sms_get (&data, state)) == GN_ERR_NONE)                                          /* On recupere le SMS */
+        { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
+                   "%s: Recu SMS %s de %s", __func__, (gchar *)sms.user_data[0].u.text, sms.remote.number );
+          Traiter_commande_sms ( sms.remote.number, (gchar *)sms.user_data[0].u.text );
+          gn_sms_delete (&data, state);                                                   /* On l'a traité, on peut l'effacer */
+        }
+       else if (error == GN_ERR_INVALIDLOCATION) break;                           /* On regarde toutes les places de stockage */
+       else  { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_DEBUG,
+                        "%s: error %s from %s (sms_index=%d)", __func__,
+                        gn_error_print(error), sms.remote.number, sms_index );
+               break;
+             }
+     }
+
+    gn_lib_phone_close(state);
+    gn_lib_phoneprofile_free(&state);
+    gn_lib_library_free();
+    if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 1 );                                                     /* Communication OK */
+  }
+/******************************************************************************************************************************/
+/* Envoyer_sms: Envoi un sms                                                                                                  */
 /* Entrée: un client et un utilisateur                                                                                        */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct CMD_TYPE_HISTO *histo;
+  { struct CMD_TYPE_HISTO *histo, histo_buf;
+    struct ZMQUEUE *zmq_msg;
+    struct ZMQUEUE *zmq_admin;
     
     prctl(PR_SET_NAME, "W-SMS", 0, 0, 0 );
     memset( &Cfg_sms, 0, sizeof(Cfg_sms) );                                         /* Mise a zero de la structure de travail */
@@ -621,20 +568,22 @@
        goto end;
      }
 
-    Abonner_distribution_histo ( Sms_Gerer_histo );                                 /* Abonnement à la diffusion des messages */
+    zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
+    Connect_zmq (zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+
+    zmq_admin = New_zmq ( ZMQ_REP, "listen-to-admin" );
+    Bind_zmq (zmq_admin, "inproc", NOM_THREAD "-admin", 0 );
+
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
     while(Cfg_sms.lib->Thread_run == TRUE)                                                   /* On tourne tant que necessaire */
-     { usleep(10000);
+     { gchar buffer[128];
+       usleep(10000);
        sched_yield();
 
        if (Cfg_sms.lib->Thread_sigusr1)                                                       /* A-t'on recu un signal USR1 ? */
         { int nbr;
 
           Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "%s: SIGUSR1", __func__ );
-          pthread_mutex_lock( &Cfg_sms.lib->synchro );                             /* On recupere le nombre de sms en attente */
-          nbr = g_slist_length(Cfg_sms.Liste_histos);
-          pthread_mutex_unlock( &Cfg_sms.lib->synchro );
-          Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "%s: Nbr SMS a envoyer = %d", __func__, nbr );
           Cfg_sms.lib->Thread_sigusr1 = FALSE;
         }
 
@@ -643,24 +592,23 @@
           Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "%s: Reloading conf", __func__ );
           Sms_Lire_config ();                                               /* Lecture de la configuration logiciel du thread */
         }          
+
 /****************************************************** Lecture de SMS ********************************************************/
        Lire_sms_gsm();
 
 /********************************************************* Envoi de SMS *******************************************************/
-       sleep(5);
-       if ( !Cfg_sms.Liste_histos )                                                         /* Attente de demande d'envoi SMS */
-        { sched_yield();
-          continue;
+       if (Recv_zmq ( zmq_admin, &buffer, sizeof(buffer)) > 0 )                           /* As-t'on recu un paquet d'admin ? */
+        { gchar *response;
+          response = Admin_response ( buffer );
+          Send_zmq ( zmq_admin, response, strlen(response)+1 );
+          g_free(response);
         }
 
-       pthread_mutex_lock( &Cfg_sms.lib->synchro );
-       histo = Cfg_sms.Liste_histos->data;
-       Cfg_sms.Liste_histos = g_slist_remove ( Cfg_sms.Liste_histos, histo );
-       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
-                "%s: Reste %d a envoyer apres le msg %d", __func__,
-                 g_slist_length(Cfg_sms.Liste_histos), histo->msg.num );
-       pthread_mutex_unlock( &Cfg_sms.lib->synchro );
-       if ( histo->alive == TRUE )                                                          /* On n'envoie que si MSGnum == 1 */
+       if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) ) { continue; }
+
+       histo = &histo_buf;
+
+       if ( histo && histo->alive == TRUE && histo->msg.sms != MSG_SMS_NONE)                /* On n'envoie que si MSGnum == 1 */
         { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO,
                    "%s : Sending msg %d (%s)", __func__, histo->msg.num, histo->msg.libelle_sms );
       
@@ -671,12 +619,18 @@
           else 
            { Sms_send_to_all_authorized_recipients( &histo->msg ); }
         }
-       g_free( histo );
+       else
+        { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_DEBUG,
+                    "%s : msg %d not sent (alive=%d, msg.sms = %d) (%s)", __func__,
+                    histo->msg.num, histo->alive, histo->msg.sms, histo->msg.libelle_sms );
+        }
+       sleep(2);
      }
-    Desabonner_distribution_histo ( Sms_Gerer_histo );                          /* Desabonnement de la diffusion des messages */
+    Close_zmq ( zmq_msg );
+    Close_zmq ( zmq_admin );
 
 end:
-    if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );                                /* Communication NOK */
+    if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );                                                    /* Communication NOK */
     Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_sms.lib->Thread_run = FALSE;
     Cfg_sms.lib->TID = 0;                                                     /* On indique au master que le thread est mort. */

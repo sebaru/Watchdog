@@ -80,6 +80,7 @@
  extern void Utilisateur_set_new_salt ( struct CMD_TYPE_UTILISATEUR *util );
  extern gchar *Utilisateur_hash_password ( struct CMD_TYPE_UTILISATEUR *util, gchar *pwd );
  extern gboolean Check_utilisateur_password( struct CMD_TYPE_UTILISATEUR *util, gchar *pwd );
+ extern gchar *Rechercher_util_by_phpsessionid( gchar *ssid );
 
  extern gboolean Raz_login_failed( guint id );                                     /* Dans login_failed.c */
  extern gboolean Ajouter_one_login_failed( guint id, gint max_login_failed );

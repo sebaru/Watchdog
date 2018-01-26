@@ -183,12 +183,107 @@
     lws_write ( wsi, buffer, taille_buf, LWS_WRITE_HTTP);                                                   /* Send to client */
   }
 /******************************************************************************************************************************/
-/* CB_ws_login : Gere le protocole WS status (appellée par libwebsockets)                                                     */
+/* Http_send_histo : envoie un histo au client                                                                                */
+/* Entrée : la connexion client WebSocket et l'histo a envoyer                                                                */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void WS_send_histo ( struct lws *wsi, struct CMD_TYPE_HISTO *histo )
+  { struct WS_PER_SESSION_DATA *pss;
+    gchar *buf, *buf_to_send, *date_create;
+    JsonBuilder *builder;
+    JsonGenerator *gen;
+    gsize taille_buf;
+    struct tm *temps;
+    gchar chaine[80];
+    time_t time;
+
+    pss = lws_wsi_user ( wsi );
+    builder = json_builder_new ();
+    if (!builder) return;
+
+    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+    json_builder_set_member_name  ( builder, "Histo" );
+
+    json_builder_begin_object (builder);                                                                  /* Contenu du Histo */
+    json_builder_set_member_name  ( builder, "alive" );         json_builder_add_boolean_value( builder, histo->alive );
+
+    time = histo->date_create_sec;
+    temps = localtime( (time_t *)&time );
+    if (temps) { strftime( chaine, sizeof(chaine), "%F %T", temps ); }
+    else       { g_snprintf( chaine, sizeof(chaine), "Erreur" ); }
+    date_create = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
+    g_snprintf( chaine, sizeof(chaine), "%s.%03d", date_create, ((int)histo->date_create_usec/1000) );
+    g_free( date_create );
+    json_builder_set_member_name  ( builder, "date_create" );   json_builder_add_string_value ( builder, chaine );
+    json_builder_set_member_name  ( builder, "nom_ack" );       json_builder_add_string_value ( builder, histo->nom_ack );
+    json_builder_set_member_name  ( builder, "num" );           json_builder_add_int_value    ( builder, histo->msg.num );
+    json_builder_set_member_name  ( builder, "libelle" );       json_builder_add_string_value ( builder, histo->msg.libelle );
+    json_builder_set_member_name  ( builder, "syn_groupe" );    json_builder_add_string_value ( builder, histo->msg.syn_groupe );
+    json_builder_set_member_name  ( builder, "syn_page" );      json_builder_add_string_value ( builder, histo->msg.syn_page );
+    json_builder_set_member_name  ( builder, "syn_libelle" );   json_builder_add_string_value ( builder, histo->msg.syn_libelle );
+    json_builder_set_member_name  ( builder, "dls_shortname" ); json_builder_add_string_value ( builder, histo->msg.dls_shortname );
+    json_builder_end_object (builder);                                                                           /* End Histo */
+
+    json_builder_end_object (builder);                                                                        /* End Document */
+
+    gen = json_generator_new ();
+    json_generator_set_root ( gen, json_builder_get_root(builder) );
+    json_generator_set_pretty ( gen, TRUE );
+    buf = json_generator_to_data (gen, &taille_buf);
+    g_object_unref(builder);
+    g_object_unref(gen);
+    buf_to_send = g_malloc0( taille_buf + LWS_PRE );
+    if (buf_to_send)
+     { memcpy( buf_to_send + LWS_PRE, buf, taille_buf );
+       lws_write(wsi, &buf_to_send[LWS_PRE], taille_buf, LWS_WRITE_TEXT );
+       g_free(buf_to_send);                                           /* Libération du buffer dont nous n'avons plus besoin ! */
+     }
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+              "%s: send %d byte to '%s' ('%s')", __func__, taille_buf, pss->sid, pss->util );
+    g_free(buf);
+  }   
+/******************************************************************************************************************************/
+/* CB_ws_histos : Gere le protocole WS histos (appellée par libwebsockets)                                                    */
 /* Entrées : le contexte, le message, l'URL                                                                                   */
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
 /******************************************************************************************************************************/
- static gint CB_ws_login ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
-  { return(1);
+ static gint CB_ws_histos ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
+  { struct WS_PER_SESSION_DATA *pss;
+    gchar *util;
+
+    pss = lws_wsi_user ( wsi );
+    switch (tag)
+     { case LWS_CALLBACK_ESTABLISHED: lws_callback_on_writable(wsi);
+            if (Get_phpsessionid_cookie(wsi)==FALSE)                                              /* Recupere le PHPSessionID */
+             { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: No PHPSESSID. Killing.", __func__ );
+               return(1);
+             }
+            util = Rechercher_util_by_phpsessionid ( pss->sid );
+            if (!util)
+             { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: No user found for session %s.", __func__, pss->sid );
+               return(1);
+             }
+            g_snprintf( pss->util, sizeof(pss->util), "%s", util );
+            g_free(util);
+            
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback established for %s", __func__, pss->util );
+            pss->zmq = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
+            Connect_zmq ( pss->zmq, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+            break;
+       case LWS_CALLBACK_CLOSED:
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback closed", __func__ );
+            if (pss->zmq) Close_zmq(pss->zmq);
+            break;
+       case LWS_CALLBACK_SERVER_WRITEABLE:
+             { struct CMD_TYPE_HISTO histo_buf;
+               if ( pss->zmq && Recv_zmq ( pss->zmq, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )
+                { WS_send_histo ( wsi, &histo_buf );
+                }
+             }
+            lws_callback_on_writable(wsi);
+            break;
+     }
+    return(0);
   }
 /******************************************************************************************************************************/
 /* Http_CB_file_upload : Récupère les data de la requete POST en cours                                                        */
@@ -282,8 +377,6 @@
                lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
                                         (char *)&remote_name, sizeof(remote_name),
                                         (char *)&remote_ip, sizeof(remote_ip) );
-               session = Http_get_session ( wsi, remote_name, remote_ip );
-               if (session) session->last_top = Partage->top;                                             /* Tagging temporel */
 
                pss = lws_wsi_user ( wsi );
                if ( ! strcasecmp ( url, "/favicon.ico" ) )
@@ -347,7 +440,7 @@
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct lws_protocols WS_PROTOS[] =
      { { "http-only", CB_http, sizeof(struct HTTP_PER_SESSION_DATA), 0 },       /* first protocol must always be HTTP handler */
-       { "ws-login", CB_ws_login, 0, 0 },
+       { "histos", CB_ws_histos, sizeof(struct WS_PER_SESSION_DATA), 0 },
        { NULL, NULL, 0, 0 } /* terminator */
      };
     struct stat sbuf;

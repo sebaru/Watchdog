@@ -38,7 +38,6 @@
 
  struct AUDIO_CONFIG
   { struct LIBRAIRIE *lib;
-    GSList *Liste_histos;                                                                     /* liste de message a prononcer */
     gint last_audio;                                                                   /* Date de la derniere emission sonore */
     gboolean enable;                                                                      /* Is this thread enabled at boot ? */
     gchar language[80];                                             /* Language de restitution vocal, au format google_speech */
@@ -48,5 +47,6 @@
  extern gboolean Audio_Lire_config ( void );
  extern gboolean Jouer_mp3 ( struct CMD_TYPE_MESSAGE *msg );
  extern gboolean Jouer_google_speech ( gchar *libelle_audio );
+ extern gchar *Admin_response( gchar *ligne );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

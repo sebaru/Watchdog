@@ -155,13 +155,6 @@
      }
 
     lib->Admin_command = dlsym( lib->dl_handle, "Admin_command" );            /* Recherche de la fonction */
-    if (!lib->Admin_command)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Charger_librairie_par_prompt: Candidat %s rejected (Admin_command not found)", nom_absolu ); 
-       dlclose( lib->dl_handle );
-       g_free(lib);
-       return(NULL);
-     }
 
     g_snprintf( lib->nom_fichier, sizeof(lib->nom_fichier), "%s", nom_absolu );
 

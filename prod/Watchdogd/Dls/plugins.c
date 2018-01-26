@@ -143,6 +143,7 @@
 
      }
     if (dls->plugindb.on) dls->start_date = time(NULL);
+                     else dls->start_date = 0;
     pthread_mutex_lock( &Partage->com_dls.synchro );                                  /* Ajout dans la liste de travail D.L.S */
     Partage->com_dls.Plugins = g_slist_append( Partage->com_dls.Plugins, dls );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
@@ -293,6 +294,7 @@
        if ( plugin->plugindb.id == id )
         { if (actif == FALSE)
            { plugin->plugindb.on = FALSE;
+             plugin->start_date = 0;
              plugin->conso = 0.0;
              Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: id %06d stopped (%s)", __func__, plugin->plugindb.id, plugin->plugindb.nom );
            }
@@ -305,6 +307,7 @@
            }
           else
            { plugin->plugindb.on = 0;
+             plugin->start_date = 0;
              plugin->conso = 0.0;
              plugin->starting = 0;
              Info_new( Config.log, Config.log_dls, LOG_WARNING,
@@ -411,8 +414,8 @@
        Info_new( Config.log, Config.log_dls, LOG_DEBUG,
                 "%s: GCC start (pid %d) source %s cible %s!",
                  __func__, pidgcc, source, cible );
-       execlp( "gcc", "gcc", "-I/usr/include/glib-2.0","-I/usr/lib/glib-2.0/include", "-shared", "-o3",
-               "-Wall", "-lwatchdog-dls", source, "-fPIC", "-o", cible, NULL );
+       execlp( "gcc", "gcc", "-I/usr/include/glib-2.0", "-I/usr/lib/glib-2.0/include", "-I/usr/lib64/glib-2.0/include",
+               "-shared", "-o3", "-Wall", "-lwatchdog-dls", source, "-fPIC", "-o", cible, NULL );
        Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s_Fils: lancement GCC failed", __func__ );
        _exit(0);
      }

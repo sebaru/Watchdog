@@ -71,37 +71,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Ajouter_audio: Ajoute un message audio a prononcer                                                                         */
-/* Entrées: le numéro du message a prononcer                                                                                  */
-/******************************************************************************************************************************/
- void Audio_Gerer_histo( struct CMD_TYPE_HISTO *histo )
-  { gint taille;
-
-    if ( ! histo->msg.audio ) { g_free(histo); return; }                                     /* Si flag = 0; on return direct */
-
-    pthread_mutex_lock( &Cfg_audio.lib->synchro );                                  /* Ajout dans la liste de audio a traiter */
-    taille = g_slist_length( Cfg_audio.Liste_histos );
-    pthread_mutex_unlock( &Cfg_audio.lib->synchro );
-
-
-    if (taille > 150)
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                 "Ajouter_audio: DROP audio %d (taille = %d > 150)", histo->msg.num, taille);
-       g_free(histo);
-       return;
-     }
-    else if (Cfg_audio.lib->Thread_run == FALSE)
-     { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                "Ajouter_audio: Thread is down. Dropping msg %d", histo->msg.num );
-       g_free(histo);
-       return;
-     }
-
-    pthread_mutex_lock( &Cfg_audio.lib->synchro );                                  /* Ajout dans la liste de audio a traiter */
-    Cfg_audio.Liste_histos = g_slist_append( Cfg_audio.Liste_histos, histo );
-    pthread_mutex_unlock( &Cfg_audio.lib->synchro );
-  }
-/******************************************************************************************************************************/
 /* Jouer_wav: Jouer un fichier wav dont le nom est en paramètre                                                               */
 /* Entrée : le nom du fichier wav                                                                                             */
 /* Sortie : Néant                                                                                                             */
@@ -203,7 +172,10 @@
 /* Main: Fonction principale du Thread Audio                                                                                  */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct CMD_TYPE_HISTO *histo;
+  { struct CMD_TYPE_HISTO *histo, histo_buf;
+    struct ZMQUEUE *zmq_msg;
+    struct ZMQUEUE *zmq_master;
+    struct ZMQUEUE *zmq_admin;
     static gboolean audio_stop = TRUE;
 
     prctl(PR_SET_NAME, "W-Audio", 0, 0, 0 );
@@ -226,36 +198,51 @@
        goto end;
      }
 
-    Abonner_distribution_histo ( Audio_Gerer_histo );                              /* Abonnement de la diffusion des messages */
+    zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
+    Connect_zmq (zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+
+    zmq_master = New_zmq ( ZMQ_SUB, "listen-to-MSRV" );
+    Connect_zmq (zmq_master, "inproc", ZMQUEUE_LIVE_THREADS, 0 );
+
+    zmq_admin = New_zmq ( ZMQ_REP, "listen-to-admin" );
+    Bind_zmq (zmq_admin, "inproc", NOM_THREAD "-admin", 0 );
+
     while(Cfg_audio.lib->Thread_run == TRUE)                                                 /* On tourne tant que necessaire */
-     {
+     { gchar buffer[256];
+       struct MSRV_EVENT *event;
+       void *payload;
+
        if (Cfg_audio.lib->Thread_sigusr1)                                                             /* On a recu sigusr1 ?? */
-        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "Run_audio: SIGUSR1" );
-          pthread_mutex_lock( &Cfg_audio.lib->synchro );                                                     /* lockage futex */
-          Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,
-                    "Run_audio: Reste %03d a traiter",
-                    g_slist_length(Cfg_audio.Liste_histos) );
-          pthread_mutex_unlock( &Cfg_audio.lib->synchro );
+        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
           Cfg_audio.lib->Thread_sigusr1 = FALSE;
         }
 
-       if (!Cfg_audio.Liste_histos)                                                           /* Si pas de message, on tourne */
-        { if (Cfg_audio.last_audio + 100 < Partage->top)                             /* Au bout de 10 secondes sans diffusion */
-           { if (audio_stop == TRUE)                             /* Avons-nous deja envoyé une commande de STOP AUDIO a DLS ? */
-              { audio_stop = FALSE;                                      /* Positionné quand il n'y a plus de diffusion audio */
-                if (Config.instance_is_master) Envoyer_commande_dls( NUM_BIT_M_AUDIO_END );
-              }
-           } else audio_stop = TRUE;
-          sched_yield();
-          sleep(1);
-          continue;
+       if (Cfg_audio.last_audio + 100 < Partage->top)                                /* Au bout de 10 secondes sans diffusion */
+        { if (audio_stop == TRUE)                                /* Avons-nous deja envoyé une commande de STOP AUDIO a DLS ? */
+           { audio_stop = FALSE;                                         /* Positionné quand il n'y a plus de diffusion audio */
+             if (Config.instance_is_master) Envoyer_commande_dls( NUM_BIT_M_AUDIO_END );
+           }
+        } else audio_stop = TRUE;
+
+       if (Recv_zmq (zmq_admin, &buffer, sizeof(buffer)) > 0)                             /* As-t'on recu un paquet d'admin ? */
+        { gchar *response;
+          response = Admin_response ( buffer );
+          Send_zmq ( zmq_admin, response, strlen(response)+1 );
+          g_free(response);
         }
 
-       pthread_mutex_lock( &Cfg_audio.lib->synchro );                                                        /* lockage futex */
-       histo = Cfg_audio.Liste_histos->data;                                                         /* Recuperation du audio */
-       Cfg_audio.Liste_histos = g_slist_remove ( Cfg_audio.Liste_histos, histo );
-       pthread_mutex_unlock( &Cfg_audio.lib->synchro );
+       if (Recv_zmq_with_tag ( zmq_master, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
+        { if ( strcmp( event->instance, Config.instance_id ) && strcmp (event->instance, "*") ) break;
+          if ( strcmp( event->thread, NOM_THREAD ) && strcmp ( event->thread, "*" ) ) break;
 
+          Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
+                   "%s : Reception d'un message du master : %s", (gchar *)payload );
+        }
+
+       if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) )
+        { sleep(1); continue; }
+
+       histo = &histo_buf;
        if ( histo->alive == 1 &&                                                                    /* Si le message apparait */
             (M(NUM_BIT_M_AUDIO_INHIB) == 0 || histo->msg.type == MSG_ALERTE
                                            || histo->msg.type == MSG_DANGER 
@@ -281,10 +268,10 @@
               { Jouer_google_speech( histo->msg.libelle ); }
            }
         }
-       g_free(histo);
      }
-    Desabonner_distribution_histo ( Audio_Gerer_histo );                        /* Desabonnement de la diffusion des messages */
-
+    Close_zmq ( zmq_msg );
+    Close_zmq ( zmq_master );
+    Close_zmq ( zmq_admin );
 end:
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
     Cfg_audio.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */

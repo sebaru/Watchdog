@@ -56,7 +56,6 @@
     gchar ssl_file_ca[80];
     gint  timeout_connexion;                                           /* Temps max d'attente de reponse de la part du client */
     GSList *Clients;                                                                 /* Liste des clients en cours de gestion */
-    GSList *Liste_histo;                                                                      /* Envoi d'un histo aux clients */
     GSList *Liste_motif;                                                                     /* Destruction d'un histo client */
     GSList *Liste_events;                                                                       /* Liste des evenements recus */
   } Cfg_ssrv;

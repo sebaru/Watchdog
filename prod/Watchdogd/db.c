@@ -752,7 +752,7 @@
                                              "`x_forwarded_for` varchar(50) NOT NULL,"
                                              "`data` text NOT NULL,"
                                              "PRIMARY KEY (`id`)"
-                                             ") ENGINE=InnoDB DEFAULT CHARSET=utf8"
+                                             ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
                  );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
@@ -762,7 +762,14 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
-    database_version=3386;
+    if (database_version < 3444)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE modbus_modules ADD `date_create` DATETIME NOT NULL AFTER `id`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE modbus_modules DROP `instance_id`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version=3444;
 
     Libere_DB_SQL(&db);
 
