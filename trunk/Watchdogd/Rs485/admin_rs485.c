@@ -57,9 +57,9 @@
                 " | RS485[%02d] ------> '%s' (added '%s')\n"
                 " | - num=%02d, requete = %03ds ago\n"
                 " | - enable = %d, started = %d, bit_comm = B%04d(=%d)\n"
-                " | - %03d Digital Input,  map_E = E%03d(->E%03d)\n"
+                " | - %03d Digital Input,  map_E  = E%03d (->E%03d )\n"
                 " | - %03d Analog  Input,  map_EA = EA%03d(->EA%03d)\n"
-                " | - %03d Digital Output, map_A = A%03d(->A%03d)\n"
+                " | - %03d Digital Output, map_A  = A%03d (->A%03d )\n"
                 " | - %03d Analog  Output, map_AA = AA%03d(->AA%03d)\n"
                 " | - next_get_ana=in %03ds, nbr_deconnect=%02d",
                 module->rs485.id, module->rs485.libelle, module->rs485.date_ajout,
