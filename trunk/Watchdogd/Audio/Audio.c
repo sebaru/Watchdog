@@ -250,7 +250,7 @@
             )
           )                                                                     /* Bit positionné quand arret diffusion audio */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
-                   "Run_thread : Envoi du message audio %d", histo->msg.num );
+                   "Run_thread : Envoi du message audio %d (histo->msg.audio=%d)", histo->msg.num, histo->msg.audio );
 
           if (Config.instance_is_master)
            { Envoyer_commande_dls( histo->msg.bit_audio );                   /* Positionnement du profil audio via monostable */
