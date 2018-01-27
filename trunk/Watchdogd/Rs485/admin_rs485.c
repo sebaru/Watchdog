@@ -171,7 +171,7 @@
        return(response);
      }
 
-    sscanf ( ligne, "%s %s %[^n]", id_char, param, valeur_char );
+    sscanf ( ligne, "%s %s %[^\n]", id_char, param, valeur_char );
     id     = atoi ( id_char     );
     valeur = atoi ( valeur_char );
 
