@@ -235,7 +235,7 @@
         { if ( strcmp( event->instance, Config.instance_id ) && strcmp (event->instance, "*") ) break;
           if ( strcmp( event->thread, NOM_THREAD ) && strcmp ( event->thread, "*" ) ) break;
 
-          Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
+          Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
                    "%s : Reception d'un message du master : %s", (gchar *)payload );
         }
 
@@ -243,7 +243,7 @@
         { sleep(1); continue; }
 
        histo = &histo_buf;
-       if ( histo->alive == 1 &&                                                                    /* Si le message apparait */
+       if ( histo->alive == 1 && histo->msg.audio &&                                                /* Si le message apparait */
             (M(NUM_BIT_M_AUDIO_INHIB) == 0 || histo->msg.type == MSG_ALERTE
                                            || histo->msg.type == MSG_DANGER 
                                            || histo->msg.type == MSG_ALARME
