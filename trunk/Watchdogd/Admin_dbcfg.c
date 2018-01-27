@@ -53,7 +53,7 @@
           response = Admin_write ( response, chaine );
         }
        else 
-        { g_snprintf(chaine, sizeof(chaine), " | Instance_id '%s', Thread '%s'", Config.instance_id, thread );
+        { g_snprintf(chaine, sizeof(chaine), " | - Instance_id '%s', Thread '%s'", Config.instance_id, thread );
           response = Admin_write ( response, chaine );
           while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                     /* Récupération d'une config dans la DB */
            { g_snprintf(chaine, sizeof(chaine), " | - '%20s' = '%s'", nom, valeur );
@@ -66,7 +66,7 @@
        gboolean retour;
        sscanf ( ligne, "%s %s %s", commande, param, valeur );                            /* Découpage de la ligne de commande */
        retour = Modifier_configDB( thread, param, valeur );
-       g_snprintf( chaine, sizeof(chaine), " Instance_id '%s', Thread '%s' -> Setting %s = %s -> %s",
+       g_snprintf( chaine, sizeof(chaine), " | - Instance_id '%s', Thread '%s' -> Setting %s = %s -> %s",
                    Config.instance_id, thread, param, valeur,
                   (retour ? "Success" : "Failed") );
        response = Admin_write ( response, chaine );
@@ -76,13 +76,13 @@
        gboolean retour;
        sscanf ( ligne, "%s %s", commande, param );                                       /* Découpage de la ligne de commande */
        retour = Retirer_configDB( thread, param );
-       g_snprintf( chaine, sizeof(chaine), " Instance_id '%s', Thread '%s' -> Erasing %s -> %s",
+       g_snprintf( chaine, sizeof(chaine), " | - Instance_id '%s', Thread '%s' -> Erasing %s -> %s",
                    Config.instance_id, thread, param,
                    (retour ? "Success" : "Failed") );
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "reload" ) )
-     { g_snprintf( chaine, sizeof(chaine), " Instance_id '%s', Thread '%s' -> Reloading ...",
+     { g_snprintf( chaine, sizeof(chaine), " | - Instance_id '%s', Thread '%s' -> Reloading ...",
                    Config.instance_id, thread );
        response = Admin_write ( response, chaine );
      }

@@ -80,7 +80,7 @@
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  static gchar *Admin_modbus_print ( gchar *response, struct MODULE_MODBUS *module )
-  { gchar chaine[512];
+  { gchar chaine[1024];
     g_snprintf( chaine, sizeof(chaine),
                 " |---------------------------\n"
                 " | MODBUS[%02d] ------> '%s' - %s (added '%s')\n"

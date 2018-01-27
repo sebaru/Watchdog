@@ -62,8 +62,7 @@
 /******************************************************************************************************************************/
  gchar *Admin_write ( gchar *response, gchar *new_ligne )
   { gchar *new;
-    if (response == NULL)
-     { return (g_strdup(new_ligne)); }
+    if (response == NULL) { response = g_strdup(""); }
     new = g_strconcat( response, new_ligne, "\n", NULL );
     g_free(response);
     return(new);
