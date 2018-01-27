@@ -83,7 +83,7 @@
   { gchar chaine[512];
     g_snprintf( chaine, sizeof(chaine),
                 " |---------------------------\n"
-                " | MODBUS[%02d] ------> %s - %s (%s)\n"
+                " | MODBUS[%02d] ------> '%s' - %s (added '%s')\n"
                 " | - enable = %d, started = %d (bit B%04d=%d), watchdog = %03d, IP = %s\n"
                 " | - %03d Digital Input,  map_E = E%03d(->E%03d), %03d Analog  Input,  map_EA = EA%03d(->EA%03d)\n"
                 " | - %03d Digital Output, map_A = A%03d(->A%03d), %03d Analog  Output, map_AA = AA%03d(->AA%03d)\n"
