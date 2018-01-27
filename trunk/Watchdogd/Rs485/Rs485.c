@@ -213,8 +213,8 @@
     if (!rs485) Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
                           "%s: Erreur allocation mémoire", __func__ );
     else
-     { g_snprintf( rs485->libelle, ziseof(rs485->libelle), "%s", db->row[3] );
-       g_snprintf( rs485->date_ajout, ziseof(rs485->date_ajout), "%s", db->row[13] );
+     { g_snprintf( rs485->libelle, sizeof(rs485->libelle), "%s", db->row[3] );
+       g_snprintf( rs485->date_ajout, sizeof(rs485->date_ajout), "%s", db->row[13] );
        rs485->id                = atoi(db->row[0]);
        rs485->num               = atoi(db->row[1]);
        rs485->bit_comm          = atoi(db->row[2]);
