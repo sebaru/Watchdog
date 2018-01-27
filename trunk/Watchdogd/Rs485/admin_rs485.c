@@ -53,16 +53,22 @@
  static gchar *Admin_rs485_print ( gchar *response, struct MODULE_RS485 *module )
   { gchar chaine[1024];
     g_snprintf( chaine, sizeof(chaine),
-                " RS485[%02d] ------> num=%02d, requete = %03ds ago\n"
-                "  | - enable = %d, started = %d, bit_comm = B%04d(=%d)\n"
-                "  | - EA = %03d-%03d, E = %03d-%03d, S = %03d-%03d, SA = %03d-%03d\n"
-                "  | - next_get_ana=in %03ds, nbr_deconnect=%02d",
-                module->rs485.id, module->rs485.num, (Partage->top - module->date_requete)/10,
+                " |---------------------------\n"
+                " | RS485[%02d] -> %s (added %s)\n"
+                " | - num=%02d, requete = %03ds ago\n"
+                " | - enable = %d, started = %d, bit_comm = B%04d(=%d)\n"
+                " | - %03d Digital Input,  map_E = E%03d(->E%03d)\n"
+                " | - %03d Analog  Input,  map_EA = EA%03d(->EA%03d)\n"
+                " | - %03d Digital Output, map_A = A%03d(->A%03d)\n"
+                " | - %03d Analog  Output, map_AA = AA%03d(->AA%03d)\n"
+                " | - next_get_ana=in %03ds, nbr_deconnect=%02d",
+                module->rs485.id, module->rs485.libelle, module->rs485.date_ajout,
+                module->rs485.num, (Partage->top - module->date_requete)/10, 
                 module->rs485.enable, module->started, module->rs485.bit_comm, B(module->rs485.bit_comm),
-                module->rs485.ea_min, module->rs485.ea_max,
-                module->rs485.e_min, module->rs485.e_max,
-                module->rs485.s_min, module->rs485.s_max,
-                module->rs485.sa_min, module->rs485.sa_max,
+                module->rs485.e_max  - module->rs485.e_min,  module->rs485.e_min, module->rs485.e_max,
+                module->rs485.ea_max - module->rs485.ea_min, module->rs485.ea_min, module->rs485.ea_max,
+                module->rs485.s_max  - module->rs485.s_min,  module->rs485.s_min, module->rs485.s_max,
+                module->rs485.sa_max - module->rs485.sa_min, module->rs485.sa_min, module->rs485.sa_max,
                 (module->date_next_get_ana > Partage->top ? (module->date_next_get_ana - Partage->top)/10 : -1),
                 module->nbr_deconnect
               );
@@ -152,11 +158,58 @@
 /* Entrée: Le buffer d'entrée a compléter                                                                                     */
 /* Sortie: Le buffer de sortie complété                                                                                       */
 /******************************************************************************************************************************/
- static gchar *Admin_rs485_set ( gchar *response, struct RS485DB *rs485 )
+ static gchar *Admin_rs485_set ( gchar *response, gchar *ligne )
   { gchar chaine[128];
+    GSList *liste_modules;
 
-    if ( Modifier_rs485DB( rs485 ) )
-     { g_snprintf( chaine, sizeof(chaine), " | - Module %d set.", rs485->id ); }
+    if ( ! strcmp ( ligne, "list" ) )
+     { response = Admin_write ( response, " | Parameter can be:" );
+       response = Admin_write ( response, " | - enable, bit, " );
+       response = Admin_write ( response, " | - map_E, map_EA, map_A, map_AA" );
+       return(response);
+     }
+
+    sscanf ( ligne, "%s %s %[^]", id_char, param, valeur_char );
+    id     = atoi ( id_char     );
+    valeur = atoi ( valeur_char );
+
+    pthread_mutex_lock( &Cfg_rs485.lib->synchro );                                          /* Recherche du module en mémoire */
+    liste_modules = Cfg_rs485.Modules_RS485;
+    while ( liste_modules )
+     { module = (struct MODULE_RS485 *)liste_modules->data;
+       if (module->modbus.id == id) break;
+       liste_modules = liste_modules->next;                                                      /* Passage au module suivant */
+     }
+    pthread_mutex_unlock( &Cfg_modbus.lib->synchro );
+
+    if (!module)                                                                                             /* Si non trouvé */
+     { response = Admin_write ( response, " | - Module not found" );
+       return(response);
+     }
+
+    if ( ! strcmp( param, "enable" ) )
+     { if (valeur)
+        { module->rs485.enable = TRUE;
+          module->nbr_deconnect  = 0;
+        }
+       else { module->rs485.enable = FALSE; }
+     }
+    else if ( ! strcmp( param, "bit" ) )     { module->rs485.bit = valeur;    }
+    else if ( ! strcmp( param, "map_E" ) )   { module->rs485.e_min = valeur;  }
+    else if ( ! strcmp( param, "map_EA" ) )  { module->rs485.ea_min = valeur; }
+    else if ( ! strcmp( param, "map_A" ) )   { module->rs485.s_min = valeur;  }
+    else if ( ! strcmp( param, "map_AA" ) )  { module->rs485.sa_min = valeur; }
+    else if ( ! strcmp( param, "libelle" ) )
+     { g_snprintf( module->res485.libelle, sizeof(module->rs485.libelle), "%s", valeur_char ); }
+    else
+     { g_snprintf( chaine, sizeof(chaine),
+                 " Parameter %s not known for RS485 id %s ('rs485 set list' can help)", param, id_char );
+       response = Admin_write ( response, chaine );
+       return(response);
+     }
+
+    if ( Modifier_rs485DB( &module->rs485 ) )
+     { g_snprintf( chaine, sizeof(chaine), " | - Module %d set %s to %s.", module->id, param, valeur_char ); }
     else
      { g_snprintf( chaine, sizeof(chaine), " | - Error. Module NOT set." ); }
     response = Admin_write ( response, chaine );
@@ -218,16 +271,7 @@
        response = Admin_rs485_del ( response, num );
      }
     else if ( ! strcmp ( commande, "set" ) )
-     { struct RS485DB rs485;
-       memset( &rs485, 0, sizeof(struct RS485DB) );
-       if (sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%[^\n]", commande,/* Découpage de la ligne de commande */
-                   &rs485.id, &rs485.num, &rs485.bit_comm, (gint *)&rs485.enable,
-                   &rs485.ea_min, &rs485.ea_max,
-                   &rs485.e_min, &rs485.e_max,
-                   &rs485.s_min, &rs485.s_max,
-                   &rs485.sa_min, &rs485.sa_max,
-                   rs485.libelle ) != 14) return(response);
-       response = Admin_rs485_set ( response, &rs485 );
+     { response = Admin_rs485_set ( response, ligne+4 );
      }
     else if ( ! strcmp ( commande, "start" ) )
      { int num;
@@ -262,7 +306,7 @@
        response = Admin_write ( response, "  dbcfg ...                              - Get/Set Database Parameters" );
        response = Admin_write ( response, "  add num,bit_comm,enable,ea_min,ea_max,e_min,e_max,s_min,s_max,sa_min,sa_max,libelle" );
        response = Admin_write ( response, "                                         - Ajoute un module RS485" );
-       response = Admin_write ( response, "  set id,num,bit_comm,enable,ea_min,ea_max,e_min,e_max,s_min,s_max,sa_min,sa_max,libelle" );
+       response = Admin_write ( response, "  set $id $champ $val                    - Set $val to $champ for module $id" );
        response = Admin_write ( response, "                                         - Modifie le module id" );
        response = Admin_write ( response, "  del id                                 - Retire le module id" );
        response = Admin_write ( response, "  start id                               - Demarre le module id" );

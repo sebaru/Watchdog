@@ -169,7 +169,7 @@
        return(response);
      }
 
-    sscanf ( ligne, "%s %s %[^]", id_char, param, valeur_char );
+    sscanf ( ligne, "%s %s %[^\n]", id_char, param, valeur_char );
     id     = atoi ( id_char     );
     valeur = atoi ( valeur_char );
 
@@ -194,18 +194,12 @@
         }
        else { module->modbus.enable = FALSE; }
      }
-    else if ( ! strcmp( param, "bit" ) )
-     { module->modbus.bit = valeur; }
-    else if ( ! strcmp( param, "watchdog" ) )
-     { module->modbus.watchdog = valeur; }
-    else if ( ! strcmp( param, "map_E" ) )
-     { module->modbus.map_E = valeur; }
-    else if ( ! strcmp( param, "map_EA" ) )
-     { module->modbus.map_EA = valeur; }
-    else if ( ! strcmp( param, "map_A" ) )
-     { module->modbus.map_A = valeur; }
-    else if ( ! strcmp( param, "map_AA" ) )
-     { module->modbus.map_AA = valeur; }
+    else if ( ! strcmp( param, "bit" ) )      { module->modbus.bit = valeur;      }
+    else if ( ! strcmp( param, "watchdog" ) ) { module->modbus.watchdog = valeur; }
+    else if ( ! strcmp( param, "map_E" ) )    { module->modbus.map_E = valeur;    }
+    else if ( ! strcmp( param, "map_EA" ) )   { module->modbus.map_EA = valeur;   }
+    else if ( ! strcmp( param, "map_A" ) )    { module->modbus.map_A = valeur;    }
+    else if ( ! strcmp( param, "map_AA" ) )   { module->modbus.map_AA = valeur;   }
     else if ( ! strcmp( param, "libelle" ) )
      { g_snprintf( module->modbus.libelle, sizeof(module->modbus.libelle), "%s", valeur_char ); }
     else if ( ! strcmp( param, "ip" ) )
@@ -221,7 +215,7 @@
     if (retour)
      { snprintf( chaine, sizeof(chaine), " | - ERROR : MODBUS module parameter '%s' NOT set", param ); }
     else
-     { snprintf( chaine, sizeof(chaine), " | - MODBUS module parameter '%s' set", param ); }
+     { snprintf( chaine, sizeof(chaine), " | - MODBUS module parameter '%s' set to %s", param, valeur_char ); }
     response = Admin_write ( response, chaine );
     return(response);
   }

@@ -758,7 +758,8 @@ CREATE TABLE IF NOT EXISTS `ups` (
 
 CREATE TABLE IF NOT EXISTS `rs485` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `instance_id` text NOT NULL,
+  `host` text NOT NULL,
+  `date_ajout` DATETIME NOT NULL,
   `num` int(11) NOT NULL DEFAULT '0',
   `enable` tinyint(1) NOT NULL DEFAULT '0',
   `ea_min` int(11) NOT NULL DEFAULT '-1',

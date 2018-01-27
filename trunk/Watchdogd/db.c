@@ -769,7 +769,14 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version=3444;
+    if (database_version < 3448)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE rs485 CHANGE `instance_id` `host` TEXT NOT NULL" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE rs485 ADD `date_ajout` DATETIME AFTER `host`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version=3448;
 
     Libere_DB_SQL(&db);
 

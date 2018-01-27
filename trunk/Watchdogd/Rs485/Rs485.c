@@ -123,10 +123,10 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(instance_id,num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
+                "INSERT INTO %s(host,date_ajout,num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
                 "s_min,s_max,sa_min,sa_max) "
-                " VALUES ('%s','%d','%d','%s','%d','%d','%d','%d','%d','%d','%d','%d','%d')",
-                NOM_TABLE_MODULE_RS485, Config.instance_id, rs485->num, rs485->bit_comm, libelle, rs485->enable,
+                " VALUES ('%s',NOW(),'%d','%d','%s','%d','%d','%d','%d','%d','%d','%d','%d','%d')",
+                NOM_TABLE_MODULE_RS485, g_get_host_name(), rs485->num, rs485->bit_comm, libelle, rs485->enable,
                 rs485->ea_min, rs485->ea_max, rs485->e_min, rs485->e_max,
                 rs485->s_min, rs485->s_max, rs485->sa_min, rs485->sa_max
               );
@@ -190,8 +190,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
-                "sa_min,sa_max,s_min,s_max"
-                " FROM %s WHERE instance_id='%s' ORDER BY num", NOM_TABLE_MODULE_RS485, Config.instance_id );
+                "sa_min,sa_max,s_min,s_max,date_ajout"
+                " FROM %s WHERE host='%s' ORDER BY num", NOM_TABLE_MODULE_RS485, g_get_host_name() );
 
     return ( Lancer_requete_SQL ( db, requete ) );                         /* Execution de la requete SQL */
   }
@@ -211,9 +211,10 @@
 
     rs485 = (struct RS485DB *)g_try_malloc0( sizeof(struct RS485DB) );
     if (!rs485) Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
-                          "Recuperer_rs485DB_suite: Erreur allocation mémoire" );
+                          "%s: Erreur allocation mémoire", __func__ );
     else
-     { memcpy( &rs485->libelle, db->row[3], sizeof(rs485->libelle) );
+     { g_snprintf( rs485->libelle, ziseof(rs485->libelle), "%s", db->row[3] );
+       g_snprintf( rs485->date_ajout, ziseof(rs485->date_ajout), "%s", db->row[13] );
        rs485->id                = atoi(db->row[0]);
        rs485->num               = atoi(db->row[1]);
        rs485->bit_comm          = atoi(db->row[2]);

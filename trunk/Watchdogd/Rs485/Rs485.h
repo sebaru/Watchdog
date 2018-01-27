@@ -73,6 +73,7 @@
     gint e_min, e_max;
     gint s_min, s_max;
     gint sa_min, sa_max;
+    gchar date_ajout[20];                                                 /* Date creation enregistrement */
     gchar libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                              /* Libelle de la rs485 */
   };
 
