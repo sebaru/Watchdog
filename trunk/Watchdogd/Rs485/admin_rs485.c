@@ -179,10 +179,10 @@
     liste_modules = Cfg_rs485.Modules_RS485;
     while ( liste_modules )
      { module = (struct MODULE_RS485 *)liste_modules->data;
-       if (module->modbus.id == id) break;
+       if (module->rs485.id == id) break;
        liste_modules = liste_modules->next;                                                      /* Passage au module suivant */
      }
-    pthread_mutex_unlock( &Cfg_modbus.lib->synchro );
+    pthread_mutex_unlock( &Cfg_rs485.lib->synchro );
 
     if (!module)                                                                                             /* Si non trouvé */
      { response = Admin_write ( response, " | - Module not found" );
@@ -196,13 +196,13 @@
         }
        else { module->rs485.enable = FALSE; }
      }
-    else if ( ! strcmp( param, "bit" ) )     { module->rs485.bit = valeur;    }
-    else if ( ! strcmp( param, "map_E" ) )   { module->rs485.e_min = valeur;  }
-    else if ( ! strcmp( param, "map_EA" ) )  { module->rs485.ea_min = valeur; }
-    else if ( ! strcmp( param, "map_A" ) )   { module->rs485.s_min = valeur;  }
-    else if ( ! strcmp( param, "map_AA" ) )  { module->rs485.sa_min = valeur; }
+    else if ( ! strcmp( param, "bit" ) )     { module->rs485.bit_comm = valeur; }
+    else if ( ! strcmp( param, "map_E" ) )   { module->rs485.e_min    = valeur; }
+    else if ( ! strcmp( param, "map_EA" ) )  { module->rs485.ea_min   = valeur; }
+    else if ( ! strcmp( param, "map_A" ) )   { module->rs485.s_min    = valeur; }
+    else if ( ! strcmp( param, "map_AA" ) )  { module->rs485.sa_min   = valeur; }
     else if ( ! strcmp( param, "libelle" ) )
-     { g_snprintf( module->res485.libelle, sizeof(module->rs485.libelle), "%s", valeur_char ); }
+     { g_snprintf( module->rs485.libelle, sizeof(module->rs485.libelle), "%s", valeur_char ); }
     else
      { g_snprintf( chaine, sizeof(chaine),
                  " Parameter %s not known for RS485 id %s ('rs485 set list' can help)", param, id_char );
@@ -211,7 +211,7 @@
      }
 
     if ( Modifier_rs485DB( &module->rs485 ) )
-     { g_snprintf( chaine, sizeof(chaine), " | - Module %d set %s to %s.", module->id, param, valeur_char ); }
+     { g_snprintf( chaine, sizeof(chaine), " | - Module %d set %s to %s.", module->rs485.id, param, valeur_char ); }
     else
      { g_snprintf( chaine, sizeof(chaine), " | - Error. Module NOT set." ); }
     response = Admin_write ( response, chaine );
