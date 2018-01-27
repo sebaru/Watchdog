@@ -160,7 +160,6 @@
     struct MODULE_MODBUS *module = NULL;
     GSList *liste_modules;
     guint id, valeur;
-    gint retour;
 
     if ( ! strcmp ( ligne, "list" ) )
      { response = Admin_write ( response, " | Parameter can be:" );
@@ -211,8 +210,7 @@
        return(response);
      }
 
-    retour = Modifier_modbusDB ( &module->modbus );
-    if (retour)
+    if (Modifier_modbusDB ( &module->modbus ))
      { snprintf( chaine, sizeof(chaine), " | - ERROR : MODBUS module parameter '%s' NOT set", param ); }
     else
      { snprintf( chaine, sizeof(chaine), " | - MODBUS module parameter '%s' set to %s", param, valeur_char ); }

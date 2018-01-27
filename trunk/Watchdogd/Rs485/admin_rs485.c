@@ -159,8 +159,10 @@
 /* Sortie: Le buffer de sortie complété                                                                                       */
 /******************************************************************************************************************************/
  static gchar *Admin_rs485_set ( gchar *response, gchar *ligne )
-  { gchar chaine[128];
+  { gchar id_char[16], param[32], valeur_char[64], chaine[128];
+    struct MODULE_RS485 *module = NULL;
     GSList *liste_modules;
+    guint id, valeur;
 
     if ( ! strcmp ( ligne, "list" ) )
      { response = Admin_write ( response, " | Parameter can be:" );
