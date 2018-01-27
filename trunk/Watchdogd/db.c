@@ -776,7 +776,14 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version=3448;
+    if (database_version < 3463)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos ADD `host` VARCHAR(20) NOT NULL AFTER `libelle`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos ADD `thread` VARCHAR(20) NOT NULL AFTER `host`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version=3463;
 
     Libere_DB_SQL(&db);
 

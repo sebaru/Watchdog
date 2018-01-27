@@ -47,6 +47,8 @@
      COLONNE_NUM_PLUGIN,
      COLONNE_ACRONYME,
      COLONNE_LIBELLE,
+     COLONNE_HOST,
+     COLONNE_THREAD,
      COLONNE_COMMAND_TEXT,
      COLONNE_TABLEAU,
      COLONNE_COULEUR,
@@ -442,6 +444,8 @@ printf("id=%d\n", rezo_mnemonique.id);
                                               G_TYPE_UINT,                                  /* Num_plugin */
                                               G_TYPE_STRING,                                  /* Acronyme */
                                               G_TYPE_STRING,                                   /* libellé */
+                                              G_TYPE_STRING,                                      /* host */
+                                              G_TYPE_STRING,                                    /* thread */
                                               G_TYPE_STRING,                              /* Command_text */
                                               G_TYPE_STRING,                                   /* Tableau */
                                               GDK_TYPE_COLOR,                             /* couleur fond */
@@ -481,6 +485,20 @@ printf("id=%d\n", rezo_mnemonique.id);
                                                          "text", COLONNE_LIBELLE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de mnemonique */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("host"), renderer,
+                                                         "text", COLONNE_HOST,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_HOST);                   /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de mnemonique */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("thread"), renderer,
+                                                         "text", COLONNE_THREAD,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_THREAD);                 /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
 
     renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de mnemonique */
@@ -565,6 +583,8 @@ printf("id=%d\n", rezo_mnemonique.id);
                          COLONNE_GROUPE_PAGE_DLS, groupe_page,
                          COLONNE_ACRONYME,        mnemonique->acronyme,
                          COLONNE_LIBELLE,         mnemonique->libelle,
+                         COLONNE_HOST,            mnemonique->host,
+                         COLONNE_THREAD,          mnemonique->thread,
                          COLONNE_COMMAND_TEXT,    mnemonique->command_text,
                          COLONNE_TABLEAU,         mnemonique->tableau,
                          COLONNE_COULEUR,         Couleur_bit_interne( mnemonique->type ),

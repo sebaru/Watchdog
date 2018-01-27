@@ -443,8 +443,7 @@
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine), "%s:%s:%s", Config.instance_id, NOM_THREAD, texte );             /* Recherche du mnemo */
-    mnemo = Map_event_to_mnemo( chaine, &nbr );
+    mnemo = Map_event_to_mnemo( NOM_THREAD, texte, &nbr );
     if (nbr==0)
      { g_snprintf(chaine, sizeof(chaine), "No event found for '%s'", texte );              /* Envoi de l'erreur si pas trouvé */
        Envoyer_sms_gsm_text ( chaine );
@@ -503,7 +502,6 @@
        gn_lib_phone_close(state);
        gn_lib_phoneprofile_free(&state);
        gn_lib_library_free();
-       sleep(5);
        return;
      }
 

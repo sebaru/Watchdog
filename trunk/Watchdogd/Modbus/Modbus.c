@@ -130,7 +130,7 @@
      { g_snprintf( requete, sizeof(requete),
                   "INSERT INTO %s(instance_id,date_create,enable,ip,bit,watchdog,libelle,map_E,map_EA,map_A,map_AA) "
                   "VALUES ('%s',NOW(),'%d','%s',%d,%d,'%s','%d','%d','%d','%d')",
-                   NOM_TABLE_MODULE_MODBUS, Config.instance_id, modbus->enable, ip, modbus->bit, modbus->watchdog, libelle,
+                   NOM_TABLE_MODULE_MODBUS, g_get_host_name(), modbus->enable, ip, modbus->bit, modbus->watchdog, libelle,
                    modbus->map_E, modbus->map_EA, modbus->map_A, modbus->map_AA
                  );
      }

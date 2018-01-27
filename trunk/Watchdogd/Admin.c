@@ -84,7 +84,7 @@
              "%s: Commande Received from %s@%s : %s", __func__, user, host, ligne );
 
     g_snprintf( chaine, sizeof(chaine), "At %010.1f, processing '%s' on instance '%s'",
-                (gdouble)Partage->top/10.0, ligne, Config.instance_id );
+                (gdouble)Partage->top/10.0, ligne, g_get_host_name() );
     response = Admin_write ( g_strdup(chaine), "\n" );
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */

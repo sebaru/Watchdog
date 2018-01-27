@@ -105,7 +105,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT id,host,ups,bit_comm,enable,map_EA,map_E,map_A,username,password "
-                " FROM %s WHERE instance_id='%s' ORDER BY host,ups", NOM_TABLE_UPS, Config.instance_id );
+                " FROM %s WHERE instance_id='%s' ORDER BY host,ups", NOM_TABLE_UPS, g_get_host_name() );
 
     return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
   }
@@ -183,7 +183,7 @@
                    "INSERT INTO %s"
                    "(instance_id,host,ups,bit_comm,enable,map_EA,map_E,map_A,username,password) "
                    "VALUES ('%s','%s','%s',%d,%d,%d,%d,%d,'%s','%s')",
-                   NOM_TABLE_UPS, Config.instance_id, host, name, ups->bit_comm, ups->enable,
+                   NOM_TABLE_UPS, g_get_host_name(), host, name, ups->bit_comm, ups->enable,
                    ups->map_EA, ups->map_E, ups->map_A, username, password
                  );
      }

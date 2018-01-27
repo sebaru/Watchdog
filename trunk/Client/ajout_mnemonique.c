@@ -41,6 +41,8 @@
  static GtkWidget *Entry_lib;                                                                        /* Libelle du mnemonique */
  static GtkWidget *Entry_acro;                                                                      /* Acronyme du mnemonique */
  static GtkWidget *Entry_acro_syn;                                                           /* Acronyme Visuel du mnemonique */
+ static GtkWidget *Entry_host;                                                                 /* Commande_text du mnemonique */
+ static GtkWidget *Entry_thread;                                                               /* Commande_text du mnemonique */
  static GtkWidget *Entry_command;                                                              /* Commande_text du mnemonique */
  static GtkWidget *Entry_tableau;                                                     /* Tableau d'affichage pour les courbes */
  static GtkWidget *Combo_dls;                                                                           /* Synoptique associé */
@@ -61,6 +63,10 @@
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
     g_snprintf( Option_mnemo.mnemo_base.acronyme, sizeof(Option_mnemo.mnemo_base.acronyme),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acro) ) );
+    g_snprintf( Option_mnemo.mnemo_base.host, sizeof(Option_mnemo.mnemo_base.host),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_host) ) );
+    g_snprintf( Option_mnemo.mnemo_base.thread, sizeof(Option_mnemo.mnemo_base.thread),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_thread) ) );
     g_snprintf( Option_mnemo.mnemo_base.command_text, sizeof(Option_mnemo.mnemo_base.command_text),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_command) ) );
     g_snprintf( Option_mnemo.mnemo_base.tableau, sizeof(Option_mnemo.mnemo_base.tableau),
@@ -225,7 +231,7 @@
     gtk_notebook_set_scrollable (GTK_NOTEBOOK(notebook), TRUE );
 
 /********************************************** Premiere page : les paramètres communs ****************************************/
-    hboite = gtk_hbox_new( FALSE, 6 );
+    hboite = gtk_hbox_new( FALSE, 7 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_notebook_append_page( GTK_NOTEBOOK(notebook), hboite, gtk_label_new ( _("Common Settings") ) );
 
@@ -282,6 +288,19 @@
     Entry_tableau = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_tableau), NBR_CARAC_LIBELLE_MNEMONIQUE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_tableau, 1, 4, i, i+1 );
+
+    i++;
+    texte = gtk_label_new( _("Host") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Entry_host = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_host), NBR_CARAC_LIBELLE_MNEMONIQUE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_host, 1, 2, i, i+1 );
+
+    texte = gtk_label_new( _("Thread") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
+    Entry_thread = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_thread), NBR_CARAC_LIBELLE_MNEMONIQUE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_thread, 3, 4, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("Event") );

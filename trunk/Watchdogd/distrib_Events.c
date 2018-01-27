@@ -53,7 +53,7 @@
 /* Entrée : la source de l'evenement (thread et son type)                                                                     */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Send_Event ( gchar *instance, gchar *thread, guint type, gchar *objet, gfloat val_float )
+ void Send_Event ( const gchar *instance, gchar *thread, guint type, gchar *objet, gfloat val_float )
   { struct CMD_TYPE_MSRV_EVENT *event;
 
     event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc0( sizeof( struct CMD_TYPE_MSRV_EVENT ) );
@@ -149,12 +149,12 @@
 /* Entrée: l'evenement à traiter                                                                                              */
 /* Sortie: le mnemo en question, ou NULL si non-trouvé (ou multi trouvailles)                                                 */
 /******************************************************************************************************************************/
- struct CMD_TYPE_MNEMO_BASE *Map_event_to_mnemo( gchar *event, gint *retour_nbr )
+ struct CMD_TYPE_MNEMO_BASE *Map_event_to_mnemo( gchar *thread, gchar *event, gint *retour_nbr )
   { struct CMD_TYPE_MNEMO_BASE *mnemo, *result_mnemo = NULL;
     gint nbr_result;
     struct DB *db;
 
-    if ( ! Recuperer_mnemo_baseDB_by_command_text ( &db, event ) )
+    if ( ! Recuperer_mnemo_baseDB_by_command_text ( &db, thread, event ) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                  "%s: Error searching Database for '%s'", __func__, event );
        return(NULL);
@@ -187,7 +187,7 @@
     gint nbr;
     gchar request[128];
     g_snprintf( request, sizeof(request), "%s:%s:%s", event->instance, event->thread, event->objet );
-    mnemo = Map_event_to_mnemo ( request, &nbr );
+    mnemo = Map_event_to_mnemo ( event->instance, request, &nbr );
     if (!mnemo)                                      /* Si pas trouvé, création d'un mnemo 'discovered' ? */
      { struct CMD_TYPE_MNEMO_FULL new_mnemo;
        memset( &new_mnemo, 0, sizeof(new_mnemo) );
@@ -272,7 +272,7 @@
      }
 
     if ( strlen ( mnemo->command_text ) > 0 )                      /* Existe t'il un evenement associé ? (implique furtivité) */
-     { Send_Event ( Config.instance_id, "MSRV", EVENT_OUTPUT, mnemo->command_text, 1.0 );
+     { Send_Event ( g_get_host_name(), "MSRV", EVENT_OUTPUT, mnemo->command_text, 1.0 );
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                  "Gerer_arrive_Axxx_dls: Recu A(%03d) (%s). Reste a traiter %03d",
                  num, mnemo->command_text, reste

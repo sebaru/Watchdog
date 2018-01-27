@@ -50,7 +50,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_mnemoDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
@@ -67,7 +67,7 @@
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
  static gint Ajouter_Modifier_mnemo_baseDB ( struct CMD_TYPE_MNEMO_BASE *mnemo, gboolean ajout )
-  { gchar *libelle, *acro, *command_text, *tableau, *acro_syn;
+  { gchar *libelle, *acro, *command_text, *tableau, *acro_syn, *thread, *host;
     gchar requete[1024];
     gboolean retour;
     struct DB *db;
@@ -78,10 +78,14 @@
     command_text = Normaliser_chaine ( mnemo->command_text );                                /* Formatage correct des chaines */
     tableau      = Normaliser_chaine ( mnemo->tableau );                                     /* Formatage correct des chaines */
     acro_syn     = Normaliser_chaine ( mnemo->acro_syn );                                    /* Formatage correct des chaines */
+    thread       = Normaliser_chaine ( mnemo->thread );                                      /* Formatage correct des chaines */
+    host         = Normaliser_chaine ( mnemo->host );                                        /* Formatage correct des chaines */
     if ( !(libelle && acro && command_text && tableau && acro_syn) )
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Ajouter_Modifier_mnemo_baseDB: Normalisation impossible. Mnemo NOT added nor modified." );
+                "%s: Normalisation impossible. Mnemo NOT added nor modified.", __func__ );
        if (libelle)      g_free(libelle);
+       if (thread)       g_free(thread);
+       if (host)         g_free(host);
        if (acro)         g_free(acro);
        if (command_text) g_free(command_text);
        if (tableau)      g_free(tableau);
@@ -91,16 +95,16 @@
 
     if (ajout == TRUE)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "INSERT INTO %s(type,num,dls_id,acronyme,libelle,command_text,tableau,acro_syn) VALUES "
+                   "INSERT INTO %s(type,num,dls_id,acronyme,libelle,host,thread,command_text,tableau,acro_syn) VALUES "
                    "(%d,%d,%d,'%s','%s','%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
-                   mnemo->num, mnemo->dls_id, acro, libelle, command_text, tableau, acro_syn );
+                   mnemo->num, mnemo->dls_id, acro, libelle, host, thread, command_text, tableau, acro_syn );
      } else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "UPDATE %s SET "             
-                   "type=%d,libelle='%s',acronyme='%s',command_text='%s',dls_id=%d,num=%d,tableau='%s',"
+                   "type=%d,libelle='%s',acronyme='%s',host='%s',thread='%s',command_text='%s',dls_id=%d,num=%d,tableau='%s',"
                    "acro_syn='%s' "
                    "WHERE id=%d",
-                   NOM_TABLE_MNEMO, mnemo->type, libelle, acro, command_text, 
+                   NOM_TABLE_MNEMO, mnemo->type, libelle, acro, host, thread, command_text, 
                    mnemo->dls_id, mnemo->num, tableau, acro_syn, mnemo->id );
      }
     g_free(libelle);
@@ -108,6 +112,8 @@
     g_free(command_text);
     g_free(tableau);
     g_free(acro_syn);
+    g_free(host);
+    g_free(thread);
 
     db = Init_DB_SQL();       
     if (!db)
@@ -166,7 +172,7 @@
 /* Entrée: un pointeur vers une nouvelle connexion de base de données, le critere de recherche                                */
 /* Sortie: FALSE si erreur                                                      ********************                          */
 /******************************************************************************************************************************/
- gboolean Recuperer_mnemo_baseDB_by_command_text ( struct DB **db_retour, gchar *commande_pure )
+ gboolean Recuperer_mnemo_baseDB_by_command_text ( struct DB **db_retour, gchar *thread, gchar *commande_pure )
   { gchar requete[1024], critere[256];
     gchar *commande;
     gboolean retour;
@@ -175,23 +181,25 @@
     commande = Normaliser_chaine ( commande_pure );
     if (!commande)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                 "Recuperer_mnemo_by_command_text: Normalisation impossible commande" );
+                 "%s: Normalisation impossible commande", __func__ );
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
-                "dls.name, mnemo.tableau, mnemo.acro_syn"
+                "dls.name, mnemo.tableau, mnemo.acro_syn, mnemo.host, mnemo.thread"
                 " FROM %s as mnemo INNER JOIN %s as dls ON mnemo.dls_id=dls.id INNER JOIN %s as syn ON dls.syn_id = syn.id",
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE
               );
 
-    g_snprintf( critere, sizeof(critere), " AND mnemo.command_text = '%s'", commande_pure );
+    g_snprintf( critere, sizeof(critere),
+               " AND (mnemo.host='*' OR mnemo.host='%s') AND (mnemo.thread='*' OR mnemo.thread='%s') AND mnemo.command_text = '%s'",
+               g_get_host_name(), thread, commande_pure );
     g_strlcat( requete, critere, sizeof(requete) );
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_mnemo_by_command_text: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "thread: DB connexion failed", __func__ );
        return(FALSE);
      }
 
@@ -212,7 +220,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
-                "dls.shortname, mnemo.tableau, mnemo.acro_syn"
+                "dls.shortname, mnemo.tableau, mnemo.acro_syn, mnemo.host, mnemo.thread"
                 " FROM %s as mnemo INNER JOIN %s as dls ON mnemo.dls_id=dls.id INNER JOIN %s as syn ON dls.syn_id = syn.id"
                 " WHERE %s ORDER BY groupe,page,name,type,num",
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, (conditions ? conditions : "1=1")
@@ -267,6 +275,8 @@
        g_snprintf( mnemo->dls_shortname,sizeof(mnemo->dls_shortname),"%s", db->row[9] );
        g_snprintf( mnemo->tableau,      sizeof(mnemo->tableau),      "%s", db->row[10] );
        g_snprintf( mnemo->acro_syn,     sizeof(mnemo->acro_syn),     "%s", db->row[11] );
+       g_snprintf( mnemo->host,         sizeof(mnemo->host),         "%s", db->row[12] );
+       g_snprintf( mnemo->thread,       sizeof(mnemo->thread),       "%s", db->row[13] );
        mnemo->id     = atoi(db->row[0]);
        mnemo->type   = atoi(db->row[1]);
        mnemo->num    = atoi(db->row[2]);
@@ -286,7 +296,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
-                "dls.shortname, mnemo.tableau, mnemo.acro_syn"
+                "dls.shortname, mnemo.tableau, mnemo.acro_syn, mnemo.host, mnemo.thread"
                 " FROM %s as mnemo"
                 " INNER JOIN %s as dls ON mnemo.dls_id=dls.id"
                 " INNER JOIN %s as syn ON dls.syn_id = syn.id"
@@ -320,7 +330,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
-                "dls.name, mnemo.tableau, mnemo.acro_syn"
+                "dls.name, mnemo.tableau, mnemo.acro_syn, mnemo.host, mnemo.thread"
                 " FROM %s as mnemo INNER JOIN %s as dls ON mnemo.dls_id=dls.id INNER JOIN %s as syn ON dls.syn_id = syn.id"
                 " WHERE mnemo.type = %d AND mnemo.num = %d LIMIT 1",
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, critere->type, critere->num

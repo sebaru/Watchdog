@@ -84,7 +84,7 @@
                    " | - Version (%s) running on %s\n"
                    " | - run as '%s' (uid=%d)\n"
                    " | - home = '%s'",
-                   (Config.instance_is_master ? "Master" : "Slave"), Config.instance_id, date, getpid(),
+                   (Config.instance_is_master ? "Master" : "Slave"), g_get_host_name(), date, getpid(),
                    VERSION, nom, 
                    Config.run_as, getuid(),
                    Config.home );

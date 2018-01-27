@@ -232,7 +232,7 @@
         }
 
        if (Recv_zmq_with_tag ( zmq_master, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
-        { if ( strcmp( event->instance, Config.instance_id ) && strcmp (event->instance, "*") ) break;
+        { if ( strcmp( event->instance, g_get_host_name() ) && strcmp (event->instance, "*") ) break;
           if ( strcmp( event->thread, NOM_THREAD ) && strcmp ( event->thread, "*" ) ) break;
 
           Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
