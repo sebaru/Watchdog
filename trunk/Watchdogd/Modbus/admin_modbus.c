@@ -230,13 +230,13 @@
     if ( ! strcmp ( commande, "start" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
-       snprintf( chaine, sizeof(chaine), "%d enable 1", num );
+       g_snprintf( chaine, sizeof(chaine), "%d enable 1", num );
        response = Admin_modbus_set ( response, chaine );
      }
     else if ( ! strcmp ( commande, "stop" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
-       snprintf( chaine, sizeof(chaine), "%d enable 0", num );
+       g_snprintf( chaine, sizeof(chaine), "%d enable 0", num );
        response = Admin_modbus_set ( response, chaine );
      }
     else if ( ! strcmp ( commande, "list" ) )

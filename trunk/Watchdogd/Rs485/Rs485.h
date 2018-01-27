@@ -91,8 +91,6 @@
     GSList *Modules_RS485;
     gboolean enable;                                                           /* Thread enable at boot ? */
     gboolean reload;                                 /* TRUE si le thread doit recharger sa configuration */
-    guint admin_start;                                                          /* Demande de deconnexion */
-    guint admin_stop;                                                           /* Demande de deconnexion */
     gint  fd;                                         /* File Descriptor de la connexion a la ligne RS485 */
     gchar port[80];                                                            /* Port d'accès a la RS485 */
   } Cfg_rs485;

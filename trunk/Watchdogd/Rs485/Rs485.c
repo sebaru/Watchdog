@@ -320,6 +320,7 @@
     for( cpt = 0; cpt<nbr_ea; cpt++)
      { SEA_range( module->rs485.ea_min + cpt, 0 ); }
     SB(module->rs485.bit_comm, 0);
+    module->started = FALSE;
   }
 /**********************************************************************************************************/
 /* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
@@ -593,31 +594,14 @@
           lib->Thread_sigusr1 = FALSE;
         }
 
-       if (Cfg_rs485.admin_start)
-        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
-                    "Run_thread: Run_rs485: Starting module" );
-          module = Chercher_module_rs485_by_id ( Cfg_rs485.admin_start );
-          if (module) { module->started = TRUE; }
-          Cfg_rs485.admin_start = 0;
-        }
-
-       if (Cfg_rs485.admin_stop)
-        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
-                    "Run_thread: Run_rs485: Stopping module" );
-          module = Chercher_module_rs485_by_id ( Cfg_rs485.admin_stop );
-          if (module) module->started = FALSE;
-          Deconnecter_rs485 ( module );
-          Cfg_rs485.admin_stop = 0;
-        }
-
        if (Cfg_rs485.Modules_RS485 == NULL )                    /* Si pas de module référencés, on attend */
-        { sleep(2); continue; }
+        { sleep(1); continue; }
 
        pthread_mutex_lock ( &Cfg_rs485.lib->synchro );             /* Car utilisation de la liste chainée */
        liste = Cfg_rs485.Modules_RS485;
        while (liste && (lib->Thread_run == TRUE) && (Cfg_rs485.reload == FALSE))
         { module = (struct MODULE_RS485 *)liste->data;
-          if (module->started != TRUE)                           /* Si le module est stopped, on le zappe */
+          if (module->rs485.enable != TRUE)                     /* Si le module est disabled, on le zappe */
            { liste = liste->next;
              continue;
            }
@@ -700,6 +684,7 @@
                     { if (Processer_trame( module, &Trame ))/* Si la trame est processée, on passe suivant */
                        { attente_reponse = FALSE;                             /* Nous avons une reponse ! */
                          SB(module->rs485.bit_comm, 1);             /* Bit de comm = 1 pour avertir D.L.S */
+                         module->started = 1;
                          module->nbr_deconnect = 0;
                          liste = liste->next;
                        }

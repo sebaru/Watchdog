@@ -218,34 +218,6 @@
     return(response);
   }
 /******************************************************************************************************************************/
-/* Admin_rs485_start: Demande le demarrage du traitement du module en paremetre                                               */
-/* Entrée: Le buffer d'entrée a compléter                                                                                     */
-/* Sortie: Le buffer de sortie complété                                                                                       */
-/******************************************************************************************************************************/
- static gchar *Admin_rs485_start ( gchar *response, gint id )
-  { gchar chaine[128];
-
-    Cfg_rs485.admin_start = id;
-
-    g_snprintf( chaine, sizeof(chaine), " | - Module RS485 %d started", id );
-    response = Admin_write ( response, chaine );
-    return(response);
-  }
-/******************************************************************************************************************************/
-/* Admin_rs485_stop: Demande l'arret du traitement du module en paremetre                                                     */
-/* Entrée: Le buffer d'entrée a compléter                                                                                     */
-/* Sortie: Le buffer de sortie complété                                                                                       */
-/******************************************************************************************************************************/
- static gchar *Admin_rs485_stop ( gchar *response, gint id )
-  { gchar chaine[128];
-
-    Cfg_rs485.admin_stop = id;
-
-    g_snprintf( chaine, sizeof(chaine), " | - Module RS485 %d stopped", id );
-    response = Admin_write ( response, chaine );
-    return(response);
-  }
-/******************************************************************************************************************************/
 /* Admin_command : Appeller par le thread admin pour traiter une commande                                                     */
 /* Entrée: Le buffer d'entrée a compléter                                                                                     */
 /* Sortie: Le buffer de sortie complété                                                                                       */
@@ -275,15 +247,17 @@
     else if ( ! strcmp ( commande, "set" ) )
      { response = Admin_rs485_set ( response, ligne+4 );
      }
-    else if ( ! strcmp ( commande, "start" ) )
+    if ( ! strcmp ( commande, "start" ) )
      { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       response = Admin_rs485_start ( response, num );
+       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
+       g_snprintf( chaine, sizeof(chaine), "%d enable 1", num );
+       response = Admin_rs485_set ( response, chaine );
      }
     else if ( ! strcmp ( commande, "stop" ) )
      { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
-       response = Admin_rs485_stop ( response, num );
+       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
+       g_snprintf( chaine, sizeof(chaine), "%d enable 0", num );
+       response = Admin_rs485_set ( response, chaine );
      }
     else if ( ! strcmp ( commande, "show" ) )
      { int num;
