@@ -61,7 +61,7 @@
                 " | - %03d Analog  Input,  map_EA = EA%03d(->EA%03d)\n"
                 " | - %03d Digital Output, map_A = A%03d(->A%03d)\n"
                 " | - %03d Analog  Output, map_AA = AA%03d(->AA%03d)\n"
-                " | - next_get_ana=in %03ds, nbr_deconnect=%02d\n",
+                " | - next_get_ana=in %03ds, nbr_deconnect=%02d",
                 module->rs485.id, module->rs485.libelle, module->rs485.date_ajout,
                 module->rs485.num, (Partage->top - module->date_requete)/10, 
                 module->rs485.enable, module->started, module->rs485.bit_comm, B(module->rs485.bit_comm),
@@ -247,7 +247,7 @@
     else if ( ! strcmp ( commande, "set" ) )
      { response = Admin_rs485_set ( response, ligne+4 );
      }
-    if ( ! strcmp ( commande, "start" ) )
+    else if ( ! strcmp ( commande, "start" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), "%d enable 1", num );

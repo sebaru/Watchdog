@@ -125,7 +125,7 @@
 /******************************************************************************************************************************/
  static void CB_envoyer_commande_admin ( char *ligne )
   { gchar commande_old[128];
-    gchar buffer[2048];
+    gchar buffer[10240];
     gint recu;
 
     if (strlen(ligne) == 0) return;
