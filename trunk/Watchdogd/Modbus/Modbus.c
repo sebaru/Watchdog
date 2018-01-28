@@ -128,21 +128,21 @@
 
     if ( ajout == TRUE )
      { g_snprintf( requete, sizeof(requete),
-                  "INSERT INTO %s(instance_id,date_create,enable,ip,bit,watchdog,libelle,map_E,map_EA,map_A,map_AA) "
-                  "VALUES ('%s',NOW(),'%d','%s',%d,%d,'%s','%d','%d','%d','%d')",
+                  "INSERT INTO %s(instance_id,date_create,enable,ip,bit,watchdog,libelle,map_E,map_EA,map_A,map_AA,max_nbr_E) "
+                  "VALUES ('%s',NOW(),'%d','%s',%d,%d,'%s','%d','%d','%d','%d','%d')",
                    NOM_TABLE_MODULE_MODBUS, g_get_host_name(), modbus->enable, ip, modbus->bit, modbus->watchdog, libelle,
-                   modbus->map_E, modbus->map_EA, modbus->map_A, modbus->map_AA
+                   modbus->map_E, modbus->map_EA, modbus->map_A, modbus->map_AA, modbus->max_nbr_E
                  );
      }
     else
-     { g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+     { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                   "UPDATE %s SET "             
                   "enable='%d',ip='%s',bit='%d',watchdog='%d',libelle='%s',"
-                  "map_E='%d',map_EA='%d',map_A='%d',map_AA='%d'"
+                  "map_E='%d',map_EA='%d',map_A='%d',map_AA='%d',max_nbr_E='%d'"
                   " WHERE id=%d",
                    NOM_TABLE_MODULE_MODBUS,
                    modbus->enable, ip, modbus->bit, modbus->watchdog, libelle,
-                   modbus->map_E, modbus->map_EA, modbus->map_A, modbus->map_AA,
+                   modbus->map_E, modbus->map_EA, modbus->map_A, modbus->map_AA, modbus->max_nbr_E,
                    modbus->id );
       }
     w_free(ip, "free ip");
@@ -187,7 +187,7 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,date_create,enable,ip,bit,watchdog,libelle,map_E,map_EA,map_A,map_AA "
+                "SELECT id,date_create,enable,ip,bit,watchdog,libelle,map_E,map_EA,map_A,map_AA,max_nbr_E "
                 " FROM %s ORDER BY libelle",
                 NOM_TABLE_MODULE_MODBUS );
 
@@ -222,6 +222,7 @@
        modbus->map_EA   = atoi(db->row[8]);
        modbus->map_A    = atoi(db->row[9]);
        modbus->map_AA   = atoi(db->row[10]);
+       modbus->max_nbr_E= atoi(db->row[11]);
      }
     return(modbus);
   }
@@ -496,12 +497,12 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "Init_watchdog_modbus: 'stop watchdog failed' for %d (error %d)", module->modbus.id, retour );
+               "%s: 'stop watchdog failed' for %d (error %d)", __func__, module->modbus.id, retour );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-               "Init_watchdog_modbus: 'stop watchdog OK' for %d", module->modbus.id );
+               "%s: 'stop watchdog OK' for %d", __func__, module->modbus.id );
        module->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
@@ -526,13 +527,13 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                            /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "Init_watchdog_modbus: 'close modbus tcp on watchdog' failed for %d (error %d)",
+               "%s: 'close modbus tcp on watchdog' failed for %d (error %d)", __func__,
                module->modbus.id, retour );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-               "Init_watchdog_modbus: 'close modbus tcp on watchdog' OK for %d", module->modbus.id );
+               "%s: 'close modbus tcp on watchdog' OK for %d", __func__, module->modbus.id );
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -557,13 +558,13 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                            /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "Init_watchdog_modbus: 'init watchdog timer' failed for %d (error %d)",
+               "%s: 'init watchdog timer' failed for %d (error %d)", __func__,
                module->modbus.id, retour );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-               "Init_watchdog_modbus: 'init watchdog timer' OK for %d", module->modbus.id );
+               "%s: 'init watchdog timer' OK for %d", __func__, module->modbus.id );
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -588,13 +589,13 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                            /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                "Init_watchdog_modbus: 'watchdog start' failed for %d (error %d)",
+                "%s: 'watchdog start' failed for %d (error %d)", __func__,
                  module->modbus.id, retour );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-                "Init_watchdog_modbus: 'watchdog start' OK for %d", module->modbus.id );
+                "%s: Init_watchdog_modbus: 'watchdog start' OK for %d", __func__, module->modbus.id );
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -678,13 +679,12 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                            /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "Interroger_nbr_entree_TOR: failed %d (error %d)",
-               module->modbus.id, retour );
+               "%s: failed %d (error %d)", __func__, module->modbus.id, retour );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-               "Interroger_nbr_entree_TOR: OK for %d", module->modbus.id );
+                "%s: OK for %d", __func__, module->modbus.id );
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -835,7 +835,7 @@
     module->request = FALSE;                                                                     /* Une requete a été traitée */
 
     if ( (guint16) module->response.proto_id )
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "Processer_trame: wrong proto_id" );
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: wrong proto_id", __func__ );
        Deconnecter_module( module );
      }
     else
@@ -844,12 +844,12 @@
        SB( module->modbus.bit, 1 );                                                  /* Mise a 1 du bit interne lié au module */
        if (ntohs(module->response.transaction_id) != module->transaction_id)                              /* Mauvaise reponse */
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                   "Processer_trame: wrong transaction_id for module %d  attendu %d, recu %d",
+                   "%s: wrong transaction_id for module %d  attendu %d, recu %d", __func__,
                     module->modbus.id, module->transaction_id, ntohs(module->response.transaction_id) );
         }
        if ( module->response.fct >=0x80 )
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                   "Processer_trame: Erreur Reponse Module %d, Error %d, Exception code %d",
+                   "%s: Erreur Reponse Module %d, Error %d, Exception code %d", __func__,
                     module->modbus.id, module->response.fct, (int)module->response.data[0] );
           Deconnecter_module( module );
         }
@@ -971,11 +971,15 @@
                module->mode = MODBUS_GET_NBR_DI;
                break;
           case MODBUS_GET_NBR_DI:
-               module->nbr_entree_tor = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) );
-               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "Processer_trame: Get number Entree TOR = %d",
-                         module->nbr_entree_tor
-                       );
-               module->mode = MODBUS_GET_NBR_DO;
+                { gint nbr;
+                  nbr = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) );
+                  if (module->modbus.max_nbr_E>0) module->nbr_entree_tor = module->modbus.max_nbr_E;
+                                             else module->nbr_entree_tor = nbr;
+                  Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Get number Entree TOR = %d %s",
+                            module->nbr_entree_tor, (module->modbus.max_nbr_E>0 ? "(forced !)" : "")
+                          );
+                  module->mode = MODBUS_GET_NBR_DO;
+                }
                break;
           case MODBUS_GET_NBR_DO:
                module->nbr_sortie_tor = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) );

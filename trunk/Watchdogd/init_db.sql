@@ -682,6 +682,7 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `bit` int(11) NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `map_E` int(11) NOT NULL,
+  `max_nbr_E` int(11) NOT NULL,
   `map_EA` int(11) NOT NULL,
   `map_A` int(11) NOT NULL,
   `map_AA` int(11) NOT NULL,  PRIMARY KEY (`id`),

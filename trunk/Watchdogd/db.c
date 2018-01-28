@@ -785,7 +785,12 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version=3463;
+    if (database_version < 3470)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE modbus_modules ADD `max_nbr_E` INT(11) NOT NULL AFTER `map_E`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version=3470;
 
     Libere_DB_SQL(&db);
 
