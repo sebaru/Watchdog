@@ -352,6 +352,9 @@
                  }
               }
            }
+                                                                      /* Si reception depuis un thread, report vers le master */
+          if ( (byte=Recv_zmq_with_tag( zmq_from_threads, &buffer, sizeof(buffer), &event, &payload )) > 0 )
+           { Send_zmq ( Partage->com_msrv.zmq_to_master, buffer, byte ); }
         }
 
        if (Partage->com_msrv.Thread_reload)                                                               /* On a recu RELOAD */
