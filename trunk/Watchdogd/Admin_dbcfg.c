@@ -37,19 +37,19 @@
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'DBCFG'" );
-       response = Admin_write ( response, "  list               - List all parameters" );
-       response = Admin_write ( response, "  reload             - Reload all Parameters from DB" );
-       response = Admin_write ( response, "  set name value     - Set parameter name to value" );
-       response = Admin_write ( response, "  del name           - Erase parameter name" );
-       response = Admin_write ( response, "  help               - This help" );
+     { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'DBCFG'" );
+       response = Admin_write ( response, " | - list               - List all parameters" );
+       response = Admin_write ( response, " | - reload             - Reload all Parameters from DB" );
+       response = Admin_write ( response, " | - set $name $value   - Set parameter name to value" );
+       response = Admin_write ( response, " | - del $name          - Erase parameter name" );
+       response = Admin_write ( response, " |  help                - This help" );
      } else
     if ( ! strcmp ( commande, "list" ) )
      { gchar *nom, *valeur;
        struct DB *db;
 
        if ( ! Recuperer_configDB( &db, thread ) )                       /* Connexion a la base de données */
-        { g_snprintf(chaine, sizeof(chaine), "Database connexion failed" );
+        { g_snprintf(chaine, sizeof(chaine), " | - Database connexion failed" );
           response = Admin_write ( response, chaine );
         }
        else 
@@ -87,7 +87,7 @@
        response = Admin_write ( response, chaine );
      }
     else
-     { g_snprintf( chaine, sizeof(chaine), " Unknown DBCFG command : %s", ligne );
+     { g_snprintf( chaine, sizeof(chaine), " | - Unknown DBCFG command : %s", ligne );
        response = Admin_write ( response, chaine );
      }
     return(response);
