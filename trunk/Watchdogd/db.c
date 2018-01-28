@@ -777,9 +777,11 @@
      }
 
     if (database_version < 3463)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos ADD `host` VARCHAR(20) NOT NULL AFTER `libelle`" );
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos ADD `ev_host` VARCHAR(40) NOT NULL AFTER `libelle`" );
        Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos ADD `thread` VARCHAR(20) NOT NULL AFTER `host`" );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos ADD `ev_thread` VARCHAR(20) NOT NULL AFTER `ev_host`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos CHANGE `command_text` `ev_text` VARCHAR(160) NOT NULL" );
        Lancer_requete_SQL ( db, requete );
      }
 

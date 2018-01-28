@@ -154,7 +154,7 @@
     gint nbr_result;
     struct DB *db;
 
-    if ( ! Recuperer_mnemo_baseDB_by_command_text ( &db, thread, event ) )
+    if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, thread, event ) )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                  "%s: Error searching Database for '%s'", __func__, event );
        return(NULL);
@@ -196,7 +196,7 @@
        new_mnemo.mnemo_base.dls_id = 1;
        g_snprintf( new_mnemo.mnemo_base.acronyme,     sizeof(new_mnemo.mnemo_base.acronyme), "Discovered Event" );
        g_snprintf( new_mnemo.mnemo_base.libelle,      sizeof(new_mnemo.mnemo_base.libelle),  "To be filled" );
-       g_snprintf( new_mnemo.mnemo_base.command_text, sizeof(new_mnemo.mnemo_base.command_text), "%s", request );
+       g_snprintf( new_mnemo.mnemo_base.ev_text, sizeof(new_mnemo.mnemo_base.ev_text), "%s", request );
        Envoyer_commande_dls( 7 );                                                      /* Met à un le bit SYS_EVENT_NOT_FOUND */
        if ( Ajouter_mnemo_fullDB ( &new_mnemo ) < 0 )                                /* Ajout auto dans la base de mnemonique */
         { Info_new( Config.log, Config.log_msrv, LOG_ERR,
@@ -261,7 +261,7 @@
     reste = g_slist_length(Partage->com_msrv.liste_a);
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-    critere.type = MNEMO_SORTIE;                                           /* Recherche du command_text associé au mnemonique */
+    critere.type = MNEMO_SORTIE;                                           /* Recherche du ev_text associé au mnemonique */
     critere.num  = num;
     mnemo = Rechercher_mnemo_baseDB_type_num ( &critere );
     if (!mnemo)
@@ -271,11 +271,11 @@
        return;
      }
 
-    if ( strlen ( mnemo->command_text ) > 0 )                      /* Existe t'il un evenement associé ? (implique furtivité) */
-     { Send_Event ( g_get_host_name(), "MSRV", EVENT_OUTPUT, mnemo->command_text, 1.0 );
+    if ( strlen ( mnemo->ev_text ) > 0 )                      /* Existe t'il un evenement associé ? (implique furtivité) */
+     { Send_Event ( g_get_host_name(), "MSRV", EVENT_OUTPUT, mnemo->ev_text, 1.0 );
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                  "Gerer_arrive_Axxx_dls: Recu A(%03d) (%s). Reste a traiter %03d",
-                 num, mnemo->command_text, reste
+                 num, mnemo->ev_text, reste
                );
        SA ( num, 0 );                                                   /* L'evenement est traité, on fait retomber la sortie */
      }

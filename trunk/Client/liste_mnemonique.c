@@ -47,9 +47,9 @@
      COLONNE_NUM_PLUGIN,
      COLONNE_ACRONYME,
      COLONNE_LIBELLE,
-     COLONNE_HOST,
-     COLONNE_THREAD,
-     COLONNE_COMMAND_TEXT,
+     COLONNE_EV_HOST,
+     COLONNE_EV_THREAD,
+     COLONNE_EV_TEXT,
      COLONNE_TABLEAU,
      COLONNE_COULEUR,
      COLONNE_COULEUR_TEXTE,
@@ -487,25 +487,25 @@ printf("id=%d\n", rezo_mnemonique.id);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
 
-    renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de mnemonique */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("host"), renderer,
-                                                         "text", COLONNE_HOST,
+    renderer = gtk_cell_renderer_text_new();                                              /* Colonne du libelle de mnemonique */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Event Host"), renderer,
+                                                         "text", COLONNE_EV_HOST,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_HOST);                   /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EV_HOST);                                    /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
 
-    renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de mnemonique */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("thread"), renderer,
-                                                         "text", COLONNE_THREAD,
+    renderer = gtk_cell_renderer_text_new();                                              /* Colonne du libelle de mnemonique */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Event Thread"), renderer,
+                                                         "text", COLONNE_EV_THREAD,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_THREAD);                 /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EV_THREAD);                                  /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
 
-    renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de mnemonique */
-    colonne = gtk_tree_view_column_new_with_attributes ( _("Command text"), renderer,
-                                                         "text", COLONNE_COMMAND_TEXT,
+    renderer = gtk_cell_renderer_text_new();                                              /* Colonne du libelle de mnemonique */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Event Text"), renderer,
+                                                         "text", COLONNE_EV_TEXT,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_COMMAND_TEXT);           /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EV_TEXT);                                    /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
 
     renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de mnemonique */
@@ -583,9 +583,9 @@ printf("id=%d\n", rezo_mnemonique.id);
                          COLONNE_GROUPE_PAGE_DLS, groupe_page,
                          COLONNE_ACRONYME,        mnemonique->acronyme,
                          COLONNE_LIBELLE,         mnemonique->libelle,
-                         COLONNE_HOST,            mnemonique->host,
-                         COLONNE_THREAD,          mnemonique->thread,
-                         COLONNE_COMMAND_TEXT,    mnemonique->command_text,
+                         COLONNE_EV_HOST,         mnemonique->ev_host,
+                         COLONNE_EV_THREAD,       mnemonique->ev_thread,
+                         COLONNE_EV_TEXT,         mnemonique->ev_text,
                          COLONNE_TABLEAU,         mnemonique->tableau,
                          COLONNE_COULEUR,         Couleur_bit_interne( mnemonique->type ),
                          COLONNE_COULEUR_TEXTE,   Couleur_texte_bit_interne( mnemonique->type ),

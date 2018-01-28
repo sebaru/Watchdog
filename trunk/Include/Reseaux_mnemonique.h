@@ -66,9 +66,9 @@
     gchar  dls_shortname[NBR_CARAC_PLUGIN_DLS_UTF8+1];
     gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
-    gchar  host[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
-    gchar  thread[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
-    gchar  command_text[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
+    gchar  ev_host[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
+    gchar  ev_thread[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
+    gchar  ev_text[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
     gchar  tableau[ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
     gchar  acro_syn[ NBR_CARAC_ACRO_SYN_MNEMONIQUE_UTF8 + 1 ];         /* Acronyme présenté sur le synoptique, en mode cadran */
   };

@@ -469,7 +469,7 @@
                     "%s: From %s -> Error, type of mnemo not handled", __func__, from );
         }
      }
-    else /* Envoi au master vi thread HTTP */
+    else /* Envoi au master via thread HTTP */
      {
      }
     g_free(mnemo);

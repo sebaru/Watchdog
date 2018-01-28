@@ -41,9 +41,9 @@
  static GtkWidget *Entry_lib;                                                                        /* Libelle du mnemonique */
  static GtkWidget *Entry_acro;                                                                      /* Acronyme du mnemonique */
  static GtkWidget *Entry_acro_syn;                                                           /* Acronyme Visuel du mnemonique */
- static GtkWidget *Entry_host;                                                                 /* Commande_text du mnemonique */
- static GtkWidget *Entry_thread;                                                               /* Commande_text du mnemonique */
- static GtkWidget *Entry_command;                                                              /* Commande_text du mnemonique */
+ static GtkWidget *Entry_ev_host;                                                                 /* Commande_text du mnemonique */
+ static GtkWidget *Entry_ev_thread;                                                               /* Commande_text du mnemonique */
+ static GtkWidget *Entry_ev_text;                                                              /* Commande_text du mnemonique */
  static GtkWidget *Entry_tableau;                                                     /* Tableau d'affichage pour les courbes */
  static GtkWidget *Combo_dls;                                                                           /* Synoptique associé */
  static struct CMD_TYPE_MNEMO_FULL Option_mnemo;                                             /* Mnemonique en cours d'édition */
@@ -63,12 +63,12 @@
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
     g_snprintf( Option_mnemo.mnemo_base.acronyme, sizeof(Option_mnemo.mnemo_base.acronyme),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acro) ) );
-    g_snprintf( Option_mnemo.mnemo_base.host, sizeof(Option_mnemo.mnemo_base.host),
-                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_host) ) );
-    g_snprintf( Option_mnemo.mnemo_base.thread, sizeof(Option_mnemo.mnemo_base.thread),
-                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_thread) ) );
-    g_snprintf( Option_mnemo.mnemo_base.command_text, sizeof(Option_mnemo.mnemo_base.command_text),
-                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_command) ) );
+    g_snprintf( Option_mnemo.mnemo_base.ev_host, sizeof(Option_mnemo.mnemo_base.ev_host),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_ev_host) ) );
+    g_snprintf( Option_mnemo.mnemo_base.ev_thread, sizeof(Option_mnemo.mnemo_base.ev_thread),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_ev_thread) ) );
+    g_snprintf( Option_mnemo.mnemo_base.ev_text, sizeof(Option_mnemo.mnemo_base.ev_text),
+                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_ev_text) ) );
     g_snprintf( Option_mnemo.mnemo_base.tableau, sizeof(Option_mnemo.mnemo_base.tableau),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_tableau) ) );
     g_snprintf( Option_mnemo.mnemo_base.acro_syn, sizeof(Option_mnemo.mnemo_base.acro_syn),
@@ -290,24 +290,24 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_tableau, 1, 4, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Host") );
+    texte = gtk_label_new( _("Event Host") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Entry_host = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_host), NBR_CARAC_LIBELLE_MNEMONIQUE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_host, 1, 2, i, i+1 );
+    Entry_ev_host = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_ev_host), NBR_CARAC_LIBELLE_MNEMONIQUE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_ev_host, 1, 2, i, i+1 );
 
-    texte = gtk_label_new( _("Thread") );
+    texte = gtk_label_new( _("Event Thread") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 2, 3, i, i+1 );
-    Entry_thread = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_thread), NBR_CARAC_LIBELLE_MNEMONIQUE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_thread, 3, 4, i, i+1 );
+    Entry_ev_thread = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_ev_thread), NBR_CARAC_LIBELLE_MNEMONIQUE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_ev_thread, 3, 4, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Event") );
+    texte = gtk_label_new( _("Event Text") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Entry_command = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_command), NBR_CARAC_LIBELLE_MNEMONIQUE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_command, 1, 4, i, i+1 );
+    Entry_ev_text = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_ev_text), NBR_CARAC_LIBELLE_MNEMONIQUE );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_ev_text, 1, 4, i, i+1 );
 
     Type_changed();
     g_signal_connect_swapped( Entry_lib, "activate", G_CALLBACK(CB_valider), NULL );
@@ -347,7 +347,9 @@
     if (mnemo_full)                                                                             /* Si edition d'un mnemonique */
      { gtk_entry_set_text( GTK_ENTRY(Entry_lib),      mnemo_full->mnemo_base.libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_acro),     mnemo_full->mnemo_base.acronyme );
-       gtk_entry_set_text( GTK_ENTRY(Entry_command),  mnemo_full->mnemo_base.command_text );
+       gtk_entry_set_text( GTK_ENTRY(Entry_ev_host),  mnemo_full->mnemo_base.ev_host );
+       gtk_entry_set_text( GTK_ENTRY(Entry_ev_thread),mnemo_full->mnemo_base.ev_thread );
+       gtk_entry_set_text( GTK_ENTRY(Entry_ev_text),  mnemo_full->mnemo_base.ev_text );
        gtk_entry_set_text( GTK_ENTRY(Entry_tableau),  mnemo_full->mnemo_base.tableau );
        gtk_entry_set_text( GTK_ENTRY(Entry_acro_syn), mnemo_full->mnemo_base.acro_syn );
        gtk_combo_box_set_active( GTK_COMBO_BOX(Option_type), mnemo_full->mnemo_base.type );
