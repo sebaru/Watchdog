@@ -194,13 +194,13 @@
               );
 
     g_snprintf( critere, sizeof(critere),
-               " AND (mnemo.host='*' OR mnemo.host='%s') AND (mnemo.thread='*' OR mnemo.thread='%s') AND mnemo.command_text = '%s'",
+               " AND (mnemo.ev_host='*' OR mnemo.ev_host='%s') AND (mnemo.ev_thread='*' OR mnemo.ev_thread='%s') AND mnemo.ev_text = '%s'",
                g_get_host_name(), thread, commande_pure );
     g_strlcat( requete, critere, sizeof(requete) );
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "thread: DB connexion failed", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
