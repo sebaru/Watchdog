@@ -212,7 +212,7 @@
                 { Satellite_Deconnecter_sale(); }
                else
                 { struct REZO_CLI_IDENT ident;
-                  g_snprintf( ident.nom,     sizeof(ident.nom), "Watchdog Satellite on %s", Config.instance_id );
+                  g_snprintf( ident.nom,     sizeof(ident.nom), "Watchdog Satellite on %s", g_get_host_name() );
                   g_snprintf( ident.version, sizeof(ident.version), "%s", VERSION );
 
                   Satellite_Envoyer_maitre( TAG_CONNEXION, SSTAG_CLIENT_IDENT,

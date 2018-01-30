@@ -62,8 +62,7 @@
 /******************************************************************************************************************************/
  gchar *Admin_write ( gchar *response, gchar *new_ligne )
   { gchar *new;
-    if (response == NULL)
-     { return (g_strdup(new_ligne)); }
+    if (response == NULL) { response = g_strdup(""); }
     new = g_strconcat( response, new_ligne, "\n", NULL );
     g_free(response);
     return(new);
@@ -85,7 +84,7 @@
              "%s: Commande Received from %s@%s : %s", __func__, user, host, ligne );
 
     g_snprintf( chaine, sizeof(chaine), "At %010.1f, processing '%s' on instance '%s'",
-                (gdouble)Partage->top/10.0, ligne, Config.instance_id );
+                (gdouble)Partage->top/10.0, ligne, g_get_host_name() );
     response = Admin_write ( g_strdup(chaine), "\n" );
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */

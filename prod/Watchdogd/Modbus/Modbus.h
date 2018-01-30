@@ -99,6 +99,7 @@
     gchar ip[32];                                                                             /* Adresses IP du module MODBUS */
     gchar libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                                                    /* Libelle du modbus */
     guint map_E;
+    guint max_nbr_E;
     guint map_EA;
     guint map_A;
     guint map_AA;

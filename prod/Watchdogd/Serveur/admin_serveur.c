@@ -76,7 +76,7 @@
        client = (struct CLIENT *)liste->data;
        strftime( date, sizeof(date), "%F %T", localtime(&client->date_connexion) );
        g_snprintf( chaine, sizeof(chaine),
-                   " | SSRV%06d - v%s - AccessLevel %02d - mode %02d (%s) ref %d defaut %02d date %s - %s@%s",
+                   " | - SSRV%06d - v%s - AccessLevel %02d - mode %02d (%s) ref %d defaut %02d date %s - %s@%s",
                    client->ssrv_id, client->ident.version, (client->util ? client->util->access_level : -1),
                    client->mode, Mode_vers_string(client->mode), client->struct_used, client->defaut, date,
                   (client->util ? client->util->nom : "unknown"), client->machine
@@ -97,7 +97,7 @@
     gchar chaine[128];
     GSList *liste;
 
-    g_snprintf( chaine, sizeof(chaine), " -- Starting killing Sessions for %s --", name );
+    g_snprintf( chaine, sizeof(chaine), " | -- Starting killing Sessions for %s --", name );
     response = Admin_write ( response, chaine );
 
     pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
@@ -125,7 +125,7 @@
     gchar chaine[128];
     GSList *liste;
 
-    g_snprintf( chaine, sizeof(chaine), " -- Starting killing Session for id %d --", id );
+    g_snprintf( chaine, sizeof(chaine), " | -- Starting killing Session for id %d --", id );
     response = Admin_write ( response, chaine );
 
     pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
@@ -205,24 +205,24 @@
      { gboolean retour;
        response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
        retour = Ssrv_Lire_config();
-       g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s",
+       g_snprintf( chaine, sizeof(chaine), " | - Reloading Thread Parameters from Database -> %s",
                    (retour ? "Success" : "Failed") );
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'SSRV'" );
-       response = Admin_write ( response, "  dbcfg...              - Manage Threads Parameters in Database" );
-       response = Admin_write ( response, "  list                  - Listes les sous serveurs" );
-       response = Admin_write ( response, "  msgs $message         - Send $message to all connected client" );
-       response = Admin_write ( response, "  msg $user $message    - Send $message to $user (can be 'all')" );
-       response = Admin_write ( response, "  killid $id            - Kill session with ID $id" );
-       response = Admin_write ( response, "  kill $name            - Kill all sessions for user $name" );
-       response = Admin_write ( response, "  status                - Show status of the Thread SSRV" );
-       response = Admin_write ( response, "  help                  - This help\n" );
+     { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'SSRV'" );
+       response = Admin_write ( response, " | - dbcfg...              - Manage Threads Parameters in Database" );
+       response = Admin_write ( response, " | - list                  - Listes les sous serveurs" );
+       response = Admin_write ( response, " | - msgs $message         - Send $message to all connected client" );
+       response = Admin_write ( response, " | - msg $user $message    - Send $message to $user (can be 'all')" );
+       response = Admin_write ( response, " | - killid $id            - Kill session with ID $id" );
+       response = Admin_write ( response, " | - kill $name            - Kill all sessions for user $name" );
+       response = Admin_write ( response, " | - status                - Show status of the Thread SSRV" );
+       response = Admin_write ( response, " | - help                  - This help\n" );
      }
     else
      { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), " Unknown command : %s", ligne );
+       g_snprintf( chaine, sizeof(chaine), " | -Unknown command : %s", ligne );
        response = Admin_write ( response, chaine );
      }
     return(response);

@@ -73,6 +73,7 @@
     gint e_min, e_max;
     gint s_min, s_max;
     gint sa_min, sa_max;
+    gchar date_ajout[20];                                                 /* Date creation enregistrement */
     gchar libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                              /* Libelle de la rs485 */
   };
 
@@ -90,8 +91,6 @@
     GSList *Modules_RS485;
     gboolean enable;                                                           /* Thread enable at boot ? */
     gboolean reload;                                 /* TRUE si le thread doit recharger sa configuration */
-    guint admin_start;                                                          /* Demande de deconnexion */
-    guint admin_stop;                                                           /* Demande de deconnexion */
     gint  fd;                                         /* File Descriptor de la connexion a la ligne RS485 */
     gchar port[80];                                                            /* Port d'accès a la RS485 */
   } Cfg_rs485;

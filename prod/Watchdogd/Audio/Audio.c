@@ -232,10 +232,10 @@
         }
 
        if (Recv_zmq_with_tag ( zmq_master, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
-        { if ( strcmp( event->instance, Config.instance_id ) && strcmp (event->instance, "*") ) break;
+        { if ( strcmp( event->instance, g_get_host_name() ) && strcmp (event->instance, "*") ) break;
           if ( strcmp( event->thread, NOM_THREAD ) && strcmp ( event->thread, "*" ) ) break;
 
-          Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
+          Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
                    "%s : Reception d'un message du master : %s", (gchar *)payload );
         }
 
@@ -243,14 +243,14 @@
         { sleep(1); continue; }
 
        histo = &histo_buf;
-       if ( histo->alive == 1 &&                                                                    /* Si le message apparait */
+       if ( histo->alive == 1 && histo->msg.audio &&                                                /* Si le message apparait */
             (M(NUM_BIT_M_AUDIO_INHIB) == 0 || histo->msg.type == MSG_ALERTE
                                            || histo->msg.type == MSG_DANGER 
                                            || histo->msg.type == MSG_ALARME
             )
           )                                                                     /* Bit positionné quand arret diffusion audio */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
-                   "Run_thread : Envoi du message audio %d", histo->msg.num );
+                   "Run_thread : Envoi du message audio %d (histo->msg.audio=%d)", histo->msg.num, histo->msg.audio );
 
           if (Config.instance_is_master)
            { Envoyer_commande_dls( histo->msg.bit_audio );                   /* Positionnement du profil audio via monostable */

@@ -123,10 +123,10 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-                "INSERT INTO %s(instance_id,num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
+                "INSERT INTO %s(host,date_ajout,num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
                 "s_min,s_max,sa_min,sa_max) "
-                " VALUES ('%s','%d','%d','%s','%d','%d','%d','%d','%d','%d','%d','%d','%d')",
-                NOM_TABLE_MODULE_RS485, Config.instance_id, rs485->num, rs485->bit_comm, libelle, rs485->enable,
+                " VALUES ('%s',NOW(),'%d','%d','%s','%d','%d','%d','%d','%d','%d','%d','%d','%d')",
+                NOM_TABLE_MODULE_RS485, g_get_host_name(), rs485->num, rs485->bit_comm, libelle, rs485->enable,
                 rs485->ea_min, rs485->ea_max, rs485->e_min, rs485->e_max,
                 rs485->s_min, rs485->s_max, rs485->sa_min, rs485->sa_max
               );
@@ -190,8 +190,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT id,num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
-                "sa_min,sa_max,s_min,s_max"
-                " FROM %s WHERE instance_id='%s' ORDER BY num", NOM_TABLE_MODULE_RS485, Config.instance_id );
+                "sa_min,sa_max,s_min,s_max,date_ajout"
+                " FROM %s WHERE host='%s' ORDER BY num", NOM_TABLE_MODULE_RS485, g_get_host_name() );
 
     return ( Lancer_requete_SQL ( db, requete ) );                         /* Execution de la requete SQL */
   }
@@ -211,9 +211,10 @@
 
     rs485 = (struct RS485DB *)g_try_malloc0( sizeof(struct RS485DB) );
     if (!rs485) Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
-                          "Recuperer_rs485DB_suite: Erreur allocation mémoire" );
+                          "%s: Erreur allocation mémoire", __func__ );
     else
-     { memcpy( &rs485->libelle, db->row[3], sizeof(rs485->libelle) );
+     { g_snprintf( rs485->libelle, sizeof(rs485->libelle), "%s", db->row[3] );
+       g_snprintf( rs485->date_ajout, sizeof(rs485->date_ajout), "%s", db->row[13] );
        rs485->id                = atoi(db->row[0]);
        rs485->num               = atoi(db->row[1]);
        rs485->bit_comm          = atoi(db->row[2]);
@@ -319,6 +320,7 @@
     for( cpt = 0; cpt<nbr_ea; cpt++)
      { SEA_range( module->rs485.ea_min + cpt, 0 ); }
     SB(module->rs485.bit_comm, 0);
+    module->started = FALSE;
   }
 /**********************************************************************************************************/
 /* Rechercher_msgDB: Recupération du message dont le num est en parametre                                 */
@@ -592,31 +594,14 @@
           lib->Thread_sigusr1 = FALSE;
         }
 
-       if (Cfg_rs485.admin_start)
-        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
-                    "Run_thread: Run_rs485: Starting module" );
-          module = Chercher_module_rs485_by_id ( Cfg_rs485.admin_start );
-          if (module) { module->started = TRUE; }
-          Cfg_rs485.admin_start = 0;
-        }
-
-       if (Cfg_rs485.admin_stop)
-        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
-                    "Run_thread: Run_rs485: Stopping module" );
-          module = Chercher_module_rs485_by_id ( Cfg_rs485.admin_stop );
-          if (module) module->started = FALSE;
-          Deconnecter_rs485 ( module );
-          Cfg_rs485.admin_stop = 0;
-        }
-
        if (Cfg_rs485.Modules_RS485 == NULL )                    /* Si pas de module référencés, on attend */
-        { sleep(2); continue; }
+        { sleep(1); continue; }
 
        pthread_mutex_lock ( &Cfg_rs485.lib->synchro );             /* Car utilisation de la liste chainée */
        liste = Cfg_rs485.Modules_RS485;
        while (liste && (lib->Thread_run == TRUE) && (Cfg_rs485.reload == FALSE))
         { module = (struct MODULE_RS485 *)liste->data;
-          if (module->started != TRUE)                           /* Si le module est stopped, on le zappe */
+          if (module->rs485.enable != TRUE)                     /* Si le module est disabled, on le zappe */
            { liste = liste->next;
              continue;
            }
@@ -651,7 +636,7 @@
                           "Run_thread: module %03d down. Restarting communication....", module->rs485.id );
                 if (module->nbr_deconnect>4)                                  /* Arret sur pb comm module */
                  { Deconnecter_rs485 ( module );
-                   module->started=FALSE; 
+                   module->rs485.enable=FALSE; 
                    Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING,
                             "Run_thread: module %03d down too many times -> Stopping.", module->rs485.id );
                  }
@@ -699,6 +684,7 @@
                     { if (Processer_trame( module, &Trame ))/* Si la trame est processée, on passe suivant */
                        { attente_reponse = FALSE;                             /* Nous avons une reponse ! */
                          SB(module->rs485.bit_comm, 1);             /* Bit de comm = 1 pour avertir D.L.S */
+                         module->started = 1;
                          module->nbr_deconnect = 0;
                          liste = liste->next;
                        }

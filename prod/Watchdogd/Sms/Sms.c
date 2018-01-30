@@ -443,8 +443,7 @@
        return;
      }
 
-    g_snprintf(chaine, sizeof(chaine), "%s:%s:%s", Config.instance_id, NOM_THREAD, texte );             /* Recherche du mnemo */
-    mnemo = Map_event_to_mnemo( chaine, &nbr );
+    mnemo = Map_event_to_mnemo( NOM_THREAD, texte, &nbr );
     if (nbr==0)
      { g_snprintf(chaine, sizeof(chaine), "No event found for '%s'", texte );              /* Envoi de l'erreur si pas trouvé */
        Envoyer_sms_gsm_text ( chaine );
@@ -470,8 +469,15 @@
                     "%s: From %s -> Error, type of mnemo not handled", __func__, from );
         }
      }
-    else /* Envoi au master vi thread HTTP */
-     {
+    else /* Envoi au master via thread HTTP */
+     { if (mnemo->type == MNEMO_MONOSTABLE)
+        { struct ZMQ_SET_BIT bit;
+          bit.type = mnemo->type;
+          bit.num = mnemo->num;
+          Send_zmq_with_tag ( Cfg_sms.zmq_to_master, TAG_ZMQ_SET_BIT, "*", "*", &bit, sizeof(struct ZMQ_SET_BIT) );
+        }
+       else Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                     "%s: From %s -> Error, type of mnemo not handled", __func__, from );
      }
     g_free(mnemo);
   }
@@ -503,7 +509,6 @@
        gn_lib_phone_close(state);
        gn_lib_phoneprofile_free(&state);
        gn_lib_library_free();
-       sleep(5);
        return;
      }
 
@@ -574,6 +579,9 @@
     zmq_admin = New_zmq ( ZMQ_REP, "listen-to-admin" );
     Bind_zmq (zmq_admin, "inproc", NOM_THREAD "-admin", 0 );
 
+    Cfg_sms.zmq_to_master = New_zmq ( ZMQ_PUB, "pub-to-master" );
+    Bind_zmq ( Cfg_sms.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
+
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
     while(Cfg_sms.lib->Thread_run == TRUE)                                                   /* On tourne tant que necessaire */
      { gchar buffer[128];
@@ -628,6 +636,7 @@
      }
     Close_zmq ( zmq_msg );
     Close_zmq ( zmq_admin );
+    Close_zmq ( Cfg_sms.zmq_to_master );
 
 end:
     if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );                                                    /* Communication NOK */

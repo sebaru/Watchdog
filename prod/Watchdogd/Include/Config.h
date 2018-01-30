@@ -47,7 +47,6 @@
 
     gchar home [ TAILLE_HOME+1 ];                                          /* Repertoire maison du daemon */
     gchar librairie_dir [ TAILLE_HOME+1 ];               /* Repertoire de stockage des libraires watchdog */
-    gchar instance_id [ TAILLE_INSTANCE_ID+1 ];              /* Global ID, unique, de l'instance Watchdog */
     gboolean instance_is_master;                           /* TRUE si l'instance est l'instance maitresse */
     gchar master_host[ TAILLE_DB_HOST+1 ];
     guint log_level;                                                      /* Niveau de debug du programme */

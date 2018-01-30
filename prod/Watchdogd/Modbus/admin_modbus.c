@@ -80,33 +80,60 @@
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  static gchar *Admin_modbus_print ( gchar *response, struct MODULE_MODBUS *module )
-  { gchar chaine[512];
-    g_snprintf( chaine, sizeof(chaine),
-                " |---------------------------\n"
-                " | MODBUS[%02d] ------> %s - %s (%s)\n"
-                " | - enable = %d, started = %d (bit B%04d=%d), watchdog = %03d, IP = %s\n"
-                " | - %03d Digital Input,  map_E = E%03d(->E%03d), %03d Analog  Input,  map_EA = EA%03d(->EA%03d)\n"
-                " | - %03d Digital Output, map_A = A%03d(->A%03d), %03d Analog  Output, map_AA = AA%03d(->AA%03d)\n"
-                " | - transaction_id = %06d, nbr_deconnect = %02d\n"
-                " | - last_reponse = %03ds ago, date_next_eana = in %03ds\n"
-                " | - retente = in %03ds\n",
-                module->modbus.id, module->modbus.libelle,  Modbus_mode_to_string(module), module->modbus.date_create,
+  { gchar chaine[1024];
+
+    response = Admin_write ( response, " |---------------------------" );
+
+    g_snprintf( chaine, sizeof(chaine), " | MODBUS[%02d] ------> '%s' - %s (added '%s')",
+                module->modbus.id, module->modbus.libelle,  Modbus_mode_to_string(module), module->modbus.date_create );
+    response = Admin_write ( response, chaine );
+
+    g_snprintf( chaine, sizeof(chaine), " | - enable = %d, started = %d (bit B%04d=%d), watchdog = %03d, IP = %s",
                 module->modbus.enable, module->started, module->modbus.bit, B(module->modbus.bit),
-                module->modbus.watchdog, module->modbus.ip,
-                module->nbr_entree_tor, module->modbus.map_E,
-               (module->nbr_entree_tor ? module->modbus.map_E + module->nbr_entree_tor - 1 : module->modbus.map_E),
+                module->modbus.watchdog, module->modbus.ip );
+    response = Admin_write ( response, chaine );
+
+    if (module->modbus.max_nbr_E>0)
+     { g_snprintf( chaine, sizeof(chaine), " | - %03d Digital Input,  map_E  = E%03d (->E%03d ) (forced by max_nbr_E)",
+                   module->modbus.max_nbr_E, module->modbus.map_E,
+                   module->modbus.map_E + module->modbus.max_nbr_E - 1 );
+     }
+    else
+     { g_snprintf( chaine, sizeof(chaine), " | - %03d Digital Input,  map_E  = E%03d (->E%03d )",
+                   module->nbr_entree_tor, module->modbus.map_E,
+                  (module->nbr_entree_tor ? module->modbus.map_E + module->nbr_entree_tor - 1 : module->modbus.map_E) );
+     }
+    response = Admin_write ( response, chaine );
+
+    g_snprintf( chaine, sizeof(chaine), " | - %03d Analog  Input,  map_EA = EA%03d(->EA%03d)",
                 module->nbr_entree_ana, module->modbus.map_EA, 
-               (module->nbr_entree_ana ? module->modbus.map_EA + module->nbr_entree_ana - 1 : module->modbus.map_EA),
+               (module->nbr_entree_ana ? module->modbus.map_EA + module->nbr_entree_ana - 1 : module->modbus.map_EA) );
+    response = Admin_write ( response, chaine );
+
+    g_snprintf( chaine, sizeof(chaine), " | - %03d Digital Output, map_A  = A%03d (->A%03d )",
                 module->nbr_sortie_tor, module->modbus.map_A, 
-               (module->nbr_sortie_tor ? module->modbus.map_A + module->nbr_sortie_tor - 1 : module->modbus.map_A),
+               (module->nbr_sortie_tor ? module->modbus.map_A + module->nbr_sortie_tor - 1 : module->modbus.map_A) );
+    response = Admin_write ( response, chaine );
+
+    g_snprintf( chaine, sizeof(chaine), " [ - %03d Analog  Output, map_AA = AA%03d(->AA%03d)",
                 module->nbr_sortie_ana, module->modbus.map_AA, 
-               (module->nbr_sortie_ana ? module->modbus.map_AA + module->nbr_sortie_ana - 1 : module->modbus.map_AA),
-                module->transaction_id, module->nbr_deconnect,
+               (module->nbr_sortie_ana ? module->modbus.map_AA + module->nbr_sortie_ana - 1 : module->modbus.map_AA) );
+    response = Admin_write ( response, chaine );
+
+    g_snprintf( chaine, sizeof(chaine), " | - transaction_id = %06d, nbr_deconnect = %02d",
+                module->transaction_id, module->nbr_deconnect );
+    response = Admin_write ( response, chaine );
+
+    g_snprintf( chaine, sizeof(chaine), " | - last_reponse = %03ds ago, date_next_eana = in %03ds",
                (Partage->top - module->date_last_reponse)/10,                   
-               (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1),
-               (module->date_retente > Partage->top   ? (module->date_retente   - Partage->top)/10 : -1)
-              );
-    return(Admin_write ( response, chaine ));
+               (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1) );
+    response = Admin_write ( response, chaine );
+
+    g_snprintf( chaine, sizeof(chaine), " | - retente = in %03ds",
+               (module->date_retente > Partage->top   ? (module->date_retente   - Partage->top)/10 : -1) );
+    response = Admin_write ( response, chaine );
+
+    return( response );
   }
 /******************************************************************************************************************************/
 /* Admin_modbus_liste : Print l'ensemble des informations opérationnelles de tous les modules                                 */
@@ -160,16 +187,15 @@
     struct MODULE_MODBUS *module = NULL;
     GSList *liste_modules;
     guint id, valeur;
-    gint retour;
 
     if ( ! strcmp ( ligne, "list" ) )
      { response = Admin_write ( response, " | Parameter can be:" );
        response = Admin_write ( response, " | - enable, bit, watchdog, libelle," );
-       response = Admin_write ( response, " | - map_E, map_EA, map_A, map_AA" );
+       response = Admin_write ( response, " | - map_E, map_EA, map_A, map_AA, max_nbr_E" );
        return(response);
      }
 
-    sscanf ( ligne, "%s %s %[^]", id_char, param, valeur_char );
+    sscanf ( ligne, "%s %s %[^\n]", id_char, param, valeur_char );
     id     = atoi ( id_char     );
     valeur = atoi ( valeur_char );
 
@@ -194,34 +220,28 @@
         }
        else { module->modbus.enable = FALSE; }
      }
-    else if ( ! strcmp( param, "bit" ) )
-     { module->modbus.bit = valeur; }
-    else if ( ! strcmp( param, "watchdog" ) )
-     { module->modbus.watchdog = valeur; }
-    else if ( ! strcmp( param, "map_E" ) )
-     { module->modbus.map_E = valeur; }
-    else if ( ! strcmp( param, "map_EA" ) )
-     { module->modbus.map_EA = valeur; }
-    else if ( ! strcmp( param, "map_A" ) )
-     { module->modbus.map_A = valeur; }
-    else if ( ! strcmp( param, "map_AA" ) )
-     { module->modbus.map_AA = valeur; }
+    else if ( ! strcmp( param, "bit" ) )       { module->modbus.bit = valeur;       }
+    else if ( ! strcmp( param, "watchdog" ) )  { module->modbus.watchdog = valeur;  }
+    else if ( ! strcmp( param, "map_E" ) )     { module->modbus.map_E = valeur;     }
+    else if ( ! strcmp( param, "map_EA" ) )    { module->modbus.map_EA = valeur;    }
+    else if ( ! strcmp( param, "map_A" ) )     { module->modbus.map_A = valeur;     }
+    else if ( ! strcmp( param, "map_AA" ) )    { module->modbus.map_AA = valeur;    }
+    else if ( ! strcmp( param, "max_nbr_E" ) ) { module->modbus.max_nbr_E = valeur; }
     else if ( ! strcmp( param, "libelle" ) )
      { g_snprintf( module->modbus.libelle, sizeof(module->modbus.libelle), "%s", valeur_char ); }
     else if ( ! strcmp( param, "ip" ) )
      { g_snprintf( module->modbus.ip, sizeof(module->modbus.ip), "%s", valeur_char ); }
     else
      { g_snprintf( chaine, sizeof(chaine),
-                 " Parameter %s not known for MODBUS id %s ('modbus set list' can help)", param, id_char );
+                 " | - Parameter %s not known for MODBUS id %s ('modbus set list' can help)", param, id_char );
        response = Admin_write ( response, chaine );
        return(response);
      }
 
-    retour = Modifier_modbusDB ( &module->modbus );
-    if (retour)
+    if (Modifier_modbusDB ( &module->modbus ))
      { snprintf( chaine, sizeof(chaine), " | - ERROR : MODBUS module parameter '%s' NOT set", param ); }
     else
-     { snprintf( chaine, sizeof(chaine), " | - MODBUS module parameter '%s' set", param ); }
+     { snprintf( chaine, sizeof(chaine), " | - MODBUS module parameter '%s' set to %s", param, valeur_char ); }
     response = Admin_write ( response, chaine );
     return(response);
   }
@@ -238,13 +258,13 @@
     if ( ! strcmp ( commande, "start" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
-       snprintf( chaine, sizeof(chaine), "%d enable 1", num );
+       g_snprintf( chaine, sizeof(chaine), "%d enable 1", num );
        response = Admin_modbus_set ( response, chaine );
      }
     else if ( ! strcmp ( commande, "stop" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
-       snprintf( chaine, sizeof(chaine), "%d enable 0", num );
+       g_snprintf( chaine, sizeof(chaine), "%d enable 0", num );
        response = Admin_modbus_set ( response, chaine );
      }
     else if ( ! strcmp ( commande, "list" ) )
@@ -300,17 +320,17 @@
        response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'MODBUS'" );
-       response = Admin_write ( response, "  dbcfg ...            - Get/Set Database Parameters" );
-       response = Admin_write ( response, "  add $ip $libelle     - Ajoute un module modbus" );
-       response = Admin_write ( response, "  set $id $champ $val  - Set $val to $champ for module $id" );
-       response = Admin_write ( response, "  set list             - List parameter that can be set" );
-       response = Admin_write ( response, "  del $id              - Erase module $id" );
-       response = Admin_write ( response, "  start $id            - Demarre le module $id" );
-       response = Admin_write ( response, "  stop $id             - Arrete le module $id" );
-       response = Admin_write ( response, "  show $id             - Affiche les informations du modbus $id" );
-       response = Admin_write ( response, "  list                 - Liste les modules MODBUS" );
-       response = Admin_write ( response, "  reload               - Recharge la configuration" );
+     { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'MODBUS'" );
+       response = Admin_write ( response, " | - dbcfg ...            - Get/Set Database Parameters" );
+       response = Admin_write ( response, " | - add $ip $libelle     - Ajoute un module modbus" );
+       response = Admin_write ( response, " | - set $id $champ $val  - Set $val to $champ for module $id" );
+       response = Admin_write ( response, " | - set list             - List parameter that can be set" );
+       response = Admin_write ( response, " | - del $id              - Erase module $id" );
+       response = Admin_write ( response, " | - start $id            - Demarre le module $id" );
+       response = Admin_write ( response, " | - stop $id             - Arrete le module $id" );
+       response = Admin_write ( response, " | - show $id             - Affiche les informations du modbus $id" );
+       response = Admin_write ( response, " | - list                 - Liste les modules MODBUS" );
+       response = Admin_write ( response, " | - reload               - Recharge la configuration" );
      }
     else
      { gchar chaine[128];

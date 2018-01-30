@@ -148,7 +148,7 @@
        return;
      }
 
-    if ( strcmp ( instance, Config.instance_id ) ) return;                                      /* Are we the right thread ?? */
+    if ( strcmp ( instance, g_get_host_name() ) ) return;                                       /* Are we the right thread ?? */
     if ( strcmp ( thread, NOM_THREAD ) ) return;
     
     if ( type == 0x11 && sstype == 0x00 )                                                             /* Envoi de lighting ?? */
@@ -287,20 +287,20 @@
 
        g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:%03d:TEMP",
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
-       Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, chaine,
+       Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, chaine,
                      (trame->data[2] & 0x80 ? -1.0 : 1.0)* ( ((trame->data[2] & 0x7F)<<8) + trame->data[3]) / 10.0 );
                   
        g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:%03d:HUMIDITY",
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
-       Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, chaine, 1.0 * trame->data[4] );
+       Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, chaine, 1.0 * trame->data[4] );
 
        g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:%03d:BATTERY",
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
-       Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, chaine, 1.0 * (trame->data[6] >> 4) );
+       Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, chaine, 1.0 * (trame->data[6] >> 4) );
        
        g_snprintf ( chaine, sizeof(chaine), "%02X:%02X:%03d:%03d:%03d:%03d:%03d:%03d:RSSI",
                     trame->type, trame->sous_type, trame->data[0], trame->data[1], 0, 0, 0, 0 );
-       Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, chaine, 1.0 * (trame->data[6] & 0x0F) );
+       Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, chaine, 1.0 * (trame->data[6] & 0x0F) );
        
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                  "Processer_trame : get status type=%03d(0x%02X), sous_type=%03d(0x%02X), id1=%03d, id2=%03d, high=%03d, "
@@ -317,7 +317,7 @@
                     trame->type, trame->sous_type, trame->data[0] & 0x03, trame->data[1],
                     trame->data[2], trame->data[3], trame->data[4], trame->data[5] );
 
-       Send_Event ( Config.instance_id, NOM_THREAD, EVENT_INPUT, chaine, 1.0 * trame->data[6] );
+       Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, chaine, 1.0 * trame->data[6] );
 
        Info_new( Config.log, Cfg_rfxcom.lib->Thread_debug, LOG_INFO,
                  "Processer_trame : get lighting ! type=%03d(0x%02X), sous_type=%03d(0x%02X), id1=%03d, id2=%03d, "

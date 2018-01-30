@@ -769,7 +769,28 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version=3444;
+    if (database_version < 3448)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE rs485 CHANGE `instance_id` `host` TEXT NOT NULL" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE rs485 ADD `date_ajout` DATETIME AFTER `host`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 3463)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos ADD `ev_host` VARCHAR(40) NOT NULL AFTER `libelle`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos ADD `ev_thread` VARCHAR(20) NOT NULL AFTER `ev_host`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE mnemos CHANGE `command_text` `ev_text` VARCHAR(160) NOT NULL" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 3470)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE modbus_modules ADD `max_nbr_E` INT(11) NOT NULL AFTER `map_E`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version=3470;
 
     Libere_DB_SQL(&db);
 

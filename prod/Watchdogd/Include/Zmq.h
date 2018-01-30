@@ -33,6 +33,7 @@
 
  #define ZMQUEUE_LIVE_MSGS     "live-msgs"
  #define ZMQUEUE_LIVE_THREADS  "live-threads"
+ #define ZMQUEUE_LIVE_MASTER   "live-master"
 
  struct ZMQUEUE
   { void *socket;
@@ -47,9 +48,15 @@
     gchar thread[12];
   };
 
+ struct ZMQ_SET_BIT
+  { gint type;
+    gint num;
+  };
+
  enum
   { TAG_ZMQ_TO_HISTO,
     TAG_ZMQ_TO_THREADS,
+    TAG_ZMQ_SET_BIT,
     NBR_ZMQ_TAG
   };
 /************************************************ Définitions des prototypes **************************************************/

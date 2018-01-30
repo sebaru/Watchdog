@@ -33,6 +33,9 @@
  #include <fcntl.h>
  #include <string.h>
 
+ #define MNEMO_SQL_SELECT "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.ev_text,syn.groupe,syn.page," \
+                          "dls.name, mnemo.tableau, mnemo.acro_syn, mnemo.ev_host, mnemo.ev_thread"
+
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
@@ -50,7 +53,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_mnemoDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
@@ -67,51 +70,57 @@
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
  static gint Ajouter_Modifier_mnemo_baseDB ( struct CMD_TYPE_MNEMO_BASE *mnemo, gboolean ajout )
-  { gchar *libelle, *acro, *command_text, *tableau, *acro_syn;
+  { gchar *libelle, *acro, *ev_text, *tableau, *acro_syn, *ev_thread, *ev_host;
     gchar requete[1024];
     gboolean retour;
     struct DB *db;
     gint last_id;
 
-    libelle      = Normaliser_chaine ( mnemo->libelle );                                     /* Formatage correct des chaines */
-    acro         = Normaliser_chaine ( mnemo->acronyme );                                    /* Formatage correct des chaines */
-    command_text = Normaliser_chaine ( mnemo->command_text );                                /* Formatage correct des chaines */
-    tableau      = Normaliser_chaine ( mnemo->tableau );                                     /* Formatage correct des chaines */
-    acro_syn     = Normaliser_chaine ( mnemo->acro_syn );                                    /* Formatage correct des chaines */
-    if ( !(libelle && acro && command_text && tableau && acro_syn) )
+    libelle    = Normaliser_chaine ( mnemo->libelle );                                       /* Formatage correct des chaines */
+    acro       = Normaliser_chaine ( mnemo->acronyme );                                      /* Formatage correct des chaines */
+    ev_text    = Normaliser_chaine ( mnemo->ev_text );                                       /* Formatage correct des chaines */
+    tableau    = Normaliser_chaine ( mnemo->tableau );                                       /* Formatage correct des chaines */
+    acro_syn   = Normaliser_chaine ( mnemo->acro_syn );                                      /* Formatage correct des chaines */
+    ev_thread  = Normaliser_chaine ( mnemo->ev_thread );                                     /* Formatage correct des chaines */
+    ev_host    = Normaliser_chaine ( mnemo->ev_host );                                       /* Formatage correct des chaines */
+    if ( !(libelle && acro && ev_text && ev_thread && ev_host && tableau && acro_syn) )
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "Ajouter_Modifier_mnemo_baseDB: Normalisation impossible. Mnemo NOT added nor modified." );
-       if (libelle)      g_free(libelle);
-       if (acro)         g_free(acro);
-       if (command_text) g_free(command_text);
-       if (tableau)      g_free(tableau);
-       if (acro_syn)     g_free(acro_syn);
+                "%s: Normalisation impossible. Mnemo NOT added nor modified.", __func__ );
+       if (libelle)   g_free(libelle);
+       if (acro)      g_free(acro);
+       if (tableau)   g_free(tableau);
+       if (acro_syn)  g_free(acro_syn);
+       if (ev_thread) g_free(ev_thread);
+       if (ev_host)   g_free(ev_host);
+       if (ev_text)   g_free(ev_text);
        return(-1);
      }
 
     if (ajout == TRUE)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "INSERT INTO %s(type,num,dls_id,acronyme,libelle,command_text,tableau,acro_syn) VALUES "
+                   "INSERT INTO %s(type,num,dls_id,acronyme,libelle,ev_host,ev_thread,ev_text,tableau,acro_syn) VALUES "
                    "(%d,%d,%d,'%s','%s','%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
-                   mnemo->num, mnemo->dls_id, acro, libelle, command_text, tableau, acro_syn );
+                   mnemo->num, mnemo->dls_id, acro, libelle, ev_host, ev_thread, ev_text, tableau, acro_syn );
      } else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "UPDATE %s SET "             
-                   "type=%d,libelle='%s',acronyme='%s',command_text='%s',dls_id=%d,num=%d,tableau='%s',"
+                   "type=%d,libelle='%s',acronyme='%s',ev_host='%s',ev_thread='%s',ev_text='%s',dls_id=%d,num=%d,tableau='%s',"
                    "acro_syn='%s' "
                    "WHERE id=%d",
-                   NOM_TABLE_MNEMO, mnemo->type, libelle, acro, command_text, 
+                   NOM_TABLE_MNEMO, mnemo->type, libelle, acro, ev_host, ev_thread, ev_text, 
                    mnemo->dls_id, mnemo->num, tableau, acro_syn, mnemo->id );
      }
     g_free(libelle);
     g_free(acro);
-    g_free(command_text);
     g_free(tableau);
     g_free(acro_syn);
+    g_free(ev_host);
+    g_free(ev_thread);
+    g_free(ev_text);
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_Modifier_mnemo_baseDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(-1);
      }
 
@@ -166,7 +175,7 @@
 /* Entrée: un pointeur vers une nouvelle connexion de base de données, le critere de recherche                                */
 /* Sortie: FALSE si erreur                                                      ********************                          */
 /******************************************************************************************************************************/
- gboolean Recuperer_mnemo_baseDB_by_command_text ( struct DB **db_retour, gchar *commande_pure )
+ gboolean Recuperer_mnemo_baseDB_by_event_text ( struct DB **db_retour, gchar *thread, gchar *commande_pure )
   { gchar requete[1024], critere[256];
     gchar *commande;
     gboolean retour;
@@ -175,23 +184,23 @@
     commande = Normaliser_chaine ( commande_pure );
     if (!commande)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                 "Recuperer_mnemo_by_command_text: Normalisation impossible commande" );
+                 "%s: Normalisation impossible commande", __func__ );
        return(FALSE);
      }
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
-                "dls.name, mnemo.tableau, mnemo.acro_syn"
+    g_snprintf( requete, sizeof(requete), MNEMO_SQL_SELECT                                                     /* Requete SQL */
                 " FROM %s as mnemo INNER JOIN %s as dls ON mnemo.dls_id=dls.id INNER JOIN %s as syn ON dls.syn_id = syn.id",
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE
               );
 
-    g_snprintf( critere, sizeof(critere), " AND mnemo.command_text = '%s'", commande_pure );
+    g_snprintf( critere, sizeof(critere),
+               " AND (mnemo.ev_host='*' OR mnemo.ev_host='%s') AND (mnemo.ev_thread='*' OR mnemo.ev_thread='%s') AND mnemo.ev_text = '%s'",
+               g_get_host_name(), thread, commande_pure );
     g_strlcat( requete, critere, sizeof(requete) );
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_mnemo_by_command_text: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
@@ -210,9 +219,7 @@
     gboolean retour;
     struct DB *db;
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
-                "dls.shortname, mnemo.tableau, mnemo.acro_syn"
+    g_snprintf( requete, sizeof(requete), MNEMO_SQL_SELECT                                                     /* Requete SQL */
                 " FROM %s as mnemo INNER JOIN %s as dls ON mnemo.dls_id=dls.id INNER JOIN %s as syn ON dls.syn_id = syn.id"
                 " WHERE %s ORDER BY groupe,page,name,type,num",
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, (conditions ? conditions : "1=1")
@@ -261,12 +268,14 @@
     else                                                                                /* Recopie dans la nouvelle structure */
      { g_snprintf( mnemo->acronyme,     sizeof(mnemo->acronyme),     "%s", db->row[4] );
        g_snprintf( mnemo->libelle,      sizeof(mnemo->libelle),      "%s", db->row[5] );
-       g_snprintf( mnemo->command_text, sizeof(mnemo->command_text), "%s", db->row[6] );
+       g_snprintf( mnemo->ev_text,      sizeof(mnemo->ev_text),      "%s", db->row[6] );
        g_snprintf( mnemo->syn_groupe,   sizeof(mnemo->syn_groupe),   "%s", db->row[7] );
        g_snprintf( mnemo->syn_page,     sizeof(mnemo->syn_page),     "%s", db->row[8] );
        g_snprintf( mnemo->dls_shortname,sizeof(mnemo->dls_shortname),"%s", db->row[9] );
        g_snprintf( mnemo->tableau,      sizeof(mnemo->tableau),      "%s", db->row[10] );
        g_snprintf( mnemo->acro_syn,     sizeof(mnemo->acro_syn),     "%s", db->row[11] );
+       g_snprintf( mnemo->ev_host,      sizeof(mnemo->ev_host),      "%s", db->row[12] );
+       g_snprintf( mnemo->ev_thread,    sizeof(mnemo->ev_thread),    "%s", db->row[13] );
        mnemo->id     = atoi(db->row[0]);
        mnemo->type   = atoi(db->row[1]);
        mnemo->num    = atoi(db->row[2]);
@@ -284,9 +293,7 @@
     gchar requete[1024];
     struct DB *db;
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
-                "dls.shortname, mnemo.tableau, mnemo.acro_syn"
+    g_snprintf( requete, sizeof(requete), MNEMO_SQL_SELECT                                                     /* Requete SQL */
                 " FROM %s as mnemo"
                 " INNER JOIN %s as dls ON mnemo.dls_id=dls.id"
                 " INNER JOIN %s as syn ON dls.syn_id = syn.id"
@@ -318,9 +325,7 @@
     gchar requete[1024];
     struct DB *db;
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.command_text,syn.groupe,syn.page,"
-                "dls.name, mnemo.tableau, mnemo.acro_syn"
+    g_snprintf( requete, sizeof(requete), MNEMO_SQL_SELECT                                                     /* Requete SQL */
                 " FROM %s as mnemo INNER JOIN %s as dls ON mnemo.dls_id=dls.id INNER JOIN %s as syn ON dls.syn_id = syn.id"
                 " WHERE mnemo.type = %d AND mnemo.num = %d LIMIT 1",
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, critere->type, critere->num
@@ -353,14 +358,14 @@
     mnemo_base = Rechercher_mnemo_baseDB ( id );
     if (!mnemo_base)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "Recuperer_mnemo_fullDB: Mnemo %d not found", id );
+                "%s: Mnemo %d not found", __func__, id );
        return(NULL);
      }
 
     mnemo_full = (struct CMD_TYPE_MNEMO_FULL *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_FULL) );
     if (!mnemo_full)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "Recuperer_mnemo_fullDB: Erreur allocation mémoire" );
+                "%s: Erreur allocation mémoire", __func__ );
        g_free(mnemo_base);
        return(NULL);
      }

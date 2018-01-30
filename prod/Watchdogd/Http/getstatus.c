@@ -63,7 +63,7 @@
     gethostname( host, sizeof(host) );
     json_builder_set_member_name  ( builder, "host" );         json_builder_add_string_value ( builder, host );
     json_builder_set_member_name  ( builder, "version" );      json_builder_add_string_value ( builder, VERSION );
-    json_builder_set_member_name  ( builder, "instance" );     json_builder_add_string_value ( builder, Config.instance_id );
+    json_builder_set_member_name  ( builder, "instance" );     json_builder_add_string_value ( builder, g_get_host_name() );
     localtime( (time_t *)&Partage->start_time );
     if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
     else       { g_snprintf( date, sizeof(date), "Erreur" ); }

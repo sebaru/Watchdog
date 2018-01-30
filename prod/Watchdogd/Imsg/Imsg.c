@@ -387,7 +387,7 @@
 
     if ( ! strcasecmp( (gchar *)lm_message_node_get_value ( body ), "ping" ) )     /* Interfacage de test */
      { Imsg_Envoi_message_to( from, "Pong !" ); }   
-    else if ( ! Recuperer_mnemo_baseDB_by_command_text ( &db, (gchar *)lm_message_node_get_value ( body ) ) )
+    else if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, (gchar *)lm_message_node_get_value ( body ) ) )
      { Imsg_Envoi_message_to( from, "Error searching Database .. Sorry .." ); }   
     else 
      { struct CMD_TYPE_MNEMO_BASE *mnemo, *result_mnemo = NULL;
@@ -398,7 +398,7 @@
         { Imsg_Envoi_message_to( from, " Need to choose ... :" ); }
 
        while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL )
-        { if (db->nbr_result>1) Imsg_Envoi_message_to( from, mnemo->command_text );
+        { if (db->nbr_result>1) Imsg_Envoi_message_to( from, mnemo->ev_text );
           if (db->nbr_result==1) result_mnemo = mnemo;
                             else g_free(mnemo);
         }

@@ -547,7 +547,9 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
   `dls_id` int(11) NOT NULL DEFAULT '0',
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `command_text` text COLLATE utf8_unicode_ci NOT NULL,
+  `ev_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL,
+  `ev_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL,
+  `ev_text` VARCHAR(160) COLLATE utf8_unicode_ci NOT NULL,
   `tableau` text COLLATE utf8_unicode_ci NOT NULL,
   `acro_syn` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`), FULLTEXT(`command_text`)
@@ -680,6 +682,7 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `bit` int(11) NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `map_E` int(11) NOT NULL,
+  `max_nbr_E` int(11) NOT NULL,
   `map_EA` int(11) NOT NULL,
   `map_A` int(11) NOT NULL,
   `map_AA` int(11) NOT NULL,  PRIMARY KEY (`id`),
@@ -758,7 +761,8 @@ CREATE TABLE IF NOT EXISTS `ups` (
 
 CREATE TABLE IF NOT EXISTS `rs485` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `instance_id` text NOT NULL,
+  `host` text NOT NULL,
+  `date_ajout` DATETIME NOT NULL,
   `num` int(11) NOT NULL DEFAULT '0',
   `enable` tinyint(1) NOT NULL DEFAULT '0',
   `ea_min` int(11) NOT NULL DEFAULT '-1',
