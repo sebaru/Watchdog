@@ -975,9 +975,14 @@
                   nbr = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) );
                   if (module->modbus.max_nbr_E>0) module->nbr_entree_tor = module->modbus.max_nbr_E;
                                              else module->nbr_entree_tor = nbr;
-                  Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Get number Entree TOR = %d %s",
-                            module->nbr_entree_tor, (module->modbus.max_nbr_E>0 ? "(forced !)" : "")
-                          );
+                  if (module->modbus.max_nbr_E>0)
+                   { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Get number Entree TOR = %d",
+                               module->nbr_entree_tor );
+                   }
+                  else
+                   { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Get number Entree TOR = %d (forced)",
+                               module->nbr_entree_tor );
+                   }
                   module->mode = MODBUS_GET_NBR_DO;
                 }
                break;
