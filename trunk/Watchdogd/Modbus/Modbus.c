@@ -976,21 +976,20 @@
                   if (module->modbus.max_nbr_E>0) module->nbr_entree_tor = module->modbus.max_nbr_E;
                                              else module->nbr_entree_tor = nbr;
                   if (module->modbus.max_nbr_E>0)
-                   { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Get number Entree TOR = %d",
-                               module->nbr_entree_tor );
+                   { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
+                               "%s: Get number Entree TOR = %d", __func__, module->nbr_entree_tor );
                    }
                   else
-                   { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Get number Entree TOR = %d (forced)",
-                               module->nbr_entree_tor );
+                   { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
+                               "%s: Get number Entree TOR = %d (forced)", __func__, module->nbr_entree_tor );
                    }
                   module->mode = MODBUS_GET_NBR_DO;
                 }
                break;
           case MODBUS_GET_NBR_DO:
                module->nbr_sortie_tor = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) );
-               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "Processer_trame: Get number Sortie TOR = %d",
-                         module->nbr_sortie_tor
-                       );
+               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
+                         "%s: Get number Sortie TOR = %d", __func__, module->nbr_sortie_tor );
                module->mode = MODBUS_GET_DI;
                break;
         }
