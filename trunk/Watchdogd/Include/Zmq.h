@@ -32,6 +32,7 @@
  #include <zmq.h>
 
  #define ZMQUEUE_LIVE_MSGS     "live-msgs"
+ #define ZMQUEUE_LIVE_MOTIFS   "live-motifs"
  #define ZMQUEUE_LIVE_THREADS  "live-threads"
  #define ZMQUEUE_LIVE_MASTER   "live-master"
 

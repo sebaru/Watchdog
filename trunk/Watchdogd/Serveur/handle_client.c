@@ -38,25 +38,26 @@
 /* Entrée : le client a gerer                                                                                                 */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Envoyer_new_motif_au_client ( struct CLIENT *client )
-  { struct CMD_ETAT_BIT_CTRL *motif;
+ static void Envoyer_new_motif_au_client ( struct CLIENT *client, gint num_i )
+  { struct CMD_ETAT_BIT_CTRL motif;
+    gint num;
+    
+/**************************************** Création de la structure passée aux clients *****************************************/
+    motif.num    = num_i;
+    motif.etat   = Partage->i[num_i].etat;
+    motif.rouge  = Partage->i[num_i].rouge;
+    motif.vert   = Partage->i[num_i].vert;
+    motif.bleu   = Partage->i[num_i].bleu;
+    motif.cligno = Partage->i[num_i].cligno;
 
-    if ( client->Liste_new_motif == NULL ) return;
-
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-    motif = (struct CMD_ETAT_BIT_CTRL *) client->Liste_new_motif->data;
-    client->Liste_new_motif = g_slist_remove ( client->Liste_new_motif, motif );
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-       
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "Envoyer_new_motif: Motif traite : I%03d=%d rvbc %d/%d/%d/%d",
-              motif->num, motif->etat, motif->rouge, motif->vert, motif->bleu, motif->cligno );
+             "%s: Motif traite : I%03d=%d rvbc %d/%d/%d/%d", __func__,
+              motif.num, motif.etat, motif.rouge, motif.vert, motif.bleu, motif.cligno );
 
-    if ( g_slist_find( client->Liste_bit_syns, GINT_TO_POINTER(motif->num) ) )
+    if ( g_slist_find( client->Liste_bit_syns, GINT_TO_POINTER(motif.num) ) )    /* Envoi uniquement si le client en a besoin */
      { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,
-                     (gchar *)motif, sizeof(struct CMD_ETAT_BIT_CTRL) );
+                     (gchar *)&motif, sizeof(struct CMD_ETAT_BIT_CTRL) );
      }
-    g_free(motif);
   }
 /******************************************************************************************************************************/
 /* Envoyer_new_histo_au_client: Parcours la liste des histo et les envoi                                                      */
@@ -72,31 +73,6 @@
                   (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
   }
 /******************************************************************************************************************************/
-/* Envoyer_event_au_client: Parcours la liste des events et les envoi                                                         */
-/* Entrée : le client a gerer                                                                                                 */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Envoyer_event_au_client ( struct CLIENT *client )
-  { struct CMD_TYPE_MSRV_EVENT *event;
-    
-    if ( client->Liste_events == NULL ) return;
-
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-    event = (struct CMD_TYPE_MSRV_EVENT *) client->Liste_events->data;
-    client->Liste_events = g_slist_remove ( client->Liste_events, event );
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-       
-    if ( Tester_level_util( client->util, ACCESS_LEVEL_SATELLITE) )           /* Il faut etre dans le bon groupe Satellite ! */
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_event_au_client: Event traite %s (instance %s, thread %s)",
-                 event->objet, event->instance, event->thread );
-
-       Envoi_client( client, TAG_SATELLITE, SSTAG_SSRV_SAT_SET_INTERNAL,
-                     (gchar *)event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
-     }
-    g_free(event);
-  }
-/******************************************************************************************************************************/
 /* Run_hangle_client boucle principale d'un sous-hangle_client Watchdog                                                       */
 /* Entree: l'id du hangle_client et le pid du pere                                                                            */
 /* Sortie: un code d'erreur EXIT_xxx                                                                                          */
@@ -106,6 +82,7 @@
     pthread_t tid;
     gchar nom[16];
     struct ZMQUEUE *zmq_msg;
+    struct ZMQUEUE *zmq_motif;
 
     client->ssrv_id = thread_count++;
     g_snprintf(nom, sizeof(nom), "W-SSRV-%06d", client->ssrv_id );
@@ -116,6 +93,9 @@
     zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
     Connect_zmq ( zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
      
+    zmq_motif = New_zmq ( ZMQ_SUB, "listen-to-motifs" );
+    Connect_zmq ( zmq_msg, "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
+
     while( Cfg_ssrv.lib->Thread_run == TRUE )                                                /* On tourne tant que necessaire */
      { usleep(1000);
        sched_yield();
@@ -177,10 +157,11 @@
 /********************************************** Envoi des histos et des motifs ************************************************/
        if (client->mode == VALIDE)                                                /* Envoi au suppression des histo au client */
         { struct CMD_TYPE_HISTO histo;
+          gint num_i;
           if ( Recv_zmq ( zmq_msg, &histo, sizeof(histo) ) == sizeof(struct CMD_TYPE_HISTO) )
            { Envoyer_histo_au_client ( client, &histo ); }
-          Envoyer_new_motif_au_client (client);
-          Envoyer_event_au_client (client);
+          if ( Recv_zmq ( zmq_motif, &num_i, sizeof(num_i) ) == sizeof(num_i) )
+           { Envoyer_new_motif_au_client ( client, num_i ); }
         }
 /************************************************ Ecoute du client  ***********************************************************/
        if (client->mode >= WAIT_FOR_IDENT) Ecouter_client( client );
@@ -190,13 +171,11 @@
           client->pulse = Partage->top + TEMPS_PULSE;
         }
      }
-
-/**************************************************** Arret du hangle_client **************************************************/
+/**************************************************** Arret du handle_client **************************************************/
     Close_zmq ( zmq_msg );
+    Close_zmq ( zmq_motif );
     Deconnecter(client);
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
-              "%s: Down . . . TID = %p", __func__, pthread_self() );
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     pthread_exit( NULL );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
-

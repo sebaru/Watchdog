@@ -102,6 +102,7 @@
     GSList *liste_a;                                                             /* liste de A a traiter dans la distribution */
     GSList *liste_Event;                                                     /* liste de Event a traiter dans la distribution */
     struct ZMQUEUE *zmq_msg;                                                           /* Message Queue des messages Watchdog */
+    struct ZMQUEUE *zmq_motif;                                                           /* Message Queue des motifs Watchdog */
     union
      { struct ZMQUEUE *zmq_to_slave;                                                         /* Message Queue vers les slaves */
        struct ZMQUEUE *zmq_to_master;
@@ -174,8 +175,6 @@
  extern void Gerer_histo_repeat ( void );
 
  extern void Gerer_arrive_Ixxx_dls ( void );                                                           /* Dans distrib_Ixxx.c */
- extern void Abonner_distribution_motif ( void (*Gerer_motif) (gint num) );
- extern void Desabonner_distribution_motif ( void (*Gerer_motif) (gint num) );
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -292,6 +292,9 @@
     Partage->com_msrv.zmq_msg = New_zmq ( ZMQ_PUB, "pub-int-msgs" );
     Bind_zmq ( Partage->com_msrv.zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
 
+    Partage->com_msrv.zmq_motif = New_zmq ( ZMQ_PUB, "pub-int-motifs" );
+    Bind_zmq ( Partage->com_msrv.zmq_motif, "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
+
     zmq_to_threads = New_zmq ( ZMQ_PUB, "pub-to-threads" );
     Bind_zmq ( zmq_to_threads, "inproc", ZMQUEUE_LIVE_THREADS, 0 );
 
@@ -408,6 +411,7 @@
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/ 
     Sauver_compteur();                                                                     /* Dernière sauvegarde avant arret */
     Close_zmq ( Partage->com_msrv.zmq_msg );
+    Close_zmq ( Partage->com_msrv.zmq_motif );
     Close_zmq ( zmq_to_threads );
     Close_zmq ( zmq_from_threads );
     if (Config.instance_is_master == TRUE)

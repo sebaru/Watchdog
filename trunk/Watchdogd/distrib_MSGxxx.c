@@ -79,8 +79,7 @@
 
     msg = Rechercher_messageDB( num );
     if (!msg)
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, 
-                "%s: Message %03d not found", __func__, num );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Message %03d not found", __func__, num );
        return;                                                            /* On n'a pas trouvé le message, alors on s'en va ! */
      }
     memset( &histo, 0, sizeof(histo) );
@@ -88,8 +87,7 @@
     g_free( msg );                                                                     /* On a plus besoin de cette reference */
 
     if (!histo.msg.enable)                                                       /* Distribution du message aux sous serveurs */
-     { Info_new( Config.log, Config.log_msrv, LOG_INFO, 
-                "%s: Message %03d not enabled !", __func__, num );
+     { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Message %03d not enabled !", __func__, num );
        return;
      }
 /***************************************** Création de la structure interne de stockage ***************************************/
