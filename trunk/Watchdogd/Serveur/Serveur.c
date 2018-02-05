@@ -208,70 +208,6 @@
     Unref_client( client ); 
   }
 /******************************************************************************************************************************/
-/* Ssrv_Gerer_events: Receptionne un evenement fourni par MSRV                                                                */
-/* Entrées: l'evenemen a recupérer                                                                                            */
-/******************************************************************************************************************************/
- static void Ssrv_Gerer_events( struct CMD_TYPE_MSRV_EVENT *event )
-  { gint taille;
-
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );                                    /* Ajout dans la liste de tell a traiter */
-    taille = g_slist_length( Cfg_ssrv.Liste_events );
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-
-    if (taille > MAX_ENREG_QUEUE)
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
-                "Ssrv_Gerer_events: DROP (taille>MAX_ENREG_QUEUE(%d))", MAX_ENREG_QUEUE );
-       g_free(event);
-       return;
-     }
-
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );                                    /* Ajout dans la liste de tell a traiter */
-    Cfg_ssrv.Liste_events = g_slist_prepend( Cfg_ssrv.Liste_events, event );
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-  }
-/******************************************************************************************************************************/
-/* Envoyer_events_aux_thread: duplique les evenements recus et en envoi la copie a chacun des threads                         */
-/* Entrée : néant                                                                                                             */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Envoyer_events_aux_threads ( void )
-  { struct CMD_TYPE_MSRV_EVENT *event;
-    GSList *liste;
-    
-    if ( Cfg_ssrv.Liste_events == NULL ) return;
-
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-    event = (struct CMD_TYPE_MSRV_EVENT *) Cfg_ssrv.Liste_events->data;
-    Cfg_ssrv.Liste_events = g_slist_remove ( Cfg_ssrv.Liste_events, event );
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-       
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-    liste = Cfg_ssrv.Clients;
-    while (liste && Cfg_ssrv.lib->Thread_run)
-     { struct CLIENT *client;
-       struct CMD_TYPE_MSRV_EVENT *dup_event;
-       client = (struct CLIENT *)liste->data;
-
-       if (client->mode == VALIDE)
-        { dup_event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc0( sizeof ( struct CMD_TYPE_MSRV_EVENT ) );
-          if (!dup_event)
-           { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                      "Envoyer_event_aux_threads: Memory error" );
-             break;
-           }
-          else memcpy ( dup_event, event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
-
-          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                   "Envoyer_event_aux_threads: Envoi au thread %06d (client %s) -> Event %s %s %s",
-                   client->ssrv_id, client->machine, event->instance, event->thread, event->objet );
-          client->Liste_events = g_slist_prepend ( client->Liste_events, dup_event );
-        }
-       liste = g_slist_next( liste );
-     }
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-    g_free(event);                                                          /* On a plus besoin de la structure, on la libere */
-  }
-/******************************************************************************************************************************/
 /* Ssrv_Gerer_motif: Ajoute une demande d'envoi des motif Ixxx aux thread                                                     */
 /* Entrées: le numéro de la sortie                                                                                            */
 /******************************************************************************************************************************/
@@ -444,7 +380,6 @@
      }
 
     Abonner_distribution_motif ( Ssrv_Gerer_motif );                                    /* Abonnement a la liste de diffusion */
-    Abonner_distribution_events ( Ssrv_Gerer_events, NOM_THREAD );                      /* Abonnement a la liste de diffusion */
 
     while(lib->Thread_run == TRUE)                                                           /* On tourne tant que necessaire */
      { struct CLIENT *client;
@@ -465,14 +400,7 @@
         }
 
        Envoyer_motif_aux_threads();                                                /* Envoi les motifs aux thread s'il y en a */
-       Envoyer_events_aux_threads();                                               /* Envoi les events aux thread s'il y en a */
       }                                                                                        /* Fin du while partage->arret */
-
-    Desabonner_distribution_events ( Ssrv_Gerer_events );                        /* Desabonnement de la diffusion des sorties */
-    if (Cfg_ssrv.Liste_events)                                                               /* Si la liste est encore pleine */
-     { g_slist_foreach( Cfg_ssrv.Liste_events, (GFunc) g_free, NULL );
-       g_slist_free ( Cfg_ssrv.Liste_events );
-     }
 
     Desabonner_distribution_motif ( Ssrv_Gerer_motif );                                 /* Abonnement a la liste de diffusion */
 
