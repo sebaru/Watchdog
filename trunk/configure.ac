@@ -98,7 +98,6 @@ Watchdogd/Archive/Makefile \
 Watchdogd/Rfxcom/Makefile \
 Watchdogd/Enocean/Makefile \
 Watchdogd/Imsg/Makefile \
-Watchdogd/Satellite/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \
 Watchdogd/Http/Makefile \
 Watchdogd/Lirc/Makefile \

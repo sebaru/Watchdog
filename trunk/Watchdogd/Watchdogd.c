@@ -282,7 +282,7 @@
  static void *Boucle_pere ( void )
   { gint cpt_5_minutes, cpt_1_minute;
     struct CMD_TYPE_HISTO histo;
-    struct ZMQUEUE *zmq_from_slave, *zmq_from_master, *zmq_to_threads, *zmq_from_threads;
+    struct ZMQUEUE *zmq_from_slave, *zmq_from_master, *zmq_from_threads;
 
     prctl(PR_SET_NAME, "W-MSRV", 0, 0, 0 );
 
@@ -295,11 +295,11 @@
     Partage->com_msrv.zmq_motif = New_zmq ( ZMQ_PUB, "pub-int-motifs" );
     Bind_zmq ( Partage->com_msrv.zmq_motif, "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
 
-    zmq_to_threads = New_zmq ( ZMQ_PUB, "pub-to-threads" );
-    Bind_zmq ( zmq_to_threads, "inproc", ZMQUEUE_LIVE_THREADS, 0 );
+    Partage->com_msrv.zmq_to_threads = New_zmq ( ZMQ_PUB, "pub-to-threads" );
+    Bind_zmq ( Partage->com_msrv.zmq_to_threads, "inproc", ZMQUEUE_LIVE_THREADS, 0 );
 
     zmq_from_threads = New_zmq ( ZMQ_SUB, "listen-to-threads" );
-    Bind_zmq ( zmq_to_threads, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
+    Bind_zmq ( zmq_from_threads, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
 
 /***************************************** Socket pour une instance master ****************************************************/
     if (Config.instance_is_master == TRUE)
@@ -344,14 +344,14 @@
                     }
                  }
                 case TAG_ZMQ_TO_THREADS:
-                 { if (Send_zmq( zmq_to_threads, buffer, byte ) == -1)
+                 { if (Send_zmq( Partage->com_msrv.zmq_to_threads, buffer, byte ) == -1)
                     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ '%s' socket failed (%s)",
-                                __func__, zmq_to_threads, zmq_strerror(errno) );
+                                __func__, Partage->com_msrv.zmq_to_threads->name, zmq_strerror(errno) );
                     }
                  }
                 default:
                  { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: receive wrong tag number '%d' for ZMQ '%s'",
-                             __func__, event->tag, zmq_from_master );
+                             __func__, event->tag, zmq_from_master->name );
                  }
               }
            }
@@ -412,7 +412,7 @@
     Sauver_compteur();                                                                     /* Dernière sauvegarde avant arret */
     Close_zmq ( Partage->com_msrv.zmq_msg );
     Close_zmq ( Partage->com_msrv.zmq_motif );
-    Close_zmq ( zmq_to_threads );
+    Close_zmq ( Partage->com_msrv.zmq_to_threads );
     Close_zmq ( zmq_from_threads );
     if (Config.instance_is_master == TRUE)
      { Close_zmq( Partage->com_msrv.zmq_to_slave );

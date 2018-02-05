@@ -261,21 +261,26 @@
     reste = g_slist_length(Partage->com_msrv.liste_a);
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-    critere.type = MNEMO_SORTIE;                                           /* Recherche du ev_text associé au mnemonique */
+    critere.type = MNEMO_SORTIE;                                                /* Recherche du ev_text associé au mnemonique */
     critere.num  = num;
     mnemo = Rechercher_mnemo_baseDB_type_num ( &critere );
     if (!mnemo)
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "Gerer_arrive_Axxx_dls: Mnemo not found for A%03d", num
-               );
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Mnemo not found for A%03d", __func__, num );
        return;
      }
 
-    if ( strlen ( mnemo->ev_text ) > 0 )                      /* Existe t'il un evenement associé ? (implique furtivité) */
-     { Send_Event ( g_get_host_name(), "MSRV", EVENT_OUTPUT, mnemo->ev_text, 1.0 );
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                 "Gerer_arrive_Axxx_dls: Recu A(%03d) (%s). Reste a traiter %03d",
-                 num, mnemo->ev_text, reste
+    if ( strlen ( mnemo->ev_text ) > 0 )                           /* Existe t'il un evenement associé ? (implique furtivité) */
+     { if ( !strcmp(mnemo->ev_host, g_get_host_name()) || !strcmp(mnemo->ev_host, "*"))
+        { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_TO_THREADS,
+                              mnemo->ev_host, mnemo->ev_thread, mnemo->ev_text, strlen(mnemo->ev_text)+1 );
+        }
+       else
+        { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, TAG_ZMQ_TO_THREADS,
+                           mnemo->ev_host, mnemo->ev_thread, mnemo->ev_text, strlen(mnemo->ev_text)+1 );
+        }
+
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Recu A(%03d) (%s/%s/%s). Reste a traiter %03d", __func__,
+                 num, mnemo->ev_host, mnemo->ev_thread, mnemo->ev_text, reste
                );
        SA ( num, 0 );                                                   /* L'evenement est traité, on fait retomber la sortie */
      }

@@ -103,6 +103,7 @@
     GSList *liste_Event;                                                     /* liste de Event a traiter dans la distribution */
     struct ZMQUEUE *zmq_msg;                                                           /* Message Queue des messages Watchdog */
     struct ZMQUEUE *zmq_motif;                                                           /* Message Queue des motifs Watchdog */
+    struct ZMQUEUE *zmq_to_threads;                                                  /* Message Queue des evenements Watchdog */
     union
      { struct ZMQUEUE *zmq_to_slave;                                                         /* Message Queue vers les slaves */
        struct ZMQUEUE *zmq_to_master;
