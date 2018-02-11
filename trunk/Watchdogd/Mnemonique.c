@@ -99,7 +99,7 @@
     if (ajout == TRUE)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "INSERT INTO %s(type,num,dls_id,acronyme,libelle,ev_host,ev_thread,ev_text,tableau,acro_syn) VALUES "
-                   "(%d,%d,%d,'%s','%s','%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
+                   "(%d,%d,%d,'%s','%s','%s','%s','%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
                    mnemo->num, mnemo->dls_id, acro, libelle, ev_host, ev_thread, ev_text, tableau, acro_syn );
      } else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
