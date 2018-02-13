@@ -1,4 +1,3 @@
-
 /******************************************************************************************************************************/
 /* Watchdogd/Serveur/serveur.c                Comportement d'un sous-serveur Watchdog                                         */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                           jeu 02 fév 2006 13:01:57 CET */
@@ -188,8 +187,7 @@
      }
 
     client->mode = mode;
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-                "Client_mode: client %s (SSRV%06d) en mode %s",
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "%s: client %s (SSRV%06d) en mode %s", __func__,
                  client->machine, client->ssrv_id, Mode_vers_string(mode) );
   }
 /******************************************************************************************************************************/
@@ -199,151 +197,12 @@
 /******************************************************************************************************************************/
  void Deconnecter ( struct CLIENT *client )
   { client->mode = VALIDE;                                                /* Envoi un dernier paquet "OFF" avant deconnexion" */
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-              "Deconnecter: deconnexion client %s", client->machine );
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO, "%s: deconnexion client %s", __func__, client->machine );
     Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_OFF, NULL, 0 );
     client->mode = DECONNECTE;
                                                                         /* Le client n'est plus connecté, on en informe D.L.S */
     if (client->util && client->util->ssrv_bit_presence) SB(client->util->ssrv_bit_presence, 0);
     Unref_client( client ); 
-  }
-/******************************************************************************************************************************/
-/* Ssrv_Gerer_events: Receptionne un evenement fourni par MSRV                                                                */
-/* Entrées: l'evenemen a recupérer                                                                                            */
-/******************************************************************************************************************************/
- static void Ssrv_Gerer_events( struct CMD_TYPE_MSRV_EVENT *event )
-  { gint taille;
-
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );                                    /* Ajout dans la liste de tell a traiter */
-    taille = g_slist_length( Cfg_ssrv.Liste_events );
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-
-    if (taille > MAX_ENREG_QUEUE)
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
-                "Ssrv_Gerer_events: DROP (taille>MAX_ENREG_QUEUE(%d))", MAX_ENREG_QUEUE );
-       g_free(event);
-       return;
-     }
-
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );                                    /* Ajout dans la liste de tell a traiter */
-    Cfg_ssrv.Liste_events = g_slist_prepend( Cfg_ssrv.Liste_events, event );
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-  }
-/******************************************************************************************************************************/
-/* Envoyer_events_aux_thread: duplique les evenements recus et en envoi la copie a chacun des threads                         */
-/* Entrée : néant                                                                                                             */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Envoyer_events_aux_threads ( void )
-  { struct CMD_TYPE_MSRV_EVENT *event;
-    GSList *liste;
-    
-    if ( Cfg_ssrv.Liste_events == NULL ) return;
-
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-    event = (struct CMD_TYPE_MSRV_EVENT *) Cfg_ssrv.Liste_events->data;
-    Cfg_ssrv.Liste_events = g_slist_remove ( Cfg_ssrv.Liste_events, event );
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-       
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-    liste = Cfg_ssrv.Clients;
-    while (liste && Cfg_ssrv.lib->Thread_run)
-     { struct CLIENT *client;
-       struct CMD_TYPE_MSRV_EVENT *dup_event;
-       client = (struct CLIENT *)liste->data;
-
-       if (client->mode == VALIDE)
-        { dup_event = (struct CMD_TYPE_MSRV_EVENT *)g_try_malloc0( sizeof ( struct CMD_TYPE_MSRV_EVENT ) );
-          if (!dup_event)
-           { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                      "Envoyer_event_aux_threads: Memory error" );
-             break;
-           }
-          else memcpy ( dup_event, event, sizeof(struct CMD_TYPE_MSRV_EVENT) );
-
-          Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                   "Envoyer_event_aux_threads: Envoi au thread %06d (client %s) -> Event %s %s %s",
-                   client->ssrv_id, client->machine, event->instance, event->thread, event->objet );
-          client->Liste_events = g_slist_prepend ( client->Liste_events, dup_event );
-        }
-       liste = g_slist_next( liste );
-     }
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-    g_free(event);                                                          /* On a plus besoin de la structure, on la libere */
-  }
-/******************************************************************************************************************************/
-/* Ssrv_Gerer_motif: Ajoute une demande d'envoi des motif Ixxx aux thread                                                     */
-/* Entrées: le numéro de la sortie                                                                                            */
-/******************************************************************************************************************************/
- static void Ssrv_Gerer_motif( gint num )
-  { gint taille;
-
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );                                    /* Ajout dans la liste de tell a traiter */
-    taille = g_slist_length( Cfg_ssrv.Liste_motif );
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-
-    if (taille > MAX_ENREG_QUEUE)
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,
-                "Ssrv_Gerer_motif: DROP (taille>MAX_ENREG_QUEUE(%d)) num=%d", MAX_ENREG_QUEUE, num );
-       return;
-     }
-
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "Ssrv_Gerer_motif: Motif a traiter : num=%d", num );
-
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );                                    /* Ajout dans la liste de tell a traiter */
-    Cfg_ssrv.Liste_motif = g_slist_append( Cfg_ssrv.Liste_motif, GINT_TO_POINTER(num) );
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-  }
-/******************************************************************************************************************************/
-/* Envoyer_motif_aux_thread: duplique le motif recu et en envoi la copie a chacun des thread                                  */
-/* Entrée : néant                                                                                                             */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Envoyer_motif_aux_threads ( void )
-  { struct CMD_ETAT_BIT_CTRL motif;
-    GSList *liste;
-    gint num;
-    
-    if ( Cfg_ssrv.Liste_motif == NULL ) return;
-
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );
-    num = GPOINTER_TO_INT (Cfg_ssrv.Liste_motif->data);
-    Cfg_ssrv.Liste_motif = g_slist_remove ( Cfg_ssrv.Liste_motif, GINT_TO_POINTER(num) );
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
-
-/**************************************** Création de la structure passée aux clients *****************************************/
-    motif.num    = num;
-    motif.etat   = Partage->i[num].etat;
-    motif.rouge  = Partage->i[num].rouge;
-    motif.vert   = Partage->i[num].vert;
-    motif.bleu   = Partage->i[num].bleu;
-    motif.cligno = Partage->i[num].cligno;
-
-    pthread_mutex_lock( &Cfg_ssrv.lib->synchro );                                                  /* Envoi a tous les thread */
-    liste = Cfg_ssrv.Clients;
-    while (liste && Cfg_ssrv.lib->Thread_run)
-     { struct CLIENT *client;
-       struct CMD_ETAT_BIT_CTRL *dup_motif;
-       client = (struct CLIENT *)liste->data;
-
-       dup_motif = (struct CMD_ETAT_BIT_CTRL *)g_try_malloc0( sizeof ( struct CMD_ETAT_BIT_CTRL ) );
-       if (!dup_motif)
-        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                   "Envoyer_motif_aux_threads: Memory error" );
-          break;
-        }
-       else memcpy ( dup_motif, &motif, sizeof(struct CMD_ETAT_BIT_CTRL));
-
-       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_motif_aux_threads: Envoi du I%03d = %d, r%03d, v%03d, b%03d, c%d au thread %06d (client %s)",
-                dup_motif->num, dup_motif->etat,
-                dup_motif->rouge, dup_motif->vert, dup_motif->bleu,
-                dup_motif->cligno, client->ssrv_id, client->machine );
-       client->Liste_new_motif = g_slist_append ( client->Liste_new_motif, dup_motif );
-       liste = g_slist_next( liste );
-     }
-    pthread_mutex_unlock( &Cfg_ssrv.lib->synchro );
   }
 /******************************************************************************************************************************/
 /* Accueillir_nouveaux_clients: Cette fonction permet de loguer d'éventuels nouveaux clients distants                         */
@@ -443,9 +302,6 @@
        goto end;
      }
 
-    Abonner_distribution_motif ( Ssrv_Gerer_motif );                                    /* Abonnement a la liste de diffusion */
-    Abonner_distribution_events ( Ssrv_Gerer_events, NOM_THREAD );                      /* Abonnement a la liste de diffusion */
-
     while(lib->Thread_run == TRUE)                                                           /* On tourne tant que necessaire */
      { struct CLIENT *client;
        pthread_t tid;
@@ -453,8 +309,7 @@
        sched_yield();
 
        if (lib->Thread_sigusr1 == TRUE)
-        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
-                    "Run_thread: Run_ssrv: SIGUSR1" );
+        { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Run_ssrv: SIGUSR1", __func__ );
           lib->Thread_sigusr1 = FALSE;
         }
 
@@ -463,18 +318,7 @@
         { pthread_create( &tid, NULL, (void *)Run_handle_client, client );
           pthread_detach( tid );
         }
-
-       Envoyer_motif_aux_threads();                                                /* Envoi les motifs aux thread s'il y en a */
-       Envoyer_events_aux_threads();                                               /* Envoi les events aux thread s'il y en a */
       }                                                                                        /* Fin du while partage->arret */
-
-    Desabonner_distribution_events ( Ssrv_Gerer_events );                        /* Desabonnement de la diffusion des sorties */
-    if (Cfg_ssrv.Liste_events)                                                               /* Si la liste est encore pleine */
-     { g_slist_foreach( Cfg_ssrv.Liste_events, (GFunc) g_free, NULL );
-       g_slist_free ( Cfg_ssrv.Liste_events );
-     }
-
-    Desabonner_distribution_motif ( Ssrv_Gerer_motif );                                 /* Abonnement a la liste de diffusion */
 
 end:
     while (Cfg_ssrv.Clients)                                                      /* Tant que des clients sont encore managés */
