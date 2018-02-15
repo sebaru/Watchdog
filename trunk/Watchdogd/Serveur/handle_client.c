@@ -94,7 +94,7 @@
     Connect_zmq ( zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
      
     zmq_motif = New_zmq ( ZMQ_SUB, "listen-to-motifs" );
-    Connect_zmq ( zmq_msg, "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
+    Connect_zmq ( zmq_motif, "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
 
     while( Cfg_ssrv.lib->Thread_run == TRUE )                                                /* On tourne tant que necessaire */
      { usleep(1000);
