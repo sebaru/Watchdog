@@ -498,7 +498,7 @@
     if ((error=gn_lib_phoneprofile_load("", &state)) != GN_ERR_NONE)                                      /* Read config file */
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
                 "%s: Read Phone profile NOK (%s)", __func__, gn_error_print(error) );
-       sleep(5);
+       sleep(1);
        if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );
        return;
      }
@@ -506,7 +506,7 @@
     if ((error=gn_lib_phone_open(state)) != GN_ERR_NONE)
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
                 "%s: Open Phone NOK (%s)", __func__, gn_error_print(error) );
-       sleep(5);
+       sleep(1);
        if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );
        gn_lib_phone_close(state);
        gn_lib_phoneprofile_free(&state);

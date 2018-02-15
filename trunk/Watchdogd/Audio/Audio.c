@@ -236,7 +236,7 @@
           if ( strcmp( event->thread, NOM_THREAD ) && strcmp ( event->thread, "*" ) ) break;
 
           Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                   "%s : Reception d'un message du master : %s", (gchar *)payload );
+                   "%s : Reception d'un message du master : %s", __func__, (gchar *)payload );
         }
 
        if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) )
@@ -250,7 +250,7 @@
             )
           )                                                                     /* Bit positionné quand arret diffusion audio */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
-                   "Run_thread : Envoi du message audio %d (histo->msg.audio=%d)", histo->msg.num, histo->msg.audio );
+                   "%s : Envoi du message audio %d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
 
           if (Config.instance_is_master)
            { Envoyer_commande_dls( histo->msg.bit_audio );                   /* Positionnement du profil audio via monostable */
@@ -273,7 +273,7 @@
     Close_zmq ( zmq_master );
     Close_zmq ( zmq_admin );
 end:
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_audio.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */
     Cfg_audio.lib->TID = 0;                                                   /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
