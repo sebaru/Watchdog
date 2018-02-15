@@ -587,7 +587,7 @@
     Bind_zmq (zmq_admin, "inproc", NOM_THREAD "-admin", 0 );
 
     Cfg_sms.zmq_to_master = New_zmq ( ZMQ_PUB, "pub-to-master" );
-    Bind_zmq ( Cfg_sms.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
+    Connect_zmq ( Cfg_sms.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
 
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
     while(Cfg_sms.lib->Thread_run == TRUE)                                                   /* On tourne tant que necessaire */
