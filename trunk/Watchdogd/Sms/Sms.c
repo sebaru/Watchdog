@@ -531,7 +531,12 @@
         { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
                    "%s: Recu SMS %s de %s", __func__, (gchar *)sms.user_data[0].u.text, sms.remote.number );
           Traiter_commande_sms ( sms.remote.number, (gchar *)sms.user_data[0].u.text );
-          gn_sms_delete (&data, state);                                                   /* On l'a traité, on peut l'effacer */
+          error = gn_sms_delete (&data, state);                                           /* On l'a traité, on peut l'effacer */
+          if (error!=GN_ERR_NONE)
+            { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_ERR, "%s: Delete error %s from %s (sms_index=%d)", __func__,
+                        gn_error_print(error), sms.remote.number, sms_index );
+            }
+          break;
         }
        else if (error == GN_ERR_INVALIDLOCATION) break;                           /* On regarde toutes les places de stockage */
        else  { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_DEBUG,
