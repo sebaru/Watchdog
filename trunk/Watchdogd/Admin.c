@@ -151,7 +151,7 @@
     while(Partage->com_admin.Thread_run == TRUE)                                             /* On tourne tant que necessaire */
      { gchar buffer[2048];
        if (Partage->com_admin.Thread_sigusr1)                                                         /* On a recu sigusr1 ?? */
-        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Run_admin: recu SIGUSR1" );
+        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: recu SIGUSR1", __func__ );
           Partage->com_admin.Thread_sigusr1 = FALSE;
         }
 
@@ -159,6 +159,7 @@
         { gchar *response;
           response = Processer_commande_admin ( "localuser", "localhost", buffer );
           Send_zmq ( Socket, response, strlen(response)+1 );
+          Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Response = %s", __func__, response );
           g_free(response);
         }
 
@@ -167,8 +168,7 @@
      }
 
     Desactiver_ecoute_admin ();
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-              "%s: Down . . . TID = %p", __func__, pthread_self() );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Partage->com_admin.TID = 0;                                               /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

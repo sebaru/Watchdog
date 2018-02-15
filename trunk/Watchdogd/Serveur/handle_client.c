@@ -73,7 +73,7 @@
                   (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
   }
 /******************************************************************************************************************************/
-/* Run_hangle_client boucle principale d'un sous-hangle_client Watchdog                                                       */
+/* Run_handle_client: boucle principale d'un handle client Watchdog                                                           */
 /* Entree: l'id du hangle_client et le pid du pere                                                                            */
 /* Sortie: un code d'erreur EXIT_xxx                                                                                          */
 /******************************************************************************************************************************/
@@ -160,7 +160,7 @@
           gint num_i;
           if ( Recv_zmq ( zmq_msg, &histo, sizeof(histo) ) == sizeof(struct CMD_TYPE_HISTO) )
            { Envoyer_histo_au_client ( client, &histo ); }
-          if ( Recv_zmq ( zmq_motif, &num_i, sizeof(num_i) ) == sizeof(num_i) )
+          if ( Recv_zmq ( zmq_motif, &num_i, sizeof(gint) ) == sizeof(gint) )
            { Envoyer_new_motif_au_client ( client, num_i ); }
         }
 /************************************************ Ecoute du client  ***********************************************************/
