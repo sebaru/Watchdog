@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Rs485/Rs485.c  Gestion des modules rs485 Watchdgo 2.0                                        */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 21 aoû 2005 17:09:19 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Rs485/Rs485.c  Gestion des modules rs485 Watchdgo 2.0                                                            */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          dim 21 aoû 2005 17:09:19 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Rs485.c
  * This file is part of Watchdog
@@ -37,30 +37,30 @@
  #include <stdlib.h>
  #include <signal.h>
 
- #include "watchdogd.h"                                                         /* Pour la struct PARTAGE */
+ #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Rs485.h"
 
-/**********************************************************************************************************/
-/* Rs485_Lire_config : Lit la config Watchdog et rempli la structure mémoire                              */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Rs485_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  gboolean Rs485_Lire_config ( void )
   { gchar *nom, *valeur;
     struct DB *db;
 
-    Cfg_rs485.lib->Thread_debug = FALSE;                                     /* Settings default parameters */
+    Cfg_rs485.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
     Cfg_rs485.enable            = FALSE; 
     g_snprintf( Cfg_rs485.port, sizeof(Cfg_rs485.port), "%s", DEFAUT_PORT_RS485 );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                     /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING,
                 "Rs485_Lire_config: Database connexion failed. Using Default Parameters" );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )       /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,                         /* Print Config */
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,                                           /* Print Config */
                 "Rs485_Lire_config: '%s' = %s", nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "port" ) )
         { g_snprintf( Cfg_rs485.port, sizeof(Cfg_rs485.port), "%s", valeur ); }
@@ -75,11 +75,11 @@
      }
     return(TRUE);
   } 
-/**********************************************************************************************************/
-/* Retirer_rs485DB: Elimination d'un module rs485                                                         */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Retirer_rs485DB: Elimination d'un module rs485                                                                             */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
  gboolean Retirer_rs485DB ( struct RS485DB *rs485 )
   { gchar requete[200];
     gboolean retour;
@@ -99,11 +99,11 @@
     Cfg_rs485.reload = TRUE;                       /* Rechargement des modules RS en mémoire de travaille */
     return(retour);
   }
-/**********************************************************************************************************/
-/* Ajouter_rs485DB: Ajout ou edition d'un rs485                                                           */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure rs485                         */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Ajouter_rs485DB: Ajout ou edition d'un rs485                                                                               */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure rs485                                             */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
  gint Ajouter_rs485DB ( struct RS485DB *rs485 )
   { gchar requete[2048];
     gboolean retour;
@@ -124,11 +124,11 @@
 
     g_snprintf( requete, sizeof(requete),
                 "INSERT INTO %s(host,date_ajout,num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
-                "s_min,s_max,sa_min,sa_max) "
-                " VALUES ('%s',NOW(),'%d','%d','%s','%d','%d','%d','%d','%d','%d','%d','%d','%d')",
+                "s_min,s_max,sa_min,sa_max,forced_e_min) "
+                " VALUES ('%s',NOW(),'%d','%d','%s','%d','%d','%d','%d','%d','%d','%d','%d','%d','%d')",
                 NOM_TABLE_MODULE_RS485, g_get_host_name(), rs485->num, rs485->bit_comm, libelle, rs485->enable,
                 rs485->ea_min, rs485->ea_max, rs485->e_min, rs485->e_max,
-                rs485->s_min, rs485->s_max, rs485->sa_min, rs485->sa_max
+                rs485->s_min, rs485->s_max, rs485->sa_min, rs485->sa_max, rs485->forced_e_min
               );
     g_free(libelle);
 
@@ -155,7 +155,7 @@
     db = Init_DB_SQL();       
     if (!db) return(FALSE);
 
-    libelle = Normaliser_chaine ( rs485->libelle );              /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( rs485->libelle );                                          /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_ERR,
                  "Modifier_rs485DB: Normalisation libelle impossible" );
@@ -163,47 +163,47 @@
        return(-1);
      }
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "             
                 "num='%d',bit_comm='%d',libelle='%s',enable='%d',"
                 "ea_min='%d',ea_max='%d',e_min='%d',e_max='%d',"
-                "sa_min='%d',sa_max='%d',s_min='%d',s_max='%d'"
+                "sa_min='%d',sa_max='%d',s_min='%d',s_max='%d',forced_e_min='%d'"
                 " WHERE id=%d",
                 NOM_TABLE_MODULE_RS485,
                 rs485->num, rs485->bit_comm, libelle, rs485->enable,
                 rs485->ea_min, rs485->ea_max, rs485->e_min, rs485->e_max,
-                rs485->sa_min, rs485->sa_max, rs485->s_min, rs485->s_max,
+                rs485->sa_min, rs485->sa_max, rs485->s_min, rs485->s_max, rs485->forced_e_min,
                 rs485->id );
     g_free(libelle);
-    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
-    Cfg_rs485.reload = TRUE;                       /* Rechargement des modules RS en mémoire de travaille */
+    Cfg_rs485.reload = TRUE;                                           /* Rechargement des modules RS en mémoire de travaille */
     return( retour );
   }
-/**********************************************************************************************************/
-/* Recuperer_liste_id_rs485DB: Recupération de la liste des ids des rs485s                                */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Recuperer_liste_id_rs485DB: Recupération de la liste des ids des rs485s                                                    */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: une GList                                                                                                          */
+/******************************************************************************************************************************/
  static gboolean Recuperer_rs485DB ( struct DB *db )
   { gchar requete[256];
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT id,num,bit_comm,libelle,enable,ea_min,ea_max,e_min,e_max,"
-                "sa_min,sa_max,s_min,s_max,date_ajout"
+                "sa_min,sa_max,s_min,s_max,date_ajout,forced_e_min"
                 " FROM %s WHERE host='%s' ORDER BY num", NOM_TABLE_MODULE_RS485, g_get_host_name() );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                         /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
   }
-/**********************************************************************************************************/
-/* Recuperer_liste_id_rs485DB: Recupération de la liste des ids des rs485s                                */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Recuperer_liste_id_rs485DB: Recupération de la liste des ids des rs485s                                                    */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: une GList                                                                                                          */
+/******************************************************************************************************************************/
  static struct RS485DB *Recuperer_rs485DB_suite( struct DB *db )
   { struct RS485DB *rs485;
 
-    Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL ( db );
        return(NULL);
@@ -227,6 +227,7 @@
        rs485->sa_max            = atoi(db->row[10]);
        rs485->s_min             = atoi(db->row[11]);
        rs485->s_max             = atoi(db->row[12]);
+       rs485->forced_e_min      = atoi(db->row[14]);
      }
     return(rs485);
   }
@@ -248,7 +249,7 @@
      }
     pthread_mutex_unlock ( &Cfg_rs485.lib->synchro );
     if (liste) return(module);
-    Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO, "Chercher_module_rs485_by_id: Module %d not found", id );
+    Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO, "%s: Module %d not found", __func__, id );
     return(NULL);
   }
 /**********************************************************************************************************/
@@ -497,17 +498,20 @@
     switch( trame->fonction )
      { case RS485_FCT_IDENT: printf("bouh\n");
 	               trame_ident = (struct TRAME_RS485_IDENT *)trame->donnees;
-                       printf("Recu Ident de %d: version %d.%d, nbr ana %d, nbr tor %d (%d choc), sortie %d\n",
-                              trame->source, trame_ident->version_major, trame_ident->version_minor,
-                              trame_ident->nbr_entre_ana, trame_ident->nbr_entre_tor,
-                              trame_ident->nbr_entre_choc, trame_ident->nbr_sortie_tor );
+                       Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_INFO,
+                                "%s: Recu Ident de %d: version %d.%d, nbr ana %d, nbr tor %d (%d choc), sortie %d\n", __func__,
+                                trame->source, trame_ident->version_major, trame_ident->version_minor,
+                                trame_ident->nbr_entre_ana, trame_ident->nbr_entre_tor,
+                                trame_ident->nbr_entre_choc, trame_ident->nbr_sortie_tor );
                        break;
        case RS485_FCT_ENTRE_TOR:
              { int e, cpt, nbr_e;
                nbr_e = module->rs485.e_max - module->rs485.e_min + 1;
                for( cpt = 0; cpt<nbr_e; cpt++)
-                { e = ! (trame->donnees[cpt >> 3] & (0x80 >> (cpt & 0x07)));
-                  SE( module->rs485.e_min + cpt, e );
+                { gint num_e = module->rs485.e_min + cpt;
+                  e = ! (trame->donnees[cpt >> 3] & (0x80 >> (cpt & 0x07)));
+                  if ( num_e >= module->rs485.forced_e_min > 0 )
+                   { SE( num_e, e ); }
                 }
              }
 	    break;

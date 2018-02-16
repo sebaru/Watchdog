@@ -57,7 +57,7 @@
                 " | RS485[%02d] ------> '%s' (added '%s')\n"
                 " | - num=%02d, requete = %03ds ago\n"
                 " | - enable = %d, started = %d, bit_comm = B%04d(=%d)\n"
-                " | - %03d Digital Input,  map_E  = E%03d (->E%03d )\n"
+                " | - %03d Digital Input,  map_E  = E%03d (->E%03d ), forced_e_min=%d\n"
                 " | - %03d Analog  Input,  map_EA = EA%03d(->EA%03d)\n"
                 " | - %03d Digital Output, map_A  = A%03d (->A%03d )\n"
                 " | - %03d Analog  Output, map_AA = AA%03d(->AA%03d)\n"
@@ -65,7 +65,7 @@
                 module->rs485.id, module->rs485.libelle, module->rs485.date_ajout,
                 module->rs485.num, (Partage->top - module->date_requete)/10, 
                 module->rs485.enable, module->started, module->rs485.bit_comm, B(module->rs485.bit_comm),
-                module->rs485.e_max  - module->rs485.e_min,  module->rs485.e_min, module->rs485.e_max,
+                module->rs485.e_max  - module->rs485.e_min,  module->rs485.e_min, module->rs485.e_max, module->rs485.forced_e_min,
                 module->rs485.ea_max - module->rs485.ea_min, module->rs485.ea_min, module->rs485.ea_max,
                 module->rs485.s_max  - module->rs485.s_min,  module->rs485.s_min, module->rs485.s_max,
                 module->rs485.sa_max - module->rs485.sa_min, module->rs485.sa_min, module->rs485.sa_max,
@@ -167,7 +167,7 @@
     if ( ! strcmp ( ligne, "list" ) )
      { response = Admin_write ( response, " | Parameter can be:" );
        response = Admin_write ( response, " | - enable, bit, " );
-       response = Admin_write ( response, " | - map_E, map_EA, map_A, map_AA" );
+       response = Admin_write ( response, " | - map_E, map_EA, map_A, map_AA, forced_e_min" );
        return(response);
      }
 
@@ -196,16 +196,17 @@
         }
        else { module->rs485.enable = FALSE; }
      }
-    else if ( ! strcmp( param, "bit" ) )     { module->rs485.bit_comm = valeur; }
-    else if ( ! strcmp( param, "map_E" ) )   { module->rs485.e_min    = valeur; }
-    else if ( ! strcmp( param, "map_EA" ) )  { module->rs485.ea_min   = valeur; }
-    else if ( ! strcmp( param, "map_A" ) )   { module->rs485.s_min    = valeur; }
-    else if ( ! strcmp( param, "map_AA" ) )  { module->rs485.sa_min   = valeur; }
+    else if ( ! strcmp( param, "bit" ) )          { module->rs485.bit_comm     = valeur; }
+    else if ( ! strcmp( param, "map_E" ) )        { module->rs485.e_min        = valeur; }
+    else if ( ! strcmp( param, "forced_e_min" ) ) { module->rs485.forced_e_min = valeur; }
+    else if ( ! strcmp( param, "map_EA" ) )       { module->rs485.ea_min       = valeur; }
+    else if ( ! strcmp( param, "map_A" ) )        { module->rs485.s_min        = valeur; }
+    else if ( ! strcmp( param, "map_AA" ) )       { module->rs485.sa_min       = valeur; }
     else if ( ! strcmp( param, "libelle" ) )
      { g_snprintf( module->rs485.libelle, sizeof(module->rs485.libelle), "%s", valeur_char ); }
     else
      { g_snprintf( chaine, sizeof(chaine),
-                 " Parameter %s not known for RS485 id %s ('rs485 set list' can help)", param, id_char );
+                 " | - -Parameter %s not known for RS485 id %s ('rs485 set list' can help)", param, id_char );
        response = Admin_write ( response, chaine );
        return(response);
      }
@@ -225,12 +226,12 @@
  gchar *Admin_command ( gchar *response, gchar *ligne )
   { gchar commande[128], chaine[128];
 
-    sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
+    sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
 
     if ( ! strcmp ( commande, "add" ) )
      { struct RS485DB rs485;
        memset( &rs485, 0, sizeof(struct RS485DB) );
-       if (sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%[^\n]", commande,/* Découpage de la ligne de commande */
+       if (sscanf ( ligne, "%s %d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%[^\n]", commande,       /* Découpage de la ligne de commande */
                    &rs485.num, &rs485.bit_comm, (gint *)&rs485.enable,
                    &rs485.ea_min, &rs485.ea_max,
                    &rs485.e_min, &rs485.e_max,
@@ -241,7 +242,7 @@
      }
     else if ( ! strcmp ( commande, "del" ) )
      { gint num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
        response = Admin_rs485_del ( response, num );
      }
     else if ( ! strcmp ( commande, "set" ) )
@@ -261,7 +262,7 @@
      }
     else if ( ! strcmp ( commande, "show" ) )
      { int num;
-       sscanf ( ligne, "%s %d", commande, &num );                    /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
        response = Admin_rs485_show ( response, num );
      }
     else if ( ! strcmp ( commande, "list" ) )
@@ -270,7 +271,7 @@
     else if ( ! strcmp ( commande, "reload" ) )
      { response = Admin_rs485_reload(response);
      }
-    else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
+    else if ( ! strcmp ( commande, "dbcfg" ) )                /* Appelle de la fonction dédiée à la gestion des parametres DB */
      { gboolean retour;
        response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
        retour = Rs485_Lire_config();
@@ -293,7 +294,7 @@
      }
     else
      { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), " Unknown RS485 command : %s", ligne );
+       g_snprintf( chaine, sizeof(chaine), " | - Unknown RS485 command : %s", ligne );
        response = Admin_write ( response, chaine );
      }
     return(response);

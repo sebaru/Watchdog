@@ -70,7 +70,7 @@
     guint bit_comm;                         /* Bit bistable correspondant au bon fonctionnement du module */
     gboolean enable;                                                            /* Module Start at boot ? */
     gint ea_min, ea_max;
-    gint e_min, e_max;
+    gint e_min, e_max, forced_e_min;
     gint s_min, s_max;
     gint sa_min, sa_max;
     gchar date_ajout[20];                                                 /* Date creation enregistrement */

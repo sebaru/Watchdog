@@ -768,6 +768,7 @@ CREATE TABLE IF NOT EXISTS `rs485` (
   `ea_min` int(11) NOT NULL DEFAULT '-1',
   `ea_max` int(11) NOT NULL DEFAULT '-1',
   `e_min` int(11) NOT NULL DEFAULT '-1',
+  `forced_e_min` int(11) NOT NULL DEFAULT '0',
   `e_max` int(11) NOT NULL DEFAULT '-1',
   `s_min` int(11) NOT NULL DEFAULT '-1',
   `s_max` int(11) NOT NULL DEFAULT '-1',

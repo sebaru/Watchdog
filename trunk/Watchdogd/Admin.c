@@ -101,13 +101,13 @@
                { lib = (struct LIBRAIRIE *)liste->data;
                  if ( ! strcmp( commande, lib->admin_prompt ) )
                   { if (lib->Thread_run == FALSE)
-                     { response = Admin_write ( response, " -- WARNING --" );
-                       response = Admin_write ( response, " -- Thread is not started, Running config is not loaded --");
-                       response = Admin_write ( response, " -- WARNING --" );
+                     { response = Admin_write ( response, " | -- WARNING --" );
+                       response = Admin_write ( response, " | -- Thread is not started, Running config is not loaded --");
+                       response = Admin_write ( response, " | -- WARNING --" );
                      }    
                     if (lib->Admin_command)                        /* Ancienne mode, via appel de fonction intégrée au thread */
                      { response =  lib->Admin_command ( response, ligne + strlen(lib->admin_prompt)+1 ); }     /* Appel local */
-                    else                                                      /* Nouvelle méthode, en utilisant les files ZMQ */
+                    else if (lib->Thread_run == TRUE)                         /* Nouvelle méthode, en utilisant les files ZMQ */
                      { gchar endpoint[128], buffer[2048];
                        struct ZMQUEUE *zmq_admin;
                        zmq_admin = New_zmq ( ZMQ_REQ, "send-to-admin" );
