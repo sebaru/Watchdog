@@ -241,12 +241,15 @@
 
        if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) )
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                   "%s : Reception d'un mauvais paquet ZMQ)", __func__ );
+                   "%s : Reception d'un mauvais paquet ZMQ", __func__ );
           sleep(1); continue;
         }
 
        histo = &histo_buf;
-
+       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
+                "%s : Recu message num=%d (histo->msg.audio=%d, alive=%d)", __func__,
+                histo->msg.num, histo->msg.audio, histo->alive );
+                   
        if ( M(NUM_BIT_M_AUDIO_INHIB) == 1 &&
            ! (histo->msg.type == MSG_ALERTE || histo->msg.type == MSG_DANGER || histo->msg.type == MSG_ALARME)
           )                                                                     /* Bit positionné quand arret diffusion audio */
