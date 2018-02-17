@@ -529,7 +529,7 @@
 
        if ((error = gn_sms_get (&data, state)) == GN_ERR_NONE)                                          /* On recupere le SMS */
         { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
-                   "%s: Recu SMS %s de %s", __func__, (gchar *)sms.user_data[0].u.text, sms.remote.number );
+                   "%s: Recu SMS %s de %s (position %d)", __func__, (gchar *)sms.user_data[0].u.text, sms.remote.number, sms_index );
           Traiter_commande_sms ( sms.remote.number, (gchar *)sms.user_data[0].u.text );
           error = gn_sms_delete (&data, state);                                           /* On l'a traité, on peut l'effacer */
           if (error!=GN_ERR_NONE)
@@ -638,7 +638,7 @@
         }
        else
         { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_DEBUG,
-                    "%s : msg %d not sent (alive=%d, msg.sms = %d) (%s)", __func__,
+                    "%s : msg %d not sent (alive=%d, msg.sms = %s) (%s)", __func__,
                     histo->msg.num, histo->alive, histo->msg.sms, histo->msg.libelle_sms );
         }
        sleep(2);
