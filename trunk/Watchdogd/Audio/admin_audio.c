@@ -41,7 +41,6 @@
 
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, "  | -- Watchdog ADMIN -- Help du mode 'AUDIO'" );
-       response = Admin_write ( response, "  | - dbcfg ...             - Get/Set Database Parameters" );
        response = Admin_write ( response, "  | - tell_mp3 $num         - Send message num with mp3 format" );
        response = Admin_write ( response, "  | - tell_google $text     - Send $text with google_speech format" );
        response = Admin_write ( response, "  | - help                  - This help" );
@@ -56,14 +55,6 @@
     if ( ! strcmp ( commande, "tell_google" ) )
      { Jouer_google_speech ( ligne + 12 );
        g_snprintf( chaine, sizeof(chaine), " | - Message sent with google_speech" );
-       response = Admin_write ( response, chaine );
-     } else
-    if ( ! strcmp ( commande, "dbcfg" ) )                     /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { gboolean retour;
-       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
-       retour = Audio_Lire_config();
-       g_snprintf( chaine, sizeof(chaine), " | - Reloading Audio Thread Parameters from Database -> %s",
-                   (retour ? "Success" : "Failed") );
        response = Admin_write ( response, chaine );
      } else
      { gchar chaine[128];

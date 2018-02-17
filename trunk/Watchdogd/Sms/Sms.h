@@ -38,7 +38,6 @@
   { struct LIBRAIRIE *lib;
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
     gboolean enable;                                                                    /* Is this tread is enabled at boot ? */
-    gboolean reload;                                                      /* Demande rechargement des SMS en bases de données */
     gchar smsbox_apikey[TAILLE_SMSBOX_APIKEY+1];                                                           /* Clef API SMSBOX */
     guint bit_comm;                                                           /* Bit B d'état de la communication avec le GSM */
     void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */

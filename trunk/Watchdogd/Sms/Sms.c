@@ -568,7 +568,7 @@
     Sms_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
-              "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
+              "%s: Demarrage %s . . . TID = %p", __func__, VERSION, pthread_self() );
     Cfg_sms.lib->Thread_run = TRUE;                                                                     /* Le thread tourne ! */
 
     g_snprintf( Cfg_sms.lib->admin_prompt, sizeof(Cfg_sms.lib->admin_prompt), NOM_THREAD );
@@ -597,16 +597,10 @@
 
        if (Cfg_sms.lib->Thread_sigusr1)                                                       /* A-t'on recu un signal USR1 ? */
         { int nbr;
-
           Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "%s: SIGUSR1", __func__ );
+          Sms_Lire_config();
           Cfg_sms.lib->Thread_sigusr1 = FALSE;
         }
-
-       if (Cfg_sms.reload)                                       /* Prise en compte des reload conf depuis la console d'admin */
-        { Cfg_sms.reload = FALSE;
-          Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "%s: Reloading conf", __func__ );
-          Sms_Lire_config ();                                               /* Lecture de la configuration logiciel du thread */
-        }          
 
 /****************************************************** Lecture de SMS ********************************************************/
        Lire_sms_gsm();
@@ -638,7 +632,7 @@
         }
        else
         { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_DEBUG,
-                    "%s : msg %d not sent (alive=%d, msg.sms = %s) (%s)", __func__,
+                    "%s : msg %d not sent (alive=%d, msg.sms = %d) (%s)", __func__,
                     histo->msg.num, histo->alive, histo->msg.sms, histo->msg.libelle_sms );
         }
        sleep(2);

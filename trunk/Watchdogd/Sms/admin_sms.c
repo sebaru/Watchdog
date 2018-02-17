@@ -40,8 +40,8 @@
        return(response);
      }
     
-    Cfg_sms.reload = TRUE;
-    while (Cfg_sms.reload) sched_yield();
+    Cfg_sms.lib->Thread_sigusr1 = TRUE;
+    while (Cfg_sms.lib->Thread_sigusr1) sched_yield();
     response = Admin_write ( response, " SMS Reload done" );
     return(response);
   }
@@ -110,7 +110,6 @@
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, "  | -- Watchdog ADMIN -- Help du mode 'SMS'" );
-       response = Admin_write ( response, "  | - dbcfg ...             - Get/Set Database Parameters" );
        response = Admin_write ( response, "  | - reload                - Reload contacts from Database" );
        response = Admin_write ( response, "  | - sms smsbox message    - Send 'message' via smsbox" );
        response = Admin_write ( response, "  | - sms gsm    message    - Send 'message' via gsm" );
@@ -134,13 +133,6 @@
        sscanf ( ligne, "%s %s", commande, message );                                     /* Découpage de la ligne de commande */
        Envoyer_sms_smsbox_text ( ligne + 7 );                /* On envoie le reste de la liste, pas seulement le mot suivant. */
        g_snprintf( chaine, sizeof(chaine), " | - Sms sent\n" );
-       response = Admin_write ( response, chaine );
-     }
-    else if ( ! strcmp ( commande, "dbcfg" ) )                /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { gboolean retour;
-       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
-       retour = Sms_Lire_config();
-       g_snprintf( chaine, sizeof(chaine), " | - Reloading Sms Thread Parameters from Database -> %s", (retour ? "Success" : "Failed") );
        response = Admin_write ( response, chaine );
      }
     else

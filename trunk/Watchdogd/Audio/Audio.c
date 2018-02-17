@@ -214,6 +214,7 @@
 
        if (Cfg_audio.lib->Thread_sigusr1)                                                             /* On a recu sigusr1 ?? */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
+          Audio_Lire_config();
           Cfg_audio.lib->Thread_sigusr1 = FALSE;
         }
 

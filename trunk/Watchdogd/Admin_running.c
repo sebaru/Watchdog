@@ -45,7 +45,7 @@
        response = Admin_write ( response, "  ident                 - ID du serveur Watchdog" );
        response = Admin_write ( response, "  ping                  - Ping Watchdog" );
        response = Admin_write ( response, "  audit                 - Audit bit/s" );
-       response = Admin_write ( response, "  dbcfg                 - Manage Threads Parameters in Database" );
+       response = Admin_write ( response, "  dbcfg $thread         - Manage Threads Parameters in Database" );
        response = Admin_write ( response, "  clear_histo           - Clear Histo DB" );
        response = Admin_write ( response, "  get                   - Sous-menu de lecture des bits internes" );
        response = Admin_write ( response, "  set                   - Sous-menu d'affectation des bits internes" );
@@ -91,7 +91,9 @@
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "dbcfg" ) )
-     { return(Admin_dbcfg_thread( response, "global", ligne + 6 ));
+     { gchar chaine[128];
+       if (sscanf ( ligne, "%s %s", commande, chaine ) != 2) return(response);
+       return(Admin_dbcfg( response, chaine ));
      } else
     if ( ! strcmp ( commande, "clear_histo" ) )
      { Clear_histoDB ();                                                                   /* Clear de la table histo au boot */

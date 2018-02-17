@@ -530,6 +530,7 @@
        if (Cfg_http.lib->Thread_sigusr1)                                                      /* A-t'on recu un signal USR1 ? */
         { pthread_mutex_lock( &Cfg_http.lib->synchro );                                      /* Ajout dans la liste a traiter */
           pthread_mutex_unlock( &Cfg_http.lib->synchro );
+          Http_Lire_config();
           /*Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
                    "Run_thread: SIGUSR1. %03d sessions", nbr );*/
           Cfg_http.lib->Thread_sigusr1 = FALSE;

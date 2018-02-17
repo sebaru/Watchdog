@@ -40,8 +40,8 @@
        return(response);
      }
     
-    Cfg_rs485.reload = TRUE;
-    while (Cfg_rs485.reload) sched_yield();
+    Cfg_rs485.lib->Thread_sigusr1 = TRUE;
+    while (Cfg_rs485.lib->Thread_sigusr1) sched_yield();
     response = Admin_write ( response, " RS485 Reload done" );
     return(response);
   }
@@ -271,16 +271,8 @@
     else if ( ! strcmp ( commande, "reload" ) )
      { response = Admin_rs485_reload(response);
      }
-    else if ( ! strcmp ( commande, "dbcfg" ) )                /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { gboolean retour;
-       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
-       retour = Rs485_Lire_config();
-       g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s", (retour ? "Success" : "Failed") );
-       response = Admin_write ( response, chaine );
-     }
     else if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'RS485'" );
-       response = Admin_write ( response, "  dbcfg ...                              - Get/Set Database Parameters" );
        response = Admin_write ( response, "  add num,bit_comm,enable,ea_min,ea_max,e_min,e_max,s_min,s_max,sa_min,sa_max,libelle" );
        response = Admin_write ( response, "                                         - Ajoute un module RS485" );
        response = Admin_write ( response, "  set $id $champ $val                    - Set $val to $champ for module $id" );

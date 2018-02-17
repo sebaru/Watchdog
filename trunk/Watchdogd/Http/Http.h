@@ -60,7 +60,6 @@
 
  struct HTTP_CONFIG
   { struct LIBRAIRIE *lib;
-    gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
 
     struct lws_context_creation_info ws_info;                                             /* Paramétrage du context WebSocket */
     struct lws_context *ws_context;                                                                      /* Context WebSocket */

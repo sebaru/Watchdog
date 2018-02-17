@@ -41,7 +41,6 @@
   { struct LIBRAIRIE *lib;
     GSList *Modules_UPS;
     gboolean enable;                                                           /* Thread enable at boot ? */
-    gboolean reload;                                       /* Pour le rechargement des modules en mémoire */
     guint admin_start;                                                          /* Demande de deconnexion */
     guint admin_stop;                                                           /* Demande de deconnexion */
   } Cfg_ups;

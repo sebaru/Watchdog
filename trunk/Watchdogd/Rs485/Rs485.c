@@ -91,12 +91,12 @@
        return(FALSE);
      }
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MODULE_RS485, rs485->id );
 
-    retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
-    Cfg_rs485.reload = TRUE;                       /* Rechargement des modules RS en mémoire de travaille */
+    Cfg_rs485.lib->Thread_sigusr1 = TRUE;                              /* Rechargement des modules RS en mémoire de travaille */
     return(retour);
   }
 /******************************************************************************************************************************/
@@ -132,20 +132,20 @@
               );
     g_free(libelle);
 
-    retour = Lancer_requete_SQL ( db, requete );               /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if (retour == FALSE)  { Libere_DB_SQL( &db );
                             return(-1);
                           }
     last_id = Recuperer_last_ID_SQL ( db );
     Libere_DB_SQL( &db );
-    Cfg_rs485.reload = TRUE;                       /* Rechargement des modules RS en mémoire de travaille */
+    Cfg_rs485.lib->Thread_sigusr1 = TRUE;                              /* Rechargement des modules RS en mémoire de travaille */
     return( last_id );
   }
-/**********************************************************************************************************/
-/* Modifier_rs485DB: Modification d'un rs485 Watchdog                                                     */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
-/* Sortie: -1 si pb, id sinon                                                                             */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Modifier_rs485DB: Modification d'un rs485 Watchdog                                                                         */
+/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                                                */
+/* Sortie: -1 si pb, id sinon                                                                                                 */
+/******************************************************************************************************************************/
  gboolean Modifier_rs485DB( struct RS485DB *rs485 )
   { gchar requete[2048];
     gboolean retour;
@@ -177,7 +177,7 @@
     g_free(libelle);
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
-    Cfg_rs485.reload = TRUE;                                           /* Rechargement des modules RS en mémoire de travaille */
+    Cfg_rs485.lib->Thread_sigusr1 = TRUE;                              /* Rechargement des modules RS en mémoire de travaille */
     return( retour );
   }
 /******************************************************************************************************************************/
@@ -556,7 +556,7 @@
     Rs485_Lire_config ();                               /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
+              "%s: Demarrage %s . . . TID = %p", __func__, VERSION, pthread_self() );
     Cfg_rs485.lib->Thread_run = TRUE;                                               /* Le thread tourne ! */
 
     g_snprintf( Cfg_rs485.lib->admin_prompt, sizeof(Cfg_rs485.lib->admin_prompt), "rs485" );
@@ -580,21 +580,15 @@
      { usleep(1);
        sched_yield();
 
-       if (Cfg_rs485.reload == TRUE)
-        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
-                    "Run_thread: Run_rs485: Reloading...." );
+       if (lib->Thread_sigusr1 == TRUE)
+        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE, "Run_thread: Run_rs485: SIGUSR1" );
+          Rs485_Lire_config();
           Decharger_tous_rs485();
           Fermer_rs485();
           sleep(5);                                                /* Attente de 5 secondes avant relance */
           nbr_oct_lu = 0;
           attente_reponse = FALSE;
           Charger_tous_rs485();
-          Cfg_rs485.reload = FALSE;
-        }
-
-       if (lib->Thread_sigusr1 == TRUE)
-        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE,
-                    "Run_thread: Run_rs485: SIGUSR1" );
           lib->Thread_sigusr1 = FALSE;
         }
 
@@ -603,7 +597,7 @@
 
        pthread_mutex_lock ( &Cfg_rs485.lib->synchro );             /* Car utilisation de la liste chainée */
        liste = Cfg_rs485.Modules_RS485;
-       while (liste && (lib->Thread_run == TRUE) && (Cfg_rs485.reload == FALSE))
+       while (liste && (lib->Thread_run == TRUE) && (Cfg_rs485.lib->Thread_sigusr1 == FALSE))
         { module = (struct MODULE_RS485 *)liste->data;
           if (module->rs485.enable != TRUE)                     /* Si le module est disabled, on le zappe */
            { liste = liste->next;

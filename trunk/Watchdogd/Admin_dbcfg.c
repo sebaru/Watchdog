@@ -28,21 +28,37 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Admin_dbcfg_reload: Gere une commande 'admin dbcfg' depuis une connexion admin                                             */
+/* Entrée: la response et le thread a reloader                                                                                */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static gchar *Admin_dbcfg_reload ( gchar *thread )
+  { struct LIBRAIRIE *lib;
+    GSList *liste;
+    liste = Partage->com_msrv.Librairies;                                                /* Parcours de toutes les librairies */
+    while(liste)
+     { lib = (struct LIBRAIRIE *)liste->data;
+       if ( ! strcmp( thread, lib->admin_prompt ) ) { lib->Thread_sigusr1 = TRUE; break; }
+       liste = liste->next;
+     }
+  }
+/******************************************************************************************************************************/
 /* Admin_dbcfg: Gere une commande 'admin dbcfg' depuis une connexion admin                                                    */
 /* Entrée: le connexion et la ligne de commande                                                                               */
 /* Sortie: TRUE si un des parametres à été modifié et necessite un rechargement de la conf DB                                 */
 /******************************************************************************************************************************/
- gchar *Admin_dbcfg_thread ( gchar *response, gchar *thread, gchar *ligne )
-  { gchar commande[128], chaine[128];
+ gchar *Admin_dbcfg ( gchar *response, gchar *ligne )
+  { gchar commande[128], chaine[128], thread[20];
 
-    sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
-    if ( ! strcmp ( commande, "help" ) )
+    if ( sscanf ( ligne, "%s %s", thread, commande ) != 2) return(response);             /* Découpage de la ligne de commande */
+
+    if ( !strcmp ( commande, "help" ) )
      { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'DBCFG'" );
-       response = Admin_write ( response, " | - list               - List all parameters" );
-       response = Admin_write ( response, " | - reload             - Reload all Parameters from DB" );
-       response = Admin_write ( response, " | - set $name $value   - Set parameter name to value" );
-       response = Admin_write ( response, " | - del $name          - Erase parameter name" );
-       response = Admin_write ( response, " |  help                - This help" );
+       response = Admin_write ( response, " | - $thread list               - List all parameters" );
+       response = Admin_write ( response, " | - $thread reload             - Reload all Parameters from DB" );
+       response = Admin_write ( response, " | - $thread set $name $value   - Set parameter name to value" );
+       response = Admin_write ( response, " | - $thread del $name          - Erase parameter name" );
+       response = Admin_write ( response, " | - help                       - This help" );
      } else
     if ( ! strcmp ( commande, "list" ) )
      { gchar *nom, *valeur;
@@ -64,27 +80,28 @@
     if ( ! strcmp ( commande, "set" ) )
      { gchar param[80],valeur[80];
        gboolean retour;
-       sscanf ( ligne, "%s %s %s", commande, param, valeur );                            /* Découpage de la ligne de commande */
+       if (sscanf ( ligne, "%s %s %s %s", thread, commande, param, valeur )!=4) return(response);
        retour = Modifier_configDB( thread, param, valeur );
        g_snprintf( chaine, sizeof(chaine), " | - Instance_id '%s', Thread '%s' -> Setting %s = %s -> %s",
-                   g_get_host_name(), thread, param, valeur,
-                  (retour ? "Success" : "Failed") );
+                   g_get_host_name(), thread, param, valeur, (retour ? "Success" : "Failed") );
        response = Admin_write ( response, chaine );
+       Admin_dbcfg_reload(thread);
      } else
     if ( ! strcmp ( commande, "del" ) )
      { gchar param[80];
        gboolean retour;
-       sscanf ( ligne, "%s %s", commande, param );                                       /* Découpage de la ligne de commande */
+       if (sscanf ( ligne, "%s %s %s", thread, commande, param )!=3) return(response);
        retour = Retirer_configDB( thread, param );
        g_snprintf( chaine, sizeof(chaine), " | - Instance_id '%s', Thread '%s' -> Erasing %s -> %s",
-                   g_get_host_name(), thread, param,
-                   (retour ? "Success" : "Failed") );
+                   g_get_host_name(), thread, param, (retour ? "Success" : "Failed") );
        response = Admin_write ( response, chaine );
+       Admin_dbcfg_reload(thread);
      } else
     if ( ! strcmp ( commande, "reload" ) )
      { g_snprintf( chaine, sizeof(chaine), " | - Instance_id '%s', Thread '%s' -> Reloading ...",
                    g_get_host_name(), thread );
        response = Admin_write ( response, chaine );
+       Admin_dbcfg_reload(thread);
      }
     else
      { g_snprintf( chaine, sizeof(chaine), " | - Unknown DBCFG command : %s", ligne );
