@@ -243,12 +243,15 @@
         { sleep(1); continue; }
 
        histo = &histo_buf;
-       if ( histo->alive == 1 && histo->msg.audio &&                                                /* Si le message apparait */
-            (M(NUM_BIT_M_AUDIO_INHIB) == 0 || histo->msg.type == MSG_ALERTE
-                                           || histo->msg.type == MSG_DANGER 
-                                           || histo->msg.type == MSG_ALARME
-            )
+
+       if ( M(NUM_BIT_M_AUDIO_INHIB) == 1 &&
+           ! (histo->msg.type == MSG_ALERTE || histo->msg.type == MSG_DANGER || histo->msg.type == MSG_ALARME)
           )                                                                     /* Bit positionné quand arret diffusion audio */
+        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
+                   "%s : Envoi audio inhibé pour num=%d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
+          continue;
+        }
+       if ( histo->alive == 1 && histo->msg.audio )                                                 /* Si le message apparait */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
                    "%s : Envoi du message audio %d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
 
@@ -267,6 +270,10 @@
              else
               { Jouer_google_speech( histo->msg.libelle ); }
            }
+        }
+       else
+        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+                   "%s : Msg Audio non envoyé num=%d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
         }
      }
     Close_zmq ( zmq_msg );
