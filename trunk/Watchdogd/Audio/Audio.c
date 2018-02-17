@@ -251,7 +251,7 @@
            ! (histo->msg.type == MSG_ALERTE || histo->msg.type == MSG_DANGER || histo->msg.type == MSG_ALARME)
           )                                                                     /* Bit positionné quand arret diffusion audio */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                   "%s : Envoi audio inhibé pour num=%d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
+                   "%s : Envoi audio inhibe pour num=%d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
           continue;
         }
        if ( histo->alive == 1 && histo->msg.audio )                                                 /* Si le message apparait */
@@ -276,7 +276,7 @@
         }
        else
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                   "%s : Msg Audio non envoyé num=%d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
+                   "%s : Msg Audio non envoye num=%d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
         }
      }
     Close_zmq ( zmq_msg );
