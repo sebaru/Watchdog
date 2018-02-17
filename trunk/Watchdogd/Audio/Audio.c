@@ -185,7 +185,7 @@
     Audio_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
+              "%s: Demarrage %s . . . TID = %p", __func__, VERSION, pthread_self() );
     Cfg_audio.lib->Thread_run = TRUE;                                                                   /* Le thread tourne ! */
 
     g_snprintf( Cfg_audio.lib->admin_prompt, sizeof(Cfg_audio.lib->admin_prompt), "audio" );
@@ -240,13 +240,10 @@
         }
 
        if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) )
-        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                   "%s : Reception d'un mauvais paquet ZMQ", __func__ );
-          sleep(1); continue;
-        }
+        { sleep(1); continue; }
 
        histo = &histo_buf;
-       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
+       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
                 "%s : Recu message num=%d (histo->msg.audio=%d, alive=%d)", __func__,
                 histo->msg.num, histo->msg.audio, histo->alive );
                    
