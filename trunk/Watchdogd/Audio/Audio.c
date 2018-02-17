@@ -276,8 +276,7 @@
         }
        else
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                   "%s : test", __func__ );
-                   //Msg Audio non envoye num=%d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
+                   "%s : Msg Audio non envoye num=%d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
         }
      }
     Close_zmq ( zmq_msg );
