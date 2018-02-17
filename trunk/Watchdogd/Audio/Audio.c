@@ -240,7 +240,10 @@
         }
 
        if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) )
-        { sleep(1); continue; }
+        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
+                   "%s : Reception d'un mauvais paquet ZMQ)", __func__ );
+          sleep(1); continue;
+        }
 
        histo = &histo_buf;
 
