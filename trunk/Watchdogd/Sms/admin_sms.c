@@ -103,7 +103,7 @@
 /* Entrée: Le buffer d'entrée a compléter                                                                                     */
 /* Sortie: Le buffer de sortie complété                                                                                       */
 /******************************************************************************************************************************/
- gchar *Admin_response ( gchar *ligne )
+ gchar *Sms_Admin_response ( gchar *ligne )
   { gchar commande[128], chaine[128];
     gchar *response = NULL;
 

@@ -110,13 +110,14 @@
                      { response =  lib->Admin_command ( response, ligne + strlen(lib->admin_prompt)+1 ); }     /* Appel local */
                     else if (lib->Thread_run == TRUE)                         /* Nouvelle méthode, en utilisant les files ZMQ */
                      { gchar endpoint[128], buffer[2048];
+                       gint byte;
                        struct ZMQUEUE *zmq_admin;
                        zmq_admin = New_zmq ( ZMQ_REQ, "send-to-admin" );
                        g_snprintf(endpoint, sizeof(endpoint), "%s-admin", lib->admin_prompt );
                        Connect_zmq (zmq_admin, "inproc", endpoint, 0 );
                        Send_zmq ( zmq_admin, ligne + strlen(lib->admin_prompt)+1, strlen(ligne) - strlen(lib->admin_prompt) );
-                       Recv_zmq_block ( zmq_admin, &buffer, sizeof(buffer) );
-                       buffer[sizeof(buffer)-1]=0;                                    /* caractere NULL de fin si depassement */
+                       byte = Recv_zmq_block ( zmq_admin, &buffer, sizeof(buffer) );
+                       buffer[byte-1]=0;                                              /* caractere NULL de fin si depassement */
                        response = Admin_write ( response, buffer );                                    /* Appel via zmq local */
                        Close_zmq ( zmq_admin );
                      }

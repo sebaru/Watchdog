@@ -47,6 +47,6 @@
  extern gboolean Audio_Lire_config ( void );
  extern gboolean Jouer_mp3 ( struct CMD_TYPE_MESSAGE *msg );
  extern gboolean Jouer_google_speech ( gchar *libelle_audio );
- extern gchar *Admin_response( gchar *ligne );
+ extern gchar *Audio_Admin_response( gchar *ligne );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

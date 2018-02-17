@@ -227,8 +227,8 @@
 
        if (Recv_zmq (zmq_admin, &buffer, sizeof(buffer)) > 0)                             /* As-t'on recu un paquet d'admin ? */
         { gchar *response;
-          response = Admin_response ( buffer );
-          Send_zmq ( zmq_admin, response, strlen(response)+1 );
+          response = Audio_Admin_response ( buffer );
+          Send_zmq ( zmq_admin, response, strlen(response) );
           g_free(response);
         }
 

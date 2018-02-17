@@ -55,7 +55,7 @@
 
 /*********************************************** Définitions des prototypes ***************************************************/
  extern gboolean Sms_Lire_config ( void );                                                                      /* Dans Sms.c */
- extern gchar *Admin_response ( gchar *ligne );
+ extern gchar *Sms_Admin_response ( gchar *ligne );
  extern gboolean Sms_Recuperer_smsDB ( struct DB *db );
  extern struct SMSDB *Sms_Recuperer_smsDB_suite( struct DB *db );
  extern void Envoyer_sms_smsbox_text ( gchar *texte );

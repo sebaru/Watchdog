@@ -609,8 +609,8 @@
        if (Recv_zmq ( zmq_admin, &buffer, sizeof(buffer)) > 0 )                           /* As-t'on recu un paquet d'admin ? */
         { gchar *response;
           Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "%s: Recu commande admin %s", __func__, buffer );
-          response = Admin_response ( buffer );
-          Send_zmq ( zmq_admin, response, strlen(response)+1 );
+          response = Sms_Admin_response ( buffer );
+          Send_zmq ( zmq_admin, response, strlen(response) );
           Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_DEBUG, "%s: Response admin %s", __func__, response );
           g_free(response);
         }

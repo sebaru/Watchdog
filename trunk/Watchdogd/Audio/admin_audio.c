@@ -33,17 +33,17 @@
 /* Entrée: Le connexion d'admin, la ligne a traiter                                                                           */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- gchar *Admin_response( gchar *ligne )
+ gchar *Audio_Admin_response( gchar *ligne )
   { gchar commande[128], chaine[80];
     gchar *response = NULL;
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
 
     if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, "  | -- Watchdog ADMIN -- Help du mode 'AUDIO'" );
-       response = Admin_write ( response, "  | - tell_mp3 $num         - Send message num with mp3 format" );
-       response = Admin_write ( response, "  | - tell_google $text     - Send $text with google_speech format" );
-       response = Admin_write ( response, "  | - help                  - This help" );
+     { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'AUDIO'" );
+       response = Admin_write ( response, " | - tell_mp3 $num         - Send message num with mp3 format" );
+       response = Admin_write ( response, " | - tell_google $text     - Send $text with google_speech format" );
+       response = Admin_write ( response, " | - help                  - This help" );
      } else
     if ( ! strcmp ( commande, "tell_mp3" ) )
      { struct CMD_TYPE_MESSAGE msg;
