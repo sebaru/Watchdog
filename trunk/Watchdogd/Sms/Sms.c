@@ -542,6 +542,7 @@
        else  { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_DEBUG,
                         "%s: error %s from %s (sms_index=%d)", __func__,
                         gn_error_print(error), sms.remote.number, sms_index );
+               sleep(1);
                break;
              }
      }
@@ -635,7 +636,6 @@
                     "%s : msg %d not sent (alive=%d, msg.sms = %d) (%s)", __func__,
                     histo->msg.num, histo->alive, histo->msg.sms, histo->msg.libelle_sms );
         }
-       sleep(2);
      }
     Close_zmq ( zmq_msg );
     Close_zmq ( zmq_admin );
