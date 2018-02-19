@@ -218,9 +218,9 @@
                    "(name,access_level,mustchangepwd,cansetpwd,comment,login_failed,enable,"
                    "date_create,enable_expire,date_expire,date_modif,sms_enable,sms_phone,sms_allow_cde,"
                    "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence)"
-                   "VALUES ('%s', '%d', 1, 1, '%s', 0, 1, %d, %d, '%d', '%d','%d','%s','%d','%d','%s','%d','%d','%d' );",
+                   "VALUES ('%s', '%d', 1, 1, '%s', 0, 1, NOW(), %d, FROM_UNIXTIME('%d'), '%d','%d','%s','%d','%d','%s','%d','%d','%d' );",
                    NOM_TABLE_UTIL, nom, util->access_level,
-                   comment, (gint)time(NULL),
+                   comment,
                    util->expire, (gint)util->date_expire, (gint)time(NULL),
                    util->sms_enable, phone, util->sms_allow_cde,
                    util->imsg_enable, jabberid, util->imsg_allow_cde, util->imsg_available,
@@ -230,13 +230,13 @@
      { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
                    "UPDATE %s SET "             
                    "access_level='%d', mustchangepwd=%d,comment='%s',enable=%d, enable_expire=%d,"
-                   "cansetpwd=%d,date_expire='%d',date_modif='%d',"
+                   "cansetpwd=%d,date_expire=FROM_UNIXTIME('%d'),date_modif=NOW(),"
                    "sms_enable='%d',sms_phone='%s',sms_allow_cde='%d',"
                    "imsg_enable='%d',imsg_jabberid='%s',imsg_allow_cde='%d',imsg_available='%d',"
                    "ssrv_bit_presence='%d'",
                    NOM_TABLE_UTIL, util->access_level, util->mustchangepwd, comment,
                    util->enable, util->expire,
-                   util->cansetpwd, (gint)util->date_expire, (gint)time(NULL),
+                   util->cansetpwd, (gint)util->date_expire,
                    util->sms_enable, phone, util->sms_allow_cde,
                    util->imsg_enable, jabberid, util->imsg_allow_cde, util->imsg_available,
                    util->ssrv_bit_presence );
@@ -308,8 +308,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "             
-                "salt='%s',hash='%s',date_modif='%d',mustchangepwd=0 WHERE id=%d",
-                NOM_TABLE_UTIL, salt, hash, (gint)time(NULL), util->id );
+                "salt='%s',hash='%s',date_modif=NOW(),mustchangepwd=0 WHERE id=%d",
+                NOM_TABLE_UTIL, salt, hash, util->id );
     g_free(salt);
     g_free(hash);
 
@@ -342,8 +342,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "cansetpwd=%d,date_modif='%d' WHERE id=%d",
-                NOM_TABLE_UTIL, util->cansetpwd, (gint)time(NULL), util->id );
+                "cansetpwd=%d,date_modif=NOW() WHERE id=%d",
+                NOM_TABLE_UTIL, util->cansetpwd, util->id );
     db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_utilisateurDB_set_cansetpwd: DB connexion failed" );
@@ -373,8 +373,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "UPDATE %s SET "             
-                "mustchangepwd=%d,date_modif='%d' WHERE id=%d",
-                NOM_TABLE_UTIL, util->mustchangepwd, (gint)time(NULL), util->id );
+                "mustchangepwd=%d,date_modif=NOW() WHERE id=%d",
+                NOM_TABLE_UTIL, util->mustchangepwd, util->id );
     db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_utilisateurDB_set_mustchangepwd: DB connexion failed" );
@@ -398,13 +398,13 @@
 /* Sortie: une structure utilisateur, ou null si erreur                                                   */
 /**********************************************************************************************************/
  gboolean Recuperer_utilisateurDB( struct DB **db_retour )
-  { gchar requete[512];
+  { gchar requete[1024];
     gboolean retour;
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT name,id,mustchangepwd,comment,enable,access_level,date_create,"
-                "enable_expire,date_expire,cansetpwd,date_modif,salt,hash,sms_enable,sms_phone,sms_allow_cde,"
+                "SELECT name,id,mustchangepwd,comment,enable,access_level,UNIX_TIMESTAMP(date_create),"
+                "enable_expire,UNIX_TIMESTAMP(date_expire),cansetpwd,UNIX_TIMESTAMP(date_modif),salt,hash,sms_enable,sms_phone,sms_allow_cde,"
                 "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence "
                 "FROM %s", NOM_TABLE_UTIL );
 
@@ -471,12 +471,12 @@
 /**********************************************************************************************************/
  struct CMD_TYPE_UTILISATEUR *Rechercher_utilisateurDB_by_id( gint id )
   { struct CMD_TYPE_UTILISATEUR *util;
-    gchar requete[512];
+    gchar requete[1024];
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT name,id,mustchangepwd,comment,enable,access_level,date_create,"
-                "enable_expire,date_expire,cansetpwd,date_modif,salt,hash,sms_enable,sms_phone,sms_allow_cde,"
+                "SELECT name,id,mustchangepwd,comment,enable,access_level,UNIX_TIMESTAMP(date_create),"
+                "enable_expire,UNIX_TIMESTAMP(date_expire),cansetpwd,UNIX_TIMESTAMP(date_modif),salt,hash,sms_enable,sms_phone,sms_allow_cde,"
                 "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence "
                 "FROM %s WHERE id=%d LIMIT 1", NOM_TABLE_UTIL, id );
 
@@ -513,8 +513,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT name,id,mustchangepwd,comment,enable,access_level,date_create,"
-                "enable_expire,date_expire,cansetpwd,date_modif,salt,hash,sms_enable,sms_phone,sms_allow_cde,"
+                "SELECT name,id,mustchangepwd,comment,enable,access_level,UNIX_TIMESTAMP(date_create),"
+                "enable_expire,UNIX_TIMESTAMP(date_expire),cansetpwd,UNIX_TIMESTAMP(date_modif),salt,hash,sms_enable,sms_phone,sms_allow_cde,"
                 "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence "
                 "FROM %s WHERE name='%s' LIMIT 1", NOM_TABLE_UTIL, nom );
     g_free(name);
