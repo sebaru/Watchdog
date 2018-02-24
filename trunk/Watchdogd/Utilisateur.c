@@ -214,7 +214,14 @@
 
     if (ajout)
      { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
-                   "INSERT INTO %s"             
+                   "INSERT INTO %s SET"             
+                   "name='%s',access_level='%d',comment='%s',mustchangepwd=%d,comment='%s',enable=%d, enable_expire=%d,"
+                   "cansetpwd=%d,date_expire='%d',date_modif='%d',"
+                   "sms_enable='%d',sms_phone='%s',sms_allow_cde='%d',"
+                   "imsg_enable='%d',imsg_jabberid='%s',imsg_allow_cde='%d',imsg_available='%d',"
+                   "ssrv_bit_presence='%d'",
+
+
                    "(name,access_level,mustchangepwd,cansetpwd,comment,login_failed,enable,"
                    "date_create,enable_expire,date_expire,date_modif,sms_enable,sms_phone,sms_allow_cde,"
                    "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence)"
