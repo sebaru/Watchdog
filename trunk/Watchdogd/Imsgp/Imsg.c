@@ -25,15 +25,13 @@
  * Boston, MA  02110-1301  USA
  */
  
+ #include <sys/prctl.h>
  #include <purple.h>
 
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Imsg.h"
 
  static GMainLoop *MainLoop;                                                    /* Contexte pour attendre les evenements xmpp */
- static void Imsgp_Fermer_connexion ( void );
- static gboolean Imsgp_Ouvrir_connexion ( void );
- static void Imsgp_Connexion_close (LmConnection *connection, LmDisconnectReason reason, gpointer user_data);
 
 /******************************************************************************************************************************/
 /* Imsgp_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
@@ -46,9 +44,8 @@
 
     Cfg_imsgp.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
     Cfg_imsgp.enable            = FALSE; 
-    g_snprintf( Cfg_imsgp.username, sizeof(Cfg_imsgp.username), DEFAUT_USERNAME_IMSG );
-    g_snprintf( Cfg_imsgp.server,   sizeof(Cfg_imsgp.server  ), DEFAUT_SERVER_IMSG );
-    g_snprintf( Cfg_imsgp.password, sizeof(Cfg_imsgp.password), DEFAUT_PASSWORD_IMSG );
+    g_snprintf( Cfg_imsgp.username, sizeof(Cfg_imsgp.username), IMSGP_DEFAUT_USERNAME );
+    g_snprintf( Cfg_imsgp.password, sizeof(Cfg_imsgp.password), IMSGP_DEFAUT_PASSWORD );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_WARNING,
@@ -61,8 +58,6 @@
                 "%s: '%s' = %s", __func__, nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "username" ) )
         { g_snprintf( Cfg_imsgp.username, sizeof(Cfg_imsgp.username), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "server" ) )
-        { g_snprintf( Cfg_imsgp.server, sizeof(Cfg_imsgp.server), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "password" ) )
         { g_snprintf( Cfg_imsgp.password, sizeof(Cfg_imsgp.password), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
@@ -76,41 +71,41 @@
      }
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Recuperer_liste_id_imsgDB: Recupération de la liste des ids des imsgs                                  */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- gboolean Recuperer_imsgDB ( struct DB *db )
+/******************************************************************************************************************************/
+/* Recuperer_imsgpDB: Recupération de la liste des users users IM                                                             */
+/* Entrée: Un pointeur vers une database                                                                                      */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ gboolean Recuperer_imsgpDB ( struct DB *db )
   { gchar requete[512];
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT id,name,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available "
                 " FROM %s as user ORDER BY user.name",
                 NOM_TABLE_UTIL );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                         /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
   }
-/**********************************************************************************************************/
-/* Recuperer_liste_id_imsgDB: Recupération de la liste des ids des imsgs                                  */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Recuperer_all_available_imsgDB: Recupération de la liste des uses IM actifs                                                */
+/* Entrée: Un pointeur vers une database                                                                                      */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
  static gboolean Recuperer_all_available_imsgDB ( struct DB *db )
   { gchar requete[512];
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT id,name,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available "
                 " FROM %s as user WHERE enable=1 AND imsg_enable=1 AND imsg_available=1 ORDER BY user.name",
                 NOM_TABLE_UTIL );
 
-    return ( Lancer_requete_SQL ( db, requete ) );                         /* Execution de la requete SQL */
+    return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
   }
-/**********************************************************************************************************/
-/* Recuperer_liste_id_imsgDB: Recupération de la liste des ids des imsgs                                  */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
- struct IMSGDB *Recuperer_imsgDB_suite( struct DB *db )
-  { struct IMSGDB *imsg;
+/******************************************************************************************************************************/
+/* Recuperer_imsgDB_suite: Recupération de la liste des champs des users                                                      */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: une GList                                                                                                          */
+/******************************************************************************************************************************/
+ struct IMSGPDB *Recuperer_imsgpDB_suite( struct DB *db )
+  { struct IMSGPDB *imsg;
 
     Recuperer_ligne_SQL(db);                                           /* Chargement d'une ligne resultat */
     if ( ! db->row )
@@ -118,8 +113,8 @@
        return(NULL);
      }
 
-    imsg = (struct IMSGDB *)g_try_malloc0( sizeof(struct IMSGDB) );
-    if (!imsg) Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_ERR, "Recuperer_imsgDB_suite: Erreur allocation mémoire" );
+    imsg = (struct IMSGPDB *)g_try_malloc0( sizeof(struct IMSGPDB) );
+    if (!imsg) Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
     else
      { g_snprintf( imsg->user_jabberid, sizeof(imsg->user_jabberid), "%s", db->row[5] );
        g_snprintf( imsg->user_name,     sizeof(imsg->user_name),     "%s", db->row[1] );
@@ -132,114 +127,115 @@
      }
     return(imsg);
   }
-
-
-
 /******************************************************************************************************************************/
 /* Imsgp_recevoir_imsg: Appelé lors de la reception d'un message depuis le reseau                                             */
 /* Entrée: La conversation et le message IMSG                                                                                 */
 /******************************************************************************************************************************/
- static void Imsgp_recevoir_imsg (PurpleConversation *conv, PurpleMessage *msg)
-  { time_t mtime = purple_message_get_time(msg);
+ static void Imsgp_recevoir_imsgss (PurpleConversation *conv, const char *who, const char *alias,
+             const char *message, PurpleMessageFlags flags, time_t mtime)
+  { 
 
+    Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
+             "%s: (%s) %s %s(%s): %s", __func__,
+		           purple_conversation_get_name(conv),
+		           purple_utf8_strftime("(%H:%M:%S)", localtime(&mtime)),
+		           who, alias, message );
+
+
+  }
+
+ static void Imsgp_recevoir_imsg(PurpleAccount *account, char *sender, char *message, PurpleConversation *conv, PurpleMessageFlags flags)
+  { if (conv==NULL)
+     { conv = purple_conversation_new(PURPLE_CONV_TYPE_IM, account, sender); }
+  
     Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
              "%s: (%s) %s %s: %s", __func__,
 		           purple_conversation_get_name(conv),
-		           purple_utf8_strftime("(%H:%M:%S)", localtime(&mtime)),
-		           purple_message_get_author_alias(msg),
-		           purple_message_get_contents(msg));
+		           purple_utf8_strftime("(%H:%M:%S)", NULL), sender, message );
+
+    // Autoreply from here:
+    PurpleConvIm *im = PURPLE_CONV_IM(conv);
+    purple_conv_im_set_typing_state(im, PURPLE_TYPING);
+       
+    // Let an external program to decide the answer:
+    purple_conv_im_send(im, "test !!" );
+    purple_conv_im_set_typing_state(im, PURPLE_NOT_TYPING);
   }
 
- static PurpleConversationUiOps Imsg_conv_uiops =
-  {	NULL,                      /* create_conversation  */
-   	NULL,                      /* destroy_conversation */
-   	NULL,                      /* write_chat           */
-   	NULL,                      /* write_im             */
-   	Imsgp_recevoir_imsg,       /* write_conv           */
-   	NULL,                      /* chat_add_users       */
-   	NULL,                      /* chat_rename_user     */
-   	NULL,                      /* chat_remove_users    */
-   	NULL,                      /* chat_update_user     */
-   	NULL,                      /* present              */
-   	NULL,                      /* has_focus            */
-   	NULL,                      /* send_confirm         */
-   	NULL,
-   	NULL,
-   	NULL,
-   	NULL
-  };
-/******************************************************************************************************************************/
-/* Imsgp_ui_init: Initialisation de la librairie libpurple                                                                    */
-/* Entrée/sortie: Néant                                                                                                       */
-/******************************************************************************************************************************/
- static void Imsgp_ui_init ( void )
-  {	purple_conversations_set_ui_ops(&Imsg_conv_uiops);
+ static void Imsgp_buddy_signed_on(PurpleBuddy *buddy)
+  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
+             "%s: '%s' with proto %s", __func__,
+              purple_buddy_get_name(buddy), purple_account_get_protocol_id(purple_buddy_get_account(buddy)));
+  }
+ 
+ static void Imsgp_buddy_signed_off(PurpleBuddy *buddy)
+  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
+             "%s: '%s' with proto %s", __func__,
+              purple_buddy_get_name(buddy), purple_account_get_protocol_id(purple_buddy_get_account(buddy)));
+  }
+ 
+ static void Imsgp_buddy_away(PurpleBuddy *buddy, PurpleStatus *old_status, PurpleStatus *status)
+  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
+             "%s: '%s' with proto %s", __func__,
+              purple_buddy_get_name(buddy), purple_account_get_protocol_id(purple_buddy_get_account(buddy)));
+  }
+ 
+ static void Imsgp_buddy_idle(PurpleBuddy *buddy, gboolean old_idle, gboolean idle)
+  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
+             "%s: '%s' with proto %s", __func__,
+              purple_buddy_get_name(buddy), purple_account_get_protocol_id(purple_buddy_get_account(buddy)));
   }
 
- static PurpleCoreUiOps null_core_uiops =
+ static void Imsgp_buddy_typing(PurpleAccount *account, const char *name)
+  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
+             "%s: '%s' with proto %s", __func__,
+              name, purple_account_get_protocol_id(account));
+  }
+ 
+ static void Imsgp_buddy_typed(PurpleAccount *account, const char *name) //not supported on all protocols
+  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
+             "%s: '%s' with proto %s", __func__,
+              name, purple_account_get_protocol_id(account));
+  }
+ 
+ static void Imsgp_buddy_typing_stopped(PurpleAccount *account, const char *name)
+  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
+             "%s: '%s' with proto %s", __func__,
+              name, purple_account_get_protocol_id(account));
+  }
+ 
+ static int Imsgp_account_authorization_requested(PurpleAccount *account, const char *user)
+  { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
+             "%s: Buddy authorization request from '%s' for protocol '%s'", __func__,
+              user, purple_account_get_protocol_id(account) );
+              
+    return 1; //authorize buddy request automatically (-1 denies it)
+  }
+
+ static PurpleCoreUiOps Imsgp_core_uiops =
   {	NULL,
    	NULL,
-	   Imsgp_ui_init,
+	   NULL,
 	   NULL,
 	 /* padding */
    	NULL,
 	   NULL,
 	   NULL,
-   	NULL,
    	NULL
   };
-
-static void
-init_libpurple(void)
-{
-	/* Set a custom user directory (optional) */
-	purple_util_set_user_dir(CUSTOM_USER_DIRECTORY);
-
-	/* We do not want any debugging for now to keep the noise to a minimum. */
-	purple_debug_set_enabled(FALSE);
-
-	/* Set the core-uiops, which is used to
-	 * 	- initialize the ui specific preferences.
-	 * 	- initialize the debug ui.
-	 * 	- initialize the ui components for all the modules.
-	 * 	- uninitialize the ui components for all the modules when the core terminates.
-	 */
-	purple_core_set_ui_ops(&null_core_uiops);
-
-	/* Now that all the essential stuff has been set, let's try to init the core. It's
-	 * necessary to provide a non-NULL name for the current ui to the core. This name
-	 * is used by stuff that depends on this ui, for example the ui-specific plugins. */
-	if (!purple_core_init(UI_ID)) {
-		/* Initializing the core failed. Terminate. */
-		fprintf(stderr,
-				"libpurple initialization failed. Dumping core.\n"
-				"Please report this!\n");
-		abort();
-	}
-
-	/* Set path to search for plugins. The core (libpurple) takes care of loading the
-	 * core-plugins, which includes the in-tree protocols. So it is not essential to add
-	 * any path here, but it might be desired, especially for ui-specific plugins. */
-	purple_plugins_add_search_path(CUSTOM_PLUGIN_PATH);
-	purple_plugins_refresh();
-
-	/* Load the preferences. */
-	purple_prefs_load();
-
-	/* Load the desired plugins. The client should save the list of loaded plugins in
-	 * the preferences using purple_plugins_save_loaded(PLUGIN_SAVE_PREF) */
-	purple_plugins_load_saved(PLUGIN_SAVE_PREF);
-}
-
- static void Imsgp_signed_on(PurpleConnection *gc, gpointer null)
+/******************************************************************************************************************************/
+/* Imsgp_signed_on: Appelé lorsque le compte vient de se connecter                                                            */
+/* Entrée: La conversation                                                                                                    */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Imsgp_signed_on ( PurpleConnection *gc, gpointer null )
   {	PurpleAccount *account = purple_connection_get_account(gc);
     Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
              "%s: Account '%s' connected for protocol id '%s'", __func__,
               purple_account_get_username(account), purple_account_get_protocol_id(account));
   }
 
-
-
+#ifdef bouh
 /**********************************************************************************************************/
 /* Imsgp_Gerer_message: Fonction d'abonné appellé lorsqu'un message est disponible.                        */
 /* Entrée: une structure CMD_TYPE_HISTO                                                                   */
@@ -352,36 +348,9 @@ init_libpurple(void)
        return(NULL);
      }
 
-    imsg = Recuperer_imsgDB_suite ( db );
+    imsg = Recuperer_imsgpDB_suite ( db );
     Libere_DB_SQL( &db );
     return(imsg);
-  }
-/**********************************************************************************************************/
-/* Mode_presence : Change la presence du server watchdog aupres du serveur XMPP                           */
-/* Entrée: la connexion xmpp                                                                              */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- void Imsgp_Mode_presence ( gchar *type, gchar *show, gchar *status )
-  { LmMessage *m;
-    GError *error = NULL;
-
-    if ( lm_connection_get_state ( Cfg_imsgp.connection ) != LM_CONNECTION_STATE_AUTHENTICATED )
-     { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_CRIT,
-                 "Imsgp_Mode_presence: Not connected .. cannot send presence %s / %s / %s -> %s",
-                 type, show, status, error->message );
-       return;
-     }
-
-    m = lm_message_new ( NULL, LM_MESSAGE_TYPE_PRESENCE );
-    if (type)   lm_message_node_set_attribute (m->node, "type", type );
-    if (show)   lm_message_node_add_child (m->node, "show", show );
-    if (status) lm_message_node_add_child (m->node, "status", status );
-    if (!lm_connection_send (Cfg_imsgp.connection, m, &error)) 
-     { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_CRIT,
-                 "Imsgp_Mode_presence: Unable to send presence %s / %s / %s -> %s",
-                 type, show, status, error->message );
-     }
-    lm_message_unref (m);
   }
 /**********************************************************************************************************/
 /* Imsgp_Envoi_message_to : Envoi un message a un contact xmpp                                             */
@@ -437,7 +406,7 @@ init_libpurple(void)
        return;
      }
 
-    while ( (imsg = Recuperer_imsgDB_suite( db )) != NULL)
+    while ( (imsg = Recuperer_imsgpDB_suite( db )) != NULL)
      { Imsgp_Envoi_message_to ( imsg->user_jabberid, message ); }
 
     Libere_DB_SQL( &db );
@@ -603,173 +572,58 @@ init_libpurple(void)
      }
     return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
   }
-/**********************************************************************************************************/
-/* Imsgp_Reception_message : CB appellé lorsque l'on recoit un message xmpp de type IQ                     */
-/* Entrée : Le Handler, la connexion, le message                                                          */
-/* Sortie : Néant                                                                                         */
-/**********************************************************************************************************/
- static LmHandlerResult Imsgp_Reception_contact ( LmMessageHandler *handler, LmConnection *connection,
-                                                 LmMessage *message, gpointer data )
-  { LmMessageNode *node_iq;
-    node_iq = lm_message_get_node ( message );
-    Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_DEBUG,
-              "Imsgp_Reception_contact : recu un msg xmpp : iq = %s", 
-              lm_message_node_to_string (node_iq)
-            );
-    return(LM_HANDLER_RESULT_ALLOW_MORE_HANDLERS);
-  }
-/**********************************************************************************************************/
-/* Imsgp_Fermer_connexion : Ferme une connexion avec le serveur Jabber                                     */
-/* Entrée : Void                                                                                          */
-/* Sortie : Néant                                                                                         */
-/**********************************************************************************************************/
- static void Imsgp_Fermer_connexion ( void )
-  { if ( ! lm_connection_is_authenticated  ( Cfg_imsgp.connection ) )
-     { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
-                 "Imsgp_Fermer_connexion: Strange, connexion is not authenticated...");
-     }
-    else                                                           /* Fermeture de la Cfg_imsgp.connection */
-     { Imsgp_Mode_presence( "unavailable", "xa", "Server is down" );
-     }
-    lm_connection_close (Cfg_imsgp.connection, NULL);
-    sleep(2);
-                                                                  /* Destruction de la structure associée */
-    lm_connection_unref (Cfg_imsgp.connection);
-    Cfg_imsgp.connection = NULL;
-    Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_DEBUG,
-              "Imsgp_Fermer_connexion: Connexion is closed.");
-  }
-/**********************************************************************************************************/
-/* Imsgp_Ouvrir_connexion : Ouvre une connexion avec le serveur Jabber                                     */
-/* Entrée : Void                                                                                          */
-/* Sortie : TRUE ou FALSE si probleme                                                                     */
-/**********************************************************************************************************/
- static gboolean Imsgp_Ouvrir_connexion ( void )
-  { LmMessageHandler *lmMsgHandler;
-    GError *error = NULL;
 
-    Cfg_imsgp.connection = lm_connection_new_with_context ( Cfg_imsgp.server, MainLoop );
-    if ( Cfg_imsgp.connection == NULL )
-     { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_CRIT,
-                 "Imsgp_Ouvrir_connexion: Error creating connection" );
-       return(FALSE);
-     }
 
-    if ( Cfg_imsgp.connection && (lm_ssl_is_supported () == TRUE) )
-     { LmSSL *ssl;
-       ssl = lm_ssl_new ( NULL, NULL, NULL, NULL );
-       lm_ssl_use_starttls ( ssl, TRUE, TRUE );
-       lm_connection_set_ssl ( Cfg_imsgp.connection, ssl );
-       lm_ssl_unref ( ssl );
-       Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
-                 "Imsgp_Ouvrir_connexion: SSL is available" );
-     }
-    else { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_WARNING,
-                     "Imsgp_Ouvrir_connexion: SSL is _Not_ available" );
-         }
-                                                                             /* Connexion au serveur XMPP */
-    if ( lm_connection_open_and_block (Cfg_imsgp.connection, &error) == FALSE )
-     { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_CRIT,
-                 "Imsgp_Ouvrir_connexion: Unable to connect to xmpp server %s -> %s", Cfg_imsgp.server, error->message );
-       lm_connection_unref (Cfg_imsgp.connection);
-       return(FALSE);
-     }
+#endif
 
-    Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_INFO,
-              "Imsgp_Ouvrir_connexion: Connexion to xmpp server %s OK", Cfg_imsgp.server );
-    if ( lm_connection_authenticate_and_block ( Cfg_imsgp.connection, Cfg_imsgp.username, Cfg_imsgp.password,
-                                                "server", &error) == FALSE )
-    { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_CRIT,
-                "Imsgp_Ouvrir_connexion: Unable to authenticate to xmpp server -> %s", error->message );
-      lm_connection_close (Cfg_imsgp.connection, NULL);
-      lm_connection_unref (Cfg_imsgp.connection);
-      return(FALSE);
-    }
+ #define PURPLE_GLIB_READ_COND  (G_IO_IN | G_IO_HUP | G_IO_ERR)
+ #define PURPLE_GLIB_WRITE_COND (G_IO_OUT | G_IO_HUP | G_IO_ERR | G_IO_NVAL)
 
-     
-   Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_INFO,
-             "Imsgp_Ouvrir_connexion: Authentication to xmpp server OK (%s@%s)",
-             Cfg_imsgp.username, Cfg_imsgp.server );
+ typedef struct _PurpleGLibIOClosure
+  {	PurpleInputFunction function;
+	   guint result;
+	   gpointer data;
+  } PurpleGLibIOClosure;
 
-   lm_connection_set_disconnect_function ( Cfg_imsgp.connection,                /* Fonction de deconnexion */
-                                           (LmDisconnectFunction)Imsgp_Connexion_close,
-                                           NULL, NULL );
+ static void purple_glib_io_destroy(gpointer data)
+  {	g_free(data); }
 
-   lm_connection_set_keep_alive_rate ( Cfg_imsgp.connection, 60 );       /* Ping toutes les minutes */
-                                               /* Set up message handler to handle incoming text messages */
-   lmMsgHandler = lm_message_handler_new( (LmHandleMessageFunction)Imsgp_Reception_message, NULL, NULL );
-   lm_connection_register_message_handler( Cfg_imsgp.connection, lmMsgHandler, 
-                                           LM_MESSAGE_TYPE_MESSAGE, LM_HANDLER_PRIORITY_NORMAL);
-   lm_message_handler_unref(lmMsgHandler);
+ static gboolean purple_glib_io_invoke(GIOChannel *source, GIOCondition condition, gpointer data)
+  {	PurpleGLibIOClosure *closure = data;
+	   PurpleInputCondition purple_cond = 0;
 
-                                           /* Set up message handler to handle incoming presence messages */
-   lmMsgHandler = lm_message_handler_new( (LmHandleMessageFunction)Imsgp_Reception_presence, NULL, NULL );
-   lm_connection_register_message_handler( Cfg_imsgp.connection, lmMsgHandler, 
-                                           LM_MESSAGE_TYPE_PRESENCE, LM_HANDLER_PRIORITY_NORMAL);
-   lm_message_handler_unref(lmMsgHandler);
+	   if (condition & PURPLE_GLIB_READ_COND)	 purple_cond |= PURPLE_INPUT_READ;
+	   if (condition & PURPLE_GLIB_WRITE_COND)	purple_cond |= PURPLE_INPUT_WRITE;
 
-                                                /* Set up message handler to handle incoming contact list */
-   lmMsgHandler = lm_message_handler_new( (LmHandleMessageFunction)Imsgp_Reception_contact, NULL, NULL );
-   lm_connection_register_message_handler( Cfg_imsgp.connection, lmMsgHandler, 
-                                           LM_MESSAGE_TYPE_IQ, LM_HANDLER_PRIORITY_NORMAL);
-   lm_message_handler_unref(lmMsgHandler);
-   Imsgp_Mode_presence ( NULL, "chat", "Waiting for commands" );
-   return(TRUE);
- }
-/**********************************************************************************************************/
-/* Imsgp_Connexion_close : Appellé lorsque la connexion est fortuitement close..                           */
-/* Entrée : Le Handler, la connexion, le message                                                          */
-/* Sortie : Néant                                                                                         */
-/**********************************************************************************************************/
- static void Imsgp_Connexion_close (LmConnection *connection, LmDisconnectReason reason, gpointer user_data)
-  { switch (reason)
-     { case LM_DISCONNECT_REASON_OK:
-            Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
-                     "Imsgp_Connexion_close : Connexion lost = User requested disconnect."
-                    );
-            return;                          /* Dans ce cas la, il ne faut pas tenter de se reconnecter ! */
-            break;
-       case LM_DISCONNECT_REASON_PING_TIME_OUT:
-            Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
-                     "Imsgp_Connexion_close : Connexion lost = Connexion to the server timed out."
-                    );
-            break;
-       case LM_DISCONNECT_REASON_HUP:
-            Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
-                     "Imsgp_Connexion_close : Connexion lost = The socket emitted that the connection was hung up."
-                    );
-            break;
-       case LM_DISCONNECT_REASON_ERROR:
-            Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
-                     "Imsgp_Connexion_close : Connexion lost = A generic error somewhere in the transport layer."
-                    );
-            break;
-       case LM_DISCONNECT_REASON_RESOURCE_CONFLICT:
-            Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
-                     "Imsgp_Connexion_close : Connexion lost = Another connection was made to the server with the same resource."
-                    );
-            break;
-       case LM_DISCONNECT_REASON_INVALID_XML:
-            Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
-                     "Imsgp_Connexion_close : Connexion lost = Invalid XML was sent from the client."
-                    );
-            break;
-       case LM_DISCONNECT_REASON_UNKNOWN:
-            Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
-                     "Imsgp_Connexion_close : Connexion lost = An unknown error."
-                    );
-            break;
-       default:
-            Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
-                     "Imsgp_Connexion_close : Connexion lost = A very unknown error."
-                    );
-            break;
-    }
-   Imsgp_Fermer_connexion();
-   Cfg_imsgp.date_retente = Partage->top + TIME_RECONNECT_IMSG;
+	   closure->function(closure->data, g_io_channel_unix_get_fd(source), purple_cond);
+
+   	return TRUE;
   }
 
+ static guint glib_input_add(gint fd, PurpleInputCondition condition, PurpleInputFunction function, gpointer data)
+  { PurpleGLibIOClosure *closure = g_new0(PurpleGLibIOClosure, 1);
+	   GIOChannel *channel;
+	   GIOCondition cond = 0;
 
+	   closure->function = function;
+	   closure->data = data;
+
+	   if (condition & PURPLE_INPUT_READ)  cond |= PURPLE_GLIB_READ_COND;
+	   if (condition & PURPLE_INPUT_WRITE)	cond |= PURPLE_GLIB_WRITE_COND;
+
+   	channel = g_io_channel_unix_new(fd);
+   	closure->result = g_io_add_watch_full(channel, G_PRIORITY_DEFAULT, cond, purple_glib_io_invoke, closure, purple_glib_io_destroy);
+
+   	g_io_channel_unref(channel);
+	   return closure->result;
+  }
+
+ static PurpleEventLoopUiOps glib_eventloops = 
+  {	g_timeout_add,	g_source_remove,	glib_input_add,	g_source_remove,
+	   NULL,	g_timeout_add_seconds,
+	   /* padding */
+	   NULL,	NULL,	NULL
+  };
 
 /**********************************************************************************************************/
 /* Main: Fonction principale du thread Imsg                                                               */
@@ -788,7 +642,7 @@ init_libpurple(void)
     Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
               "%s: Demarrage v%s . . . TID = %p", __func__, VERSION, pthread_self() );
 
-    g_snprintf( Cfg_imsgp.lib->admin_prompt, sizeof(Cfg_imsgp.lib->admin_prompt), "imsgp" );
+    g_snprintf( Cfg_imsgp.lib->admin_prompt, sizeof(Cfg_imsgp.lib->admin_prompt), NOM_THREAD );
     g_snprintf( Cfg_imsgp.lib->admin_help,   sizeof(Cfg_imsgp.lib->admin_help),   "Manage Instant Messaging system (libpurple)" );
 
     if (!Cfg_imsgp.enable)
@@ -809,20 +663,23 @@ init_libpurple(void)
    	signal(SIGCHLD, SIG_IGN);
 
    	purple_util_set_user_dir(g_get_home_dir());
-   	purple_debug_set_enabled(TRUE);
+   	purple_debug_set_enabled(FALSE);
    	purple_core_set_ui_ops(&Imsgp_core_uiops);
-   	if (!purple_core_init("Watchdog"))
+	   purple_eventloop_set_ui_ops(&glib_eventloops);
+    if (!purple_core_init("Watchdog"))
      { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_ERR,
                 "%s: LibPurple Init failed. Shutting Down %p", __func__, pthread_self() );
        goto end;
      }
    	purple_plugins_add_search_path("");
-   	purple_plugins_refresh();
+   	purple_plugins_get_all();
    	purple_prefs_load();
-   	purple_plugins_load_saved(PLUGIN_SAVE_PREF);
+   	purple_plugins_load_saved("");
+    purple_set_blist(purple_blist_new());
+    purple_blist_load();
 
    	account = purple_account_new( Cfg_imsgp.username, "prpl-jabber" );
-   	purple_account_set_password(account, Cfg_imsgp.password, NULL, NULL);
+   	purple_account_set_password(account, Cfg_imsgp.password);
 
    	/* It's necessary to enable the account first. */
 	   purple_account_set_enabled(account, "Watchdog", TRUE);
@@ -831,31 +688,46 @@ init_libpurple(void)
 	   status = purple_savedstatus_new(NULL, PURPLE_STATUS_AVAILABLE);
 	   purple_savedstatus_activate(status);
 
-	   purple_signal_connect(purple_connections_get_handle(), "signed-on", &handle,	PURPLE_CALLBACK(Imsgp_signed_on), NULL);
+	   purple_signal_connect( purple_connections_get_handle(), "signed-on", &handle,
+                          	PURPLE_CALLBACK(Imsgp_signed_on), NULL );
+    purple_signal_connect( purple_conversations_get_handle(), "received-im-msg", &handle,
+                           PURPLE_CALLBACK(Imsgp_recevoir_imsg), NULL );
+    purple_signal_connect( purple_accounts_get_handle(), "account-authorization-requested", &handle,
+                           PURPLE_CALLBACK(Imsgp_account_authorization_requested), NULL );
+    purple_signal_connect( purple_blist_get_handle(), "buddy-signed-on", &handle,
+                           PURPLE_CALLBACK(Imsgp_buddy_signed_on), NULL);
+    purple_signal_connect( purple_blist_get_handle(), "buddy-signed-off", &handle,
+                           PURPLE_CALLBACK(Imsgp_buddy_signed_off), NULL);
+    purple_signal_connect( purple_blist_get_handle(), "buddy-status-changed", &handle,
+                           PURPLE_CALLBACK(Imsgp_buddy_away), NULL);
+    purple_signal_connect( purple_blist_get_handle(), "buddy-idle-changed", &handle,
+                           PURPLE_CALLBACK(Imsgp_buddy_idle), NULL);
+    purple_signal_connect( purple_conversations_get_handle(), "buddy-typing", &handle,
+                           PURPLE_CALLBACK(Imsgp_buddy_typing), NULL);
+    purple_signal_connect( purple_conversations_get_handle(), "buddy-typed", &handle,
+                           PURPLE_CALLBACK(Imsgp_buddy_typed), NULL);
 
+
+                                
 /*    Abonner_distribution_histo ( Imsgp_Gerer_histo );              /* Abonnement à la diffusion des histos */
     while( Cfg_imsgp.lib->Thread_run == TRUE )                            /* On tourne tant que necessaire */
-     { usleep(10000);
+     { g_usleep(10000);
        sched_yield();
 
        if (Cfg_imsgp.lib->Thread_sigusr1 == TRUE)
         { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE, "Run_thread: recu signal SIGUSR1" );
           pthread_mutex_lock ( &Cfg_imsgp.lib->synchro );
           Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
-                    "Run_thread: USR1 -> Nbr of IMSG to send=%d, Number of contacts=%d",
+                    "%s: USR1 -> Nbr of IMSG to send=%d, Number of contacts=%d", __func__,
                     g_slist_length ( Cfg_imsgp.Liste_histos ),
                     g_slist_length ( Cfg_imsgp.Contacts )
                   );
           pthread_mutex_unlock ( &Cfg_imsgp.lib->synchro );
+          Imsgp_Lire_config ();                          /* Lecture de la configuration logiciel du thread */
           Cfg_imsgp.lib->Thread_sigusr1 = FALSE;
         }
 
-       if (Cfg_imsgp.reload == TRUE)
-        { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE, "Run_thread: Reloading conf" );
-          Imsgp_Lire_config ();                          /* Lecture de la configuration logiciel du thread */
-          Cfg_imsgp.reload = FALSE;
-        }
-
+#ifdef bouh
        if ( Cfg_imsgp.Liste_histos )                        /* Gestion de la listes des messages a traiter */
         { struct CMD_TYPE_HISTO *histo;
           pthread_mutex_lock ( &Cfg_imsgp.lib->synchro );
@@ -870,7 +742,6 @@ init_libpurple(void)
         { Cfg_imsgp.set_status = FALSE;
           Imsgp_Mode_presence( NULL, "chat", Cfg_imsgp.new_status );
         }
-
        if (Cfg_imsgp.date_retente && Partage->top >= Cfg_imsgp.date_retente)
         { Cfg_imsgp.date_retente = 0;
           Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
@@ -879,17 +750,19 @@ init_libpurple(void)
           if ( Imsgp_Ouvrir_connexion() == FALSE )
            { Cfg_imsgp.date_retente = Partage->top + TIME_RECONNECT_IMSG; }        /* Si probleme, retente */
         }
+#endif
 
        g_main_context_iteration ( g_main_loop_get_context (MainLoop), FALSE );
 
      }                                                                     /* Fin du while partage->arret */
 /*    Desabonner_distribution_histo ( Imsgp_Gerer_histo );       /* Desabonnement de la diffusion des histos */
-    Imsgp_Fermer_connexion ();                              /* Fermeture de la connexion au serveur Jabber */
-    g_main_context_unref (MainLoop);
+/*    Imsgp_Fermer_connexion ();                              /* Fermeture de la connexion au serveur Jabber */
+    g_main_context_unref (g_main_loop_get_context (MainLoop));
 end:
-    Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
-    Cfg_imsgp.lib->Thread_run = FALSE;                                       /* Le thread ne tourne plus ! */
-    Cfg_imsgp.lib->TID = 0;                                /* On indique au master que le thread est mort. */
+    purple_core_quit();
+    Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
+    Cfg_imsgp.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */
+    Cfg_imsgp.lib->TID = 0;                                                   /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Include/Imsg.h   Header et constantes des modules imsg Watchdgog 2.0                         */
-/* Projet WatchDog version 2.0       Gestion d'habitat                    sam. 11 août 2012 14:56:02 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Imsgp/Imsg.h     Header et constantes des modules imsg Purple Watchdgog 2.0                                      */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                                    25.02.2018 16:27:36 */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Imsg.h
  * This file is part of Watchdog
@@ -28,16 +28,13 @@
 #ifndef _IMSG_H_
  #define _IMSG_H_
 
- #include <loudmouth/loudmouth.h>
+ #define NOM_THREAD                "imsgp"
 
- #define NOM_THREAD                "imsg"
+ #define IMSGP_DEFAUT_USERNAME      "defaultuser@jabber.fr"
+ #define IMSGP_DEFAUT_PASSWORD      "defaultpassword"
+ #define IMSGP_TIME_RECONNECT      600                                              /* 1 minute avant reconnexion si probleme */
 
- #define DEFAUT_USERNAME_IMSG      "defaultuser"
- #define DEFAUT_SERVER_IMSG        "jabber.fr"
- #define DEFAUT_PASSWORD_IMSG      "defaultpassword"
- #define TIME_RECONNECT_IMSG       600                          /* 1 minute avant reconnexion si probleme */
-
- struct IMSGDB
+ struct IMSGPDB
   { gint     user_id;
     gchar    user_jabberid[80];
     gchar    user_name[80];
@@ -51,10 +48,8 @@
  struct IMSGP_CONFIG
   { struct LIBRAIRIE *lib;
     gchar username[80];
-    gchar server  [80];
     gchar password[80];
     gboolean enable;
-    LmConnection *connection;
     GSList *Contacts;
     GSList *Liste_histos;
     gboolean set_status;
@@ -66,7 +61,7 @@
  extern gboolean Imsgp_Lire_config ( void );
  extern void Imsgp_Envoi_message_to ( const gchar *dest, gchar *message );
  extern void Imsgp_Mode_presence ( gchar *type, gchar *show, gchar *status );
- extern gboolean Recuperer_imsgDB ( struct DB *db );
- extern struct IMSGDB *Recuperer_imsgDB_suite( struct DB *db );
+ extern gboolean Recuperer_imsgpDB ( struct DB *db );
+ extern struct IMSGPDB *Recuperer_imsgpDB_suite( struct DB *db );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
