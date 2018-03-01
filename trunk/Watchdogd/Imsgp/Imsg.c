@@ -208,7 +208,7 @@
   { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
              "%s: Buddy authorization request from '%s' for protocol '%s'", __func__,
               user, purple_account_get_protocol_id(account) );
-              
+    /*purple_blist_add_buddy 	( purple_buddy_new 	( account, user, NULL ), NULL, NULL, purple_blist_get_root() );*/
     return 1; //authorize buddy request automatically (-1 denies it)
   }
 

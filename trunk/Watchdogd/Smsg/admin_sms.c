@@ -105,8 +105,8 @@
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, "  | -- Watchdog ADMIN -- Help du mode 'SMS'" );
        response = Admin_write ( response, "  | - reload                - Reload contacts from Database" );
-       response = Admin_write ( response, "  | - sms smsbox message    - Send 'message' via smsbox" );
-       response = Admin_write ( response, "  | - sms gsm    message    - Send 'message' via gsm" );
+       response = Admin_write ( response, "  | - smsbox $message       - Send 'message' via smsbox" );
+       response = Admin_write ( response, "  | - gsm    $message       - Send 'message' via gsm" );
        response = Admin_write ( response, "  | - list                  - Liste les contacts SMS" );
        response = Admin_write ( response, "  | - help                  - This help" );
      }

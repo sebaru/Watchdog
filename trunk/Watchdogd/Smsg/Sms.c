@@ -198,13 +198,14 @@
     INI_Section *cfg;
     gint wait;
 
+    GSM_InitLocales(NULL);
    	memset(&sms, 0, sizeof(sms));                                                                       /* Préparation du SMS */
 	  	EncodeUnicode( sms.Text, msg->libelle_sms, strlen(msg->libelle_sms));                              /* Encode message text */
-    EncodeUnicode(sms.Number, telephone, strlen(telephone));
+    EncodeUnicode( sms.Number, telephone, strlen(telephone));
    	
 	   sms.PDU = SMS_Submit;                                                                        /* We want to submit message */
 	   sms.UDH.Type = UDH_NoUDH;                                                                 /* No UDH, just a plain message */
-	   sms.Coding = SMS_Coding_Default_No_Compression;                                        /* We used default coding for text */
+	   sms.Coding = SMS_Coding_Unicode_No_Compression;                                        /* We used default coding for text */
    	sms.Class = 1;                                                                                /* Class 1 message (normal) */
 
 	
@@ -679,7 +680,6 @@
     Connect_zmq ( Cfg_smsg.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
 
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
-    GSM_InitLocales(NULL);
     while(Cfg_smsg.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */
      { gchar buffer[128];
        usleep(10000);
