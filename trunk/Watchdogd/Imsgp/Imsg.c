@@ -26,7 +26,6 @@
  */
  
  #include <sys/prctl.h>
- #include <purple.h>
 
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Imsg.h"
@@ -208,7 +207,7 @@
   { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
              "%s: Buddy authorization request from '%s' for protocol '%s'", __func__,
               user, purple_account_get_protocol_id(account) );
-    /*purple_blist_add_buddy 	( purple_buddy_new 	( account, user, NULL ), NULL, NULL, purple_blist_get_root() );*/
+    purple_account_add_buddy( account, purple_buddy_new 	( account, user, user ) );
     return 1; //authorize buddy request automatically (-1 denies it)
   }
 
@@ -629,8 +628,7 @@
 /* Main: Fonction principale du thread Imsg                                                               */
 /**********************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { PurpleAccount *account;
-   	PurpleSavedStatus *status;
+  { PurpleSavedStatus *status;
    	static int handle;
 
     prctl(PR_SET_NAME, "W-IMSGP", 0, 0, 0 );
@@ -678,11 +676,11 @@
     purple_set_blist(purple_blist_new());
     purple_blist_load();
 
-   	account = purple_account_new( Cfg_imsgp.username, "prpl-jabber" );
-   	purple_account_set_password(account, Cfg_imsgp.password);
+   	Cfg_imsgp.account = purple_account_new( Cfg_imsgp.username, "prpl-jabber" );
+   	purple_account_set_password(Cfg_imsgp.account, Cfg_imsgp.password);
 
    	/* It's necessary to enable the account first. */
-	   purple_account_set_enabled(account, "Watchdog", TRUE);
+	   purple_account_set_enabled(Cfg_imsgp.account, "Watchdog", TRUE);
 
    	/* Now, to connect the account(s), create a status and activate it. */
 	   status = purple_savedstatus_new(NULL, PURPLE_STATUS_AVAILABLE);
