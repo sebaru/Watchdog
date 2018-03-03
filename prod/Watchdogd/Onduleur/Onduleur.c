@@ -92,7 +92,7 @@
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
-    Cfg_ups.reload = TRUE;                                             /* Rechargement des modules RS en mémoire de travaille */
+    Cfg_ups.lib->Thread_sigusr1 = TRUE;                                /* Rechargement des modules RS en mémoire de travaille */
     return(retour);
   }
 /******************************************************************************************************************************/
@@ -676,15 +676,11 @@
      { sleep(1);
        sched_yield();
 
-       if (Cfg_ups.reload == TRUE)
-        { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: Reloading conf", __func__ );
-          Decharger_tous_UPS();
-          Charger_tous_ups();
-          Cfg_ups.reload = FALSE;
-        }
-
        if (lib->Thread_sigusr1 == TRUE)
         { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
+          Ups_Lire_config();
+          Decharger_tous_UPS();
+          Charger_tous_ups();
           lib->Thread_sigusr1 = FALSE;
         }
 

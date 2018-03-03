@@ -94,6 +94,7 @@
        else if ( ! strcmp ( commande, "set"       ) ) { response = Admin_set      ( response, ligne + 4);  }
        else if ( ! strcmp ( commande, "get"       ) ) { response = Admin_get      ( response, ligne + 4);  }
        else if ( ! strcmp ( commande, "user"      ) ) { response = Admin_user     ( response, ligne + 5);  }
+       else if ( ! strcmp ( commande, "dbcfg"     ) ) { response = Admin_dbcfg    ( response, ligne + 6);  }
        else if ( ! strcmp ( commande, "arch"      ) ) { response = Admin_arch     ( response, ligne + 5);  }
        else { gboolean found = FALSE;
               liste = Partage->com_msrv.Librairies;                                      /* Parcours de toutes les librairies */
@@ -101,21 +102,22 @@
                { lib = (struct LIBRAIRIE *)liste->data;
                  if ( ! strcmp( commande, lib->admin_prompt ) )
                   { if (lib->Thread_run == FALSE)
-                     { response = Admin_write ( response, " -- WARNING --" );
-                       response = Admin_write ( response, " -- Thread is not started, Running config is not loaded --");
-                       response = Admin_write ( response, " -- WARNING --" );
+                     { response = Admin_write ( response, " | -- WARNING --" );
+                       response = Admin_write ( response, " | -- Thread is not started, Running config is not loaded --");
+                       response = Admin_write ( response, " | -- WARNING --" );
                      }    
                     if (lib->Admin_command)                        /* Ancienne mode, via appel de fonction intégrée au thread */
                      { response =  lib->Admin_command ( response, ligne + strlen(lib->admin_prompt)+1 ); }     /* Appel local */
-                    else                                                      /* Nouvelle méthode, en utilisant les files ZMQ */
+                    else if (lib->Thread_run == TRUE)                         /* Nouvelle méthode, en utilisant les files ZMQ */
                      { gchar endpoint[128], buffer[2048];
+                       gint byte;
                        struct ZMQUEUE *zmq_admin;
                        zmq_admin = New_zmq ( ZMQ_REQ, "send-to-admin" );
                        g_snprintf(endpoint, sizeof(endpoint), "%s-admin", lib->admin_prompt );
                        Connect_zmq (zmq_admin, "inproc", endpoint, 0 );
                        Send_zmq ( zmq_admin, ligne + strlen(lib->admin_prompt)+1, strlen(ligne) - strlen(lib->admin_prompt) );
-                       Recv_zmq_block ( zmq_admin, &buffer, sizeof(buffer) );
-                       buffer[sizeof(buffer)-1]=0;                                    /* caractere NULL de fin si depassement */
+                       byte = Recv_zmq_block ( zmq_admin, &buffer, sizeof(buffer) );
+                       buffer[byte-1]=0;                                              /* caractere NULL de fin si depassement */
                        response = Admin_write ( response, buffer );                                    /* Appel via zmq local */
                        Close_zmq ( zmq_admin );
                      }
@@ -151,7 +153,7 @@
     while(Partage->com_admin.Thread_run == TRUE)                                             /* On tourne tant que necessaire */
      { gchar buffer[2048];
        if (Partage->com_admin.Thread_sigusr1)                                                         /* On a recu sigusr1 ?? */
-        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Run_admin: recu SIGUSR1" );
+        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: recu SIGUSR1", __func__ );
           Partage->com_admin.Thread_sigusr1 = FALSE;
         }
 
@@ -159,6 +161,7 @@
         { gchar *response;
           response = Processer_commande_admin ( "localuser", "localhost", buffer );
           Send_zmq ( Socket, response, strlen(response)+1 );
+          Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Response = %s", __func__, response );
           g_free(response);
         }
 
@@ -167,8 +170,7 @@
      }
 
     Desactiver_ecoute_admin ();
-    Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-              "%s: Down . . . TID = %p", __func__, pthread_self() );
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Partage->com_admin.TID = 0;                                               /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

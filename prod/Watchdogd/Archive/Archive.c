@@ -177,6 +177,7 @@
                     g_slist_length(Partage->com_arch.liste_arch) );
           pthread_mutex_unlock( &Partage->com_arch.synchro );
           Partage->com_arch.Thread_sigusr1 = FALSE;
+          Arch_Lire_config();
         }
 
        if ( (Partage->top - last_update) >= 864000 )                                                     /* Une fois par jour */

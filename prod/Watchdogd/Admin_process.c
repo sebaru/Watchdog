@@ -85,7 +85,7 @@
  static gchar *Admin_stop ( gchar *response, gchar *thread )
   { gchar chaine[128];
 
-    g_snprintf( chaine, sizeof(chaine), "  | - Trying to stop %s", thread );
+    g_snprintf( chaine, sizeof(chaine), " | - Trying to stop %s", thread );
     response = Admin_write ( response, chaine );
 
     if ( ! strcmp ( thread, "all" ) )

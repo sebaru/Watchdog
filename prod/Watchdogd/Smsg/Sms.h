@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Include/Sms.h        Déclaration structure internes des SMS                                                      */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                          mer 15 avr 2009 15:46:31 CEST */
+/* Watchdogd/Smsg/Sms.h        Déclaration structure internes des SMS avec Gammu                                              */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                                    18.02.2018 11:59:59 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -25,10 +25,10 @@
  * Boston, MA  02110-1301  USA
  */
  
-#ifndef _SMS_H_
- #define _SMS_H_
+#ifndef _SMSG_H_
+ #define _SMSG_H_
 
- #define NOM_THREAD                    "sms"
+ #define NOM_THREAD                    "smsg"
 
  #define TOP_MIN_ENVOI_SMS              1200                                      /* 2 minutes sans envoi de SMS au démarrage */
  #define TAILLE_SMSBOX_APIKEY           64                                     /* Nombre de caractere dans la clef API SMSBOX */
@@ -36,12 +36,11 @@
 
  struct SMS_CONFIG
   { struct LIBRAIRIE *lib;
-    gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
     gboolean enable;                                                                    /* Is this tread is enabled at boot ? */
     gchar smsbox_apikey[TAILLE_SMSBOX_APIKEY+1];                                                           /* Clef API SMSBOX */
     guint bit_comm;                                                           /* Bit B d'état de la communication avec le GSM */
     void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
-  } Cfg_sms;
+  } Cfg_smsg;
 
  struct SMSDB
   { gint     user_id;                                                                                     /* From users table */
@@ -54,10 +53,10 @@
   };
 
 /*********************************************** Définitions des prototypes ***************************************************/
- extern gchar *Sms_Admin_response ( gchar *ligne );
- extern gboolean Sms_Recuperer_smsDB ( struct DB *db );
- extern struct SMSDB *Sms_Recuperer_smsDB_suite( struct DB *db );
- extern void Envoyer_sms_smsbox_text ( gchar *texte );
- extern void Envoyer_sms_gsm_text ( gchar *texte );
+ extern gchar *Smsg_Admin_response ( gchar *ligne );
+ extern gboolean Smsg_Recuperer_smsDB ( struct DB *db );
+ extern struct SMSDB *Smsg_Recuperer_smsDB_suite( struct DB *db );
+ extern void Envoyer_smsg_smsbox_text ( gchar *texte );
+ extern void Envoyer_smsg_gsm_text ( gchar *texte );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

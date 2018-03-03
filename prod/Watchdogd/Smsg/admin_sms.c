@@ -35,14 +35,8 @@
 /* Sortie: Le buffer de sortie complété                                                                                       */
 /******************************************************************************************************************************/
  static gchar *Admin_sms_reload ( gchar *response )
-  { if (Cfg_sms.lib->Thread_run == FALSE)
-     { response = Admin_write ( response, " Thread SMS is not running" );
-       return(response);
-     }
-    
-    Cfg_sms.lib->Thread_sigusr1 = TRUE;
-    while (Cfg_sms.lib->Thread_sigusr1) sched_yield();
-    response = Admin_write ( response, " SMS Reload done" );
+  { Cfg_smsg.lib->Thread_sigusr1 = TRUE;
+    response = Admin_write ( response, " | - SMS Reload done" );
     return(response);
   }
 /******************************************************************************************************************************/
@@ -81,18 +75,18 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
        return(response);
      }
 
 /********************************************* Chargement des informations en bases *******************************************/
-    if ( ! Sms_Recuperer_smsDB( db ) )
+    if ( ! Smsg_Recuperer_smsDB( db ) )
      { Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING, "%s: Recuperer_sms Failed", __func__ );
+       Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING, "%s: Recuperer_sms Failed", __func__ );
        return(response);
      }
 
-    while ( (sms = Sms_Recuperer_smsDB_suite( db )) != NULL)
+    while ( (sms = Smsg_Recuperer_smsDB_suite( db )) != NULL)
      { response = Admin_print_sms ( response, sms ); }
 
     Libere_DB_SQL( &db );
@@ -103,7 +97,7 @@
 /* Entrée: Le buffer d'entrée a compléter                                                                                     */
 /* Sortie: Le buffer de sortie complété                                                                                       */
 /******************************************************************************************************************************/
- gchar *Sms_Admin_response ( gchar *ligne )
+ gchar *Smsg_Admin_response ( gchar *ligne )
   { gchar commande[128], chaine[128];
     gchar *response = NULL;
 
@@ -111,8 +105,8 @@
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, "  | -- Watchdog ADMIN -- Help du mode 'SMS'" );
        response = Admin_write ( response, "  | - reload                - Reload contacts from Database" );
-       response = Admin_write ( response, "  | - sms smsbox message    - Send 'message' via smsbox" );
-       response = Admin_write ( response, "  | - sms gsm    message    - Send 'message' via gsm" );
+       response = Admin_write ( response, "  | - smsbox $message       - Send 'message' via smsbox" );
+       response = Admin_write ( response, "  | - gsm    $message       - Send 'message' via gsm" );
        response = Admin_write ( response, "  | - list                  - Liste les contacts SMS" );
        response = Admin_write ( response, "  | - help                  - This help" );
      }
@@ -124,14 +118,14 @@
     else if ( ! strcmp ( commande, "gsm" ) )
      { gchar message[80];
        sscanf ( ligne, "%s %s", commande, message );                                     /* Découpage de la ligne de commande */
-       Envoyer_sms_gsm_text ( ligne + 4 );                   /* On envoie le reste de la liste, pas seulement le mot suivant. */
+       Envoyer_smsg_gsm_text ( ligne + 4 );                   /* On envoie le reste de la liste, pas seulement le mot suivant. */
        g_snprintf( chaine, sizeof(chaine), " | - Sms sent\n" );
        response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "smsbox" ) )
      { gchar message[80];
        sscanf ( ligne, "%s %s", commande, message );                                     /* Découpage de la ligne de commande */
-       Envoyer_sms_smsbox_text ( ligne + 7 );                /* On envoie le reste de la liste, pas seulement le mot suivant. */
+       Envoyer_smsg_smsbox_text ( ligne + 7 );                /* On envoie le reste de la liste, pas seulement le mot suivant. */
        g_snprintf( chaine, sizeof(chaine), " | - Sms sent\n" );
        response = Admin_write ( response, chaine );
      }

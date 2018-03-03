@@ -68,11 +68,11 @@
 /******************************************************************************************************************************/
  static gchar *Admin_modbus_reload ( gchar *response )
   { if (Cfg_modbus.lib->Thread_run == FALSE)
-     { return(Admin_write ( response, " Thread MODBUS is not running" )); }
+     { return(Admin_write ( response, " | - Thread MODBUS is not running" )); }
     
-    Cfg_modbus.reload = TRUE;
-    while (Cfg_modbus.reload) sched_yield();
-    return(Admin_write ( response, " MODBUS Reload done" ));
+    Cfg_modbus.lib->Thread_sigusr1 = TRUE;
+    while (Cfg_modbus.lib->Thread_sigusr1) sched_yield();
+    return(Admin_write ( response, " | - MODBUS Reload done" ));
   }
 /******************************************************************************************************************************/
 /* Admin_modbus_print: Affiche un modbus sur la response d'admin                                                             */
@@ -312,16 +312,8 @@
           response = Admin_write ( response, chaine );
         }
      }
-    else if ( ! strcmp ( commande, "dbcfg" ) )                /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { gboolean retour;
-       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
-       retour = Modbus_Lire_config();
-       g_snprintf( chaine, sizeof(chaine), " | - Reloading Thread Parameters from Database -> %s", (retour ? "Success" : "Failed") );
-       response = Admin_write ( response, chaine );
-     }
     else if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'MODBUS'" );
-       response = Admin_write ( response, " | - dbcfg ...            - Get/Set Database Parameters" );
        response = Admin_write ( response, " | - add $ip $libelle     - Ajoute un module modbus" );
        response = Admin_write ( response, " | - set $id $champ $val  - Set $val to $champ for module $id" );
        response = Admin_write ( response, " | - set list             - List parameter that can be set" );

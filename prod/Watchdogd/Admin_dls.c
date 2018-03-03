@@ -47,7 +47,7 @@
   { GSList *liste_dls;
     gchar chaine[128];
 
-    g_snprintf( chaine, sizeof(chaine), " -- Liste des modules D.L.S" );
+    g_snprintf( chaine, sizeof(chaine), " | -- Liste des modules D.L.S" );
     response = Admin_write ( response, chaine );
      
     pthread_mutex_lock( &Partage->com_dls.synchro );
@@ -78,7 +78,7 @@
   { GSList *liste_dls;
     gchar chaine[256], buffer[1024];
 
-    g_snprintf( chaine, sizeof(chaine), " -- Compilation des plugins D.L.S" );
+    g_snprintf( chaine, sizeof(chaine), " | -- Compilation des plugins D.L.S" );
     response = Admin_write ( response, chaine );
 
     if (id == -1)
@@ -110,7 +110,7 @@
   { gchar chaine[128], requete[128];
     struct DB *db;
 
-    g_snprintf( chaine, sizeof(chaine), " -- Demarrage d'un plugin D.L.S" );
+    g_snprintf( chaine, sizeof(chaine), " | -- Demarrage d'un plugin D.L.S" );
     response = Admin_write ( response, chaine );
 
     while (Partage->com_dls.admin_start) sched_yield();
@@ -144,7 +144,7 @@
     GSList *liste_dls;
     struct DB *db;
 
-    g_snprintf( chaine, sizeof(chaine), " -- Modification du statut de debug d'un plugin D.L.S" );
+    g_snprintf( chaine, sizeof(chaine), " | -- Modification du statut de debug d'un plugin D.L.S" );
     response = Admin_write ( response, chaine );
 
     pthread_mutex_lock( &Partage->com_dls.synchro );                                                         /* Lock du mutex */
@@ -173,7 +173,7 @@
   { gchar chaine[128], requete[128];
     struct DB *db;
 
-    g_snprintf( chaine, sizeof(chaine), " -- Arret d'un plugin D.L.S" );
+    g_snprintf( chaine, sizeof(chaine), " | -- Arret d'un plugin D.L.S" );
     response = Admin_write ( response, chaine );
 
     while (Partage->com_dls.admin_stop) sched_yield();

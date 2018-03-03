@@ -128,16 +128,8 @@ search_again:
        sscanf ( ligne, "%s %s", commande, name );                                        /* Découpage de la ligne de commande */
        response = Admin_http_kill ( response, name );
      }
-    else if ( ! strcmp ( commande, "dbcfg" ) )                /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { gboolean retour;
-       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
-       retour = Http_Lire_config();
-       g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s", (retour ? "Success" : "Failed") );
-       response = Admin_write ( response, chaine );
-     }
     else if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'UPS'" );
-       response = Admin_write ( response, "  dbcfg ...                              - Get/Set Database Parameters" );
        response = Admin_write ( response, "  status                                 - Get Status of HTTP Thread");
        response = Admin_write ( response, "  list                                   - Get Sessions list");
        response = Admin_write ( response, "  kill $id                               - Kill session(s) with id $id (name or sid)");

@@ -123,7 +123,7 @@
        return(FALSE);
      }
     else if (!pid)
-     { execlp( "mpg123", "mpg123", "-vvvv", nom_fichier, NULL );
+     { execlp( "mpg123", "mpg123", "-q", nom_fichier, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
                 "%s: '%s' exec failed pid=%d (%s)", __func__, nom_fichier, pid, strerror( errno ) );
        _exit(0);
@@ -185,7 +185,7 @@
     Audio_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
+              "%s: Demarrage %s . . . TID = %p", __func__, VERSION, pthread_self() );
     Cfg_audio.lib->Thread_run = TRUE;                                                                   /* Le thread tourne ! */
 
     g_snprintf( Cfg_audio.lib->admin_prompt, sizeof(Cfg_audio.lib->admin_prompt), "audio" );
@@ -214,6 +214,7 @@
 
        if (Cfg_audio.lib->Thread_sigusr1)                                                             /* On a recu sigusr1 ?? */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
+          Audio_Lire_config();
           Cfg_audio.lib->Thread_sigusr1 = FALSE;
         }
 
@@ -226,8 +227,8 @@
 
        if (Recv_zmq (zmq_admin, &buffer, sizeof(buffer)) > 0)                             /* As-t'on recu un paquet d'admin ? */
         { gchar *response;
-          response = Admin_response ( buffer );
-          Send_zmq ( zmq_admin, response, strlen(response)+1 );
+          response = Audio_Admin_response ( buffer );
+          Send_zmq ( zmq_admin, response, strlen(response) );
           g_free(response);
         }
 
@@ -236,21 +237,27 @@
           if ( strcmp( event->thread, NOM_THREAD ) && strcmp ( event->thread, "*" ) ) break;
 
           Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                   "%s : Reception d'un message du master : %s", (gchar *)payload );
+                   "%s : Reception d'un message du master : %s", __func__, (gchar *)payload );
         }
 
        if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) )
         { sleep(1); continue; }
 
        histo = &histo_buf;
-       if ( histo->alive == 1 && histo->msg.audio &&                                                /* Si le message apparait */
-            (M(NUM_BIT_M_AUDIO_INHIB) == 0 || histo->msg.type == MSG_ALERTE
-                                           || histo->msg.type == MSG_DANGER 
-                                           || histo->msg.type == MSG_ALARME
-            )
+       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+                "%s : Recu message num=%d (histo->msg.audio=%d, alive=%d)", __func__,
+                histo->msg.num, histo->msg.audio, histo->alive );
+                   
+       if ( M(NUM_BIT_M_AUDIO_INHIB) == 1 &&
+           ! (histo->msg.type == MSG_ALERTE || histo->msg.type == MSG_DANGER || histo->msg.type == MSG_ALARME)
           )                                                                     /* Bit positionné quand arret diffusion audio */
+        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
+                   "%s : Envoi audio inhibe pour num=%d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
+          continue;
+        }
+       if ( histo->alive == 1 && histo->msg.audio )                                                 /* Si le message apparait */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,
-                   "Run_thread : Envoi du message audio %d (histo->msg.audio=%d)", histo->msg.num, histo->msg.audio );
+                   "%s : Envoi du message audio %d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
 
           if (Config.instance_is_master)
            { Envoyer_commande_dls( histo->msg.bit_audio );                   /* Positionnement du profil audio via monostable */
@@ -268,12 +275,16 @@
               { Jouer_google_speech( histo->msg.libelle ); }
            }
         }
+       else
+        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+                   "%s : Msg Audio non envoye num=%d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
+        }
      }
     Close_zmq ( zmq_msg );
     Close_zmq ( zmq_master );
     Close_zmq ( zmq_admin );
 end:
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "Run_thread: Down . . . TID = %p", pthread_self() );
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_audio.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */
     Cfg_audio.lib->TID = 0;                                                   /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

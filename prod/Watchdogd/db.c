@@ -790,7 +790,12 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version=3470;
+    if (database_version < 3490)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE rs485 ADD `forced_e_min` INT(11) NOT NULL DEFAULT '0' AFTER `e_min`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version=3490;
 
     Libere_DB_SQL(&db);
 

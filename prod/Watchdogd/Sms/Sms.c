@@ -498,7 +498,7 @@
     if ((error=gn_lib_phoneprofile_load("", &state)) != GN_ERR_NONE)                                      /* Read config file */
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
                 "%s: Read Phone profile NOK (%s)", __func__, gn_error_print(error) );
-       sleep(5);
+       sleep(1);
        if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );
        return;
      }
@@ -506,7 +506,7 @@
     if ((error=gn_lib_phone_open(state)) != GN_ERR_NONE)
      { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_WARNING,
                 "%s: Open Phone NOK (%s)", __func__, gn_error_print(error) );
-       sleep(5);
+       sleep(1);
        if (Cfg_sms.bit_comm) SB ( Cfg_sms.bit_comm, 0 );
        gn_lib_phone_close(state);
        gn_lib_phoneprofile_free(&state);
@@ -529,14 +529,20 @@
 
        if ((error = gn_sms_get (&data, state)) == GN_ERR_NONE)                                          /* On recupere le SMS */
         { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
-                   "%s: Recu SMS %s de %s", __func__, (gchar *)sms.user_data[0].u.text, sms.remote.number );
+                   "%s: Recu SMS %s de %s (position %d)", __func__, (gchar *)sms.user_data[0].u.text, sms.remote.number, sms_index );
           Traiter_commande_sms ( sms.remote.number, (gchar *)sms.user_data[0].u.text );
-          gn_sms_delete (&data, state);                                                   /* On l'a traité, on peut l'effacer */
+          error = gn_sms_delete (&data, state);                                           /* On l'a traité, on peut l'effacer */
+          if (error!=GN_ERR_NONE)
+            { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_ERR, "%s: Delete error %s from %s (sms_index=%d)", __func__,
+                        gn_error_print(error), sms.remote.number, sms_index );
+            }
+          break;
         }
        else if (error == GN_ERR_INVALIDLOCATION) break;                           /* On regarde toutes les places de stockage */
        else  { Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_DEBUG,
                         "%s: error %s from %s (sms_index=%d)", __func__,
                         gn_error_print(error), sms.remote.number, sms_index );
+               sleep(1);
                break;
              }
      }
@@ -563,7 +569,7 @@
     Sms_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_NOTICE,
-              "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
+              "%s: Demarrage %s . . . TID = %p (thread %s)", __func__, VERSION, pthread_self(), NOM_THREAD );
     Cfg_sms.lib->Thread_run = TRUE;                                                                     /* Le thread tourne ! */
 
     g_snprintf( Cfg_sms.lib->admin_prompt, sizeof(Cfg_sms.lib->admin_prompt), NOM_THREAD );
@@ -582,7 +588,7 @@
     Bind_zmq (zmq_admin, "inproc", NOM_THREAD "-admin", 0 );
 
     Cfg_sms.zmq_to_master = New_zmq ( ZMQ_PUB, "pub-to-master" );
-    Bind_zmq ( Cfg_sms.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
+    Connect_zmq ( Cfg_sms.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
 
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
     while(Cfg_sms.lib->Thread_run == TRUE)                                                   /* On tourne tant que necessaire */
@@ -592,16 +598,10 @@
 
        if (Cfg_sms.lib->Thread_sigusr1)                                                       /* A-t'on recu un signal USR1 ? */
         { int nbr;
-
           Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "%s: SIGUSR1", __func__ );
+          Sms_Lire_config();
           Cfg_sms.lib->Thread_sigusr1 = FALSE;
         }
-
-       if (Cfg_sms.reload)                                       /* Prise en compte des reload conf depuis la console d'admin */
-        { Cfg_sms.reload = FALSE;
-          Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "%s: Reloading conf", __func__ );
-          Sms_Lire_config ();                                               /* Lecture de la configuration logiciel du thread */
-        }          
 
 /****************************************************** Lecture de SMS ********************************************************/
        Lire_sms_gsm();
@@ -609,8 +609,10 @@
 /********************************************************* Envoi de SMS *******************************************************/
        if (Recv_zmq ( zmq_admin, &buffer, sizeof(buffer)) > 0 )                           /* As-t'on recu un paquet d'admin ? */
         { gchar *response;
-          response = Admin_response ( buffer );
-          Send_zmq ( zmq_admin, response, strlen(response)+1 );
+          Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_INFO, "%s: Recu commande admin %s", __func__, buffer );
+          response = Sms_Admin_response ( buffer );
+          Send_zmq ( zmq_admin, response, strlen(response) );
+          Info_new( Config.log, Cfg_sms.lib->Thread_debug, LOG_DEBUG, "%s: Response admin %s", __func__, response );
           g_free(response);
         }
 
@@ -634,7 +636,6 @@
                     "%s : msg %d not sent (alive=%d, msg.sms = %d) (%s)", __func__,
                     histo->msg.num, histo->alive, histo->msg.sms, histo->msg.libelle_sms );
         }
-       sleep(2);
      }
     Close_zmq ( zmq_msg );
     Close_zmq ( zmq_admin );

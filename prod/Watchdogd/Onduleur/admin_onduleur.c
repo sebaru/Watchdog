@@ -38,8 +38,8 @@
        return(response);
      }
     
-    Cfg_ups.reload = TRUE;
-    while (Cfg_ups.reload) sched_yield();
+    Cfg_ups.lib->Thread_sigusr1 = TRUE;
+    while (Cfg_ups.lib->Thread_sigusr1) sched_yield();
     response = Admin_write ( response, " ONDULEUR Reload done" );
     return(response);
   }
@@ -243,12 +243,12 @@
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), " UPS %s added. New ID=%d\n", ups.ups, retour );
           response = Admin_write ( response, chaine );
-          Cfg_ups.reload = TRUE;                    /* Rechargement des modules UPS en mémoire de travail */
+          Cfg_ups.lib->Thread_sigusr1 = TRUE;                           /* Rechargement des modules UPS en mémoire de travail */
         }
      }
     else if ( ! strcmp ( commande, "set" ) )
      { response = Admin_ups_set ( response, ligne+4 );
-       Cfg_ups.reload = TRUE;                       /* Rechargement des modules UPS en mémoire de travail */
+       Cfg_ups.lib->Thread_sigusr1 = TRUE;                              /* Rechargement des modules UPS en mémoire de travail */
      }
     else if ( ! strcmp ( commande, "del" ) )
      { struct UPSDB ups;
@@ -261,19 +261,11 @@
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), " UPS %d erased\n", ups.id );
           response = Admin_write ( response, chaine );
-          Cfg_ups.reload = TRUE;                     /* Rechargement des modules RS en mémoire de travail */
+          Cfg_ups.lib->Thread_sigusr1 = TRUE;                           /* Rechargement des modules UPS en mémoire de travail */
         }
-     }
-    else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { gboolean retour;
-       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
-       retour = Ups_Lire_config();
-       g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s", (retour ? "Success" : "Failed") );
-          response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'UPS'" );
-       response = Admin_write ( response, "  dbcfg ...             - Get/Set Database Parameters" );
        response = Admin_write ( response, "  add $ups              - Ajoute un UPS" );
        response = Admin_write ( response, "  set $id $champ $val   - Set $val to $champ for module $id" );
        response = Admin_write ( response, "  set list              - List parameter that can be set" );

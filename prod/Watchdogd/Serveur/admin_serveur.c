@@ -201,17 +201,8 @@
        sscanf ( ligne, "%s %d", commande, &id );                                         /* Découpage de la ligne de commande */
        response = Admin_ssrv_kill_id ( response, id );
      } else
-    if ( ! strcmp ( commande, "dbcfg" ) )                     /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { gboolean retour;
-       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
-       retour = Ssrv_Lire_config();
-       g_snprintf( chaine, sizeof(chaine), " | - Reloading Thread Parameters from Database -> %s",
-                   (retour ? "Success" : "Failed") );
-       response = Admin_write ( response, chaine );
-     } else
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'SSRV'" );
-       response = Admin_write ( response, " | - dbcfg...              - Manage Threads Parameters in Database" );
        response = Admin_write ( response, " | - list                  - Listes les sous serveurs" );
        response = Admin_write ( response, " | - msgs $message         - Send $message to all connected client" );
        response = Admin_write ( response, " | - msg $user $message    - Send $message to $user (can be 'all')" );

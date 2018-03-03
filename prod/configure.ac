@@ -91,6 +91,7 @@ Watchdogd/Makefile \
 Watchdogd/Include/Makefile \
 Watchdogd/Onduleur/Makefile \
 Watchdogd/Sms/Makefile \
+Watchdogd/Smsg/Makefile \
 Watchdogd/Audio/Makefile \
 Watchdogd/Rs485/Makefile \
 Watchdogd/Modbus/Makefile \
@@ -98,6 +99,7 @@ Watchdogd/Archive/Makefile \
 Watchdogd/Rfxcom/Makefile \
 Watchdogd/Enocean/Makefile \
 Watchdogd/Imsg/Makefile \
+Watchdogd/Imsgp/Makefile \
 Watchdogd/TeleinfoEDF/Makefile \
 Watchdogd/Http/Makefile \
 Watchdogd/Lirc/Makefile \

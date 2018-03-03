@@ -310,6 +310,7 @@
 
        if (lib->Thread_sigusr1 == TRUE)
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Run_ssrv: SIGUSR1", __func__ );
+          Ssrv_Lire_config();
           lib->Thread_sigusr1 = FALSE;
         }
 

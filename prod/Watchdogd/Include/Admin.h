@@ -46,7 +46,7 @@
  extern gchar *Admin_set ( gchar *response, gchar *ligne );
  extern gchar *Admin_get ( gchar *response, gchar *ligne );
  extern gchar *Admin_user ( gchar *response, gchar *ligne );
- extern gchar *Admin_dbcfg_thread ( gchar *response, gchar *thread, gchar *ligne );
+ extern gchar *Admin_dbcfg ( gchar *response, gchar *ligne );
  extern gchar *Admin_write ( gchar *response, gchar *new_ligne );
  extern gchar *Processer_commande_admin ( gchar *user, gchar *host, gchar *ligne );
  

@@ -73,7 +73,7 @@
                   (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
   }
 /******************************************************************************************************************************/
-/* Run_hangle_client boucle principale d'un sous-hangle_client Watchdog                                                       */
+/* Run_handle_client: boucle principale d'un handle client Watchdog                                                           */
 /* Entree: l'id du hangle_client et le pid du pere                                                                            */
 /* Sortie: un code d'erreur EXIT_xxx                                                                                          */
 /******************************************************************************************************************************/
@@ -94,7 +94,7 @@
     Connect_zmq ( zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
      
     zmq_motif = New_zmq ( ZMQ_SUB, "listen-to-motifs" );
-    Connect_zmq ( zmq_msg, "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
+    Connect_zmq ( zmq_motif, "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
 
     while( Cfg_ssrv.lib->Thread_run == TRUE )                                                /* On tourne tant que necessaire */
      { usleep(1000);
@@ -160,7 +160,7 @@
           gint num_i;
           if ( Recv_zmq ( zmq_msg, &histo, sizeof(histo) ) == sizeof(struct CMD_TYPE_HISTO) )
            { Envoyer_histo_au_client ( client, &histo ); }
-          if ( Recv_zmq ( zmq_motif, &num_i, sizeof(num_i) ) == sizeof(num_i) )
+          if ( Recv_zmq ( zmq_motif, &num_i, sizeof(gint) ) == sizeof(gint) )
            { Envoyer_new_motif_au_client ( client, num_i ); }
         }
 /************************************************ Ecoute du client  ***********************************************************/

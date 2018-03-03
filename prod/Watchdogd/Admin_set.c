@@ -39,16 +39,16 @@
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'SET'" );
-       response = Admin_write ( response, "  e num val             - Set E[num]   = val" );
-       response = Admin_write ( response, "  m num val             - Set M[num]   = val" );
-       response = Admin_write ( response, "  b num val             - Set B[num]   = val" );
-       response = Admin_write ( response, "  a num val             - Set A[num]   = val" );
-       response = Admin_write ( response, "  msg num val           - Set MSG[num] = val" );
-       response = Admin_write ( response, "  i num E R V B C       - Set I[num]   = Etat Rouge Vert Bleu Cligno" );
-       response = Admin_write ( response, "  ch num val actif      - Set CH[num]  = val, actif" );
-       response = Admin_write ( response, "  ci num val            - Set CI[num]  = val" );
-       response = Admin_write ( response, "  help                  - This help" );
+     { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'SET'" );
+       response = Admin_write ( response, " | - e num val             - Set E[num]   = val" );
+       response = Admin_write ( response, " | - m num val             - Set M[num]   = val" );
+       response = Admin_write ( response, " | - b num val             - Set B[num]   = val" );
+       response = Admin_write ( response, " | - a num val             - Set A[num]   = val" );
+       response = Admin_write ( response, " | - msg num val           - Set MSG[num] = val" );
+       response = Admin_write ( response, " | - i num E R V B C       - Set I[num]   = Etat Rouge Vert Bleu Cligno" );
+       response = Admin_write ( response, " | - ch num val actif      - Set CH[num]  = val, actif" );
+       response = Admin_write ( response, " | - ci num val            - Set CI[num]  = val" );
+       response = Admin_write ( response, " | - help                  - This help" );
      } else
     if ( ! strcmp ( commande, "ch" ) )
      { int num, val, actif;
@@ -56,9 +56,9 @@
        if (num<NBR_COMPTEUR_H)
         { Partage->ch[num].confDB.valeur = val;
           Partage->ch[num].actif = actif;
-          g_snprintf( chaine, sizeof(chaine), " CH%03d = %d", num, val );
+          g_snprintf( chaine, sizeof(chaine), " | - CH%03d = %d", num, val );
         } else
-        { g_snprintf( chaine, sizeof(chaine), " CH -> num '%d' out of range", num ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - CH -> num '%d' out of range", num ); }
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "ci" ) )
@@ -68,9 +68,9 @@
         { Partage->ci[num].confDB.valeur = (gfloat)val;
           Partage->ci[num].val_en_cours1 = 0.0;
           Partage->ci[num].val_en_cours2 = (gfloat)val;
-          g_snprintf( chaine, sizeof(chaine), " CI%03d = %d", num, val );
+          g_snprintf( chaine, sizeof(chaine), " | - CI%03d = %d", num, val );
         } else
-        { g_snprintf( chaine, sizeof(chaine), " CI -> num '%d' out of range", num ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - CI -> num '%d' out of range", num ); }
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "i" ) )
@@ -79,14 +79,14 @@
        if (num<NBR_BIT_CONTROLE)
         { SI(num, etat, rouge, vert, bleu, cligno);
           sleep(1);
-          g_snprintf( chaine, sizeof(chaine), " I%03d = etat=%d, rouge=%d, vert=%d, bleu=%d, cligno=%d, "
+          g_snprintf( chaine, sizeof(chaine), " | - I%03d = etat=%d, rouge=%d, vert=%d, bleu=%d, cligno=%d, "
                                               "changes=%d, last_change=%d, top=%d",
                       num, Partage->i[num].etat,
                       Partage->i[num].rouge, Partage->i[num].vert, Partage->i[num].bleu,
                       Partage->i[num].cligno, Partage->i[num].changes, Partage->i[num].last_change,
                       Partage->top );
         } else
-        { g_snprintf( chaine, sizeof(chaine), " I -> num '%d' out of range", num ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - I -> num '%d' out of range", num ); }
         response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "msg" ) )
@@ -95,9 +95,9 @@
        if (num<NBR_MESSAGE_ECRITS)
         { if (val) val = 1;
           MSG ( num, val );
-          g_snprintf( chaine, sizeof(chaine), " MSG%03d = %d", num, val );
+          g_snprintf( chaine, sizeof(chaine), " | - MSG%03d = %d", num, val );
         } else
-        { g_snprintf( chaine, sizeof(chaine), " MSG -> num '%d' out of range", num ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - MSG -> num '%d' out of range", num ); }
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "e" ) )
@@ -106,9 +106,9 @@
        if (num<NBR_ENTRE_TOR)
         { if (val) val = 1;
           SE( num, val );                                                                                 /* Pas de furtivité */
-          g_snprintf( chaine, sizeof(chaine), " E%03d = %d", num, val );
+          g_snprintf( chaine, sizeof(chaine), " | - E%03d = %d", num, val );
         } else
-        { g_snprintf( chaine, sizeof(chaine), " E -> num '%d' out of range", num ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - E -> num '%d' out of range", num ); }
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "m" ) )
@@ -118,9 +118,9 @@
         { if (val) val = 1;
           if (val) Envoyer_commande_dls( num );
               else SM ( num, 0 );
-          g_snprintf( chaine, sizeof(chaine), " M%03d = %d", num, val );
+          g_snprintf( chaine, sizeof(chaine), " | - M%03d = %d", num, val );
         } else
-        { g_snprintf( chaine, sizeof(chaine), " M -> num '%d' out of range", num ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - M -> num '%d' out of range", num ); }
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "b" ) )
@@ -129,9 +129,9 @@
        if (num<NBR_BIT_BISTABLE)
         { if (val) val = 1;
           SB ( num, val );
-          g_snprintf( chaine, sizeof(chaine), " B%03d = %d", num, val );
+          g_snprintf( chaine, sizeof(chaine), " | - B%03d = %d", num, val );
         } else
-        { g_snprintf( chaine, sizeof(chaine), " B -> num '%d' out of range", num ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - B -> num '%d' out of range", num ); }
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "a" ) )
@@ -140,12 +140,12 @@
        if (num<NBR_SORTIE_TOR)
         { if (val) val = 1;
           SA ( num, val );
-          g_snprintf( chaine, sizeof(chaine), " A%03d = %d", num, val );
+          g_snprintf( chaine, sizeof(chaine), " | - A%03d = %d", num, val );
         } else
-        { g_snprintf( chaine, sizeof(chaine), " A -> num '%d' out of range", num ); }
+        { g_snprintf( chaine, sizeof(chaine), " | - A -> num '%d' out of range", num ); }
        response = Admin_write ( response, chaine );
      } else
-     { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s", ligne );
+     { g_snprintf( chaine, sizeof(chaine), " | - Unknown command : %s", ligne );
        response = Admin_write ( response, chaine );
      }
     return(response);
