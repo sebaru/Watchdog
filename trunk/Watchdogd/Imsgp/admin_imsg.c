@@ -105,8 +105,8 @@
     if ( ! strcmp ( commande, "send" ) )
      { gchar to[256];
        sscanf ( ligne, "%s %s", commande, to );                      /* Découpage de la ligne de commande */
-/*       Imsgp_Envoi_message_to ( to, ligne + strlen (to) + 6 );*/
-       g_snprintf( chaine, sizeof(chaine), " Message '%s' send to %s", ligne + strlen (to) + 6, to );
+       Imsgp_Envoi_message_to ( to, ligne + strlen (to) + 6 );
+       g_snprintf( chaine, sizeof(chaine), " | - Message '%s' sent to '%s'", ligne + strlen (to) + 6, to );
        response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "list" ) )
@@ -115,9 +115,6 @@
      { response = Admin_imsgp_reload ( response ); }
     else if ( ! strcmp ( commande, "status" ) )
      { gchar chaine[128];
-        { g_snprintf( chaine, sizeof(chaine), " No response ... strange !" );
-          response = Admin_write ( response, chaine );
-        }
      }
     else if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'IMSG'" );
