@@ -678,7 +678,7 @@
 
     Cfg_smsg.zmq_to_master = New_zmq ( ZMQ_PUB, "pub-to-master" );
     Connect_zmq ( Cfg_smsg.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
-
+    Envoyer_smsg_gsm_text ( "SMS System is running" );
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
     while(Cfg_smsg.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */
      { gchar buffer[128];
