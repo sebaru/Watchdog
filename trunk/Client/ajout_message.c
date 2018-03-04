@@ -122,16 +122,23 @@
     Msg.persist    = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_persist) );
     Msg.sms        = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_sms) );
     Msg.num        = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
-    index               = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls) );
-    Msg.dls_id   = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, index ) );
+    index          = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls) );
+    Msg.dls_id     = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, index ) );
     if (Msg.dls_id == 0) Msg.dls_id = 1;                                           /* Par défaut, pointe sur le premier D.L.S */
     Msg.bit_audio  = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bit_audio) );
     Msg.time_repeat= gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_time_repeat) );
 
     switch(reponse)
-     { case GTK_RESPONSE_OK:
-             { Envoi_serveur( TAG_MESSAGE, (edition ? SSTAG_CLIENT_VALIDE_EDIT_MESSAGE
-                                                    : SSTAG_CLIENT_ADD_MESSAGE),
+     { case GTK_RESPONSE_APPLY:
+             { Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_VALIDE_EDIT_MESSAGE,
+                              (gchar *)&Msg, sizeof( struct CMD_TYPE_MESSAGE ) );
+               /*Valider_fichier_mp3 ( &Msg,
+                                     gnome_file_entry_get_full_path ( GNOME_FILE_ENTRY(Entry_mp3), TRUE )
+                                   );*/
+             }
+            break;
+       case GTK_RESPONSE_OK:
+             { Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_ADD_MESSAGE,
                               (gchar *)&Msg, sizeof( struct CMD_TYPE_MESSAGE ) );
                /*Valider_fichier_mp3 ( &Msg,
                                      gnome_file_entry_get_full_path ( GNOME_FILE_ENTRY(Entry_mp3), TRUE )
@@ -223,15 +230,22 @@
 
     if (edit_msg)
      { memcpy( &Msg, edit_msg, sizeof(struct CMD_TYPE_MESSAGE) );                             /* Save pour utilisation future */
+       F_ajout = gtk_dialog_new_with_buttons( _("Edit a message"), GTK_WINDOW(F_client),
+                                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                              GTK_STOCK_COPY, GTK_RESPONSE_OK,
+                                              GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                              GTK_STOCK_APPLY, GTK_RESPONSE_APPLY,
+                                              NULL);
      }
-    else memset (&Msg, 0, sizeof(struct CMD_TYPE_MESSAGE) );                                           /* Sinon RAZ structure */
+    else
+     { memset (&Msg, 0, sizeof(struct CMD_TYPE_MESSAGE) );                                             /* Sinon RAZ structure */
+       F_ajout = gtk_dialog_new_with_buttons( _("Add a message"), GTK_WINDOW(F_client),
+                                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                              GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                              GTK_STOCK_ADD, GTK_RESPONSE_APPLY,
+                                              NULL);
+     }
 
-    F_ajout = gtk_dialog_new_with_buttons( (edit_msg ? _("Edit a message") : _("Add a message")),
-                                           GTK_WINDOW(F_client),
-                                           GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-                                           GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                           GTK_STOCK_OK, GTK_RESPONSE_OK,
-                                           NULL);
     g_signal_connect( F_ajout, "response",
                       G_CALLBACK(CB_ajouter_editer_message),
                       GINT_TO_POINTER( (edit_msg ? TRUE : FALSE) ) );
