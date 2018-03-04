@@ -205,7 +205,7 @@
    	
 	   sms.PDU = SMS_Submit;                                                                        /* We want to submit message */
 	   sms.UDH.Type = UDH_NoUDH;                                                                 /* No UDH, just a plain message */
-	   sms.Coding = SMS_Coding_Unicode_No_Compression;                                        /* We used default coding for text */
+	   sms.Coding = SMS_Coding_Default_No_Compression;                                        /* We used default coding for text */
    	sms.Class = 1;                                                                                /* Class 1 message (normal) */
 
 	
@@ -678,7 +678,7 @@
 
     Cfg_smsg.zmq_to_master = New_zmq ( ZMQ_PUB, "pub-to-master" );
     Connect_zmq ( Cfg_smsg.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
-
+    Envoyer_smsg_gsm_text ( "SMS System is running" );
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
     while(Cfg_smsg.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */
      { gchar buffer[128];

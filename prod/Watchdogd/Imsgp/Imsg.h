@@ -28,6 +28,8 @@
 #ifndef _IMSG_H_
  #define _IMSG_H_
 
+ #include <purple.h>
+
  #define NOM_THREAD                "imsgp"
 
  #define IMSGP_DEFAUT_USERNAME      "defaultuser@jabber.fr"
@@ -47,16 +49,11 @@
 
  struct IMSGP_CONFIG
   { struct LIBRAIRIE *lib;
+    PurpleAccount *account;
     gchar username[80];
     gchar password[80];
     gboolean enable;
-    GSList *Contacts;
-    GSList *Liste_histos;
-    gboolean set_status;
-    gboolean reload;
-    gchar new_status[80];
-    gint date_retente;                                                 /* Date de reconnexion si probleme */
- } Cfg_imsgp;
+  } Cfg_imsgp;
 /****************************************** Déclarations des prototypes ***********************************/
  extern gboolean Imsgp_Lire_config ( void );
  extern void Imsgp_Envoi_message_to ( const gchar *dest, gchar *message );

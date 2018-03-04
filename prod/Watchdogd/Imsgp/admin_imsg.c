@@ -105,8 +105,8 @@
     if ( ! strcmp ( commande, "send" ) )
      { gchar to[256];
        sscanf ( ligne, "%s %s", commande, to );                      /* Découpage de la ligne de commande */
-/*       Imsgp_Envoi_message_to ( to, ligne + strlen (to) + 6 );*/
-       g_snprintf( chaine, sizeof(chaine), " Message '%s' send to %s", ligne + strlen (to) + 6, to );
+       Imsgp_Envoi_message_to ( to, ligne + strlen (to) + 6 );
+       g_snprintf( chaine, sizeof(chaine), " | - Message '%s' sent to '%s'", ligne + strlen (to) + 6, to );
        response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "list" ) )
@@ -115,17 +115,21 @@
      { response = Admin_imsgp_reload ( response ); }
     else if ( ! strcmp ( commande, "status" ) )
      { gchar chaine[128];
-        { g_snprintf( chaine, sizeof(chaine), " No response ... strange !" );
-          response = Admin_write ( response, chaine );
-        }
      }
     else if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'IMSG'" );
-       response = Admin_write ( response, "  send user@domain/resource message      - Send a message to user" );
-       response = Admin_write ( response, "  reload                                 - Reload configuration from Database" );
-       response = Admin_write ( response, "  list                                   - List contact and availability" );
+     { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'IMSG'" );
+       response = Admin_write ( response, " | - send user@domain/resource message      - Send a message to user" );
+       response = Admin_write ( response, " | - add_buddy user@domain                  - Ajoute un buddy dans la liste" );
+       response = Admin_write ( response, " | - reload                                 - Reload configuration from Database" );
+       response = Admin_write ( response, " | - list                                   - List contact and availability" );
 /*       response = Admin_write ( response, "  presence new_status                    - Change Presence to 'new_status'" );
-  */     response = Admin_write ( response, "  status                                 - See response status" );
+  */
+       response = Admin_write ( response, " | - status                                 - See response status" );
+     }
+    else if ( ! strcmp ( commande, "add_buddy" ) )
+				 { g_snprintf( chaine, sizeof(chaine), " | - Adding '%s'", ligne + 10 );
+       response = Admin_write ( response, chaine );
+       purple_account_add_buddy( Cfg_imsgp.account, purple_buddy_new	( Cfg_imsgp.account, ligne + 10, ligne + 10 ) );
      }
     else
      { gchar chaine[128];
