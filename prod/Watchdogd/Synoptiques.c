@@ -112,11 +112,11 @@
     Libere_DB_SQL(&db);
     return(retour);
   }
-/**********************************************************************************************************/
-/* Ajouter_msgDB: Ajout ou edition d'un message                                                           */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                           */
-/* Sortie: false si probleme                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Ajouter_msgDB: Ajout ou edition d'un message                                                                               */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                                               */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
  gint Ajouter_synoptiqueDB ( struct CMD_TYPE_SYNOPTIQUE *syn )
   { gchar requete[512];
     gchar *libelle, *page, *groupe;
@@ -124,41 +124,41 @@
     struct DB *db;
     gint id;
 
-    libelle = Normaliser_chaine ( syn->libelle );                   /* Formatage correct des chaines */
+    libelle = Normaliser_chaine ( syn->libelle );                                            /* Formatage correct des chaines */
     if (!libelle)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_synoptiqueDB: Normalisation impossible libelle" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible libelle", __func__ );
        return(-1);
      }
 
-    page = Normaliser_chaine ( syn->page );                       /* Formatage correct des chaines */
+    page = Normaliser_chaine ( syn->page );                                                  /* Formatage correct des chaines */
     if (!page)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_synoptiqueDB: Normalisation impossible page" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible page", __func__ );
        g_free(libelle);
        return(-1);
      }
 
-    groupe = Normaliser_chaine ( syn->groupe );                     /* Formatage correct des chaines */
+    groupe = Normaliser_chaine ( syn->groupe );                                              /* Formatage correct des chaines */
     if (!groupe)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_synoptiqueDB: Normalisation impossible groupe" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible groupe", __func__ );
        g_free(libelle);
        g_free(page);
        return(-1);
      }
 
-    g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s(libelle,groupe,page,access_level) VALUES "
-                "('%s','%s','%d','%s')", NOM_TABLE_SYNOPTIQUE, libelle, groupe, page, syn->access_level );
+                "('%s','%s','%s','%d')", NOM_TABLE_SYNOPTIQUE, libelle, groupe, page, syn->access_level );
     g_free(libelle);
     g_free(page);
     g_free(groupe);
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_synoptiqueDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(-1);
      }
 
-    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if ( retour == FALSE )
      { Libere_DB_SQL(&db); 
        return(-1);
@@ -220,11 +220,11 @@
      }
     return(syn);
   }
-/**********************************************************************************************************/
-/* Rechercher_synoptiqueDB: Recupération du synoptique dont l'id est en parametre                         */
-/* Entrée: un log et une database                                                                         */
-/* Sortie: une GList                                                                                      */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Rechercher_synoptiqueDB: Recupération du synoptique dont l'id est en parametre                                             */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: une GList                                                                                                          */
+/******************************************************************************************************************************/
  struct CMD_TYPE_SYNOPTIQUE *Rechercher_synoptiqueDB ( guint id )
   { struct CMD_TYPE_SYNOPTIQUE *syn;
     gchar requete[200];
@@ -236,7 +236,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_synoptiqueDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
      }
 
@@ -249,11 +249,11 @@
     Libere_DB_SQL ( &db );
     return(syn);
   }
-/**********************************************************************************************************/
-/* Modifier_synoptiqueDB: Modification d'un synoptique Watchdog                                           */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                            */
-/* Sortie: -1 si pb, id sinon                                                                             */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Modifier_synoptiqueDB: Modification d'un synoptique Watchdog                                                               */
+/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                                                */
+/* Sortie: -1 si pb, id sinon                                                                                                 */
+/******************************************************************************************************************************/
  gboolean Modifier_synoptiqueDB( struct CMD_TYPE_SYNOPTIQUE *syn )
   { gchar requete[1024];
     gchar *libelle, *page, *groupe;
@@ -262,26 +262,26 @@
 
     libelle = Normaliser_chaine ( syn->libelle );
     if (!libelle)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_synoptiqueDB: Normalisation impossible libelle" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible libelle", __func__ );
        return(FALSE);
      }
 
     page = Normaliser_chaine ( syn->page );
     if (!page)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_synoptiqueDB: Normalisation impossible page" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible page", __func__ );
        g_free(libelle);
        return(FALSE);
      }
 
     groupe = Normaliser_chaine ( syn->groupe );
     if (!groupe)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_synoptiqueDB: Normalisation impossible groupe" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible groupe", __func__ );
        g_free(libelle);
        g_free(page);
        return(FALSE);
      }
 
-    g_snprintf( requete, sizeof(requete),                                              /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "             
                 "libelle='%s',page='%s',access_level='%d',groupe='%s' "
                 "WHERE id='%d'",
@@ -292,12 +292,12 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_synoptiqueDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
-    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return(retour);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

@@ -191,7 +191,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,libelle,icone,syn_id,gid,bitctrl,bitclic,posx,posy,larg,haut,angle,"
+                "SELECT id,libelle,icone,syn_id,access_level,bitctrl,bitclic,posx,posy,larg,haut,angle,"
                 "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer"
                 " FROM %s WHERE id=%d", NOM_TABLE_MOTIF, id );
 

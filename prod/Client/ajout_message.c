@@ -195,11 +195,11 @@
     Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_TYPE_NUM_MNEMO_VOC,
                    (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
   }
-/**********************************************************************************************************/
-/* Rafraichir_sensibilite: met a jour la sensibilite des widgets de la fenetre propriete                  */
-/* Entrée: void                                                                                           */
-/* Sortie: void                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Rafraichir_sensibilite: met a jour la sensibilite des widgets de la fenetre propriete                                      */
+/* Entrée: void                                                                                                               */
+/* Sortie: void                                                                                                               */
+/******************************************************************************************************************************/
  static void Rafraichir_sensibilite_msg ( void )
   { gboolean enable, audio;
     enable = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_enable) );
@@ -242,7 +242,7 @@
        F_ajout = gtk_dialog_new_with_buttons( _("Add a message"), GTK_WINDOW(F_client),
                                               GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
                                               GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                              GTK_STOCK_ADD, GTK_RESPONSE_APPLY,
+                                              GTK_STOCK_ADD, GTK_RESPONSE_OK,
                                               NULL);
      }
 
