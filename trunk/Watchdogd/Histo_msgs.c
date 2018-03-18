@@ -148,15 +148,16 @@
     gboolean retour;
     struct DB *db;
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
-                "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
+                "parent_syn.page, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
                 "histo.date_fixe,histo.date_fin,dls.shortname"
                 " FROM %s as histo"
                 " INNER JOIN %s as msg ON msg.id = histo.id_msg"
                 " INNER JOIN %s as dls ON dls.id = msg.dls_id"
-                " INNER JOIN %s as syn ON syn.id = dls.syn_id",
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE /* From */
+                " INNER JOIN %s as syn ON syn.id = dls.syn_id"
+                " INNER JOIN %s as parent_syn ON parent_syn.id = syn.parent_id",
+                NOM_TABLE_HISTO_MSGS, NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE        /* From */
               );
 
     memset( critereSQL, 0, sizeof(critereSQL) );
@@ -232,19 +233,20 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
-                "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
+                "parent_syn.page, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
                 "histo.date_fixe,histo.date_fin,dls.shortname"
                 " FROM %s as histo"
                 " INNER JOIN %s as msg ON msg.id = histo.id_msg"
                 " INNER JOIN %s as dls ON dls.id = msg.dls_id"
                 " INNER JOIN %s as syn ON syn.id = dls.syn_id"
+                " INNER JOIN %s as parent_syn ON parent_syn.id = syn.parent_id"
                 " WHERE alive = 1 ORDER BY histo.date_create_sec, histo.date_create_usec",
-                NOM_TABLE_HISTO_MSGS, NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE /* From */
+                NOM_TABLE_HISTO_MSGS, NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE        /* From */
               );
  
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_histoDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
@@ -312,11 +314,11 @@
     if (!histo_msgs) Info_new( Config.log, Config.log_msrv, LOG_ERR,
                               "Recuperer_histo_msgsDB_suite: Erreur allocation mémoire" );
     else                                                                                         /* Recopie dans la structure */
-     { g_snprintf( histo_msgs->msg.libelle,       sizeof(histo_msgs->msg.libelle),       "%s", db->row[3]  );
-       g_snprintf( histo_msgs->msg.syn_groupe,    sizeof(histo_msgs->msg.syn_groupe),    "%s", db->row[6]  );
-       g_snprintf( histo_msgs->msg.syn_page,      sizeof(histo_msgs->msg.syn_page),      "%s", db->row[7]  );
-       g_snprintf( histo_msgs->nom_ack,           sizeof(histo_msgs->nom_ack),           "%s", db->row[8]  );
-       g_snprintf( histo_msgs->msg.dls_shortname, sizeof(histo_msgs->msg.dls_shortname), "%s", db->row[13] );
+     { g_snprintf( histo_msgs->msg.libelle,         sizeof(histo_msgs->msg.libelle),         "%s", db->row[3]  );
+       g_snprintf( histo_msgs->msg.syn_parent_page, sizeof(histo_msgs->msg.syn_parent_page), "%s", db->row[6]  );
+       g_snprintf( histo_msgs->msg.syn_page,        sizeof(histo_msgs->msg.syn_page),        "%s", db->row[7]  );
+       g_snprintf( histo_msgs->nom_ack,             sizeof(histo_msgs->nom_ack),             "%s", db->row[8]  );
+       g_snprintf( histo_msgs->msg.dls_shortname,   sizeof(histo_msgs->msg.dls_shortname),   "%s", db->row[13] );
        histo_msgs->id               = atoi(db->row[0]);
        histo_msgs->alive            = atoi(db->row[1]);
        histo_msgs->msg.num          = atoi(db->row[2]);

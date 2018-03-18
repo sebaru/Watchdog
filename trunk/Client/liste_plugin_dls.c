@@ -569,7 +569,7 @@
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_plugin_dls) );                              /* Acquisition du modele */
 
-    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", plugin_dls->syn_groupe, plugin_dls->syn_page );
+    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", plugin_dls->syn_parent_page, plugin_dls->syn_page );
     time = plugin_dls->compil_date;
     temps = localtime( (time_t *)&time );
     if (temps) { strftime( chaine, sizeof(chaine), "%F %T", temps ); }

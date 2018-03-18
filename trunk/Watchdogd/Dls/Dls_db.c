@@ -47,7 +47,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_plugin_dlsDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
@@ -56,18 +56,11 @@
                 NOM_TABLE_DLS, dls->id );
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
 
-/************************************************ Re-affectation des mnémoniques **********************************************/
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "UPDATE %s SET num_plugin=1 WHERE num_plugin=%d", NOM_TABLE_MNEMO, dls->id );
-    Lancer_requete_SQL ( db, requete );
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "UPDATE %s SET dls_id=1 WHERE dls_id=%d", NOM_TABLE_MSG, dls->id );
-    Lancer_requete_SQL ( db, requete );
     Libere_DB_SQL(&db);
 
-    g_snprintf( (gchar *)requete, sizeof(requete), "%d.dls", dls->id );
+    g_snprintf( (gchar *)requete, sizeof(requete), "Dls/%06d.dls", dls->id );
     unlink( (gchar *)requete );
-    g_snprintf( (gchar *)requete, sizeof(requete), "lib%d.dls.so", dls->id );
+    g_snprintf( (gchar *)requete, sizeof(requete), "Dls/libdls%06d.so", dls->id );
     unlink( (gchar *)requete );
     return(retour);
   }
@@ -85,14 +78,14 @@
 
     nom = Normaliser_chaine ( dls->nom );                                                    /* Formatage correct des chaines */
     if (!nom)
-     { Info_new( Config.log, Config.log_dls, LOG_WARNING, "Ajouter_plugin_dlsDB: Normalisation nom impossible" );
+     { Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: Normalisation nom impossible", __func__ );
        return(-1);
      }
 
     shortname = Normaliser_chaine ( dls->shortname );                                        /* Formatage correct des chaines */
     if (!shortname)
      { g_free(nom);
-       Info_new( Config.log, Config.log_dls, LOG_WARNING, "Ajouter_plugin_dlsDB: Normalisation shortname impossible" );
+       Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: Normalisation shortname impossible", __func__ );
        return(-1);
      }
 
@@ -115,7 +108,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_Modifier_plugin_dlsDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(-1);
      }
 
@@ -155,23 +148,23 @@
 /* Sortie: une hquery, null si erreur                                                                                         */
 /******************************************************************************************************************************/
  gboolean Recuperer_plugins_dlsDB( struct DB **db_retour )
-  { gchar requete[256];
+  { gchar requete[512];
     gboolean retour;
     struct DB *db;
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_plugins_dlsDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.type,dls.syn_id,syn.groupe,syn.page,"
+                "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.type,dls.syn_id,parent_syn.page,syn.page,"
                 "dls.compil_date,dls.compil_status,dls.nbr_compil"
-                " FROM %s as dls,%s as syn"
-                " WHERE dls.syn_id = syn.id"
-                " ORDER BY groupe,page,shortname",
-                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE
+                " FROM %s as dls INNER JOIN %s as syn ON dls.syn_id = syn.id "
+                " INNER JOIN %s AS parent_syn ON parent_syn.id=syn.parent_id"
+                " ORDER BY parent_syn.page,syn.page,shortname",
+                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE
               );
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if (retour == FALSE) Libere_DB_SQL (&db);
@@ -201,7 +194,7 @@
     else
      { memcpy( &dls->nom,      db->row[1], sizeof(dls->nom       ) );                            /* Recopie dans la structure */
        memcpy( &dls->shortname,db->row[2], sizeof(dls->shortname ) );                            /* Recopie dans la structure */
-       memcpy( &dls->syn_groupe,db->row[6], sizeof(dls->syn_groupe ) );
+       memcpy( &dls->syn_parent_page,db->row[6], sizeof(dls->syn_parent_page) );
        memcpy( &dls->syn_page,  db->row[7], sizeof(dls->syn_page   ) );
        dls->id            = atoi(db->row[0]);
        dls->on            = atoi(db->row[3]);
@@ -229,15 +222,14 @@
        return(NULL);
      }
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.name,%s.shortname,actif,type,syn_id,groupe,page,"
-                "compil_date,compil_status,nbr_compil"
-                " FROM %s,%s"
-                " WHERE %s.syn_id = %s.id AND %s.id = %d",
-                NOM_TABLE_DLS, NOM_TABLE_DLS, NOM_TABLE_DLS,
-                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, /* From */
-                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,  /* Where */
-                NOM_TABLE_DLS, id
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.type,dls.syn_id,parent_syn.page,syn.page,"
+                "dls.compil_date,dls.compil_status,dls.nbr_compil"
+                " FROM %s as dls INNER JOIN %s as syn ON dls.syn_id = syn.id "
+                " INNER JOIN %s AS parent_syn ON parent_syn.id=syn.parent_id"
+                " WHERE %s.id = %d",
+                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE
+                NOM_TABLE_DLS, id                                                                                    /* Where */
               );
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
@@ -266,7 +258,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Set_compil_status_plugin_dlsDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 

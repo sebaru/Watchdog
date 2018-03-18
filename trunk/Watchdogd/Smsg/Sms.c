@@ -401,7 +401,7 @@
                Envoi_sms_smsbox( msg, sms->user_sms_phone );
                break;
         }
-       sleep(5);
+       /*sleep(5);*/
      }
 
     Libere_DB_SQL( &db );

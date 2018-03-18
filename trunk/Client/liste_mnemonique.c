@@ -574,7 +574,7 @@ printf("id=%d\n", rezo_mnemonique.id);
                 Type_bit_interne_court( mnemonique->type ), mnemonique->num );
 
     g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s/%s",
-                mnemonique->syn_groupe, mnemonique->syn_page, mnemonique->dls_shortname );
+                mnemonique->syn_parent_page, mnemonique->syn_page, mnemonique->dls_shortname );
 
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID,              mnemonique->id,

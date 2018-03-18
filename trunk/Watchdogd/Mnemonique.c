@@ -33,8 +33,12 @@
  #include <fcntl.h>
  #include <string.h>
 
- #define MNEMO_SQL_SELECT "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.ev_text,syn.groupe,syn.page," \
-                          "dls.name, mnemo.tableau, mnemo.acro_syn, mnemo.ev_host, mnemo.ev_thread"
+ #define MNEMO_SQL_SELECT "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.ev_text,parent_syn.page,syn.page," \
+                          "dls.name, mnemo.tableau, mnemo.acro_syn, mnemo.ev_host, mnemo.ev_thread" \
+                          " FROM mnemos as mnemo" \
+                          " INNER JOIN dls as dls ON mnemo.dls_id=dls.id" \
+                          " INNER JOIN syns as syn ON dls.syn_id = syn.id" \
+                          " INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id"
 
  #include "watchdogd.h"
 
@@ -176,7 +180,7 @@
 /* Sortie: FALSE si erreur                                                      ********************                          */
 /******************************************************************************************************************************/
  gboolean Recuperer_mnemo_baseDB_by_event_text ( struct DB **db_retour, gchar *thread, gchar *commande_pure )
-  { gchar requete[1024], critere[256];
+  { gchar requete[1024];
     gchar *commande;
     gboolean retour;
     struct DB *db;
@@ -189,14 +193,8 @@
      }
 
     g_snprintf( requete, sizeof(requete), MNEMO_SQL_SELECT                                                     /* Requete SQL */
-                " FROM %s as mnemo INNER JOIN %s as dls ON mnemo.dls_id=dls.id INNER JOIN %s as syn ON dls.syn_id = syn.id",
-                NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE
-              );
-
-    g_snprintf( critere, sizeof(critere),
-               " AND (mnemo.ev_host='*' OR mnemo.ev_host='%s') AND (mnemo.ev_thread='*' OR mnemo.ev_thread='%s') AND mnemo.ev_text = '%s'",
+               " WHERE (mnemo.ev_host='*' OR mnemo.ev_host='%s') AND (mnemo.ev_thread='*' OR mnemo.ev_thread='%s') AND mnemo.ev_text = '%s'",
                g_get_host_name(), thread, commande_pure );
-    g_strlcat( requete, critere, sizeof(requete) );
 
     db = Init_DB_SQL();       
     if (!db)
@@ -220,9 +218,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete), MNEMO_SQL_SELECT                                                     /* Requete SQL */
-                " FROM %s as mnemo INNER JOIN %s as dls ON mnemo.dls_id=dls.id INNER JOIN %s as syn ON dls.syn_id = syn.id"
-                " WHERE %s ORDER BY groupe,page,name,type,num",
-                NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, (conditions ? conditions : "1=1")
+                " WHERE %s ORDER BY parent_syn.page,syn.page,name,type,num", (conditions ? conditions : "1=1")
               );                                                                                    /* order by test 25/01/06 */
 
     if (start != -1 && length != -1)                                                 /* Critere d'affichage (offset et count) */
@@ -266,16 +262,16 @@
     if (!mnemo) Info_new( Config.log, Config.log_msrv, LOG_ERR,
                          "%s: Erreur allocation mémoire", __func__ );
     else                                                                                /* Recopie dans la nouvelle structure */
-     { g_snprintf( mnemo->acronyme,     sizeof(mnemo->acronyme),     "%s", db->row[4] );
-       g_snprintf( mnemo->libelle,      sizeof(mnemo->libelle),      "%s", db->row[5] );
-       g_snprintf( mnemo->ev_text,      sizeof(mnemo->ev_text),      "%s", db->row[6] );
-       g_snprintf( mnemo->syn_groupe,   sizeof(mnemo->syn_groupe),   "%s", db->row[7] );
-       g_snprintf( mnemo->syn_page,     sizeof(mnemo->syn_page),     "%s", db->row[8] );
-       g_snprintf( mnemo->dls_shortname,sizeof(mnemo->dls_shortname),"%s", db->row[9] );
-       g_snprintf( mnemo->tableau,      sizeof(mnemo->tableau),      "%s", db->row[10] );
-       g_snprintf( mnemo->acro_syn,     sizeof(mnemo->acro_syn),     "%s", db->row[11] );
-       g_snprintf( mnemo->ev_host,      sizeof(mnemo->ev_host),      "%s", db->row[12] );
-       g_snprintf( mnemo->ev_thread,    sizeof(mnemo->ev_thread),    "%s", db->row[13] );
+     { g_snprintf( mnemo->acronyme,        sizeof(mnemo->acronyme),        "%s", db->row[4] );
+       g_snprintf( mnemo->libelle,         sizeof(mnemo->libelle),         "%s", db->row[5] );
+       g_snprintf( mnemo->ev_text,         sizeof(mnemo->ev_text),         "%s", db->row[6] );
+       g_snprintf( mnemo->syn_parent_page, sizeof(mnemo->syn_parent_page), "%s", db->row[7] );
+       g_snprintf( mnemo->syn_page,        sizeof(mnemo->syn_page),        "%s", db->row[8] );
+       g_snprintf( mnemo->dls_shortname,   sizeof(mnemo->dls_shortname),   "%s", db->row[9] );
+       g_snprintf( mnemo->tableau,         sizeof(mnemo->tableau),         "%s", db->row[10] );
+       g_snprintf( mnemo->acro_syn,        sizeof(mnemo->acro_syn),        "%s", db->row[11] );
+       g_snprintf( mnemo->ev_host,         sizeof(mnemo->ev_host),         "%s", db->row[12] );
+       g_snprintf( mnemo->ev_thread,       sizeof(mnemo->ev_thread),       "%s", db->row[13] );
        mnemo->id     = atoi(db->row[0]);
        mnemo->type   = atoi(db->row[1]);
        mnemo->num    = atoi(db->row[2]);
@@ -294,10 +290,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete), MNEMO_SQL_SELECT                                                     /* Requete SQL */
-                " FROM %s as mnemo"
-                " INNER JOIN %s as dls ON mnemo.dls_id=dls.id"
-                " INNER JOIN %s as syn ON dls.syn_id = syn.id"
-                " WHERE mnemo.id = %d", NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, id
+                " WHERE mnemo.id = %d", id
               );
 
     db = Init_DB_SQL();       
@@ -326,9 +319,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete), MNEMO_SQL_SELECT                                                     /* Requete SQL */
-                " FROM %s as mnemo INNER JOIN %s as dls ON mnemo.dls_id=dls.id INNER JOIN %s as syn ON dls.syn_id = syn.id"
-                " WHERE mnemo.type = %d AND mnemo.num = %d LIMIT 1",
-                NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, critere->type, critere->num
+                " WHERE mnemo.type = %d AND mnemo.num = %d LIMIT 1", critere->type, critere->num
               );
 
     db = Init_DB_SQL();       

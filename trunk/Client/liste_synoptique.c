@@ -370,7 +370,7 @@ printf("on veut editer(atelier) le synoptique %d, %s\n", rezo_synoptique.id, rez
 
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, synoptique->id,
-                         COLONNE_GROUPE, synoptique->groupe,
+                         COLONNE_GROUPE, synoptique->parent_page,
                          COLONNE_PAGE, synoptique->page,
                          COLONNE_LIBELLE, synoptique->libelle,
                          -1

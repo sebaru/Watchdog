@@ -61,7 +61,7 @@
     guint type;                                                                                    /* Type du bit interne lié */
     guint num;                                                                             /* Numéro du bit lié au mnemonique */
     guint dls_id;                                                                             /* Numéro du plugin DLS associé */
-    gchar  syn_groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
+    gchar  syn_parent_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar  syn_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar  dls_shortname[NBR_CARAC_PLUGIN_DLS_UTF8+1];
     gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];

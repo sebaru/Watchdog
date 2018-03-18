@@ -827,17 +827,18 @@ CREATE TABLE IF NOT EXISTS `rfxcom` (
 
 CREATE TABLE IF NOT EXISTS `syns` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent_id` int(11) NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `groupe` text COLLATE utf8_unicode_ci NOT NULL,
   `page` text COLLATE utf8_unicode_ci NOT NULL,
   `access_level` int(11) NOT NULL DEFAULT '0',
   `vignette_activite` int(11) NOT NULL DEFAULT '0',
   `vignette_secu_bien` int(11) NOT NULL DEFAULT '0',
   `vignette_secu_personne` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-INSERT INTO `syns` (`id`, `libelle`, `groupe`, `page`, `access_level` ) VALUES
-(1, 'Accueil', 'Defaut Groupe', 'Defaut Page', 0);
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_parent_id` FOREIGN KEY (`parent_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+INSERT INTO `syns` (`id`, `parent_id`, `libelle`, `page`, `access_level` ) VALUES
+(1, 1, 'Accueil', 'Defaut Page', 0);
 
 -- --------------------------------------------------------
 
@@ -854,7 +855,7 @@ CREATE TABLE IF NOT EXISTS `syns_camerasup` (
   PRIMARY KEY (`id`),
   CONSTRAINT `id_camera` FOREIGN KEY (`camera_src_id`) REFERENCES `cameras` (`id`) ON DELETE CASCADE,
   CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 
@@ -862,7 +863,7 @@ CREATE TABLE IF NOT EXISTS `syns_camerasup` (
 -- Structure de la table `syns_scenario`
 --
 
-CREATE TABLE IF NOT EXISTS `syns_camerasup` (
+CREATE TABLE IF NOT EXISTS `syns_scenario` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `syn_id` int(11) NOT NULL,
   `num` int(11) NOT NULL,
@@ -870,7 +871,7 @@ CREATE TABLE IF NOT EXISTS `syns_camerasup` (
   `posy` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 
@@ -887,8 +888,8 @@ CREATE TABLE IF NOT EXISTS `syns_cadrans` (
   `type` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+  CONSTRAINT `fk_id_syn` FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -909,7 +910,7 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
   `posy` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_id_syn` FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -940,7 +941,7 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `bleu` int(11) NOT NULL DEFAULT '0',
   `layer` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_syn_id`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -955,8 +956,8 @@ CREATE TABLE IF NOT EXISTS `syns_palettes` (
   `syn_cible_id` int(11) NOT NULL DEFAULT '0',
   `pos` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  CONSTRAINT `id_syn`       FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `id_cible syn` FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_id_syn`       FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_id_cible syn` FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -972,7 +973,9 @@ CREATE TABLE IF NOT EXISTS `syns_pass` (
   `posx` int(11) NOT NULL DEFAULT '0',
   `posy` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_id_syn`       FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_id_cible syn` FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------

@@ -29,17 +29,17 @@
  
  #include "Reseaux.h"
  
-/********************************* Définitions des prototypes programme ***********************************/
+/****************************************** Définitions des prototypes programme **********************************************/
  #include "protocli.h"
 
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG Config;                                          /* Configuration generale watchdog */
+ extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
+ extern struct CONFIG Config;                                                              /* Configuration generale watchdog */
 
- static GtkWidget *F_ajout;                                            /* Widget de l'interface graphique */
- static GtkWidget *Entry_id;                             /* Numéro du synoptique en cours d'édition/ajout */
- static GtkWidget *Entry_lib;                                                    /* Libelle du synoptique */
- static GtkWidget *Entry_page;                                        /* Mnemonique du synoptique */
- static GtkWidget *Entry_groupe;                                                  /* Groupe du synoptique */
+ static GtkWidget *F_ajout;                                                                /* Widget de l'interface graphique */
+ static GtkWidget *Entry_id;                                                 /* Numéro du synoptique en cours d'édition/ajout */
+ static GtkWidget *Entry_lib;                                                                        /* Libelle du synoptique */
+ static GtkWidget *Entry_page;                                                                    /* Mnemonique du synoptique */
+ static GtkWidget *Spin_parent_id;                                                                 /* ID du synoptique parent */
  static GtkWidget *Spin_access_level;                                   /* Pour le choix du niveau de clearance du synoptique */
  static struct CMD_TYPE_SYNOPTIQUE Edit_syn;                                                    /* Message en cours d'édition */
 
@@ -50,13 +50,10 @@
 /******************************************************************************************************************************/
  static gboolean CB_ajouter_editer_synoptique ( GtkDialog *dialog, gint reponse, gboolean edition )
   { gint index_groupe;
-    g_snprintf( Edit_syn.libelle, sizeof(Edit_syn.libelle),
-                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
-    g_snprintf( Edit_syn.page, sizeof(Edit_syn.page),
-                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_page) ) );
-    g_snprintf( Edit_syn.groupe, sizeof(Edit_syn.groupe),
-                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_groupe) ) );
+    g_snprintf( Edit_syn.libelle, sizeof(Edit_syn.libelle), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
+    g_snprintf( Edit_syn.page, sizeof(Edit_syn.page),       "%s", gtk_entry_get_text( GTK_ENTRY(Entry_page) ) );
     Edit_syn.access_level = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_access_level) );
+    Edit_syn.parent_id    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_parent_id) );
                   
     switch(reponse)
      { case GTK_RESPONSE_OK:
@@ -129,11 +126,10 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_access_level, 3, 4, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Groupe") );
+    texte = gtk_label_new( _("Parent_id") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Entry_groupe = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_groupe), NBR_CARAC_LIBELLE_SYNOPTIQUE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_groupe, 1, 4, i, i+1 );
+    Spin_parent_id = gtk_spin_button_new_with_range( 1, 100000, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_parent_id, 2, 4, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("Page") );
@@ -156,7 +152,6 @@
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_access_level), edit_syn->access_level );
        gtk_entry_set_text( GTK_ENTRY(Entry_lib), edit_syn->libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_page), edit_syn->page );
-       gtk_entry_set_text( GTK_ENTRY(Entry_groupe), edit_syn->groupe );
        g_snprintf( chaine, sizeof(chaine), "%d", edit_syn->id );
        gtk_entry_set_text( GTK_ENTRY(Entry_id), chaine );
      }
