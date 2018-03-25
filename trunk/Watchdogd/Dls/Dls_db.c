@@ -227,9 +227,9 @@
                 "dls.compil_date,dls.compil_status,dls.nbr_compil"
                 " FROM %s as dls INNER JOIN %s as syn ON dls.syn_id = syn.id "
                 " INNER JOIN %s AS parent_syn ON parent_syn.id=syn.parent_id"
-                " WHERE %s.id = %d",
-                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE
-                NOM_TABLE_DLS, id                                                                                    /* Where */
+                " WHERE dls.id = %d",
+                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE,
+                id                                                                                                   /* Where */
               );
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
