@@ -1,4 +1,5 @@
 -- phpMyAdmin SQL Dump
+-- phpMyAdmin SQL Dump
 -- version 3.3.9
 -- http://www.phpmyadmin.net
 --
@@ -84,7 +85,7 @@ CREATE TABLE IF NOT EXISTS `dls` (
   `compil_date` int(11) NOT NULL,
   `compil_status` int(11) NOT NULL,
   `nbr_compil` int(11) NOT NULL DEFAULT '0',
-  `sourcecode` MEDIUMTEXT COLLATE utf8_unicode_ci NOT NULL,
+  `sourcecode` MEDIUMTEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT "/* Default ! */",
   PRIMARY KEY (`id`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 INSERT INTO `dls` (`id`, `type`, `syn_id`, `name`, `shortname`, `actif`, `compil_date`, `compil_status` ) VALUES
