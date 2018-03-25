@@ -92,8 +92,8 @@
     if (ajout)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "INSERT INTO %s"             
-                   "(name,shortname,actif,type,syn_id,compil_date,compil_status,nbr_compil,sourcecode)"
-                   "VALUES ('%s','%s','%s','%d',%d,0,0,0,'/* Source Code */';",
+                   "(name,shortname,actif,type,syn_id,compil_date,compil_status,nbr_compil,sourcecode) "
+                   "VALUES ('%s','%s','%s','%d',%d,0,0,0,'/* Source Code */');",
                    NOM_TABLE_DLS, nom, shortname, (dls->on ? "true" : "false"), dls->type, dls->syn_id );
      }
     else
