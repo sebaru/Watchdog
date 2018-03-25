@@ -213,7 +213,7 @@
 /******************************************************************************************************************************/
  struct CMD_TYPE_PLUGIN_DLS *Rechercher_plugin_dlsDB( gint id )
   { struct CMD_TYPE_PLUGIN_DLS *dls;
-    gchar requete[200];
+    gchar requete[512];
     struct DB *db;
 
     db = Init_DB_SQL();       
