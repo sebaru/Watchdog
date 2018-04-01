@@ -87,7 +87,7 @@
      }
 
     while ( (imsgp = Recuperer_imsgpDB_suite( db )) != NULL)
-     { Admin_print_imsgp ( response, imsgp ); }
+     { response = Admin_print_imsgp ( response, imsgp ); }
 
     Libere_DB_SQL( &db );
     return(response);
