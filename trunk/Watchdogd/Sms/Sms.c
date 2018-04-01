@@ -469,7 +469,7 @@
                     "%s: From %s -> Error, type of mnemo not handled", __func__, from );
         }
      }
-    else /* Envoi au master via thread HTTP */
+    else /* Envoi au master via ZMQ */
      { if (mnemo->type == MNEMO_MONOSTABLE)
         { struct ZMQ_SET_BIT bit;
           bit.type = mnemo->type;

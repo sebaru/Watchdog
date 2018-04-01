@@ -327,10 +327,27 @@
        Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
        Gerer_arrive_Events();                                       /* Gestion des evenements entre Thread, DLS, et satellite */
 
-       if (Config.instance_is_master == TRUE)
-        { 
+       if (Config.instance_is_master == TRUE)                                     /* Instance is master : listening to slaves */
+        { struct MSRV_EVENT *event;
+          gchar buffer[2048];
+          void *payload;
+          gint byte;
+          if ( (byte=Recv_zmq_with_tag( zmq_from_slave, &buffer, sizeof(buffer), &event, &payload )) > 0 )
+           { switch(event->tag)
+              { case TAG_ZMQ_SET_BIT:
+                 { struct ZMQ_SET_BIT *bit;
+                   bit = (struct ZMQ_SET_BIT *)payload;
+                   if (bit->type == MNEMO_MONOSTABLE) { Envoyer_commande_dls ( bit->num ); }
+                   break;
+                 }
+                default:
+                 { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: receive wrong tag number '%d' for ZMQ '%s'",
+                             __func__, event->tag, zmq_from_slave->name );
+                 }
+              }
+           }
         }
-       else
+       else                                                                         /* Instance is slave, listening to master */
         { struct MSRV_EVENT *event;
           gchar buffer[2048];
           void *payload;
