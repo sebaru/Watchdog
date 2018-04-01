@@ -728,7 +728,6 @@
                     histo->msg.num, histo->alive, histo->msg.sms, histo->msg.libelle_sms );
         }
      }
-    Smsg_disconnect();
     Close_zmq ( zmq_msg );
     Close_zmq ( zmq_admin );
     Close_zmq ( Cfg_smsg.zmq_to_master );
