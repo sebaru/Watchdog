@@ -550,8 +550,8 @@
 
     g_main_context_unref (g_main_loop_get_context (MainLoop));
     Close_zmq ( zmq_msg );
-end:
     purple_core_quit();
+end:
     Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_imsgp.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */
     Cfg_imsgp.lib->TID = 0;                                                   /* On indique au master que le thread est mort. */

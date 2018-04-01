@@ -95,7 +95,7 @@
 /******************************************************************************************************************************/
  void Proto_afficher_un_syn_for_plugin_dls ( struct CMD_TYPE_SYNOPTIQUE *syn )
   { gchar chaine[512];
-    g_snprintf( chaine, sizeof(chaine), "%s/%s/%s", syn->groupe, syn->page, syn->libelle );
+    g_snprintf( chaine, sizeof(chaine), "%s/%s/%s", syn->parent_page, syn->page, syn->libelle );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_syn), chaine );
     Liste_index_syn = g_list_append( Liste_index_syn, GINT_TO_POINTER(syn->id) );
     if (Edit_dls.syn_id == syn->id)

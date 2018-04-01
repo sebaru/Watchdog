@@ -218,7 +218,7 @@
     json_builder_set_member_name  ( builder, "nom_ack" );       json_builder_add_string_value ( builder, histo->nom_ack );
     json_builder_set_member_name  ( builder, "num" );           json_builder_add_int_value    ( builder, histo->msg.num );
     json_builder_set_member_name  ( builder, "libelle" );       json_builder_add_string_value ( builder, histo->msg.libelle );
-    json_builder_set_member_name  ( builder, "syn_groupe" );    json_builder_add_string_value ( builder, histo->msg.syn_groupe );
+    json_builder_set_member_name  ( builder, "syn_groupe" );    json_builder_add_string_value ( builder, histo->msg.syn_parent_page );
     json_builder_set_member_name  ( builder, "syn_page" );      json_builder_add_string_value ( builder, histo->msg.syn_page );
     json_builder_set_member_name  ( builder, "syn_libelle" );   json_builder_add_string_value ( builder, histo->msg.syn_libelle );
     json_builder_set_member_name  ( builder, "dls_shortname" ); json_builder_add_string_value ( builder, histo->msg.dls_shortname );

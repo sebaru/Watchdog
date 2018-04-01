@@ -28,7 +28,8 @@
  #include <glib.h>
  #include <sys/time.h>
  #include <sys/prctl.h>
- 
+ #include <locale.h>
+
  #include "watchdogd.h"
 /******************************************************************************************************************************/
 /* Ajouter_archDB: Ajout d'une entree archive dans la Base de Données                                                         */
@@ -38,6 +39,7 @@
  void Ajouter_archDB ( struct DB *db, struct ARCHDB *arch )
   { gchar requete[512], table[512];
 
+    setlocale ( LC_NUMERIC, "C" );
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s_%03d_%06d(date_time,valeur) VALUES "
                 "(FROM_UNIXTIME(%d.%d),'%f')",

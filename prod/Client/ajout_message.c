@@ -159,7 +159,7 @@
 /******************************************************************************************************************************/
  void Proto_afficher_un_dls_for_message ( struct CMD_TYPE_PLUGIN_DLS *dls )
   { gchar chaine[512];
-    g_snprintf( chaine, sizeof(chaine), "%s/%s/%s", dls->syn_groupe, dls->syn_page, dls->shortname );
+    g_snprintf( chaine, sizeof(chaine), "%s/%s/%s", dls->syn_parent_page, dls->syn_page, dls->shortname );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_dls), chaine );
     Liste_index_dls = g_list_append( Liste_index_dls, GINT_TO_POINTER(dls->id) );
     if (Msg.dls_id == dls->id)

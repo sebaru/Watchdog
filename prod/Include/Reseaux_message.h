@@ -58,7 +58,7 @@
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  libelle_sms[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     guint  syn_id;                                                             /* Numéro ID du synoptique rattaché au message */
-    gchar  syn_groupe[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
+    gchar  syn_parent_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar  syn_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar  syn_libelle[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
     guchar type;                                                                           /* Etat, prealarme, defaut, alarme */

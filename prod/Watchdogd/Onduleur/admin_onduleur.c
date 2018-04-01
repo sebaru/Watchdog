@@ -113,7 +113,7 @@
 
     Cfg_ups.admin_start = id;
 
-    g_snprintf( chaine, sizeof(chaine), " Module UPS %d started", id );
+    g_snprintf( chaine, sizeof(chaine), " | - Module UPS %d started", id );
     response = Admin_write ( response, chaine );
     return(response);
   }
@@ -127,7 +127,7 @@
 
     Cfg_ups.admin_stop = id;
 
-    g_snprintf( chaine, sizeof(chaine), " Module UPS %d stopped", id );
+    g_snprintf( chaine, sizeof(chaine), " | - Module UPS %d stopped", id );
     response = Admin_write ( response, chaine );
     return(response);
   }
@@ -144,9 +144,9 @@
     gint retour;
 
     if ( ! strcmp ( ligne, "list" ) )
-     { response = Admin_write ( response, " | Parameter can be:\n" );
-       response = Admin_write ( response, " | - enable, host, ups, username, password, bit_comm,\n" );
-       response = Admin_write ( response, " | - map_E, map_EA, map_A\n" );
+     { response = Admin_write ( response, " | Parameter can be:" );
+       response = Admin_write ( response, " | - enable, host, ups, username, password, bit_comm," );
+       response = Admin_write ( response, " | - map_E, map_EA, map_A" );
        return(response);
      }
 
@@ -188,16 +188,16 @@
      { g_snprintf( module->ups.password, sizeof(module->ups.password), "%s", valeur_char ); }
     else
      { g_snprintf( chaine, sizeof(chaine),
-                 " Parameter %s not known for UPS id %s ('ups set list' can help)", param, id_char );
+                 " | - Parameter %s not known for UPS id %s ('ups set list' can help)", param, id_char );
        response = Admin_write ( response, chaine );
        return(response);
      }
 
     retour = Modifier_upsDB ( &module->ups );
     if (retour)
-     { response = Admin_write ( response, " ERROR : UPS module NOT set" ); }
+     { response = Admin_write ( response, " | - ERROR : UPS module NOT set" ); }
     else
-     { response = Admin_write ( response, " UPS module parameter set" ); }
+     { response = Admin_write ( response, " | - UPS module parameter set" ); }
     return(response);
   }
 /******************************************************************************************************************************/
@@ -265,20 +265,20 @@
         }
      }
     else if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'UPS'" );
-       response = Admin_write ( response, "  add $ups              - Ajoute un UPS" );
-       response = Admin_write ( response, "  set $id $champ $val   - Set $val to $champ for module $id" );
-       response = Admin_write ( response, "  set list              - List parameter that can be set" );
-       response = Admin_write ( response, "  del $id               - Delete UPS id" );
-       response = Admin_write ( response, "  start $id             - Start UPS id" );
-       response = Admin_write ( response, "  stop $id              - Stop UPS id" );
-       response = Admin_write ( response, "  show $id              - Show UPS id" );
-       response = Admin_write ( response, "  list                  - Liste les modules ONDULEUR" );
-       response = Admin_write ( response, "  reload                - Recharge la configuration" );
+     { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'UPS'" );
+       response = Admin_write ( response, " | -  add $ups              - Ajoute un UPS" );
+       response = Admin_write ( response, " | - set $id $champ $val   - Set $val to $champ for module $id" );
+       response = Admin_write ( response, " | - set list              - List parameter that can be set" );
+       response = Admin_write ( response, " | - del $id               - Delete UPS id" );
+       response = Admin_write ( response, " | - start $id             - Start UPS id" );
+       response = Admin_write ( response, " | -  stop $id              - Stop UPS id" );
+       response = Admin_write ( response, " | - show $id              - Show UPS id" );
+       response = Admin_write ( response, " | - list                  - Liste les modules ONDULEUR" );
+       response = Admin_write ( response, " | - reload                - Recharge la configuration" );
      }
     else
      { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), " Unknown NUT command : %s", ligne );
+       g_snprintf( chaine, sizeof(chaine), " | - Unknown NUT command : %s", ligne );
        response = Admin_write ( response, chaine );
      }
     return(response);

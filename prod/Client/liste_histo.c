@@ -225,7 +225,7 @@
     g_snprintf( date, sizeof(date), "%s.%03d", date_create, ((int)histo->date_create_usec/1000) );
     g_free( date_create );
 
-    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", histo->msg.syn_groupe, histo->msg.syn_page );
+    g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", histo->msg.syn_parent_page, histo->msg.syn_page );
 
     if (histo->date_fixe)
      { gchar *date_fixe;

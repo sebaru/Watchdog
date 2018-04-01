@@ -89,12 +89,12 @@
     struct DB *db;
 
     if ( ! Recuperer_utilisateurDB( &db ) )                                               /* Chargement de la base de données */
-     { g_snprintf( chaine, sizeof(chaine), " Error : DB Connexion failed" );
+     { g_snprintf( chaine, sizeof(chaine), " | - Error : DB Connexion failed" );
        response = Admin_write ( response, chaine );
        return(response);
      }                                                                                               /* Si pas de histos (??) */
 
-    g_snprintf( chaine, sizeof(chaine), " -------- Users List ------------" );
+    g_snprintf( chaine, sizeof(chaine), " | -------- Users List ------------" );
     response = Admin_write ( response, chaine );
     for ( ; ; )
      { util = Recuperer_utilisateurDB_suite( &db );
@@ -114,17 +114,17 @@
 
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'running'" );
-       response = Admin_write ( response, "  add $name $comment         - Add user $name with $commment" );
-       response = Admin_write ( response, "  del $name                  - Erase user $name" );
-       response = Admin_write ( response, "  enable $name               - Allow user $name to connect" );
-       response = Admin_write ( response, "  disable $name              - Deny user $id to connect $name" );
-       response = Admin_write ( response, "  cansetpwd $name $bool      - Set CanSetPwd flag to true or false" );
-       response = Admin_write ( response, "  mustchangepwd $name $bool  - Set CanSetPwd flag to true or false" );
-       response = Admin_write ( response, "  list                       - Liste les users Watchdog" );
-       response = Admin_write ( response, "  passwd $name $pwd          - Set password $pwd to user $name" );
-       response = Admin_write ( response, "  show $name                 - Show user $name" );
-       response = Admin_write ( response, "  help                       - This help" );
+     { response = Admin_write ( response, " |  -- Watchdog ADMIN -- Help du mode 'running'" );
+       response = Admin_write ( response, " | - add $name $comment         - Add user $name with $commment" );
+       response = Admin_write ( response, " | - del $name                  - Erase user $name" );
+       response = Admin_write ( response, " | - enable $name               - Allow user $name to connect" );
+       response = Admin_write ( response, " | - disable $name              - Deny user $id to connect $name" );
+       response = Admin_write ( response, " | - cansetpwd $name $bool      - Set CanSetPwd flag to true or false" );
+       response = Admin_write ( response, " | - mustchangepwd $name $bool  - Set CanSetPwd flag to true or false" );
+       response = Admin_write ( response, " | - list                       - Liste les users Watchdog" );
+       response = Admin_write ( response, " | - passwd $name $pwd          - Set password $pwd to user $name" );
+       response = Admin_write ( response, " | - show $name                 - Show user $name" );
+       response = Admin_write ( response, " | - help                       - This help" );
      } else
     if ( ! strcmp ( commande, "list" ) )
      { return(Admin_user_list ( response ) );
@@ -137,7 +137,7 @@
 
        util = Rechercher_utilisateurDB_by_name ( name );
        if (!util)
-        { g_snprintf( chaine, sizeof(chaine), " User %s not found in Database", name );
+        { g_snprintf( chaine, sizeof(chaine), " | - User %s not found in Database", name );
           response = Admin_write ( response, chaine );
         }
        else
@@ -151,16 +151,16 @@
        sscanf ( ligne, "%s %s", commande, name );                    /* Découpage de la ligne de commande */
        util = Rechercher_utilisateurDB_by_name( name );          /* suppression par nom plutot que par id */
        if (!util)
-        { g_snprintf( chaine, sizeof(chaine), " User %s not found in Database", name );
+        { g_snprintf( chaine, sizeof(chaine), " | - User %s not found in Database", name );
           response = Admin_write ( response, chaine );
         }
        else
         { if (Retirer_utilisateurDB ( util ) == FALSE)
-           { g_snprintf( chaine, sizeof(chaine), " User %s couldn't be removed", name );
+           { g_snprintf( chaine, sizeof(chaine), " | - User %s couldn't be removed", name );
              response = Admin_write ( response, chaine );
            }
           else
-           { g_snprintf( chaine, sizeof(chaine), " User %s (id=%d) removed", util->nom, util->id );
+           { g_snprintf( chaine, sizeof(chaine), " | - User %s (id=%d) removed", util->nom, util->id );
              response = Admin_write ( response, chaine );
            }
           g_free(util);
@@ -172,11 +172,11 @@
        util.id = -1;                                            /* suppression par nom plutot que par id */
        util.enable = TRUE;
        if (Set_enable_utilisateurDB ( &util ) == FALSE)
-        { g_snprintf( chaine, sizeof(chaine), " User %s couldn't be enabled", util.nom );
+        { g_snprintf( chaine, sizeof(chaine), " | - User %s couldn't be enabled", util.nom );
           response = Admin_write ( response, chaine );
         }
        else
-        { g_snprintf( chaine, sizeof(chaine), " User %s enabled", util.nom );
+        { g_snprintf( chaine, sizeof(chaine), " | - User %s enabled", util.nom );
           response = Admin_write ( response, chaine );
         }
      } else
@@ -186,11 +186,11 @@
        util.id = -1;                                                                 /* suppression par nom plutot que par id */
        util.enable = FALSE;
        if (Set_enable_utilisateurDB ( &util ) == FALSE)
-        { g_snprintf( chaine, sizeof(chaine), " User %s couldn't be disabled", util.nom );
+        { g_snprintf( chaine, sizeof(chaine), " | - User %s couldn't be disabled", util.nom );
           response = Admin_write ( response, chaine );
         }
        else
-        { g_snprintf( chaine, sizeof(chaine), " User %s disabled", util.nom );
+        { g_snprintf( chaine, sizeof(chaine), " | - User %s disabled", util.nom );
           response = Admin_write ( response, chaine );
         }
      } else
@@ -199,11 +199,11 @@
        memset ( &util, 0, sizeof( struct CMD_TYPE_UTILISATEUR ) );
        sscanf ( ligne, "%s %s %[^]", commande, util.nom, util.commentaire );             /* Découpage de la ligne de commande */
        if (Ajouter_utilisateurDB ( &util ) == -1)
-        { g_snprintf( chaine, sizeof(chaine), " User %s couldn't be added in Database", util.nom );
+        { g_snprintf( chaine, sizeof(chaine), " | - User %s couldn't be added in Database", util.nom );
           response = Admin_write ( response, chaine );
         }
        else
-        { g_snprintf( chaine, sizeof(chaine), " User %s added. UID = %d", util.nom, util.id );
+        { g_snprintf( chaine, sizeof(chaine), " | - User %s added. UID = %d", util.nom, util.id );
           response = Admin_write ( response, chaine );
         }
      } else
@@ -215,17 +215,17 @@
 
        util = Rechercher_utilisateurDB_by_name ( name );
        if (!util)
-        { g_snprintf( chaine, sizeof(chaine), " User %s not found in Database", name );
+        { g_snprintf( chaine, sizeof(chaine), " | - User %s not found in Database", name );
           response = Admin_write ( response, chaine );
         }
        else
         { if (!strcmp( cansetpwd, "true" ) ) util->cansetpwd = 1;
                                         else util->cansetpwd = 0;
           if( Modifier_utilisateurDB_set_cansetpwd( util ) )
-           { g_snprintf( chaine, sizeof(chaine), " Flag CanSetPwd set to %d for user %s",
+           { g_snprintf( chaine, sizeof(chaine), " | - Flag CanSetPwd set to %d for user %s",
                          util->cansetpwd, util->nom ); }
           else
-           { g_snprintf( chaine, sizeof(chaine), " Error while setting CanSetPwd" ); }
+           { g_snprintf( chaine, sizeof(chaine), " | - Error while setting CanSetPwd" ); }
           g_free(util);
           response = Admin_write ( response, chaine );
         }
@@ -238,17 +238,17 @@
 
        util = Rechercher_utilisateurDB_by_name ( name );
        if (!util)
-        { g_snprintf( chaine, sizeof(chaine), " User %s not found in Database", name );
+        { g_snprintf( chaine, sizeof(chaine), " | - User %s not found in Database", name );
           response = Admin_write ( response, chaine );
         }
        else
         { if (!strcmp( mustchangepwd, "true" ) ) util->mustchangepwd = 1;
                                             else util->mustchangepwd = 0;
           if( Modifier_utilisateurDB_set_mustchangepwd( util ) )
-           { g_snprintf( chaine, sizeof(chaine), " Flag MustChangePwd set to %d for user %s",
+           { g_snprintf( chaine, sizeof(chaine), " | - Flag MustChangePwd set to %d for user %s",
                          util->mustchangepwd, util->nom ); }
           else
-           { g_snprintf( chaine, sizeof(chaine), " Error while setting MustChangePwd" ); }
+           { g_snprintf( chaine, sizeof(chaine), " | - Error while setting MustChangePwd" ); }
           g_free(util);
           response = Admin_write ( response, chaine );
         }
@@ -261,19 +261,19 @@
 
        util = Rechercher_utilisateurDB_by_name ( name );
        if (!util)
-        { g_snprintf( chaine, sizeof(chaine), " User %s not found in Database", name );
+        { g_snprintf( chaine, sizeof(chaine), " | - User %s not found in Database", name );
           response = Admin_write ( response, chaine );
         }
        else
         { if( Modifier_utilisateurDB_set_password( util, pwd ) )
-           { g_snprintf( chaine, sizeof(chaine), " Password set for user %s", util->nom ); }
+           { g_snprintf( chaine, sizeof(chaine), " | - Password set for user %s", util->nom ); }
           else
-           { g_snprintf( chaine, sizeof(chaine), " Error while setting password" ); }
+           { g_snprintf( chaine, sizeof(chaine), " | - Error while setting password" ); }
           g_free(util);
           response = Admin_write ( response, chaine );
         }
      } else
-     { g_snprintf( chaine, sizeof(chaine), " Unknown command : %s", ligne );
+     { g_snprintf( chaine, sizeof(chaine), " | - Unknown command : %s", ligne );
        response = Admin_write ( response, chaine );
      }
     return(response);

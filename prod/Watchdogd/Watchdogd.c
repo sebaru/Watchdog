@@ -342,12 +342,14 @@
                     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ '%s' socket failed (%s)",
                                 __func__, Partage->com_msrv.zmq_msg->name, zmq_strerror(errno) );
                     }
+                   break;
                  }
                 case TAG_ZMQ_TO_THREADS:
                  { if (Send_zmq( Partage->com_msrv.zmq_to_threads, buffer, byte ) == -1)
                     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ '%s' socket failed (%s)",
                                 __func__, Partage->com_msrv.zmq_to_threads->name, zmq_strerror(errno) );
                     }
+                   break;
                  }
                 default:
                  { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: receive wrong tag number '%d' for ZMQ '%s'",

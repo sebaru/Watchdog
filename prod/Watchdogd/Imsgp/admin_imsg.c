@@ -35,7 +35,7 @@
 /******************************************************************************************************************************/
  static gchar *Admin_imsgp_reload ( gchar *response )
   { Cfg_imsgp.lib->Thread_sigusr1 = TRUE;
-    response = Admin_write ( response, " IMSG Reloading done\n" );
+    response = Admin_write ( response, " | - IMSG Reloading done\n" );
     return(response);
   }
 /******************************************************************************************************************************/
@@ -47,12 +47,12 @@
   { gchar chaine[512];
 
     g_snprintf( chaine, sizeof(chaine),
-              " [%03d]%12s -> user_enable       = %d\n"
-              "   |               -> imsgp_enable       = %d\n"
-              "   |               -> imsgp_jabberid     = %s\n"
-              "   |               -> imsgp_allow_cde    = %d\n"
-              "   |               -> imsgp_availability = %d\n"
-              "   |----------------> %s",
+              " | - [%03d]%12s -> user_enable       = %d\n"
+              " |               -> imsgp_enable       = %d\n"
+              " |               -> imsgp_jabberid     = %s\n"
+              " |               -> imsgp_allow_cde    = %d\n"
+              " |               -> imsgp_availability = %d\n"
+              " | ---------------> %s",
                 imsgp->user_id, imsgp->user_name, imsgp->user_enable, imsgp->user_imsg_enable, imsgp->user_jabberid,
                 imsgp->user_allow_cde, imsgp->user_available, imsgp->user_comment
               );
@@ -67,11 +67,9 @@
 /******************************************************************************************************************************/
  static gchar *Admin_imsgp_list ( gchar *response )
   { struct IMSGPDB *imsgp;
-    gchar chaine[256];
     struct DB *db;
 
-    g_snprintf( chaine, sizeof(chaine), " -- Liste des Contacts IMSG\n" );
-    response = Admin_write ( response, chaine );
+    response = Admin_write ( response, " | -- Liste des Contacts IMSG" );
 
     db = Init_DB_SQL();       
     if (!db)
@@ -87,7 +85,7 @@
      }
 
     while ( (imsgp = Recuperer_imsgpDB_suite( db )) != NULL)
-     { Admin_print_imsgp ( response, imsgp ); }
+     { response = Admin_print_imsgp ( response, imsgp ); }
 
     Libere_DB_SQL( &db );
     return(response);

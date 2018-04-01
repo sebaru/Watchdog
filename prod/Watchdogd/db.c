@@ -795,7 +795,30 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version=3490;
+    if (database_version < 3521)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns` ENGINE = INNODB" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_camerasup` ENGINE = INNODB" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_scenario` ENGINE = INNODB" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_cadrans` ENGINE = INNODB" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_comments` ENGINE = INNODB" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_motifs` ENGINE = INNODB" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns_palettes` ENGINE = INNODB" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns ADD `parent_id` INT(11) NOT NULL AFTER `id`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns` ADD CONSTRAINT `fk_parent_id` FOREIGN KEY (`parent_id`) REFERENCES `syns`(`id`) ON DELETE CASCADE ON UPDATE RESTRICT;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `syns` DROP `groupe`");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version=3521;
 
     Libere_DB_SQL(&db);
 

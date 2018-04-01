@@ -94,7 +94,7 @@
     /*json_builder_set_member_name  ( builder, "Synoptique" );  Pas de noeud principal */
     json_builder_begin_object (builder);                                                                  /* Contenu du Noeud */
     json_builder_set_member_name  ( builder, "id" );            json_builder_add_int_value    ( builder, syndb->id );
-    json_builder_set_member_name  ( builder, "groupe" );        json_builder_add_string_value ( builder, syndb->groupe );
+    json_builder_set_member_name  ( builder, "parent_page" );   json_builder_add_string_value ( builder, syndb->parent_page );
     json_builder_set_member_name  ( builder, "page" );          json_builder_add_string_value ( builder, syndb->page );
     json_builder_set_member_name  ( builder, "libelle" );       json_builder_add_string_value ( builder, syndb->libelle );
     g_free(syndb);

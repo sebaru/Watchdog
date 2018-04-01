@@ -33,6 +33,13 @@
  #include <fcntl.h>
  #include <string.h>
 
+ #define MSGS_SQL_SELECT  "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,audio,bit_audio,enable,parent_syn.page,syn.page," \
+                          "sms,libelle_audio,libelle_sms,time_repeat,dls.id,dls.shortname,syn.id,persist,is_mp3" \
+                          " FROM msgs as msg" \
+                          " INNER JOIN dls as dls ON msg.dls_id=dls.id" \
+                          " INNER JOIN syns as syn ON dls.syn_id=syn.id" \
+                          " INNER JOIN syns as parent_syn ON parent_syn.id=syn.parent_id"
+
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
@@ -102,7 +109,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_messageDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
@@ -147,20 +154,20 @@
 
     libelle = Normaliser_chaine ( msg->libelle );                                            /* Formatage correct des chaines */
     if (!libelle)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_messageDB: Normalisation libelle impossible" );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle impossible", __func__ );
        return(-1);
      }
     libelle_audio = Normaliser_chaine ( msg->libelle_audio );                                /* Formatage correct des chaines */
     if (!libelle_audio)
      { g_free(libelle);
-       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_messageDB: Normalisation libelle_audio impossible" );
+       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle_audio impossible", __func__ );
        return(-1);
      }
     libelle_sms = Normaliser_chaine ( msg->libelle_sms );                                    /* Formatage correct des chaines */
     if (!libelle_sms)
      { g_free(libelle);
        g_free(libelle_audio);
-       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_messageDB: Normalisation libelle_sms impossible" );
+       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle_sms impossible", __func__ );
        return(-1);
      }
 
@@ -178,7 +185,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_messageDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(-1);
      }
 
@@ -202,16 +209,8 @@
     gboolean retour;
     struct DB *db;
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,audio,bit_audio,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "time_repeat,dls.id,dls.shortname,syn.id,persist,is_mp3"
-                " FROM %s as msg"
-                " INNER JOIN %s as dls ON msg.dls_id=dls.id"
-                " INNER JOIN %s as syn ON dls.syn_id=syn.id"
-                " WHERE %s"
-                " ORDER BY groupe,page,num ",
-                NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,/* From */
-                (conditions ? conditions : "1=1") /* Where */
+    g_snprintf( requete, sizeof(requete), MSGS_SQL_SELECT                                                      /* Requete SQL */
+                " WHERE %s ORDER BY parent_syn.page,syn.page,num ", (conditions ? conditions : "1=1")                /* Where */
               );
 
     if (start != -1 && length != -1)                                                 /* Critere d'affichage (offset et count) */
@@ -225,7 +224,7 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_messageDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
@@ -261,13 +260,13 @@
     msg = (struct CMD_TYPE_MESSAGE *)g_try_malloc0( sizeof(struct CMD_TYPE_MESSAGE) );
     if (!msg) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
     else
-     { g_snprintf( msg->libelle,       sizeof(msg->libelle      ), "%s", db->row[2]  );          /* Recopie dans la structure */
-       g_snprintf( msg->syn_libelle,   sizeof(msg->syn_libelle  ), "%s", db->row[4]  );
-       g_snprintf( msg->syn_groupe,    sizeof(msg->syn_groupe   ), "%s", db->row[8]  );
-       g_snprintf( msg->syn_page,      sizeof(msg->syn_page     ), "%s", db->row[9]  );
-       g_snprintf( msg->libelle_audio, sizeof(msg->libelle_audio), "%s", db->row[11] );
-       g_snprintf( msg->libelle_sms,   sizeof(msg->libelle_sms  ), "%s", db->row[12] );
-       g_snprintf( msg->dls_shortname, sizeof(msg->dls_shortname), "%s", db->row[15] );
+     { g_snprintf( msg->libelle,         sizeof(msg->libelle      ),   "%s", db->row[2]  );      /* Recopie dans la structure */
+       g_snprintf( msg->syn_libelle,     sizeof(msg->syn_libelle  ),   "%s", db->row[4]  );
+       g_snprintf( msg->syn_parent_page, sizeof(msg->syn_parent_page), "%s", db->row[8]  );
+       g_snprintf( msg->syn_page,        sizeof(msg->syn_page     ),   "%s", db->row[9]  );
+       g_snprintf( msg->libelle_audio,   sizeof(msg->libelle_audio),   "%s", db->row[11] );
+       g_snprintf( msg->libelle_sms,     sizeof(msg->libelle_sms  ),   "%s", db->row[12] );
+       g_snprintf( msg->dls_shortname,   sizeof(msg->dls_shortname),   "%s", db->row[15] );
        msg->id          = atoi(db->row[0]);
        msg->num         = atoi(db->row[1]);
        msg->type        = atoi(db->row[3]);
@@ -293,15 +292,8 @@
     gchar requete[512];
     struct DB *db;
 
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,audio,bit_audio,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "time_repeat,dls.id,dls.shortname,syn.id,persist,is_mp3"
-                " FROM %s as msg"
-                " INNER JOIN %s as dls ON msg.dls_id=dls.id"
-                " INNER JOIN %s as syn ON dls.syn_id=syn.id"
-                " WHERE num=%d LIMIT 1",
-                NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,    /* From */
-                num /* Where */
+    g_snprintf( requete, sizeof(requete), MSGS_SQL_SELECT                                                      /* Requete SQL */
+                " WHERE num=%d LIMIT 1", num                                                                         /* Where */
               );
 
     db = Init_DB_SQL();       
@@ -335,15 +327,8 @@
        return(NULL);
      }
    
-    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT msg.id,num,msg.libelle,msg.type,syn.libelle,audio,bit_audio,enable,groupe,page,sms,libelle_audio,libelle_sms,"
-                "time_repeat,dls.id,dls.shortname,syn.id,persist,is_mp3"
-                " FROM %s as msg"
-                " INNER JOIN %s as dls ON msg.dls_id=dls.id"
-                " INNER JOIN %s as syn ON dls.syn_id=syn.id"
-                " WHERE msg.id=%d LIMIT 1",
-                NOM_TABLE_MSG, NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE,    /* From */
-                id /* Where */
+    g_snprintf( requete, sizeof(requete), MSGS_SQL_SELECT                                                      /* Requete SQL */
+                " WHERE msg.id=%d LIMIT 1", id                                                                       /* Where */
               );
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { Libere_DB_SQL( &db );
