@@ -40,8 +40,8 @@
        return(response);
      }
     
-    Cfg_sms.lib->Thread_sigusr1 = TRUE;
-    while (Cfg_sms.lib->Thread_sigusr1) sched_yield();
+    Cfg_sms.lib->Thread_reload = TRUE;
+    while (Cfg_sms.lib->Thread_reload) sched_yield();
     response = Admin_write ( response, " SMS Reload done" );
     return(response);
   }

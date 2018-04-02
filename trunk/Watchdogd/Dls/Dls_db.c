@@ -147,7 +147,7 @@
 /* Entrées: un log, une db                                                                                                    */
 /* Sortie: une hquery, null si erreur                                                                                         */
 /******************************************************************************************************************************/
- gboolean Recuperer_plugins_dlsDB( struct DB **db_retour )
+ static gboolean Recuperer_plugins_dlsDB_with_conditions( struct DB **db_retour, gchar *conditions )
   { gchar requete[512];
     gboolean retour;
     struct DB *db;
@@ -161,15 +161,33 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.type,dls.syn_id,parent_syn.page,syn.page,"
                 "dls.compil_date,dls.compil_status,dls.nbr_compil"
-                " FROM %s as dls INNER JOIN %s as syn ON dls.syn_id = syn.id "
-                " INNER JOIN %s AS parent_syn ON parent_syn.id=syn.parent_id"
-                " ORDER BY parent_syn.page,syn.page,shortname",
-                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE
+                " FROM dls INNER JOIN syns as syn ON dls.syn_id = syn.id "
+                " INNER JOIN syns AS parent_syn ON parent_syn.id=syn.parent_id"
+                " %s "
+                " ORDER BY parent_syn.page,syn.page,dls.shortname",
+                (conditions ? conditions : " ")
               );
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if (retour == FALSE) Libere_DB_SQL (&db);
     *db_retour = db;
     return ( retour );
+  }
+/******************************************************************************************************************************/
+/* Recuperer_plugins_dlsDB: Recuperation de tous les plugins D.L.S                                                            */
+/* Entrées: un log, une db                                                                                                    */
+/* Sortie: une hquery, null si erreur                                                                                         */
+/******************************************************************************************************************************/
+ gboolean Recuperer_plugins_dlsDB( struct DB **db_retour )
+  { return( Recuperer_plugins_dlsDB_with_conditions ( db_retour, NULL ) ); }
+/******************************************************************************************************************************/
+/* Recuperer_plugins_dlsDB: Recuperation de tous les plugins D.L.S                                                            */
+/* Entrées: un log, une db                                                                                                    */
+/* Sortie: une hquery, null si erreur                                                                                         */
+/******************************************************************************************************************************/
+ gboolean Recuperer_plugins_dlsDB_by_syn( struct DB **db_retour, gint syn_id )
+  { gchar chaine[80];
+    g_snprintf( chaine, sizeof(chaine), "WHERE syn.id=%d", syn_id );
+    return( Recuperer_plugins_dlsDB_with_conditions ( db_retour, chaine ) );
   }
 /******************************************************************************************************************************/
 /* Recuperer_plugins_dlsDB_suite: poursuite de la recherche des plugins DLS                                                   */

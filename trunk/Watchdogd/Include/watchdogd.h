@@ -75,7 +75,7 @@
 
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
-    gboolean Thread_sigusr1;                                                          /* TRUE si le thread doit gerer le USR1 */
+    gboolean Thread_reload;                                                          /* TRUE si le thread doit gerer le USR1 */
 
     void (*Run_thread)( struct LIBRAIRIE *lib );                                  /* Fonction principale de gestion du thread */
                                                                                  /* Fonction de gestion des commandes d'admin */
@@ -92,7 +92,6 @@
     gboolean Thread_reboot;                                                  /* TRUE si le reboot doit suivre une RAZ mémoire */
     gboolean Thread_clear_reboot;                                            /* TRUE si le reboot doit suivre une RAZ mémoire */
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
-    gboolean Thread_sigusr1;                                                          /* TRUE si le thread doit gerer le USR1 */
 
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     GSList *liste_msg_repeat;                                                          /* liste de struct MSGDB msg a envoyer */

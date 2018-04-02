@@ -93,7 +93,7 @@
     GList *Modules_RS485;
     gboolean Thread_run;                /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_reload;                          /* TRUE si le thread doit recharger sa configuration */
-    gboolean Thread_sigusr1;                                      /* TRUE si le thread doit gerer le USR1 */
+    gboolean Thread_reload;                                      /* TRUE si le thread doit gerer le USR1 */
     guint admin_del;                                                            /* Demande de deconnexion */
     guint admin_start;                                                          /* Demande de deconnexion */
     guint admin_stop;                                                           /* Demande de deconnexion */

@@ -60,15 +60,11 @@
  void Proto_effacer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { gboolean retour;
 
-    pthread_mutex_lock( &Partage->com_dls.synchro );
-    Partage->com_dls.liste_plugin_reset = g_slist_append ( Partage->com_dls.liste_plugin_reset,
-                                                           GINT_TO_POINTER(rezo_dls->id) );
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
-
     retour = Retirer_plugin_dlsDB( rezo_dls );
     if (retour)
      { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_DEL_PLUGIN_DLS_OK,
                      (gchar *)rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+       Partage->com_dls.Thread_reload = TRUE;
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -120,12 +116,7 @@
      }
     else { result = Rechercher_plugin_dlsDB( rezo_dls->id );
            if (result) 
-            { pthread_mutex_lock( &Partage->com_dls.synchro );
-              Partage->com_dls.liste_plugin_reset =
-                              g_slist_append ( Partage->com_dls.liste_plugin_reset,
-                                               GINT_TO_POINTER(result->id) );
-              pthread_mutex_unlock( &Partage->com_dls.synchro );
-                      
+            { Partage->com_dls.Thread_reload = TRUE;
               Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_VALIDE_EDIT_PLUGIN_DLS_OK,
                             (gchar *)result, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
               g_free(result);

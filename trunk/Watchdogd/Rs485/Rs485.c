@@ -96,7 +96,7 @@
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
-    Cfg_rs485.lib->Thread_sigusr1 = TRUE;                              /* Rechargement des modules RS en mémoire de travaille */
+    Cfg_rs485.lib->Thread_reload = TRUE;                              /* Rechargement des modules RS en mémoire de travaille */
     return(retour);
   }
 /******************************************************************************************************************************/
@@ -138,7 +138,7 @@
                           }
     last_id = Recuperer_last_ID_SQL ( db );
     Libere_DB_SQL( &db );
-    Cfg_rs485.lib->Thread_sigusr1 = TRUE;                              /* Rechargement des modules RS en mémoire de travaille */
+    Cfg_rs485.lib->Thread_reload = TRUE;                              /* Rechargement des modules RS en mémoire de travaille */
     return( last_id );
   }
 /******************************************************************************************************************************/
@@ -177,7 +177,7 @@
     g_free(libelle);
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
-    Cfg_rs485.lib->Thread_sigusr1 = TRUE;                              /* Rechargement des modules RS en mémoire de travaille */
+    Cfg_rs485.lib->Thread_reload = TRUE;                              /* Rechargement des modules RS en mémoire de travaille */
     return( retour );
   }
 /******************************************************************************************************************************/
@@ -580,7 +580,7 @@
      { usleep(1);
        sched_yield();
 
-       if (lib->Thread_sigusr1 == TRUE)
+       if (lib->Thread_reload == TRUE)
         { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_NOTICE, "Run_thread: Run_rs485: SIGUSR1" );
           Rs485_Lire_config();
           Decharger_tous_rs485();
@@ -589,7 +589,7 @@
           nbr_oct_lu = 0;
           attente_reponse = FALSE;
           Charger_tous_rs485();
-          lib->Thread_sigusr1 = FALSE;
+          lib->Thread_reload = FALSE;
         }
 
        if (Cfg_rs485.Modules_RS485 == NULL )                    /* Si pas de module référencés, on attend */
@@ -597,7 +597,7 @@
 
        pthread_mutex_lock ( &Cfg_rs485.lib->synchro );             /* Car utilisation de la liste chainée */
        liste = Cfg_rs485.Modules_RS485;
-       while (liste && (lib->Thread_run == TRUE) && (Cfg_rs485.lib->Thread_sigusr1 == FALSE))
+       while (liste && (lib->Thread_run == TRUE) && (Cfg_rs485.lib->Thread_reload == FALSE))
         { module = (struct MODULE_RS485 *)liste->data;
           if (module->rs485.enable != TRUE)                     /* Si le module est disabled, on le zappe */
            { liste = liste->next;

@@ -308,10 +308,10 @@
        usleep(100000);
        sched_yield();
 
-       if (lib->Thread_sigusr1 == TRUE)
+       if (lib->Thread_reload == TRUE)
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Run_ssrv: SIGUSR1", __func__ );
           Ssrv_Lire_config();
-          lib->Thread_sigusr1 = FALSE;
+          lib->Thread_reload = FALSE;
         }
 
        client = Accueillir_un_client();

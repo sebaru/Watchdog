@@ -105,7 +105,7 @@
     while(lib->Thread_run == TRUE)                                    /* On tourne tant que l'on a besoin */
      { gint id;
 
-       if (lib->Thread_sigusr1)                                                   /* On a recu sigusr1 ?? */
+       if (lib->Thread_reload)                                                   /* On a recu reload ?? */
         { Info_new( Config.log, lib->Thread_debug, LOG_INFO, "Run_tellstick: SIGUSR1" );
           pthread_mutex_lock ( &Cfg_tellstick.lib->synchro );
           Info_new( Config.log, lib->Thread_debug, LOG_NOTICE,
@@ -113,7 +113,7 @@
                     g_slist_length ( Cfg_tellstick.Liste_tell )
                   );
           pthread_mutex_unlock ( &Cfg_tellstick.lib->synchro );
-          lib->Thread_sigusr1 = FALSE;
+          lib->Thread_reload = FALSE;
         }
 
        if (!Cfg_tellstick.Liste_tell)                            /* Si pas de message, on tourne */

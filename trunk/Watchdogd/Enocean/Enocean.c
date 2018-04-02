@@ -362,9 +362,9 @@
      { usleep(1);
        sched_yield();
 
-       if (lib->Thread_sigusr1 == TRUE)
+       if (lib->Thread_reload == TRUE)
         { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE, "Run_thread: recu signal SIGUSR1" );
-          lib->Thread_sigusr1 = FALSE;
+          lib->Thread_reload = FALSE;
         }
 
        if (Cfg_enocean.reload == TRUE)

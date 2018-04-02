@@ -35,7 +35,7 @@
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gboolean Thread_sigusr1;                                                          /* TRUE si le thread doit gerer le USR1 */
+    gboolean Thread_reload;                                                          /* TRUE si le thread doit gerer le USR1 */
   };
 
 /*********************************************** Définitions des prototypes ***************************************************/

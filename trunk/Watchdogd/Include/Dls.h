@@ -129,17 +129,21 @@
     gint changes;
   };
 
+ struct DLS_SYN
+  { gint syn_id;
+    GSList *Liste_plugin_dls;                                                /* Liste des plugins D.L.S associé au synoptique */
+    GSList *Liste_dls_syn;                                               /* Liste des sous_synoptiques associés au synoptique */
+  };
+
  struct COM_DLS                                                                      /* Communication entre le serveur et DLS */
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     pthread_mutex_t synchro_traduction;                  /* Mutex pour interdire les traductions simultanées de plugins D.L.S */
-    GSList *Plugins;                                                                      /* Liste des plugins chargés de DLS */
+    struct DLS_SYN *Dls_syn;                                           /* Liste des synoptiques chargés. Contient des DLS_SYN */
     GSList *Set_M;                                                              /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_M;                                                      /* liste des Mxxx a désactiver à la fin du tour prg */
-    GSList *liste_plugin_reset;                                                               /* liste des plugins a resetter */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
-    gboolean Thread_sigusr1;                                                          /* TRUE si le thread doit gerer le USR1 */
     guint admin_start;                                                                              /* Demande de deconnexion */
     guint admin_stop;                                                                               /* Demande de deconnexion */
     guint temps_sched;
@@ -149,6 +153,7 @@
  extern gboolean Retirer_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls );                                    /* Dans Dls_db.c */
  extern gint Ajouter_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls );
  extern gboolean Recuperer_plugins_dlsDB( struct DB **db );
+ extern gboolean Recuperer_plugins_dlsDB_by_syn( struct DB **db_retour, gint syn_id );
  extern struct CMD_TYPE_PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct DB **db );
  extern struct CMD_TYPE_PLUGIN_DLS *Rechercher_plugin_dlsDB( gint id );
  extern gboolean Modifier_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls );
@@ -156,12 +161,14 @@
  extern gboolean Get_source_dls_from_DB ( gint id, gchar **result_buffer, gint *result_taille );
  extern gboolean Save_source_dls_to_DB( gint id, gchar *buffer, gint taille );
 
+ extern void Charger_plugins ( void );                                                                      /* Dans plugins.c */
+ extern void Decharger_plugins ( void );
+ extern gint Compiler_source_dls( gboolean reset, gint id, gchar *buffer, gint taille_buffer );
+ extern void Activer_plugin_by_id ( gint id, gboolean actif );
+#ifdef bouh
  extern void Reseter_un_plugin ( gint id );                                                                 /* Dans plugins.c */
  extern void Decharger_un_plugin_by_id ( gint id );
- extern void Decharger_plugins ( void );
- extern void Charger_plugins ( void );
- extern void Activer_plugin_by_id ( gint id, gboolean actif );
- extern gint Compiler_source_dls( gboolean reset, gint id, gchar *buffer, gint taille_buffer );
+#endif
  
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
  extern int EA_inrange( int num );

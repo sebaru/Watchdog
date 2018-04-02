@@ -38,8 +38,8 @@
        return(response);
      }
     
-    Cfg_ups.lib->Thread_sigusr1 = TRUE;
-    while (Cfg_ups.lib->Thread_sigusr1) sched_yield();
+    Cfg_ups.lib->Thread_reload = TRUE;
+    while (Cfg_ups.lib->Thread_reload) sched_yield();
     response = Admin_write ( response, " ONDULEUR Reload done" );
     return(response);
   }
@@ -243,12 +243,12 @@
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), " UPS %s added. New ID=%d\n", ups.ups, retour );
           response = Admin_write ( response, chaine );
-          Cfg_ups.lib->Thread_sigusr1 = TRUE;                           /* Rechargement des modules UPS en mémoire de travail */
+          Cfg_ups.lib->Thread_reload = TRUE;                           /* Rechargement des modules UPS en mémoire de travail */
         }
      }
     else if ( ! strcmp ( commande, "set" ) )
      { response = Admin_ups_set ( response, ligne+4 );
-       Cfg_ups.lib->Thread_sigusr1 = TRUE;                              /* Rechargement des modules UPS en mémoire de travail */
+       Cfg_ups.lib->Thread_reload = TRUE;                              /* Rechargement des modules UPS en mémoire de travail */
      }
     else if ( ! strcmp ( commande, "del" ) )
      { struct UPSDB ups;
@@ -261,7 +261,7 @@
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), " UPS %d erased\n", ups.id );
           response = Admin_write ( response, chaine );
-          Cfg_ups.lib->Thread_sigusr1 = TRUE;                           /* Rechargement des modules UPS en mémoire de travail */
+          Cfg_ups.lib->Thread_reload = TRUE;                           /* Rechargement des modules UPS en mémoire de travail */
         }
      }
     else if ( ! strcmp ( commande, "help" ) )

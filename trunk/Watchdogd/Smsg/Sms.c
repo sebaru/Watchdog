@@ -685,11 +685,11 @@
        usleep(10000);
        sched_yield();
 
-       if (Cfg_smsg.lib->Thread_sigusr1)                                                      /* A-t'on recu un signal USR1 ? */
+       if (Cfg_smsg.lib->Thread_reload)                                                      /* A-t'on recu un signal USR1 ? */
         { int nbr;
           Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: SIGUSR1", __func__ );
           Smsg_Lire_config();
-          Cfg_smsg.lib->Thread_sigusr1 = FALSE;
+          Cfg_smsg.lib->Thread_reload = FALSE;
         }
 
          

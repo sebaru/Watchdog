@@ -776,6 +776,35 @@
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
 /******************************************************************************************************************************/
+/* Dls_run_dls_syn: Fait tourner les DLS synoptique en parametre + les sous DLS                                               */
+/* Entrée : le Dls_syn correspondant                                                                                          */
+/* Sortie : rien                                                                                                              */
+/******************************************************************************************************************************/
+ static void Dls_run_dls_syn ( struct DLS_SYN *dls_syn )
+  { GSList *liste;
+    struct timeval tv_avant, tv_apres;
+    liste = dls_syn->Liste_plugin_dls;
+    while(liste)                                                                /* On execute tous les modules un par un */
+     { struct PLUGIN_DLS *plugin_actuel;
+       plugin_actuel = (struct PLUGIN_DLS *)liste->data;
+
+       if (plugin_actuel->plugindb.on && plugin_actuel->go)
+        { gettimeofday( &tv_avant, NULL );
+          Partage->top_cdg_plugin_dls = 0;                                                   /* On reset le cdg plugin DLS */
+          plugin_actuel->go( plugin_actuel->starting, plugin_actuel->debug );                        /* On appel le plugin */
+          gettimeofday( &tv_apres, NULL );
+          plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
+          plugin_actuel->starting = 0;
+        }
+       liste = liste->next;
+     }
+    liste = dls_syn->Liste_dls_syn;
+    while (liste)
+     { Dls_run_dls_syn ( liste->data );
+       liste = liste->next;
+     }
+ }
+/******************************************************************************************************************************/
 /* Main: Fonction principale du DLS                                                                                           */
 /******************************************************************************************************************************/
  void Run_dls ( void )
@@ -794,18 +823,13 @@
     sleep(30);                    /* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
 
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
-     { struct timeval tv_avant, tv_apres;
+     { 
 
        if (Partage->com_dls.Thread_reload)
         { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Run_dls: RELOADING" );
           Decharger_plugins();
           Charger_plugins();
           Partage->com_dls.Thread_reload = FALSE;
-        }
-
-       if (Partage->com_dls.Thread_sigusr1)
-        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Run_dls: SIGUSR1" );
-          Partage->com_dls.Thread_sigusr1 = FALSE;
         }
 
        if (Partage->top-Update_heure>=600)      /* Gestion des changements d'horaire (toutes les minutes) */
@@ -823,37 +847,13 @@
           Partage->com_dls.admin_stop = 0;
         }
 
-       if (Partage->com_dls.liste_plugin_reset)                          /* A-t-on un plugin a reseter ?? */
-        { gint num;
-          pthread_mutex_lock( &Partage->com_dls.synchro );
-          num = GPOINTER_TO_INT( Partage->com_dls.liste_plugin_reset->data );
-          Partage->com_dls.liste_plugin_reset = g_slist_remove ( Partage->com_dls.liste_plugin_reset,
-                                                                 GINT_TO_POINTER(num) );
-          pthread_mutex_unlock( &Partage->com_dls.synchro );
-          Reseter_un_plugin( num );
-        }
-
        Set_cde_exterieure();                                            /* Mise à un des bit de commande exterieure (furtifs) */
 
        SB_SYS(0, !B(0));                                                            /* Change d'etat tous les tours programme */
        SI(1, 1, 255, 0, 0, 0 );                                                                   /* Icone toujours à 1:rouge */
 
        pthread_mutex_lock( &Partage->com_dls.synchro );
-       plugins = Partage->com_dls.Plugins;
-       while(plugins)                                                                /* On execute tous les modules un par un */
-        { struct PLUGIN_DLS *plugin_actuel;
-          plugin_actuel = (struct PLUGIN_DLS *)plugins->data;
-
-          if (plugin_actuel->plugindb.on && plugin_actuel->go)
-           { gettimeofday( &tv_avant, NULL );
-             Partage->top_cdg_plugin_dls = 0;                                                   /* On reset le cdg plugin DLS */
-             plugin_actuel->go( plugin_actuel->starting, plugin_actuel->debug );                        /* On appel le plugin */
-             gettimeofday( &tv_apres, NULL );
-             plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
-             plugin_actuel->starting = 0;
-           }
-          plugins = plugins->next;
-        }
+       Dls_run_dls_syn( Partage->com_dls.Dls_syn );
        pthread_mutex_unlock( &Partage->com_dls.synchro );
        SB_SYS(3, 1);                                                  /* B3 est toujours à un apres le premier tour programme */
 

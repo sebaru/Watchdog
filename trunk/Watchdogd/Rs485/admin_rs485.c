@@ -40,8 +40,8 @@
        return(response);
      }
     
-    Cfg_rs485.lib->Thread_sigusr1 = TRUE;
-    while (Cfg_rs485.lib->Thread_sigusr1) sched_yield();
+    Cfg_rs485.lib->Thread_reload = TRUE;
+    while (Cfg_rs485.lib->Thread_reload) sched_yield();
     response = Admin_write ( response, " RS485 Reload done" );
     return(response);
   }

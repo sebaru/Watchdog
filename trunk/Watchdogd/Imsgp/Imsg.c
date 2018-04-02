@@ -533,10 +533,10 @@
        g_usleep(10000);
        sched_yield();
 
-       if (Cfg_imsgp.lib->Thread_sigusr1 == TRUE)
+       if (Cfg_imsgp.lib->Thread_reload == TRUE)
         { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE, "%s: recu signal SIGUSR1", __func__ );
           Imsgp_Lire_config ();                                             /* Lecture de la configuration logiciel du thread */
-          Cfg_imsgp.lib->Thread_sigusr1 = FALSE;
+          Cfg_imsgp.lib->Thread_reload = FALSE;
         }
 
        if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )

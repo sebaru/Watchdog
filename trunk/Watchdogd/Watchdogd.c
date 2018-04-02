@@ -236,7 +236,7 @@
        case SIGBUS:  Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGBUS" ); break;
        case SIGIO:   Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGIO" ); break;
        case SIGUSR1: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGUSR1: dumping infos" );
-                     Partage->com_msrv.Thread_sigusr1 = TRUE;
+                     Partage->com_msrv.Thread_reload = TRUE;
                      break;
        case SIGUSR2: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGUSR2: Reloading THREAD in progress" );
                      Partage->com_msrv.Thread_reload = TRUE;
@@ -256,11 +256,11 @@
     Updater_cpt_impDB();                                                              /* Sauvegarde des compteurs d'impulsion */
   }
 /******************************************************************************************************************************/
-/* Tatiter_sigusr1 : Print les variable importante dans les lgos                                                              */
+/* Tatiter_reload : Print les variable importante dans les lgos                                                              */
 /* Entrée : Néant                                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Traiter_sigusr1 ( void )
+ static void Traiter_reload ( void )
   { guint nbr_i, nbr_msg, nbr_msg_repeat;
     gchar chaine[256];
 
@@ -391,24 +391,24 @@
           Partage->com_msrv.Thread_reload      = FALSE;                                                 /* signal traité. RAZ */
         }
 
-       if (Partage->com_msrv.Thread_sigusr1)                                                          /* On a recu sigusr1 ?? */
+       if (Partage->com_msrv.Thread_reload)                                                          /* On a recu reload ?? */
         { struct LIBRAIRIE *lib;
           GSList *liste;
 
           Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: SIGUSR1", __func__ );
-          Partage->com_dls.Thread_sigusr1       = TRUE;
-          Partage->com_arch.Thread_sigusr1      = TRUE;
-          Partage->com_admin.Thread_sigusr1     = TRUE;
+          Partage->com_dls.Thread_reload       = TRUE;
+          Partage->com_arch.Thread_reload      = TRUE;
+          Partage->com_admin.Thread_reload     = TRUE;
 
           liste = Partage->com_msrv.Librairies;                                          /* Parcours de toutes les librairies */
           while(liste)
            { lib = (struct LIBRAIRIE *)liste->data;
-             lib->Thread_sigusr1 = TRUE;
+             lib->Thread_reload = TRUE;
              liste = liste->next;
            }
 
-          Traiter_sigusr1();                                         /* Appel de la fonction pour traiter le signal pour MSRV */
-          Partage->com_msrv.Thread_sigusr1      = FALSE;
+          Traiter_reload();                                         /* Appel de la fonction pour traiter le signal pour MSRV */
+          Partage->com_msrv.Thread_reload      = FALSE;
         }
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */

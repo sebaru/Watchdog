@@ -699,7 +699,7 @@
      { usleep(10000);
        sched_yield();
 
-       if (Cfg_imsg.lib->Thread_sigusr1 == TRUE)
+       if (Cfg_imsg.lib->Thread_reload == TRUE)
         { Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE, "Run_thread: recu signal SIGUSR1" );
           pthread_mutex_lock ( &Cfg_imsg.lib->synchro );
           Info_new( Config.log, Cfg_imsg.lib->Thread_debug, LOG_NOTICE,
@@ -708,7 +708,7 @@
                     g_slist_length ( Cfg_imsg.Contacts )
                   );
           pthread_mutex_unlock ( &Cfg_imsg.lib->synchro );
-          Cfg_imsg.lib->Thread_sigusr1 = FALSE;
+          Cfg_imsg.lib->Thread_reload = FALSE;
         }
 
        if (Cfg_imsg.reload == TRUE)

@@ -97,7 +97,7 @@
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL( &db );
-    Cfg_modbus.lib->Thread_sigusr1 = TRUE;                           /* Rechargement des modules MODBUS en mémoire de travail */
+    Cfg_modbus.lib->Thread_reload = TRUE;                           /* Rechargement des modules MODBUS en mémoire de travail */
     return(retour);
   }
 /******************************************************************************************************************************/
@@ -161,7 +161,7 @@
      }
     else retour = -1;
     Libere_DB_SQL( &db );
-    Cfg_modbus.lib->Thread_sigusr1 = TRUE;                           /* Rechargement des modules MODBUS en mémoire de travail */
+    Cfg_modbus.lib->Thread_reload = TRUE;                           /* Rechargement des modules MODBUS en mémoire de travail */
     return ( retour );                                                                /* Pas d'erreur lors de la modification */
   }
 /******************************************************************************************************************************/
@@ -1097,12 +1097,12 @@
     while(lib->Thread_run == TRUE)                                                           /* On tourne tant que necessaire */
      { usleep(10000);
 
-       if (lib->Thread_sigusr1 == TRUE)
+       if (lib->Thread_reload == TRUE)
         { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
           Modbus_Lire_config();
           Decharger_tous_MODBUS();
           Charger_tous_MODBUS();
-          lib->Thread_sigusr1 = FALSE;
+          lib->Thread_reload = FALSE;
         }
 
        if (Cfg_modbus.Modules_MODBUS == NULL ||                                     /* Si pas de module référencés, on attend */
@@ -1110,7 +1110,7 @@
         { sleep(2); continue; }
 
        liste = Cfg_modbus.Modules_MODBUS;
-       while (liste && (lib->Thread_run == TRUE) && (Cfg_modbus.lib->Thread_sigusr1 == FALSE) )
+       while (liste && (lib->Thread_run == TRUE) && (Cfg_modbus.lib->Thread_reload == FALSE) )
         { module = (struct MODULE_MODBUS *)liste->data;
 
           if ( module->modbus.enable == FALSE && module->started )                                  /* Module a deconnecter ! */

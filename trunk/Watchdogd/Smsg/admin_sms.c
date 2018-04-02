@@ -35,7 +35,7 @@
 /* Sortie: Le buffer de sortie complété                                                                                       */
 /******************************************************************************************************************************/
  static gchar *Admin_sms_reload ( gchar *response )
-  { Cfg_smsg.lib->Thread_sigusr1 = TRUE;
+  { Cfg_smsg.lib->Thread_reload = TRUE;
     response = Admin_write ( response, " | - SMS Reload done" );
     return(response);
   }
