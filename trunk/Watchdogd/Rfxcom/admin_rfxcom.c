@@ -113,16 +113,8 @@
        response = Admin_write ( response, chaine );
        response = Admin_write ( response, " -" );
      }
-    else if ( ! strcmp ( commande, "dbcfg" ) )                /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { gboolean retour;
-       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
-       retour = Rfxcom_Lire_config();
-       g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s", (retour ? "Success" : "Failed") );
-       response = Admin_write ( response, chaine );
-     }
     else if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'RFXCOM'" );
-       response = Admin_write ( response, "  dbcfg ...                              - Get/Set Database Parameters" );
        response = Admin_write ( response, "  light proto,housecode,unitcode,cmdnumber" );
        response = Admin_write ( response, "                                         - Envoie une commande RFXCOM proto = x10 or arc" );
        response = Admin_write ( response, "  light_ac (id1,id2,id3,id4),unitcode,cmdnumber,level" );

@@ -158,16 +158,8 @@
        g_snprintf( chaine, sizeof(chaine), " Presence Status changed to %s! \n", Cfg_imsg.new_status );
        response = Admin_write ( response, chaine );
      }
-    else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { gboolean retour;
-       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
-       retour = Imsg_Lire_config();
-       g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s", (retour ? "Success" : "Failed") );
-       response = Admin_write ( response, chaine );
-     }
     else if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'IMSG'\n" );
-       response = Admin_write ( response, "  dbcfg ...                              - Get/Set Database Parameters\n" );
        response = Admin_write ( response, "  send user@domain/resource message      - Send a message to user\n" );
        response = Admin_write ( response, "  reload                                 - Reload configuration from Database\n" );
        response = Admin_write ( response, "  list                                   - List contact and availability\n" );

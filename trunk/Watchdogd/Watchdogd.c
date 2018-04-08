@@ -325,7 +325,6 @@
      { Gerer_arrive_MSGxxx_dls();                                 /* Redistrib des messages DLS vers les clients + Historique */ 
        Gerer_arrive_Ixxx_dls();                                                 /* Distribution des changements d'etats motif */
        Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
-       Gerer_arrive_Events();                                       /* Gestion des evenements entre Thread, DLS, et satellite */
 
        if (Config.instance_is_master == TRUE)                                     /* Instance is master : listening to slaves */
         { struct MSRV_EVENT *event;

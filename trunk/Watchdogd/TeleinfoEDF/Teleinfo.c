@@ -109,6 +109,7 @@
 /******************************************************************************************************************************/
  static void Processer_trame( void )
   { 
+#ifdef bouh
     if ( (! strncmp ( Cfg_teleinfo.buffer, "ADCO", 4 )) && Cfg_teleinfo.last_view_adco + 300 <= Partage->top )
      { Send_Event ( g_get_host_name(), NOM_THREAD, EVENT_INPUT, "ADCO", atof( Cfg_teleinfo.buffer + 5) );
        Cfg_teleinfo.last_view_adco = Partage->top;
@@ -152,6 +153,7 @@
     else { return; }
 /* Other buffer : HHPHC, MOTDETAT, PTEC, OPTARIF */
     Cfg_teleinfo.last_view = Partage->top;
+#endif
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du thread Teleinfo                                                                               */

@@ -54,6 +54,12 @@
     gint num;
   };
 
+ struct ZMQ_SET_SYN_VARS
+  { gint syn_id;
+    gboolean activite;
+    gboolean activite_fixe;
+  };
+
  enum
   { TAG_ZMQ_TO_HISTO,
     TAG_ZMQ_TO_THREADS,

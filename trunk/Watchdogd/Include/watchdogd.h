@@ -99,7 +99,6 @@
     GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
     GSList *liste_i;                                                             /* liste de I a traiter dans la distribution */
     GSList *liste_a;                                                             /* liste de A a traiter dans la distribution */
-    GSList *liste_Event;                                                     /* liste de Event a traiter dans la distribution */
     struct ZMQUEUE *zmq_msg;                                                           /* Message Queue des messages Watchdog */
     struct ZMQUEUE *zmq_motif;                                                           /* Message Queue des motifs Watchdog */
     struct ZMQUEUE *zmq_to_threads;                                                  /* Message Queue des evenements Watchdog */
@@ -163,12 +162,7 @@
  extern struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *nom_fichier );
  extern gboolean Decharger_librairie_par_prompt ( gchar *nom_fichier );
 
- extern void Gerer_arrive_Events ( void );                                                           /* Dans distrib_Events.c */
- extern void Abonner_distribution_events ( void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event), gchar *thread );
- extern void Desabonner_distribution_events ( void (*Gerer_event) (struct CMD_TYPE_MSRV_EVENT *event) );
- extern void Send_Event ( const gchar *instance, gchar *thread, guint type, gchar *objet, gfloat val_float );
- extern void Envoyer_Event_msrv( struct CMD_TYPE_MSRV_EVENT *event );
- extern void Gerer_arrive_Axxx_dls ( void );
+ extern void Gerer_arrive_Axxx_dls ( void );                                                         /* Dans distrib_Events.c */
  extern struct CMD_TYPE_MNEMO_BASE *Map_event_to_mnemo( gchar *thread, gchar *event, gint *retour_nbr );
 
  extern void Gerer_arrive_MSGxxx_dls ( void );                                                       /* Dans distrib_MSGxxx.c */

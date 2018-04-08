@@ -776,15 +776,16 @@
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
 /******************************************************************************************************************************/
-/* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                               */
-/* Entrée : le Dls_tree correspondant                                                                                          */
+/* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                              */
+/* Entrée : le Dls_tree correspondant                                                                                         */
 /* Sortie : rien                                                                                                              */
 /******************************************************************************************************************************/
  static void Dls_run_dls_tree ( struct DLS_TREE *dls_tree )
-  { GSList *liste;
-    struct timeval tv_avant, tv_apres;
-    dls_tree->activite      = TRUE;
-    dls_tree->activite_fixe = FALSE;
+  { struct timeval tv_avant, tv_apres;
+    gboolean activite, activite_fixe;
+    GSList *liste;
+    activite      = TRUE;                                              /* Valeur par défaut si pas positionnée dans le plugin */
+    activite_fixe = FALSE;
     liste = dls_tree->Liste_plugin_dls;
     while(liste)                                                                     /* On execute tous les modules un par un */
      { struct PLUGIN_DLS *plugin_actuel;
@@ -797,8 +798,8 @@
           gettimeofday( &tv_apres, NULL );
           plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
           plugin_actuel->starting = 0;
-          dls_tree->activite &= plugin_actuel->vars.activite;
-          dls_tree->activite_fixe |= plugin_actuel->vars.activite_fixe;
+          activite &= plugin_actuel->vars.activite;
+          activite_fixe |= plugin_actuel->vars.activite_fixe;
         }
        liste = liste->next;
      }
@@ -807,10 +808,15 @@
      { struct DLS_TREE *sub_tree;
        sub_tree = (struct DLS_TREE *)liste->data;
        Dls_run_dls_tree ( sub_tree );
-       dls_tree->activite &= sub_tree->activite;
-       dls_tree->activite_fixe |= sub_tree->activite_fixe;
+       activite &= sub_tree->activite;
+       activite_fixe |= sub_tree->activite_fixe;
        liste = liste->next;
      }
+
+    if (activite != dls_tree->activite)                                                          /* Detection des changements */
+     { dls_tree->activite = activite;
+     }
+
  }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du DLS                                                                                           */
