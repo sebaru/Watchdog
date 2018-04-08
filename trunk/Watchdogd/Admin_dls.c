@@ -59,7 +59,7 @@
        else       { g_snprintf( date, sizeof(date), "Erreur" ); }
 
        g_snprintf( chaine, sizeof(chaine), " | - SYN[%05d] - DLS[%06d] -> started=%d, start_date=%s, debug=%d, conso=%08.03f, nom=%s",
-                   dls_tree->syn_id, dls->plugindb.id, dls->plugindb.on, date, dls->debug, dls->conso, dls->plugindb.shortname );
+                   dls_tree->syn_vars.syn_id, dls->plugindb.id, dls->plugindb.on, date, dls->debug, dls->conso, dls->plugindb.shortname );
        response = Admin_write ( response, chaine );
        g_snprintf( chaine, sizeof(chaine), " |                   vignette -> activite=%d, fixe=%d",
                    dls->vars.activite, dls->vars.activite_fixe );

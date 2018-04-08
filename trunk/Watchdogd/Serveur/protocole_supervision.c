@@ -87,7 +87,7 @@
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_SUPERVISION:
              { struct CMD_TYPE_SYNOPTIQUE *syn;
-	           pthread_t tid;
+	              pthread_t tid;
                syn = (struct CMD_TYPE_SYNOPTIQUE *)connexion->donnees;         /* Récupération du numéro du synoptique désiré */
 
                if ( client->syn_to_send )

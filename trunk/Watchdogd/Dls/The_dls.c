@@ -808,13 +808,17 @@
      { struct DLS_TREE *sub_tree;
        sub_tree = (struct DLS_TREE *)liste->data;
        Dls_run_dls_tree ( sub_tree );
-       activite &= sub_tree->activite;
-       activite_fixe |= sub_tree->activite_fixe;
+       activite      &= sub_tree->syn_vars.activite;
+       activite_fixe |= sub_tree->syn_vars.activite_fixe;
        liste = liste->next;
      }
 
-    if (activite != dls_tree->activite)                                                          /* Detection des changements */
-     { dls_tree->activite = activite;
+    if ( activite != dls_tree->syn_vars.activite ||                                              /* Detection des changements */
+         activite_fixe != dls_tree->syn_vars.activite_fixe )
+     { dls_tree->syn_vars.activite      = activite;
+       dls_tree->syn_vars.activite_fixe = activite_fixe;
+       Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_SET_SYN_VARS, "*", "ssrv",
+                          &dls_tree->syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
      }
 
  }

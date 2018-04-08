@@ -388,6 +388,7 @@
  extern void Detruire_page_supervision( struct PAGE_NOTEBOOK *page );
  extern void Proto_afficher_un_motif_supervision( struct CMD_TYPE_MOTIF *rezo_motif );
  extern void Proto_changer_etat_motif( struct CMD_ETAT_BIT_CTRL *etat_motif );
+ extern void Proto_set_syn_vars( struct CMD_TYPE_SYN_VARS *syn_vars );
  extern struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( gint syn_id );
 
                                                                                                    /* Dans supervision_clic.c */

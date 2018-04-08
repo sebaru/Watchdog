@@ -401,7 +401,7 @@
        goto end;
      }
 
-    Abonner_distribution_events ( Rfxcom_Gerer_event, NOM_THREAD );              /* Desabonnement de la diffusion des sorties */
+/*    Abonner_distribution_events ( Rfxcom_Gerer_event, NOM_THREAD );              /* Desabonnement de la diffusion des sorties */
     nbr_oct_lu = 0;
     Cfg_rfxcom.mode = RFXCOM_RETRING;
     while( lib->Thread_run == TRUE)                                                          /* On tourne tant que necessaire */
@@ -497,7 +497,7 @@
        if (Cfg_rfxcom.Liste_events)                                                           /* Si pas de message, on tourne */
         { struct CMD_TYPE_MSRV_EVENT *event;
           event = Rfxcom_Pick_event();                                                             /* Recuperation d'un event */
-          Rfxcom_Envoyer_event ( event );
+/*          Rfxcom_Envoyer_event ( event );*/
           g_free(event);
         }
      }                                                                                         /* Fin du while partage->arret */

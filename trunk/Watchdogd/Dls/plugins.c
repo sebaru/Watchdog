@@ -284,7 +284,7 @@
      { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: Memory Error for id '%s'", __func__, id );
        return(NULL);
      }
-    dls_tree->syn_id = id;
+    dls_tree->syn_vars.syn_id = id;
 
     if ( Recuperer_plugins_dlsDB_by_syn( &db, id ) )
      { struct CMD_TYPE_PLUGIN_DLS *plugindb;

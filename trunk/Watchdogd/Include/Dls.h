@@ -131,9 +131,7 @@
   };
 
  struct DLS_TREE
-  { gint syn_id;
-    gboolean activite;
-    gboolean activite_fixe;
+  { struct CMD_TYPE_SYN_VARS syn_vars;
     GSList *Liste_plugin_dls;                                                /* Liste des plugins D.L.S associé au synoptique */
     GSList *Liste_dls_tree;                                               /* Liste des sous_synoptiques associés au synoptique */
   };

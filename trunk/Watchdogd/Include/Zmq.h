@@ -54,16 +54,11 @@
     gint num;
   };
 
- struct ZMQ_SET_SYN_VARS
-  { gint syn_id;
-    gboolean activite;
-    gboolean activite_fixe;
-  };
-
  enum
   { TAG_ZMQ_TO_HISTO,
     TAG_ZMQ_TO_THREADS,
     TAG_ZMQ_SET_BIT,
+    TAG_ZMQ_SET_SYN_VARS,
     NBR_ZMQ_TAG
   };
 /************************************************ Définitions des prototypes **************************************************/

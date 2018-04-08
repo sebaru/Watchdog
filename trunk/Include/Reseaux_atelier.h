@@ -129,6 +129,12 @@
     gint  posy;
   };
 
+ struct CMD_TYPE_SYN_VARS
+  { gint syn_id;
+    gboolean activite;
+    gboolean activite_fixe;
+  };
+
 /******************************************************* Tag de communication *************************************************/
  enum 
   { SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE,  /* Envoi des groupes pour l'edition motif */

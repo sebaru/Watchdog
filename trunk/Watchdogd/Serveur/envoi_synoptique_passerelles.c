@@ -124,7 +124,9 @@
 
     while ( (pass = Recuperer_passerelleDB_suite( &db )) )
      { if (tag == TAG_SUPERVISION)
-        { if ( ! g_slist_find( liste_bit_init, GINT_TO_POINTER(pass->vignette_activite) ) )
+        {
+#ifdef bouh
+          if ( ! g_slist_find( liste_bit_init, GINT_TO_POINTER(pass->vignette_activite) ) )
            { liste_bit_init = g_slist_prepend( liste_bit_init, GINT_TO_POINTER(pass->vignette_activite) );
              Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                       "liste des bit_init_syn pass %d", pass->vignette_activite );
@@ -141,15 +143,21 @@
              Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                       "liste des bit_init_syn pass %d", pass->vignette_secu_personne );
            }
+#endif
+          if ( ! g_slist_find( client->Liste_syns, GINT_TO_POINTER(pass->syn_cible_id) ) )
+           { client->Liste_syns = g_slist_prepend( client->Liste_syns, GINT_TO_POINTER(pass->syn_cible_id) );
+             Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                      "liste des syn_cible id pass %d", pass->syn_cible_id );
+           }
+
+
          }
-       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_passerelle_tag: pass %d (%s) to client %s",
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "%s: pass %d (%s) to client %s", __func__,
                  pass->id, pass->libelle, client->machine );
-       Envoi_client ( client, tag, sstag,
-                      (gchar *)pass, sizeof(struct CMD_TYPE_PASSERELLE) );
+       Envoi_client ( client, tag, sstag, (gchar *)pass, sizeof(struct CMD_TYPE_PASSERELLE) );
        g_free(pass);
      }
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-    Envoyer_bit_init_motif ( client, liste_bit_init );                                     /* Envoi des bits d'initialisation */
+/*  Envoyer_bit_init_motif ( client, liste_bit_init );                                     /* Envoi des bits d'initialisation */
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
