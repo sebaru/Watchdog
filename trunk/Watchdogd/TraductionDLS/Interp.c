@@ -360,6 +360,24 @@
 /* Entrées: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
+ struct ACTION *New_action_vars_mono( gchar *nom )
+  { struct ACTION *action;
+    int taille;
+
+    taille = strlen(nom)+5;
+    action = New_action();
+    action->alors = New_chaine( taille );
+    action->sinon = New_chaine( taille );
+
+    g_snprintf( action->alors, taille, "%s=1;", nom );
+    g_snprintf( action->sinon, taille, "%s=0;", nom );
+    return(action);
+  }
+/******************************************************************************************************************************/
+/* New_action_mono: Prepare une struct action avec une commande SM                                                            */
+/* Entrées: numero du monostable, sa logique                                                                                  */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
  struct ACTION *New_action_mono( int num )
   { struct ACTION *action;
     int taille;
@@ -631,7 +649,7 @@
           gchar *Fonction= " gint Get_Tableau_bit(int n) { return(Tableau_bit[n]); }\n"
                            " gint Get_Tableau_num(int n) { return(Tableau_num[n]); }\n"
                            " gint Get_Tableau_msg(int n) { return(Tableau_msg[n]); }\n";
-          gchar *Start_Go = " void Go ( gint start, gint debug )\n"
+          gchar *Start_Go = " void Go ( gint start, gint debug, struct DLS_TO_PLUGIN *vars )\n"
                             "  {\n"
                             "    Update_edge_up_value();\n"
                             "    if (debug) Dls_print_debug( Dls_id, (int *)&Tableau_bit, (int *)&Tableau_num, (float *)&Tableau_val );\n";

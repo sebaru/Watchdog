@@ -80,6 +80,11 @@ blanc         [\t ]+
 "_SAMEDI"                  { DlsScanner_lval.val = SAMEDI;      return SAMEDI;      }
 "_DIMANCHE"                { DlsScanner_lval.val = DIMANCHE;    return DIMANCHE;    }
 
+
+ /**************************************************** Status des vignette ****************************************************/
+"_ACTIVITE_OK"             { DlsScanner_lval.val = T_ACTIVITE_OK;   return T_ACTIVITE_OK;    }
+"_ACTIVITE_FIXE"           { DlsScanner_lval.val = T_ACTIVITE_FIXE; return T_ACTIVITE_FIXE;  }
+
  /************************************************ Couleurs ***********************************************/
 "rouge"                    { DlsScanner_lval.val = ROUGE;       return ROUGE;       }
 "vert"                     { DlsScanner_lval.val = VERT;        return VERT;        }

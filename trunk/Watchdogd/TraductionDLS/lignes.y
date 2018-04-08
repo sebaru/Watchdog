@@ -43,6 +43,7 @@
        };
 
 %token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS T_POUV T_PFERM T_EGAL OU ET BARRE T_FOIS
+%token <val>    T_ACTIVITE_OK T_ACTIVITE_FIXE
 %token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL T_TRUE T_FALSE
@@ -592,6 +593,10 @@ une_action:     barre SORTIE ENTIER
                   }}
                 | T_MSG ENTIER
                   {{ $$=New_action_msg($2); }}
+                | T_ACTIVITE_OK
+                  {{ $$=New_action_vars_mono("vars->activite"); }}
+                | T_ACTIVITE_FIXE
+                  {{ $$=New_action_vars_mono("vars->activite_fixe"); }}
                 | barre ID liste_options
                 {{ struct ALIAS *alias;                                                   /* Definition des actions via alias */
                    int taille;

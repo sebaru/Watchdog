@@ -783,24 +783,32 @@
  static void Dls_run_dls_tree ( struct DLS_TREE *dls_tree )
   { GSList *liste;
     struct timeval tv_avant, tv_apres;
+    dls_tree->activite      = TRUE;
+    dls_tree->activite_fixe = FALSE;
     liste = dls_tree->Liste_plugin_dls;
-    while(liste)                                                                /* On execute tous les modules un par un */
+    while(liste)                                                                     /* On execute tous les modules un par un */
      { struct PLUGIN_DLS *plugin_actuel;
        plugin_actuel = (struct PLUGIN_DLS *)liste->data;
 
        if (plugin_actuel->plugindb.on && plugin_actuel->go)
         { gettimeofday( &tv_avant, NULL );
-          Partage->top_cdg_plugin_dls = 0;                                                   /* On reset le cdg plugin DLS */
-          plugin_actuel->go( plugin_actuel->starting, plugin_actuel->debug );                        /* On appel le plugin */
+          Partage->top_cdg_plugin_dls = 0;                                                      /* On reset le cdg plugin DLS */
+          plugin_actuel->go( plugin_actuel->starting, plugin_actuel->debug, &plugin_actuel->vars );     /* On appel le plugin */
           gettimeofday( &tv_apres, NULL );
           plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
           plugin_actuel->starting = 0;
+          dls_tree->activite &= plugin_actuel->vars.activite;
+          dls_tree->activite_fixe |= plugin_actuel->vars.activite_fixe;
         }
        liste = liste->next;
      }
     liste = dls_tree->Liste_dls_tree;
     while (liste)
-     { Dls_run_dls_tree ( liste->data );
+     { struct DLS_TREE *sub_tree;
+       sub_tree = (struct DLS_TREE *)liste->data;
+       Dls_run_dls_tree ( sub_tree );
+       dls_tree->activite &= sub_tree->activite;
+       dls_tree->activite_fixe |= sub_tree->activite_fixe;
        liste = liste->next;
      }
  }

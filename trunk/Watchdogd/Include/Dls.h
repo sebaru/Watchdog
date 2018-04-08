@@ -42,11 +42,12 @@
     gint starting;                                      /* 1 si les bits internes "start" du plugins doivent etre positionnés */
     gboolean debug;                                                 /* TRUE si le plugin doit logguer ses changements de bits */
     void *handle;                                                                              /* Handle du fichier librairie */
-    void (*go)(gint,gint);                                                                /* Fonction de traitement du module */
+    void (*go)(gint,gint,struct DLS_TO_PLUGIN *);                                         /* Fonction de traitement du module */
     float conso;                                                                         /* Consommation temporelle du plugin */
     gint (*Get_Tableau_bit)(gint);                                             /* Fonction d'identification des bits utilisés */
     gint (*Get_Tableau_num)(gint);                                             /* Fonction d'identification des bits utilisés */
     gint (*Get_Tableau_msg)(gint);                                             /* Fonction d'identification des bits utilisés */
+    struct DLS_TO_PLUGIN vars;
   };
 
  enum                                                                                  /* différent statut des temporisations */
@@ -131,6 +132,8 @@
 
  struct DLS_TREE
   { gint syn_id;
+    gboolean activite;
+    gboolean activite_fixe;
     GSList *Liste_plugin_dls;                                                /* Liste des plugins D.L.S associé au synoptique */
     GSList *Liste_dls_tree;                                               /* Liste des sous_synoptiques associés au synoptique */
   };
@@ -163,6 +166,7 @@
 
  extern void Charger_plugins ( void );                                                                      /* Dans plugins.c */
  extern void Decharger_plugins ( void );
+ extern void Decharger_plugin_by_id ( gint id );
  extern gint Compiler_source_dls( gboolean reset, gint id, gchar *buffer, gint taille_buffer );
  extern void Activer_plugin_by_id ( gint id, gboolean actif );
  extern void Reseter_un_plugin ( gint id );                                                                 /* Dans plugins.c */

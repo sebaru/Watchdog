@@ -78,6 +78,8 @@
  extern struct ACTION *New_action( void );
  extern struct ACTION *New_action_msg( int num );
  extern struct ACTION *New_action_sortie( int num, int barre );
+ extern struct ACTION *New_action_vars_mono( gchar *nom );
+ extern struct ACTION *New_action_activite_fixe( void );
  extern struct ACTION *New_action_mono( int num );
  extern struct ACTION *New_action_icone( int num, GList *options );
  extern struct ACTION *New_action_tempo( int num, GList *options );

@@ -64,7 +64,7 @@
     if (retour)
      { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_DEL_PLUGIN_DLS_OK,
                      (gchar *)rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-       Partage->com_dls.Thread_reload = TRUE;
+       Decharger_plugin_by_id ( rezo_dls->id );
      }
     else
      { struct CMD_GTK_MESSAGE erreur;
@@ -209,7 +209,7 @@
  void *Proto_compiler_source_dls_thread( struct CLIENT *client )
   { struct CMD_TYPE_PLUGIN_DLS *result;
     struct CMD_GTK_MESSAGE erreur;
-    prctl(PR_SET_NAME, "W-Trad.DLS", 0, 0, 0 );
+    /*prctl(PR_SET_NAME, "W-Trad.DLS", 0, 0, 0 );*/
     switch ( Compiler_source_dls ( TRUE, client->dls.id, erreur.message, sizeof(erreur.message) ) )
      { case DLS_COMPIL_ERROR_LOAD_SOURCE:
             g_snprintf( erreur.message, sizeof(erreur.message),
@@ -289,12 +289,13 @@
               else { g_snprintf(chaine, sizeof(chaine), "/* %06d.dls: %s */\n", result->id, result->nom );
                      if (write(id_fichier, chaine, strlen(chaine) )<0)
                       { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                                 "Proto_ajouter_plugin_dls: Init .dls failed %d (%s)", result->id, strerror(errno) );
+                                 "%s: Init .dls failed %d (%s)", __func__, result->id, strerror(errno) );
                       }
                      close(id_fichier); 
 
                      Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_ADD_PLUGIN_DLS_OK,                          /* Tout va bien */
                                    (gchar *)result, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+                     Partage->com_dls.Thread_reload = TRUE; 
                      g_free(result);
                    }
             }
