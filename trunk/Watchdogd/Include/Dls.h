@@ -129,17 +129,17 @@
     gint changes;
   };
 
- struct DLS_SYN
+ struct DLS_TREE
   { gint syn_id;
     GSList *Liste_plugin_dls;                                                /* Liste des plugins D.L.S associé au synoptique */
-    GSList *Liste_dls_syn;                                               /* Liste des sous_synoptiques associés au synoptique */
+    GSList *Liste_dls_tree;                                               /* Liste des sous_synoptiques associés au synoptique */
   };
 
  struct COM_DLS                                                                      /* Communication entre le serveur et DLS */
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     pthread_mutex_t synchro_traduction;                  /* Mutex pour interdire les traductions simultanées de plugins D.L.S */
-    struct DLS_SYN *Dls_syn;                                           /* Liste des synoptiques chargés. Contient des DLS_SYN */
+    struct DLS_TREE *Dls_tree;                                           /* Liste des synoptiques chargés. Contient des DLS_TREE */
     GSList *Set_M;                                                              /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_M;                                                      /* liste des Mxxx a désactiver à la fin du tour prg */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
@@ -165,10 +165,7 @@
  extern void Decharger_plugins ( void );
  extern gint Compiler_source_dls( gboolean reset, gint id, gchar *buffer, gint taille_buffer );
  extern void Activer_plugin_by_id ( gint id, gboolean actif );
-#ifdef bouh
  extern void Reseter_un_plugin ( gint id );                                                                 /* Dans plugins.c */
- extern void Decharger_un_plugin_by_id ( gint id );
-#endif
  
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
  extern int EA_inrange( int num );

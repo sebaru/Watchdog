@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/ajout_synoptique.c        Addition/Edition d'un synoptique Watchdog2.0                          */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 04 avr 2009 13:54:48 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/ajout_synoptique.c        Addition/Edition d'un synoptique Watchdog2.0                                              */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          sam 04 avr 2009 13:54:48 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * ajout_synoptique.c
  * This file is part of Watchdog
@@ -126,8 +126,8 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_access_level, 3, 4, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Parent_id") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    texte = gtk_label_new( _("Synoptique parent (id)") );
+    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 2, i, i+1 );
     Spin_parent_id = gtk_spin_button_new_with_range( 1, 100000, 1 );
     gtk_table_attach_defaults( GTK_TABLE(table), Spin_parent_id, 2, 4, i, i+1 );
 

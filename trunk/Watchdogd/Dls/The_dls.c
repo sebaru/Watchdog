@@ -776,14 +776,14 @@
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
 /******************************************************************************************************************************/
-/* Dls_run_dls_syn: Fait tourner les DLS synoptique en parametre + les sous DLS                                               */
-/* Entrée : le Dls_syn correspondant                                                                                          */
+/* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                               */
+/* Entrée : le Dls_tree correspondant                                                                                          */
 /* Sortie : rien                                                                                                              */
 /******************************************************************************************************************************/
- static void Dls_run_dls_syn ( struct DLS_SYN *dls_syn )
+ static void Dls_run_dls_tree ( struct DLS_TREE *dls_tree )
   { GSList *liste;
     struct timeval tv_avant, tv_apres;
-    liste = dls_syn->Liste_plugin_dls;
+    liste = dls_tree->Liste_plugin_dls;
     while(liste)                                                                /* On execute tous les modules un par un */
      { struct PLUGIN_DLS *plugin_actuel;
        plugin_actuel = (struct PLUGIN_DLS *)liste->data;
@@ -798,9 +798,9 @@
         }
        liste = liste->next;
      }
-    liste = dls_syn->Liste_dls_syn;
+    liste = dls_tree->Liste_dls_tree;
     while (liste)
-     { Dls_run_dls_syn ( liste->data );
+     { Dls_run_dls_tree ( liste->data );
        liste = liste->next;
      }
  }
@@ -853,7 +853,7 @@
        SI(1, 1, 255, 0, 0, 0 );                                                                   /* Icone toujours à 1:rouge */
 
        pthread_mutex_lock( &Partage->com_dls.synchro );
-       Dls_run_dls_syn( Partage->com_dls.Dls_syn );
+       Dls_run_dls_tree( Partage->com_dls.Dls_tree );
        pthread_mutex_unlock( &Partage->com_dls.synchro );
        SB_SYS(3, 1);                                                  /* B3 est toujours à un apres le premier tour programme */
 
