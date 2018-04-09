@@ -74,7 +74,7 @@
     GSList *Liste_bit_cadrans;                             /* Ensemble des bits EAxx utilisés pour les synoptiques visualisés */
 
 /* Communication des syn_cible_id des passerelles chargées */
-    GSList *Liste_syns;                                                                         /* Liste des evenements recus */
+    GSList *Liste_pass;                                                                         /* Liste des evenements recus */
 
 /* Communication des fichiers de travail vers les clients */
     GSList *Liste_file;

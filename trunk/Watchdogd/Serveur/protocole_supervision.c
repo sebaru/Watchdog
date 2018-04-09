@@ -133,6 +133,13 @@
                client->Liste_bit_syns = g_slist_remove ( client->Liste_bit_syns, GINT_TO_POINTER( etat->num ) );
              }
             break;
+       case SSTAG_CLIENT_SET_SYN_VARS_UNKNOWN:
+             { struct CMD_TYPE_SYN_VARS *syn_vars;
+               syn_vars = (struct CMD_TYPE_SYN_VARS *)connexion->donnees;
+               printf("Le client n'a plus besoin du syn_cible_id %d\n", syn_vars->syn_id );
+               client->Liste_pass = g_slist_remove ( client->Liste_pass, GINT_TO_POINTER( syn_vars->syn_id ) );
+             }
+            break;
        case SSTAG_CLIENT_SET_BIT_INTERNE:
              { struct CMD_SET_BIT_INTERNE *bit;
                bit = (struct CMD_SET_BIT_INTERNE *)connexion->donnees;

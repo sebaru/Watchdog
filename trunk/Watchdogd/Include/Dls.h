@@ -180,6 +180,9 @@
  extern void SEA_ech( int num, float val_ech );
  extern void Envoyer_entree_furtive_dls( int num );
  extern void Envoyer_commande_dls ( int num );
+ extern void Dls_foreach ( void *user_data, 
+                           void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
+                           void (*do_tree)   (void *user_data, struct DLS_TREE *) );
 
  extern void Prendre_heure ( void );                                                                          /* Dans heure.c */ 
  #endif

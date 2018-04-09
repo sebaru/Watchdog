@@ -177,7 +177,7 @@
               { case TAG_ZMQ_SET_SYN_VARS:
                  { struct CMD_TYPE_SYN_VARS *syn_vars;
                    syn_vars = (struct CMD_TYPE_SYN_VARS *)payload;
-                   if ( g_slist_find( client->Liste_syns, GINT_TO_POINTER(syn_vars->syn_id) ) )/* Envoi uniquement si le client en a besoin */
+                   if ( g_slist_find( client->Liste_pass, GINT_TO_POINTER(syn_vars->syn_id) ) )/* Envoi uniquement si le client en a besoin */
                     { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_SET_SYN_VARS,
                                     (gchar *)syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
                     }

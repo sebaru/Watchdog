@@ -459,11 +459,10 @@ printf("Recu set syn_vars %d  act=%d act_fixe=%d\n", syn_vars->syn_id, syn_vars-
         }
        liste = liste->next;
      }
-#ifdef bouh
+
     if (!cpt)                                 /* Si nous n'avons rien mis à jour, c'est que le bit Ixxx ne nous est pas utile */
-     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN,
-                      (gchar *)etat_motif, sizeof(struct CMD_ETAT_BIT_CTRL) ); 
+     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SET_SYN_VARS_UNKNOWN,
+                      (gchar *)syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) ); 
      }
-#endif
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

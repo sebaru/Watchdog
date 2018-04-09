@@ -780,6 +780,37 @@
 /* Entrée : le Dls_tree correspondant                                                                                         */
 /* Sortie : rien                                                                                                              */
 /******************************************************************************************************************************/
+ static void Dls_foreach_dls_tree ( struct DLS_TREE *dls_tree, void *user_data,
+                                    void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
+                                    void (*do_tree)   (void *user_data, struct DLS_TREE *) )
+  { GSList *liste;
+    liste = dls_tree->Liste_dls_tree;
+    while (liste)
+     { struct DLS_TREE *sub_tree;
+       sub_tree = (struct DLS_TREE *)liste->data;
+       Dls_foreach_dls_tree( sub_tree, user_data, do_plugin, do_tree );
+       liste = liste->next;
+     }
+    liste = dls_tree->Liste_plugin_dls;
+    while(liste && do_plugin)                                                        /* On execute tous les modules un par un */
+     { struct PLUGIN_DLS *plugin_actuel;
+       plugin_actuel = (struct PLUGIN_DLS *)liste->data;
+       do_plugin( user_data, plugin_actuel );       
+       liste = liste->next;
+     }
+    if (do_tree) do_tree( user_data, dls_tree );
+  }
+ void Dls_foreach ( void *user_data, void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
+                                     void (*do_tree)   (void *user_data, struct DLS_TREE *) )
+  { pthread_mutex_lock( &Partage->com_dls.synchro );
+    Dls_foreach_dls_tree( Partage->com_dls.Dls_tree, user_data, do_plugin, do_tree );
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+  }
+/******************************************************************************************************************************/
+/* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                              */
+/* Entrée : le Dls_tree correspondant                                                                                         */
+/* Sortie : rien                                                                                                              */
+/******************************************************************************************************************************/
  static void Dls_run_dls_tree ( struct DLS_TREE *dls_tree )
   { struct timeval tv_avant, tv_apres;
     gboolean activite, activite_fixe;
