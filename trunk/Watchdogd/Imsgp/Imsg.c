@@ -530,7 +530,7 @@
 
     while( Cfg_imsgp.lib->Thread_run == TRUE )                                               /* On tourne tant que necessaire */
      { struct CMD_TYPE_HISTO *histo, histo_buf;
-       g_usleep(10000);
+       g_usleep(200000);
        sched_yield();
 
        if (Cfg_imsgp.lib->Thread_reload == TRUE)

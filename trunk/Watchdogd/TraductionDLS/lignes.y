@@ -44,7 +44,7 @@
 
 %token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS T_POUV T_PFERM T_EGAL OU ET BARRE T_FOIS
 %token <val>    T_ACTIVITE_OK T_ACTIVITE_FIXE
-%token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO
+%token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LOCAL
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL T_TRUE T_FALSE
 %type  <val>    ordre
@@ -52,7 +52,7 @@
 %token <val>    HEURE APRES AVANT LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE
 %type  <val>    modulateur jour_semaine
 
-%token <val>    BI MONO ENTREE SORTIE T_TEMPO T_TYPE T_RETARD
+%token <val>    BI T_MONO ENTREE SORTIE T_TEMPO T_TYPE T_RETARD
 %token <val>    T_MSG ICONE CPT_H T_CPT_IMP EANA T_START T_REGISTRE
 %type  <val>    alias_bit
 
@@ -96,7 +96,7 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                                    break;
                       case T_TEMPO :
                       case EANA  :
-                      case MONO  :
+                      case T_MONO  :
                       case CPT_H :
                       case T_CPT_IMP:
                       case T_MSG :
@@ -113,7 +113,7 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                     }
                 }}
                 ;
-alias_bit:      BI | MONO | ENTREE | SORTIE | T_MSG | T_TEMPO | ICONE | CPT_H | T_CPT_IMP | EANA | T_REGISTRE
+alias_bit:      BI | T_MONO | ENTREE | SORTIE | T_MSG | T_TEMPO | ICONE | CPT_H | T_CPT_IMP | EANA | T_REGISTRE
                 ;
 /**************************************************** Gestion des instructions ************************************************/
 listeInstr:     une_instr listeInstr
@@ -349,7 +349,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                 {{ $$ = New_condition_bi ( $1, $3, $4 );
                    Liberer_options($4);
                 }}
-                | barre MONO ENTIER
+                | barre T_MONO ENTIER
                 {{ int taille;
                    taille = 10;
                    $$ = New_chaine( taille ); /* 10 caractères max */
@@ -427,7 +427,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                     { if ($4 && (alias->bit==T_TEMPO ||                              /* Vérification des bits non comparables */
                                  alias->bit==ENTREE ||
                                  alias->bit==BI ||
-                                 alias->bit==MONO)
+                                 alias->bit==T_MONO)
                          )
                        { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser dans une comparaison", DlsScanner_get_lineno(), $2 );
                          $$=New_chaine(2);
@@ -463,7 +463,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                              { $$ = New_condition_bi( 1, alias->num, $3 ); }
                             break;
                           }
-                         case MONO:
+                         case T_MONO:
                           { taille = 15;
                             $$ = New_chaine( taille ); /* 10 caractères max */
                             if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
@@ -573,7 +573,7 @@ une_action:     barre SORTIE ENTIER
                          $$->sinon = NULL;
                        }
                   }}
-                | MONO ENTIER
+                | T_MONO ENTIER
                   {{ $$=New_action_mono($2);           }}
                 | ICONE ENTIER liste_options
                   {{ $$=New_action_icone($2, $3);
@@ -618,7 +618,7 @@ une_action:     barre SORTIE ENTIER
                       options = g_list_concat( options_g, options_d );                  /* Concaténation des listes d'options */
                       if ($1 && (alias->bit==T_TEMPO ||
                                  alias->bit==T_MSG ||
-                                 alias->bit==MONO)
+                                 alias->bit==T_MONO)
                          )
                        { Emettre_erreur_new( "Ligne %d: '/%s' ne peut s'utiliser", DlsScanner_get_lineno(), alias->nom );
                          $$=New_action();
@@ -642,7 +642,7 @@ une_action:     barre SORTIE ENTIER
                                           $$->sinon = NULL;
                                         }
                                        break;
-                         case MONO   : $$=New_action_mono( alias->num );        break;
+                         case T_MONO   : $$=New_action_mono( alias->num );        break;
                          case CPT_H  : $$=New_action_cpt_h( alias->num, options );   break;
                          case T_CPT_IMP: $$=New_action_cpt_imp( alias->num, options ); break;
                          case ICONE  : $$=New_action_icone( alias->num, options );   break;
@@ -706,6 +706,11 @@ une_option:     MODE T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->type = COLOR;
                    $$->entier = $3;
+                }}
+                | T_LOCAL
+                {{ $$=New_option();
+                   $$->type = T_LOCAL;
+                   $$->entier = 1;
                 }}
                 | CLIGNO
                 {{ $$=New_option();

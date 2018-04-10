@@ -667,6 +667,20 @@
           g_snprintf( chaine, sizeof(chaine), " static gint Dls_id = %d;\n", id );
           write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
 
+          liste = Alias;                                                      /* Déclaration des variables internes au module */
+          while(liste)
+           { gint local;
+             alias = (struct ALIAS *)liste->data;
+             if ( Get_option_entier ( alias->options, T_LOCAL )  == 1 )
+              { switch ( alias->bit )
+                 { case T_MONO: g_snprintf( chaine, sizeof(chaine), " static gboolean _M_%s;\n", alias->nom );
+                                write(fd, chaine, strlen(chaine) );                                   /* Ecriture du prologue */
+                   break;
+                 }
+              }
+             liste = liste->next;
+           }
+
           write(fd, Chaine_bit, strlen(Chaine_bit) );                                                 /* Ecriture du prologue */
           liste = Liste_Actions_bit;                                       /* Initialise les tableaux des actions rencontrées */
           while(liste)

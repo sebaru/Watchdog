@@ -58,7 +58,7 @@ blanc         [\t ]+
 "_A"                       { DlsScanner_lval.val = SORTIE;      return SORTIE;      }
 "_I"                       { DlsScanner_lval.val = ICONE;       return ICONE;       }
 "_B"                       { DlsScanner_lval.val = BI;          return BI;          }
-"_M"                       { DlsScanner_lval.val = MONO;        return MONO;        }
+"_M"                       { DlsScanner_lval.val = T_MONO;        return T_MONO;        }
 "_T"                       { DlsScanner_lval.val = T_TEMPO;     return T_TEMPO;     }
 "_R"                       { DlsScanner_lval.val = T_REGISTRE;  return T_REGISTRE;  }
 "_CH"                      { DlsScanner_lval.val = CPT_H;       return CPT_H;       }
@@ -102,6 +102,7 @@ blanc         [\t ]+
 "color"                    { DlsScanner_lval.val = COLOR;       return COLOR;       }
 "cligno"                   { DlsScanner_lval.val = CLIGNO;      return CLIGNO;      }
 "edge_up"                  { DlsScanner_lval.val = T_EDGE_UP;   return T_EDGE_UP;   }
+"local"                    { DlsScanner_lval.val = T_LOCAL;     return T_LOCAL;     }
  /*********************************************** Le reste ************************************************/
 "."                        { DlsScanner_lval.val = ET;          return ET;          }
 "+"                        { DlsScanner_lval.val = OU;          return OU;          }
