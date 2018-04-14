@@ -30,8 +30,14 @@
  #include <glib.h>
 
  struct DLS_TO_PLUGIN                                                 /* structure dechange de données entre DLS et le plugin */
-  { gboolean activite;
-    gboolean activite_fixe;
+  { gboolean bit_comm_out;
+    gboolean bit_defaut;
+    gboolean bit_alarme;
+    gboolean bit_veille_partielle;
+    gboolean bit_veille_totale;
+    gboolean bit_alerte;
+    gboolean bit_derangement;
+    gboolean bit_danger;
   };
 
  extern void Dls_print_debug ( gint id, gint *Tableau_bit, gint *Tableau_num, gfloat *Tableau_val );

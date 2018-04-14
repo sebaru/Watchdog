@@ -145,8 +145,6 @@
      }
     if (dls->plugindb.on) dls->start_date = time(NULL);
                      else dls->start_date = 0;
-    dls->vars.activite = TRUE;
-    dls->vars.activite_fixe = FALSE;
     return(retour);
   }
 /******************************************************************************************************************************/

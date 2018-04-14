@@ -340,23 +340,29 @@
 /******************************************************************************************************************************/
  static void Changer_etat_passerelle( struct TRAME_ITEM_PASS *trame_pass, struct CMD_TYPE_SYN_VARS *vars )
   { printf("Changer_etat_passerelle !\n");
-    if (vars->activite == TRUE)
+    if (vars->bit_comm_out == TRUE)
      { trame_pass->rouge1  = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->vert1   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert1   = 100;                                                                    /* Sauvegarde etat motif */
        trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
        trame_pass->cligno1 = 0;                                                                      /* Sauvegarde etat motif */
      }
-    else if (vars->activite_fixe == TRUE)
-     { trame_pass->rouge1  = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->vert1   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno1 = 0;                                                                      /* Sauvegarde etat motif */
-     }
-    else
+    else if (vars->bit_alarme == TRUE)
      { trame_pass->rouge1  = 255;                                                                    /* Sauvegarde etat motif */
        trame_pass->vert1   = 0;                                                                      /* Sauvegarde etat motif */
        trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
        trame_pass->cligno1 = 1;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_defaut == TRUE)
+     { trame_pass->rouge1  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert1   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno1 = 1;                                                                      /* Sauvegarde etat motif */
+     }
+    else
+     { trame_pass->rouge1  = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->vert1   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno1 = 0;                                                                      /* Sauvegarde etat motif */
      }
     
     Trame_peindre_pass_1 ( trame_pass, trame_pass->rouge1, trame_pass->vert1, trame_pass->bleu1 );
@@ -434,7 +440,10 @@ printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, eta
     GList *liste;
     gint cpt;
 
-printf("Recu set syn_vars %d  act=%d act_fixe=%d\n", syn_vars->syn_id, syn_vars->activite, syn_vars->activite_fixe );
+printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d, der=%d, dan=%d",syn_vars->syn_id,
+                   syn_vars->bit_comm_out, syn_vars->bit_defaut, syn_vars->bit_alarme,
+                   syn_vars->bit_veille_partielle, syn_vars->bit_veille_totale, syn_vars->bit_alerte,
+                   syn_vars->bit_derangement, syn_vars->bit_danger );
 
     cpt = 0;                                                                     /* Nous n'avons encore rien fait au debut !! */
     liste = Liste_pages;

@@ -61,8 +61,10 @@
        g_snprintf( chaine, sizeof(chaine), " | - SYN[%05d] - DLS[%06d] -> started=%d, start_date=%s, debug=%d, conso=%08.03f, nom=%s",
                    dls_tree->syn_vars.syn_id, dls->plugindb.id, dls->plugindb.on, date, dls->debug, dls->conso, dls->plugindb.shortname );
        response = Admin_write ( response, chaine );
-       g_snprintf( chaine, sizeof(chaine), " |                   vignette -> activite=%d, fixe=%d",
-                   dls->vars.activite, dls->vars.activite_fixe );
+       g_snprintf( chaine, sizeof(chaine), " |                   comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d, der=%d, dan=%d",
+                   dls->vars.bit_comm_out, dls->vars.bit_defaut, dls->vars.bit_alarme,
+                   dls->vars.bit_veille_partielle, dls->vars.bit_veille_totale, dls->vars.bit_alerte,
+                   dls->vars.bit_derangement, dls->vars.bit_danger );
        response = Admin_write ( response, chaine );
        liste = liste->next;
      }
