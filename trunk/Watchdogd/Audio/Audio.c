@@ -50,22 +50,21 @@
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                "Audio_Lire_config: Database connexion failed. Using Default Parameters" );
+                "%s: Database connexion failed. Using Default Parameters", __func__ );
        return(FALSE);
      }
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,                                           /* Print Config */
-                "Audio_Lire_config: '%s' = %s", nom, valeur );
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "%s: '%s' = %s", nom, valeur );           /* Print Config */
             if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_audio.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_audio.lib->Thread_debug = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "language" ) )
-        { g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", valeur ); }
+        { g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", __func__, valeur ); }
        else
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,
-                   "Audio_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
+                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
         }
      }
     return(TRUE);
@@ -82,21 +81,21 @@
     pid = fork();
     if (pid<0)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "Jouer_wav: APLAY '%s' fork failed pid=%d", fichier, pid );
+                "%s: APLAY '%s' fork failed pid=%d", __func__, fichier, pid );
      }
     else if (!pid)
      { execlp( "aplay", "aplay", "-R", "1", fichier, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "Jouer_wav: APLAY '%s' exec failed pid=%d", fichier, pid );
+                "%s: APLAY '%s' exec failed pid=%d", __func__, fichier, pid );
        _exit(0);
      }
     else
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                "Jouer_wav: APLAY '%s' waiting to finish pid=%d (%s)", fichier, pid, strerror(errno) );
+                "%s: APLAY '%s' waiting to finish pid=%d", __func__, fichier, pid );
        waitpid(pid, NULL, 0 );
      }
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-             "Jouer_wav: APLAY '%s' finished pid=%d", fichier, pid );
+             "%s: APLAY '%s' finished pid=%d", __func__, fichier, pid );
   }
 /******************************************************************************************************************************/
 /* Jouer_mp3 : Joue un fichier mp3 et attend la fin de la diffusion                                                           */

@@ -652,7 +652,7 @@
     struct ZMQUEUE *zmq_admin;
     
     prctl(PR_SET_NAME, "W-SMSG", 0, 0, 0 );
-    memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                         /* Mise a zero de la structure de travail */
+    memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                        /* Mise a zero de la structure de travail */
     Cfg_smsg.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_smsg.lib->TID = pthread_self();                                                      /* Sauvegarde du TID pour le pere */
     Smsg_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
