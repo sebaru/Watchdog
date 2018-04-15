@@ -43,7 +43,7 @@
        };
 
 %token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS T_POUV T_PFERM T_EGAL OU ET BARRE T_FOIS
-%token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_SBIEN_VP T_SBIEN_VT T_SBIEN_ALE T_SPERS_DER T_SPERS_DAN
+%token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_SBIEN_VP T_SBIEN_VT T_SBIEN_ALE T_SPERS_DER T_SPERS_DAN T_OSYN_ACQ
 %token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LOCAL
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL T_TRUE T_FALSE
@@ -194,6 +194,9 @@ calcul_expr3:   VALF
                    taille = 15;
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "%d", $1 );
+                }}
+                | T_OSYN_ACQ
+                {{ $$ = g_strdup("plugin->vars.bit_acquit");
                 }}
                 | EANA ENTIER
                 {{ int taille;

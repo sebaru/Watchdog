@@ -90,6 +90,7 @@ blanc         [\t ]+
 "_MEMSSB_ALE"              { DlsScanner_lval.val = T_SBIEN_ALE;  return T_SBIEN_ALE;  }
 "_MEMSSP_DER"              { DlsScanner_lval.val = T_SPERS_DER;  return T_SPERS_DER;  }
 "_MEMSSP_DAN"              { DlsScanner_lval.val = T_SPERS_DAN;  return T_SPERS_DAN;  }
+"_OSYN_ACQUIT"             { DlsScanner_lval.val = T_OSYN_ACQ;   return T_OSYN_ACQ;   }
 
  /************************************************ Couleurs ***********************************************/
 "rouge"                    { DlsScanner_lval.val = ROUGE;       return ROUGE;       }

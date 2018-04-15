@@ -38,6 +38,7 @@
     gboolean bit_alerte;
     gboolean bit_derangement;
     gboolean bit_danger;
+    gboolean bit_acquit;
   };
 
  extern void Dls_print_debug ( gint id, gint *Tableau_bit, gint *Tableau_num, gfloat *Tableau_val );

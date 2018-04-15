@@ -74,6 +74,7 @@
     SSTAG_CLIENT_SET_BIT_INTERNE,                                               /* Le client envoie un bit interne au serveur */
     SSTAG_SERVEUR_SUPERVISION_SET_SYN_VARS,                                           /* Changement des variables synoptiques */
     SSTAG_CLIENT_SET_SYN_VARS_UNKNOWN,                                                                  /* Synoptique inconnu */
+    SSTAG_CLIENT_ACQ_SYN,                                                                 /* Le client acquitte un synoptique */
   };
 
 #endif

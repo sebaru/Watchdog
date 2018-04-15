@@ -113,11 +113,18 @@
     gtk_print_operation_run (print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
                              GTK_WINDOW(F_client), &error);
   }
-/**********************************************************************************************************/
-/* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                    */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_acquitter_synoptique: Envoi une commande d'acquit du synoptique en cours de visu                                      */
+/* Entrée: La page d'information synoptique                                                                                   */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Menu_acquitter_synoptique( struct TYPE_INFO_SUPERVISION *infos )
+  { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_ACQ_SYN, (gchar *)&infos->syn_id, sizeof(gint) ); }
+/******************************************************************************************************************************/
+/* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
+/* Entrée: Le libelle a afficher dans le notebook et l'ID du synoptique                                                       */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Creer_page_supervision ( gchar *libelle, guint syn_id )
   { GtkWidget *bouton, *boite, *hboite, *scroll, *frame, *label;
     GtkAdjustment *adj;
@@ -189,6 +196,12 @@
     infos->Box_palette = gtk_vbox_new( FALSE, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(infos->Box_palette), 6 );
     gtk_container_add( GTK_CONTAINER(frame), infos->Box_palette );
+
+/******************************************************* Acquitter ************************************************************/
+    bouton = gtk_button_new_with_label( "Acquitter" );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                              G_CALLBACK(Menu_acquitter_synoptique), infos );
 
     gtk_widget_show_all( page->child );
 
@@ -278,24 +291,6 @@
        default: printf("Changer_etat_motif: type gestion non géré %d bit_ctrl=%d\n",
                         trame_motif->motif->type_gestion, trame_motif->motif->bit_controle );
      }
-  }
-/**********************************************************************************************************/
-/* Changer_etat_motif: Changement d'etat d'un motif                                                       */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Changer_etat_pass_1( struct TRAME_ITEM_PASS *trame_pass, struct CMD_ETAT_BIT_CTRL *etat_motif )
-  { printf("Changer_etat_pass !\n");
-    trame_pass->rouge1  = etat_motif->rouge;                                     /* Sauvegarde etat motif */
-    trame_pass->vert1   = etat_motif->vert;                                      /* Sauvegarde etat motif */
-    trame_pass->bleu1   = etat_motif->bleu;                                      /* Sauvegarde etat motif */
-    trame_pass->cligno1  = etat_motif->cligno;                                   /* Sauvegarde etat motif */
-
-    Trame_peindre_pass_1 ( trame_pass, etat_motif->rouge,
-                                     etat_motif->vert,
-                                     etat_motif->bleu );
-    printf("Changer_etat_pass: sortie\n");
-    
   }
 /**********************************************************************************************************/
 /* Changer_etat_motif: Changement d'etat d'un motif                                                       */
@@ -402,11 +397,7 @@ printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, eta
                                     break;
              case TYPE_COMMENTAIRE: break;
              case TYPE_PASSERELLE : trame_pass = (struct TRAME_ITEM_PASS *)liste_motifs->data;
-                                    if (trame_pass->pass->vignette_activite == etat_motif->num)
-                                     { Changer_etat_pass_1( trame_pass, etat_motif );
-                                       cpt++;                         /* Nous updatons un motif de plus ! */ 
-                                     }
-                                    else if (trame_pass->pass->vignette_secu_bien == etat_motif->num)
+                                    if (trame_pass->pass->vignette_secu_bien == etat_motif->num)
                                      { Changer_etat_pass_2( trame_pass, etat_motif );
                                        cpt++;                         /* Nous updatons un motif de plus ! */ 
                                      }

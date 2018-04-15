@@ -31,6 +31,19 @@
  #include "watchdogd.h"
  #include "Sous_serveur.h"
 /******************************************************************************************************************************/
+/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Proto_Acquitter_synoptique ( void *user_data, struct PLUGIN_DLS *plugin )
+  { gint syn_id = *(gint *)user_data;
+    if (plugin->plugindb.syn_id == syn_id)
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "%s: Synoptique %d -> plugin %s acquitté", __func__,
+                 plugin->plugindb.syn_id, plugin->plugindb.nom );
+       plugin->vars.bit_acquit = TRUE;
+     }
+  }
+/******************************************************************************************************************************/
 /* Proto_Envoyer_supervision_thread: Envoi du synoptique de supervision demandé par le client                                 */
 /* Entrée: Le client destinaire                                                                                               */
 /* Sortie: Néant                                                                                                              */
@@ -129,15 +142,19 @@
        case SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN:
              { struct CMD_ETAT_BIT_CTRL *etat;
                etat = (struct CMD_ETAT_BIT_CTRL *)connexion->donnees;
-               printf("Le client n'a plus besoin du bit %d\n", etat->num );
                client->Liste_bit_syns = g_slist_remove ( client->Liste_bit_syns, GINT_TO_POINTER( etat->num ) );
              }
             break;
        case SSTAG_CLIENT_SET_SYN_VARS_UNKNOWN:
              { struct CMD_TYPE_SYN_VARS *syn_vars;
                syn_vars = (struct CMD_TYPE_SYN_VARS *)connexion->donnees;
-               printf("Le client n'a plus besoin du syn_cible_id %d\n", syn_vars->syn_id );
                client->Liste_pass = g_slist_remove ( client->Liste_pass, GINT_TO_POINTER( syn_vars->syn_id ) );
+             }
+            break;
+       case SSTAG_CLIENT_ACQ_SYN:
+             { gint syn_id;
+               syn_id = *(gint *)connexion->donnees;
+               Dls_foreach ( &syn_id, Proto_Acquitter_synoptique, NULL );
              }
             break;
        case SSTAG_CLIENT_SET_BIT_INTERNE:

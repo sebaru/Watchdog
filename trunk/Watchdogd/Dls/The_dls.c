@@ -776,8 +776,8 @@
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
 /******************************************************************************************************************************/
-/* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                              */
-/* Entrée : le Dls_tree correspondant                                                                                         */
+/* Dls_foreach_dls_tree: Parcours recursivement l'arbre DLS et execute des commandes en parametres                            */
+/* Entrée : le Dls_tree et les fonctions a appliquer                                                                          */
 /* Sortie : rien                                                                                                              */
 /******************************************************************************************************************************/
  static void Dls_foreach_dls_tree ( struct DLS_TREE *dls_tree, void *user_data,
@@ -800,6 +800,11 @@
      }
     if (do_tree) do_tree( user_data, dls_tree );
   }
+/******************************************************************************************************************************/
+/* Dls_foreach: Parcours l'arbre DLS et execute des commandes en parametres                                                   */
+/* Entrée : les fonctions a appliquer                                                                                         */
+/* Sortie : rien                                                                                                              */
+/******************************************************************************************************************************/
  void Dls_foreach ( void *user_data, void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
                                      void (*do_tree)   (void *user_data, struct DLS_TREE *) )
   { pthread_mutex_lock( &Partage->com_dls.synchro );
@@ -835,6 +840,7 @@
           gettimeofday( &tv_apres, NULL );
           plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
           plugin_actuel->starting = 0;
+          plugin_actuel->vars.bit_acquit = 0;                                                 /* On arrete l'acquit du plugin */
           bit_comm_out         |= plugin_actuel->vars.bit_comm_out;
           bit_defaut           |= plugin_actuel->vars.bit_defaut;
           bit_alarme           |= plugin_actuel->vars.bit_alarme;
