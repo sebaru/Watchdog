@@ -292,50 +292,15 @@
                         trame_motif->motif->type_gestion, trame_motif->motif->bit_controle );
      }
   }
-/**********************************************************************************************************/
-/* Changer_etat_motif: Changement d'etat d'un motif                                                       */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Changer_etat_pass_2( struct TRAME_ITEM_PASS *trame_pass, struct CMD_ETAT_BIT_CTRL *etat_motif )
-  { printf("Changer_etat_pass !\n");
-    trame_pass->rouge2  = etat_motif->rouge;                                     /* Sauvegarde etat motif */
-    trame_pass->vert2   = etat_motif->vert;                                      /* Sauvegarde etat motif */
-    trame_pass->bleu2   = etat_motif->bleu;                                      /* Sauvegarde etat motif */
-    trame_pass->cligno2  = etat_motif->cligno;                                   /* Sauvegarde etat motif */
-
-    Trame_peindre_pass_2 ( trame_pass, etat_motif->rouge,
-                                     etat_motif->vert,
-                                     etat_motif->bleu );
-    printf("Changer_etat_pass_2: sortie\n");
-    
-  }
-/**********************************************************************************************************/
-/* Changer_etat_pass_3: Changement d'etat d'une passerelle (vignette help)                                */
-/* Entrée: une reference sur la passerelle, l'etat attendu                                                */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Changer_etat_pass_3( struct TRAME_ITEM_PASS *trame_pass, struct CMD_ETAT_BIT_CTRL *etat_motif )
-  { printf("Changer_etat_pass !\n");
-    trame_pass->rouge3  = etat_motif->rouge;                                     /* Sauvegarde etat motif */
-    trame_pass->vert3   = etat_motif->vert;                                      /* Sauvegarde etat motif */
-    trame_pass->bleu3   = etat_motif->bleu;                                      /* Sauvegarde etat motif */
-    trame_pass->cligno3 = etat_motif->cligno;                                    /* Sauvegarde etat motif */
-
-    Trame_peindre_pass_3 ( trame_pass, etat_motif->rouge,
-                                       etat_motif->vert,
-                                       etat_motif->bleu );
-    printf("Changer_etat_pass_3: sortie\n");
-    
-  }
 /******************************************************************************************************************************/
 /* Changer_etat_passerelle: Changement d'etat d'une passerelle (toutes les vignettes)                                         */
 /* Entrée: une reference sur la passerelle, l'etat attendu                                                                    */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Changer_etat_passerelle( struct TRAME_ITEM_PASS *trame_pass, struct CMD_TYPE_SYN_VARS *vars )
-  { printf("Changer_etat_passerelle !\n");
-    if (vars->bit_comm_out == TRUE)
+  { printf("Changer_etat_passerelle syn %d!\n", vars->syn_id );
+
+    if (vars->bit_comm_out == TRUE)  /****************************  Vignette Activite *****************************************/
      { trame_pass->rouge1  = 0;                                                                      /* Sauvegarde etat motif */
        trame_pass->vert1   = 100;                                                                    /* Sauvegarde etat motif */
        trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
@@ -359,9 +324,66 @@
        trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
        trame_pass->cligno1 = 0;                                                                      /* Sauvegarde etat motif */
      }
-    
     Trame_peindre_pass_1 ( trame_pass, trame_pass->rouge1, trame_pass->vert1, trame_pass->bleu1 );
-  }
+
+    if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Personnes **************************/
+     { trame_pass->rouge2  = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->vert2   = 100;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu2   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno2 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_alerte == TRUE)
+     { trame_pass->rouge2  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert2   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->bleu2   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno2 = 1;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_veille_totale == TRUE)
+     { trame_pass->rouge2  = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->vert2   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu2   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno2 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_veille_partielle == TRUE)
+     { trame_pass->rouge2  = 127;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert2   = 127;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu2   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno2 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else
+     { trame_pass->rouge2  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert2   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu2   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->cligno1 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    Trame_peindre_pass_2 ( trame_pass, trame_pass->rouge2, trame_pass->vert2, trame_pass->bleu2 );
+
+    if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Biens ******************************/
+     { trame_pass->rouge3  = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->vert3   = 100;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno3 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_danger == TRUE)
+     { trame_pass->rouge3  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert3   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno3 = 1;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_derangement == TRUE)
+     { trame_pass->rouge3  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert3   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno3 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else
+     { trame_pass->rouge3  = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->vert3   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno3 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    Trame_peindre_pass_3 ( trame_pass, trame_pass->rouge3, trame_pass->vert3, trame_pass->bleu3 );
+ }
 /**********************************************************************************************************/
 /* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                   */
 /* Entrée: une reference sur le message                                                                   */
@@ -396,16 +418,6 @@ printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, eta
                                      }
                                     break;
              case TYPE_COMMENTAIRE: break;
-             case TYPE_PASSERELLE : trame_pass = (struct TRAME_ITEM_PASS *)liste_motifs->data;
-                                    if (trame_pass->pass->vignette_secu_bien == etat_motif->num)
-                                     { Changer_etat_pass_2( trame_pass, etat_motif );
-                                       cpt++;                         /* Nous updatons un motif de plus ! */ 
-                                     }
-                                    else if (trame_pass->pass->vignette_secu_personne == etat_motif->num)
-                                     { Changer_etat_pass_3( trame_pass, etat_motif );
-                                       cpt++;                         /* Nous updatons un motif de plus ! */ 
-                                     }
-                                    break;
              default: break;
            }
           liste_motifs=liste_motifs->next;
@@ -423,15 +435,14 @@ printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, eta
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  void Proto_set_syn_vars( struct CMD_TYPE_SYN_VARS *syn_vars )
-  { struct TRAME_ITEM_MOTIF *trame_motif;
-    struct TRAME_ITEM_PASS *trame_pass;
+  { struct TRAME_ITEM_PASS *trame_pass;
     struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
     GList *liste_motifs;
     GList *liste;
     gint cpt;
 
-printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d, der=%d, dan=%d",syn_vars->syn_id,
+printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d, der=%d, dan=%d\n",syn_vars->syn_id,
                    syn_vars->bit_comm_out, syn_vars->bit_defaut, syn_vars->bit_alarme,
                    syn_vars->bit_veille_partielle, syn_vars->bit_veille_totale, syn_vars->bit_alerte,
                    syn_vars->bit_derangement, syn_vars->bit_danger );
