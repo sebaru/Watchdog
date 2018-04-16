@@ -40,15 +40,16 @@
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'SET'" );
-       response = Admin_write ( response, " | - e num val             - Set E[num]   = val" );
-       response = Admin_write ( response, " | - m num val             - Set M[num]   = val" );
-       response = Admin_write ( response, " | - b num val             - Set B[num]   = val" );
-       response = Admin_write ( response, " | - a num val             - Set A[num]   = val" );
-       response = Admin_write ( response, " | - msg num val           - Set MSG[num] = val" );
-       response = Admin_write ( response, " | - i num E R V B C       - Set I[num]   = Etat Rouge Vert Bleu Cligno" );
-       response = Admin_write ( response, " | - ch num val actif      - Set CH[num]  = val, actif" );
-       response = Admin_write ( response, " | - ci num val            - Set CI[num]  = val" );
-       response = Admin_write ( response, " | - help                  - This help" );
+       response = Admin_write ( response, " | - new_b $name $owner $val - Set bistable $name_$owner to $val" );
+       response = Admin_write ( response, " | - e num val               - Set E[num]   = val" );
+       response = Admin_write ( response, " | - m num val               - Set M[num]   = val" );
+       response = Admin_write ( response, " | - b num val               - Set B[num]   = val" );
+       response = Admin_write ( response, " | - a num val               - Set A[num]   = val" );
+       response = Admin_write ( response, " | - msg num val             - Set MSG[num] = val" );
+       response = Admin_write ( response, " | - i num E R V B C         - Set I[num]   = Etat Rouge Vert Bleu Cligno" );
+       response = Admin_write ( response, " | - ch num val actif        - Set CH[num]  = val, actif" );
+       response = Admin_write ( response, " | - ci num val              - Set CI[num]  = val" );
+       response = Admin_write ( response, " | - help                    - This help" );
      } else
     if ( ! strcmp ( commande, "ch" ) )
      { int num, val, actif;
@@ -132,6 +133,16 @@
           g_snprintf( chaine, sizeof(chaine), " | - B%03d = %d", num, val );
         } else
         { g_snprintf( chaine, sizeof(chaine), " | - B -> num '%d' out of range", num ); }
+       response = Admin_write ( response, chaine );
+     } else
+    if ( ! strcmp ( commande, "new_b" ) )
+     { gchar nom[80], owner[80];
+       int val;
+       if (sscanf ( ligne, "%s %s %s %d", commande, nom, owner, &val ) == 4)             /* Découpage de la ligne de commande */
+        { Dls_data_set_bool ( nom, owner, NULL, val );
+          g_snprintf( chaine, sizeof(chaine), " | - %s_%s set to %d", nom, owner, val );
+        }
+       else { g_snprintf( chaine, sizeof(chaine), " | - Wrong number of parameters" ); }
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "a" ) )

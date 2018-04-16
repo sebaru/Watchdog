@@ -140,7 +140,9 @@
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     pthread_mutex_t synchro_traduction;                  /* Mutex pour interdire les traductions simultanées de plugins D.L.S */
-    struct DLS_TREE *Dls_tree;                                           /* Liste des synoptiques chargés. Contient des DLS_TREE */
+    struct DLS_TREE *Dls_tree;                                                                       /* Arbre d'execution DLS */
+    pthread_mutex_t synchro_data;                                      /* Mutex pour les acces concurrents à l'arbre des data */
+    GTree *Dls_data;
     GSList *Set_M;                                                              /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_M;                                                      /* liste des Mxxx a désactiver à la fin du tour prg */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
@@ -183,6 +185,8 @@
  extern void Dls_foreach ( void *user_data, 
                            void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
                            void (*do_tree)   (void *user_data, struct DLS_TREE *) );
+ extern void Dls_data_set_bool ( gchar *nom, gchar *owner, gboolean **data_p, gboolean valeur );
+ extern gboolean Dls_data_get_bool ( gchar *nom, gchar *owner, gboolean **data_p );
 
  extern void Prendre_heure ( void );                                                                          /* Dans heure.c */ 
  #endif

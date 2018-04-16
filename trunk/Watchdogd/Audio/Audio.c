@@ -55,7 +55,7 @@
      }
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "%s: '%s' = %s", nom, valeur );           /* Print Config */
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "%s: '%s' = %s", __func__, nom, valeur ); /* Print Config */
             if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_audio.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )

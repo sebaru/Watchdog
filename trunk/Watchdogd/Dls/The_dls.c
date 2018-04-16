@@ -776,6 +776,64 @@
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
 /******************************************************************************************************************************/
+/* Dls_data_set: Ajoute une données à l'arbre des data dls                                                                    */
+/* Entrée : le propriétaire de la données, son nom, sa valeur                                                                 */
+/* Sortie : rien                                                                                                              */
+/******************************************************************************************************************************/
+ static void Dls_data_add ( gchar *key, void *data )
+  { pthread_mutex_lock( &Partage->com_dls.synchro_data );
+    g_tree_insert ( Partage->com_dls.Dls_data, key, data );
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding key %s : %p", __func__, key, data );
+    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+  }
+ static void *Dls_data_get ( gchar *key )
+  { void *data;
+    pthread_mutex_lock( &Partage->com_dls.synchro_data );
+    data = g_tree_lookup ( Partage->com_dls.Dls_data, key );
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : searching for key %s : %p", __func__, key, data );
+    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+    return(data);
+  }
+ void Dls_data_set_bool ( gchar *nom, gchar *owner, gboolean **data_p, gboolean valeur )
+  { if (!data_p || !*data_p)
+     { gchar chaine[80];
+       gboolean *data;
+       g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
+       data = Dls_data_get( chaine );
+       if (!data)
+        { data = g_malloc ( sizeof(gboolean) );
+          if (!data) { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for %s", __func__, chaine ); return; }
+          Dls_data_add ( g_strdup(chaine), data );
+        }
+       *data = valeur;                                                                            /* Recopie dans la variable */
+       if (data_p) *data_p = data;                                                  /* Sauvegarde pour acceleration si besoin */
+      }
+    else
+     { **data_p = valeur; }                                                   /* Récopie directement via le pointeur acceléré */
+  }
+ gboolean Dls_data_get_bool ( gchar *nom, gchar *owner, gboolean **data_p )
+  { gchar chaine[80];
+    gboolean *data;
+    if (data_p && *data_p) return (**data_p);                                        /* Si pointeur d'acceleration disponible */
+    g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
+    data = Dls_data_get( chaine );
+    if (data)
+     { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : key %s found val %d", __func__, chaine, *data );
+       return(*data);
+     }
+    return(FALSE);    
+  }
+/******************************************************************************************************************************/
+/* Dls_data_free_data: Libere la memoire pour les clefs et data contenu dans l'arbre Dls_data. Appellé par g_tree_foreach     */
+/* Entrée : la clef a libérer, la value qui va avec et un pointer non utilisé                                                 */
+/* Sortie : FALSE pour poursuivre le cheminement de l'arbre                                                                   */
+/******************************************************************************************************************************/
+ static gboolean Dls_data_free_data (gpointer key, gpointer value, gpointer data)
+  { g_free(key);
+    g_free(value);
+    return(FALSE);
+  }
+/******************************************************************************************************************************/
 /* Dls_foreach_dls_tree: Parcours recursivement l'arbre DLS et execute des commandes en parametres                            */
 /* Entrée : le Dls_tree et les fonctions a appliquer                                                                          */
 /* Sortie : rien                                                                                                              */
@@ -897,10 +955,9 @@
     GSList *plugins;
 
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
-    Info_new( Config.log, Config.log_dls, LOG_NOTICE,
-              "Run_dls: Demarrage . . . TID = %p", pthread_self() );
+    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
     Partage->com_dls.Thread_run         = TRUE;                                                         /* Le thread tourne ! */
-             
+    Partage->com_dls.Dls_data = g_tree_new ( (GCompareFunc) strcmp ); 
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                                          /* Chargement des modules dls */
     SB_SYS(1, 0);                                                                                      /* B1 est toujours à 0 */
@@ -911,23 +968,23 @@
      { 
 
        if (Partage->com_dls.Thread_reload)
-        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Run_dls: RELOADING" );
+        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: RELOADING", __func__ );
           Decharger_plugins();
           Charger_plugins();
           Partage->com_dls.Thread_reload = FALSE;
         }
 
-       if (Partage->top-Update_heure>=600)      /* Gestion des changements d'horaire (toutes les minutes) */
-        { Prendre_heure ();                            /* Mise à jour des variables de gestion de l'heure */
+       if (Partage->top-Update_heure>=600)                          /* Gestion des changements d'horaire (toutes les minutes) */
+        { Prendre_heure ();                                                /* Mise à jour des variables de gestion de l'heure */
           Update_heure=Partage->top;
         }
 
-       if (Partage->com_dls.admin_start)                                  /* A-t-on un plugin a allumer ? */
+       if (Partage->com_dls.admin_start)                                                      /* A-t-on un plugin a allumer ? */
         { Activer_plugin_by_id ( Partage->com_dls.admin_start, TRUE );
           Partage->com_dls.admin_start = 0;
         }
 
-       if (Partage->com_dls.admin_stop)                                  /* A-t-on un plugin a eteindre ? */
+       if (Partage->com_dls.admin_stop)                                                      /* A-t-on un plugin a eteindre ? */
         { Activer_plugin_by_id ( Partage->com_dls.admin_stop, FALSE );
           Partage->com_dls.admin_stop = 0;
         }
@@ -949,6 +1006,8 @@
        sched_yield();
      }
     Decharger_plugins();                                                                      /* Dechargement des modules DLS */
+    g_tree_foreach (Partage->com_dls.Dls_data, Dls_data_free_data, NULL );
+    g_tree_destroy (Partage->com_dls.Dls_data);
     Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: DLS Down (%p)", __func__, pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

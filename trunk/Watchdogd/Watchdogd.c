@@ -633,6 +633,7 @@
        pthread_mutex_init( &Partage->com_msrv.synchro, &attr );
        pthread_mutex_init( &Partage->com_dls.synchro, &attr );
        pthread_mutex_init( &Partage->com_dls.synchro_traduction, &attr );
+       pthread_mutex_init( &Partage->com_dls.synchro_data, &attr );
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
        pthread_mutex_init( &Partage->com_db.synchro, &attr );
@@ -692,6 +693,7 @@
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro_traduction );
+    pthread_mutex_destroy( &Partage->com_dls.synchro_data );
     pthread_mutex_destroy( &Partage->com_arch.synchro );
     pthread_mutex_destroy( &Partage->com_admin.synchro );
     pthread_mutex_destroy( &Partage->com_db.synchro );
