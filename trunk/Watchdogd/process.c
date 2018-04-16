@@ -85,7 +85,8 @@
     if ( lib->TID != 0 )
      { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: thread %s, stopping in progress", __func__, lib->nom_fichier );
        lib->Thread_run = FALSE;                                                          /* On demande au thread de s'arreter */
-       while( lib->TID != 0 ) sched_yield();                                        /* Attente fin thread */
+       while( lib->TID != 0 ) sched_yield();                                                            /* Attente fin thread */
+       sleep(1);
      }
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: thread %s stopped", __func__, lib->nom_fichier );
     return(TRUE);
@@ -163,7 +164,6 @@
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: trying to unload %s", __func__, lib->nom_fichier );
 
           Stop_librairie(lib);
-          sleep(5);
           pthread_mutex_destroy( &lib->synchro );
           dlclose( lib->dl_handle );
           Partage->com_msrv.Librairies = g_slist_remove( Partage->com_msrv.Librairies, lib );
@@ -184,6 +184,14 @@
 /******************************************************************************************************************************/
  void Decharger_librairies ( void )
   { struct LIBRAIRIE *lib;
+    GSList *liste;
+
+    liste = Partage->com_msrv.Librairies;                 /* Envoie une commande d'arret pour toutes les librairies d'un coup */
+    while(liste)
+     { lib = (struct LIBRAIRIE *)liste->data;
+       lib->Thread_run = FALSE;                                                          /* On demande au thread de s'arreter */
+       liste = liste->next;
+     }
 
     while(Partage->com_msrv.Librairies)                                                     /* Liberation mémoire des modules */
      { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
