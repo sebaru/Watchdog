@@ -140,10 +140,10 @@
   }
 /******************************************************************************************************************************/
 /* Get_option_entier: Cherche une option et renvoie sa valeur                                                                 */
-/* Entrées: rien                                                                                                              */
-/* Sortie: NULL si probleme                                                                                                   */
+/* Entrées: la liste des options, le type a rechercher                                                                        */
+/* Sortie: -1 si pas trouvé                                                                                                   */
 /******************************************************************************************************************************/
- int Get_option_entier( GList *liste_options, gint type )
+ static int Get_option_entier( GList *liste_options, gint type )
   { struct OPTION *option;
     GList *liste;
     liste = liste_options;
@@ -154,6 +154,23 @@
        liste = liste->next;
      }
     return(-1);
+  }
+/******************************************************************************************************************************/
+/* Get_option_chaine: Cherche une option de type chaine et renvoie sa valeur                                                  */
+/* Entrées: la liste des options, le type a rechercher                                                                        */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ static gchar *Get_option_chaine( GList *liste_options, gint type )
+  { struct OPTION *option;
+    GList *liste;
+    liste = liste_options;
+    while (liste)
+     { option=(struct OPTION *)liste->data;
+       if ( option->type == type )
+        { return (option->chaine); }
+       liste = liste->next;
+     }
+    return("no string");
   }
 /******************************************************************************************************************************/
 /* Check_msg_ownership: Vérifie la propriété du bit interne MSG en action                                                     */
@@ -544,9 +561,12 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Liberer_options ( GList *options )
-  { if (options)
-     { g_list_foreach( options, (GFunc)g_free, NULL );
-       g_list_free( options );
+  { while (options)
+     { struct OPTION *option = (struct OPTION *)options->data;
+       options = g_list_remove (options, option);
+       switch (option->type)
+        { case T_LIBELLE: g_free(option->chaine); break; }
+       g_free(option);
      }
   }
 /******************************************************************************************************************************/
@@ -555,7 +575,8 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Liberer_alias ( struct ALIAS *alias )
-  { Liberer_options( alias->options );
+  { GList *liste;
+    Liberer_options(alias->options);
     g_free(alias->nom);
     g_free(alias);
   }
@@ -667,20 +688,6 @@
           g_snprintf( chaine, sizeof(chaine), " static gint Dls_id = %d;\n", id );
           write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
 
-          liste = Alias;                                                      /* Déclaration des variables internes au module */
-          while(liste)
-           { gint local;
-             alias = (struct ALIAS *)liste->data;
-             if ( Get_option_entier ( alias->options, T_LOCAL )  == 1 )
-              { switch ( alias->bit )
-                 { case T_MONO: g_snprintf( chaine, sizeof(chaine), " static gboolean _M_%s;\n", alias->nom );
-                                write(fd, chaine, strlen(chaine) );                                   /* Ecriture du prologue */
-                   break;
-                 }
-              }
-             liste = liste->next;
-           }
-
           write(fd, Chaine_bit, strlen(Chaine_bit) );                                                 /* Ecriture du prologue */
           liste = Liste_Actions_bit;                                       /* Initialise les tableaux des actions rencontrées */
           while(liste)
@@ -775,12 +782,24 @@
           close(fd);
         }
 
+     /*Retirer_mnemo_baseDB_for_dls ( id );                  /* Suppression des mnemos automatique du DLS fraichement traduit */
        liste = Alias;                                           /* Libération des alias, et remonté d'un Warning si il y en a */
        while(liste)
-        { alias = (struct ALIAS *)liste->data;
+        { struct CMD_TYPE_MNEMO_BASE mnemo;
+          alias = (struct ALIAS *)liste->data;
           if ( (!alias->used) )
            { Emettre_erreur_new( "Warning: %s not used", alias->nom );
              retour = TRAD_DLS_WARNING;
+           }
+          mnemo.dls_id = id;
+          mnemo.type = alias->bit;
+          switch ( alias->bit )
+           { case T_MONO:
+              { g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
+                g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
+                Mnemo_auto_create_for_dls ( &mnemo );
+              }
+             break;
            }
           liste = liste->next;
         }

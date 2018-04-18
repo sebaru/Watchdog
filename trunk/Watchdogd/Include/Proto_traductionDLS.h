@@ -46,6 +46,7 @@
  struct OPTION
   { gint type;
     union { int entier;
+            gchar *chaine;
           };
   };
 
@@ -89,7 +90,7 @@
  extern gboolean New_alias( char *nom, int bit, int num, int barre, GList *options );
  extern struct ALIAS *Get_alias_par_nom( char *nom );
  extern struct OPTION *New_option( void );
- extern int Get_option_entier( GList *liste_options, gint type );
+ /*extern int Get_option_entier( GList *liste_options, gint type );*/
  extern void Liberer_options ( GList *options );
  extern int DlsScanner_error ( char *s );
 /* Fonctions mise a disposition par Flex et Bison */

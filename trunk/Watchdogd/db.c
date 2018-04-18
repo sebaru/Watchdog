@@ -818,7 +818,20 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version=3521;
+    if (database_version < 3550)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos` ADD `created_by_user` INT(1) NOT NULL DEFAULT '1' AFTER `id`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos` CHANGE `libelle` `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "alter table mnemos change `ev_host` `ev_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "alter table mnemos change `ev_thread` `ev_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "alter table mnemos change `ev_text` `ev_text` VARCHAR(160) COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version=3550;
 
     Libere_DB_SQL(&db);
 

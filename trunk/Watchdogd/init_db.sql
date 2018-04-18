@@ -543,17 +543,19 @@ CREATE TABLE IF NOT EXISTS `icons_new` (
 
 CREATE TABLE IF NOT EXISTS `mnemos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_by_user` int(1) NOT NULL DEFAULT '1',
   `type` int(11) NOT NULL DEFAULT '0',
   `num` int(11) NOT NULL DEFAULT '0',
   `dls_id` int(11) NOT NULL DEFAULT '0',
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `ev_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL,
-  `ev_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL,
-  `ev_text` VARCHAR(160) COLLATE utf8_unicode_ci NOT NULL,
-  `tableau` text COLLATE utf8_unicode_ci NOT NULL,
-  `acro_syn` text COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`), FULLTEXT(`command_text`)
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `ev_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
+  `ev_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
+  `ev_text` VARCHAR(160) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `tableau` text COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `acro_syn` text COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  UNIQUE (`dls_id`,`acronyme`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `command_text`) VALUES

@@ -42,10 +42,12 @@
 digit         [0-9]+
 digitf        [-]?[0-9]+[.[0-9]+]?
 id            [a-zA-Z][a-zA-Z_0-9-]+[a-zA-Z0-9]
+chaine        \"[a-zA-Z0-9 ]*\"
 blanc         [\t ]+
 
  /* Noms des environnements */
 %x code_en_c
+%x chaine_directe
 %x comment
 %%
 {blanc}                    ;
@@ -57,8 +59,8 @@ blanc         [\t ]+
 "_EA"                      { DlsScanner_lval.val = EANA;        return EANA;        }
 "_A"                       { DlsScanner_lval.val = SORTIE;      return SORTIE;      }
 "_I"                       { DlsScanner_lval.val = ICONE;       return ICONE;       }
-"_B"                       { DlsScanner_lval.val = BI;          return BI;          }
-"_M"                       { DlsScanner_lval.val = T_MONO;        return T_MONO;        }
+"_B"                       { DlsScanner_lval.val = T_BI;        return T_BI;        }
+"_M"                       { DlsScanner_lval.val = T_MONO;      return T_MONO;      }
 "_T"                       { DlsScanner_lval.val = T_TEMPO;     return T_TEMPO;     }
 "_R"                       { DlsScanner_lval.val = T_REGISTRE;  return T_REGISTRE;  }
 "_CH"                      { DlsScanner_lval.val = CPT_H;       return CPT_H;       }
@@ -109,7 +111,7 @@ blanc         [\t ]+
 "color"                    { DlsScanner_lval.val = COLOR;       return COLOR;       }
 "cligno"                   { DlsScanner_lval.val = CLIGNO;      return CLIGNO;      }
 "edge_up"                  { DlsScanner_lval.val = T_EDGE_UP;   return T_EDGE_UP;   }
-"local"                    { DlsScanner_lval.val = T_LOCAL;     return T_LOCAL;     }
+"libelle"                  { DlsScanner_lval.val = T_LIBELLE;   return T_LIBELLE;   }
  /*********************************************** Le reste ************************************************/
 "."                        { DlsScanner_lval.val = ET;          return ET;          }
 "+"                        { DlsScanner_lval.val = OU;          return OU;          }
@@ -137,8 +139,12 @@ blanc         [\t ]+
 <comment>\n                {  }
 <comment>.                 ;
 
-{id}                       { DlsScanner_lval.chaine = (char *)strdup(DlsScanner_text); return ID;     }
-{digit}                    { DlsScanner_lval.val    = atoi(DlsScanner_text);           return ENTIER; }
-{digitf}                   { DlsScanner_lval.valf   = atof(DlsScanner_text);           return VALF;   }
+"\""                       { BEGIN(chaine_directe); }
+<chaine_directe>{chaine}   { DlsScanner_lval.chaine = (char *)strdup(DlsScanner_text); return T_CHAINE; }
+<chaine_directe>"\""       { BEGIN(INITIAL); }
+
+{id}                       { DlsScanner_lval.chaine = (char *)strdup(DlsScanner_text); return ID;       }
+{digit}                    { DlsScanner_lval.val    = atoi(DlsScanner_text);           return ENTIER;   }
+{digitf}                   { DlsScanner_lval.valf   = atof(DlsScanner_text);           return VALF;     }
 .                          {  }
 %%

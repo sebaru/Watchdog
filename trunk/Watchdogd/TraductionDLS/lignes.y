@@ -44,7 +44,7 @@
 
 %token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS T_POUV T_PFERM T_EGAL OU ET BARRE T_FOIS
 %token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_SBIEN_VP T_SBIEN_VT T_SBIEN_ALE T_SPERS_DER T_SPERS_DAN T_OSYN_ACQ
-%token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LOCAL
+%token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LIBELLE
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL T_TRUE T_FALSE
 %type  <val>    ordre
@@ -52,14 +52,14 @@
 %token <val>    HEURE APRES AVANT LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE
 %type  <val>    modulateur jour_semaine
 
-%token <val>    BI T_MONO ENTREE SORTIE T_TEMPO T_TYPE T_RETARD
+%token <val>    T_BI T_MONO ENTREE SORTIE T_TEMPO T_TYPE T_RETARD
 %token <val>    T_MSG ICONE CPT_H T_CPT_IMP EANA T_START T_REGISTRE
 %type  <val>    alias_bit
 
 %token <val>    ROUGE VERT BLEU JAUNE NOIR BLANC ORANGE GRIS KAKI T_EDGE_UP
 %type  <val>    couleur
 
-%token <chaine> ID
+%token <chaine> ID T_CHAINE
 %token <val>    ENTIER
 %token <valf>   VALF
 
@@ -91,7 +91,7 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                    switch($4)
                     { case ENTREE:
                       case SORTIE:
-                      case BI    : if ( New_alias($1, $4, $5, $3, $6) == FALSE )                             /* Deja defini ? */
+                      case T_BI  : if ( New_alias($1, $4, $5, $3, $6) == FALSE )                             /* Deja defini ? */
                                     { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $1 ); }
                                    break;
                       case T_TEMPO :
@@ -102,7 +102,7 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                       case T_MSG :
                       case T_REGISTRE :
                       case ICONE : if ($3==1)                                             /* Barre = 1 ?? */
-                                    { Emettre_erreur_new( "Ligne %d:Use of '/%s' is forbidden", DlsScanner_get_lineno(), $1 ); }
+                                    { Emettre_erreur_new( "Ligne %d: Use of '/%s' is forbidden", DlsScanner_get_lineno(), $1 ); }
                                    else
                                     { if (New_alias($1, $4, $5, 0, $6) == FALSE)
                                        { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $1 ); }
@@ -112,8 +112,29 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                                break;
                     }
                 }}
+                | ID EQUIV alias_bit liste_options PVIRGULE
+                {{ char *chaine;
+                   int taille;
+                   switch($3)
+                    { case ENTREE:
+                      case SORTIE:
+                      case T_TEMPO :
+                      case EANA  :
+                      case T_MONO  :
+                      case CPT_H :
+                      case T_CPT_IMP:
+                      case T_MSG :
+                      case T_REGISTRE :
+                      case ICONE :
+                      case T_BI  : if ( New_alias($1, $3, -1, 0, $4) == FALSE )                             /* Deja defini ? */
+                                    { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $1 ); }
+                                   break;
+                      default: Emettre_erreur_new( "Ligne %d: Syntaxe Error near '%s'", DlsScanner_get_lineno(), $1 );
+                               break;
+                    }
+                }}
                 ;
-alias_bit:      BI | T_MONO | ENTREE | SORTIE | T_MSG | T_TEMPO | ICONE | CPT_H | T_CPT_IMP | EANA | T_REGISTRE
+alias_bit:      T_BI | T_MONO | ENTREE | SORTIE | T_MSG | T_TEMPO | ICONE | CPT_H | T_CPT_IMP | EANA | T_REGISTRE
                 ;
 /**************************************************** Gestion des instructions ************************************************/
 listeInstr:     une_instr listeInstr
@@ -348,7 +369,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                    $$ = New_chaine(taille);
                    g_snprintf( $$, taille, "(0)" );
                 }}
-                | barre BI ENTIER liste_options
+                | barre T_BI ENTIER liste_options
                 {{ $$ = New_condition_bi ( $1, $3, $4 );
                    Liberer_options($4);
                 }}
@@ -429,7 +450,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                    if (alias)
                     { if ($4 && (alias->bit==T_TEMPO ||                              /* Vérification des bits non comparables */
                                  alias->bit==ENTREE ||
-                                 alias->bit==BI ||
+                                 alias->bit==T_BI ||
                                  alias->bit==T_MONO)
                          )
                        { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser dans une comparaison", DlsScanner_get_lineno(), $2 );
@@ -459,7 +480,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                              { $$ = New_condition_entree( 1, alias->num, $3 ); }
                             break;
                           }
-                         case BI:
+                         case T_BI:
                           { if ( (alias->barre && $1) || (!alias->barre && !$1))
                              { $$ = New_condition_bi( 0, alias->num, $3 ); }
                             else
@@ -563,7 +584,7 @@ action:         action VIRGULE une_action
 
 une_action:     barre SORTIE ENTIER
                   {{ $$=New_action_sortie($3, $1);     }}
-                | barre BI ENTIER
+                | barre T_BI ENTIER
                   {{ if ($3 >= NBR_BIT_BISTABLE_RESERVED)
                        { $$=New_action_bi($3, $1); }
                      else
@@ -646,7 +667,7 @@ une_action:     barre SORTIE ENTIER
                        { case T_TEMPO: $$=New_action_tempo( alias->num, options );   break;
                          case T_MSG  : $$=New_action_msg( alias->num );              break;
                          case SORTIE : $$=New_action_sortie( alias->num, $1 );       break;
-                         case BI     : if (alias->num >= NBR_BIT_BISTABLE_RESERVED)
+                         case T_BI     : if (alias->num >= NBR_BIT_BISTABLE_RESERVED)
                                         { $$=New_action_bi( alias->num, $1 ); }
                                        else
                                         { Emettre_erreur_new( "Ligne %d: 'B%04d' could not be set (system bit)", DlsScanner_get_lineno(), alias->bit );
@@ -722,10 +743,10 @@ une_option:     MODE T_EGAL ENTIER
                    $$->type = COLOR;
                    $$->entier = $3;
                 }}
-                | T_LOCAL
+                | T_LIBELLE T_EGAL T_CHAINE
                 {{ $$=New_option();
-                   $$->type = T_LOCAL;
-                   $$->entier = 1;
+                   $$->type = T_LIBELLE;
+                   $$->chaine = $3;
                 }}
                 | CLIGNO
                 {{ $$=New_option();
