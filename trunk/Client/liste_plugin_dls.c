@@ -42,6 +42,7 @@
      COLONNE_TYPE,
      COLONNE_GROUPE_PAGE,
      COLONNE_SHORTNAME,
+     COLONNE_TECH_ID,
      COLONNE_NOM,
      COLONNE_COMPIL_DATE,
      COLONNE_COMPIL_STATUS,
@@ -418,6 +419,7 @@
                                               G_TYPE_UINT,                                                            /* Type */
                                               G_TYPE_STRING,                                                   /* Groupe/Page */
                                               G_TYPE_STRING,                                                     /* Shortname */
+                                              G_TYPE_STRING,                                                       /* Tech_id */
                                               G_TYPE_STRING,                                                           /* Nom */
                                               G_TYPE_STRING,                                                   /* Compil_date */
                                               G_TYPE_STRING,                                                 /* Compil_status */
@@ -444,6 +446,16 @@
                                                          NULL);
     gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_ID);                                         /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Tech_ID"), renderer,
+                                                         "text", COLONNE_TECH_ID,
+                                                         "background-gdk", COLONNE_COLOR_FOND,
+                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,
+                                                         NULL);
+    gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_TECH_ID);                                    /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
@@ -583,6 +595,7 @@
                          COLONNE_GROUPE_PAGE, groupe_page,
                          COLONNE_NOM, plugin_dls->nom,
                          COLONNE_SHORTNAME, plugin_dls->shortname,
+                         COLONNE_TECH_ID, plugin_dls->tech_id,
                          COLONNE_COMPIL_DATE, date_compil,
                          COLONNE_COMPIL_STATUS, Dls_compil_status(plugin_dls->compil_status),
                          COLONNE_COMPIL_NBR, plugin_dls->nbr_compil,

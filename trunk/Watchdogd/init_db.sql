@@ -77,6 +77,7 @@ INSERT INTO `class` (`id`, `libelle`) VALUES
 
 CREATE TABLE IF NOT EXISTS `dls` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tech_id` VARCHAR(8) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT 'SYS',
   `type` int(11) NOT NULL,
   `syn_id` int(11) NOT NULL DEFAULT '0',
   `name` text COLLATE utf8_unicode_ci NOT NULL,
@@ -86,10 +87,10 @@ CREATE TABLE IF NOT EXISTS `dls` (
   `compil_status` int(11) NOT NULL,
   `nbr_compil` int(11) NOT NULL DEFAULT '0',
   `sourcecode` MEDIUMTEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT "/* Default ! */",
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-INSERT INTO `dls` (`id`, `type`, `syn_id`, `name`, `shortname`, `actif`, `compil_date`, `compil_status` ) VALUES
-(1, 0, 1, 'Système', 'Système', FALSE, 0, 0);
+INSERT INTO `dls` (`id`, `type`, `syn_id`, `name`, `shortname`, `tech_id`, `actif`, `compil_date`, `compil_status` ) VALUES
+(1, 0, 1, 'Système', 'Système', 'SYS', FALSE, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -689,7 +690,7 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `map_EA` int(11) NOT NULL,
   `map_A` int(11) NOT NULL,
   `map_AA` int(11) NOT NULL,  PRIMARY KEY (`id`),
-  UNIQUE KEY `ip` (`ip`)
+  PRIMARY KEY `ip` (`ip`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -1029,7 +1030,7 @@ CREATE TABLE IF NOT EXISTS `scenario_ticks` (
 
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
   `access_level` int(11) NOT NULL DEFAULT '0',
   `mustchangepwd` tinyint(1) NOT NULL DEFAULT '0',
   `cansetpwd` tinyint(1) NOT NULL DEFAULT '0',
@@ -1051,8 +1052,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `imsg_allow_cde` tinyint(1) NOT NULL DEFAULT '0',
   `imsg_available` tinyint(1) NOT NULL DEFAULT '0',
   `ssrv_bit_presence` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`)
+  PRIMARY KEY (`id`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `users` (`id`, `access_level`, `name`, `phphash`, `mustchangepwd`, `cansetpwd`, `salt`, `hash`, `comment`, `login_failed`, `enable`, `date_create`, `enable_expire`, `date_expire`, `date_modif`) VALUES

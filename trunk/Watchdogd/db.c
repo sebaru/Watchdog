@@ -835,7 +835,12 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version=3550;
+    if (database_version < 3555)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` ADD `tech_id` VARCHAR(24) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT 'SYS' AFTER `id`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version=3555;
 
     Libere_DB_SQL(&db);
 

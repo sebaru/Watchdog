@@ -38,6 +38,7 @@
  static GtkWidget *Entry_nom;                                                 /* Le nom en clair du plugin en cours d'edition */
  static GtkWidget *Entry_shortname;                                           /* Le nom en clair du plugin en cours d'edition */
  static GtkWidget *Entry_id;                                                        /* Le numéro de plugin en cours d'edition */
+ static GtkWidget *Entry_tech_id;                                                   /* Le numéro de plugin en cours d'edition */
  static GtkWidget *Combo_syn;                                                                           /* Synoptique associé */
  static GtkWidget *Combo_type;                                                      /* Type du plugin (module, ssgrpupe, ...) */
  static GtkWidget *Check_actif;                                                      /* Le plugin est-il activé dans le dls ? */
@@ -69,6 +70,9 @@
 
     g_snprintf( Edit_dls.nom, sizeof(Edit_dls.nom), "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
     g_snprintf( Edit_dls.shortname, sizeof(Edit_dls.shortname), "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_shortname) ) );
+    g_snprintf( Edit_dls.tech_id, sizeof(Edit_dls.tech_id), "%s", (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_tech_id) ) );
+    g_strcanon (Edit_dls.tech_id, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_", 0 );
+    if (strlen(Edit_dls.tech_id) == 0) g_snprintf( Edit_dls.tech_id, sizeof(Edit_dls.tech_id), "SYS" );
     index             = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_syn) );
     Edit_dls.syn_id   = GPOINTER_TO_INT(g_list_nth_data( Liste_index_syn, index ) );
     Edit_dls.on       = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(Check_actif) );
@@ -84,6 +88,7 @@
        case GTK_RESPONSE_CANCEL:
        default:                  break;
      }
+
     g_list_free( Liste_index_syn );
     gtk_widget_destroy(F_ajout);
     return(TRUE);
@@ -153,13 +158,16 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Check_actif, 2, 3, i, i+1 );
 
     i++;
-    texte = gtk_label_new( _("Type") );                         /* Création de l'option menu pour le choix du type de message */
+    texte = gtk_label_new( _("Tech_ID\n(AlphaNum Only)") );      /* Création de l'option menu pour le choix du type de message */
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
+    Entry_tech_id = gtk_entry_new();
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_tech_id), sizeof(Edit_dls.tech_id)-1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_tech_id, 1, 2, i, i+1 );
 
     Combo_type = gtk_combo_box_new_text();
     for ( cpt=0; cpt<NBR_TYPE_PLUGIN; cpt++ )
      { gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_type), Type_plugin_vers_string(cpt) ); }
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_type, 1, 3, i, i+1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_type, 2, 3, i, i+1 );
 
     i++;
     texte = gtk_label_new( _("Synoptique Name") );                                   /* Choix du synoptique cible du messages */
@@ -189,6 +197,7 @@
        gtk_entry_set_text( GTK_ENTRY(Entry_id), id );
        gtk_entry_set_text( GTK_ENTRY(Entry_nom), edit_dls->nom );
        gtk_entry_set_text( GTK_ENTRY(Entry_shortname), edit_dls->shortname );
+       gtk_entry_set_text( GTK_ENTRY(Entry_tech_id), edit_dls->tech_id );
        gtk_combo_box_set_active (GTK_COMBO_BOX (Combo_type), edit_dls->type );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_actif), edit_dls->on );
      }
