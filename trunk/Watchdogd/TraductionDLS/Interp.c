@@ -604,7 +604,7 @@
   { gchar source[80], cible[80], log[80];
     struct ALIAS *alias;
     GSList *liste;
-    gint retour;
+    gint retour, nb_car;
     FILE *rc;
 
     Buffer_taille = 1024;
@@ -639,7 +639,7 @@
     rc = fopen( source, "r" );
     if (!rc) retour = TRAD_DLS_ERROR;
     else
-     { DlsScanner_debug = 0;                                                                     /* Debug de la traduction ?? */
+     { DlsScanner_debug = 1;                                                                     /* Debug de la traduction ?? */
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
        fclose(rc);
@@ -680,6 +680,20 @@
 
           write(fd, include, strlen(include));
 
+          liste = Alias;
+          while(liste)
+           { alias = (struct ALIAS *)liste->data;
+             if (alias->num == -1)                                       /* alias par nom ? creation du pointeur de raccourci */
+              { switch (alias->bit)
+                 { case T_MONO: nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_M_%s;\n", alias->nom );
+                                write (fd, chaine, nb_car);
+                                break;
+                 }
+              }
+             liste = liste->next;
+           }
+
+     
           cpt = g_slist_length(Liste_Actions_bit);
           if (cpt==0) cpt=1;
           g_snprintf( chaine, sizeof(chaine), " static gfloat Tableau_val[%d];\n", cpt );
@@ -792,10 +806,10 @@
              retour = TRAD_DLS_WARNING;
            }
           mnemo.dls_id = id;
-          mnemo.type = alias->bit;
           switch ( alias->bit )
            { case T_MONO:
-              { g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
+              { mnemo.type = MNEMO_MONOSTABLE;
+                g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
                 g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
                 Mnemo_auto_create_for_dls ( &mnemo );
               }

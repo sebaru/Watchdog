@@ -560,18 +560,20 @@ printf("id=%d\n", rezo_mnemonique.id);
     gtk_widget_show_all( hboite );
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( _("Mnemoniques") ) );
   }
-/**********************************************************************************************************/
-/* Rafraichir_visu_mnemonique: Rafraichissement d'un mnemonique la liste à l'écran                        */
-/* Entrée: une reference sur le mnemonique                                                                */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Rafraichir_visu_mnemonique: Rafraichissement d'un mnemonique la liste à l'écran                                            */
+/* Entrée: une reference sur le mnemonique                                                                                    */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Rafraichir_visu_mnemonique( GtkTreeIter *iter, struct CMD_TYPE_MNEMO_BASE *mnemonique )
   { GtkTreeModel *store;
     gchar chaine[60], groupe_page[512];
        
-    store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_mnemonique) );          /* Acquisition du modele */
-    g_snprintf( chaine, sizeof(chaine), "%s%04d",
-                Type_bit_interne_court( mnemonique->type ), mnemonique->num );
+    store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_mnemonique) );                              /* Acquisition du modele */
+    if (mnemonique->num != -1)
+     { g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court( mnemonique->type ), mnemonique->num ); }
+    else
+     { g_snprintf( chaine, sizeof(chaine), "%s", Type_bit_interne_court( mnemonique->type ) ); }
 
     g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s/%s",
                 mnemonique->syn_parent_page, mnemonique->syn_page, mnemonique->dls_shortname );

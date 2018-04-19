@@ -829,6 +829,10 @@
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "alter table mnemos change `ev_text` `ev_text` VARCHAR(160) COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
        Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "alter table mnemos change `tableau` `tableau` TEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "alter table mnemos change `acro_syn` `acro_syn` TEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
+       Lancer_requete_SQL ( db, requete );
      }
 
     database_version=3550;

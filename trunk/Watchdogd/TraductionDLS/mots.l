@@ -42,7 +42,7 @@
 digit         [0-9]+
 digitf        [-]?[0-9]+[.[0-9]+]?
 id            [a-zA-Z][a-zA-Z_0-9-]+[a-zA-Z0-9]
-chaine        \"[a-zA-Z0-9 ]*\"
+chaine        [a-zA-Z0-9' ]*
 blanc         [\t ]+
 
  /* Noms des environnements */
@@ -113,6 +113,8 @@ blanc         [\t ]+
 "edge_up"                  { DlsScanner_lval.val = T_EDGE_UP;   return T_EDGE_UP;   }
 "libelle"                  { DlsScanner_lval.val = T_LIBELLE;   return T_LIBELLE;   }
  /*********************************************** Le reste ************************************************/
+"#define"                  { DlsScanner_lval.val = T_DEFINE;    return T_DEFINE;    }
+"#static"                  { DlsScanner_lval.val = T_STATIC;    return T_STATIC;    }
 "."                        { DlsScanner_lval.val = ET;          return ET;          }
 "+"                        { DlsScanner_lval.val = OU;          return OU;          }
 "/"                        { DlsScanner_lval.val = BARRE;       return BARRE;       }

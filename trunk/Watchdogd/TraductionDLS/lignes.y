@@ -42,7 +42,7 @@
          struct COMPARATEUR *comparateur;
        };
 
-%token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS T_POUV T_PFERM T_EGAL OU ET BARRE T_FOIS
+%token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS T_POUV T_PFERM T_EGAL OU ET BARRE T_FOIS T_DEFINE T_STATIC
 %token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_SBIEN_VP T_SBIEN_VT T_SBIEN_ALE T_SPERS_DER T_SPERS_DAN T_OSYN_ACQ
 %token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LIBELLE
 
@@ -80,42 +80,14 @@ ligne_source_dls:         listeAlias listeInstr
                         |
                         ;
 
-/************************************************* Gestion des alias **************************************/
+/*************************************************** Gestion des alias ********************************************************/
 listeAlias:     un_alias listeAlias
                 | un_alias
                 ;
                 
-un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
-                {{ char *chaine;
-                   int taille;
+un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
+                {{ int taille;
                    switch($4)
-                    { case ENTREE:
-                      case SORTIE:
-                      case T_BI  : if ( New_alias($1, $4, $5, $3, $6) == FALSE )                             /* Deja defini ? */
-                                    { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $1 ); }
-                                   break;
-                      case T_TEMPO :
-                      case EANA  :
-                      case T_MONO  :
-                      case CPT_H :
-                      case T_CPT_IMP:
-                      case T_MSG :
-                      case T_REGISTRE :
-                      case ICONE : if ($3==1)                                             /* Barre = 1 ?? */
-                                    { Emettre_erreur_new( "Ligne %d: Use of '/%s' is forbidden", DlsScanner_get_lineno(), $1 ); }
-                                   else
-                                    { if (New_alias($1, $4, $5, 0, $6) == FALSE)
-                                       { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $1 ); }
-                                    }
-                                   break;
-                      default: Emettre_erreur_new( "Ligne %d: Syntaxe Error near '%s'", DlsScanner_get_lineno(), $1 );
-                               break;
-                    }
-                }}
-                | ID EQUIV alias_bit liste_options PVIRGULE
-                {{ char *chaine;
-                   int taille;
-                   switch($3)
                     { case ENTREE:
                       case SORTIE:
                       case T_TEMPO :
@@ -126,10 +98,36 @@ un_alias:       ID EQUIV barre alias_bit ENTIER liste_options PVIRGULE
                       case T_MSG :
                       case T_REGISTRE :
                       case ICONE :
-                      case T_BI  : if ( New_alias($1, $3, -1, 0, $4) == FALSE )                             /* Deja defini ? */
-                                    { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $1 ); }
+                      case T_BI  : if ( New_alias($2, $4, -1, 0, $5) == FALSE )                             /* Deja defini ? */
+                                    { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
                                    break;
-                      default: Emettre_erreur_new( "Ligne %d: Syntaxe Error near '%s'", DlsScanner_get_lineno(), $1 );
+                      default: Emettre_erreur_new( "Ligne %d: Syntaxe Error near '%s'", DlsScanner_get_lineno(), $2 );
+                               break;
+                    }
+                }}
+                | T_STATIC ID EQUIV barre alias_bit ENTIER PVIRGULE
+                {{ int taille;
+                   switch($5)
+                    { case ENTREE:
+                      case SORTIE:
+                      case T_BI  : if ( New_alias($2, $5, $6, $4, NULL) == FALSE )                           /* Deja defini ? */
+                                    { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
+                                   break;
+                      case T_TEMPO :
+                      case EANA  :
+                      case T_MONO  :
+                      case CPT_H :
+                      case T_CPT_IMP:
+                      case T_MSG :
+                      case T_REGISTRE :
+                      case ICONE : if ($4==1)                                             /* Barre = 1 ?? */
+                                    { Emettre_erreur_new( "Ligne %d: Use of '/%s' is forbidden", DlsScanner_get_lineno(), $2 ); }
+                                   else
+                                    { if (New_alias($2, $5, $6, 0, NULL) == FALSE)
+                                       { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
+                                    }
+                                   break;
+                      default: Emettre_erreur_new( "Ligne %d: Syntaxe Error near '%s'", DlsScanner_get_lineno(), $2 );
                                break;
                     }
                 }}
@@ -488,11 +486,20 @@ unite:          modulateur ENTIER HEURE ENTIER
                             break;
                           }
                          case T_MONO:
-                          { taille = 15;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
-                            if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
-                                 { g_snprintf( $$, taille, "M(%d)", alias->num ); }
-                            else { g_snprintf( $$, taille, "!M(%d)", alias->num ); }
+                          { if (alias->num != -1) /* Alias par numéro ? */
+                             { taille = 15;
+                               $$ = New_chaine( taille ); /* 10 caractères max */
+                               if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
+                                    { g_snprintf( $$, taille, "M(%d)", alias->num ); }
+                               else { g_snprintf( $$, taille, "!M(%d)", alias->num ); }
+                             }
+                            else /* Alias par nom */
+                             { taille = 100;
+                               $$ = New_chaine( taille ); /* 10 caractères max */
+                               if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
+                                    { g_snprintf( $$, taille, "Dls_data_get_bool ( \"%s\", \"test\", &_M_%s )", alias->nom, alias->nom ); }
+                               else { g_snprintf( $$, taille, "!Dls_data_get_bool ( \"%s\", \"test\", &_M_%s )", alias->nom, alias->nom ); }
+                             }
                             break;
                           }
                          case EANA:

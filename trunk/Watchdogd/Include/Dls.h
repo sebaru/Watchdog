@@ -186,7 +186,6 @@
                            void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
                            void (*do_tree)   (void *user_data, struct DLS_TREE *) );
  extern void Dls_data_set_bool ( gchar *nom, gchar *owner, gboolean **data_p, gboolean valeur );
- extern gboolean Dls_data_get_bool ( gchar *nom, gchar *owner, gboolean **data_p );
 
  extern void Prendre_heure ( void );                                                                          /* Dans heure.c */ 
  #endif
