@@ -76,12 +76,14 @@
  extern gboolean Check_ownership ( gint type, gint num );
  extern gchar *New_condition_bi( int barre, int num, GList *options );
  extern gchar *New_condition_entree( int barre, int num, GList *options );
+ extern gchar *New_condition_mono( int barre, struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action( void );
  extern struct ACTION *New_action_msg( int num );
  extern struct ACTION *New_action_sortie( int num, int barre );
  extern struct ACTION *New_action_vars_mono( gchar *nom );
  extern struct ACTION *New_action_activite_fixe( void );
  extern struct ACTION *New_action_mono( int num );
+ extern struct ACTION *New_action_mono_by_alias( struct ALIAS *alias );
  extern struct ACTION *New_action_icone( int num, GList *options );
  extern struct ACTION *New_action_tempo( int num, GList *options );
  extern struct ACTION *New_action_bi( int num, int barre );

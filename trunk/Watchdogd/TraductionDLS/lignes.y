@@ -142,15 +142,15 @@ listeInstr:     une_instr listeInstr
 une_instr:      MOINS expr DONNE action PVIRGULE
                 {{ int taille;
                    char *instr;
-                   taille = strlen($2)+strlen($4->alors)+11;
+                   taille = strlen($2)+strlen($4->alors)+15;
                    if ($4->sinon)
                     { taille += (strlen($4->sinon) + 10);
                       instr = New_chaine( taille );
-                      g_snprintf( instr, taille, "if(%s) { %s }\nelse { %s }\n", $2, $4->alors, $4->sinon );
+                      g_snprintf( instr, taille, "if(%s)\n { %s }\nelse\n { %s }\n", $2, $4->alors, $4->sinon );
                     }
                    else
                     { instr = New_chaine( taille );
-                      g_snprintf( instr, taille, "if(%s) { %s }\n", $2, $4->alors );
+                      g_snprintf( instr, taille, "if(%s)\n { %s }\n", $2, $4->alors );
                     }
 
                    Emettre( instr ); g_free(instr);
@@ -486,21 +486,11 @@ unite:          modulateur ENTIER HEURE ENTIER
                             break;
                           }
                          case T_MONO:
-                          { if (alias->num != -1) /* Alias par numéro ? */
-                             { taille = 15;
-                               $$ = New_chaine( taille ); /* 10 caractères max */
-                               if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
-                                    { g_snprintf( $$, taille, "M(%d)", alias->num ); }
-                               else { g_snprintf( $$, taille, "!M(%d)", alias->num ); }
-                             }
-                            else /* Alias par nom */
-                             { taille = 100;
-                               $$ = New_chaine( taille ); /* 10 caractères max */
-                               if ( (!$1 && !alias->barre) || ($1 && alias->barre) )
-                                    { g_snprintf( $$, taille, "Dls_data_get_bool ( \"%s\", \"test\", &_M_%s )", alias->nom, alias->nom ); }
-                               else { g_snprintf( $$, taille, "!Dls_data_get_bool ( \"%s\", \"test\", &_M_%s )", alias->nom, alias->nom ); }
-                             }
-                            break;
+                          { if ( (alias->barre && $1) || (!alias->barre && !$1))
+                             { $$ = New_condition_mono( 0, alias, $3 ); }
+                            else
+                             { $$ = New_condition_mono( 1, alias, $3 ); }
+                             break;
                           }
                          case EANA:
                           { char *chaine;
@@ -685,7 +675,7 @@ une_action:     barre SORTIE ENTIER
                                           $$->sinon = NULL;
                                         }
                                        break;
-                         case T_MONO   : $$=New_action_mono( alias->num );        break;
+                         case T_MONO   : $$=New_action_mono_by_alias( alias ); break;
                          case CPT_H  : $$=New_action_cpt_h( alias->num, options );   break;
                          case T_CPT_IMP: $$=New_action_cpt_imp( alias->num, options ); break;
                          case ICONE  : $$=New_action_icone( alias->num, options );   break;

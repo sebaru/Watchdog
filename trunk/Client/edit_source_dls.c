@@ -446,7 +446,7 @@
                               G_CALLBACK(Menu_ajouter_mnemo), page );
 
     gtk_widget_show_all( hboite );
-    g_snprintf( titre, sizeof(titre), "Dls: %s", rezo_dls->nom );
+    g_snprintf( titre, sizeof(titre), "%s %s", rezo_dls->tech_id, rezo_dls->nom );
     label = gtk_event_box_new ();
     gtk_container_add( GTK_CONTAINER(label), gtk_label_new(titre) );
     gdk_color_parse ("red", &color);

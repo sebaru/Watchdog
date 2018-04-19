@@ -48,7 +48,7 @@
  static gint Buffer_used=0, Buffer_taille=0;
  static int Id_log;                                                                     /* Pour la creation du fichier de log */
  static int nbr_erreur;
- static int Dls_id;                                                                /* numéro du plugin en cours de traduction */
+ static struct CMD_TYPE_PLUGIN_DLS Dls_plugin;
 
 /******************************************************************************************************************************/
 /* New_chaine: Alloue une certaine quantité de mémoire pour utiliser des chaines de caractères                                */
@@ -184,9 +184,9 @@
     retour = FALSE;
     message = Rechercher_messageDB ( num );
     Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-             "%s: Test Message %d for id %d: mnemo %p", __func__, num, Dls_id, message ); 
+             "%s: Test Message %d for id %d: mnemo %p", __func__, num, Dls_plugin.id, message ); 
     if (message)
-     { if (message->dls_id == Dls_id) retour=TRUE;
+     { if (message->dls_id == Dls_plugin.id) retour=TRUE;
        g_free(message);
      }
     
@@ -212,9 +212,9 @@
     retour = FALSE;
     mnemo = Rechercher_mnemo_baseDB_type_num ( &critere );
     Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-             "%s: Test Mnemo %d %d for id %d: mnemo %p", __func__, critere.type, critere.num, Dls_id, mnemo ); 
+             "%s: Test Mnemo %d %d for id %d: mnemo %p", __func__, critere.type, critere.num, Dls_plugin.id, mnemo ); 
     if (mnemo)
-     { if (mnemo->dls_id == Dls_id) retour=TRUE;
+     { if (mnemo->dls_id == Dls_plugin.id) retour=TRUE;
        g_free(mnemo);
      }
     
@@ -295,6 +295,30 @@
          }
     return(result);
   }
+/******************************************************************************************************************************/
+/* New_condition_mono: Prepare la chaine de caractere associée à la condition, en respectant les options                      */
+/* Entrées: l'alias du monostable et sa liste d'options                                                                       */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_mono( int barre, struct ALIAS *alias, GList *options )
+  { gchar *result;
+    gint taille;
+    if (alias->num != -1) /* Alias par numéro ? */
+     { taille = 15;
+       result = New_chaine( taille ); /* 10 caractères max */
+       if ( (!barre && !alias->barre) || (barre && alias->barre) )
+            { g_snprintf( result, taille, "M(%d)", alias->num ); }
+       else { g_snprintf( result, taille, "!M(%d)", alias->num ); }
+     }
+    else /* Alias par nom */
+     { taille = 100;
+       result = New_chaine( taille ); /* 10 caractères max */
+       if ( (!barre && !alias->barre) || (barre && alias->barre) )
+            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_M_%s )", alias->nom, Dls_plugin.tech_id, alias->nom ); }
+       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_M_%s )", alias->nom, Dls_plugin.tech_id, alias->nom ); }
+     }
+   return(result);
+ }
 /******************************************************************************************************************************/
 /* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
 /* Entrées: rien                                                                                                              */
@@ -408,6 +432,28 @@
     g_snprintf( action->alors, taille, "SM(%d,1);", num );
     g_snprintf( action->sinon, taille, "SM(%d,0);", num );
     return(action);
+  }
+/******************************************************************************************************************************/
+/* New_action_mono: Prepare une struct action avec une commande SM                                                            */
+/* Entrées: numero du monostable, sa logique                                                                                  */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
+ struct ACTION *New_action_mono_by_alias( struct ALIAS *alias )
+  { struct ACTION *action;
+    int taille;
+
+    if (alias->num != -1) /* Alias par numéro ? */
+     { return(New_action_mono ( alias->num )); }
+    else /* Alias par nom */
+     { taille = 100;
+       action = New_action();
+       action->alors = New_chaine( taille );
+       action->sinon = New_chaine( taille );
+
+       g_snprintf( action->alors, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_M_%s, TRUE );", alias->nom, Dls_plugin.tech_id, alias->nom );
+       g_snprintf( action->sinon, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_M_%s, FALSE );", alias->nom, Dls_plugin.tech_id, alias->nom );
+       return(action);
+     }
   }
 /******************************************************************************************************************************/
 /* New_action_mono: Prepare une struct action avec une commande SM                                                            */
@@ -602,11 +648,17 @@
 /******************************************************************************************************************************/
  gint Traduire_DLS( int id )
   { gchar source[80], cible[80], log[80];
+    struct CMD_TYPE_PLUGIN_DLS *plugin;
     struct ALIAS *alias;
     GSList *liste;
     gint retour, nb_car;
     FILE *rc;
 
+    plugin = Rechercher_plugin_dlsDB ( id );
+    if (!plugin) return (TRAD_DLS_ERROR);
+    memcpy ( &Dls_plugin, plugin, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+    g_free(plugin);
+    
     Buffer_taille = 1024;
     Buffer = g_try_malloc0( Buffer_taille );                                             /* Initialisation du buffer resultat */
     if (!Buffer) return ( TRAD_DLS_ERROR );
@@ -628,7 +680,6 @@
 
     pthread_mutex_lock( &Partage->com_dls.synchro_traduction );                           /* Attente unicité de la traduction */
 
-    Dls_id = id;                                     /* Sauvegarde, pour notamment les tests de d'ownership des bits internes */
     Alias = NULL;                                                                                  /* Par défaut, pas d'alias */
     Liste_Actions_bit = NULL;                                                                    /* Par défaut, pas d'actions */
     Liste_Actions_num = NULL;                                                                    /* Par défaut, pas d'actions */

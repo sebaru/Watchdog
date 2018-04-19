@@ -52,7 +52,7 @@
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'SET'" );
+     { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'GET'" );
 
        response = Admin_write ( response, " | - new_b $name $owner    - Get bistable $name_$owner" );
        response = Admin_write ( response, " | - list                  - List all running bits" );

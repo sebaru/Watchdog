@@ -192,37 +192,38 @@
                       G_CALLBACK(CB_effacer_plugin_dls), NULL );
     gtk_widget_show_all( dialog );
   }
-/**********************************************************************************************************/
-/* Menu_editer_source_dls: Demande d'edition du plugin_dls selectionné                                    */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_editer_source_dls: Demande d'edition du plugin_dls selectionné                                                        */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static void Menu_editer_source_dls ( void )
   { GtkTreeSelection *selection;
     struct CMD_TYPE_PLUGIN_DLS rezo_dls;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
-    gchar *nom;
+    gchar *nom, *tech_id;
     guint nbr;
 
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_plugin_dls) );
     store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_plugin_dls) );
 
     nbr = gtk_tree_selection_count_selected_rows( selection );
-    if (!nbr) return;                                                        /* Si rien n'est selectionné */
+    if (!nbr) return;                                                                            /* Si rien n'est selectionné */
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
-    gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_dls.id, -1 );                      /* Recup du id */
+    gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
+    gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_dls.id, -1 );                                          /* Recup du id */
+    gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, -1 );                                         /* Recup du id */
     gtk_tree_model_get( store, &iter, COLONNE_NOM, &nom, -1 );
 
     memcpy( &rezo_dls.nom, nom, sizeof(rezo_dls.nom) );
+    memcpy( &rezo_dls.tech_id, tech_id, sizeof(rezo_dls.tech_id) );
     g_free( nom );
     if (!Chercher_page_notebook (TYPE_PAGE_SOURCE_DLS, rezo_dls.id, TRUE))/* Page deja créé et affichée ? */
      { Creer_page_source_dls ( &rezo_dls );
-     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_WANT_SOURCE_DLS,
-                      (gchar *)&rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_WANT_SOURCE_DLS, (gchar *)&rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
      }
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);

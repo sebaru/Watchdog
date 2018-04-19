@@ -178,10 +178,8 @@
                       buffer_all, taille + sizeof(struct CMD_TYPE_SOURCE_DLS) );
        taille_sent+=taille;
      }
-    Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_SOURCE_DLS_END,
-                   buffer_all, sizeof(struct CMD_TYPE_SOURCE_DLS) );
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "%s: Source DLS %05d sent", __func__, rezo_dls->id );
+    Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_SOURCE_DLS_END, buffer_all, sizeof(struct CMD_TYPE_SOURCE_DLS) );
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "%s: Source DLS %05d sent", __func__, rezo_dls->id );
     g_free(buffer_all);
     g_free(Source);
   }

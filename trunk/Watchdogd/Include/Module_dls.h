@@ -46,6 +46,7 @@
  extern int B( int num );
  extern int M( int num );
  extern gboolean Dls_data_get_bool ( gchar *nom, gchar *owner, gboolean **data_p );
+ extern void Dls_data_set_bool ( gchar *nom, gchar *owner, gboolean **data_p, gboolean valeur );
  extern int T( int num );
  extern int EA_ech_inf( float val, int num );
  extern int EA_ech_sup( float val, int num );
