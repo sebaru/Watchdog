@@ -42,7 +42,7 @@
 digit         [0-9]+
 digitf        [-]?[0-9]+[.[0-9]+]?
 id            [a-zA-Z][a-zA-Z_0-9-]+[a-zA-Z0-9]
-chaine        [a-zA-Z0-9' ]*
+chaine        [a-zA-Z_0-9' ]*
 blanc         [\t ]+
 
  /* Noms des environnements */
@@ -143,6 +143,7 @@ blanc         [\t ]+
 
 "\""                       { BEGIN(chaine_directe); }
 <chaine_directe>{chaine}   { DlsScanner_lval.chaine = (char *)strdup(DlsScanner_text); return T_CHAINE; }
+<chaine_directe>.          { BEGIN(INITIAL); }
 <chaine_directe>"\""       { BEGIN(INITIAL); }
 
 {id}                       { DlsScanner_lval.chaine = (char *)strdup(DlsScanner_text); return ID;       }
