@@ -173,7 +173,7 @@
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "UPDATE %s SET "             
                    "type=%d,libelle='%s',acronyme='%s',ev_host='%s',ev_thread='%s',ev_text='%s',dls_id=%d,num=%d,tableau='%s',"
-                   "acro_syn='%s',creates_by_user='1' "
+                   "acro_syn='%s',created_by_user='1' "
                    "WHERE id=%d",
                    NOM_TABLE_MNEMO, mnemo->type, libelle, acro, ev_host, ev_thread, ev_text, 
                    mnemo->dls_id, mnemo->num, tableau, acro_syn, mnemo->id );

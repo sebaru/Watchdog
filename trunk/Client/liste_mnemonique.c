@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/liste_mnemonique.c        Configuration des mnemoniques de Watchdog v2.0                        */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       dim 05 déc 2004 14:20:57 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/liste_mnemonique.c        Configuration des mnemoniques de Watchdog v2.0                                            */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                           dim 05 déc 2004 14:20:57 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * liste_mnemonique.c
  * This file is part of Watchdog
@@ -32,12 +32,10 @@
  
  #include "Reseaux.h"
 
- static GtkWidget *Liste_mnemonique;              /* GtkTreeView pour la gestion des mnemoniques Watchdog */
-                                 /* non static car reutilisable par l'utilitaire d'ajout d'un utilisateur */
- extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
- extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
- extern struct CONFIG Config;                                          /* Configuration generale watchdog */
+ extern GList *Liste_pages;                                                       /* Liste des pages ouvertes sur le notebook */  
+ extern GtkWidget *Notebook;                                                             /* Le Notebook de controle du client */
+ extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
+ extern struct CONFIG Config;                                                              /* Configuration generale watchdog */
 
  enum
   {  COLONNE_ID,
@@ -107,7 +105,7 @@
     "CI",
     "R",
   };
-/********************************* Définitions des prototypes programme ***********************************/
+/******************************************** Définitions des prototypes programme ********************************************/
  #include "protocli.h"
 
  static void Menu_effacer_mnemonique ( void );
@@ -126,41 +124,41 @@
   { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_mnemonique, GNOME_STOCK_PIXMAP_ADD ),
     GNOMEUIINFO_END
   };
-/**********************************************************************************************************/
-/* Type_gestion_motif: Renvoie le type correspondant au numero passé en argument                          */
-/* Entrée: le numero du type                                                                              */
-/* Sortie: le type                                                                                        */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Type_gestion_motif: Renvoie le type correspondant au numero passé en argument                                              */
+/* Entrée: le numero du type                                                                                                  */
+/* Sortie: le type                                                                                                            */
+/******************************************************************************************************************************/
  static GdkColor *Couleur_bit_interne ( gint num )
   { if (num >= NBR_TYPE_MNEMO)
      return( &COULEUR[0] );
     return( &COULEUR[num] );
   }
-/**********************************************************************************************************/
-/* Type_gestion_motif: Renvoie le type correspondant au numero passé en argument                          */
-/* Entrée: le numero du type                                                                              */
-/* Sortie: le type                                                                                        */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Type_gestion_motif: Renvoie le type correspondant au numero passé en argument                                              */
+/* Entrée: le numero du type                                                                                                  */
+/* Sortie: le type                                                                                                            */
+/******************************************************************************************************************************/
  static GdkColor *Couleur_texte_bit_interne ( gint num )
   { if (num >= NBR_TYPE_MNEMO)
      return( &COULEUR_TEXTE[0] );
     return( &COULEUR_TEXTE[num] );
   }
-/**********************************************************************************************************/
-/* Type_gestion_motif: Renvoie le type correspondant au numero passé en argument                          */
-/* Entrée: le numero du type                                                                              */
-/* Sortie: le type                                                                                        */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Type_gestion_motif: Renvoie le type correspondant au numero passé en argument                                              */
+/* Entrée: le numero du type                                                                                                  */
+/* Sortie: le type                                                                                                            */
+/******************************************************************************************************************************/
  gchar *Type_bit_interne ( gint num )
   { if (num >= NBR_TYPE_MNEMO)
      return("Type_bit_interne: Erreur interne");
     return( TYPE_BIT_INTERNE[num] );
   }
-/**********************************************************************************************************/
-/* Type_gestion_motif: Renvoie le type correspondant au numero passé en argument                          */
-/* Entrée: le numero du type                                                                              */
-/* Sortie: le type                                                                                        */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Type_gestion_motif: Renvoie le type correspondant au numero passé en argument                                              */
+/* Entrée: le numero du type                                                                                                  */
+/* Sortie: le type                                                                                                            */
+/******************************************************************************************************************************/
  gint Type_bit_interne_int ( gchar *type )
   { gint cpt;
     for (cpt=0; cpt<NBR_TYPE_MNEMO; cpt++)
@@ -168,37 +166,39 @@
     printf("Type_bit_interne_int: pas trouvé\n");
     return(0);
   }
-/**********************************************************************************************************/
-/* Type_gestion_motif: Renvoie le type correspondant au numero passé en argument                          */
-/* Entrée: le numero du type                                                                              */
-/* Sortie: le type                                                                                        */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Type_gestion_motif: Renvoie le type correspondant au numero passé en argument                                              */
+/* Entrée: le numero du type                                                                                                  */
+/* Sortie: le type                                                                                                            */
+/******************************************************************************************************************************/
  gchar *Type_bit_interne_court ( gint num )
   { if (num >= NBR_TYPE_MNEMO)
      return("Type_bit_interne_court: Erreur interne");
     return( TYPE_BIT_INTERNE_COURT[num] );
   }
-/**********************************************************************************************************/
-/* CB_effacer_mnemonique: Fonction appelée qd on appuie sur un des boutons de l'interface                 */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
-/* sortie: TRUE                                                                                           */
-/**********************************************************************************************************/
- static gboolean CB_effacer_mnemonique ( GtkDialog *dialog, gint reponse, gboolean edition )
+/******************************************************************************************************************************/
+/* CB_effacer_mnemonique: Fonction appelée qd on appuie sur un des boutons de l'interface                                     */
+/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
+/* sortie: TRUE                                                                                                               */
+/******************************************************************************************************************************/
+ static gboolean CB_effacer_mnemonique ( GtkDialog *dialog, gint reponse, struct PAGE_NOTEBOOK *page )
   { struct CMD_TYPE_MNEMO_BASE rezo_mnemonique;
+    struct TYPE_INFO_MNEMONIQUE *infos;
     GtkTreeSelection *selection;
     GtkTreeModel *store;
     GList *lignes;
     GtkTreeIter iter;
 
+    infos = page->infos;
     switch(reponse)
      { case GTK_RESPONSE_YES:
-            selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_mnemonique) );
-            store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_mnemonique) );
+            selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(infos->Liste_mnemonique) );
+            store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(infos->Liste_mnemonique) );
             lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
             while ( lignes )
              { gchar *libelle;
-               gtk_tree_model_get_iter( store, &iter, lignes->data );  /* Recuperation ligne selectionnée */
-               gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_mnemonique.id, -1 );    /* Recup du id */
+               gtk_tree_model_get_iter( store, &iter, lignes->data );                      /* Recuperation ligne selectionnée */
+               gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_mnemonique.id, -1 );                        /* Recup du id */
                gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
 
                memcpy( &rezo_mnemonique.libelle, libelle, sizeof(rezo_mnemonique.libelle) );
@@ -210,51 +210,59 @@
                lignes = lignes->next;
              }
             g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-            g_list_free (lignes);                                                   /* Liberation mémoire */
+            g_list_free (lignes);                                                                       /* Liberation mémoire */
             break;
        default: break;
      }
     gtk_widget_destroy( GTK_WIDGET(dialog) );
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Menu_ajouter_mnemonique: Ajout d'un mnemonique                                                         */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_ajouter_mnemonique: Ajout d'un mnemonique                                                                             */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static void Menu_ajouter_mnemonique ( void )
-  { Menu_ajouter_editer_mnemonique(NULL);
+  { struct PAGE_NOTEBOOK *page = Page_actuelle();
+    struct TYPE_INFO_MNEMONIQUE *infos;
+    infos=page->infos;
+    Menu_ajouter_editer_mnemonique(NULL, infos->id);
   }
-/**********************************************************************************************************/
-/* Menu_effacer_mnemonique: Retrait des mnemoniques selectionnés                                          */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_effacer_mnemonique: Retrait des mnemoniques selectionnés                                                              */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static void Menu_effacer_mnemonique ( void )
-  { GtkTreeSelection *selection;
+  { struct TYPE_INFO_MNEMONIQUE *infos;
+    struct PAGE_NOTEBOOK *page = Page_actuelle();
+    GtkTreeSelection *selection;
     GtkWidget *dialog;
     guint nbr;
 
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_mnemonique) );
+    infos = page->infos;
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(infos->Liste_mnemonique) );
 
     nbr = gtk_tree_selection_count_selected_rows( selection );
-    if (!nbr) return;                                                       /* Si rien n'est selectionné */
+    if (!nbr) return;                                                                            /* Si rien n'est selectionné */
 
     dialog = gtk_message_dialog_new ( GTK_WINDOW(F_client),
                                       GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
                                       GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO,
                                       _("Do you want to delete %d mnemonique%c ?"), nbr, (nbr>1 ? 's' : ' ') );
     g_signal_connect( dialog, "response",
-                      G_CALLBACK(CB_effacer_mnemonique), NULL );
+                      G_CALLBACK(CB_effacer_mnemonique), page );
     gtk_widget_show_all( dialog );
   }
-/**********************************************************************************************************/
-/* Menu_editer_mnemonique: Demande d'edition du mnemonique selectionné                                    */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_editer_mnemonique: Demande d'edition du mnemonique selectionné                                                        */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static void Menu_editer_mnemonique ( void )
   { GtkTreeSelection *selection;
+    struct PAGE_NOTEBOOK *page = Page_actuelle();
+    struct TYPE_INFO_MNEMONIQUE *infos;
     struct CMD_TYPE_MNEMO_BASE rezo_mnemonique;
     GtkTreeModel *store;
     GtkTreeIter iter;
@@ -262,32 +270,35 @@
     gchar *libelle;
     guint nbr;
 
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_mnemonique) );
-    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_mnemonique) );
+    infos = page->infos;
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(infos->Liste_mnemonique) );
+    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(infos->Liste_mnemonique) );
 
     nbr = gtk_tree_selection_count_selected_rows( selection );
-    if (!nbr) return;                                                        /* Si rien n'est selectionné */
+    if (!nbr) return;                                                                            /* Si rien n'est selectionné */
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
-    gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_mnemonique.id, -1 );               /* Recup du id */
+    gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
+    gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_mnemonique.id, -1 );                                   /* Recup du id */
     gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
-printf("id=%d\n", rezo_mnemonique.id);
+
     memcpy( &rezo_mnemonique.libelle, libelle, sizeof(rezo_mnemonique.libelle) );
     g_free( libelle );
 
     Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_EDIT_MNEMONIQUE,
                   (gchar *)&rezo_mnemonique, sizeof(struct CMD_TYPE_MNEMO_BASE) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-    g_list_free (lignes);                                                           /* Liberation mémoire */
+    g_list_free (lignes);                                                                               /* Liberation mémoire */
   }
-/**********************************************************************************************************/
-/* Menu_exporter_message: Exportation de la base dans un fichier texte                                    */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_exporter_message: Exportation de la base dans un fichier texte                                                        */
+/* Entrée: néant                                                                                                              */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Menu_exporter_mnemonique( void )
-  { GtkSourcePrintCompositor *compositor;
+  { struct PAGE_NOTEBOOK *page = Page_actuelle();
+    struct TYPE_INFO_MNEMONIQUE *infos;
+    GtkSourcePrintCompositor *compositor;
     GtkPrintOperation *print;
     GtkSourceBuffer *buffer;
     GtkTreeModel *store;
@@ -296,7 +307,8 @@ printf("id=%d\n", rezo_mnemonique.id);
     GError *error;
     gint cpt;
 
-    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_mnemonique) );
+    infos = page->infos;
+    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(infos->Liste_mnemonique) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
     if (!valide) return;
 
@@ -371,27 +383,32 @@ printf("id=%d\n", rezo_mnemonique.id);
     g_object_unref(compositor);
     g_object_unref(buffer);
   }
-/**********************************************************************************************************/
-/* Gerer_popup_mnemonique: Gestion du menu popup quand on clique droite sur la liste des mnemoniques      */
-/* Entrée: la liste(widget), l'evenement bouton, et les data                                              */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
- static gboolean Gerer_popup_mnemonique ( GtkWidget *widget, GdkEventButton *event, gpointer data )
+/******************************************************************************************************************************/
+/* Gerer_popup_mnemonique: Gestion du menu popup quand on clique droite sur la liste des mnemoniques                          */
+/* Entrée: la liste(widget), l'evenement bouton, et les data                                                                  */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
+ static gboolean Gerer_popup_mnemonique ( GtkWidget *widget, GdkEventButton *event, struct PAGE_NOTEBOOK *page )
   { static GtkWidget *Popup_select=NULL, *Popup_nonselect=NULL;
+    struct TYPE_INFO_MNEMONIQUE *infos;
     GtkTreeSelection *selection;
     gboolean ya_selection;
     GtkTreePath *path;
     gint cellx, celly;
+
     if (!event) return(FALSE);
 
-    if ( event->button == 3 )                                                         /* Gestion du popup */
+    infos = page->infos;
+    if (!infos) return(FALSE);
+
+    if ( event->button == 3 )                                                                             /* Gestion du popup */
      { if (!Popup_select)    Popup_select = gnome_popup_menu_new( Menu_popup_select );
        if (!Popup_nonselect) Popup_nonselect = gnome_popup_menu_new( Menu_popup_nonselect );
 
        ya_selection = FALSE;
-       selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_mnemonique) );/* On recupere selection*/
+       selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(infos->Liste_mnemonique) );             /* On recupere selection*/
        if (gtk_tree_selection_count_selected_rows(selection) == 0)
-        { gtk_tree_view_get_path_at_pos ( GTK_TREE_VIEW(Liste_mnemonique), event->x, event->y,
+        { gtk_tree_view_get_path_at_pos ( GTK_TREE_VIEW(infos->Liste_mnemonique), event->x, event->y,
                                           &path, NULL, &cellx, &celly );
           
           if (path)
@@ -399,40 +416,47 @@ printf("id=%d\n", rezo_mnemonique.id);
              gtk_tree_path_free( path );
              ya_selection = TRUE;
            }
-        } else ya_selection = TRUE;                              /* ya bel et bien qqchose de selectionné */
+        } else ya_selection = TRUE;                                                  /* ya bel et bien qqchose de selectionné */
 
        gnome_popup_menu_do_popup_modal( (ya_selection ? Popup_select : Popup_nonselect),
                                         NULL, NULL, event, NULL, F_client );
        return(TRUE);
      }
-    else if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                   /* Double clic ?? */
+    else if (event->type == GDK_2BUTTON_PRESS && event->button == 1 )                                       /* Double clic ?? */
      { Menu_editer_mnemonique(); }
     return(FALSE);
   }
-/**********************************************************************************************************/
-/* Creer_page_mnemonique: Creation de la page du notebook consacrée aux mnemoniques watchdog              */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- void Creer_page_mnemonique( void )
+/******************************************************************************************************************************/
+/* Creer_page_mnemonique: Creation de la page du notebook consacrée aux mnemoniques watchdog                                  */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Creer_page_mnemonique( struct CMD_TYPE_PLUGIN_DLS *plugin )
   { GtkWidget *boite, *scroll, *hboite, *bouton, *separateur;
+    struct TYPE_INFO_MNEMONIQUE *infos;
     GtkTreeSelection *selection;
     GtkTreeViewColumn *colonne;
     GtkCellRenderer *renderer;
     GtkListStore *store;
+    gchar titre[120];
     struct PAGE_NOTEBOOK *page;
 
     page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
     
+    page->infos = (struct TYPE_INFO_MNEMONIQUE *)g_try_malloc0( sizeof(struct TYPE_INFO_MNEMONIQUE) );
+    if (!page->infos) { g_free(page); return; }
+    infos = (struct TYPE_INFO_MNEMONIQUE *)page->infos;
+    
     page->type  = TYPE_PAGE_MNEMONIQUE;
+    infos->id   = plugin->id;
     Liste_pages = g_list_append( Liste_pages, page );
 
     hboite = gtk_hbox_new( FALSE, 6 );
     page->child = hboite;
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     
-/***************************************** La liste des mnemoniques ***************************************/
+/************************************************* La liste des mnemoniques ***************************************************/
     scroll = gtk_scrolled_window_new( NULL, NULL );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
@@ -452,77 +476,77 @@ printf("id=%d\n", rezo_mnemonique.id);
                                               GDK_TYPE_COLOR                             /* couleur texte */
                                );
 
-    Liste_mnemonique = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );      /* Creation de la vue */
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_mnemonique) );
+    infos->Liste_mnemonique = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                   /* Creation de la vue */
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(infos->Liste_mnemonique) );
     gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );
-    gtk_container_add( GTK_CONTAINER(scroll), Liste_mnemonique );
+    gtk_container_add( GTK_CONTAINER(scroll), infos->Liste_mnemonique );
 
-    renderer = gtk_cell_renderer_text_new();                                    /* Colonne du commentaire */
+    renderer = gtk_cell_renderer_text_new();                                                        /* Colonne du commentaire */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Type/Num"), renderer,
                                                          "text", COLONNE_TYPE,
                                                          "background-gdk", COLONNE_COULEUR,
                                                          "foreground-gdk", COLONNE_COULEUR_TEXTE,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id (colonne, COLONNE_TYPE);
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (infos->Liste_mnemonique), colonne );
 
-    renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de mnemonique */
+    renderer = gtk_cell_renderer_text_new();                                              /* Colonne du libelle de mnemonique */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe/Page/D.L.S Name"), renderer,
                                                          "text", COLONNE_GROUPE_PAGE_DLS,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_GROUPE_PAGE_DLS);        /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_GROUPE_PAGE_DLS);                            /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (infos->Liste_mnemonique), colonne );
 
-    renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de mnemonique */
+    renderer = gtk_cell_renderer_text_new();                                              /* Colonne du libelle de mnemonique */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Acronyme"), renderer,
                                                          "text", COLONNE_ACRONYME,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_ACRONYME);               /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_ACRONYME);                                   /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (infos->Liste_mnemonique), colonne );
 
-    renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de mnemonique */
+    renderer = gtk_cell_renderer_text_new();                                              /* Colonne du libelle de mnemonique */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Description"), renderer,
                                                          "text", COLONNE_LIBELLE,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                                    /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (infos->Liste_mnemonique), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                              /* Colonne du libelle de mnemonique */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Event Host"), renderer,
                                                          "text", COLONNE_EV_HOST,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EV_HOST);                                    /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (infos->Liste_mnemonique), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                              /* Colonne du libelle de mnemonique */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Event Thread"), renderer,
                                                          "text", COLONNE_EV_THREAD,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EV_THREAD);                                  /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (infos->Liste_mnemonique), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                              /* Colonne du libelle de mnemonique */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Event Text"), renderer,
                                                          "text", COLONNE_EV_TEXT,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_EV_TEXT);                                    /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (infos->Liste_mnemonique), colonne );
 
-    renderer = gtk_cell_renderer_text_new();                          /* Colonne du libelle de mnemonique */
+    renderer = gtk_cell_renderer_text_new();                                              /* Colonne du libelle de mnemonique */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Tableau"), renderer,
                                                          "text", COLONNE_TABLEAU,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_TABLEAU);           /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_mnemonique), colonne );
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_TABLEAU);                                    /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (infos->Liste_mnemonique), colonne );
 
     /*gtk_tree_view_set_reorderable( GTK_TREE_VIEW(Liste_mnemonique), TRUE );*/
-    gtk_tree_view_set_rules_hint( GTK_TREE_VIEW(Liste_mnemonique), TRUE );             /* Pour faire beau */
+    gtk_tree_view_set_rules_hint( GTK_TREE_VIEW(infos->Liste_mnemonique), TRUE );                          /* Pour faire beau */
 
-    g_signal_connect( G_OBJECT(Liste_mnemonique), "button_press_event",          /* Gestion du menu popup */
-                      G_CALLBACK(Gerer_popup_mnemonique), NULL );
-    g_object_unref (G_OBJECT (store));                        /* nous n'avons plus besoin de notre modele */
+    g_signal_connect( G_OBJECT(infos->Liste_mnemonique), "button_press_event",                       /* Gestion du menu popup */
+                      G_CALLBACK(Gerer_popup_mnemonique), page );
+    g_object_unref (G_OBJECT (store));                                            /* nous n'avons plus besoin de notre modele */
     
-/************************************ Les boutons de controles ********************************************/
+/************************************************* Les boutons de controles ***************************************************/
     boite = gtk_vbox_new( FALSE, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
 
@@ -542,7 +566,7 @@ printf("id=%d\n", rezo_mnemonique.id);
     bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_ajouter_editer_mnemonique), NULL );
+                              G_CALLBACK(Menu_ajouter_mnemonique), NULL );
 
     bouton = gtk_button_new_from_stock( GTK_STOCK_PRINT );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
@@ -558,18 +582,17 @@ printf("id=%d\n", rezo_mnemonique.id);
                               G_CALLBACK(Menu_effacer_mnemonique), NULL );
 
     gtk_widget_show_all( hboite );
-    gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( _("Mnemoniques") ) );
+    g_snprintf( titre, sizeof(titre), "%s Mnemos", plugin->tech_id );
+    gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( titre ) );
   }
 /******************************************************************************************************************************/
 /* Rafraichir_visu_mnemonique: Rafraichissement d'un mnemonique la liste à l'écran                                            */
 /* Entrée: une reference sur le mnemonique                                                                                    */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- static void Rafraichir_visu_mnemonique( GtkTreeIter *iter, struct CMD_TYPE_MNEMO_BASE *mnemonique )
-  { GtkTreeModel *store;
-    gchar chaine[60], groupe_page[512];
+ static void Rafraichir_visu_mnemonique( GtkListStore *store, GtkTreeIter *iter, struct CMD_TYPE_MNEMO_BASE *mnemonique )
+  { gchar chaine[60], groupe_page[512];
        
-    store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_mnemonique) );                              /* Acquisition du modele */
     if (mnemonique->num != -1)
      { g_snprintf( chaine, sizeof(chaine), "%s%04d", Type_bit_interne_court( mnemonique->type ), mnemonique->num ); }
     else
@@ -594,33 +617,47 @@ printf("id=%d\n", rezo_mnemonique.id);
                          -1
                        );
   }
-/**********************************************************************************************************/
-/* Afficher_un_mnemonique: Ajoute un mnemonique dans la liste des mnemoniques                             */
-/* Entrée: une reference sur le mnemonique                                                                */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Afficher_un_mnemonique: Ajoute un mnemonique dans la liste des mnemoniques                                                 */
+/* Entrée: une reference sur le mnemonique                                                                                    */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Proto_afficher_un_mnemonique( struct CMD_TYPE_MNEMO_BASE *mnemonique )
-  { GtkListStore *store;
+  { struct TYPE_INFO_MNEMONIQUE *infos;
+    struct PAGE_NOTEBOOK *page;
+    GtkListStore *store;
     GtkTreeIter iter;
 
-    if (!Tester_page_notebook(TYPE_PAGE_MNEMONIQUE)) Creer_page_mnemonique();
+    page = Chercher_page_notebook( TYPE_PAGE_MNEMONIQUE, mnemonique->dls_id, FALSE );
+    if (!page) return;
 
-    store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_mnemonique) ));
-    gtk_list_store_append ( store, &iter );                                      /* Acquisition iterateur */
-    Rafraichir_visu_mnemonique ( &iter, mnemonique );
+    infos = page->infos;
+    if (!infos) return;
+
+    store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(infos->Liste_mnemonique) ));
+    gtk_list_store_append ( store, &iter );                                                          /* Acquisition iterateur */
+    Rafraichir_visu_mnemonique ( store, &iter, mnemonique );
   }
-/**********************************************************************************************************/
-/* Cacher_un_mnemonique: Enleve un mnemonique de la liste des mnemoniques                                 */
-/* Entrée: une reference sur le mnemonique                                                                */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Cacher_un_mnemonique: Enleve un mnemonique de la liste des mnemoniques                                                     */
+/* Entrée: une reference sur le mnemonique                                                                                    */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Proto_cacher_un_mnemonique( struct CMD_TYPE_MNEMO_BASE *mnemonique )
-  { GtkTreeModel *store;
+  { struct TYPE_INFO_MNEMONIQUE *infos;
+    struct PAGE_NOTEBOOK *page;
+    GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
     gint id;
 
-    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_mnemonique) );
+    page = Chercher_page_notebook( TYPE_PAGE_MNEMONIQUE, mnemonique->dls_id, FALSE );
+    if (!page) return;
+
+    infos = page->infos;
+    if (!infos) return;
+
+    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(infos->Liste_mnemonique) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )
@@ -635,18 +672,26 @@ printf("id=%d\n", rezo_mnemonique.id);
     if (valide)
      { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); }
   }
-/**********************************************************************************************************/
-/* Proto_rafrachir_un_mnemonique: Rafraichissement du mnemonique en parametre                             */
-/* Entrée: une reference sur le mnemonique                                                                */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_rafrachir_un_mnemonique: Rafraichissement du mnemonique en parametre                                                 */
+/* Entrée: une reference sur le mnemonique                                                                                    */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Proto_rafraichir_un_mnemonique( struct CMD_TYPE_MNEMO_BASE *mnemonique )
-  { GtkTreeModel *store;
+  { struct TYPE_INFO_MNEMONIQUE *infos;
+    struct PAGE_NOTEBOOK *page;
+    GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
     gint id;
 
-    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_mnemonique) );
+    page = Chercher_page_notebook( TYPE_PAGE_MNEMONIQUE, mnemonique->dls_id, FALSE );
+    if (!page) return;
+
+    infos = page->infos;
+    if (!infos) return;
+
+    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(infos->Liste_mnemonique) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )
@@ -659,6 +704,6 @@ printf("id=%d\n", rezo_mnemonique.id);
      }
 
     if (valide)
-     { Rafraichir_visu_mnemonique( &iter, mnemonique ); }
+     { Rafraichir_visu_mnemonique( GTK_LIST_STORE(store), &iter, mnemonique ); }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

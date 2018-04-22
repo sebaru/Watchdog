@@ -88,6 +88,7 @@
     struct CMD_TYPE_SOURCE_DLS dls;                                         /* Pour la sauvegarde et compilation dls en cours */
 
     struct CMD_TYPE_SYNOPTIQUE *syn_to_send;             /* Structure du synoptique en cours d'envoi (atelier ou supervision) */
+    gint mnemo_dls_id_to_send;
   };     
 
  #endif

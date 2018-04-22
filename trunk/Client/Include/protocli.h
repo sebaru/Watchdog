@@ -85,6 +85,11 @@
     struct TRAME *Trame;                                                                   /* La trame de fond de supervision */
   };
 
+ struct TYPE_INFO_MNEMONIQUE
+  { gint id;                                                 /* ID du module DLS dont les mnemoniques sont en cours d'edition */
+    GtkWidget *Liste_mnemonique;                                      /* GtkTreeView pour la gestion des mnemoniques Watchdog */
+  };
+
  struct TYPE_INFO_SOURCE_DLS
   { GtkWidget *text;                                  /* Pour les plugins DLS, ici est placé le widget TextView correspondant */
     guint id;                                       /* Pour les plugins DLS, ici est stocké l'id du plugin en cours d'edition */
@@ -252,9 +257,9 @@
  extern gchar *Type_bit_interne ( gint num );
  extern gchar *Type_bit_interne_court ( gint num );
  extern gint Type_bit_interne_int ( gchar *type );
- extern void Creer_page_mnemonique( void );
+ extern void Creer_page_mnemonique( struct CMD_TYPE_PLUGIN_DLS *plugin );
 
- extern void Menu_ajouter_editer_mnemonique ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );                  /* ajout_mnemonique.c*/
+ extern void Menu_ajouter_editer_mnemonique ( struct CMD_TYPE_MNEMO_FULL *mnemo_full, gint dls_id );     /* ajout_mnemonique.c*/
  extern void Proto_afficher_un_syn_for_mnemonique ( struct CMD_TYPE_SYNOPTIQUE *syn );
 
  extern void Proto_cacher_un_icone( struct CMD_TYPE_ICONE *icone );                                     /* Dans liste_icone.c */
@@ -275,7 +280,6 @@
  extern void Menu_want_message ( void );
  extern void Menu_want_icone ( void );
  extern void Menu_want_synoptique ( void );
- extern void Menu_want_mnemonique ( void );
  extern void Menu_want_camera ( void );
  extern void Menu_want_histo_msgs ( void );
  extern void Menu_want_supervision( void );

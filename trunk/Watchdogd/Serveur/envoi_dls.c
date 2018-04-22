@@ -352,18 +352,6 @@
     pthread_exit ( NULL );
   }
 /******************************************************************************************************************************/
-/* Envoyer_plugins_dls_thread: Envoi la liste des plugin D.L.S au client                                                      */
-/* Entrée: Néant                                                                                                              */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void *Envoyer_plugins_dls_pour_mnemo_thread ( struct CLIENT *client )
-  { Envoyer_plugins_dls_thread_tag ( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO,
-                                                             SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO_FIN
-                                   );
-    Unref_client( client );                                                               /* Déréférence la structure cliente */
-    pthread_exit ( NULL );
-  }
-/******************************************************************************************************************************/
 /* Envoyer_syns: Envoi des syns au client GID_SYNOPTIQUE                                                                      */
 /* Entrée: Néant                                                                                                              */
 /* Sortie: Néant                                                                                                              */

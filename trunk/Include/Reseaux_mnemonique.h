@@ -148,7 +148,6 @@
   { SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE,                                          /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE_FIN,                                      /* Ajout d'un groupe dans la liste cliente */
     SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE,                                                /* Le client demande la page mnemonique */
-    SSTAG_SERVEUR_CREATE_PAGE_MNEMO_OK,                                  /* Les serveur repond OK pour la creation de la page */
     SSTAG_CLIENT_ADD_MNEMONIQUE,                                               /* Le client desire ajouter un groupe watchdog */
     SSTAG_SERVEUR_ADD_MNEMONIQUE_OK,                                                       /* L'ajout du groupe est un succes */
 
@@ -159,10 +158,6 @@
     SSTAG_SERVEUR_EDIT_MNEMONIQUE_OK,                              /* Le serveur accepte et envoi les données correspondantes */
     SSTAG_CLIENT_VALIDE_EDIT_MNEMONIQUE,                                             /* Le client renvoie les données editées */
     SSTAG_SERVEUR_VALIDE_EDIT_MNEMONIQUE_OK,                                       /* Le serveur valide les nouvelles données */
-
-    SSTAG_CLIENT_WANT_DLS_FOR_MNEMO,                                                 /* Envoi des synoptiques pour les mnemos */
-    SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO,
-    SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO_FIN,
   };
 
 #endif

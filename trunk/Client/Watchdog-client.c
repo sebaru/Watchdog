@@ -83,8 +83,6 @@
                             Menu_want_page_admin, GNOME_STOCK_PIXMAP_PROPERTIES ),
     GNOMEUIINFO_ITEM_STOCK( N_("Edit _Messages"), N_("Edit messages"),
                             Menu_want_message, GNOME_STOCK_PIXMAP_MAIL ),
-    GNOMEUIINFO_ITEM_STOCK( N_("M_nemoniques"), N_("Edit mnemoniques"),
-                            Menu_want_mnemonique, GNOME_STOCK_PIXMAP_BOOK_GREEN ),
     GNOMEUIINFO_ITEM_STOCK( N_("_D.L.S"), N_("Edit DLS plugins"),
                             Menu_want_plugin_dls, GNOME_STOCK_PIXMAP_EXEC ),
     GNOMEUIINFO_SUBTREE(N_("_Synoptiques"), Menu_synoptique),
