@@ -836,7 +836,7 @@
      }
 
     if (database_version < 3555)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` ADD `tech_id` VARCHAR(24) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT 'SYS' AFTER `id`" );
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` ADD `tech_id` VARCHAR(24) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT id AFTER `id`" );
        Lancer_requete_SQL ( db, requete );
      }
 

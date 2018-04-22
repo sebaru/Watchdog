@@ -77,7 +77,7 @@ INSERT INTO `class` (`id`, `libelle`) VALUES
 
 CREATE TABLE IF NOT EXISTS `dls` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tech_id` VARCHAR(8) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT 'SYS',
+  `tech_id` VARCHAR(8) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT id,
   `type` int(11) NOT NULL,
   `syn_id` int(11) NOT NULL DEFAULT '0',
   `name` text COLLATE utf8_unicode_ci NOT NULL,
