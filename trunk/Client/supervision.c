@@ -312,11 +312,23 @@
        trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
        trame_pass->cligno1 = 1;                                                                      /* Sauvegarde etat motif */
      }
+    else if (vars->bit_alarme_fixe == TRUE)
+     { trame_pass->rouge1  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert1   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno1 = 0;                                                                      /* Sauvegarde etat motif */
+     }
     else if (vars->bit_defaut == TRUE)
      { trame_pass->rouge1  = 255;                                                                    /* Sauvegarde etat motif */
        trame_pass->vert1   = 255;                                                                    /* Sauvegarde etat motif */
        trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
        trame_pass->cligno1 = 1;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_defaut_fixe == TRUE)
+     { trame_pass->rouge1  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert1   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno1 = 0;                                                                      /* Sauvegarde etat motif */
      }
     else
      { trame_pass->rouge1  = 0;                                                                      /* Sauvegarde etat motif */
@@ -337,6 +349,12 @@
        trame_pass->vert2   = 0;                                                                      /* Sauvegarde etat motif */
        trame_pass->bleu2   = 0;                                                                      /* Sauvegarde etat motif */
        trame_pass->cligno2 = 1;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_alerte_fixe == TRUE)
+     { trame_pass->rouge2  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert2   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->bleu2   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno2 = 0;                                                                      /* Sauvegarde etat motif */
      }
     else if (vars->bit_veille_totale == TRUE)
      { trame_pass->rouge2  = 0;                                                                      /* Sauvegarde etat motif */
@@ -384,11 +402,11 @@
      }
     Trame_peindre_pass_3 ( trame_pass, trame_pass->rouge3, trame_pass->vert3, trame_pass->bleu3 );
  }
-/**********************************************************************************************************/
-/* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                   */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                                       */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Proto_changer_etat_motif( struct CMD_ETAT_BIT_CTRL *etat_motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
     struct TRAME_ITEM_PASS *trame_pass;
@@ -400,21 +418,21 @@
 
 printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, etat_motif->etat, etat_motif->rouge,
                                                          etat_motif->vert, etat_motif->bleu );
-    cpt = 0;                                                 /* Nous n'avons encore rien fait au debut !! */
+    cpt = 0;                                                                     /* Nous n'avons encore rien fait au debut !! */
     liste = Liste_pages;
-    while(liste)                                              /* On parcours toutes les pages SUPERVISION */
+    while(liste)                                                                  /* On parcours toutes les pages SUPERVISION */
      { page = (struct PAGE_NOTEBOOK *)liste->data;
        if (page->type != TYPE_PAGE_SUPERVISION) { liste = liste->next; continue; }
 
        infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
 
-       liste_motifs = infos->Trame->trame_items;            /* On parcours tous les motifs de chaque page */
+       liste_motifs = infos->Trame->trame_items;                                /* On parcours tous les motifs de chaque page */
        while (liste_motifs)
         { switch( *((gint *)liste_motifs->data) )
            { case TYPE_MOTIF      : trame_motif = (struct TRAME_ITEM_MOTIF *)liste_motifs->data;
                                     if (trame_motif->motif->bit_controle == etat_motif->num)
                                      { Changer_etat_motif( trame_motif, etat_motif );
-                                       cpt++;                         /* Nous updatons un motif de plus ! */ 
+                                       cpt++;                                             /* Nous updatons un motif de plus ! */ 
                                      }
                                     break;
              case TYPE_COMMENTAIRE: break;
@@ -424,9 +442,8 @@ printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, eta
         }
        liste = liste->next;
      }
-    if (!cpt)             /* Si nous n'avons rien mis à jour, c'est que le bit Ixxx ne nous est pas utile */
-     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN,
-                      (gchar *)etat_motif, sizeof(struct CMD_ETAT_BIT_CTRL) ); 
+    if (!cpt)                                 /* Si nous n'avons rien mis à jour, c'est que le bit Ixxx ne nous est pas utile */
+     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN, (gchar *)etat_motif, sizeof(struct CMD_ETAT_BIT_CTRL) ); 
      }
   }
 /******************************************************************************************************************************/
@@ -472,8 +489,7 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
      }
 
     if (!cpt)                                 /* Si nous n'avons rien mis à jour, c'est que le bit Ixxx ne nous est pas utile */
-     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SET_SYN_VARS_UNKNOWN,
-                      (gchar *)syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) ); 
+     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SET_SYN_VARS_UNKNOWN, (gchar *)syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) ); 
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

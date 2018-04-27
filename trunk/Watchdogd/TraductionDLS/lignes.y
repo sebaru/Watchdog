@@ -44,6 +44,7 @@
 
 %token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS T_POUV T_PFERM T_EGAL OU ET BARRE T_FOIS T_DEFINE T_STATIC
 %token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_SBIEN_VP T_SBIEN_VT T_SBIEN_ALE T_SPERS_DER T_SPERS_DAN T_OSYN_ACQ
+%token <val>    T_ACT_DEFF T_ACT_ALAF T_SBIEN_ALEF
 %token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LIBELLE
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL T_TRUE T_FALSE
@@ -618,14 +619,20 @@ une_action:     barre SORTIE ENTIER
                   {{ $$=New_action_vars_mono("vars->bit_comm_out"); }}
                 | T_ACT_DEF
                   {{ $$=New_action_vars_mono("vars->bit_defaut"); }}
+                | T_ACT_DEFF
+                  {{ $$=New_action_vars_mono("vars->bit_defaut_fixe"); }}
                 | T_ACT_ALA
                   {{ $$=New_action_vars_mono("vars->bit_alarme"); }}
+                | T_ACT_ALAF
+                  {{ $$=New_action_vars_mono("vars->bit_alarme_fixe"); }}
                 | T_SBIEN_VP
                   {{ $$=New_action_vars_mono("vars->bit_veille_partielle"); }}
                 | T_SBIEN_VT
                   {{ $$=New_action_vars_mono("vars->bit_veille_totale"); }}
                 | T_SBIEN_ALE
                   {{ $$=New_action_vars_mono("vars->bit_alerte"); }}
+                | T_SBIEN_ALEF
+                  {{ $$=New_action_vars_mono("vars->bit_alerte_fixe"); }}
                 | T_SPERS_DER
                   {{ $$=New_action_vars_mono("vars->bit_derangement"); }}
                 | T_SPERS_DAN

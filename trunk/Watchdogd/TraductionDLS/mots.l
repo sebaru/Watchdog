@@ -86,10 +86,13 @@ blanc         [\t ]+
  /**************************************************** Status des vignette ****************************************************/
 "_MEMSA_COMOUT"            { DlsScanner_lval.val = T_ACT_COMOUT; return T_ACT_COMOUT; }
 "_MEMSA_DEF"               { DlsScanner_lval.val = T_ACT_DEF;    return T_ACT_DEF;    }
+"_MEMSA_DEFF"              { DlsScanner_lval.val = T_ACT_DEFF;   return T_ACT_DEFF;   }
 "_MEMSA_ALA"               { DlsScanner_lval.val = T_ACT_ALA;    return T_ACT_ALA;    }
+"_MEMSA_ALAF"              { DlsScanner_lval.val = T_ACT_ALAF;   return T_ACT_ALAF;   }
 "_MEMSSB_VP"               { DlsScanner_lval.val = T_SBIEN_VP;   return T_SBIEN_VP;   }
 "_MEMSSB_VT"               { DlsScanner_lval.val = T_SBIEN_VT;   return T_SBIEN_VT;   }
 "_MEMSSB_ALE"              { DlsScanner_lval.val = T_SBIEN_ALE;  return T_SBIEN_ALE;  }
+"_MEMSSB_ALEF"             { DlsScanner_lval.val = T_SBIEN_ALEF; return T_SBIEN_ALEF; }
 "_MEMSSP_DER"              { DlsScanner_lval.val = T_SPERS_DER;  return T_SPERS_DER;  }
 "_MEMSSP_DAN"              { DlsScanner_lval.val = T_SPERS_DAN;  return T_SPERS_DAN;  }
 "_OSYN_ACQUIT"             { DlsScanner_lval.val = T_OSYN_ACQ;   return T_OSYN_ACQ;   }

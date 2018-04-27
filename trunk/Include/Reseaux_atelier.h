@@ -133,10 +133,13 @@
   { gint syn_id;
     gboolean bit_comm_out;
     gboolean bit_defaut;
+    gboolean bit_defaut_fixe;
     gboolean bit_alarme;
+    gboolean bit_alarme_fixe;
     gboolean bit_veille_partielle;
     gboolean bit_veille_totale;
     gboolean bit_alerte;
+    gboolean bit_alerte_fixe;
     gboolean bit_derangement;
     gboolean bit_danger;
   };

@@ -32,10 +32,13 @@
  struct DLS_TO_PLUGIN                                                 /* structure dechange de données entre DLS et le plugin */
   { gboolean bit_comm_out;
     gboolean bit_defaut;
+    gboolean bit_defaut_fixe;
     gboolean bit_alarme;
+    gboolean bit_alarme_fixe;
     gboolean bit_veille_partielle;
     gboolean bit_veille_totale;
     gboolean bit_alerte;
+    gboolean bit_alerte_fixe;
     gboolean bit_derangement;
     gboolean bit_danger;
     gboolean bit_acquit;
