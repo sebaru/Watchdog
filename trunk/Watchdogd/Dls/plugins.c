@@ -157,7 +157,7 @@
     GSList *liste;
     liste = dls_tree->Liste_plugin_dls;
     while(liste)                                                                            /* Liberation mémoire des modules */
-     { plugin = (struct PLUGIN_DLS *)dls_tree->Liste_plugin_dls->data;
+     { plugin = (struct PLUGIN_DLS *)liste->data;
        if ( plugin->plugindb.id == dls_id )
         {
           if (plugin->handle)
