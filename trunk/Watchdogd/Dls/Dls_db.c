@@ -100,15 +100,15 @@
     if (ajout)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "INSERT INTO %s"             
-                   "(name,shortname,tech_id,actif,type,syn_id,compil_date,compil_status,nbr_compil,sourcecode) "
-                   "VALUES ('%s','%s','%s','%d','%d',%d,0,0,0,'/* Source Code */');",
-                   NOM_TABLE_DLS, nom, shortname, tech_id, dls->on, dls->type, dls->syn_id );
+                   "(name,shortname,tech_id,actif,syn_id,compil_date,compil_status,nbr_compil,sourcecode) "
+                   "VALUES ('%s','%s','%s','%d',%d,0,0,0,'/* Source Code */');",
+                   NOM_TABLE_DLS, nom, shortname, tech_id, dls->on, dls->syn_id );
      }
     else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                   "UPDATE %s SET "             
-                  "name='%s',shortname='%s',tech_id='%s',actif='%d',type='%d',syn_id=%d WHERE id=%d",
-                   NOM_TABLE_DLS, nom, shortname, tech_id, dls->on, dls->type, dls->syn_id, dls->id );
+                  "name='%s',shortname='%s',tech_id='%s',actif='%d',syn_id=%d WHERE id=%d",
+                   NOM_TABLE_DLS, nom, shortname, tech_id, dls->on, dls->syn_id, dls->id );
      }
 
     g_free(nom);
