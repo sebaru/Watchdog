@@ -44,7 +44,7 @@
 
 %token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS T_POUV T_PFERM T_EGAL OU ET BARRE T_FOIS T_DEFINE T_STATIC
 %token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_SBIEN_VP T_SBIEN_VT T_SBIEN_ALE T_SPERS_DER T_SPERS_DAN T_OSYN_ACQ
-%token <val>    T_ACT_DEFF T_ACT_ALAF T_SBIEN_ALEF
+%token <val>    T_ACT_DEFF T_ACT_ALAF T_SBIEN_ALEF T_TOP_ALERTE
 %token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LIBELLE
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL T_TRUE T_FALSE
@@ -367,6 +367,12 @@ unite:          modulateur ENTIER HEURE ENTIER
                    taille = 5;
                    $$ = New_chaine(taille);
                    g_snprintf( $$, taille, "(0)" );
+                }}
+                | T_TOP_ALERTE
+                {{ int taille;
+                   taille = 22;
+                   $$ = New_chaine(taille);
+                   g_snprintf( $$, taille, "Dls_get_top_alerte()" );
                 }}
                 | barre T_BI ENTIER liste_options
                 {{ $$ = New_condition_bi ( $1, $3, $4 );

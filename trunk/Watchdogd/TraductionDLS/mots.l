@@ -69,6 +69,7 @@ blanc         [\t ]+
 "_START"                   { DlsScanner_lval.val = T_START;     return T_START;     }
 "_TRUE"                    { DlsScanner_lval.val = T_TRUE;      return T_TRUE;      }
 "_FALSE"                   { DlsScanner_lval.val = T_FALSE;     return T_FALSE;     }
+"_TOP_ALERTE"              { DlsScanner_lval.val = T_TOP_ALERTE;return T_TOP_ALERTE;}
 
  /***************************************** Methodes speciales ********************************************/
 "_HEURE"                   { DlsScanner_lval.val = HEURE;       return HEURE;       }
@@ -146,8 +147,8 @@ blanc         [\t ]+
 
 "\""                       { BEGIN(chaine_directe); }
 <chaine_directe>{chaine}   { DlsScanner_lval.chaine = (char *)strdup(DlsScanner_text); return T_CHAINE; }
-<chaine_directe>.          { BEGIN(INITIAL); }
 <chaine_directe>"\""       { BEGIN(INITIAL); }
+<chaine_directe>.          { BEGIN(INITIAL); }
 
 {id}                       { DlsScanner_lval.chaine = (char *)strdup(DlsScanner_text); return ID;       }
 {digit}                    { DlsScanner_lval.val    = atoi(DlsScanner_text);           return ENTIER;   }

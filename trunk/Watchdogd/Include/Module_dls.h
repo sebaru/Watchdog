@@ -44,12 +44,13 @@
     gboolean bit_acquit;
   };
 
- extern void Dls_print_debug ( gint id, gint *Tableau_bit, gint *Tableau_num, gfloat *Tableau_val );
+ extern void     Dls_print_debug ( gint id, gint *Tableau_bit, gint *Tableau_num, gfloat *Tableau_val );
+ extern gboolean Dls_get_top_alerte ( void );
+ extern gboolean Dls_data_get_bool ( gchar *nom, gchar *owner, gboolean **data_p );
+ extern void     Dls_data_set_bool ( gchar *nom, gchar *owner, gboolean **data_p, gboolean valeur );
  extern int E( int num );
  extern int B( int num );
  extern int M( int num );
- extern gboolean Dls_data_get_bool ( gchar *nom, gchar *owner, gboolean **data_p );
- extern void Dls_data_set_bool ( gchar *nom, gchar *owner, gboolean **data_p, gboolean valeur );
  extern int T( int num );
  extern int EA_ech_inf( float val, int num );
  extern int EA_ech_sup( float val, int num );
@@ -69,9 +70,9 @@
  extern void SA( int num, int etat );
  extern void MSG( int num, int etat );
                            
- extern int Heure( int heure, int minute );                                    /* Tester l'heure actuelle */
+ extern int Heure( int heure, int minute );                                                        /* Tester l'heure actuelle */
  extern int Heure_avant( int heure, int minute );
  extern int Heure_apres( int heure, int minute );
- extern int Jour_semaine( int jour );                 /* Sommes nous le jour de la semaine en parametre ? */
+ extern int Jour_semaine( int jour );                                     /* Sommes nous le jour de la semaine en parametre ? */
  #endif 
-/*-------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

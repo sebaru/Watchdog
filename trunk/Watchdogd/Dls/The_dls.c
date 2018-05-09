@@ -103,6 +103,13 @@
     { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : DLS[%06d]->%s", __func__, id, result ); }
  }
 /******************************************************************************************************************************/
+/* Dls_get_top_alerte: Remonte la valeur du plus haut bit d'alerte dans l'arbre DLS                                           */
+/* Entrée: Rien                                                                                                               */
+/* Sortie: TRUE ou FALSe                                                                                                      */
+/******************************************************************************************************************************/
+ gboolean Dls_get_top_alerte ( void )
+  { return( Partage->com_dls.Dls_tree->syn_vars.bit_alerte ); }
+/******************************************************************************************************************************/
 /* Chrono: renvoi la difference de temps entre deux structures timeval                                                        */
 /* Entrée: le temps avant, et le temps apres l'action                                                                         */
 /* Sortie: un float                                                                                                           */
