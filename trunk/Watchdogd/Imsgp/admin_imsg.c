@@ -35,7 +35,7 @@
 /******************************************************************************************************************************/
  static gchar *Admin_imsgp_reload ( gchar *response )
   { Cfg_imsgp.lib->Thread_reload = TRUE;
-    response = Admin_write ( response, " | - IMSG Reloading done\n" );
+    response = Admin_write ( response, " | - IMSG Reloading done" );
     return(response);
   }
 /******************************************************************************************************************************/
