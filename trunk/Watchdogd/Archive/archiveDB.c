@@ -53,7 +53,7 @@
                    "`valeur` float NOT NULL DEFAULT '0',"
                    "KEY `index_date` (`date_time`)"
                    ") ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
-                   "  PARTITION BY LINEAR KEY (date_time) PARTITIONS 52;",
+                   "  PARTITION BY LINEAR KEY (date_time) PARTITIONS 12;",
                    NOM_TABLE_ARCH, arch->type, arch->num );
        Lancer_requete_SQL ( db, table );                                                       /* Execution de la requete SQL */
        Lancer_requete_SQL ( db, requete );                             /* Une fois la table créé, on peut y stocker l'archive */
