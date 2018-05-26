@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/liste_message.c        Configuration des messages de Watchdog v2.0                              */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       sam 23 fév 2008 11:25:00 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/liste_message.c        Configuration des messages de Watchdog v2.0                                                  */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                           sam 23 fév 2008 11:25:00 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * liste_message.c
  * This file is part of Watchdog
@@ -85,13 +85,14 @@
 /**********************************************************************************************************/
  gchar *Type_vers_string ( guint32 type )
   { switch (type)
-     { case MSG_ETAT     : return( _("Info    (I) ") );
-       case MSG_ALERTE   : return( _("Alerte  (AK)") );
-       case MSG_ALARME   : return( _("Alarme  (AL)") );
-       case MSG_DEFAUT   : return( _("Trouble (T) ") );
-       case MSG_VEILLE   : return( _("Veille  (V) ") );
-       case MSG_ATTENTE  : return( _("Attente (A) ") );
-       case MSG_DANGER   : return( _("Danger  (D) ") );
+     { case MSG_ETAT        : return( _("Info        (I) ") );
+       case MSG_ALERTE      : return( _("Alerte      (AK)") );
+       case MSG_ALARME      : return( _("Alarme      (AL)") );
+       case MSG_DEFAUT      : return( _("Trouble     (T) ") );
+       case MSG_VEILLE      : return( _("Veille      (V) ") );
+       case MSG_ATTENTE     : return( _("Attente     (A) ") );
+       case MSG_DANGER      : return( _("Danger      (DA)") );
+       case MSG_DERANGEMENT : return( _("Derangement (DE)") );
      }
     return( _("Unknown") );
   }

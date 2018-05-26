@@ -39,6 +39,7 @@
     MSG_VEILLE,
     MSG_ATTENTE,
     MSG_DANGER,
+    MSG_DERANGEMENT,
     NBR_TYPE_MSG
   };
 

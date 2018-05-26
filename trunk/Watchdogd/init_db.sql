@@ -113,8 +113,8 @@ CREATE TABLE IF NOT EXISTS `mnemos_CptHoraire` (
 
 CREATE TABLE IF NOT EXISTS `mnemos_CptImp` (
   `id_mnemo` int(11) NOT NULL,
-  `valeur` float NOT NULL,
-  `type_ci` int(11) NOT NULL,
+  `valeur` float NOT NULL DEFAULT '0',
+  `type_ci` int(11) NOT NULL DEFAULT '0',
   `multi` float NOT NULL DEFAULT '1',
   `unite_string` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id_mnemo`),
