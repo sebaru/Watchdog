@@ -324,13 +324,14 @@
 /* Entrées: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- gchar *New_condition_vars( gchar *nom )
+ gchar *New_condition_vars( int barre, gchar *nom )
   { gchar *result;
     int taille;
 
     taille = strlen(nom)+5;
     result = New_chaine( taille ); /* 10 caractères max */
-    g_snprintf( result, taille, "%s", nom );
+    if (!barre) { g_snprintf( result, taille, "%s", nom ); }
+           else { g_snprintf( result, taille, "!%s", nom ); }
     return(result);
   }
 /******************************************************************************************************************************/
