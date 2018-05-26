@@ -77,6 +77,7 @@
  extern gchar *New_condition_bi( int barre, int num, GList *options );
  extern gchar *New_condition_entree( int barre, int num, GList *options );
  extern gchar *New_condition_mono( int barre, struct ALIAS *alias, GList *options );
+ extern gchar *New_condition_vars( gchar *nom );
  extern struct ACTION *New_action( void );
  extern struct ACTION *New_action_msg( int num );
  extern struct ACTION *New_action_sortie( int num, int barre );

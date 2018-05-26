@@ -439,6 +439,28 @@ unite:          modulateur ENTIER HEURE ENTIER
                                ($1==1 ? "!" : ""), $3 );
                    Liberer_options($4);
                 }}
+                | T_ACT_COMOUT
+                  {{ $$=New_condition_vars("vars->bit_comm_out"); }}
+                | T_ACT_DEF
+                  {{ $$=New_condition_vars("vars->bit_defaut"); }}
+                | T_ACT_DEFF
+                  {{ $$=New_condition_vars("vars->bit_defaut_fixe"); }}
+                | T_ACT_ALA
+                  {{ $$=New_condition_vars("vars->bit_alarme"); }}
+                | T_ACT_ALAF
+                  {{ $$=New_condition_vars("vars->bit_alarme_fixe"); }}
+                | T_SBIEN_VP
+                  {{ $$=New_condition_vars("vars->bit_veille_partielle"); }}
+                | T_SBIEN_VT
+                  {{ $$=New_condition_vars("vars->bit_veille_totale"); }}
+                | T_SBIEN_ALE
+                  {{ $$=New_condition_vars("vars->bit_alerte"); }}
+                | T_SBIEN_ALEF
+                  {{ $$=New_condition_vars("vars->bit_alerte_fixe"); }}
+                | T_SPERS_DER
+                  {{ $$=New_condition_vars("vars->bit_derangement"); }}
+                | T_SPERS_DAN
+                  {{ $$=New_condition_vars("vars->bit_danger"); }}
                 | barre T_POUV expr T_PFERM
                 {{ int taille;
                    taille = strlen($3)+5;

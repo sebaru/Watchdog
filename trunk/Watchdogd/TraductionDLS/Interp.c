@@ -320,6 +320,20 @@
    return(result);
  }
 /******************************************************************************************************************************/
+/* New_condition_vars: formate une condition avec le nom de variable en parametre                                             */
+/* Entrées: numero du monostable, sa logique                                                                                  */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
+ gchar *New_condition_vars( gchar *nom )
+  { gchar *result;
+    int taille;
+
+    taille = strlen(nom)+5;
+    result = New_chaine( taille ); /* 10 caractères max */
+    g_snprintf( result, taille, "%s", nom );
+    return(result);
+  }
+/******************************************************************************************************************************/
 /* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
 /* Entrées: rien                                                                                                              */
 /* Sortie: NULL si probleme                                                                                                   */
