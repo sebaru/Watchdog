@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `dls` (
   `nbr_compil` int(11) NOT NULL DEFAULT '0',
   `sourcecode` MEDIUMTEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT "/* Default ! */",
   PRIMARY KEY (`id`),
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 INSERT INTO `dls` (`id`, `type`, `syn_id`, `name`, `shortname`, `tech_id`, `actif`, `compil_date`, `compil_status` ) VALUES
 (1, 0, 1, 'Système', 'Système', 'SYS', FALSE, 0, 0);
 
@@ -557,7 +557,7 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
   `acro_syn` text COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE (`dls_id`,`acronyme`)
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `command_text`) VALUES
 (01, 0,   0, 1, 'SYS_TOGGLE_RUN', 'Change d''Ã©tat tous les tours programme', ''),
