@@ -872,14 +872,16 @@
              retour = TRAD_DLS_WARNING;
            }
           mnemo.dls_id = id;
-          switch ( alias->bit )
-           { case T_MONO:
-              { mnemo.type = MNEMO_MONOSTABLE;
-                g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
-                g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
-                Mnemo_auto_create_for_dls ( &mnemo );
+          if (alias->num == -1)                                                       /* Pour les alias Dynamiques uniquement */
+           { switch ( alias->bit )
+              { case T_MONO:
+                 { mnemo.type = MNEMO_MONOSTABLE;
+                   g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
+                   g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
+                   Mnemo_auto_create_for_dls ( &mnemo );
+                 }
+                break;
               }
-             break;
            }
           liste = liste->next;
         }
