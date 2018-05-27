@@ -88,6 +88,7 @@ CREATE TABLE IF NOT EXISTS `dls` (
   `nbr_compil` int(11) NOT NULL DEFAULT '0',
   `sourcecode` MEDIUMTEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT "/* Default ! */",
   PRIMARY KEY (`id`),
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 INSERT INTO `dls` (`id`, `type`, `syn_id`, `name`, `shortname`, `tech_id`, `actif`, `compil_date`, `compil_status` ) VALUES
 (1, 0, 1, 'Système', 'Système', 'SYS', FALSE, 0, 0);
@@ -102,7 +103,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_CptHoraire` (
   `id_mnemo` int(11) NOT NULL DEFAULT '0',
   `valeur` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id_mnemo`),
-  CONSTRAINT `id_mnemo` FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -118,7 +119,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_CptImp` (
   `multi` float NOT NULL DEFAULT '1',
   `unite_string` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id_mnemo`),
-  CONSTRAINT `id_mnemo` FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -134,7 +135,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AnalogInput` (
   `max` float NOT NULL DEFAULT '0',
   `unite` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id_mnemo`),
-  CONSTRAINT `id_mnemo` FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 INSERT INTO `mnemos_AnalogInput` (`id_mnemo`, `type`, `min`, `max`, `unite`) VALUES
@@ -154,7 +155,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_Registre` (
   `id_mnemo` int(11) NOT NULL,
   `unite` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id_mnemo`),
-  CONSTRAINT `id_mnemo` FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -166,7 +167,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_Registre` (
 CREATE TABLE IF NOT EXISTS `mnemos_DigitalInput` (
   `id_mnemo` int(11) NOT NULL,
   PRIMARY KEY (`id_mnemo`),
-  CONSTRAINT `id_mnemo` FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -177,7 +178,8 @@ CREATE TABLE IF NOT EXISTS `mnemos_DigitalInput` (
 
 CREATE TABLE IF NOT EXISTS `gids` (
   `id_util` int(11) NOT NULL DEFAULT '0',
-  `gids` int(11) NOT NULL DEFAULT '0'
+  `gids` int(11) NOT NULL DEFAULT '0',
+  FOREIGN KEY (`id_util`) REFERENCES `util` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -196,8 +198,7 @@ CREATE TABLE IF NOT EXISTS `histo_msgs` (
   PRIMARY KEY (`id`),
   KEY `date_create_sec` (`date_create_sec`),
   KEY `alive` (`alive`),
-  KEY `fk_id_msg` (`id_msg`),
-  CONSTRAINT `fk_id_msg` FOREIGN KEY (`id_msg`) REFERENCES `msgs` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`id_msg`) REFERENCES `msgs` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -556,7 +557,8 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
   `tableau` text COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `acro_syn` text COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
-  UNIQUE (`dls_id`,`acronyme`)
+  UNIQUE (`dls_id`,`acronyme`),
+  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `command_text`) VALUES
@@ -728,7 +730,8 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `sms` int(11) NOT NULL DEFAULT '0',
   `time_repeat` int(11) NOT NULL DEFAULT '0',
   `is_mp3` tinyint(1) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `msgs` (`id`, `num`, `dls_id`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `enable`, `sms` ) VALUES
@@ -796,7 +799,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_Tempo` (
   `min_on` int(11) NOT NULL DEFAULT '0',
   `max_on` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id_mnemo`),
-  CONSTRAINT `id_mnemo` FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -839,7 +842,7 @@ CREATE TABLE IF NOT EXISTS `syns` (
   `vignette_secu_bien` int(11) NOT NULL DEFAULT '0',
   `vignette_secu_personne` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_parent_id` FOREIGN KEY (`parent_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`parent_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 INSERT INTO `syns` (`id`, `parent_id`, `libelle`, `page`, `access_level` ) VALUES
 (1, 1, 'Accueil', 'Defaut Page', 0);
@@ -857,8 +860,8 @@ CREATE TABLE IF NOT EXISTS `syns_camerasup` (
   `posx` int(11) NOT NULL,
   `posy` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  CONSTRAINT `id_camera` FOREIGN KEY (`camera_src_id`) REFERENCES `cameras` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`camera_src_id`) REFERENCES `cameras` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
@@ -874,7 +877,7 @@ CREATE TABLE IF NOT EXISTS `syns_scenario` (
   `posx` int(11) NOT NULL,
   `posy` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  CONSTRAINT `id_syn`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
@@ -892,7 +895,7 @@ CREATE TABLE IF NOT EXISTS `syns_cadrans` (
   `type` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_id_syn` FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -914,7 +917,7 @@ CREATE TABLE IF NOT EXISTS `syns_comments` (
   `posy` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_id_syn` FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -945,7 +948,7 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `bleu` int(11) NOT NULL DEFAULT '0',
   `layer` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_syn_id`    FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -960,8 +963,8 @@ CREATE TABLE IF NOT EXISTS `syns_palettes` (
   `syn_cible_id` int(11) NOT NULL DEFAULT '0',
   `pos` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_id_syn`       FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_id_cible syn` FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -978,8 +981,8 @@ CREATE TABLE IF NOT EXISTS `syns_pass` (
   `posy` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_id_syn`       FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_id_cible syn` FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -997,7 +1000,7 @@ CREATE TABLE IF NOT EXISTS `syns_scenario` (
   `posy` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  CONSTRAINT `id_syn` FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 
@@ -1018,8 +1021,8 @@ CREATE TABLE IF NOT EXISTS `scenario_ticks` (
   `mois` int(11) NOT NULL,
   `mnemo_id` int(11) NOT NULL,
   PRIMARY KEY (`id`), KEY(`syns_scenario_id`),
-  CONSTRAINT `syns_scenario_id` FOREIGN KEY (`syns_scenario_id`) REFERENCES `syns_scenario` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `mnemo_id` FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`syns_scenario_id`) REFERENCES `syns_scenario` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
 
 -- --------------------------------------------------------
