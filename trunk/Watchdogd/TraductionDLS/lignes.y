@@ -215,9 +215,6 @@ calcul_expr3:   VALF
                    $$ = New_chaine( taille );
                    g_snprintf( $$, taille, "%d", $1 );
                 }}
-                | T_OSYN_ACQ
-                {{ $$ = g_strdup("plugin->vars.bit_acquit");
-                }}
                 | EANA ENTIER
                 {{ int taille;
                    taille = 15;
@@ -373,6 +370,9 @@ unite:          modulateur ENTIER HEURE ENTIER
                    taille = 22;
                    $$ = New_chaine(taille);
                    g_snprintf( $$, taille, "Dls_get_top_alerte()" );
+                }}
+                | T_OSYN_ACQ
+                {{ $$ = g_strdup("plugin->vars.bit_acquit");
                 }}
                 | barre T_BI ENTIER liste_options
                 {{ $$ = New_condition_bi ( $1, $3, $4 );
