@@ -889,7 +889,7 @@
     GSList *liste;
 
     bit_comm_out = bit_defaut = bit_defaut_fixe = bit_alarme = bit_alarme_fixe = FALSE;
-    bit_veille_partielle = bit_veille_totale = FALSE;
+    bit_veille_partielle = bit_veille_totale = TRUE;
     bit_alerte = FALSE;
     bit_derangement = bit_danger = FALSE;
 
