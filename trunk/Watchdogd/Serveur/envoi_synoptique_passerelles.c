@@ -109,8 +109,12 @@
  static void Envoyer_bit_init_pass ( void *user_data, struct DLS_TREE *dls_tree )
   { struct CLIENT *client = user_data;
 
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+                   "%s: Check syn_id=%d -> %d", __func__, dls_tree->syn_vars.syn_id,
+                   g_slist_find( client->Liste_pass, GINT_TO_POINTER(dls_tree->syn_vars.syn_id) )
+            );
     if( g_slist_find( client->Liste_pass, GINT_TO_POINTER(dls_tree->syn_vars.syn_id) ) )
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
                    "%s: envoi des parametres du synoptique %d", __func__, dls_tree->syn_vars.syn_id );
        Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_SET_SYN_VARS,
                       (gchar *)&dls_tree->syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
@@ -142,7 +146,7 @@
         { if ( ! g_slist_find( client->Liste_pass, GINT_TO_POINTER(pass->syn_cible_id) ) )
            { client->Liste_pass = g_slist_prepend( client->Liste_pass, GINT_TO_POINTER(pass->syn_cible_id) );
              Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                      "liste des syn_cible id pass %d length=%d", pass->syn_cible_id, g_slist_length(client->Liste_pass) );
+                      "liste des bit init passerelles, add syn_cible_id '%d' length=%d", pass->syn_cible_id, g_slist_length(client->Liste_pass) );
            }
          }
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "%s: pass %d (%s) to client %s", __func__,
