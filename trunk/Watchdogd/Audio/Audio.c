@@ -232,11 +232,12 @@
         }
 
        if (Recv_zmq_with_tag ( zmq_master, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
-        { if ( strcmp( event->instance, g_get_host_name() ) && strcmp (event->instance, "*") ) break;
-          if ( strcmp( event->thread, NOM_THREAD ) && strcmp ( event->thread, "*" ) ) break;
-
-          Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                   "%s : Reception d'un message du master : %s", __func__, (gchar *)payload );
+        { if ( !strcmp( event->instance, g_get_host_name() ) || !strcmp (event->instance, "*") )
+           { if ( !strcmp( event->thread, NOM_THREAD ) || !strcmp ( event->thread, "*" ) )
+              { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+                          "%s : Reception d'un message du master : %s", __func__, (gchar *)payload );
+              }
+           }
         }
 
        if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) )

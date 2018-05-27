@@ -109,13 +109,9 @@
  static void Envoyer_bit_init_pass ( void *user_data, struct DLS_TREE *dls_tree )
   { struct CLIENT *client = user_data;
 
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                   "%s: Check syn_id=%d -> %d", __func__, dls_tree->syn_vars.syn_id,
-                   g_slist_find( client->Liste_pass, GINT_TO_POINTER(dls_tree->syn_vars.syn_id) )
-            );
     if( g_slist_find( client->Liste_pass, GINT_TO_POINTER(dls_tree->syn_vars.syn_id) ) )
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-                   "%s: envoi des parametres du synoptique %d", __func__, dls_tree->syn_vars.syn_id );
+                   "%s: envoi des parametres du synoptique %d a %s", __func__, dls_tree->syn_vars.syn_id, client->machine );
        Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_SET_SYN_VARS,
                       (gchar *)&dls_tree->syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
      }
