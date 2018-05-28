@@ -652,7 +652,7 @@
     struct ZMQUEUE *zmq_admin;
     
     prctl(PR_SET_NAME, "W-SMSG", 0, 0, 0 );
-    memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                         /* Mise a zero de la structure de travail */
+    memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                        /* Mise a zero de la structure de travail */
     Cfg_smsg.lib = lib;                                             /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_smsg.lib->TID = pthread_self();                                                      /* Sauvegarde du TID pour le pere */
     Smsg_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
@@ -685,11 +685,11 @@
        usleep(10000);
        sched_yield();
 
-       if (Cfg_smsg.lib->Thread_sigusr1)                                                      /* A-t'on recu un signal USR1 ? */
+       if (Cfg_smsg.lib->Thread_reload)                                                      /* A-t'on recu un signal USR1 ? */
         { int nbr;
           Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: SIGUSR1", __func__ );
           Smsg_Lire_config();
-          Cfg_smsg.lib->Thread_sigusr1 = FALSE;
+          Cfg_smsg.lib->Thread_reload = FALSE;
         }
 
          

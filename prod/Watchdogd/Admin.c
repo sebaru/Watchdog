@@ -85,7 +85,7 @@
 
     g_snprintf( chaine, sizeof(chaine), "At %010.1f, processing '%s' on instance '%s'",
                 (gdouble)Partage->top/10.0, ligne, g_get_host_name() );
-    response = Admin_write ( g_strdup(chaine), "\n" );
+    response = Admin_write ( NULL, chaine );
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
 
@@ -152,9 +152,9 @@
     Partage->com_admin.Thread_run = TRUE;                                                               /* Le thread tourne ! */
     while(Partage->com_admin.Thread_run == TRUE)                                             /* On tourne tant que necessaire */
      { gchar buffer[2048];
-       if (Partage->com_admin.Thread_sigusr1)                                                         /* On a recu sigusr1 ?? */
+       if (Partage->com_admin.Thread_reload)                                                         /* On a recu reload ?? */
         { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: recu SIGUSR1", __func__ );
-          Partage->com_admin.Thread_sigusr1 = FALSE;
+          Partage->com_admin.Thread_reload = FALSE;
         }
 
        if ( Recv_zmq ( Socket, &buffer, sizeof(buffer) ) > 0 )

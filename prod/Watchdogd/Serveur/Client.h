@@ -71,10 +71,10 @@
     GSList *Liste_new_motif;                               /* Liste des changements de motifs a traiter et envoyer aux client */
     GSList *Liste_bit_syns;                                /* Ensemble des bits CTRL utilisés pour les synoptiques visualisés */
 
-    GSList *Liste_bit_cadrans;                            /* Ensemble des bits EAxx utilisés pour les synoptiques visualisés */
+    GSList *Liste_bit_cadrans;                             /* Ensemble des bits EAxx utilisés pour les synoptiques visualisés */
 
-/* Communication des Evenements depuis SSRV vers les clients */
-    GSList *Liste_events;                                                                       /* Liste des evenements recus */
+/* Communication des syn_cible_id des passerelles chargées */
+    GSList *Liste_pass;                                                                         /* Liste des evenements recus */
 
 /* Communication des fichiers de travail vers les clients */
     GSList *Liste_file;
@@ -88,6 +88,7 @@
     struct CMD_TYPE_SOURCE_DLS dls;                                         /* Pour la sauvegarde et compilation dls en cours */
 
     struct CMD_TYPE_SYNOPTIQUE *syn_to_send;             /* Structure du synoptique en cours d'envoi (atelier ou supervision) */
+    gint mnemo_dls_id_to_send;
   };     
 
  #endif

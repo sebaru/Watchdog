@@ -193,6 +193,8 @@
  struct PAGE_NOTEBOOK *Chercher_page_notebook ( guint type, guint id, gboolean affiche )
   { struct PAGE_NOTEBOOK *page;
     GList *liste;
+
+printf("searching page %d %d\n", type, id );
     liste = Liste_pages;
     while(liste)
      { page = (struct PAGE_NOTEBOOK *)liste->data;
@@ -210,6 +212,10 @@
                   if ( ((struct TYPE_INFO_SUPERVISION *)page->infos)->syn_id != id )
                    { liste = liste->next; continue; }
                   break;
+             case TYPE_PAGE_MNEMONIQUE:
+                  if ( ((struct TYPE_INFO_MNEMONIQUE *)page->infos)->id != id )
+                   { liste = liste->next; continue; }
+                  break;
              case TYPE_PAGE_SOURCE_DLS:
                   if ( ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->id != id )
                    { liste = liste->next; continue; }
@@ -225,6 +231,7 @@
         }
        liste = liste->next;
      }
+printf("not found\n");
     return(NULL);
   }
 /**********************************************************************************************************/

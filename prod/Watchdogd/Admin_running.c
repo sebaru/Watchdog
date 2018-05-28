@@ -64,7 +64,6 @@
           memcpy ( chaine + 2, lib->admin_prompt, strlen(lib->admin_prompt) );
           memcpy ( chaine + 24, "-", 1 );
           memcpy ( chaine + 26, lib->admin_help, strlen(lib->admin_help) );
-          memcpy ( chaine + 26 + strlen(lib->admin_help), "", 2 );
           response = Admin_write ( response, chaine );
           liste = liste->next;
         }

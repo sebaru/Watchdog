@@ -130,6 +130,7 @@
        if (client->util)            { g_free( client->util ); }
        if (client->syn_to_send)     { g_free( client->syn_to_send ); }
        if (client->Liste_bit_syns)  { g_slist_free(client->Liste_bit_syns); }
+       if (client->Liste_pass)      { g_slist_free(client->Liste_pass); }
        if (client->Liste_bit_cadrans)
                                     { g_slist_foreach( client->Liste_bit_cadrans, (GFunc) g_free, NULL );
                                       g_slist_free(client->Liste_bit_cadrans);
@@ -308,10 +309,10 @@
        usleep(100000);
        sched_yield();
 
-       if (lib->Thread_sigusr1 == TRUE)
+       if (lib->Thread_reload == TRUE)
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Run_ssrv: SIGUSR1", __func__ );
           Ssrv_Lire_config();
-          lib->Thread_sigusr1 = FALSE;
+          lib->Thread_reload = FALSE;
         }
 
        client = Accueillir_un_client();

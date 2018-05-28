@@ -113,11 +113,18 @@
     gtk_print_operation_run (print, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG,
                              GTK_WINDOW(F_client), &error);
   }
-/**********************************************************************************************************/
-/* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                    */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_acquitter_synoptique: Envoi une commande d'acquit du synoptique en cours de visu                                      */
+/* Entrée: La page d'information synoptique                                                                                   */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Menu_acquitter_synoptique( struct TYPE_INFO_SUPERVISION *infos )
+  { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_ACQ_SYN, (gchar *)&infos->syn_id, sizeof(gint) ); }
+/******************************************************************************************************************************/
+/* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
+/* Entrée: Le libelle a afficher dans le notebook et l'ID du synoptique                                                       */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Creer_page_supervision ( gchar *libelle, guint syn_id )
   { GtkWidget *bouton, *boite, *hboite, *scroll, *frame, *label;
     GtkAdjustment *adj;
@@ -189,6 +196,12 @@
     infos->Box_palette = gtk_vbox_new( FALSE, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(infos->Box_palette), 6 );
     gtk_container_add( GTK_CONTAINER(frame), infos->Box_palette );
+
+/******************************************************* Acquitter ************************************************************/
+    bouton = gtk_button_new_with_label( "Acquitter" );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                              G_CALLBACK(Menu_acquitter_synoptique), infos );
 
     gtk_widget_show_all( page->child );
 
@@ -279,65 +292,121 @@
                         trame_motif->motif->type_gestion, trame_motif->motif->bit_controle );
      }
   }
-/**********************************************************************************************************/
-/* Changer_etat_motif: Changement d'etat d'un motif                                                       */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Changer_etat_pass_1( struct TRAME_ITEM_PASS *trame_pass, struct CMD_ETAT_BIT_CTRL *etat_motif )
-  { printf("Changer_etat_pass !\n");
-    trame_pass->rouge1  = etat_motif->rouge;                                     /* Sauvegarde etat motif */
-    trame_pass->vert1   = etat_motif->vert;                                      /* Sauvegarde etat motif */
-    trame_pass->bleu1   = etat_motif->bleu;                                      /* Sauvegarde etat motif */
-    trame_pass->cligno1  = etat_motif->cligno;                                   /* Sauvegarde etat motif */
+/******************************************************************************************************************************/
+/* Changer_etat_passerelle: Changement d'etat d'une passerelle (toutes les vignettes)                                         */
+/* Entrée: une reference sur la passerelle, l'etat attendu                                                                    */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Changer_etat_passerelle( struct TRAME_ITEM_PASS *trame_pass, struct CMD_TYPE_SYN_VARS *vars )
+  { printf("Changer_etat_passerelle syn %d!\n", vars->syn_id );
 
-    Trame_peindre_pass_1 ( trame_pass, etat_motif->rouge,
-                                     etat_motif->vert,
-                                     etat_motif->bleu );
-    printf("Changer_etat_pass: sortie\n");
-    
-  }
-/**********************************************************************************************************/
-/* Changer_etat_motif: Changement d'etat d'un motif                                                       */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Changer_etat_pass_2( struct TRAME_ITEM_PASS *trame_pass, struct CMD_ETAT_BIT_CTRL *etat_motif )
-  { printf("Changer_etat_pass !\n");
-    trame_pass->rouge2  = etat_motif->rouge;                                     /* Sauvegarde etat motif */
-    trame_pass->vert2   = etat_motif->vert;                                      /* Sauvegarde etat motif */
-    trame_pass->bleu2   = etat_motif->bleu;                                      /* Sauvegarde etat motif */
-    trame_pass->cligno2  = etat_motif->cligno;                                   /* Sauvegarde etat motif */
+    if (vars->bit_comm_out == TRUE)  /****************************  Vignette Activite *****************************************/
+     { trame_pass->rouge1  = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->vert1   = 100;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno1 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_alarme == TRUE)
+     { trame_pass->rouge1  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert1   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno1 = 1;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_alarme_fixe == TRUE)
+     { trame_pass->rouge1  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert1   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno1 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_defaut == TRUE)
+     { trame_pass->rouge1  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert1   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno1 = 1;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_defaut_fixe == TRUE)
+     { trame_pass->rouge1  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert1   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno1 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else
+     { trame_pass->rouge1  = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->vert1   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno1 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    Trame_peindre_pass_1 ( trame_pass, trame_pass->rouge1, trame_pass->vert1, trame_pass->bleu1 );
 
-    Trame_peindre_pass_2 ( trame_pass, etat_motif->rouge,
-                                     etat_motif->vert,
-                                     etat_motif->bleu );
-    printf("Changer_etat_pass_2: sortie\n");
-    
-  }
-/**********************************************************************************************************/
-/* Changer_etat_pass_3: Changement d'etat d'une passerelle (vignette help)                                */
-/* Entrée: une reference sur la passerelle, l'etat attendu                                                */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
- static void Changer_etat_pass_3( struct TRAME_ITEM_PASS *trame_pass, struct CMD_ETAT_BIT_CTRL *etat_motif )
-  { printf("Changer_etat_pass !\n");
-    trame_pass->rouge3  = etat_motif->rouge;                                     /* Sauvegarde etat motif */
-    trame_pass->vert3   = etat_motif->vert;                                      /* Sauvegarde etat motif */
-    trame_pass->bleu3   = etat_motif->bleu;                                      /* Sauvegarde etat motif */
-    trame_pass->cligno3 = etat_motif->cligno;                                    /* Sauvegarde etat motif */
+    if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Personnes **************************/
+     { trame_pass->rouge2  = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->vert2   = 100;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu2   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno2 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_alerte == TRUE)
+     { trame_pass->rouge2  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert2   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->bleu2   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno2 = 1;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_alerte_fixe == TRUE)
+     { trame_pass->rouge2  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert2   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->bleu2   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno2 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_veille_totale == TRUE)
+     { trame_pass->rouge2  = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->vert2   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu2   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno2 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_veille_partielle == TRUE)
+     { trame_pass->rouge2  = 127;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert2   = 127;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu2   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno2 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else
+     { trame_pass->rouge2  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert2   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu2   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->cligno1 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    Trame_peindre_pass_2 ( trame_pass, trame_pass->rouge2, trame_pass->vert2, trame_pass->bleu2 );
 
-    Trame_peindre_pass_3 ( trame_pass, etat_motif->rouge,
-                                       etat_motif->vert,
-                                       etat_motif->bleu );
-    printf("Changer_etat_pass_3: sortie\n");
-    
-  }
-/**********************************************************************************************************/
-/* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                   */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+    if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Biens ******************************/
+     { trame_pass->rouge3  = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->vert3   = 100;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno3 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_danger == TRUE)
+     { trame_pass->rouge3  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert3   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno3 = 1;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_derangement == TRUE)
+     { trame_pass->rouge3  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert3   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno3 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else
+     { trame_pass->rouge3  = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->vert3   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno3 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    Trame_peindre_pass_3 ( trame_pass, trame_pass->rouge3, trame_pass->vert3, trame_pass->bleu3 );
+ }
+/******************************************************************************************************************************/
+/* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                                       */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  void Proto_changer_etat_motif( struct CMD_ETAT_BIT_CTRL *etat_motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
     struct TRAME_ITEM_PASS *trame_pass;
@@ -349,36 +418,67 @@
 
 printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, etat_motif->etat, etat_motif->rouge,
                                                          etat_motif->vert, etat_motif->bleu );
-    cpt = 0;                                                 /* Nous n'avons encore rien fait au debut !! */
+    cpt = 0;                                                                     /* Nous n'avons encore rien fait au debut !! */
     liste = Liste_pages;
-    while(liste)                                              /* On parcours toutes les pages SUPERVISION */
+    while(liste)                                                                  /* On parcours toutes les pages SUPERVISION */
      { page = (struct PAGE_NOTEBOOK *)liste->data;
        if (page->type != TYPE_PAGE_SUPERVISION) { liste = liste->next; continue; }
 
        infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
 
-       liste_motifs = infos->Trame->trame_items;            /* On parcours tous les motifs de chaque page */
+       liste_motifs = infos->Trame->trame_items;                                /* On parcours tous les motifs de chaque page */
        while (liste_motifs)
         { switch( *((gint *)liste_motifs->data) )
            { case TYPE_MOTIF      : trame_motif = (struct TRAME_ITEM_MOTIF *)liste_motifs->data;
                                     if (trame_motif->motif->bit_controle == etat_motif->num)
                                      { Changer_etat_motif( trame_motif, etat_motif );
-                                       cpt++;                         /* Nous updatons un motif de plus ! */ 
+                                       cpt++;                                             /* Nous updatons un motif de plus ! */ 
                                      }
                                     break;
              case TYPE_COMMENTAIRE: break;
-             case TYPE_PASSERELLE : trame_pass = (struct TRAME_ITEM_PASS *)liste_motifs->data;
-                                    if (trame_pass->pass->vignette_activite == etat_motif->num)
-                                     { Changer_etat_pass_1( trame_pass, etat_motif );
-                                       cpt++;                         /* Nous updatons un motif de plus ! */ 
-                                     }
-                                    else if (trame_pass->pass->vignette_secu_bien == etat_motif->num)
-                                     { Changer_etat_pass_2( trame_pass, etat_motif );
-                                       cpt++;                         /* Nous updatons un motif de plus ! */ 
-                                     }
-                                    else if (trame_pass->pass->vignette_secu_personne == etat_motif->num)
-                                     { Changer_etat_pass_3( trame_pass, etat_motif );
-                                       cpt++;                         /* Nous updatons un motif de plus ! */ 
+             default: break;
+           }
+          liste_motifs=liste_motifs->next;
+        }
+       liste = liste->next;
+     }
+    if (!cpt)                                 /* Si nous n'avons rien mis à jour, c'est que le bit Ixxx ne nous est pas utile */
+     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN, (gchar *)etat_motif, sizeof(struct CMD_ETAT_BIT_CTRL) ); 
+     }
+  }
+/******************************************************************************************************************************/
+/* Proto_set_syn_vars: Mets a jour les variables de run d'un synoptique                                                       */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Proto_set_syn_vars( struct CMD_TYPE_SYN_VARS *syn_vars )
+  { struct TRAME_ITEM_PASS *trame_pass;
+    struct TYPE_INFO_SUPERVISION *infos;
+    struct PAGE_NOTEBOOK *page;
+    GList *liste_motifs;
+    GList *liste;
+    gint cpt;
+
+printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d, der=%d, dan=%d\n",syn_vars->syn_id,
+                   syn_vars->bit_comm_out, syn_vars->bit_defaut, syn_vars->bit_alarme,
+                   syn_vars->bit_veille_partielle, syn_vars->bit_veille_totale, syn_vars->bit_alerte,
+                   syn_vars->bit_derangement, syn_vars->bit_danger );
+
+    cpt = 0;                                                                     /* Nous n'avons encore rien fait au debut !! */
+    liste = Liste_pages;
+    while(liste)                                                                  /* On parcours toutes les pages SUPERVISION */
+     { page = (struct PAGE_NOTEBOOK *)liste->data;
+       if (page->type != TYPE_PAGE_SUPERVISION) { liste = liste->next; continue; }
+
+       infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
+
+       liste_motifs = infos->Trame->trame_items;                                /* On parcours tous les motifs de chaque page */
+       while (liste_motifs)
+        { switch( *((gint *)liste_motifs->data) )
+           { case TYPE_PASSERELLE : trame_pass = (struct TRAME_ITEM_PASS *)liste_motifs->data;
+                                    if (trame_pass->pass->syn_cible_id == syn_vars->syn_id)
+                                     { Changer_etat_passerelle( trame_pass, syn_vars );
+                                       cpt++;                                             /* Nous updatons un motif de plus ! */ 
                                      }
                                     break;
              default: break;
@@ -387,9 +487,9 @@ printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, eta
         }
        liste = liste->next;
      }
-    if (!cpt)             /* Si nous n'avons rien mis à jour, c'est que le bit Ixxx ne nous est pas utile */
-     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN,
-                      (gchar *)etat_motif, sizeof(struct CMD_ETAT_BIT_CTRL) ); 
+
+    if (!cpt)                                 /* Si nous n'avons rien mis à jour, c'est que le bit Ixxx ne nous est pas utile */
+     { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SET_SYN_VARS_UNKNOWN, (gchar *)syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) ); 
      }
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

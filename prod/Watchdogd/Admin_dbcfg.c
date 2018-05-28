@@ -38,7 +38,7 @@
     liste = Partage->com_msrv.Librairies;                                                /* Parcours de toutes les librairies */
     while(liste)
      { lib = (struct LIBRAIRIE *)liste->data;
-       if ( ! strcmp( thread, lib->admin_prompt ) ) { lib->Thread_sigusr1 = TRUE; break; }
+       if ( ! strcmp( thread, lib->admin_prompt ) ) { lib->Thread_reload = TRUE; break; }
        liste = liste->next;
      }
   }

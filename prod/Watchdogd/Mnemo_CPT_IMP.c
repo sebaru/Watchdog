@@ -99,8 +99,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s (id_mnemo,type_ci,multi,unite_string) VALUES "
-                "('%d','%d','%f','%s') "
+                "INSERT INTO %s (id_mnemo,type_ci,multi,unite_string,valeur) VALUES "
+                "('%d','%d','%f','%s','0') "
                 "ON DUPLICATE KEY UPDATE "
                 "type_ci=VALUES(type_ci), multi=VALUES(multi), unite_string=VALUES(unite_string) ",
                 NOM_TABLE_MNEMO_CPTIMP,

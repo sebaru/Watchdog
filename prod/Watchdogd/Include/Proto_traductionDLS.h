@@ -46,6 +46,7 @@
  struct OPTION
   { gint type;
     union { int entier;
+            gchar *chaine;
           };
   };
 
@@ -75,10 +76,15 @@
  extern gboolean Check_ownership ( gint type, gint num );
  extern gchar *New_condition_bi( int barre, int num, GList *options );
  extern gchar *New_condition_entree( int barre, int num, GList *options );
+ extern gchar *New_condition_mono( int barre, struct ALIAS *alias, GList *options );
+ extern gchar *New_condition_vars( int barre, gchar *nom );
  extern struct ACTION *New_action( void );
  extern struct ACTION *New_action_msg( int num );
  extern struct ACTION *New_action_sortie( int num, int barre );
+ extern struct ACTION *New_action_vars_mono( gchar *nom );
+ extern struct ACTION *New_action_activite_fixe( void );
  extern struct ACTION *New_action_mono( int num );
+ extern struct ACTION *New_action_mono_by_alias( struct ALIAS *alias );
  extern struct ACTION *New_action_icone( int num, GList *options );
  extern struct ACTION *New_action_tempo( int num, GList *options );
  extern struct ACTION *New_action_bi( int num, int barre );
@@ -87,7 +93,7 @@
  extern gboolean New_alias( char *nom, int bit, int num, int barre, GList *options );
  extern struct ALIAS *Get_alias_par_nom( char *nom );
  extern struct OPTION *New_option( void );
- extern int Get_option_entier( GList *liste_options, gint type );
+ /*extern int Get_option_entier( GList *liste_options, gint type );*/
  extern void Liberer_options ( GList *options );
  extern int DlsScanner_error ( char *s );
 /* Fonctions mise a disposition par Flex et Bison */

@@ -103,6 +103,13 @@
     { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : DLS[%06d]->%s", __func__, id, result ); }
  }
 /******************************************************************************************************************************/
+/* Dls_get_top_alerte: Remonte la valeur du plus haut bit d'alerte dans l'arbre DLS                                           */
+/* Entrée: Rien                                                                                                               */
+/* Sortie: TRUE ou FALSe                                                                                                      */
+/******************************************************************************************************************************/
+ gboolean Dls_get_top_alerte ( void )
+  { return( Partage->com_dls.Dls_tree->syn_vars.bit_alerte ); }
+/******************************************************************************************************************************/
 /* Chrono: renvoi la difference de temps entre deux structures timeval                                                        */
 /* Entrée: le temps avant, et le temps apres l'action                                                                         */
 /* Sortie: un float                                                                                                           */
@@ -776,6 +783,190 @@
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
 /******************************************************************************************************************************/
+/* Dls_data_set: Ajoute une données à l'arbre des data dls                                                                    */
+/* Entrée : le propriétaire de la données, son nom, sa valeur                                                                 */
+/* Sortie : rien                                                                                                              */
+/******************************************************************************************************************************/
+ static void Dls_data_add ( gchar *key, void *data )
+  { pthread_mutex_lock( &Partage->com_dls.synchro_data );
+    g_tree_insert ( Partage->com_dls.Dls_data, key, data );
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding key %s : %p", __func__, key, data );
+    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+  }
+ static void *Dls_data_get ( gchar *key )
+  { void *data;
+    pthread_mutex_lock( &Partage->com_dls.synchro_data );
+    data = g_tree_lookup ( Partage->com_dls.Dls_data, key );
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : searching for key %s : %p", __func__, key, data );
+    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+    return(data);
+  }
+ void Dls_data_set_bool ( gchar *nom, gchar *owner, gboolean **data_p, gboolean valeur )
+  { if (!data_p || !*data_p)
+     { gchar chaine[80];
+       gboolean *data;
+       g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
+       data = Dls_data_get( chaine );
+       if (!data)
+        { data = g_malloc ( sizeof(gboolean) );
+          if (!data) { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for %s", __func__, chaine ); return; }
+          Dls_data_add ( g_strdup(chaine), data );
+        }
+       *data = valeur;                                                                            /* Recopie dans la variable */
+       if (data_p) *data_p = data;                                                  /* Sauvegarde pour acceleration si besoin */
+      }
+    else
+     { **data_p = valeur; }                                                   /* Récopie directement via le pointeur acceléré */
+  }
+ gboolean Dls_data_get_bool ( gchar *nom, gchar *owner, gboolean **data_p )
+  { gchar chaine[80];
+    gboolean *data;
+    if (data_p && *data_p) return (**data_p);                                        /* Si pointeur d'acceleration disponible */
+    g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
+    data = Dls_data_get( chaine );
+    if (data)
+     { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : key %s found val %d", __func__, chaine, *data );
+       return(*data);
+     }
+    return(FALSE);    
+  }
+/******************************************************************************************************************************/
+/* Dls_data_free_data: Libere la memoire pour les clefs et data contenu dans l'arbre Dls_data. Appellé par g_tree_foreach     */
+/* Entrée : la clef a libérer, la value qui va avec et un pointer non utilisé                                                 */
+/* Sortie : FALSE pour poursuivre le cheminement de l'arbre                                                                   */
+/******************************************************************************************************************************/
+ static gboolean Dls_data_free_data (gpointer key, gpointer value, gpointer data)
+  { g_free(key);
+    g_free(value);
+    return(FALSE);
+  }
+/******************************************************************************************************************************/
+/* Dls_foreach_dls_tree: Parcours recursivement l'arbre DLS et execute des commandes en parametres                            */
+/* Entrée : le Dls_tree et les fonctions a appliquer                                                                          */
+/* Sortie : rien                                                                                                              */
+/******************************************************************************************************************************/
+ static void Dls_foreach_dls_tree ( struct DLS_TREE *dls_tree, void *user_data,
+                                    void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
+                                    void (*do_tree)   (void *user_data, struct DLS_TREE *) )
+  { GSList *liste;
+    liste = dls_tree->Liste_dls_tree;
+    while (liste)
+     { struct DLS_TREE *sub_tree;
+       sub_tree = (struct DLS_TREE *)liste->data;
+       Dls_foreach_dls_tree( sub_tree, user_data, do_plugin, do_tree );
+       liste = liste->next;
+     }
+    liste = dls_tree->Liste_plugin_dls;
+    while(liste && do_plugin)                                                        /* On execute tous les modules un par un */
+     { struct PLUGIN_DLS *plugin_actuel;
+       plugin_actuel = (struct PLUGIN_DLS *)liste->data;
+       do_plugin( user_data, plugin_actuel );       
+       liste = liste->next;
+     }
+    if (do_tree) do_tree( user_data, dls_tree );
+  }
+/******************************************************************************************************************************/
+/* Dls_foreach: Parcours l'arbre DLS et execute des commandes en parametres                                                   */
+/* Entrée : les fonctions a appliquer                                                                                         */
+/* Sortie : rien                                                                                                              */
+/******************************************************************************************************************************/
+ void Dls_foreach ( void *user_data, void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
+                                     void (*do_tree)   (void *user_data, struct DLS_TREE *) )
+  { pthread_mutex_lock( &Partage->com_dls.synchro );
+    Dls_foreach_dls_tree( Partage->com_dls.Dls_tree, user_data, do_plugin, do_tree );
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+  }
+/******************************************************************************************************************************/
+/* Dls_run_dls_tree: Fait tourner les DLS synoptique en parametre + les sous DLS                                              */
+/* Entrée : le Dls_tree correspondant                                                                                         */
+/* Sortie : rien                                                                                                              */
+/******************************************************************************************************************************/
+ static void Dls_run_dls_tree ( struct DLS_TREE *dls_tree )
+  { struct timeval tv_avant, tv_apres;
+    gboolean bit_comm_out, bit_defaut, bit_defaut_fixe, bit_alarme, bit_alarme_fixe;                              /* Activité */
+    gboolean bit_veille_partielle, bit_veille_totale, bit_alerte, bit_alerte_fixe;             /* Synthese Sécurité des Biens */
+    gboolean bit_derangement, bit_danger;                                                  /* synthèse Sécurité des Personnes */ 
+    GSList *liste;
+
+    bit_comm_out = bit_defaut = bit_defaut_fixe = bit_alarme = bit_alarme_fixe = FALSE;
+    bit_veille_partielle = bit_veille_totale = TRUE;
+    bit_alerte = FALSE;
+    bit_derangement = bit_danger = FALSE;
+
+    liste = dls_tree->Liste_plugin_dls;
+    while(liste)                                                                     /* On execute tous les modules un par un */
+     { struct PLUGIN_DLS *plugin_actuel;
+       plugin_actuel = (struct PLUGIN_DLS *)liste->data;
+
+       if (plugin_actuel->plugindb.on && plugin_actuel->go)
+        { gettimeofday( &tv_avant, NULL );
+          Partage->top_cdg_plugin_dls = 0;                                                      /* On reset le cdg plugin DLS */
+          plugin_actuel->go( plugin_actuel->starting, plugin_actuel->debug, &plugin_actuel->vars );     /* On appel le plugin */
+          gettimeofday( &tv_apres, NULL );
+          plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
+          plugin_actuel->starting = 0;
+          plugin_actuel->vars.bit_acquit = 0;                                                 /* On arrete l'acquit du plugin */
+          bit_comm_out         |= plugin_actuel->vars.bit_comm_out;
+          bit_defaut           |= plugin_actuel->vars.bit_defaut;
+          bit_defaut_fixe      |= plugin_actuel->vars.bit_defaut_fixe;
+          bit_alarme           |= plugin_actuel->vars.bit_alarme;
+          bit_alarme_fixe      |= plugin_actuel->vars.bit_alarme_fixe;
+          bit_veille_partielle &= plugin_actuel->vars.bit_veille_partielle;
+          bit_veille_totale    &= plugin_actuel->vars.bit_veille_totale;
+          bit_alerte           |= plugin_actuel->vars.bit_alerte;
+          bit_alerte_fixe      |= plugin_actuel->vars.bit_alerte_fixe;
+          bit_derangement      |= plugin_actuel->vars.bit_derangement;
+          bit_danger           |= plugin_actuel->vars.bit_danger;
+        }
+       liste = liste->next;
+     }
+    liste = dls_tree->Liste_dls_tree;
+    while (liste)
+     { struct DLS_TREE *sub_tree;
+       sub_tree = (struct DLS_TREE *)liste->data;
+       Dls_run_dls_tree ( sub_tree );
+       bit_comm_out         |= sub_tree->syn_vars.bit_comm_out;
+       bit_defaut           |= sub_tree->syn_vars.bit_defaut;
+       bit_defaut_fixe      |= sub_tree->syn_vars.bit_defaut_fixe;
+       bit_alarme           |= sub_tree->syn_vars.bit_alarme;
+       bit_alarme_fixe      |= sub_tree->syn_vars.bit_alarme_fixe;
+       bit_veille_partielle &= sub_tree->syn_vars.bit_veille_partielle;
+       bit_veille_totale    &= sub_tree->syn_vars.bit_veille_totale;
+       bit_alerte           |= sub_tree->syn_vars.bit_alerte;
+       bit_alerte_fixe      |= sub_tree->syn_vars.bit_alerte_fixe;
+       bit_derangement      |= sub_tree->syn_vars.bit_derangement;
+       bit_danger           |= sub_tree->syn_vars.bit_danger;
+       liste = liste->next;
+     }
+
+    if ( bit_comm_out         != dls_tree->syn_vars.bit_comm_out ||                              /* Detection des changements */
+         bit_defaut           != dls_tree->syn_vars.bit_defaut ||
+         bit_defaut_fixe      != dls_tree->syn_vars.bit_defaut_fixe ||
+         bit_alarme           != dls_tree->syn_vars.bit_alarme ||
+         bit_alarme_fixe      != dls_tree->syn_vars.bit_alarme_fixe ||
+         bit_veille_partielle != dls_tree->syn_vars.bit_veille_partielle ||
+         bit_veille_totale    != dls_tree->syn_vars.bit_veille_totale ||
+         bit_alerte           != dls_tree->syn_vars.bit_alerte ||
+         bit_alerte_fixe      != dls_tree->syn_vars.bit_alerte_fixe ||
+         bit_derangement      != dls_tree->syn_vars.bit_derangement ||
+         bit_danger           != dls_tree->syn_vars.bit_danger )
+     { dls_tree->syn_vars.bit_comm_out         = bit_comm_out;                           /* Recopie et envoi aux threads SSRV */
+       dls_tree->syn_vars.bit_defaut           = bit_defaut;
+       dls_tree->syn_vars.bit_defaut_fixe      = bit_defaut_fixe;
+       dls_tree->syn_vars.bit_alarme           = bit_alarme;
+       dls_tree->syn_vars.bit_alarme_fixe      = bit_alarme_fixe;
+       dls_tree->syn_vars.bit_veille_partielle = bit_veille_partielle;
+       dls_tree->syn_vars.bit_veille_totale    = bit_veille_totale;
+       dls_tree->syn_vars.bit_alerte           = bit_alerte;
+       dls_tree->syn_vars.bit_alerte_fixe      = bit_alerte_fixe;
+       dls_tree->syn_vars.bit_derangement      = bit_derangement;
+       dls_tree->syn_vars.bit_danger           = bit_danger;
+       Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_SET_SYN_VARS, "*", "ssrv",
+                          &dls_tree->syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
+     }
+
+ }
+/******************************************************************************************************************************/
 /* Main: Fonction principale du DLS                                                                                           */
 /******************************************************************************************************************************/
  void Run_dls ( void )
@@ -783,10 +974,9 @@
     GSList *plugins;
 
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
-    Info_new( Config.log, Config.log_dls, LOG_NOTICE,
-              "Run_dls: Demarrage . . . TID = %p", pthread_self() );
+    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
     Partage->com_dls.Thread_run         = TRUE;                                                         /* Le thread tourne ! */
-             
+    Partage->com_dls.Dls_data = g_tree_new ( (GCompareFunc) strcmp ); 
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                                          /* Chargement des modules dls */
     SB_SYS(1, 0);                                                                                      /* B1 est toujours à 0 */
@@ -794,43 +984,28 @@
     sleep(30);                    /* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
 
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
-     { struct timeval tv_avant, tv_apres;
+     { 
 
        if (Partage->com_dls.Thread_reload)
-        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Run_dls: RELOADING" );
+        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: RELOADING", __func__ );
           Decharger_plugins();
           Charger_plugins();
           Partage->com_dls.Thread_reload = FALSE;
         }
 
-       if (Partage->com_dls.Thread_sigusr1)
-        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Run_dls: SIGUSR1" );
-          Partage->com_dls.Thread_sigusr1 = FALSE;
-        }
-
-       if (Partage->top-Update_heure>=600)      /* Gestion des changements d'horaire (toutes les minutes) */
-        { Prendre_heure ();                            /* Mise à jour des variables de gestion de l'heure */
+       if (Partage->top-Update_heure>=600)                          /* Gestion des changements d'horaire (toutes les minutes) */
+        { Prendre_heure ();                                                /* Mise à jour des variables de gestion de l'heure */
           Update_heure=Partage->top;
         }
 
-       if (Partage->com_dls.admin_start)                                  /* A-t-on un plugin a allumer ? */
+       if (Partage->com_dls.admin_start)                                                      /* A-t-on un plugin a allumer ? */
         { Activer_plugin_by_id ( Partage->com_dls.admin_start, TRUE );
           Partage->com_dls.admin_start = 0;
         }
 
-       if (Partage->com_dls.admin_stop)                                  /* A-t-on un plugin a eteindre ? */
+       if (Partage->com_dls.admin_stop)                                                      /* A-t-on un plugin a eteindre ? */
         { Activer_plugin_by_id ( Partage->com_dls.admin_stop, FALSE );
           Partage->com_dls.admin_stop = 0;
-        }
-
-       if (Partage->com_dls.liste_plugin_reset)                          /* A-t-on un plugin a reseter ?? */
-        { gint num;
-          pthread_mutex_lock( &Partage->com_dls.synchro );
-          num = GPOINTER_TO_INT( Partage->com_dls.liste_plugin_reset->data );
-          Partage->com_dls.liste_plugin_reset = g_slist_remove ( Partage->com_dls.liste_plugin_reset,
-                                                                 GINT_TO_POINTER(num) );
-          pthread_mutex_unlock( &Partage->com_dls.synchro );
-          Reseter_un_plugin( num );
         }
 
        Set_cde_exterieure();                                            /* Mise à un des bit de commande exterieure (furtifs) */
@@ -839,21 +1014,7 @@
        SI(1, 1, 255, 0, 0, 0 );                                                                   /* Icone toujours à 1:rouge */
 
        pthread_mutex_lock( &Partage->com_dls.synchro );
-       plugins = Partage->com_dls.Plugins;
-       while(plugins)                                                                /* On execute tous les modules un par un */
-        { struct PLUGIN_DLS *plugin_actuel;
-          plugin_actuel = (struct PLUGIN_DLS *)plugins->data;
-
-          if (plugin_actuel->plugindb.on && plugin_actuel->go)
-           { gettimeofday( &tv_avant, NULL );
-             Partage->top_cdg_plugin_dls = 0;                                                   /* On reset le cdg plugin DLS */
-             plugin_actuel->go( plugin_actuel->starting, plugin_actuel->debug );                        /* On appel le plugin */
-             gettimeofday( &tv_apres, NULL );
-             plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
-             plugin_actuel->starting = 0;
-           }
-          plugins = plugins->next;
-        }
+       Dls_run_dls_tree( Partage->com_dls.Dls_tree );
        pthread_mutex_unlock( &Partage->com_dls.synchro );
        SB_SYS(3, 1);                                                  /* B3 est toujours à un apres le premier tour programme */
 
@@ -864,7 +1025,9 @@
        sched_yield();
      }
     Decharger_plugins();                                                                      /* Dechargement des modules DLS */
-    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Run_dls: DLS Down (%p)", pthread_self() );
+    g_tree_foreach (Partage->com_dls.Dls_data, Dls_data_free_data, NULL );
+    g_tree_destroy (Partage->com_dls.Dls_data);
+    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: DLS Down (%p)", __func__, pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }

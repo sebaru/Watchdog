@@ -40,16 +40,8 @@
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'TELEINFO'" );
-       response = Admin_write ( response, "  dbcfg ...             - Get/Set Database Parameters" );
        response = Admin_write ( response, "  reload                - Reload config from Database" );
        response = Admin_write ( response, "  status                - Affiche les status du device Teleinfo" );
-     }
-    else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { gboolean retour;
-       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
-       retour = Teleinfo_Lire_config();
-       g_snprintf( chaine, sizeof(chaine), " Reloading Teleinfo Thread Parameters from Database -> %s", (retour ? "Success" : "Failed") );
-       response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "status" ) )
      { g_snprintf( chaine, sizeof(chaine), " Port '%s' mode %d (retry in %02.1f) -> Last_view = %d (%.1fs ago)",

@@ -102,6 +102,21 @@
      }
   }
 /******************************************************************************************************************************/
+/* Envoyer_bit_init_pass: Envoi des passerelles à l'initialisation                                                            */
+/* Entrée: Le client destinataire et les tags reseaux                                                                         */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Envoyer_bit_init_pass ( void *user_data, struct DLS_TREE *dls_tree )
+  { struct CLIENT *client = user_data;
+
+    if( g_slist_find( client->Liste_pass, GINT_TO_POINTER(dls_tree->syn_vars.syn_id) ) )
+     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
+                   "%s: envoi des parametres du synoptique %d a %s", __func__, dls_tree->syn_vars.syn_id, client->machine );
+       Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_SET_SYN_VARS,
+                      (gchar *)&dls_tree->syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
+     }
+  }
+/******************************************************************************************************************************/
 /* Envoyer_passerelle_tag: Envoi des passerelles au client en parametre                                                       */
 /* Entrée: Le client destinataire et les tags reseaux                                                                         */
 /* Sortie: Néant                                                                                                              */
@@ -124,32 +139,18 @@
 
     while ( (pass = Recuperer_passerelleDB_suite( &db )) )
      { if (tag == TAG_SUPERVISION)
-        { if ( ! g_slist_find( liste_bit_init, GINT_TO_POINTER(pass->vignette_activite) ) )
-           { liste_bit_init = g_slist_prepend( liste_bit_init, GINT_TO_POINTER(pass->vignette_activite) );
+        { if ( ! g_slist_find( client->Liste_pass, GINT_TO_POINTER(pass->syn_cible_id) ) )
+           { client->Liste_pass = g_slist_prepend( client->Liste_pass, GINT_TO_POINTER(pass->syn_cible_id) );
              Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                      "liste des bit_init_syn pass %d", pass->vignette_activite );
-           }
-
-          if ( ! g_slist_find( liste_bit_init, GINT_TO_POINTER(pass->vignette_secu_bien) ) )
-           { liste_bit_init = g_slist_prepend( liste_bit_init, GINT_TO_POINTER(pass->vignette_secu_bien) );
-             Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                      "liste des bit_init_syn pass %d", pass->vignette_secu_bien );
-           }
-
-          if ( ! g_slist_find( liste_bit_init, GINT_TO_POINTER(pass->vignette_secu_personne) ) )
-           { liste_bit_init = g_slist_prepend( liste_bit_init, GINT_TO_POINTER(pass->vignette_secu_personne) );
-             Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                      "liste des bit_init_syn pass %d", pass->vignette_secu_personne );
+                      "liste des bit init passerelles, add syn_cible_id '%d' length=%d", pass->syn_cible_id, g_slist_length(client->Liste_pass) );
            }
          }
-       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                "Envoyer_passerelle_tag: pass %d (%s) to client %s",
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "%s: pass %d (%s) to client %s", __func__,
                  pass->id, pass->libelle, client->machine );
-       Envoi_client ( client, tag, sstag,
-                      (gchar *)pass, sizeof(struct CMD_TYPE_PASSERELLE) );
+       Envoi_client ( client, tag, sstag, (gchar *)pass, sizeof(struct CMD_TYPE_PASSERELLE) );
        g_free(pass);
      }
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
-    Envoyer_bit_init_motif ( client, liste_bit_init );                                     /* Envoi des bits d'initialisation */
+    Dls_foreach ( client, NULL, Envoyer_bit_init_pass );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

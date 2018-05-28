@@ -45,9 +45,7 @@
  static GtkWidget *Entry_ev_thread;                                                               /* Commande_text du mnemonique */
  static GtkWidget *Entry_ev_text;                                                              /* Commande_text du mnemonique */
  static GtkWidget *Entry_tableau;                                                     /* Tableau d'affichage pour les courbes */
- static GtkWidget *Combo_dls;                                                                           /* Synoptique associé */
  static struct CMD_TYPE_MNEMO_FULL Option_mnemo;                                             /* Mnemonique en cours d'édition */
- static GList *Liste_index_dls;
  static GtkWidget *Table_options_AI;                                          /* Table des options associées aux Analog Input */
  static GtkWidget *Table_options_CPTIMP;                            /* Table des options associées aux compteurs d'impulsions */
  static GtkWidget *Table_options_Tempo;                                      /* Table des options associées aux temporisation */
@@ -58,8 +56,7 @@
 /* sortie: TRUE                                                                                                               */
 /******************************************************************************************************************************/
  static gboolean CB_ajouter_editer_mnemonique ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { gint index;
-    g_snprintf( Option_mnemo.mnemo_base.libelle, sizeof(Option_mnemo.mnemo_base.libelle),
+  { g_snprintf( Option_mnemo.mnemo_base.libelle, sizeof(Option_mnemo.mnemo_base.libelle),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
     g_snprintf( Option_mnemo.mnemo_base.acronyme, sizeof(Option_mnemo.mnemo_base.acronyme),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acro) ) );
@@ -73,8 +70,6 @@
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_tableau) ) );
     g_snprintf( Option_mnemo.mnemo_base.acro_syn, sizeof(Option_mnemo.mnemo_base.acro_syn),
                 "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acro_syn) ) );
-    index                          = gtk_combo_box_get_active (GTK_COMBO_BOX (Combo_dls) );
-    Option_mnemo.mnemo_base.dls_id = GPOINTER_TO_INT(g_list_nth_data( Liste_index_dls, index ) );
     Option_mnemo.mnemo_base.type   = gtk_combo_box_get_active( GTK_COMBO_BOX(Option_type) );
     Option_mnemo.mnemo_base.num    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_num) );
 
@@ -99,25 +94,8 @@
        case GTK_RESPONSE_CANCEL:
        default:              break;
      }
-    g_list_free( Liste_index_dls );
     gtk_widget_destroy(F_ajout);
     return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Proto_afficher_un_groupe_existant: ajoute un groupe dans la liste des groupes existants                                    */
-/* Entrée: rien                                                                                                               */
-/* sortie: kedal                                                                                                              */
-/******************************************************************************************************************************/
- void Proto_afficher_un_dls_for_mnemonique ( struct CMD_TYPE_PLUGIN_DLS *dls )
-  { gchar chaine[512];
-    g_snprintf( chaine, sizeof(chaine), "%s/%s/%s", dls->syn_parent_page, dls->syn_page, dls->shortname );
-    gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_dls), chaine );
-    Liste_index_dls = g_list_append( Liste_index_dls, GINT_TO_POINTER(dls->id) );
-    if (Option_mnemo.mnemo_base.dls_id == dls->id)
-     { gtk_combo_box_set_active ( GTK_COMBO_BOX (Combo_dls),
-                                  g_list_index(Liste_index_dls, GINT_TO_POINTER(dls->id))
-                                );
-     }
   }
 /******************************************************************************************************************************/
 /* CB_Valider: Simule l'appui sur le bouton OK                                                                                */
@@ -196,13 +174,16 @@
 /* Entrée: rien                                                                                                               */
 /* sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- void Menu_ajouter_editer_mnemonique ( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
+ void Menu_ajouter_editer_mnemonique ( struct CMD_TYPE_MNEMO_FULL *mnemo_full, gint dls_id )
   { GtkWidget *table, *texte, *hboite, *notebook;
     int cpt, i;
 
     if (mnemo_full)                                                                           /* Save pour utilisation future */
        { memcpy( &Option_mnemo, mnemo_full, sizeof(struct CMD_TYPE_MNEMO_FULL) ); }
-    else memset (&Option_mnemo, 0, sizeof(struct CMD_TYPE_MNEMO_FULL) );                               /* Sinon RAZ structure */
+    else
+     { memset (&Option_mnemo, 0, sizeof(struct CMD_TYPE_MNEMO_FULL) );                                 /* Sinon RAZ structure */
+       Option_mnemo.mnemo_base.dls_id = dls_id;
+     }
 
     if (mnemo_full)
      { F_ajout = gtk_dialog_new_with_buttons( _("Edit a mnemonic"),
@@ -235,7 +216,7 @@
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_notebook_append_page( GTK_NOTEBOOK(notebook), hboite, gtk_label_new ( _("Common Settings") ) );
 
-    table = gtk_table_new( 5, 4, TRUE );
+    table = gtk_table_new( 6, 4, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, FALSE, FALSE, 0 );
@@ -266,14 +247,6 @@
     Entry_acro_syn = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_acro_syn), NBR_CARAC_ACRO_SYN_MNEMONIQUE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_acro_syn, 3, 4, i, i+1 );
-
-    i++;
-    texte = gtk_label_new( _("Module D.L.S") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, i, i+1 );
-    Combo_dls = gtk_combo_box_new_text();
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_dls, 1, 4, i, i+1 );
-    Liste_index_dls = NULL;
-    Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_WANT_DLS_FOR_MNEMO, NULL, 0 );
 
     i++;
     texte = gtk_label_new( _("Description") );
@@ -345,7 +318,8 @@
 
 /************************************************* Positionnement des infos d'edition *****************************************/
     if (mnemo_full)                                                                             /* Si edition d'un mnemonique */
-     { gtk_entry_set_text( GTK_ENTRY(Entry_lib),      mnemo_full->mnemo_base.libelle );
+     { gchar chaine[256];
+       gtk_entry_set_text( GTK_ENTRY(Entry_lib),      mnemo_full->mnemo_base.libelle );
        gtk_entry_set_text( GTK_ENTRY(Entry_acro),     mnemo_full->mnemo_base.acronyme );
        gtk_entry_set_text( GTK_ENTRY(Entry_ev_host),  mnemo_full->mnemo_base.ev_host );
        gtk_entry_set_text( GTK_ENTRY(Entry_ev_thread),mnemo_full->mnemo_base.ev_thread );

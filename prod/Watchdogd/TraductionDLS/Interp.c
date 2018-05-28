@@ -48,7 +48,7 @@
  static gint Buffer_used=0, Buffer_taille=0;
  static int Id_log;                                                                     /* Pour la creation du fichier de log */
  static int nbr_erreur;
- static int Dls_id;                                                                /* numéro du plugin en cours de traduction */
+ static struct CMD_TYPE_PLUGIN_DLS Dls_plugin;
 
 /******************************************************************************************************************************/
 /* New_chaine: Alloue une certaine quantité de mémoire pour utiliser des chaines de caractères                                */
@@ -140,10 +140,10 @@
   }
 /******************************************************************************************************************************/
 /* Get_option_entier: Cherche une option et renvoie sa valeur                                                                 */
-/* Entrées: rien                                                                                                              */
-/* Sortie: NULL si probleme                                                                                                   */
+/* Entrées: la liste des options, le type a rechercher                                                                        */
+/* Sortie: -1 si pas trouvé                                                                                                   */
 /******************************************************************************************************************************/
- int Get_option_entier( GList *liste_options, gint type )
+ static int Get_option_entier( GList *liste_options, gint type )
   { struct OPTION *option;
     GList *liste;
     liste = liste_options;
@@ -154,6 +154,23 @@
        liste = liste->next;
      }
     return(-1);
+  }
+/******************************************************************************************************************************/
+/* Get_option_chaine: Cherche une option de type chaine et renvoie sa valeur                                                  */
+/* Entrées: la liste des options, le type a rechercher                                                                        */
+/* Sortie: NULL si probleme                                                                                                   */
+/******************************************************************************************************************************/
+ static gchar *Get_option_chaine( GList *liste_options, gint type )
+  { struct OPTION *option;
+    GList *liste;
+    liste = liste_options;
+    while (liste)
+     { option=(struct OPTION *)liste->data;
+       if ( option->type == type )
+        { return (option->chaine); }
+       liste = liste->next;
+     }
+    return("no string");
   }
 /******************************************************************************************************************************/
 /* Check_msg_ownership: Vérifie la propriété du bit interne MSG en action                                                     */
@@ -167,9 +184,9 @@
     retour = FALSE;
     message = Rechercher_messageDB ( num );
     Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-             "%s: Test Message %d for id %d: mnemo %p", __func__, num, Dls_id, message ); 
+             "%s: Test Message %d for id %d: mnemo %p", __func__, num, Dls_plugin.id, message ); 
     if (message)
-     { if (message->dls_id == Dls_id) retour=TRUE;
+     { if (message->dls_id == Dls_plugin.id) retour=TRUE;
        g_free(message);
      }
     
@@ -195,9 +212,9 @@
     retour = FALSE;
     mnemo = Rechercher_mnemo_baseDB_type_num ( &critere );
     Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-             "%s: Test Mnemo %d %d for id %d: mnemo %p", __func__, critere.type, critere.num, Dls_id, mnemo ); 
+             "%s: Test Mnemo %d %d for id %d: mnemo %p", __func__, critere.type, critere.num, Dls_plugin.id, mnemo ); 
     if (mnemo)
-     { if (mnemo->dls_id == Dls_id) retour=TRUE;
+     { if (mnemo->dls_id == Dls_plugin.id) retour=TRUE;
        g_free(mnemo);
      }
     
@@ -279,6 +296,45 @@
     return(result);
   }
 /******************************************************************************************************************************/
+/* New_condition_mono: Prepare la chaine de caractere associée à la condition, en respectant les options                      */
+/* Entrées: l'alias du monostable et sa liste d'options                                                                       */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_mono( int barre, struct ALIAS *alias, GList *options )
+  { gchar *result;
+    gint taille;
+    if (alias->num != -1) /* Alias par numéro ? */
+     { taille = 15;
+       result = New_chaine( taille ); /* 10 caractères max */
+       if ( (!barre && !alias->barre) || (barre && alias->barre) )
+            { g_snprintf( result, taille, "M(%d)", alias->num ); }
+       else { g_snprintf( result, taille, "!M(%d)", alias->num ); }
+     }
+    else /* Alias par nom */
+     { taille = 100;
+       result = New_chaine( taille ); /* 10 caractères max */
+       if ( (!barre && !alias->barre) || (barre && alias->barre) )
+            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_M_%s )", alias->nom, Dls_plugin.tech_id, alias->nom ); }
+       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_M_%s )", alias->nom, Dls_plugin.tech_id, alias->nom ); }
+     }
+   return(result);
+ }
+/******************************************************************************************************************************/
+/* New_condition_vars: formate une condition avec le nom de variable en parametre                                             */
+/* Entrées: numero du monostable, sa logique                                                                                  */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
+ gchar *New_condition_vars( int barre, gchar *nom )
+  { gchar *result;
+    int taille;
+
+    taille = strlen(nom)+5;
+    result = New_chaine( taille ); /* 10 caractères max */
+    if (!barre) { g_snprintf( result, taille, "%s", nom ); }
+           else { g_snprintf( result, taille, "!%s", nom ); }
+    return(result);
+  }
+/******************************************************************************************************************************/
 /* New_action: Alloue une certaine quantité de mémoire pour les actions DLS                                                   */
 /* Entrées: rien                                                                                                              */
 /* Sortie: NULL si probleme                                                                                                   */
@@ -333,8 +389,8 @@
        liste_num=liste_num->next;
      }
     if(!liste_bit)
-     { Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(type) );
-       Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );
+     { Liste_Actions_bit = g_slist_append ( Liste_Actions_bit, GINT_TO_POINTER(type) );
+       Liste_Actions_num = g_slist_append ( Liste_Actions_num, GINT_TO_POINTER(num) );
        return(TRUE);
      }
     return(FALSE);
@@ -360,6 +416,24 @@
 /* Entrées: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
+ struct ACTION *New_action_vars_mono( gchar *nom )
+  { struct ACTION *action;
+    int taille;
+
+    taille = strlen(nom)+5;
+    action = New_action();
+    action->alors = New_chaine( taille );
+    action->sinon = New_chaine( taille );
+
+    g_snprintf( action->alors, taille, "%s=1;", nom );
+    g_snprintf( action->sinon, taille, "%s=0;", nom );
+    return(action);
+  }
+/******************************************************************************************************************************/
+/* New_action_mono: Prepare une struct action avec une commande SM                                                            */
+/* Entrées: numero du monostable, sa logique                                                                                  */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
  struct ACTION *New_action_mono( int num )
   { struct ACTION *action;
     int taille;
@@ -373,6 +447,28 @@
     g_snprintf( action->alors, taille, "SM(%d,1);", num );
     g_snprintf( action->sinon, taille, "SM(%d,0);", num );
     return(action);
+  }
+/******************************************************************************************************************************/
+/* New_action_mono: Prepare une struct action avec une commande SM                                                            */
+/* Entrées: numero du monostable, sa logique                                                                                  */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
+ struct ACTION *New_action_mono_by_alias( struct ALIAS *alias )
+  { struct ACTION *action;
+    int taille;
+
+    if (alias->num != -1) /* Alias par numéro ? */
+     { return(New_action_mono ( alias->num )); }
+    else /* Alias par nom */
+     { taille = 100;
+       action = New_action();
+       action->alors = New_chaine( taille );
+       action->sinon = New_chaine( taille );
+
+       g_snprintf( action->alors, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_M_%s, TRUE );", alias->nom, Dls_plugin.tech_id, alias->nom );
+       g_snprintf( action->sinon, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_M_%s, FALSE );", alias->nom, Dls_plugin.tech_id, alias->nom );
+       return(action);
+     }
   }
 /******************************************************************************************************************************/
 /* New_action_mono: Prepare une struct action avec une commande SM                                                            */
@@ -526,9 +622,12 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Liberer_options ( GList *options )
-  { if (options)
-     { g_list_foreach( options, (GFunc)g_free, NULL );
-       g_list_free( options );
+  { while (options)
+     { struct OPTION *option = (struct OPTION *)options->data;
+       options = g_list_remove (options, option);
+       switch (option->type)
+        { case T_LIBELLE: g_free(option->chaine); break; }
+       g_free(option);
      }
   }
 /******************************************************************************************************************************/
@@ -537,7 +636,8 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Liberer_alias ( struct ALIAS *alias )
-  { Liberer_options( alias->options );
+  { GList *liste;
+    Liberer_options(alias->options);
     g_free(alias->nom);
     g_free(alias);
   }
@@ -563,11 +663,17 @@
 /******************************************************************************************************************************/
  gint Traduire_DLS( int id )
   { gchar source[80], cible[80], log[80];
+    struct CMD_TYPE_PLUGIN_DLS *plugin;
     struct ALIAS *alias;
     GSList *liste;
-    gint retour;
+    gint retour, nb_car;
     FILE *rc;
 
+    plugin = Rechercher_plugin_dlsDB ( id );
+    if (!plugin) return (TRAD_DLS_ERROR);
+    memcpy ( &Dls_plugin, plugin, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+    g_free(plugin);
+    
     Buffer_taille = 1024;
     Buffer = g_try_malloc0( Buffer_taille );                                             /* Initialisation du buffer resultat */
     if (!Buffer) return ( TRAD_DLS_ERROR );
@@ -589,7 +695,6 @@
 
     pthread_mutex_lock( &Partage->com_dls.synchro_traduction );                           /* Attente unicité de la traduction */
 
-    Dls_id = id;                                     /* Sauvegarde, pour notamment les tests de d'ownership des bits internes */
     Alias = NULL;                                                                                  /* Par défaut, pas d'alias */
     Liste_Actions_bit = NULL;                                                                    /* Par défaut, pas d'actions */
     Liste_Actions_num = NULL;                                                                    /* Par défaut, pas d'actions */
@@ -631,7 +736,7 @@
           gchar *Fonction= " gint Get_Tableau_bit(int n) { return(Tableau_bit[n]); }\n"
                            " gint Get_Tableau_num(int n) { return(Tableau_num[n]); }\n"
                            " gint Get_Tableau_msg(int n) { return(Tableau_msg[n]); }\n";
-          gchar *Start_Go = " void Go ( gint start, gint debug )\n"
+          gchar *Start_Go = " void Go ( gint start, gint debug, struct DLS_TO_PLUGIN *vars )\n"
                             "  {\n"
                             "    Update_edge_up_value();\n"
                             "    if (debug) Dls_print_debug( Dls_id, (int *)&Tableau_bit, (int *)&Tableau_num, (float *)&Tableau_val );\n";
@@ -641,6 +746,20 @@
 
           write(fd, include, strlen(include));
 
+          liste = Alias;
+          while(liste)
+           { alias = (struct ALIAS *)liste->data;
+             if (alias->num == -1)                                       /* alias par nom ? creation du pointeur de raccourci */
+              { switch (alias->bit)
+                 { case T_MONO: nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_M_%s;\n", alias->nom );
+                                write (fd, chaine, nb_car);
+                                break;
+                 }
+              }
+             liste = liste->next;
+           }
+
+     
           cpt = g_slist_length(Liste_Actions_bit);
           if (cpt==0) cpt=1;
           g_snprintf( chaine, sizeof(chaine), " static gfloat Tableau_val[%d];\n", cpt );
@@ -743,12 +862,26 @@
           close(fd);
         }
 
+     /*Retirer_mnemo_baseDB_for_dls ( id );                  /* Suppression des mnemos automatique du DLS fraichement traduit */
        liste = Alias;                                           /* Libération des alias, et remonté d'un Warning si il y en a */
        while(liste)
-        { alias = (struct ALIAS *)liste->data;
+        { struct CMD_TYPE_MNEMO_BASE mnemo;
+          alias = (struct ALIAS *)liste->data;
           if ( (!alias->used) )
            { Emettre_erreur_new( "Warning: %s not used", alias->nom );
              retour = TRAD_DLS_WARNING;
+           }
+          mnemo.dls_id = id;
+          if (alias->num == -1)                                                       /* Pour les alias Dynamiques uniquement */
+           { switch ( alias->bit )
+              { case T_MONO:
+                 { mnemo.type = MNEMO_MONOSTABLE;
+                   g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
+                   g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
+                   Mnemo_auto_create_for_dls ( &mnemo );
+                 }
+                break;
+              }
            }
           liste = liste->next;
         }

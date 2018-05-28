@@ -41,14 +41,9 @@
 /**********************************************************************************************************/
  void Gerer_protocole_mnemonique ( struct CONNEXION *connexion )
   { static GList *Arrivee_mnemonique = NULL;
-    static GList *Arrivee_dls     = NULL;
 
     switch ( Reseau_ss_tag ( connexion ) )
-     { case SSTAG_SERVEUR_CREATE_PAGE_MNEMO_OK:
-             { if (!Tester_page_notebook(TYPE_PAGE_MNEMONIQUE)) { Creer_page_mnemonique(); }
-             }
-            break;
-       case SSTAG_SERVEUR_ADD_MNEMONIQUE_OK:
+     { case SSTAG_SERVEUR_ADD_MNEMONIQUE_OK:
              { struct CMD_TYPE_MNEMO_BASE *mnemo;
                mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
                Proto_afficher_un_mnemonique( mnemo );
@@ -63,7 +58,7 @@
        case SSTAG_SERVEUR_EDIT_MNEMONIQUE_OK:
              { struct CMD_TYPE_MNEMO_FULL *mnemo;
                mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
-               Menu_ajouter_editer_mnemonique( mnemo );
+               Menu_ajouter_editer_mnemonique( mnemo, 0 );
              }
             break;
        case SSTAG_SERVEUR_VALIDE_EDIT_MNEMONIQUE_OK:
@@ -91,24 +86,6 @@
                g_list_foreach( Arrivee_mnemonique, (GFunc)g_free, NULL );
                g_list_free( Arrivee_mnemonique );
                Arrivee_mnemonique = NULL;
-               Chercher_page_notebook( TYPE_PAGE_MNEMONIQUE, 0, TRUE );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO:
-             { struct CMD_TYPE_PLUGIN_DLS *dls;
-               Set_progress_plus(1);
-               dls = (struct CMD_TYPE_PLUGIN_DLS *)g_try_malloc0( sizeof( struct CMD_TYPE_PLUGIN_DLS ) );
-               if (!dls) return; 
-
-               memcpy( dls, connexion->donnees, sizeof(struct CMD_TYPE_PLUGIN_DLS ) );
-               Arrivee_dls = g_list_append( Arrivee_dls, dls );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_DLS_FOR_MNEMO_FIN:
-             { g_list_foreach( Arrivee_dls, (GFunc)Proto_afficher_un_dls_for_mnemonique, NULL );
-               g_list_foreach( Arrivee_dls, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_dls );
-               Arrivee_dls = NULL;
              }
             break;
      }

@@ -69,6 +69,70 @@
     return(retour);
   }
 /******************************************************************************************************************************/
+/* Retirer_mnemo_baseDB_for_dls: Elimination de l'ensemble des mnemo automatique d'un plugin D.L.S                            */
+/* Entrée: l'id dls des mnemos auto a supprimer                                                                               */
+/* Sortie: FALSE si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ gboolean Retirer_mnemo_baseDB_for_dls ( gint dls_id )
+  { gchar requete[200];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "DELETE FROM %s WHERE dls_id=%d AND created_by_user = 0", NOM_TABLE_MNEMO, dls_id );
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
+  }
+/******************************************************************************************************************************/
+/* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                                      */
+/* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
+/* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
+/******************************************************************************************************************************/
+ gboolean Mnemo_auto_create_for_dls ( struct CMD_TYPE_MNEMO_BASE *mnemo )
+  { gchar *acro, *libelle;
+    gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
+
+    acro       = Normaliser_chaine ( mnemo->acronyme );                                      /* Formatage correct des chaines */
+    if ( !acro )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation impossible. Mnemo NOT added nor modified.", __func__ );
+       return(FALSE);
+     }
+
+    libelle    = Normaliser_chaine ( mnemo->libelle );                                       /* Formatage correct des chaines */
+    if ( !libelle )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation impossible. Mnemo NOT added nor modified.", __func__ );
+       g_free(libelle);
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "INSERT INTO mnemos SET created_by_user='0',type='%d',num='-1',dls_id='%d',acronyme='%s',libelle='%s' "
+                " ON DUPLICATE KEY UPDATE type='%d',libelle='%s'",
+                mnemo->type, mnemo->dls_id, acro, libelle, mnemo->type, libelle );
+    g_free(libelle);
+    g_free(acro);
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return (retour);
+  }
+/******************************************************************************************************************************/
 /* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                                      */
 /* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
@@ -102,14 +166,14 @@
 
     if (ajout == TRUE)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "INSERT INTO %s(type,num,dls_id,acronyme,libelle,ev_host,ev_thread,ev_text,tableau,acro_syn) VALUES "
-                   "(%d,%d,%d,'%s','%s','%s','%s','%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
+                   "INSERT INTO %s(created_by_user,type,num,dls_id,acronyme,libelle,ev_host,ev_thread,ev_text,tableau,acro_syn) VALUES "
+                   "('1',%d,%d,%d,'%s','%s','%s','%s','%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
                    mnemo->num, mnemo->dls_id, acro, libelle, ev_host, ev_thread, ev_text, tableau, acro_syn );
      } else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "UPDATE %s SET "             
                    "type=%d,libelle='%s',acronyme='%s',ev_host='%s',ev_thread='%s',ev_text='%s',dls_id=%d,num=%d,tableau='%s',"
-                   "acro_syn='%s' "
+                   "acro_syn='%s',created_by_user='1' "
                    "WHERE id=%d",
                    NOM_TABLE_MNEMO, mnemo->type, libelle, acro, ev_host, ev_thread, ev_text, 
                    mnemo->dls_id, mnemo->num, tableau, acro_syn, mnemo->id );

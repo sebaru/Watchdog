@@ -251,7 +251,7 @@
        g_snprintf( chaine, sizeof(chaine), "%02X%02X%02X%02X:%s:%s",
                    trame->data[2], trame->data[3], trame->data[4], trame->data[5],
                    button, action );
-       Send_Event( g_get_host_name(), NOM_THREAD, EVENT_INPUT, chaine, 0 );
+/*       Send_Event( g_get_host_name(), NOM_THREAD, EVENT_INPUT, chaine, 0 );*/
 
        Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_INFO,
                  "Processer_trame_ERP1: New_Event : %s", chaine );
@@ -362,9 +362,9 @@
      { usleep(1);
        sched_yield();
 
-       if (lib->Thread_sigusr1 == TRUE)
+       if (lib->Thread_reload == TRUE)
         { Info_new( Config.log, Cfg_enocean.lib->Thread_debug, LOG_NOTICE, "Run_thread: recu signal SIGUSR1" );
-          lib->Thread_sigusr1 = FALSE;
+          lib->Thread_reload = FALSE;
         }
 
        if (Cfg_enocean.reload == TRUE)

@@ -70,8 +70,8 @@
   { if (Cfg_modbus.lib->Thread_run == FALSE)
      { return(Admin_write ( response, " | - Thread MODBUS is not running" )); }
     
-    Cfg_modbus.lib->Thread_sigusr1 = TRUE;
-    while (Cfg_modbus.lib->Thread_sigusr1) sched_yield();
+    Cfg_modbus.lib->Thread_reload = TRUE;
+    while (Cfg_modbus.lib->Thread_reload) sched_yield();
     return(Admin_write ( response, " | - MODBUS Reload done" ));
   }
 /******************************************************************************************************************************/

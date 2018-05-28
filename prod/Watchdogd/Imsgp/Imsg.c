@@ -397,6 +397,17 @@
               purple_account_get_username(account), purple_account_get_protocol_id(account));
   }
 /******************************************************************************************************************************/
+/* Imsgp_signed_off: Appelé lorsque nous venons de nous déconnecter                                                           */
+/* Entrée: La connextion Purple                                                                                               */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Imsgp_signed_off ( PurpleConnection *gc, gpointer null )
+  {	PurpleAccount *account = purple_connection_get_account(gc);
+    Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
+             "%s: Account '%s' disconnected for protocol id '%s'", __func__,
+              purple_account_get_username(account), purple_account_get_protocol_id(account));
+  }
+/******************************************************************************************************************************/
 /* Définition spécifique pour la librairie libpurple                                                                          */
 /******************************************************************************************************************************/
  #define PURPLE_GLIB_READ_COND  (G_IO_IN | G_IO_HUP | G_IO_ERR)
@@ -508,6 +519,8 @@
 
 	   purple_signal_connect( purple_connections_get_handle(), "signed-on", &handle,
                           	PURPLE_CALLBACK(Imsgp_signed_on), NULL );
+	   purple_signal_connect( purple_connections_get_handle(), "signed-off", &handle,
+                          	PURPLE_CALLBACK(Imsgp_signed_off), NULL );
     purple_signal_connect( purple_conversations_get_handle(), "received-im-msg", &handle,
                            PURPLE_CALLBACK(Imsgp_recevoir_imsg), NULL );
     purple_signal_connect( purple_accounts_get_handle(), "account-authorization-requested", &handle,
@@ -530,13 +543,13 @@
 
     while( Cfg_imsgp.lib->Thread_run == TRUE )                                               /* On tourne tant que necessaire */
      { struct CMD_TYPE_HISTO *histo, histo_buf;
-       g_usleep(10000);
+       g_usleep(200000);
        sched_yield();
 
-       if (Cfg_imsgp.lib->Thread_sigusr1 == TRUE)
+       if (Cfg_imsgp.lib->Thread_reload == TRUE)
         { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE, "%s: recu signal SIGUSR1", __func__ );
           Imsgp_Lire_config ();                                             /* Lecture de la configuration logiciel du thread */
-          Cfg_imsgp.lib->Thread_sigusr1 = FALSE;
+          Cfg_imsgp.lib->Thread_reload = FALSE;
         }
 
        if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )

@@ -139,6 +139,33 @@
     return ( retour );
   }
 /******************************************************************************************************************************/
+/* Recuperer_synoptiqueDB: Recupération de la liste des synoptiques                                                           */
+/* Entrée: une database                                                                                                       */
+/* Sortie: False si pb                                                                                                        */
+/******************************************************************************************************************************/
+ gboolean Recuperer_synoptiqueDB_enfant ( struct DB **db_retour, gint id_parent )
+  { gchar requete[256];
+    gboolean retour;
+    struct DB *db;
+
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT syn.id,syn.libelle,syn.page,syn.access_level,parent.id,parent.page"
+                " FROM syns as syn INNER JOIN syns as parent ON syn.parent_id=parent.id "
+                "WHERE syn.parent_id='%d' "
+                "ORDER BY parent.page,syn.page,syn.libelle", id_parent );
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
+  }
+/******************************************************************************************************************************/
 /* Recuperer_synoptiqueDB_suite: Recupération des champs de la liste des synopyiques                                          */
 /* Entrée: une database                                                                                                       */
 /* Sortie: une structure referencant le synoptique chargé                                                                     */

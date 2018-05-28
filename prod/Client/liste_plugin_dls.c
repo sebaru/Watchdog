@@ -42,6 +42,7 @@
      COLONNE_TYPE,
      COLONNE_GROUPE_PAGE,
      COLONNE_SHORTNAME,
+     COLONNE_TECH_ID,
      COLONNE_NOM,
      COLONNE_COMPIL_DATE,
      COLONNE_COMPIL_STATUS,
@@ -81,6 +82,7 @@
  #include "protocli.h"
 
  static void Menu_effacer_plugin_dls ( void );
+ static void Menu_editer_mnemo ( void );
  static void Menu_editer_source_dls ( void );
  static void Menu_editer_plugin_dls ( void );
  static void Menu_ajouter_plugin_dls ( void );
@@ -90,6 +92,8 @@
   { GNOMEUIINFO_ITEM_STOCK ( N_("Add"), NULL, Menu_ajouter_plugin_dls, GNOME_STOCK_PIXMAP_ADD ),
     GNOMEUIINFO_ITEM_STOCK ( N_("Edit Source"), NULL, Menu_editer_source_dls, GNOME_STOCK_PIXMAP_BOOK_OPEN ),
     GNOMEUIINFO_ITEM_STOCK ( N_("Properties"), NULL, Menu_editer_plugin_dls, GNOME_STOCK_PIXMAP_PROPERTIES ),
+    GNOMEUIINFO_ITEM_STOCK ( N_("M_nemoniques"), N_("Edit mnemoniques"),
+                             Menu_editer_mnemo, GNOME_STOCK_PIXMAP_BOOK_GREEN ),
     GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_ITEM_STOCK ( N_("Remove"), NULL, Menu_effacer_plugin_dls, GNOME_STOCK_PIXMAP_CLEAR ),
     GNOMEUIINFO_END
@@ -109,6 +113,43 @@
   { if (status >= NBR_DLS_COMPIL_STATUS)
          return("Unknown");
     else return ( DLS_COMPIL_STATUS[status] );
+  }
+/******************************************************************************************************************************/
+/* Menu_want_mnemonique: l'utilisateur desire editer les mnemoniques d'un plugin DLS                                          */
+/* Entrée/Sortie: rien                                                                                                        */
+/******************************************************************************************************************************/
+ static void Menu_editer_mnemo ( void )
+  { struct CMD_TYPE_PLUGIN_DLS rezo_dls;
+    GtkTreeSelection *selection;
+    gchar *nom, *tech_id;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
+    GList *lignes;
+    guint nbr;
+
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_plugin_dls) );
+    store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_plugin_dls) );
+
+    nbr = gtk_tree_selection_count_selected_rows( selection );
+    if (!nbr) return;                                                                            /* Si rien n'est selectionné */
+
+    lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
+    gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
+    gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_dls.id, -1 );                                          /* Recup du id */
+    gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, -1 );                                         /* Recup du id */
+    gtk_tree_model_get( store, &iter, COLONNE_NOM, &nom, -1 );
+
+    g_snprintf( rezo_dls.nom, sizeof(rezo_dls.nom), "%s", nom );
+    g_snprintf( rezo_dls.tech_id, sizeof(rezo_dls.tech_id), "%s", tech_id );
+    g_free( nom );
+    g_free( tech_id );
+    if (!Chercher_page_notebook (TYPE_PAGE_MNEMONIQUE, rezo_dls.id, TRUE))                    /* Page deja créé et affichée ? */
+     { Creer_page_mnemonique ( &rezo_dls );
+       Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE, (gchar *)&rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+       Chercher_page_notebook ( TYPE_PAGE_MNEMONIQUE, rezo_dls.id, TRUE );
+     }
+    g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
+    g_list_free (lignes);
   }
 /******************************************************************************************************************************/
 /* Menu_refresh_plugin_D.L.S: rafraichir la liste des plugins D.L.S                                                           */
@@ -191,37 +232,39 @@
                       G_CALLBACK(CB_effacer_plugin_dls), NULL );
     gtk_widget_show_all( dialog );
   }
-/**********************************************************************************************************/
-/* Menu_editer_source_dls: Demande d'edition du plugin_dls selectionné                                    */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_editer_source_dls: Demande d'edition du plugin_dls selectionné                                                        */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static void Menu_editer_source_dls ( void )
   { GtkTreeSelection *selection;
     struct CMD_TYPE_PLUGIN_DLS rezo_dls;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
-    gchar *nom;
+    gchar *nom, *tech_id;
     guint nbr;
 
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_plugin_dls) );
     store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_plugin_dls) );
 
     nbr = gtk_tree_selection_count_selected_rows( selection );
-    if (!nbr) return;                                                        /* Si rien n'est selectionné */
+    if (!nbr) return;                                                                            /* Si rien n'est selectionné */
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
-    gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_dls.id, -1 );                      /* Recup du id */
+    gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
+    gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_dls.id, -1 );                                          /* Recup du id */
+    gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, -1 );                                         /* Recup du id */
     gtk_tree_model_get( store, &iter, COLONNE_NOM, &nom, -1 );
 
     memcpy( &rezo_dls.nom, nom, sizeof(rezo_dls.nom) );
+    memcpy( &rezo_dls.tech_id, tech_id, sizeof(rezo_dls.tech_id) );
     g_free( nom );
+    g_free( tech_id );
     if (!Chercher_page_notebook (TYPE_PAGE_SOURCE_DLS, rezo_dls.id, TRUE))/* Page deja créé et affichée ? */
      { Creer_page_source_dls ( &rezo_dls );
-     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_WANT_SOURCE_DLS,
-                      (gchar *)&rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_WANT_SOURCE_DLS, (gchar *)&rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
      }
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);
@@ -418,6 +461,7 @@
                                               G_TYPE_UINT,                                                            /* Type */
                                               G_TYPE_STRING,                                                   /* Groupe/Page */
                                               G_TYPE_STRING,                                                     /* Shortname */
+                                              G_TYPE_STRING,                                                       /* Tech_id */
                                               G_TYPE_STRING,                                                           /* Nom */
                                               G_TYPE_STRING,                                                   /* Compil_date */
                                               G_TYPE_STRING,                                                 /* Compil_status */
@@ -444,6 +488,16 @@
                                                          NULL);
     gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_ID);                                         /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Tech_ID"), renderer,
+                                                         "text", COLONNE_TECH_ID,
+                                                         "background-gdk", COLONNE_COLOR_FOND,
+                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,
+                                                         NULL);
+    gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_TECH_ID);                                    /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
@@ -583,6 +637,7 @@
                          COLONNE_GROUPE_PAGE, groupe_page,
                          COLONNE_NOM, plugin_dls->nom,
                          COLONNE_SHORTNAME, plugin_dls->shortname,
+                         COLONNE_TECH_ID, plugin_dls->tech_id,
                          COLONNE_COMPIL_DATE, date_compil,
                          COLONNE_COMPIL_STATUS, Dls_compil_status(plugin_dls->compil_status),
                          COLONNE_COMPIL_NBR, plugin_dls->nbr_compil,

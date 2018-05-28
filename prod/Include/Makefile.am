@@ -7,7 +7,7 @@
 noinst_HEADERS =  Erreur.h Reseaux.h \
                   Reseaux_gtk_message.h Reseaux_connexion.h Reseaux_icone.h \
                   Reseaux_dls.h Reseaux_utilisateur.h Reseaux_lowlevel.h Reseaux_synoptique.h \
-                  Reseaux_message.h Reseaux_satellite.h \
+                  Reseaux_message.h \
                   Reseaux_mnemonique.h \
 		  Reseaux_supervision.h Reseaux_histo.h Reseaux_atelier.h \
                   Reseaux_admin.h \

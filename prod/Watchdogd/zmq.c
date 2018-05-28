@@ -161,7 +161,7 @@
      }
     else
      { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "%s: Send %d bytes to ZMQ '%s' ('%s') OK", __func__, taille, zmq->name, zmq->endpoint );
+                "%s: Send TAG %d : %d bytes to ZMQ '%s' ('%s') OK", __func__, tag, taille, zmq->name, zmq->endpoint );
      }
     return(TRUE);
   }

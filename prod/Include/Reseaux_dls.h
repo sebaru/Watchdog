@@ -51,6 +51,7 @@
  struct CMD_TYPE_PLUGIN_DLS
   { gchar nom[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
     gchar shortname[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
+    gchar tech_id[25];
     gchar syn_parent_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar syn_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     guint syn_id;                                           /* Numéro du fichier syn correspondant(pas l'index dans la table) */

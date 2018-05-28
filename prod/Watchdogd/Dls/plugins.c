@@ -58,7 +58,8 @@
        critere.num  = dls->Get_Tableau_num(cpt);
        mnemo = Rechercher_mnemo_baseDB_type_num ( &critere );
        Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-                "%s: Test Mnemo %d %d for id %d: mnemo %p", __func__, critere.type, critere.num, dls->plugindb.id, mnemo ); 
+                "%s: Test Mnemo %d %d for id %d: mnemo %p", __func__,
+                 dls->Get_Tableau_bit(cpt), dls->Get_Tableau_num(cpt), dls->plugindb.id, mnemo ); 
        if (!mnemo) return(FALSE);
        dls_id = mnemo->dls_id;
        g_free(mnemo);
@@ -129,102 +130,132 @@
            }
          }
        
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d loaded (%s)", __func__, dls->plugindb.id, dls->plugindb.nom );
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d loaded (%s) checking bits (start=%d)", __func__,
+                 dls->plugindb.id, dls->plugindb.shortname, dls->plugindb.on );
        retour = TRUE;
 
        if (Check_action_bit_use( dls ) == FALSE )
         { Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                   "%s: Candidat %06d -> bit(s) set but not owned by itself... Disabling", __func__, dls->plugindb.id ); 
+                   "%s: plugin %06d -> bit(s) set but not owned by itself... Disabling", __func__, dls->plugindb.id ); 
           Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_ERROR_BIT_SET_BUT_NOT_OWNED );
           dls->plugindb.on=FALSE;
         }
        else Info_new( Config.log, Config.log_dls, LOG_INFO,
-                     "%s: Candidat %06d -> bit(s) ownership OK", __func__, dls->plugindb.id ); 
+                     "%s: plugin %06d -> bit(s) ownership OK", __func__, dls->plugindb.id ); 
 
      }
     if (dls->plugindb.on) dls->start_date = time(NULL);
                      else dls->start_date = 0;
-    pthread_mutex_lock( &Partage->com_dls.synchro );                                  /* Ajout dans la liste de travail D.L.S */
-    Partage->com_dls.Plugins = g_slist_append( Partage->com_dls.Plugins, dls );
-    pthread_mutex_unlock( &Partage->com_dls.synchro );
     return(retour);
   }
 /******************************************************************************************************************************/
-/* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                                              */
-/* Entrée: Le nom de fichier correspondant                                                                                    */
+/* Decharger_plugins: Decharge tous les plugins DLS                                                                           */
+/* Entrée: Rien                                                                                                               */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- static gboolean Charger_un_plugin_by_id ( gint id )
-  { struct CMD_TYPE_PLUGIN_DLS *plugin_dls;
-    struct PLUGIN_DLS *dls;
-    struct DB *db;                                                                                       /* Database Watchdog */
-
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: Unable to open database", __func__ );
-       return(FALSE);
+ static void Reseter_plugin_by_id_dls_tree ( struct DLS_TREE *dls_tree, gint dls_id )
+  { struct PLUGIN_DLS *plugin;
+    GSList *liste;
+    liste = dls_tree->Liste_plugin_dls;
+    while(liste)                                                                            /* Liberation mémoire des modules */
+     { plugin = (struct PLUGIN_DLS *)liste->data;
+       if ( plugin->plugindb.id == dls_id )
+        {
+          if (plugin->handle)
+           { dlclose( plugin->handle );
+             plugin->plugindb.on = TRUE;                                                           /* On tente de l'allumer ! */
+             Charger_un_plugin ( plugin );
+             Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d reloaded (%s)", __func__,
+                       plugin->plugindb.id, plugin->plugindb.shortname );
+           }
+          return;
+        }
+       liste=liste->next;
      }
 
-    plugin_dls = Rechercher_plugin_dlsDB( id );
-    Libere_DB_SQL( &db );
-
-    if (!plugin_dls)
-     { Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: Plugin %06d non trouvé", __func__, id );
-       return(FALSE);
+    liste = dls_tree->Liste_dls_tree;
+    while (liste)
+     { struct DLS_TREE *sub_dls_tree = liste->data;
+       Reseter_plugin_by_id_dls_tree ( sub_dls_tree, dls_id );
+       liste=liste->next;
      }
-
-    dls = (struct PLUGIN_DLS *)g_try_malloc0( sizeof(struct PLUGIN_DLS) );
-    if (!dls)
-     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: out of memory for id=%06d", __func__, id );
-       g_free(plugin_dls);
-       return(FALSE);
-     }
-
-    memcpy( &dls->plugindb, plugin_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-    g_free(plugin_dls);
-
-    return ( Charger_un_plugin ( dls ) );
   }
 /******************************************************************************************************************************/
 /* Retirer_plugins: Decharge toutes les librairies                                                                            */
 /* Entrée: Le numéro du plugin a décharger                                                                                    */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- void Decharger_un_plugin_by_id ( gint id )
-  { struct PLUGIN_DLS *plugin;
-    GSList *plugins;
-
+ void Reseter_un_plugin ( gint id )
+  { Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: Reset plugin %06d", __func__, id );
     pthread_mutex_lock( &Partage->com_dls.synchro );
-    plugins = Partage->com_dls.Plugins;
-    while(plugins)                                                                                 /* Pour chacun des plugins */
-     { plugin = (struct PLUGIN_DLS *)plugins->data;
-
-       if ( plugin->plugindb.id == id )
-        { if (plugin->handle) dlclose( plugin->handle );
-          Partage->com_dls.Plugins = g_slist_remove( Partage->com_dls.Plugins, plugin );
-          g_free( plugin );
-          Info_new( Config.log, Config.log_dls, LOG_INFO,
-                   "%s: plugin %06d unloaded", __func__, plugin->plugindb.id );
-          break;
-        }
-       plugins = plugins->next;
-     }
+    Reseter_plugin_by_id_dls_tree ( Partage->com_dls.Dls_tree, id );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
-    if (plugins == NULL)
-     { Info_new( Config.log, Config.log_dls, LOG_INFO,
-                "%s: plugin %06d not found", __func__, id );
+  }
+/******************************************************************************************************************************/
+/* Decharger_plugins: Decharge tous les plugins DLS                                                                           */
+/* Entrée: Rien                                                                                                               */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Decharger_plugin_by_id_dls_tree ( gint id, struct DLS_TREE *dls_tree )
+  { GSList *liste;
+
+    liste = dls_tree->Liste_plugin_dls;
+    while(liste)                                                                            /* Liberation mémoire des modules */
+     { struct PLUGIN_DLS *plugin = liste->data;
+       if (plugin->plugindb.id == id)
+        { dlclose( plugin->handle );
+          dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
+                                                                             /* Destruction de l'entete associé dans la GList */
+          Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d unloaded (%s)", __func__,
+                    plugin->plugindb.id, plugin->plugindb.nom );
+          g_free( plugin );
+          return;
+        }
+       liste=liste->next;
+     }
+
+    liste = dls_tree->Liste_dls_tree;
+    while (liste)
+     { struct DLS_TREE *sub_dls_tree = liste->data;
+       Decharger_plugin_by_id_dls_tree ( id, sub_dls_tree );
+       liste=liste->next;
      }
   }
 /******************************************************************************************************************************/
-/* Retirer_un_plugin: Decharge le plugin dont le numero est en parametre                                                      */
-/* Entrée: L'identifiant du plugin                                                                                            */
+/* Decharger_plugins: Decharge tous les plugins DLS                                                                           */
+/* Entrée: Rien                                                                                                               */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
- void Reseter_un_plugin ( gint id )
-  { Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: Reset plugin %06d", __func__, id );
+ void Decharger_plugin_by_id ( gint id )
+  { pthread_mutex_lock( &Partage->com_dls.synchro );
+    Decharger_plugin_by_id_dls_tree ( id, Partage->com_dls.Dls_tree );
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+  }
+/******************************************************************************************************************************/
+/* Decharger_plugins: Decharge tous les plugins DLS                                                                           */
+/* Entrée: Rien                                                                                                               */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Decharger_plugins_dls_tree ( struct DLS_TREE *dls_tree )
+  { struct PLUGIN_DLS *plugin;
+    GSList *liste;
 
-    Decharger_un_plugin_by_id ( id );
-    Charger_un_plugin_by_id ( id );
+    while(dls_tree->Liste_plugin_dls)                                                        /* Liberation mémoire des modules */
+     { plugin = (struct PLUGIN_DLS *)dls_tree->Liste_plugin_dls->data;
+       if (plugin->handle) dlclose( plugin->handle );
+       dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
+                                                                             /* Destruction de l'entete associé dans la GList */
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d unloaded (%s)", __func__,
+                 plugin->plugindb.id, plugin->plugindb.nom );
+       g_free( plugin );
+     }
+
+    while (dls_tree->Liste_dls_tree)
+     { struct DLS_TREE *sub_dls_tree = dls_tree->Liste_dls_tree->data;
+       Decharger_plugins_dls_tree ( sub_dls_tree );
+       dls_tree->Liste_dls_tree = g_slist_remove(dls_tree->Liste_dls_tree, sub_dls_tree);
+       g_free(sub_dls_tree);
+     }
   }
 /******************************************************************************************************************************/
 /* Decharger_plugins: Decharge tous les plugins DLS                                                                           */
@@ -232,19 +263,57 @@
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Decharger_plugins ( void )
-  { struct PLUGIN_DLS *plugin;
-
-    pthread_mutex_lock( &Partage->com_dls.synchro );
-    while(Partage->com_dls.Plugins)                                                         /* Liberation mémoire des modules */
-     { plugin = (struct PLUGIN_DLS *)Partage->com_dls.Plugins->data;
-       if (plugin->handle) dlclose( plugin->handle );
-       Partage->com_dls.Plugins = g_slist_remove( Partage->com_dls.Plugins, plugin );
-                                                                             /* Destruction de l'entete associé dans la GList */
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d unloaded (%s)", __func__,
-                 plugin->plugindb.id, plugin->plugindb.nom );
-       g_free( plugin );
-     }
+  { pthread_mutex_lock( &Partage->com_dls.synchro );
+    Decharger_plugins_dls_tree ( Partage->com_dls.Dls_tree );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
+  }
+/******************************************************************************************************************************/
+/* Creer_dls_activite_securite: Creation du fichier de management des vignettes et etiquettes                                 */
+/* Entrée: Néant                                                                                                              */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static struct DLS_TREE *Dls_charger_plugins_for_syn ( gint id )
+  { struct DLS_TREE *dls_tree = NULL;
+    struct DB *db;
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: Starting for syn id '%d'", __func__, id );
+
+    dls_tree = (struct DLS_TREE *)g_try_malloc0( sizeof(struct DLS_TREE) );
+    if (!dls_tree)
+     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: Memory Error for id '%s'", __func__, id );
+       return(NULL);
+     }
+    dls_tree->syn_vars.syn_id = id;
+
+    if ( Recuperer_plugins_dlsDB_by_syn( &db, id ) )
+     { struct CMD_TYPE_PLUGIN_DLS *plugindb;
+       while ( (plugindb = Recuperer_plugins_dlsDB_suite( &db )) != NULL )
+        { struct PLUGIN_DLS *dls;
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG,
+                    "%s: Loading plugins '%s' for syn '%d' '%s'", __func__, plugindb->shortname, id, plugindb->syn_page );
+          dls = (struct PLUGIN_DLS *)g_try_malloc0( sizeof(struct PLUGIN_DLS) );
+          if (!dls)
+           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: out of memory", __func__ );
+             g_free(plugindb);
+           }
+          else { memcpy( &dls->plugindb, plugindb, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+                 g_free(plugindb);
+                 Charger_un_plugin( dls );                                                            /* Chargement du plugin */
+                 dls_tree->Liste_plugin_dls = g_slist_append( dls_tree->Liste_plugin_dls, dls );
+               }
+        }
+     }
+
+    if ( ! Recuperer_synoptiqueDB_enfant( &db, id ) ) return(dls_tree);                             /* Si pas de connexion DB */
+    struct CMD_TYPE_SYNOPTIQUE *syn;
+    while ( (syn = Recuperer_synoptiqueDB_suite( &db )) != NULL )
+     { if (syn->id != 1)                                                          /* Pas de bouclage sur le synoptique root ! */
+        { Info_new( Config.log, Config.log_dls, LOG_DEBUG,
+                    "%s: Loading sub plugins for syn '%d' '%s' (parent '%d')", __func__, syn->id, syn->page, id );
+          dls_tree->Liste_dls_tree = g_slist_append( dls_tree->Liste_dls_tree, Dls_charger_plugins_for_syn ( syn->id ) );
+        }
+       g_free(syn);
+     }
+    return(dls_tree);
   }
 /******************************************************************************************************************************/
 /* Charger_plugins: Ouverture de toutes les librairies possibles pour le DLS                                                  */
@@ -252,45 +321,23 @@
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Charger_plugins ( void )
-  { struct CMD_TYPE_PLUGIN_DLS *plugin;
-    struct PLUGIN_DLS *dls;
-    struct DB *db;                                                                                       /* Database Watchdog */
-
-    if (!Recuperer_plugins_dlsDB( &db ))
-     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: Unable to load plugins", __func__ );
-       return;
-     }
-    
-    while( (plugin = Recuperer_plugins_dlsDB_suite( &db )) != NULL )
-     { dls = (struct PLUGIN_DLS *)g_try_malloc0( sizeof(struct PLUGIN_DLS) );
-       if (!dls)
-        { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: out of memory", __func__ );
-          g_free(plugin);
-        }
-       else { memcpy( &dls->plugindb, plugin, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-              g_free(plugin);
-                                                                                          /* Si option "compil" au demarrage" */
-              if (Config.compil == 1) Compiler_source_dls( FALSE, dls->plugindb.id, NULL, 0 );
-              Charger_un_plugin( dls );                                                               /* Chargement du plugin */
-            }
-     }
-
+  { pthread_mutex_lock( &Partage->com_dls.synchro );
+    Partage->com_dls.Dls_tree = Dls_charger_plugins_for_syn(1);                              /* Chargement du root synoptique */
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
     Config.compil = 0;                                                                                   /* fin de traitement */
   }
 /******************************************************************************************************************************/
-/* Activer_plugin_by_id: Active ou non un plugin by id                                                                        */
-/* Entrée: l'ID du plugin                                                                                                     */
-/* Sortie: Rien                                                                                                               */
+/* Activer_plugin_by_id_dls_tree: Active ou non un plugin by id                                                               */
+/* Entrée: l'ID du plugin, start ou stop et le dls_tree support                                                               */
+/* Sortie: FALSE si pas trouvé dans le dls_tree en parametre                                                                  */
 /******************************************************************************************************************************/
- void Activer_plugin_by_id ( gint id, gboolean actif )
+ static gboolean Activer_plugin_by_id_dls_tree ( gint id, gboolean actif, struct DLS_TREE *dls_tree )
   { struct PLUGIN_DLS *plugin;
-    GSList *plugins;
+    GSList *plugins, *liste;
 
-    pthread_mutex_lock( &Partage->com_dls.synchro );
-    plugins = Partage->com_dls.Plugins;
+    plugins = dls_tree->Liste_plugin_dls;
     while(plugins)                                                                                  /* Pour chacun des plugin */
      { plugin = (struct PLUGIN_DLS *)plugins->data;
-
        if ( plugin->plugindb.id == id )
         { if (actif == FALSE)
            { plugin->plugindb.on = FALSE;
@@ -298,7 +345,7 @@
              plugin->conso = 0.0;
              Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: id %06d stopped (%s)", __func__, plugin->plugindb.id, plugin->plugindb.nom );
            }
-          else if (Check_action_bit_use( plugin ) == TRUE )
+          else if (Check_action_bit_use( plugin ) == TRUE)
            { plugin->plugindb.on = TRUE;
              plugin->conso = 0.0;
              plugin->starting = 1;
@@ -313,10 +360,26 @@
              Info_new( Config.log, Config.log_dls, LOG_WARNING,
                       "%s: Candidat %06d -> bit(s) set but not owned by itself... Disabling", __func__, plugin->plugindb.id ); 
            }
-          break;
+          return(TRUE);
         }
        plugins = plugins->next;
      }
+
+    liste = dls_tree->Liste_dls_tree;                                             /* Si pas trouvé, on cherche dans les sub dls */
+    while (liste)
+     { if (Activer_plugin_by_id_dls_tree( id, actif, (struct DLS_TREE *)liste->data ) == TRUE ) return(TRUE);
+       liste = liste->next;
+     }
+    return(FALSE);
+  }
+/******************************************************************************************************************************/
+/* Activer_plugin_by_id: Active ou non un plugin by id                                                                        */
+/* Entrée: l'ID du plugin                                                                                                     */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Activer_plugin_by_id ( gint id, gboolean actif )
+  { pthread_mutex_lock( &Partage->com_dls.synchro );
+    Activer_plugin_by_id_dls_tree( id, actif, Partage->com_dls.Dls_tree );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /******************************************************************************************************************************/
@@ -424,11 +487,8 @@
     wait4(pidgcc, NULL, 0, NULL );
     Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: gcc is down, OK %d", __func__, pidgcc );
 
-    if (reset)
-     { pthread_mutex_lock( &Partage->com_dls.synchro );                                 /* Demande le reset du plugin à D.L.S */
-       Partage->com_dls.liste_plugin_reset = g_slist_append ( Partage->com_dls.liste_plugin_reset, GINT_TO_POINTER(id) );
-       pthread_mutex_unlock( &Partage->com_dls.synchro );
-     }
+    if (reset)                                                                          /* Demande le reset du plugin à D.L.S */
+     { Reseter_un_plugin ( id ); }
 
     Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: end of %06d", __func__, id );
     if (retour == TRAD_DLS_WARNING)

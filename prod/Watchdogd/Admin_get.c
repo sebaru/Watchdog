@@ -30,6 +30,19 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Admin_get_list: Affiche la liste des data dans l'arbre dls_data                                                            */
+/* Entrée: la clef, la value et le data qui est la 'response'                                                                 */
+/* Sortie: FALSE                                                                                                              */
+/******************************************************************************************************************************/
+ static gboolean Admin_get_list ( gpointer key, gpointer value, gpointer data )
+  { gchar chaine[256];
+    gchar *response = *(gchar **)data;
+    g_snprintf( chaine, sizeof(chaine), " | - %s -> %p", key, value );
+    response = Admin_write ( response, chaine );
+    *(gchar **)data = response;
+    return(FALSE);
+  }    
+/******************************************************************************************************************************/
 /* Admin_get: Gere une commande 'admin get' depuis une response admin                                                         */
 /* Entrée: le response et la ligne de commande                                                                                */
 /* Sortie: Néant                                                                                                              */
@@ -39,20 +52,22 @@
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'SET'" );
+     { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'GET'" );
 
-       response = Admin_write ( response, "  e $num                - Get E[$num]" );
-       response = Admin_write ( response, "  ea $num               - Get EA[$num]" );
-       response = Admin_write ( response, "  m $num                - Get M[$num]" );
-       response = Admin_write ( response, "  b $num                - Get B[$num]" );
-       response = Admin_write ( response, "  a $num                - Get A[$num]" );
-       response = Admin_write ( response, "  msg $num              - Get MSG[$num]" );
-       response = Admin_write ( response, "  tr $num               - Get TR[$num]" );
-       response = Admin_write ( response, "  i $num                - Get I[$num]" );
-       response = Admin_write ( response, "  ci $num               - Get CI[$num]" );
-       response = Admin_write ( response, "  ch $num               - Get CH[$num]" );
-       response = Admin_write ( response, "  r $num                - Get Registre $num _R[$num]" );
-       response = Admin_write ( response, "  help                  - This help" );
+       response = Admin_write ( response, " | - new_b $name $owner    - Get bistable $name_$owner" );
+       response = Admin_write ( response, " | - list                  - List all running bits" );
+       response = Admin_write ( response, " | - e $num                - Get E[$num]" );
+       response = Admin_write ( response, " | - ea $num               - Get EA[$num]" );
+       response = Admin_write ( response, " | - m $num                - Get M[$num]" );
+       response = Admin_write ( response, " | - b $num                - Get B[$num]" );
+       response = Admin_write ( response, " | - a $num                - Get A[$num]" );
+       response = Admin_write ( response, " | - msg $num              - Get MSG[$num]" );
+       response = Admin_write ( response, " | - tr $num               - Get TR[$num]" );
+       response = Admin_write ( response, " | - i $num                - Get I[$num]" );
+       response = Admin_write ( response, " | - ci $num               - Get CI[$num]" );
+       response = Admin_write ( response, " | - ch $num               - Get CH[$num]" );
+       response = Admin_write ( response, " | - r $num                - Get Registre $num _R[$num]" );
+       response = Admin_write ( response, " | - help                  - This help" );
      } else
     if ( ! strcmp ( commande, "t" ) )
      { int num;
@@ -105,6 +120,9 @@
        g_snprintf( chaine, sizeof(chaine), " | - M%03d = %d", num, M(num) );
        response = Admin_write ( response, chaine );
      } else
+    if ( ! strcmp ( commande, "list" ) )
+     { g_tree_foreach ( Partage->com_dls.Dls_data, (GTraverseFunc)Admin_get_list, &response );
+     } else
     if ( ! strcmp ( commande, "e" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
@@ -142,6 +160,13 @@
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " | - B%03d = %d", num, B(num) );
+       response = Admin_write ( response, chaine );
+     } else
+    if ( ! strcmp ( commande, "new_b" ) )
+     { gchar nom[80], owner[80];
+       if (sscanf ( ligne, "%s %s %s", commande, nom, owner ) == 3)                      /* Découpage de la ligne de commande */
+        { g_snprintf( chaine, sizeof(chaine), " | - %s_%s = %d", nom, owner, Dls_data_get_bool ( nom, owner, NULL ) ); }
+       else { g_snprintf( chaine, sizeof(chaine), " | - Wrong number of parameters" ); }
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "a" ) )

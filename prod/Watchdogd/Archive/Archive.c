@@ -169,14 +169,14 @@
           Partage->com_arch.Thread_reload = FALSE;
         }
 
-       if (Partage->com_arch.Thread_sigusr1)                                                          /* On a recu sigusr1 ?? */
+       if (Partage->com_arch.Thread_reload)                                                          /* On a recu reload ?? */
         { Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Run_arch: SIGUSR1" );
           pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
           Info_new( Config.log, Config.log_arch, LOG_INFO,
                    "Run_arch: Reste %03d a traiter",
                     g_slist_length(Partage->com_arch.liste_arch) );
           pthread_mutex_unlock( &Partage->com_arch.synchro );
-          Partage->com_arch.Thread_sigusr1 = FALSE;
+          Partage->com_arch.Thread_reload = FALSE;
           Arch_Lire_config();
         }
 

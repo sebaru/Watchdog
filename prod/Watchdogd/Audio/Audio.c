@@ -50,22 +50,21 @@
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                "Audio_Lire_config: Database connexion failed. Using Default Parameters" );
+                "%s: Database connexion failed. Using Default Parameters", __func__ );
        return(FALSE);
      }
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO,                                           /* Print Config */
-                "Audio_Lire_config: '%s' = %s", nom, valeur );
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "%s: '%s' = %s", __func__, nom, valeur ); /* Print Config */
             if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_audio.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_audio.lib->Thread_debug = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "language" ) )
-        { g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", valeur ); }
+        { g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", __func__, valeur ); }
        else
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,
-                   "Audio_Lire_config: Unknown Parameter '%s'(='%s') in Database", nom, valeur );
+                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
         }
      }
     return(TRUE);
@@ -82,21 +81,21 @@
     pid = fork();
     if (pid<0)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "Jouer_wav: APLAY '%s' fork failed pid=%d", fichier, pid );
+                "%s: APLAY '%s' fork failed pid=%d", __func__, fichier, pid );
      }
     else if (!pid)
      { execlp( "aplay", "aplay", "-R", "1", fichier, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "Jouer_wav: APLAY '%s' exec failed pid=%d", fichier, pid );
+                "%s: APLAY '%s' exec failed pid=%d", __func__, fichier, pid );
        _exit(0);
      }
     else
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                "Jouer_wav: APLAY '%s' waiting to finish pid=%d (%s)", fichier, pid, strerror(errno) );
+                "%s: APLAY '%s' waiting to finish pid=%d", __func__, fichier, pid );
        waitpid(pid, NULL, 0 );
      }
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-             "Jouer_wav: APLAY '%s' finished pid=%d", fichier, pid );
+             "%s: APLAY '%s' finished pid=%d", __func__, fichier, pid );
   }
 /******************************************************************************************************************************/
 /* Jouer_mp3 : Joue un fichier mp3 et attend la fin de la diffusion                                                           */
@@ -212,10 +211,10 @@
        struct MSRV_EVENT *event;
        void *payload;
 
-       if (Cfg_audio.lib->Thread_sigusr1)                                                             /* On a recu sigusr1 ?? */
+       if (Cfg_audio.lib->Thread_reload)                                                             /* On a recu reload ?? */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
           Audio_Lire_config();
-          Cfg_audio.lib->Thread_sigusr1 = FALSE;
+          Cfg_audio.lib->Thread_reload = FALSE;
         }
 
        if (Cfg_audio.last_audio + 100 < Partage->top)                                /* Au bout de 10 secondes sans diffusion */
@@ -233,11 +232,12 @@
         }
 
        if (Recv_zmq_with_tag ( zmq_master, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
-        { if ( strcmp( event->instance, g_get_host_name() ) && strcmp (event->instance, "*") ) break;
-          if ( strcmp( event->thread, NOM_THREAD ) && strcmp ( event->thread, "*" ) ) break;
-
-          Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                   "%s : Reception d'un message du master : %s", __func__, (gchar *)payload );
+        { if ( !strcmp( event->instance, g_get_host_name() ) || !strcmp (event->instance, "*") )
+           { if ( !strcmp( event->thread, NOM_THREAD ) || !strcmp ( event->thread, "*" ) )
+              { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+                          "%s : Reception d'un message du master : %s", __func__, (gchar *)payload );
+              }
+           }
         }
 
        if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) )

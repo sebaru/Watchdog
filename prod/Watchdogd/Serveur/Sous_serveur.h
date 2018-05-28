@@ -119,7 +119,6 @@
                                                 struct CMD_TYPE_UTILISATEUR *rezo_util );
 
  extern void *Envoyer_plugins_dls_thread ( struct CLIENT *client );                                       /* Dans envoi_dls.c */
- extern void *Envoyer_plugins_dls_pour_mnemo_thread ( struct CLIENT *client );
  extern void *Envoyer_plugins_dls_pour_message_thread ( struct CLIENT *client );
  extern void Proto_effacer_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );
  extern void Proto_ajouter_plugin_dls ( struct CLIENT *client, struct CMD_TYPE_PLUGIN_DLS *rezo_dls );

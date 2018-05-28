@@ -129,10 +129,25 @@
     gint  posy;
   };
 
+ struct CMD_TYPE_SYN_VARS
+  { gint syn_id;
+    gboolean bit_comm_out;
+    gboolean bit_defaut;
+    gboolean bit_defaut_fixe;
+    gboolean bit_alarme;
+    gboolean bit_alarme_fixe;
+    gboolean bit_veille_partielle;
+    gboolean bit_veille_totale;
+    gboolean bit_alerte;
+    gboolean bit_alerte_fixe;
+    gboolean bit_derangement;
+    gboolean bit_danger;
+  };
+
 /******************************************************* Tag de communication *************************************************/
  enum 
-  { SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE,  /* Envoi des groupes pour l'edition motif */
-    SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE_FIN,            /* Le transfert est terminé */
+  { SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE,                      /* Envoi des groupes pour l'edition motif */
+    SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE_FIN,                                /* Le transfert est terminé */
 
     SSTAG_CLIENT_ATELIER_SYNOPTIQUE,                                     /* Le client desire editer par atelier le synoptique */
     SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF,                             /* Le serveur envoi des motifs dans l'atelier client */

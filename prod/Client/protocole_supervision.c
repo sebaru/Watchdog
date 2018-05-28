@@ -60,6 +60,12 @@
                Proto_changer_etat_motif( change_motif );
              }
             break;
+       case SSTAG_SERVEUR_SUPERVISION_SET_SYN_VARS:
+             { struct CMD_TYPE_SYN_VARS *syn_vars;
+               syn_vars = (struct CMD_TYPE_SYN_VARS *)connexion->donnees;
+               Proto_set_syn_vars( syn_vars );
+             }
+            break;
        case SSTAG_SERVEUR_SUPERVISION_CHANGE_CADRAN:
              { struct CMD_ETAT_BIT_CADRAN *change_cadran;
                change_cadran = (struct CMD_ETAT_BIT_CADRAN *)connexion->donnees;

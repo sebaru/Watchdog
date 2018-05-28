@@ -236,7 +236,7 @@
        case SIGBUS:  Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGBUS" ); break;
        case SIGIO:   Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGIO" ); break;
        case SIGUSR1: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGUSR1: dumping infos" );
-                     Partage->com_msrv.Thread_sigusr1 = TRUE;
+                     Partage->com_msrv.Thread_reload = TRUE;
                      break;
        case SIGUSR2: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGUSR2: Reloading THREAD in progress" );
                      Partage->com_msrv.Thread_reload = TRUE;
@@ -256,11 +256,11 @@
     Updater_cpt_impDB();                                                              /* Sauvegarde des compteurs d'impulsion */
   }
 /******************************************************************************************************************************/
-/* Tatiter_sigusr1 : Print les variable importante dans les lgos                                                              */
+/* Tatiter_reload : Print les variable importante dans les lgos                                                              */
 /* Entrée : Néant                                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Traiter_sigusr1 ( void )
+ static void Traiter_reload ( void )
   { guint nbr_i, nbr_msg, nbr_msg_repeat;
     gchar chaine[256];
 
@@ -315,7 +315,27 @@
        zmq_from_master = New_zmq ( ZMQ_SUB, "listen-to-master" );
        Connect_zmq ( zmq_from_master, "tcp", Config.master_host, 5555 );
      }
+/***************************************** Demarrage des threads builtin et librairies ****************************************/
+    if (Config.single == FALSE)                                                                    /* Si demarrage des thread */
+     { if (!Config.instance_is_master)
+        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Arch Thread is administratively DOWN (instance is not Master)" ); }
+       else if (!Demarrer_arch())                                                              /* Demarrage gestion Archivage */
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb ARCH" ); }
 
+       if (!Config.instance_is_master)
+        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "D.L.S Thread is administratively DOWN (instance is not Master)" ); }
+       else if (!Demarrer_dls())                                                                          /* Démarrage D.L.S. */
+        { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb DLS" ); }
+
+       Charger_librairies();                                                  /* Chargement de toutes les librairies Watchdog */
+     }
+    else
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "NOT starting threads (single mode=true)" ); }
+
+    if (!Demarrer_admin())                                                                                 /* Démarrage ADMIN */
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Pb Admin -> Arret" ); }
+
+/***************************************** Debut de la boucle sans fin ********************************************************/
     cpt_5_minutes = Partage->top + 3000;
     cpt_1_minute  = Partage->top + 600;
 
@@ -325,7 +345,6 @@
      { Gerer_arrive_MSGxxx_dls();                                 /* Redistrib des messages DLS vers les clients + Historique */ 
        Gerer_arrive_Ixxx_dls();                                                 /* Distribution des changements d'etats motif */
        Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
-       Gerer_arrive_Events();                                       /* Gestion des evenements entre Thread, DLS, et satellite */
 
        if (Config.instance_is_master == TRUE)                                     /* Instance is master : listening to slaves */
         { struct MSRV_EVENT *event;
@@ -391,24 +410,24 @@
           Partage->com_msrv.Thread_reload      = FALSE;                                                 /* signal traité. RAZ */
         }
 
-       if (Partage->com_msrv.Thread_sigusr1)                                                          /* On a recu sigusr1 ?? */
+       if (Partage->com_msrv.Thread_reload)                                                          /* On a recu reload ?? */
         { struct LIBRAIRIE *lib;
           GSList *liste;
 
           Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: SIGUSR1", __func__ );
-          Partage->com_dls.Thread_sigusr1       = TRUE;
-          Partage->com_arch.Thread_sigusr1      = TRUE;
-          Partage->com_admin.Thread_sigusr1     = TRUE;
+          Partage->com_dls.Thread_reload       = TRUE;
+          Partage->com_arch.Thread_reload      = TRUE;
+          Partage->com_admin.Thread_reload     = TRUE;
 
           liste = Partage->com_msrv.Librairies;                                          /* Parcours de toutes les librairies */
           while(liste)
            { lib = (struct LIBRAIRIE *)liste->data;
-             lib->Thread_sigusr1 = TRUE;
+             lib->Thread_reload = TRUE;
              liste = liste->next;
            }
 
-          Traiter_sigusr1();                                         /* Appel de la fonction pour traiter le signal pour MSRV */
-          Partage->com_msrv.Thread_sigusr1      = FALSE;
+          Traiter_reload();                                         /* Appel de la fonction pour traiter le signal pour MSRV */
+          Partage->com_msrv.Thread_reload      = FALSE;
         }
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
@@ -429,6 +448,8 @@
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/ 
     Sauver_compteur();                                                                     /* Dernière sauvegarde avant arret */
+    Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
+    Stopper_fils(TRUE);                                                                    /* Arret de tous les fils watchdog */
     Close_zmq ( Partage->com_msrv.zmq_msg );
     Close_zmq ( Partage->com_msrv.zmq_motif );
     Close_zmq ( Partage->com_msrv.zmq_to_threads );
@@ -508,36 +529,31 @@
 
     pwd = getpwnam ( Config.run_as );
     if (!pwd)
-     { printf("Error, user '%s' not found in /etc/passwd (%s).. Could not set run_as user\n",
-              Config.run_as, strerror(errno) );
+     { printf("Error, user '%s' not found in /etc/passwd (%s).. Could not set run_as user\n", Config.run_as, strerror(errno) );
        exit(EXIT_ERREUR);
      }
     else printf("User '%s' (uid %d) found.\n", Config.run_as, pwd->pw_uid);
 
     old = getpwuid ( getuid() );
     if (!old)
-     { printf("Error, actual user '%d' not found in /etc/passwd (%s).. Could not set run_as user\n",
-              getuid(), strerror(errno) );
+     { printf("Error, actual user '%d' not found in /etc/passwd (%s).. Could not set run_as user\n", getuid(), strerror(errno) );
        exit(EXIT_ERREUR);
      }
     
     if (old->pw_uid != pwd->pw_uid)                                                      /* Besoin de changer d'utilisateur ? */
      { printf("Dropping privileges '%s' (%d) -> '%s' (%d).\n", old->pw_name, old->pw_uid, pwd->pw_name, pwd->pw_uid );
        if (initgroups ( Config.run_as, pwd->pw_gid )==-1)                                           /* On drop les privilèges */
-        { printf("Error, cannot Initgroups for user '%s' (%s)\n",
-                 Config.run_as, strerror(errno) );
+        { printf("Error, cannot Initgroups for user '%s' (%s)\n", Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
         }
 
        if (setgid ( pwd->pw_gid )==-1)                                                              /* On drop les privilèges */
-        { printf("Error, cannot setGID for user '%s' (%s)\n",
-                 Config.run_as, strerror(errno) );
+        { printf("Error, cannot setGID for user '%s' (%s)\n", Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
         }
 
        if (setuid ( pwd->pw_uid )==-1)                                                              /* On drop les privilèges */
-        { printf("Error, cannot setUID for user '%s' (%s)\n",
-                 Config.run_as, strerror(errno) );
+        { printf("Error, cannot setUID for user '%s' (%s)\n", Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
         }
      }
@@ -617,50 +633,32 @@
        pthread_mutex_init( &Partage->com_msrv.synchro, &attr );
        pthread_mutex_init( &Partage->com_dls.synchro, &attr );
        pthread_mutex_init( &Partage->com_dls.synchro_traduction, &attr );
+       pthread_mutex_init( &Partage->com_dls.synchro_data, &attr );
        pthread_mutex_init( &Partage->com_arch.synchro, &attr );
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
        pthread_mutex_init( &Partage->com_db.synchro, &attr );
 
-       sigfillset (&sig.sa_mask);                             /* Par défaut tous les signaux sont bloqués */
+       sigfillset (&sig.sa_mask);                                                 /* Par défaut tous les signaux sont bloqués */
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
        if (!import)
-        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "Clear Histo" );
-          Clear_histoDB ();                                            /* Clear de la table histo au boot */
-          Info_new( Config.log, Config.log_msrv, LOG_INFO, "Clear Histo done" );
-        } else Info_new( Config.log, Config.log_msrv, LOG_INFO, "Import => pas de clear histo" );
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Clear Histo", __func__ );
+          Clear_histoDB ();                                                                /* Clear de la table histo au boot */
+          Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Clear Histo done", __func__ );
+        } else Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Import => pas de clear histo", __func__ );
 
-       Update_database_schema();                                /* Update du schéma de Database si besoin */
-       Charger_config_bit_interne ();     /* Chargement des configurations des bits internes depuis la DB */
+       Update_database_schema();                                                    /* Update du schéma de Database si besoin */
+       Charger_config_bit_interne ();                         /* Chargement des configurations des bits internes depuis la DB */
 
-       Partage->zmq_ctx = zmq_ctx_new ();                                                   /* Initialisation du context d'echange ZMQ */
+       Partage->zmq_ctx = zmq_ctx_new ();                                          /* Initialisation du context d'echange ZMQ */
        if (!Partage->zmq_ctx)
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Init ZMQ Context Failed (%s)", __func__, zmq_strerror(errno) ); }
        else
         { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Init ZMQ Context OK", __func__ ); }
 
-       if (Config.single == FALSE)                                                                 /* Si demarrage des thread */
-        { if (!Config.instance_is_master)
-           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Arch Thread is administratively DOWN (instance is not Master)" ); }
-          else if (!Demarrer_arch())                                            /* Demarrage gestion Archivage */
-           { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb ARCH" ); }
-
-          if (!Config.instance_is_master)
-           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "D.L.S Thread is administratively DOWN (instance is not Master)" ); }
-          else if (!Demarrer_dls())                                                        /* Démarrage D.L.S. */
-           { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb DLS" ); }
-
-          Charger_librairies();                           /* Chargement de toutes les librairies Watchdog */
-        }
-       else
-        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "NOT starting threads (single mode=true)" ); }
-
-       if (!Demarrer_admin())                                                          /* Démarrage ADMIN */
-        { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Pb Admin -> Arret" ); }
-
        if ( pthread_create( &TID, NULL, (void *)Boucle_pere, NULL ) )
         { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                   "Demarrage boucle sans fin pthread_create failed %s", strerror(errno) );
+                   "%s: Demarrage boucle sans fin pthread_create failed %s", __func__, strerror(errno) );
         }
 
                                                          /********** Mise en place de la gestion des signaux ******************/
@@ -688,8 +686,6 @@
        setitimer( ITIMER_REAL, &timer, NULL );                                                             /* Active le timer */
 
        pthread_join( TID, NULL );                                                       /* Attente fin de la boucle pere MSRV */
-       Decharger_librairies();                                                /* Déchargement de toutes les librairies filles */
-       Stopper_fils(TRUE);                                                                 /* Arret de tous les fils watchdog */
        zmq_ctx_term( Partage->zmq_ctx );
        zmq_ctx_destroy( Partage->zmq_ctx );
      }
@@ -697,6 +693,7 @@
     pthread_mutex_destroy( &Partage->com_msrv.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro );
     pthread_mutex_destroy( &Partage->com_dls.synchro_traduction );
+    pthread_mutex_destroy( &Partage->com_dls.synchro_data );
     pthread_mutex_destroy( &Partage->com_arch.synchro );
     pthread_mutex_destroy( &Partage->com_admin.synchro );
     pthread_mutex_destroy( &Partage->com_db.synchro );

@@ -35,13 +35,13 @@
 /**********************************************************************************************************/
  static gchar *Admin_imsg_reload ( gchar *response )
   { if (Cfg_imsg.lib->Thread_run == FALSE)
-     { response = Admin_write ( response, " Thread IMSG is not running\n" );
+     { response = Admin_write ( response, " Thread IMSG is not running" );
        return(response);
      }
     
     Cfg_imsg.reload = TRUE;
     while (Cfg_imsg.reload) sched_yield();
-    response = Admin_write ( response, " IMSG Reloading done\n" );
+    response = Admin_write ( response, " IMSG Reloading done" );
     return(response);
   }
 /**********************************************************************************************************/
@@ -76,7 +76,7 @@
     gchar chaine[256];
     struct DB *db;
 
-    g_snprintf( chaine, sizeof(chaine), " -- Liste des Contacts IMSG\n" );
+    g_snprintf( chaine, sizeof(chaine), " -- Liste des Contacts IMSG" );
     response = Admin_write ( response, chaine );
 
     db = Init_DB_SQL();       
@@ -114,7 +114,7 @@
      { gchar to[256];
        sscanf ( ligne, "%s %s", commande, to );                      /* Découpage de la ligne de commande */
        Imsg_Envoi_message_to ( to, ligne + strlen (to) + 6 );
-       g_snprintf( chaine, sizeof(chaine), " Message '%s' send to %s\n", ligne + strlen (to) + 6, to );
+       g_snprintf( chaine, sizeof(chaine), " Message '%s' send to %s", ligne + strlen (to) + 6, to );
        response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "list" ) )
@@ -128,55 +128,47 @@
           state =  lm_connection_get_state ( Cfg_imsg.connection );
           switch (state)
            { case LM_CONNECTION_STATE_CLOSED:
-                  g_snprintf( chaine, sizeof(chaine), " response closed.\n"); break;
+                  g_snprintf( chaine, sizeof(chaine), " response closed."); break;
              case LM_CONNECTION_STATE_OPENING:
-                  g_snprintf( chaine, sizeof(chaine), " response is opening.\n"); break;
+                  g_snprintf( chaine, sizeof(chaine), " response is opening."); break;
              case LM_CONNECTION_STATE_OPEN:
-                  g_snprintf( chaine, sizeof(chaine), " response opened.\n"); break;
+                  g_snprintf( chaine, sizeof(chaine), " response opened."); break;
              case LM_CONNECTION_STATE_AUTHENTICATING:
-                  g_snprintf( chaine, sizeof(chaine), " response is authenticating.\n"); break;
+                  g_snprintf( chaine, sizeof(chaine), " response is authenticating."); break;
              case LM_CONNECTION_STATE_AUTHENTICATED:
-                  g_snprintf( chaine, sizeof(chaine), " response authenticated (OK).\n"); break;
+                  g_snprintf( chaine, sizeof(chaine), " response authenticated (OK)."); break;
              default:
-                  g_snprintf( chaine, sizeof(chaine), " response Status Unknown.\n"); break;
+                  g_snprintf( chaine, sizeof(chaine), " response Status Unknown."); break;
            }
           response = Admin_write ( response, chaine );
           if (Cfg_imsg.date_retente)
-           { g_snprintf( chaine, sizeof(chaine), " Re-trying in %03ds.\n",
+           { g_snprintf( chaine, sizeof(chaine), " Re-trying in %03ds.",
                          (Cfg_imsg.date_retente - Partage->top)/10);
              response = Admin_write ( response, chaine );
            }
         }
        else 
-        { g_snprintf( chaine, sizeof(chaine), " No response ... strange ! \n" );
+        { g_snprintf( chaine, sizeof(chaine), " No response ... strange !" );
           response = Admin_write ( response, chaine );
         }
      }
     else if ( ! strcmp ( commande, "presence" ) )
      { g_snprintf( Cfg_imsg.new_status, sizeof(Cfg_imsg.new_status), "%s", ligne + 14 );
        Cfg_imsg.set_status = TRUE;
-       g_snprintf( chaine, sizeof(chaine), " Presence Status changed to %s! \n", Cfg_imsg.new_status );
-       response = Admin_write ( response, chaine );
-     }
-    else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { gboolean retour;
-       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
-       retour = Imsg_Lire_config();
-       g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s", (retour ? "Success" : "Failed") );
+       g_snprintf( chaine, sizeof(chaine), " Presence Status changed to %s!", Cfg_imsg.new_status );
        response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'IMSG'\n" );
-       response = Admin_write ( response, "  dbcfg ...                              - Get/Set Database Parameters\n" );
-       response = Admin_write ( response, "  send user@domain/resource message      - Send a message to user\n" );
-       response = Admin_write ( response, "  reload                                 - Reload configuration from Database\n" );
-       response = Admin_write ( response, "  list                                   - List contact and availability\n" );
-       response = Admin_write ( response, "  presence new_status                    - Change Presence to 'new_status'\n" );
-       response = Admin_write ( response, "  status                                 - See response status\n" );
+     { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'IMSG'" );
+       response = Admin_write ( response, "  send user@domain/resource message      - Send a message to user" );
+       response = Admin_write ( response, "  reload                                 - Reload configuration from Database" );
+       response = Admin_write ( response, "  list                                   - List contact and availability" );
+       response = Admin_write ( response, "  presence new_status                    - Change Presence to 'new_status'" );
+       response = Admin_write ( response, "  status                                 - See response status" );
      }
     else
      { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), " Unknown IMSG command : %s\n", ligne );
+       g_snprintf( chaine, sizeof(chaine), " Unknown IMSG command : %s", ligne );
        response = Admin_write ( response, chaine );
      }
    return(response);

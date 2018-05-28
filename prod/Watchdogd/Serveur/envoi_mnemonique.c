@@ -189,12 +189,13 @@
   { struct CMD_TYPE_MNEMONIQUES *mnemos;
     struct CMD_TYPE_MNEMO_BASE *mnemo;
     struct CMD_ENREG nbr;
+    gchar critere[30];
     struct DB *db;
     gint max_enreg;                                                    /* Nombre maximum d'enregistrement dans un bloc reseau */
 
     prctl(PR_SET_NAME, "W-EnvoiMnemo", 0, 0, 0 );
-
-    if ( ! Recuperer_mnemo_baseDB_with_conditions( &db, NULL, -1, -1 ) )
+    g_snprintf( critere, sizeof(critere), "mnemo.dls_id = '%d'", client->mnemo_dls_id_to_send );
+    if ( ! Recuperer_mnemo_baseDB_with_conditions( &db, critere, -1, -1 ) )
      { Unref_client( client );                                                            /* Déréférence la structure cliente */
        return;
      }
@@ -207,8 +208,7 @@
     mnemos = (struct CMD_TYPE_MNEMONIQUES *)g_try_malloc0( Cfg_ssrv.taille_bloc_reseau );    
     if (!mnemos)
      { struct CMD_GTK_MESSAGE erreur;
-       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                 "Envoyer_mnemoniques_tag: Pb d'allocation memoire mnemos" );
+       Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR, "%s: Pb d'allocation memoire mnemos", __func__ );
        g_snprintf( erreur.message, sizeof(erreur.message), "Pb d'allocation memoire" );
        Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );

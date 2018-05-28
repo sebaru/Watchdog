@@ -111,14 +111,6 @@
     Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE, NULL, 0 );
   }
 /**********************************************************************************************************/
-/* Menu_want_mnemonique: l'utilisateur desire editer la base syns                                         */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
- void Menu_want_mnemonique ( void )
-  { if (Chercher_page_notebook( TYPE_PAGE_MNEMONIQUE, 0, TRUE )) return;
-    Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE, NULL, 0 );
-  }
-/**********************************************************************************************************/
 /* Menu_want_histo_msgs: l'utilisateur desire voir l'historique                                           */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/

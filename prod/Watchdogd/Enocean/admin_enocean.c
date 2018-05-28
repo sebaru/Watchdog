@@ -282,17 +282,8 @@
      { Admin_enocean_list ( connexion );
      }
 #endif
-    else if ( ! strcmp ( commande, "dbcfg" ) ) /* Appelle de la fonction dédiée à la gestion des parametres DB */
-     { gboolean retour;
-       response =  Admin_dbcfg_thread ( response, NOM_THREAD, ligne+6 );                        /* Si changement de parametre */
-       retour = Enocean_Lire_config();
-       g_snprintf( chaine, sizeof(chaine), " Reloading Thread Parameters from Database -> %s",
-                   (retour ? "Success" : "Failed") );
-       response = Admin_write ( response, chaine );
-     }
     else if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'ENOCEAN'" );
-       response = Admin_write ( response, "  dbcfg ...      - Get/Set Database Parameters" );
        response = Admin_write ( response, "  status         - Affiche les status de l'equipements ENOCEAN $id" );
      }
     else

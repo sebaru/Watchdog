@@ -51,7 +51,6 @@
     gint taille_arch;
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
-    gboolean Thread_sigusr1;                                                          /* TRUE si le thread doit gerer le USR1 */
     gint  duree_retention;                                              /* Duree de retention des données d'archive, en jours */
     gint  archdb_port;
     gchar archdb_host    [ TAILLE_DB_HOST+1 ];                                  /* Nom du host de la base de donnes d'archive */

@@ -70,7 +70,7 @@
 /* Sortie: -1 si pb, id sinon                                                                                                 */
 /******************************************************************************************************************************/
  static gint Ajouter_Modifier_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls, gint ajout )
-  { gchar *nom, *shortname;
+  { gchar *nom, *shortname, *tech_id;
     gchar requete[1024];
     gboolean retour;
     struct DB *db;
@@ -89,22 +89,31 @@
        return(-1);
      }
 
+    tech_id = Normaliser_chaine ( dls->tech_id );                                            /* Formatage correct des chaines */
+    if (!tech_id)
+     { g_free(nom);
+        g_free(shortname);
+       Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: Normalisation shortname impossible", __func__ );
+       return(-1);
+     }
+
     if (ajout)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "INSERT INTO %s"             
-                   "(name,shortname,actif,type,syn_id,compil_date,compil_status,nbr_compil,sourcecode) "
-                   "VALUES ('%s','%s','%d','%d',%d,0,0,0,'/* Source Code */');",
-                   NOM_TABLE_DLS, nom, shortname, dls->on, dls->type, dls->syn_id );
+                   "(name,shortname,tech_id,actif,syn_id,compil_date,compil_status,nbr_compil,sourcecode) "
+                   "VALUES ('%s','%s','%s','%d',%d,0,0,0,'/* Source Code */');",
+                   NOM_TABLE_DLS, nom, shortname, tech_id, dls->on, dls->syn_id );
      }
     else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                   "UPDATE %s SET "             
-                  "name='%s',shortname='%s',actif='%d',type='%d',syn_id=%d WHERE id=%d",
-                   NOM_TABLE_DLS, nom, shortname, dls->on, dls->type, dls->syn_id, dls->id );
+                  "name='%s',shortname='%s',tech_id='%s',actif='%d',syn_id=%d WHERE id=%d",
+                   NOM_TABLE_DLS, nom, shortname, tech_id, dls->on, dls->syn_id, dls->id );
      }
 
     g_free(nom);
     g_free(shortname);
+    g_free(tech_id);
 
     db = Init_DB_SQL();       
     if (!db)
@@ -147,7 +156,7 @@
 /* Entrées: un log, une db                                                                                                    */
 /* Sortie: une hquery, null si erreur                                                                                         */
 /******************************************************************************************************************************/
- gboolean Recuperer_plugins_dlsDB( struct DB **db_retour )
+ static gboolean Recuperer_plugins_dlsDB_with_conditions( struct DB **db_retour, gchar *conditions )
   { gchar requete[512];
     gboolean retour;
     struct DB *db;
@@ -160,16 +169,34 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.type,dls.syn_id,parent_syn.page,syn.page,"
-                "dls.compil_date,dls.compil_status,dls.nbr_compil"
-                " FROM %s as dls INNER JOIN %s as syn ON dls.syn_id = syn.id "
-                " INNER JOIN %s AS parent_syn ON parent_syn.id=syn.parent_id"
-                " ORDER BY parent_syn.page,syn.page,shortname",
-                NOM_TABLE_DLS, NOM_TABLE_SYNOPTIQUE, NOM_TABLE_SYNOPTIQUE
+                "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id"
+                " FROM dls INNER JOIN syns as syn ON dls.syn_id = syn.id "
+                " INNER JOIN syns AS parent_syn ON parent_syn.id=syn.parent_id"
+                " %s "
+                " ORDER BY parent_syn.page,syn.page,dls.shortname",
+                (conditions ? conditions : " ")
               );
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if (retour == FALSE) Libere_DB_SQL (&db);
     *db_retour = db;
     return ( retour );
+  }
+/******************************************************************************************************************************/
+/* Recuperer_plugins_dlsDB: Recuperation de tous les plugins D.L.S                                                            */
+/* Entrées: un log, une db                                                                                                    */
+/* Sortie: une hquery, null si erreur                                                                                         */
+/******************************************************************************************************************************/
+ gboolean Recuperer_plugins_dlsDB( struct DB **db_retour )
+  { return( Recuperer_plugins_dlsDB_with_conditions ( db_retour, NULL ) ); }
+/******************************************************************************************************************************/
+/* Recuperer_plugins_dlsDB: Recuperation de tous les plugins D.L.S                                                            */
+/* Entrées: un log, une db                                                                                                    */
+/* Sortie: une hquery, null si erreur                                                                                         */
+/******************************************************************************************************************************/
+ gboolean Recuperer_plugins_dlsDB_by_syn( struct DB **db_retour, gint syn_id )
+  { gchar chaine[80];
+    g_snprintf( chaine, sizeof(chaine), "WHERE syn.id=%d", syn_id );
+    return( Recuperer_plugins_dlsDB_with_conditions ( db_retour, chaine ) );
   }
 /******************************************************************************************************************************/
 /* Recuperer_plugins_dlsDB_suite: poursuite de la recherche des plugins DLS                                                   */
@@ -192,10 +219,11 @@
     if (!dls) Info_new( Config.log, Config.log_dls, LOG_ERR,
                        "%s: Erreur allocation mémoire", __func__ );
     else
-     { memcpy( &dls->nom,      db->row[1], sizeof(dls->nom       ) );                            /* Recopie dans la structure */
-       memcpy( &dls->shortname,db->row[2], sizeof(dls->shortname ) );                            /* Recopie dans la structure */
-       memcpy( &dls->syn_parent_page,db->row[6], sizeof(dls->syn_parent_page) );
-       memcpy( &dls->syn_page,  db->row[7], sizeof(dls->syn_page   ) );
+     { g_snprintf( dls->tech_id, sizeof(dls->tech_id), "%s", db->row[11] );
+       g_snprintf( dls->nom, sizeof(dls->nom), "%s", db->row[1] );
+       g_snprintf( dls->shortname, sizeof(dls->shortname), "%s", db->row[2] );
+       g_snprintf( dls->syn_parent_page, sizeof(dls->syn_parent_page), "%s", db->row[6] );
+       g_snprintf( dls->syn_page, sizeof(dls->syn_page), "%s", db->row[7] );
        dls->id            = atoi(db->row[0]);
        dls->on            = atoi(db->row[3]);
        dls->type          = atoi(db->row[4]);
@@ -218,13 +246,13 @@
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_plugin_dlsDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.type,dls.syn_id,parent_syn.page,syn.page,"
-                "dls.compil_date,dls.compil_status,dls.nbr_compil"
+                "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id"
                 " FROM %s as dls INNER JOIN %s as syn ON dls.syn_id = syn.id "
                 " INNER JOIN %s AS parent_syn ON parent_syn.id=syn.parent_id"
                 " WHERE dls.id = %d",

@@ -49,7 +49,9 @@
 
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE:
-             { Envoi_client( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_CREATE_PAGE_MNEMO_OK, NULL, 0 );
+             { struct CMD_TYPE_PLUGIN_DLS *plugin;
+               plugin = (struct CMD_TYPE_PLUGIN_DLS *)connexion->donnees;
+               client->mnemo_dls_id_to_send = plugin->id;
                Ref_client( client, "Send Mnemonique" );
                pthread_create( &tid, NULL, (void *)Envoyer_mnemoniques_thread, client );
                pthread_detach( tid );
@@ -77,12 +79,6 @@
              { struct CMD_TYPE_MNEMO_FULL *mnemo;
                mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
                Proto_valider_editer_mnemonique( client, mnemo );
-             }
-            break;
-       case SSTAG_CLIENT_WANT_DLS_FOR_MNEMO:
-             { Ref_client( client, "Send DLS for mnemo" );
-               pthread_create( &tid, NULL, (void *)Envoyer_plugins_dls_pour_mnemo_thread, client );
-               pthread_detach( tid );
              }
             break;
      }

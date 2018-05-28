@@ -33,40 +33,105 @@
 /* Entrée: la response                                                                                                       */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static gchar *Admin_dls_reload ( gchar *response )
-  { Partage->com_dls.Thread_reload = TRUE;
+ static gchar *Admin_dls_reload ( gchar *response_src )
+  { gchar *response = response_src;
+    Partage->com_dls.Thread_reload = TRUE;
     while (Partage->com_dls.Thread_reload) sched_yield();
     return(Admin_write ( response, " | - DLS Reload done" ));
+  }
+/******************************************************************************************************************************/
+/* Admin_dls_list_dls_tree: Print la liste des plugins dls actif ou non sur un dls_tree donné                                 */
+/* Entrée: La response                                                                                                        */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static gchar *Admin_dls_list_dls_tree ( gchar *response_src, struct DLS_TREE *dls_tree )
+  { gchar *response = response_src;
+    GSList *liste;
+    gchar chaine[128];
+
+    liste = dls_tree->Liste_plugin_dls;
+    while(liste)                                                                            /* Liberation mémoire des modules */
+     { struct PLUGIN_DLS *dls;
+       struct tm *temps;
+       gchar date[80];
+       dls = (struct PLUGIN_DLS *)liste->data;
+
+       temps = localtime( (time_t *)&dls->start_date );
+       if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
+       else       { g_snprintf( date, sizeof(date), "Erreur" ); }
+
+       g_snprintf( chaine, sizeof(chaine), " | - SYN[%05d] - DLS[%06d] -> started=%d, start_date=%s, debug=%d, conso=%08.03f, nom=%s",
+                   dls_tree->syn_vars.syn_id, dls->plugindb.id, dls->plugindb.on, date, dls->debug, dls->conso, dls->plugindb.shortname );
+       response = Admin_write ( response, chaine );
+       g_snprintf( chaine, sizeof(chaine), " |                   comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d, der=%d, dan=%d",
+                   dls->vars.bit_comm_out, dls->vars.bit_defaut, dls->vars.bit_alarme,
+                   dls->vars.bit_veille_partielle, dls->vars.bit_veille_totale, dls->vars.bit_alerte,
+                   dls->vars.bit_derangement, dls->vars.bit_danger );
+       response = Admin_write ( response, chaine );
+       liste = liste->next;
+     }
+
+    liste = dls_tree->Liste_dls_tree;
+    while (liste)
+     { struct DLS_TREE *sub_dls_tree = liste->data;
+       response = Admin_dls_list_dls_tree ( response, sub_dls_tree );
+       liste = liste->next;
+     }
+    return(response);
   }
 /******************************************************************************************************************************/
 /* Admin_dls_list: Print la liste des plugins dls actif ou non, mais chargés                                                  */
 /* Entrée: La response                                                                                                       */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static gchar *Admin_dls_list ( gchar *response )
-  { GSList *liste_dls;
+ static gchar *Admin_dls_list ( gchar *response_src )
+  { gchar *response = response_src;
+    GSList *liste_dls;
     gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " | -- Liste des modules D.L.S" );
     response = Admin_write ( response, chaine );
      
     pthread_mutex_lock( &Partage->com_dls.synchro );
-    liste_dls = Partage->com_dls.Plugins;
-    while ( liste_dls )
-     { struct PLUGIN_DLS *dls;
-       struct tm *temps;
-       gchar date[80];
-       dls = (struct PLUGIN_DLS *)liste_dls->data;
-       temps = localtime( (time_t *)&dls->start_date );
-       if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
-       else       { g_snprintf( date, sizeof(date), "Erreur" ); }
-
-       g_snprintf( chaine, sizeof(chaine), " | - DLS[%06d] -> actif=%d, start=%s, debug=%d, conso=%08.03f, nom=%s",
-                   dls->plugindb.id, dls->plugindb.on, date, dls->debug, dls->conso, dls->plugindb.nom );
-       response = Admin_write ( response, chaine );
-       liste_dls = liste_dls->next;
-     }
+    response = Admin_dls_list_dls_tree ( response, Partage->com_dls.Dls_tree );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
+    return(response);
+  }
+/******************************************************************************************************************************/
+/* Admin_dls_gcc_dls_tree: Print la liste des plugins dls actif ou non sur un dls_tree donné                                  */
+/* Entrée: La response                                                                                                        */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static gchar *Admin_dls_gcc_dls_tree ( gchar *response_src, gint id, struct DLS_TREE *dls_tree )
+  { gchar chaine[256], buffer[1024];
+    gchar *response = response_src;
+    GSList *liste;
+
+    response = response_src;
+    if(id==-1)
+     { liste = dls_tree->Liste_plugin_dls;
+       while(liste)                                                                         /* Liberation mémoire des modules */
+        { struct PLUGIN_DLS *dls;
+          dls = (struct PLUGIN_DLS *)liste->data;
+
+          Compiler_source_dls ( FALSE, dls->plugindb.id, buffer, sizeof(buffer) );
+          g_snprintf( chaine, sizeof(chaine), " | - Compilation du DLS[%06d] done (no reset): %s", dls->plugindb.id, buffer );
+          response = Admin_write ( response, chaine );
+          liste = liste->next;
+        }
+
+       liste = dls_tree->Liste_dls_tree;
+       while (liste)
+        { struct DLS_TREE *sub_dls_tree = liste->data;
+          response = Admin_dls_gcc_dls_tree ( response, id, sub_dls_tree );
+          liste = liste->next;
+        }
+     }
+    else
+     { Compiler_source_dls ( FALSE, id, buffer, sizeof(buffer) );
+       g_snprintf( chaine, sizeof(chaine), " | - Compilation du DLS[%06d] done (no reset): %s", id, buffer );
+       response = Admin_write ( response, chaine );
+     }
     return(response);
   }
 /******************************************************************************************************************************/
@@ -74,31 +139,16 @@
 /* Entrée: Le buffer a compléter, l'id du plugin                                                                              */
 /* Sortie: Le buffer complété                                                                                                 */
 /******************************************************************************************************************************/
- static gchar *Admin_dls_gcc ( gchar *response, gint id )
-  { GSList *liste_dls;
-    gchar chaine[256], buffer[1024];
-
+ static gchar *Admin_dls_gcc ( gchar *response_src, gint id )
+  { gchar *response;
+    gchar chaine[256];
+    
     g_snprintf( chaine, sizeof(chaine), " | -- Compilation des plugins D.L.S" );
-    response = Admin_write ( response, chaine );
+    response = Admin_write ( response_src, chaine );
 
-    if (id == -1)
-     { pthread_mutex_lock( &Partage->com_dls.synchro );                                                      /* Lock du mutex */
-       liste_dls = Partage->com_dls.Plugins;
-       while ( liste_dls )
-        { struct PLUGIN_DLS *dls;
-          dls = (struct PLUGIN_DLS *)liste_dls->data;
-
-          Compiler_source_dls ( FALSE, dls->plugindb.id, buffer, sizeof(buffer) );
-          g_snprintf( chaine, sizeof(chaine), " | - Compilation du DLS[%06d] done (no reset): %s", dls->plugindb.id, buffer );
-          response = Admin_write ( response, chaine );
-          liste_dls = liste_dls->next;
-        }
-       pthread_mutex_unlock( &Partage->com_dls.synchro );
-     } else
-        { Compiler_source_dls ( FALSE, id, buffer, sizeof(buffer) );
-          g_snprintf( chaine, sizeof(chaine), " | - Compilation du DLS[%06d] done (no reset): %s", id, buffer );
-          response = Admin_write ( response, chaine );
-        }
+    pthread_mutex_lock( &Partage->com_dls.synchro );                                                         /* Lock du mutex */
+    response = Admin_dls_gcc_dls_tree( response, id, Partage->com_dls.Dls_tree );
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
     return(response);
   }
 /******************************************************************************************************************************/
@@ -106,8 +156,9 @@
 /* Entrée: Le buffer a compléter, l'id du plugin                                                                              */
 /* Sortie: Le buffer complété                                                                                                 */
 /******************************************************************************************************************************/
- static gchar *Admin_dls_start ( gchar *response, gint id )
+ static gchar *Admin_dls_start ( gchar *response_src, gint id )
   { gchar chaine[128], requete[128];
+    gchar *response = response_src;
     struct DB *db;
 
     g_snprintf( chaine, sizeof(chaine), " | -- Demarrage d'un plugin D.L.S" );
@@ -139,8 +190,33 @@
 /* Entrée: La response, le numéro du plugin, et le statut du debug                                                           */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static gchar *Admin_dls_debug ( gchar *response, gint id, gboolean debug )
-  { gchar chaine[128];
+ static void Admin_dls_debug_dls_tree ( gint id, gboolean debug, struct DLS_TREE *dls_tree )
+  { GSList *liste;
+    liste = dls_tree->Liste_plugin_dls;
+    while(liste)                                                                /* On execute tous les modules un par un */
+     { struct PLUGIN_DLS *plugin_actuel;
+       plugin_actuel = (struct PLUGIN_DLS *)liste->data;
+
+       if (plugin_actuel->plugindb.id == id)
+        { plugin_actuel->debug = debug;
+          return;
+        }
+       liste = liste->next;
+     }
+    liste = dls_tree->Liste_dls_tree;
+    while (liste)
+     { Admin_dls_debug_dls_tree ( id, debug, liste->data );
+       liste = liste->next;
+     }
+ }
+/******************************************************************************************************************************/
+/* Admin_dls_debug: Active ou non le debug du plugin                                                                          */
+/* Entrée: La response, le numéro du plugin, et le statut du debug                                                           */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static gchar *Admin_dls_debug ( gchar *response_src, gint id, gboolean debug )
+  { gchar *response = response_src;
+    gchar chaine[128];
     GSList *liste_dls;
     struct DB *db;
 
@@ -148,17 +224,7 @@
     response = Admin_write ( response, chaine );
 
     pthread_mutex_lock( &Partage->com_dls.synchro );                                                         /* Lock du mutex */
-    liste_dls = Partage->com_dls.Plugins;
-    while ( liste_dls )                                                      /* Recherche du plugin et positionnement du flag */
-     { struct PLUGIN_DLS *dls;
-       dls = (struct PLUGIN_DLS *)liste_dls->data;
-
-       if (dls->plugindb.id == id)
-        { dls->debug = debug;
-          break;
-        }
-       liste_dls=liste_dls->next;
-     }
+    Admin_dls_debug_dls_tree ( id, debug, Partage->com_dls.Dls_tree );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
 
     g_snprintf( chaine, sizeof(chaine), " | - Module DLS: debug set to '%d'", debug );
@@ -169,8 +235,9 @@
 /* Entrée: Le buffer a compléter, l'id du plugin                                                                              */
 /* Sortie: Le buffer complété                                                                                                 */
 /******************************************************************************************************************************/
- static gchar *Admin_dls_stop ( gchar *response, gint id )
-  { gchar chaine[128], requete[128];
+ static gchar *Admin_dls_stop ( gchar *response_src, gint id )
+  { gchar *response = response_src;
+    gchar chaine[128], requete[128];
     struct DB *db;
 
     g_snprintf( chaine, sizeof(chaine), " | -- Arret d'un plugin D.L.S" );
@@ -202,8 +269,9 @@
 /* Entrée: Le buffer a compléter, l'id du plugin                                                                              */
 /* Sortie: Le buffer complété                                                                                                 */
 /******************************************************************************************************************************/
- gchar *Admin_dls ( gchar *response, gchar *ligne )
-  { gchar commande[128];
+ gchar *Admin_dls ( gchar *response_src, gchar *ligne )
+  { gchar *response = response_src;
+    gchar commande[128];
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
 

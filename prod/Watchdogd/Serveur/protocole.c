@@ -68,7 +68,6 @@
                case TAG_ATELIER     : Gerer_protocole_atelier      ( client ); break;
                case TAG_LOWLEVEL      : Gerer_protocole_lowlevel     ( client ); break;
                case TAG_ADMIN       : Gerer_protocole_admin        ( client ); break;
-               case TAG_SATELLITE   : Gerer_protocole_satellite    ( client ); break;
                case TAG_CONNEXION   : if (Reseau_ss_tag(connexion) == SSTAG_CLIENT_SETPASSWORD )
                                        { struct CMD_TYPE_UTILISATEUR *util;
                                          util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;

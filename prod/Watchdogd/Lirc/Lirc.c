@@ -106,9 +106,9 @@
        gchar *c;
        gint ret;
 
-       if (lib->Thread_sigusr1)                                                   /* On a recu sigusr1 ?? */
+       if (lib->Thread_reload)                                                   /* On a recu reload ?? */
         { Info_new( Config.log, Cfg_lirc.lib->Thread_debug, LOG_NOTICE, "Run_lirc: SIGUSR1" );
-          lib->Thread_sigusr1 = FALSE;
+          lib->Thread_reload = FALSE;
         }
 
        if (lirc_nextcode(&code)==0)                          /* Si un code est présent sur le socket lirc */
