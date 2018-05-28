@@ -197,19 +197,14 @@
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Decharger_plugin_by_id_dls_tree ( gint id, struct DLS_TREE *dls_tree )
-  { struct PLUGIN_DLS *plugin;
-    GSList *liste;
+  { GSList *liste;
 
-    liste = dls_tree->Liste_dls_tree;
+    liste = dls_tree->Liste_plugin_dls;
     while(liste)                                                                            /* Liberation mémoire des modules */
-     { plugin = (struct PLUGIN_DLS *)dls_tree->Liste_plugin_dls->data;
+     { struct PLUGIN_DLS *plugin = liste->data;
        if (plugin->plugindb.id == id)
         { dlclose( plugin->handle );
-          Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: taille liste %d", __func__,
-                    g_slist_length( dls_tree->Liste_plugin_dls ) );
           dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
-          Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: taille liste %d", __func__,
-                    g_slist_length( dls_tree->Liste_plugin_dls ) );
                                                                              /* Destruction de l'entete associé dans la GList */
           Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d unloaded (%s)", __func__,
                     plugin->plugindb.id, plugin->plugindb.nom );
@@ -221,7 +216,7 @@
 
     liste = dls_tree->Liste_dls_tree;
     while (liste)
-     { struct DLS_TREE *sub_dls_tree = dls_tree->Liste_dls_tree->data;
+     { struct DLS_TREE *sub_dls_tree = liste->data;
        Decharger_plugin_by_id_dls_tree ( id, sub_dls_tree );
        liste=liste->next;
      }
