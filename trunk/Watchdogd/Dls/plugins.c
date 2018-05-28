@@ -163,6 +163,7 @@
         {
           if (plugin->handle)
            { dlclose( plugin->handle );
+             plugin->plugindb.on = TRUE;                                                           /* On tente de l'allumer ! */
              Charger_un_plugin ( plugin );
              Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d reloaded (%s)", __func__,
                        plugin->plugindb.id, plugin->plugindb.shortname );
@@ -346,7 +347,7 @@
              plugin->conso = 0.0;
              Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: id %06d stopped (%s)", __func__, plugin->plugindb.id, plugin->plugindb.nom );
            }
-          else if (Check_action_bit_use( plugin ) == TRUE )
+          else if (Check_action_bit_use( plugin ) == TRUE)
            { plugin->plugindb.on = TRUE;
              plugin->conso = 0.0;
              plugin->starting = 1;
