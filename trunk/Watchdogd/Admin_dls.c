@@ -147,7 +147,7 @@
     response = Admin_write ( response_src, chaine );
 
     pthread_mutex_lock( &Partage->com_dls.synchro );                                                         /* Lock du mutex */
-    response = Admin_write ( response, Admin_dls_gcc_dls_tree( response, id, Partage->com_dls.Dls_tree ) );
+    response = Admin_dls_gcc_dls_tree( response, id, Partage->com_dls.Dls_tree );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
     return(response);
   }
