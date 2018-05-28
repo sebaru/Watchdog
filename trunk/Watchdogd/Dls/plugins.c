@@ -58,7 +58,8 @@
        critere.num  = dls->Get_Tableau_num(cpt);
        mnemo = Rechercher_mnemo_baseDB_type_num ( &critere );
        Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-                "%s: Test Mnemo %d %d for id %d: mnemo %p", __func__, critere.type, critere.num, dls->plugindb.id, mnemo ); 
+                "%s: Test Mnemo %d %d for id %d: mnemo %p", __func__,
+                 dls->Get_Tableau_bit(cpt), dls->Get_Tableau_num(cpt), dls->plugindb.id, mnemo ); 
        if (!mnemo) return(FALSE);
        dls_id = mnemo->dls_id;
        g_free(mnemo);

@@ -389,8 +389,8 @@
        liste_num=liste_num->next;
      }
     if(!liste_bit)
-     { Liste_Actions_bit = g_slist_prepend ( Liste_Actions_bit, GINT_TO_POINTER(type) );
-       Liste_Actions_num = g_slist_prepend ( Liste_Actions_num, GINT_TO_POINTER(num) );
+     { Liste_Actions_bit = g_slist_append ( Liste_Actions_bit, GINT_TO_POINTER(type) );
+       Liste_Actions_num = g_slist_append ( Liste_Actions_num, GINT_TO_POINTER(num) );
        return(TRUE);
      }
     return(FALSE);
@@ -705,7 +705,7 @@
     rc = fopen( source, "r" );
     if (!rc) retour = TRAD_DLS_ERROR;
     else
-     { DlsScanner_debug = 1;                                                                     /* Debug de la traduction ?? */
+     { DlsScanner_debug = 0;                                                                     /* Debug de la traduction ?? */
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
        fclose(rc);
