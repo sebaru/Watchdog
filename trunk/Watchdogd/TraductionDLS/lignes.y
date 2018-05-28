@@ -372,7 +372,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                    g_snprintf( $$, taille, "Dls_get_top_alerte()" );
                 }}
                 | T_OSYN_ACQ
-                {{ $$ = g_strdup("plugin->vars.bit_acquit");
+                {{ $$ = g_strdup("vars->bit_acquit");
                 }}
                 | barre T_BI ENTIER liste_options
                 {{ $$ = New_condition_bi ( $1, $3, $4 );
