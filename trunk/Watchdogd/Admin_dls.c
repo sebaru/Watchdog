@@ -33,8 +33,9 @@
 /* Entrée: la response                                                                                                       */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static gchar *Admin_dls_reload ( gchar *response )
-  { Partage->com_dls.Thread_reload = TRUE;
+ static gchar *Admin_dls_reload ( gchar *response_src )
+  { gchar *response = response_src;
+    Partage->com_dls.Thread_reload = TRUE;
     while (Partage->com_dls.Thread_reload) sched_yield();
     return(Admin_write ( response, " | - DLS Reload done" ));
   }
@@ -43,8 +44,9 @@
 /* Entrée: La response                                                                                                        */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static gchar *Admin_dls_list_dls_tree ( gchar *response, struct DLS_TREE *dls_tree )
-  { GSList *liste;
+ static gchar *Admin_dls_list_dls_tree ( gchar *response_src, struct DLS_TREE *dls_tree )
+  { gchar *response = response_src;
+    GSList *liste;
     gchar chaine[128];
 
     liste = dls_tree->Liste_plugin_dls;
@@ -82,8 +84,9 @@
 /* Entrée: La response                                                                                                       */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static gchar *Admin_dls_list ( gchar *response )
-  { GSList *liste_dls;
+ static gchar *Admin_dls_list ( gchar *response_src )
+  { gchar *response = response_src;
+    GSList *liste_dls;
     gchar chaine[128];
 
     g_snprintf( chaine, sizeof(chaine), " | -- Liste des modules D.L.S" );
@@ -99,10 +102,12 @@
 /* Entrée: La response                                                                                                        */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static gchar *Admin_dls_gcc_dls_tree ( gchar *response, gint id, struct DLS_TREE *dls_tree )
+ static gchar *Admin_dls_gcc_dls_tree ( gchar *response_src, gint id, struct DLS_TREE *dls_tree )
   { gchar chaine[256], buffer[1024];
+    gchar *response = response_src;
     GSList *liste;
 
+    response = response_src;
     if(id==-1)
      { liste = dls_tree->Liste_plugin_dls;
        while(liste)                                                                         /* Liberation mémoire des modules */
@@ -134,10 +139,11 @@
 /* Entrée: Le buffer a compléter, l'id du plugin                                                                              */
 /* Sortie: Le buffer complété                                                                                                 */
 /******************************************************************************************************************************/
- static gchar *Admin_dls_gcc ( gchar *response, gint id )
-  { GSList *liste_dls;
+ static gchar *Admin_dls_gcc ( gchar *response_src, gint id )
+  { gchar *response = response_src;
     gchar chaine[256], buffer[1024];
-
+    GSList *liste_dls;
+    
     g_snprintf( chaine, sizeof(chaine), " | -- Compilation des plugins D.L.S" );
     response = Admin_write ( response, chaine );
 
@@ -151,8 +157,9 @@
 /* Entrée: Le buffer a compléter, l'id du plugin                                                                              */
 /* Sortie: Le buffer complété                                                                                                 */
 /******************************************************************************************************************************/
- static gchar *Admin_dls_start ( gchar *response, gint id )
+ static gchar *Admin_dls_start ( gchar *response_src, gint id )
   { gchar chaine[128], requete[128];
+    gchar *response = response_src;
     struct DB *db;
 
     g_snprintf( chaine, sizeof(chaine), " | -- Demarrage d'un plugin D.L.S" );
@@ -208,8 +215,9 @@
 /* Entrée: La response, le numéro du plugin, et le statut du debug                                                           */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static gchar *Admin_dls_debug ( gchar *response, gint id, gboolean debug )
-  { gchar chaine[128];
+ static gchar *Admin_dls_debug ( gchar *response_src, gint id, gboolean debug )
+  { gchar *response = response_src;
+    gchar chaine[128];
     GSList *liste_dls;
     struct DB *db;
 
@@ -228,8 +236,9 @@
 /* Entrée: Le buffer a compléter, l'id du plugin                                                                              */
 /* Sortie: Le buffer complété                                                                                                 */
 /******************************************************************************************************************************/
- static gchar *Admin_dls_stop ( gchar *response, gint id )
-  { gchar chaine[128], requete[128];
+ static gchar *Admin_dls_stop ( gchar *response_src, gint id )
+  { gchar *response = response_src;
+    gchar chaine[128], requete[128];
     struct DB *db;
 
     g_snprintf( chaine, sizeof(chaine), " | -- Arret d'un plugin D.L.S" );
@@ -261,8 +270,9 @@
 /* Entrée: Le buffer a compléter, l'id du plugin                                                                              */
 /* Sortie: Le buffer complété                                                                                                 */
 /******************************************************************************************************************************/
- gchar *Admin_dls ( gchar *response, gchar *ligne )
-  { gchar commande[128];
+ gchar *Admin_dls ( gchar *response_src, gchar *ligne )
+  { gchar *response = response_src;
+    gchar commande[128];
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
 
