@@ -140,12 +140,11 @@
 /* Sortie: Le buffer complété                                                                                                 */
 /******************************************************************************************************************************/
  static gchar *Admin_dls_gcc ( gchar *response_src, gint id )
-  { gchar *response = response_src;
-    gchar chaine[256], buffer[1024];
-    GSList *liste_dls;
+  { gchar *response;
+    gchar chaine[256];
     
     g_snprintf( chaine, sizeof(chaine), " | -- Compilation des plugins D.L.S" );
-    response = Admin_write ( response, chaine );
+    response = Admin_write ( response_src, chaine );
 
     pthread_mutex_lock( &Partage->com_dls.synchro );                                                         /* Lock du mutex */
     response = Admin_write ( response, Admin_dls_gcc_dls_tree( response, id, Partage->com_dls.Dls_tree ) );

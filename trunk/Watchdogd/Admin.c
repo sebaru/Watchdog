@@ -85,7 +85,7 @@
 
     g_snprintf( chaine, sizeof(chaine), "At %010.1f, processing '%s' on instance '%s'",
                 (gdouble)Partage->top/10.0, ligne, g_get_host_name() );
-    response = Admin_write ( g_strdup(chaine), "\n" );
+    response = Admin_write ( NULL, chaine );
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
 
