@@ -199,8 +199,8 @@
              { gchar *libelle;
                gtk_tree_model_get_iter( store, &iter, lignes->data );                      /* Recuperation ligne selectionnée */
                gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_mnemonique.id, -1 );                        /* Recup du id */
+               gtk_tree_model_get( store, &iter, COLONNE_NUM_PLUGIN, &rezo_mnemonique.dls_id, -1 );        /* Recup du dls_id */
                gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
-
                memcpy( &rezo_mnemonique.libelle, libelle, sizeof(rezo_mnemonique.libelle) );
                g_free( libelle );
 
@@ -606,6 +606,7 @@
                          COLONNE_TYPE_INT,        mnemonique->type,
                          COLONNE_TYPE,            chaine,
                          COLONNE_GROUPE_PAGE_DLS, groupe_page,
+                         COLONNE_NUM_PLUGIN,      mnemonique->dls_id,
                          COLONNE_ACRONYME,        mnemonique->acronyme,
                          COLONNE_LIBELLE,         mnemonique->libelle,
                          COLONNE_EV_HOST,         mnemonique->ev_host,
