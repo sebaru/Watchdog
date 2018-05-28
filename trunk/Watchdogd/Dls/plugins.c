@@ -205,7 +205,11 @@
      { plugin = (struct PLUGIN_DLS *)dls_tree->Liste_plugin_dls->data;
        if (plugin->plugindb.id == id)
         { dlclose( plugin->handle );
+          Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: taille liste %d", __func__,
+                    g_slist_length( dls_tree->Liste_plugin_dls ) );
           dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
+          Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: taille liste %d", __func__,
+                    g_slist_length( dls_tree->Liste_plugin_dls ) );
                                                                              /* Destruction de l'entete associé dans la GList */
           Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d unloaded (%s)", __func__,
                     plugin->plugindb.id, plugin->plugindb.nom );
@@ -219,7 +223,6 @@
     while (liste)
      { struct DLS_TREE *sub_dls_tree = dls_tree->Liste_dls_tree->data;
        Decharger_plugin_by_id_dls_tree ( id, sub_dls_tree );
-       dls_tree->Liste_dls_tree = g_slist_remove(dls_tree->Liste_dls_tree, sub_dls_tree);
        liste=liste->next;
      }
   }
