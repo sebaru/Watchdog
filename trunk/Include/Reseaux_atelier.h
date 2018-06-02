@@ -141,7 +141,9 @@
     gboolean bit_alerte;
     gboolean bit_alerte_fixe;
     gboolean bit_derangement;
+    gboolean bit_derangement_fixe;
     gboolean bit_danger;
+    gboolean bit_danger_fixe;
   };
 
 /******************************************************* Tag de communication *************************************************/

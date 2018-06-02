@@ -885,13 +885,14 @@
   { struct timeval tv_avant, tv_apres;
     gboolean bit_comm_out, bit_defaut, bit_defaut_fixe, bit_alarme, bit_alarme_fixe;                              /* Activité */
     gboolean bit_veille_partielle, bit_veille_totale, bit_alerte, bit_alerte_fixe;             /* Synthese Sécurité des Biens */
-    gboolean bit_derangement, bit_danger;                                                  /* synthèse Sécurité des Personnes */ 
+    gboolean bit_derangement, bit_derangement_fixe, bit_danger, bit_danger_fixe;           /* synthèse Sécurité des Personnes */ 
     GSList *liste;
 
     bit_comm_out = bit_defaut = bit_defaut_fixe = bit_alarme = bit_alarme_fixe = FALSE;
-    bit_veille_partielle = bit_veille_totale = TRUE;
+    bit_veille_partielle = FALSE;
+    bit_veille_totale = TRUE;
     bit_alerte = FALSE;
-    bit_derangement = bit_danger = FALSE;
+    bit_derangement = bit_derangement_fixe = bit_danger = bit_danger_fixe = FALSE;
 
     liste = dls_tree->Liste_plugin_dls;
     while(liste)                                                                     /* On execute tous les modules un par un */
@@ -911,12 +912,14 @@
           bit_defaut_fixe      |= plugin_actuel->vars.bit_defaut_fixe;
           bit_alarme           |= plugin_actuel->vars.bit_alarme;
           bit_alarme_fixe      |= plugin_actuel->vars.bit_alarme_fixe;
-          bit_veille_partielle &= plugin_actuel->vars.bit_veille_partielle;
-          bit_veille_totale    &= plugin_actuel->vars.bit_veille_totale;
+          bit_veille_partielle |= plugin_actuel->vars.bit_veille;
+          bit_veille_totale    &= plugin_actuel->vars.bit_veille;
           bit_alerte           |= plugin_actuel->vars.bit_alerte;
           bit_alerte_fixe      |= plugin_actuel->vars.bit_alerte_fixe;
           bit_derangement      |= plugin_actuel->vars.bit_derangement;
+          bit_derangement_fixe |= plugin_actuel->vars.bit_derangement_fixe;
           bit_danger           |= plugin_actuel->vars.bit_danger;
+          bit_danger_fixe      |= plugin_actuel->vars.bit_danger_fixe;
         }
        liste = liste->next;
      }
@@ -930,7 +933,7 @@
        bit_defaut_fixe      |= sub_tree->syn_vars.bit_defaut_fixe;
        bit_alarme           |= sub_tree->syn_vars.bit_alarme;
        bit_alarme_fixe      |= sub_tree->syn_vars.bit_alarme_fixe;
-       bit_veille_partielle &= sub_tree->syn_vars.bit_veille_partielle;
+       bit_veille_partielle |= sub_tree->syn_vars.bit_veille_partielle;
        bit_veille_totale    &= sub_tree->syn_vars.bit_veille_totale;
        bit_alerte           |= sub_tree->syn_vars.bit_alerte;
        bit_alerte_fixe      |= sub_tree->syn_vars.bit_alerte_fixe;
@@ -960,11 +963,12 @@
        dls_tree->syn_vars.bit_alerte           = bit_alerte;
        dls_tree->syn_vars.bit_alerte_fixe      = bit_alerte_fixe;
        dls_tree->syn_vars.bit_derangement      = bit_derangement;
+       dls_tree->syn_vars.bit_derangement_fixe = bit_derangement_fixe;
        dls_tree->syn_vars.bit_danger           = bit_danger;
+       dls_tree->syn_vars.bit_danger_fixe      = bit_danger_fixe;
        Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_SET_SYN_VARS, "*", "ssrv",
                           &dls_tree->syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
      }
-
  }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du DLS                                                                                           */

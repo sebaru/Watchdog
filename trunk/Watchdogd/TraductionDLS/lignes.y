@@ -43,7 +43,8 @@
        };
 
 %token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS T_POUV T_PFERM T_EGAL OU ET BARRE T_FOIS T_DEFINE T_STATIC
-%token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_SBIEN_VP T_SBIEN_VT T_SBIEN_ALE T_SPERS_DER T_SPERS_DAN T_OSYN_ACQ
+%token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_SBIEN_VEILLE T_SBIEN_ALE
+%token <val>    T_SPERS_DER T_SPERS_DERF T_SPERS_DAN T_SPERS_DANF T_OSYN_ACQ
 %token <val>    T_ACT_DEFF T_ACT_ALAF T_SBIEN_ALEF T_TOP_ALERTE
 %token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LIBELLE
 
@@ -449,18 +450,20 @@ unite:          modulateur ENTIER HEURE ENTIER
                   {{ $$=New_condition_vars( $1, "vars->bit_alarme"); }}
                 | barre T_ACT_ALAF
                   {{ $$=New_condition_vars( $1, "vars->bit_alarme_fixe"); }}
-                | barre T_SBIEN_VP
-                  {{ $$=New_condition_vars( $1, "vars->bit_veille_partielle"); }}
-                | barre T_SBIEN_VT
-                  {{ $$=New_condition_vars( $1, "vars->bit_veille_totale"); }}
+                | barre T_SBIEN_VEILLE
+                  {{ $$=New_condition_vars( $1, "vars->bit_veille"); }}
                 | barre T_SBIEN_ALE
                   {{ $$=New_condition_vars( $1, "vars->bit_alerte"); }}
                 | barre T_SBIEN_ALEF
                   {{ $$=New_condition_vars( $1, "vars->bit_alerte_fixe"); }}
                 | barre T_SPERS_DER
                   {{ $$=New_condition_vars( $1, "vars->bit_derangement"); }}
+                | barre T_SPERS_DERF
+                  {{ $$=New_condition_vars( $1, "vars->bit_derangement_fixe"); }}
                 | barre T_SPERS_DAN
                   {{ $$=New_condition_vars( $1, "vars->bit_danger"); }}
+                | barre T_SPERS_DANF
+                  {{ $$=New_condition_vars( $1, "vars->bit_danger_fixe"); }}
                 | barre T_POUV expr T_PFERM
                 {{ int taille;
                    taille = strlen($3)+5;
@@ -653,18 +656,20 @@ une_action:     barre SORTIE ENTIER
                   {{ $$=New_action_vars_mono("vars->bit_alarme"); }}
                 | T_ACT_ALAF
                   {{ $$=New_action_vars_mono("vars->bit_alarme_fixe"); }}
-                | T_SBIEN_VP
-                  {{ $$=New_action_vars_mono("vars->bit_veille_partielle"); }}
-                | T_SBIEN_VT
-                  {{ $$=New_action_vars_mono("vars->bit_veille_totale"); }}
+                | T_SBIEN_VEILLE
+                  {{ $$=New_action_vars_mono("vars->bit_veille"); }}
                 | T_SBIEN_ALE
                   {{ $$=New_action_vars_mono("vars->bit_alerte"); }}
                 | T_SBIEN_ALEF
                   {{ $$=New_action_vars_mono("vars->bit_alerte_fixe"); }}
                 | T_SPERS_DER
                   {{ $$=New_action_vars_mono("vars->bit_derangement"); }}
+                | T_SPERS_DERF
+                  {{ $$=New_action_vars_mono("vars->bit_derangement_fixe"); }}
                 | T_SPERS_DAN
                   {{ $$=New_action_vars_mono("vars->bit_danger"); }}
+                | T_SPERS_DANF
+                  {{ $$=New_action_vars_mono("vars->bit_danger_fixe"); }}
                 | barre ID liste_options
                 {{ struct ALIAS *alias;                                                   /* Definition des actions via alias */
                    int taille;

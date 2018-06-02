@@ -388,6 +388,18 @@
        trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
        trame_pass->cligno3 = 1;                                                                      /* Sauvegarde etat motif */
      }
+    else if (vars->bit_danger_fixe == TRUE)
+     { trame_pass->rouge3  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert3   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno3 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_derangement == TRUE)
+     { trame_pass->rouge3  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert3   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno3 = 1;                                                                      /* Sauvegarde etat motif */
+     }
     else if (vars->bit_derangement == TRUE)
      { trame_pass->rouge3  = 255;                                                                    /* Sauvegarde etat motif */
        trame_pass->vert3   = 255;                                                                    /* Sauvegarde etat motif */

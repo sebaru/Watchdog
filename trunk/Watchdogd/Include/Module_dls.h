@@ -35,13 +35,15 @@
     gboolean bit_defaut_fixe;
     gboolean bit_alarme;
     gboolean bit_alarme_fixe;
-    gboolean bit_veille_partielle;
-    gboolean bit_veille_totale;
+    gboolean bit_dispo;
+    gboolean bit_veille;
     gboolean bit_alerte;
     gboolean bit_alerte_fixe;
     gboolean bit_derangement;
     gboolean bit_danger;
     gboolean bit_acquit;
+    gboolean bit_derangement_fixe;
+    gboolean bit_danger_fixe;
   };
 
  extern void     Dls_print_debug ( gint id, gint *Tableau_bit, gint *Tableau_num, gfloat *Tableau_val );
