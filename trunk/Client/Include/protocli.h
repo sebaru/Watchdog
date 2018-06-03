@@ -54,6 +54,7 @@
     TYPE_PAGE_UTIL,                                                                        /* Liste des utilisateurs Watchdog */
     TYPE_PAGE_MESSAGE,                                                                       /* Edition des messages Watchdog */
     TYPE_PAGE_SYNOPTIQUE,                                                     /* Edition des noms/mnémoniques des synoptiques */
+    TYPE_PAGE_ALL_MNEMONIQUE,                                                /* Page de visualisation de tous les mnemoniques */
     TYPE_PAGE_MNEMONIQUE,                                                            /* Page de visualisation des mnemoniques */
     TYPE_PAGE_ICONE,                                                    /* Ajout/retrait/modif des icones et classes d'icones */
     TYPE_PAGE_SOURCE_DLS,                                                                       /* Edition d'une source D.L.S */
@@ -253,11 +254,13 @@
 
  extern void Proto_cacher_un_mnemonique( struct CMD_TYPE_MNEMO_BASE *mnemonique );                  /* Dans liste_mnemonique.c*/
  extern void Proto_afficher_un_mnemonique( struct CMD_TYPE_MNEMO_BASE *mnemonique );
+ extern void Proto_afficher_tous_mnemonique( struct CMD_TYPE_MNEMO_BASE *mnemonique );
  extern void Proto_rafraichir_un_mnemonique( struct CMD_TYPE_MNEMO_BASE *smnemonique );
  extern gchar *Type_bit_interne ( gint num );
  extern gchar *Type_bit_interne_court ( gint num );
  extern gint Type_bit_interne_int ( gchar *type );
  extern void Creer_page_mnemonique( struct CMD_TYPE_PLUGIN_DLS *plugin );
+ extern void Creer_page_all_mnemonique( void );
 
  extern void Menu_ajouter_editer_mnemonique ( struct CMD_TYPE_MNEMO_FULL *mnemo_full, gint dls_id );     /* ajout_mnemonique.c*/
  extern void Proto_afficher_un_syn_for_mnemonique ( struct CMD_TYPE_SYNOPTIQUE *syn );

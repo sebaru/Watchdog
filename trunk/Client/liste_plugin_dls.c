@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/liste_plugin_dls.c        Configuration des plugin_dlss de Watchdog v2.0                        */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       ven 23 nov 2007 20:33:45 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/liste_plugin_dls.c        Configuration des plugin_dlss de Watchdog v2.0                                            */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                           ven 23 nov 2007 20:33:45 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * liste_plugin_dls.c
  * This file is part of Watchdog
@@ -150,6 +150,19 @@
      }
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);
+  }
+/******************************************************************************************************************************/
+/* Menu_editer_all_mnemo: Demande l'affichage de la page complete de tous les mnemoniques                                     */
+/* Entrée/Sortie: rien                                                                                                        */
+/******************************************************************************************************************************/
+ static void Menu_editer_all_mnemo ( void )
+  { struct CMD_TYPE_PLUGIN_DLS rezo_dls;
+
+    if (!Chercher_page_notebook (TYPE_PAGE_ALL_MNEMONIQUE, 0, TRUE))                          /* Page deja créé et affichée ? */
+     { Creer_page_all_mnemonique ();
+       Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_WANT_PAGE_ALL_MNEMONIQUE, NULL, 0 );
+       Chercher_page_notebook ( TYPE_PAGE_ALL_MNEMONIQUE, 0, TRUE );
+     }
   }
 /******************************************************************************************************************************/
 /* Menu_refresh_plugin_D.L.S: rafraichir la liste des plugins D.L.S                                                           */
@@ -428,11 +441,11 @@
      { Menu_editer_source_dls(); }
     return(FALSE);
   }
-/**********************************************************************************************************/
-/* Creer_page_plugin_dls: Creation de la page du notebook consacrée aux plugins plugin_dlss watchdog      */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Creer_page_plugin_dls: Creation de la page du notebook consacrée aux plugins plugin_dlss watchdog                          */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Creer_page_plugin_dls( void )
   { GtkWidget *boite, *scroll, *hboite, *bouton, *separateur;
     GtkTreeSelection *selection;
@@ -588,6 +601,11 @@
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_editer_source_dls), NULL );
+
+    bouton = gtk_button_new_with_label( "Dictionnaire" );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                              G_CALLBACK(Menu_editer_all_mnemo), NULL );
 
     bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );

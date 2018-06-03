@@ -194,7 +194,11 @@
     gint max_enreg;                                                    /* Nombre maximum d'enregistrement dans un bloc reseau */
 
     prctl(PR_SET_NAME, "W-EnvoiMnemo", 0, 0, 0 );
-    g_snprintf( critere, sizeof(critere), "mnemo.dls_id = '%d'", client->mnemo_dls_id_to_send );
+    if (client->mnemo_dls_id_to_send != -1)
+     { g_snprintf( critere, sizeof(critere), "mnemo.dls_id = '%d'", client->mnemo_dls_id_to_send ); }
+    else
+     { g_snprintf( critere, sizeof(critere), "1=1" ); }
+    
     if ( ! Recuperer_mnemo_baseDB_with_conditions( &db, critere, -1, -1 ) )
      { Unref_client( client );                                                            /* Déréférence la structure cliente */
        return;
@@ -243,8 +247,14 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  void *Envoyer_mnemoniques_thread ( struct CLIENT *client )
-  { Envoyer_mnemoniques_tag( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE,
-                                                     SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE_FIN );   
+  { if (client->mnemo_dls_id_to_send != -1)
+     { Envoyer_mnemoniques_tag( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE,
+                                                        SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE_FIN );
+     }
+    else
+     { Envoyer_mnemoniques_tag( client, TAG_MNEMONIQUE, SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE,
+                                                        SSTAG_SERVEUR_ADDPROGRESS_ALL_MNEMONIQUE_FIN );
+     }
     pthread_exit ( NULL );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

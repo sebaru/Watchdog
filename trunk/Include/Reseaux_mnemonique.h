@@ -147,7 +147,9 @@
  enum 
   { SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE,                                          /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE_FIN,                                      /* Ajout d'un groupe dans la liste cliente */
+    SSTAG_SERVEUR_ADDPROGRESS_ALL_MNEMONIQUE_FIN,                                  /* Ajout d'un groupe dans la liste cliente */
     SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE,                                                /* Le client demande la page mnemonique */
+    SSTAG_CLIENT_WANT_PAGE_ALL_MNEMONIQUE,                                            /* Le client demande la page mnemonique */
     SSTAG_CLIENT_ADD_MNEMONIQUE,                                               /* Le client desire ajouter un groupe watchdog */
     SSTAG_SERVEUR_ADD_MNEMONIQUE_OK,                                                       /* L'ajout du groupe est un succes */
 
