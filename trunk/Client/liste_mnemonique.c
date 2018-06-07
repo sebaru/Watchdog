@@ -226,7 +226,7 @@
   { struct PAGE_NOTEBOOK *page = Page_actuelle();
     struct TYPE_INFO_MNEMONIQUE *infos;
     infos=page->infos;
-    Menu_ajouter_editer_mnemonique(NULL, infos->id);
+    if (page->type == TYPE_PAGE_MNEMONIQUE) Menu_ajouter_editer_mnemonique(NULL, infos->id);
   }
 /******************************************************************************************************************************/
 /* Menu_effacer_mnemonique: Retrait des mnemoniques selectionnés                                                              */
