@@ -569,7 +569,7 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
                    "Download_gif : Unable to save file %s", nom_fichier );
         }
        g_free(Gif_received_buffer);
-       Gif_received_buffer = FALSE;
+       Gif_received_buffer = NULL;
        if (fd<=0) return(FALSE);
      }
     return(TRUE);

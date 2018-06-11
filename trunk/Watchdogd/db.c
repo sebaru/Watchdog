@@ -840,7 +840,14 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version=3555;
+    if (database_version < 3586)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` DROP `type`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` ADD `package` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'custom' AFTER `tech_id`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version=3586;
 
     Libere_DB_SQL(&db);
 

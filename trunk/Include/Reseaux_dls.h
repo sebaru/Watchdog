@@ -52,12 +52,12 @@
   { gchar nom[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
     gchar shortname[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
     gchar tech_id[25];
+    gchar package[130];
     gchar syn_parent_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar syn_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     guint syn_id;                                           /* Numéro du fichier syn correspondant(pas l'index dans la table) */
     guint id;
     guint on;
-    guint type;                                                                           /* Module, Sous groupe, groupe, ... */
     guint compil_date;                                                                        /* Date de derniere compilation */
     guint compil_status;                                                                    /* Statut de derniere compilation */
     guint nbr_compil;                                                                         /* Nombre de compilation totale */
@@ -80,14 +80,6 @@
     DLS_COMPIL_WARNING_FUNCTION_MISSING,
     DLS_COMPIL_ERROR_BIT_SET_BUT_NOT_OWNED,
     NBR_DLS_COMPIL_STATUS
-  };
-
- enum
-  { PLUGIN_MODULE,                                                                         /* Definitions des types de plugin */
-    PLUGIN_SSGROUPE,
-    PLUGIN_GROUPE,
-    PLUGIN_TOPLEVEL,
-    NBR_TYPE_PLUGIN
   };
 
  enum 

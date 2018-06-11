@@ -45,11 +45,14 @@
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
  extern struct CLIENT Client;                                                                         /* Structure de travail */
 
-/**********************************************************************************************************/
-/* Afficher_mnemo: Changement du mnemonique et affichage                                                  */
-/* Entre: widget, data.                                                                                   */
-/* Sortie: void                                                                                           */
-/**********************************************************************************************************/
+ static gchar *Package_received_buffer;                                                /* Buffer de reception du code package */
+ static gint   Package_received_size;                                               /* Taille actuelle du buffer de reception */
+
+/******************************************************************************************************************************/
+/* Afficher_mnemo: Changement du mnemonique et affichage                                                                      */
+/* Entre: widget, data.                                                                                                       */
+/* Sortie: void                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_afficher_mnemo_dls ( struct CMD_TYPE_MNEMO_BASE *mnemo )
   { struct PAGE_NOTEBOOK *page;
     struct TYPE_INFO_SOURCE_DLS *infos;
@@ -145,18 +148,89 @@
 
     gtk_widget_show_all( infos->F_mnemo );
   }
-/**********************************************************************************************************/
-/* Proto_append_source_dls: Ajoute du texte dans le texte view associée au module DLS                     */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* CB_Receive_package_data : Recoit une partie du fichier package                                                             */
+/* Entrée : Les informations à sauvegarder                                                                                    */
+/******************************************************************************************************************************/
+ static size_t CB_Receive_package_data( char *ptr, size_t size, size_t nmemb, void *userdata )
+  { gchar *new_buffer;
+    Info_new( Config_cli.log, FALSE, LOG_DEBUG,
+              "%s: Récupération de %d*%d octets depuis le master", __func__, size, nmemb );
+    new_buffer = g_try_realloc ( Package_received_buffer,
+                                 Package_received_size +  size*nmemb );
+    if (!new_buffer)                                                                     /* Si erreur, on arrete le transfert */
+     { Info_new( Config_cli.log, FALSE, LOG_ERR,
+                "%s: Memory Error realloc (%s).", __func__, strerror(errno) );
+       g_free(Package_received_buffer);
+       Package_received_buffer = NULL;
+       return(-1);
+     } else Package_received_buffer = new_buffer;
+    memcpy( Package_received_buffer + Package_received_size, ptr, size*nmemb );
+    Package_received_size += size*nmemb;
+    return(size*nmemb);
+  }
+/******************************************************************************************************************************/
+/* Menu_refresh_package: Download a nouveau le code source du package                                                         */
+/* Entrée: rien                                                                                                               */
+/* sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Menu_refresh_package ( struct PAGE_NOTEBOOK *page )
+  { gchar erreur[CURL_ERROR_SIZE+1], url[256];
+    struct TYPE_INFO_SOURCE_DLS *infos;
+    long http_response;
+    CURLcode res;
+    CURL *curl;
+
+    infos = (struct TYPE_INFO_SOURCE_DLS *)page->infos;
+
+    Package_received_buffer = NULL;                                                     /* Init du tampon de reception à NULL */
+    Package_received_size = 0;                                                          /* Init du tampon de reception à NULL */
+    http_response = 0;
+
+    curl = curl_easy_init();
+    if (!curl)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "%s: cURL init failed", __func__ );
+       return;
+     }
+
+    g_snprintf( url, sizeof(url), "https://packages.abls-habitat.fr/%s", infos->package );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Trying to get %s", __func__, url );
+
+    curl_easy_setopt(curl, CURLOPT_URL, url );
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_package_data );
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT );
+    res = curl_easy_perform(curl);
+    if (res)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
+                "%s: Could not connect to %s (%s)", __func__, url, erreur);
+     }
+    else if (curl_easy_getinfo( curl, CURLINFO_RESPONSE_CODE, &http_response ) != CURLE_OK)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
+                "%s: Wrong Response code for %s", __func__, url );
+     }
+    else                                                                  
+     {                                                                          /* Recopie du tampon dans le sourcecode D.L.S */
+       gtk_text_buffer_set_text ( GTK_TEXT_BUFFER( infos->text ), Package_received_buffer, Package_received_size );
+       g_free(Package_received_buffer);                                                           /* On libere le tampon reçu */
+       Package_received_buffer = NULL;
+     }
+    curl_easy_cleanup(curl);
+  }
+/******************************************************************************************************************************/
+/* Proto_append_source_dls: Ajoute du texte dans le texte view associée au module DLS                                         */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Proto_append_source_dls( struct CMD_TYPE_SOURCE_DLS *dls, gchar *buffer )
   { GtkTextBuffer *text_buffer;
     struct TYPE_INFO_SOURCE_DLS *infos;
     struct PAGE_NOTEBOOK *page;
     GtkTextIter iter;
 
-    page = Chercher_page_notebook( TYPE_PAGE_SOURCE_DLS, dls->id, TRUE );         /* Recherche de la page */
+    page = Chercher_page_notebook( TYPE_PAGE_SOURCE_DLS, dls->id, TRUE );                             /* Recherche de la page */
     if (!page) return;
     infos = page->infos;
     if (!infos) return;
@@ -362,11 +436,11 @@
      }
    gtk_widget_destroy (dialog);
  }
-/**********************************************************************************************************/
-/* Creer_page_plugin_dls: Creation de la page du notebook consacrée aux plugins plugin_dlss watchdog      */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Creer_page_plugin_dls: Creation de la page du notebook consacrée aux plugins plugin_dlss watchdog                          */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Creer_page_source_dls( struct CMD_TYPE_PLUGIN_DLS *rezo_dls )
   { GtkWidget *boite, *scroll, *hboite, *bouton, *separateur, *label;
     struct TYPE_INFO_SOURCE_DLS *infos;
@@ -387,6 +461,7 @@
     page->type = TYPE_PAGE_SOURCE_DLS;
     infos->id = rezo_dls->id;
     g_snprintf( infos->plugin_name, sizeof(infos->plugin_name), "%s", rezo_dls->nom );
+    g_snprintf( infos->package, sizeof(infos->package), "%s", rezo_dls->package );
     Liste_pages = g_list_append( Liste_pages, page );
 
     hboite = gtk_hbox_new( FALSE, 6 );                           /* Initialisation des parametres de page */
@@ -439,6 +514,16 @@
 
     separateur = gtk_hseparator_new();
     gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
+
+/*    bouton = gtk_button_new_from_stock( GTK_STOCK_DIRECTORY );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                              G_CALLBACK(Menu_reinstall_package), page );*/
+
+    bouton = gtk_button_new_from_stock( GTK_STOCK_REFRESH );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                              G_CALLBACK(Menu_refresh_package), page );
 
     bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
