@@ -198,9 +198,9 @@
     gtk_container_add( GTK_CONTAINER(frame), infos->Box_palette );
 
 /******************************************************* Acquitter ************************************************************/
-    bouton = gtk_button_new_with_label( "Acquitter" );
-    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+    infos->bouton_acq = gtk_button_new_with_label( "Acquitter" );
+    gtk_box_pack_start( GTK_BOX(boite), infos->bouton_acq, FALSE, FALSE, 0 );
+    g_signal_connect_swapped( G_OBJECT(infos->bouton_acq), "clicked",
                               G_CALLBACK(Menu_acquitter_synoptique), infos );
 
     gtk_widget_show_all( page->child );
@@ -468,6 +468,7 @@ printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, eta
     struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
     GList *liste_motifs;
+    GdkColor color;
     GList *liste;
     gint cpt;
 
@@ -475,7 +476,6 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
                    syn_vars->bit_comm_out, syn_vars->bit_defaut, syn_vars->bit_alarme,
                    syn_vars->bit_veille_partielle, syn_vars->bit_veille_totale, syn_vars->bit_alerte,
                    syn_vars->bit_derangement, syn_vars->bit_danger );
-
     cpt = 0;                                                                     /* Nous n'avons encore rien fait au debut !! */
     liste = Liste_pages;
     while(liste)                                                                  /* On parcours toutes les pages SUPERVISION */
@@ -483,6 +483,14 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
        if (page->type != TYPE_PAGE_SUPERVISION) { liste = liste->next; continue; }
 
        infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
+
+       if (infos->syn_id == syn_vars->syn_id)
+        { if (syn_vars->bit_defaut || syn_vars->bit_alarme, syn_vars->bit_alerte, syn_vars->bit_derangement, syn_vars->bit_danger)
+           { gdk_color_parse ("blue", &color);
+             gtk_widget_modify_bg ( infos->bouton_acq, GTK_STATE_NORMAL, &color );
+           } else
+           { gtk_widget_modify_bg ( infos->bouton_acq, GTK_STATE_NORMAL, NULL ); }
+        }
 
        liste_motifs = infos->Trame->trame_items;                                /* On parcours tous les motifs de chaque page */
        while (liste_motifs)

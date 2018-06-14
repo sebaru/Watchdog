@@ -83,6 +83,7 @@
     guint syn_id;                                                                        /* Id du synoptique en cours de visu */
     GtkWidget *Option_zoom;                                                               /* Choix du zoom sur la supervision */
     GtkWidget *Box_palette;                                                                   /* Widget de la boite a palette */
+    GtkWidget *bouton_acq;                                                                   /* Bouton d'acquit du synoptique */
     struct TRAME *Trame;                                                                   /* La trame de fond de supervision */
   };
 
