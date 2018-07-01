@@ -154,5 +154,5 @@ blanc         [\t ]+
 {id}                       { DlsScanner_lval.chaine = (char *)strdup(DlsScanner_text); return ID;       }
 {digit}                    { DlsScanner_lval.val    = atoi(DlsScanner_text);           return ENTIER;   }
 {digitf}                   { DlsScanner_lval.valf   = atof(DlsScanner_text);           return VALF;     }
-.                          {  }
+ /*** Pourquoi cette ligne ??  .                          {  }   */
 %%

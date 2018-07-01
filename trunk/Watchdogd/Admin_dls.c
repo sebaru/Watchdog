@@ -44,7 +44,7 @@
 /* Entrée: La response                                                                                                        */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static gchar *Admin_dls_list_dls_tree ( gchar *response_src, struct DLS_TREE *dls_tree )
+ static gchar *Admin_dls_list_dls_tree ( gchar *response_src, gint dls_id, gint syn_id, struct DLS_TREE *dls_tree )
   { gchar *response = response_src;
     GSList *liste;
     gchar chaine[128];
@@ -56,30 +56,33 @@
        gchar date[80];
        dls = (struct PLUGIN_DLS *)liste->data;
 
-       temps = localtime( (time_t *)&dls->start_date );
-       if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
-       else       { g_snprintf( date, sizeof(date), "Erreur" ); }
+       if ( (dls_id == -1 && dls->plugindb.syn_id == syn_id)                          /* Affichage uniquement pour le bon dls */
+          || dls_id==dls->plugindb.id)
+        { temps = localtime( (time_t *)&dls->start_date );
+          if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
+          else       { g_snprintf( date, sizeof(date), "Erreur" ); }
 
-       g_snprintf( chaine, sizeof(chaine),
-                   " | - SYN[%05d] - DLS[%06d] -> started=%d, start_date=%s, debug=%d, conso=%08.03f, nom=%s",
-                   dls_tree->syn_vars.syn_id, dls->plugindb.id, dls->plugindb.on, date, dls->debug, dls->conso, dls->plugindb.shortname );
-       response = Admin_write ( response, chaine );
-       g_snprintf( chaine, sizeof(chaine),
-                   " |                   comm_out=%d, defaut=%d/%d, alarme=%d/%d, veille=%d, alerte=%d/%d, derangement=%d/%d, danger=%d/%d",
-                   dls->vars.bit_comm_out, dls->vars.bit_defaut, dls->vars.bit_defaut_fixe,
-                   dls->vars.bit_alarme, dls->vars.bit_alarme_fixe,
-                   dls->vars.bit_veille,
-                   dls->vars.bit_alerte, dls->vars.bit_alerte_fixe,
-                   dls->vars.bit_derangement,dls->vars.bit_derangement_fixe,
-                   dls->vars.bit_danger, dls->vars.bit_danger_fixe );
-       response = Admin_write ( response, chaine );
+          g_snprintf( chaine, sizeof(chaine),
+                      " | - SYN[%05d] - DLS[%06d] -> started=%d, start_date=%s, debug=%d, conso=%08.03f, nom=%s",
+                      dls_tree->syn_vars.syn_id, dls->plugindb.id, dls->plugindb.on, date, dls->debug, dls->conso, dls->plugindb.shortname );
+          response = Admin_write ( response, chaine );
+          g_snprintf( chaine, sizeof(chaine),
+                      " |                   comm_out=%d, defaut=%d/%d, alarme=%d/%d, veille=%d, alerte=%d/%d, derangement=%d/%d, danger=%d/%d",
+                      dls->vars.bit_comm_out, dls->vars.bit_defaut, dls->vars.bit_defaut_fixe,
+                      dls->vars.bit_alarme, dls->vars.bit_alarme_fixe,
+                      dls->vars.bit_veille,
+                      dls->vars.bit_alerte, dls->vars.bit_alerte_fixe,
+                      dls->vars.bit_derangement,dls->vars.bit_derangement_fixe,
+                      dls->vars.bit_danger, dls->vars.bit_danger_fixe );
+          response = Admin_write ( response, chaine );
+        }
        liste = liste->next;
      }
 
     liste = dls_tree->Liste_dls_tree;
     while (liste)
      { struct DLS_TREE *sub_dls_tree = liste->data;
-       response = Admin_dls_list_dls_tree ( response, sub_dls_tree );
+       response = Admin_dls_list_dls_tree ( response, dls_id, syn_id, sub_dls_tree );
        liste = liste->next;
      }
     return(response);
@@ -89,7 +92,7 @@
 /* Entrée: La response                                                                                                       */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- static gchar *Admin_dls_list ( gchar *response_src )
+ static gchar *Admin_dls_list_syn ( gchar *response_src, gint syn_id )
   { gchar *response = response_src;
     GSList *liste_dls;
     gchar chaine[128];
@@ -98,7 +101,25 @@
     response = Admin_write ( response, chaine );
      
     pthread_mutex_lock( &Partage->com_dls.synchro );
-    response = Admin_dls_list_dls_tree ( response, Partage->com_dls.Dls_tree );
+    response = Admin_dls_list_dls_tree ( response, -1, syn_id, Partage->com_dls.Dls_tree );
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+    return(response);
+  }
+/******************************************************************************************************************************/
+/* Admin_dls_list: Print la liste des plugins dls actif ou non, mais chargés                                                  */
+/* Entrée: La response                                                                                                       */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static gchar *Admin_dls_show ( gchar *response_src, gint dls_id )
+  { gchar *response = response_src;
+    GSList *liste_dls;
+    gchar chaine[128];
+
+    g_snprintf( chaine, sizeof(chaine), " | -- Liste des modules D.L.S" );
+    response = Admin_write ( response, chaine );
+     
+    pthread_mutex_lock( &Partage->com_dls.synchro );
+    response = Admin_dls_list_dls_tree ( response, dls_id, -1, Partage->com_dls.Dls_tree );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
     return(response);
   }
@@ -314,20 +335,28 @@
        response = Admin_write ( response, chaine );
      }
     else if ( ! strcmp ( commande, "list" ) )
-     { return(Admin_dls_list ( response ));
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
+       return(Admin_dls_list_syn ( response, num ));
+     }
+    else if ( ! strcmp ( commande, "show" ) )
+     { int num;
+       sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
+       return(Admin_dls_show ( response, num ));
      }
     else if ( ! strcmp ( commande, "reload" ) )
      { return(Admin_dls_reload( response ));
      }
     else if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'D.L.S'" );
-       response = Admin_write ( response, "  debug $id                              - Active le mode debug du plugin $id" );
-       response = Admin_write ( response, "  nodebug $id                            - Desactive le mode debug du plugin $id" );
-       response = Admin_write ( response, "  start $id                              - Demarre le module $id" );
-       response = Admin_write ( response, "  stop $id                               - Stop le module $id" );
-       response = Admin_write ( response, "  reset $id                              - Stop/Unload/Load/Start module $id" );
-       response = Admin_write ( response, "  list                                   - D.L.S. Status" );
-       response = Admin_write ( response, "  gcc $id                                - Compile le plugin $id (-1 for all)" );
+       response = Admin_write ( response, "  debug $dls_id                          - Active le mode debug du plugin $id" );
+       response = Admin_write ( response, "  nodebug $dls_id                        - Desactive le mode debug du plugin $id" );
+       response = Admin_write ( response, "  start $dls_id                          - Demarre le module $id" );
+       response = Admin_write ( response, "  stop $dls_id                           - Stop le module $id" );
+       response = Admin_write ( response, "  reset $dls_id                          - Stop/Unload/Load/Start module $id" );
+       response = Admin_write ( response, "  list $syn_id                           - Liste tous les DLS du synoptique $syn_id" );
+       response = Admin_write ( response, "  show $dls_id                           - Affiche le status du D.L.S numéro $dls_id" );
+       response = Admin_write ( response, "  gcc $dls_id                            - Compile le plugin $id (-1 for all)" );
        response = Admin_write ( response, "  reload                                 - Recharge la configuration" );
      }
     else
