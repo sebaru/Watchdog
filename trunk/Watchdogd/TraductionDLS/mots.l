@@ -90,13 +90,13 @@ blanc         [\t ]+
 "_MEMSA_DEFAUT_FIXE"       { DlsScanner_lval.val = T_ACT_DEFF;   return T_ACT_DEFF;   }
 "_MEMSA_ALARME"            { DlsScanner_lval.val = T_ACT_ALA;    return T_ACT_ALA;    }
 "_MEMSA_ALARME_FIXE"       { DlsScanner_lval.val = T_ACT_ALAF;   return T_ACT_ALAF;   }
-"_MEMSSB_VEILLE"           { DlsScanner_lval.val = T_SBIEN_VEILLE;   return T_SBIEN_VEILLE; }
+"_MEMSSB_VEILLE"           { DlsScanner_lval.val = T_SBIEN_VEILLE;return T_SBIEN_VEILLE; }
 "_MEMSSB_ALERTE"           { DlsScanner_lval.val = T_SBIEN_ALE;  return T_SBIEN_ALE;  }
 "_MEMSSB_ALERTE_FIXE"      { DlsScanner_lval.val = T_SBIEN_ALEF; return T_SBIEN_ALEF; }
 "_MEMSSP_DERANGEMENT"      { DlsScanner_lval.val = T_SPERS_DER;  return T_SPERS_DER;  }
-"_MEMSSP_DERANGEMENT_FIXE" { DlsScanner_lval.val = T_SPERS_DER;  return T_SPERS_DERF; }
+"_MEMSSP_DERANGEMENT_FIXE" { DlsScanner_lval.val = T_SPERS_DERF; return T_SPERS_DERF; }
 "_MEMSSP_DANGER"           { DlsScanner_lval.val = T_SPERS_DAN;  return T_SPERS_DAN;  }
-"_MEMSSP_DANGER_FIXE"      { DlsScanner_lval.val = T_SPERS_DAN;  return T_SPERS_DANF; }
+"_MEMSSP_DANGER_FIXE"      { DlsScanner_lval.val = T_SPERS_DANF; return T_SPERS_DANF; }
 "_OSYN_ACQUIT"             { DlsScanner_lval.val = T_OSYN_ACQ;   return T_OSYN_ACQ;   }
 
  /************************************************ Couleurs ***********************************************/
