@@ -65,10 +65,13 @@
                    dls_tree->syn_vars.syn_id, dls->plugindb.id, dls->plugindb.on, date, dls->debug, dls->conso, dls->plugindb.shortname );
        response = Admin_write ( response, chaine );
        g_snprintf( chaine, sizeof(chaine),
-                   " |                   comm_out=%d, def=%d, ala=%d, veille=%d, ale=%d, der=%d, dan=%d",
-                   dls->vars.bit_comm_out, dls->vars.bit_defaut, dls->vars.bit_alarme,
-                   dls->vars.bit_veille, dls->vars.bit_alerte,
-                   dls->vars.bit_derangement, dls->vars.bit_danger );
+                   " |                   comm_out=%d, defaut=%d/%d, alarme=%d/%d, veille=%d, alerte=%d/%d, derangement=%d/%d, danger=%d/%d",
+                   dls->vars.bit_comm_out, dls->vars.bit_defaut, dls->vars.bit_defaut_fixe,
+                   dls->vars.bit_alarme, dls->vars.bit_alarme_fixe,
+                   dls->vars.bit_veille,
+                   dls->vars.bit_alerte, dls->vars.bit_alerte_fixe,
+                   dls->vars.bit_derangement,dls->vars.bit_derangement_fixe,
+                   dls->vars.bit_danger, dls->vars.bit_danger_fixe );
        response = Admin_write ( response, chaine );
        liste = liste->next;
      }
