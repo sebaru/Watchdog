@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/trame.c         gestion de la trame du synoptique                                               */
-/* Projet WatchDog version 2.0      Gestion d'habitat                       dim 28 sep 2003 16:44:11 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/trame.c         gestion de la trame du synoptique                                                                   */
+/* Projet WatchDog version 2.0      Gestion d'habitat                                           dim 28 sep 2003 16:44:11 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * trame.c
  * This file is part of Watchdog
@@ -170,7 +170,7 @@
 
     goo_canvas_item_set_transform ( trame_motif->item_groupe, &trame_motif->transform );
 
-    if ( trame_motif->select_hd)
+    if (trame_motif->select_hd)
      {
        cairo_matrix_init_identity ( &trame_motif->transform_hd );
        cairo_matrix_translate ( &trame_motif->transform_hd,
@@ -433,11 +433,11 @@ printf("Rafraichir camera : %d %d\n", trame_camera_sup->camera_sup->posx, trame_
     Trame_peindre_motif( trame_motif, r, v, b );
   }
 
-/**********************************************************************************************************/
-/* Charger_pixbuf: Tente de charger un ensemble de pixbuf representant un icone                           */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference         */
-/* Sortie: reussite                                                                                       */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Charger_pixbuf: Tente de charger un ensemble de pixbuf representant un icone                                               */
+/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* Sortie: reussite                                                                                                           */
+/******************************************************************************************************************************/
  void Charger_pixbuf_file ( struct TRAME_ITEM_MOTIF *trame_item, gchar *fichier )
   { gint cpt_frame, source;
     gchar from_fichier[256];
@@ -694,6 +694,43 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
      { goo_canvas_item_lower( trame_motif->item, NULL );
        goo_canvas_item_lower( trame->fond, NULL );
      }
+    return(trame_motif);
+  }
+/******************************************************************************************************************************/
+/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
+/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* Sortie: reussite                                                                                                           */
+/******************************************************************************************************************************/
+ static struct TRAME_ITEM_MOTIF *Trame_ajout_vignette ( struct TRAME *trame, struct CMD_TYPE_MOTIF *motif, gchar *file )
+  { struct TRAME_ITEM_MOTIF *trame_motif;
+
+    if (!(trame && motif)) return(NULL);
+    trame_motif = Trame_new_item();
+    if (!trame_motif) return(NULL);
+
+    trame_motif->motif = motif;
+
+    Charger_pixbuf_file( trame_motif, file );
+    if (!trame_motif->images)                                              /* En cas de probleme, on sort */
+     { Trame_del_item(trame_motif);
+       g_free(trame_motif);
+       return(NULL);
+     }
+    Trame_peindre_motif( trame_motif, motif->rouge0, motif->vert0, motif->bleu0 );
+
+    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
+    trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
+                                               trame_motif->pixbuf,
+                                               (-(gdouble)(trame_motif->gif_largeur/2)),
+                                               (-(gdouble)(trame_motif->gif_hauteur/2)),
+                                               NULL );
+
+    if (!motif->largeur) motif->largeur = trame_motif->gif_largeur;
+    if (!motif->hauteur) motif->hauteur = trame_motif->gif_hauteur;
+
+    Trame_rafraichir_motif ( trame_motif );
+
+    trame_motif->type = TYPE_MOTIF;
     return(trame_motif);
   }
 /******************************************************************************************************************************/
@@ -991,7 +1028,8 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 /* Sortie: un widget GTK                                                                                  */
 /**********************************************************************************************************/
  struct TRAME *Trame_creer_trame ( guint taille_x, guint taille_y, char *coul, guint grille )
-  { struct TRAME *trame;
+  { struct CMD_TYPE_MOTIF *motif;
+    struct TRAME *trame;
     gdouble x, y;
 
     trame = g_try_malloc0( sizeof(struct TRAME) );
@@ -1005,7 +1043,15 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                        0.0, 0.0, (double) taille_x, (double) taille_y,
                                          "stroke_color", "yellow", NULL);
     goo_canvas_item_lower( GOO_CANVAS_ITEM(trame->fond), NULL );
-
+                                                                                         /* Creation de la vignette activités */
+    motif = g_try_malloc0 ( sizeof( struct TRAME_ITEM_MOTIF ) );
+    if (motif)
+     { motif->position_x = -50;
+       motif->position_y = -50;
+       trame->Vignette_activite = Trame_ajout_vignette ( trame, motif, "activite.gif" );
+       Trame_choisir_frame ( trame->Vignette_activite, 0, 0, 0, 0 );
+     }
+     
     if (grille)
      { for ( x=grille; x<taille_x; x+=grille )
         { for ( y=grille; y<taille_y; y+=grille )
@@ -1072,6 +1118,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
        objet = objet->next;
      }
     g_list_free( trame->trame_items );                                /* Raz de la g_list correspondantes */
+    Trame_del_item ( trame->Vignette_activite );
     trame->trame_items = NULL;
   }
 

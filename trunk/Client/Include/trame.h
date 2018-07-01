@@ -209,6 +209,7 @@
     GtkWidget *trame_widget;
     GooCanvasItem *fond;
     GList *trame_items;
+    struct TRAME_ITEM_MOTIF *Vignette_activite;
   };
 
 /*********************************************** Déclaration des prototypes****************************************************/

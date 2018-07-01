@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/supervision_passerelle.c        Affichage du synoptique de supervision                          */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 04 avr 2009 12:29:01 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/supervision_passerelle.c        Affichage du synoptique de supervision                                              */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          sam 04 avr 2009 12:29:01 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * supervision_passerelle.c
  * This file is part of Watchdog

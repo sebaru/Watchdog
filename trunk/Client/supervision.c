@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/supervision.c        Affichage du synoptique de supervision                                     */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 29 mar 2009 09:54:22 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/supervision.c        Affichage du synoptique de supervision                                                         */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          dim 29 mar 2009 09:54:22 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * supervision.c
  * This file is part of Watchdog
@@ -37,14 +37,14 @@
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
 
-/********************************* Définitions des prototypes programme ***********************************/
+/********************************************* Définitions des prototypes programme *******************************************/
  #include "protocli.h"
 
-/**********************************************************************************************************/
-/* Rechercher_infos_supervision_par_id_syn: Recherche une page synoptique par son numéro                  */
-/* Entrée: Un numéro de synoptique                                                                        */
-/* Sortie: Une référence sur les champs d'information de la page en question                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Rechercher_infos_supervision_par_id_syn: Recherche une page synoptique par son numéro                                      */
+/* Entrée: Un numéro de synoptique                                                                                            */
+/* Sortie: Une référence sur les champs d'information de la page en question                                                  */
+/******************************************************************************************************************************/
  struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( gint syn_id )
   { struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
@@ -61,11 +61,11 @@
      }
     return(infos);
   }
-/**********************************************************************************************************/
-/* Detruire_page_supervision: L'utilisateur veut fermer la page de supervision                            */
-/* Entrée: la page en question                                                                            */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Detruire_page_supervision: L'utilisateur veut fermer la page de supervision                                                */
+/* Entrée: la page en question                                                                                                */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Detruire_page_supervision( struct PAGE_NOTEBOOK *page )
   { struct TYPE_INFO_SUPERVISION *infos;
     infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
@@ -149,7 +149,7 @@
     hboite = gtk_hbox_new( FALSE, 6 );
     page->child = hboite;
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
-/**************************************** Trame proprement dite *******************************************/
+/**************************************************** Trame proprement dite ***************************************************/
     
     scroll = gtk_scrolled_window_new( NULL, NULL );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_ALWAYS, GTK_POLICY_ALWAYS );
@@ -158,7 +158,7 @@
     infos->Trame = Trame_creer_trame( TAILLE_SYNOPTIQUE_X, TAILLE_SYNOPTIQUE_Y, "darkgray", 0 );
     gtk_container_add( GTK_CONTAINER(scroll), infos->Trame->trame_widget );
 
-/**************************************** Boutons de controle *********************************************/
+/************************************************** Boutons de controle *******************************************************/
     boite = gtk_vbox_new( FALSE, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
 
@@ -172,7 +172,7 @@
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_exporter_synoptique), infos );
 
-/*********************************************** Zoom *****************************************************/
+/********************************************************** Zoom **************************************************************/
     frame = gtk_frame_new ( _("Zoom") );
     gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
     gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
@@ -188,7 +188,7 @@
     g_signal_connect( G_OBJECT( infos->Option_zoom ), "value-changed",
                       G_CALLBACK( Changer_option_zoom ), infos );
 
-/************************************************* Palettes ***********************************************/
+/************************************************************* Palettes *******************************************************/
     frame = gtk_frame_new( _("Palette") );
     gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
     gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
@@ -226,9 +226,7 @@
     infos = Rechercher_infos_supervision_par_id_syn ( rezo_motif->syn_id );
     if (!(infos && infos->Trame)) return;
     motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
-    if (!motif)
-     { return;
-     }
+    if (!motif) return;
 
     memcpy( motif, rezo_motif, sizeof(struct CMD_TYPE_MOTIF) );
     trame_motif = Trame_ajout_motif ( FALSE, infos->Trame, motif );
@@ -247,11 +245,11 @@
     g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event",
                       G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
   }
-/**********************************************************************************************************/
-/* Changer_etat_motif: Changement d'etat d'un motif                                                       */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Changer_etat_motif: Changement d'etat d'un motif                                                                           */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Changer_etat_motif( struct TRAME_ITEM_MOTIF *trame_motif, struct CMD_ETAT_BIT_CTRL *etat_motif )
   { printf("Changer_etat_motif: %d = %d %d %d etat %d (type %d) cligno=%d %s\n",
             trame_motif->motif->bit_controle,
@@ -485,11 +483,18 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
        infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
 
        if (infos->syn_id == syn_vars->syn_id)
-        { if (syn_vars->bit_defaut || syn_vars->bit_alarme, syn_vars->bit_alerte, syn_vars->bit_derangement, syn_vars->bit_danger)
+        {                                                     /* Positionnement de la couleur du bouton d'acquit du synotique */
+          if (syn_vars->bit_defaut || syn_vars->bit_alarme, syn_vars->bit_alerte, syn_vars->bit_derangement, syn_vars->bit_danger)
            { gdk_color_parse ("blue", &color);
              gtk_widget_modify_bg ( infos->bouton_acq, GTK_STATE_NORMAL, &color );
            } else
            { gtk_widget_modify_bg ( infos->bouton_acq, GTK_STATE_NORMAL, NULL ); }
+
+                                                                               /* Positionnement des vignettes du synoptiques */
+           struct CMD_ETAT_BIT_CTRL etat_motif;
+           /*etat_motif.rouge0=255;*/
+           Changer_etat_motif( infos->Trame->Vignette_activite, &etat_motif );
+          
         }
 
        liste_motifs = infos->Trame->trame_items;                                /* On parcours tous les motifs de chaque page */
