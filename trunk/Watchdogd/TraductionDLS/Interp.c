@@ -320,6 +320,21 @@
    return(result);
  }
 /******************************************************************************************************************************/
+/* New_condition_horloge: Prepare la chaine de caractere associée à la condition, en respectant les options                   */
+/* Entrées: l'alias de l'horloge et sa liste d'options                                                                        */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_horloge( int barre, struct ALIAS *alias, GList *options )
+  { gchar *result;
+    gint taille;
+    taille = 100;                                                                               /* Alias par nom uniquement ! */
+    result = New_chaine( taille ); /* 10 caractères max */
+    if ( !barre )
+         { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_HOR_%s )", alias->nom, Dls_plugin.tech_id, alias->nom ); }
+    else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_HOR_%s )", alias->nom, Dls_plugin.tech_id, alias->nom ); }
+   return(result);
+ }
+/******************************************************************************************************************************/
 /* New_condition_vars: formate une condition avec le nom de variable en parametre                                             */
 /* Entrées: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
@@ -754,6 +769,10 @@
                  { case T_MONO: nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_M_%s;\n", alias->nom );
                                 write (fd, chaine, nb_car);
                                 break;
+                   case T_HORLOGE:
+                                nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_HOR_%s;\n", alias->nom );
+                                write (fd, chaine, nb_car);
+                                break;
                  }
               }
              liste = liste->next;
@@ -862,7 +881,7 @@
           close(fd);
         }
 
-     /*Retirer_mnemo_baseDB_for_dls ( id );                  /* Suppression des mnemos automatique du DLS fraichement traduit */
+       Retirer_auto_mnemo_baseDB_for_dls ( id );             /* Suppression des mnemos automatique du DLS fraichement traduit */
        liste = Alias;                                           /* Libération des alias, et remonté d'un Warning si il y en a */
        while(liste)
         { struct CMD_TYPE_MNEMO_BASE mnemo;
@@ -876,6 +895,12 @@
            { switch ( alias->bit )
               { case T_MONO:
                  { mnemo.type = MNEMO_MONOSTABLE;
+                   g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
+                   g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
+                   Mnemo_auto_create_for_dls ( &mnemo );
+                 }
+                case T_HORLOGE:
+                 { mnemo.type = MNEMO_HORLOGE;
                    g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
                    g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
                    Mnemo_auto_create_for_dls ( &mnemo );

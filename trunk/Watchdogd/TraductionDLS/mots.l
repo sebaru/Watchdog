@@ -65,6 +65,7 @@ blanc         [\t ]+
 "_R"                       { DlsScanner_lval.val = T_REGISTRE;  return T_REGISTRE;  }
 "_CH"                      { DlsScanner_lval.val = CPT_H;       return CPT_H;       }
 "_CI"                      { DlsScanner_lval.val = T_CPT_IMP;   return T_CPT_IMP;   }
+"_HORLOGE"                 { DlsScanner_lval.val = T_HORLOGE;   return T_HORLOGE;   }
 "_MSG"                     { DlsScanner_lval.val = T_MSG;       return T_MSG;       }
 "_START"                   { DlsScanner_lval.val = T_START;     return T_START;     }
 "_TRUE"                    { DlsScanner_lval.val = T_TRUE;      return T_TRUE;      }

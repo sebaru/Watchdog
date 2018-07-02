@@ -69,11 +69,11 @@
     return(retour);
   }
 /******************************************************************************************************************************/
-/* Retirer_mnemo_baseDB_for_dls: Elimination de l'ensemble des mnemo automatique d'un plugin D.L.S                            */
+/* Retirer_auto_mnemo_baseDB_for_dls: Elimination de l'ensemble des mnemo automatique d'un plugin D.L.S                       */
 /* Entrée: l'id dls des mnemos auto a supprimer                                                                               */
 /* Sortie: FALSE si probleme                                                                                                  */
 /******************************************************************************************************************************/
- gboolean Retirer_mnemo_baseDB_for_dls ( gint dls_id )
+ gboolean Retirer_auto_mnemo_baseDB_for_dls ( gint dls_id )
   { gchar requete[200];
     gboolean retour;
     struct DB *db;
@@ -84,7 +84,7 @@
        return(FALSE);
      }
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "DELETE FROM %s WHERE dls_id=%d AND created_by_user = 0", NOM_TABLE_MNEMO, dls_id );
+                "DELETE FROM %s WHERE dls_id=%d AND num=-1", NOM_TABLE_MNEMO, dls_id );
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return(retour);

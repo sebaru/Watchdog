@@ -43,7 +43,7 @@
        };
 
 %token <val>    PVIRGULE VIRGULE DONNE EQUIV DPOINT MOINS T_POUV T_PFERM T_EGAL OU ET BARRE T_FOIS T_DEFINE T_STATIC
-%token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_SBIEN_VEILLE T_SBIEN_ALE
+%token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_SBIEN_VEILLE T_SBIEN_ALE T_HORLOGE
 %token <val>    T_SPERS_DER T_SPERS_DERF T_SPERS_DAN T_SPERS_DANF T_OSYN_ACQ
 %token <val>    T_ACT_DEFF T_ACT_ALAF T_SBIEN_ALEF T_TOP_ALERTE
 %token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LIBELLE
@@ -89,23 +89,8 @@ listeAlias:     un_alias listeAlias
                 
 un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                 {{ int taille;
-                   switch($4)
-                    { case ENTREE:
-                      case SORTIE:
-                      case T_TEMPO :
-                      case EANA  :
-                      case T_MONO  :
-                      case CPT_H :
-                      case T_CPT_IMP:
-                      case T_MSG :
-                      case T_REGISTRE :
-                      case ICONE :
-                      case T_BI  : if ( New_alias($2, $4, -1, 0, $5) == FALSE )                             /* Deja defini ? */
-                                    { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
-                                   break;
-                      default: Emettre_erreur_new( "Ligne %d: Syntaxe Error near '%s'", DlsScanner_get_lineno(), $2 );
-                               break;
-                    }
+                   if ( New_alias($2, $4, -1, 0, $5) == FALSE )                                              /* Deja defini ? */
+                    { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
                 }}
                 | T_STATIC ID EQUIV barre alias_bit ENTIER PVIRGULE
                 {{ int taille;
@@ -134,7 +119,7 @@ un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                     }
                 }}
                 ;
-alias_bit:      T_BI | T_MONO | ENTREE | SORTIE | T_MSG | T_TEMPO | ICONE | CPT_H | T_CPT_IMP | EANA | T_REGISTRE
+alias_bit:      T_BI | T_MONO | ENTREE | SORTIE | T_MSG | T_TEMPO | ICONE | CPT_H | T_CPT_IMP | EANA | T_REGISTRE | T_HORLOGE
                 ;
 /**************************************************** Gestion des instructions ************************************************/
 listeInstr:     une_instr listeInstr
@@ -481,7 +466,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                     { if ($4 && (alias->bit==T_TEMPO ||                              /* Vérification des bits non comparables */
                                  alias->bit==ENTREE ||
                                  alias->bit==T_BI ||
-                                 alias->bit==T_MONO)
+                                 alias->bit==T_MONO || alias->bit==T_HORLOGE)
                          )
                        { Emettre_erreur_new( "Ligne %d: '%s' ne peut s'utiliser dans une comparaison", DlsScanner_get_lineno(), $2 );
                          $$=New_chaine(2);
@@ -522,6 +507,13 @@ unite:          modulateur ENTIER HEURE ENTIER
                              { $$ = New_condition_mono( 0, alias, $3 ); }
                             else
                              { $$ = New_condition_mono( 1, alias, $3 ); }
+                             break;
+                          }
+                         case T_HORLOGE:
+                          { if ( (alias->barre && $1) || (!alias->barre && !$1))
+                             { $$ = New_condition_horloge( 0, alias, $3 ); }
+                            else
+                             { $$ = New_condition_horloge( 1, alias, $3 ); }
                              break;
                           }
                          case EANA:

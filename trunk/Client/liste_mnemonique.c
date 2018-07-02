@@ -65,6 +65,7 @@
     { 0x0, 0x0,    0x7FFF, 0x0    },
     { 0x0, 0xFFFF, 0xFFFF, 0x0    },
     { 0x0, 0x7FFF, 0x7FFF, 0x0    }, /* Registres */
+    { 0x0, 0xAFFF, 0x0,    0x0    }, /* Horloge */
   };
  static GdkColor COULEUR_TEXTE[NBR_TYPE_MNEMO]=
   { { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
@@ -78,6 +79,7 @@
     { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
     { 0x0, 0x0,    0x0,    0x0    },
     { 0x0, 0x0,    0x0,    0x0    }, /* Registres */
+    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF }, /* Horloges */
   };
  static gchar *TYPE_BIT_INTERNE[ NBR_TYPE_MNEMO ]=          /* Type des différents bits internes utilisés */
   { "B  - Bistable",
@@ -91,6 +93,7 @@
     "CH - Compteur H",
     "CI - Compteur IMP",
     "R  - Registre",
+    "HOR- Horloge",
   };
  static gchar *TYPE_BIT_INTERNE_COURT[ NBR_TYPE_MNEMO ]=    /* Type des différents bits internes utilisés */
   { "B",
@@ -104,6 +107,7 @@
     "CH",
     "CI",
     "R",
+    "HOR",
   };
 /******************************************** Définitions des prototypes programme ********************************************/
  #include "protocli.h"
