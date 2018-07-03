@@ -881,7 +881,7 @@
           close(fd);
         }
 
-       Retirer_auto_mnemo_baseDB_for_dls ( id );             /* Suppression des mnemos automatique du DLS fraichement traduit */
+       /*Retirer_auto_mnemo_baseDB_for_dls ( id );             /* Suppression des mnemos automatique du DLS fraichement traduit */
        liste = Alias;                                           /* Libération des alias, et remonté d'un Warning si il y en a */
        while(liste)
         { struct CMD_TYPE_MNEMO_BASE mnemo;

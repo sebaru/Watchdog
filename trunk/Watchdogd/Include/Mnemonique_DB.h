@@ -38,6 +38,7 @@
  #define NOM_TABLE_MNEMO_CPTIMP   "mnemos_CptImp"
  #define NOM_TABLE_MNEMO_TEMPO    "mnemos_Tempo"
  #define NOM_TABLE_MNEMO_REGISTRE "mnemos_Registre"
+ #define NOM_TABLE_MNEMO_HORLOGE  "mnemos_Horloge"
 
 /***************************************************** Définitions des prototypes *********************************************/
  extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB ( guint id );
@@ -56,6 +57,9 @@
  extern void Charger_analogInput ( void );                                                                 /* Dans Mnemo_AI.c */
  extern struct CMD_TYPE_MNEMO_AI *Rechercher_mnemo_aiDB ( guint id );
  extern gboolean Modifier_mnemo_aiDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
+
+ extern gboolean Modifier_mnemo_horlogeDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );              /* Dans Mnemo_HORLORGES.c */
+ extern gboolean Modifier_mnemo_del_all_horlogeDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
 
 
  extern void Updater_cpt_impDB ( void );                                                              /* Dans Mnemo_CPT_IMP.c */

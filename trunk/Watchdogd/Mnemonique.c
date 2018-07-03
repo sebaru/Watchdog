@@ -117,8 +117,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO mnemos SET created_by_user='0',type='%d',num='-1',dls_id='%d',acronyme='%s',libelle='%s' "
-                " ON DUPLICATE KEY UPDATE type='%d',libelle='%s'",
-                mnemo->type, mnemo->dls_id, acro, libelle, mnemo->type, libelle );
+                " ON DUPLICATE KEY UPDATE libelle='%s'",
+                mnemo->type, mnemo->dls_id, acro, libelle, libelle );
     g_free(libelle);
     g_free(acro);
 

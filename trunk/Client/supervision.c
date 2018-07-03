@@ -121,6 +121,13 @@
  static void Menu_acquitter_synoptique( struct TYPE_INFO_SUPERVISION *infos )
   { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_ACQ_SYN, (gchar *)&infos->syn_id, sizeof(gint) ); }
 /******************************************************************************************************************************/
+/* Menu_ouvrir_horloges_synoptique: Envoi une demande de liste des horloges liées au synoptique                               */
+/* Entrée: La page d'information synoptique                                                                                   */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Menu_ouvrir_horloges_synoptique( struct TYPE_INFO_SUPERVISION *infos )
+  { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_HORLOGES, (gchar *)&infos->syn_id, sizeof(gint) ); }
+/******************************************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
 /* Entrée: Le libelle a afficher dans le notebook et l'ID du synoptique                                                       */
 /* Sortie: rien                                                                                                               */
@@ -202,6 +209,11 @@
     gtk_box_pack_start( GTK_BOX(boite), infos->bouton_acq, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(infos->bouton_acq), "clicked",
                               G_CALLBACK(Menu_acquitter_synoptique), infos );
+
+    bouton = gtk_button_new_with_label( "Horloges" );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                              G_CALLBACK(Menu_ouvrir_horloges_synoptique), infos );
 
     gtk_widget_show_all( page->child );
 
