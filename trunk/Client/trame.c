@@ -514,7 +514,7 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
        return(FALSE);
      }
 
-    g_snprintf( url, sizeof(url), "http://%s/ws/gif/%d/%d", Client.host, id, mode );
+    g_snprintf( url, sizeof(url), "%s/ws/gif/%d/%d", Config_cli.target_url, id, mode );
     Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "Trying to get %s", url );
     curl_easy_setopt(curl, CURLOPT_URL, url );
        /*curl_easy_setopt(curl, CURLOPT_POST, 1 );
@@ -586,7 +586,8 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
     if (mode==0) g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif", icone_id );
     else         g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif.%02d", icone_id, mode );
     pixbuf = gdk_pixbuf_new_from_file ( nom_fichier, NULL );                            /* 2nde tentative */
-    if (!pixbuf) return(FALSE);                                        /* Chargement en erreur ou terminé */
+    if (!pixbuf)
+    { printf("Add_single_icone_to_item: Erreur chargement %s\n", nom_fichier); return(FALSE); }/* Chargement en erreur ou terminé */
     trame_item->gif_largeur = gdk_pixbuf_get_width ( pixbuf );
     trame_item->gif_hauteur = gdk_pixbuf_get_height( pixbuf );
     trame_item->images = g_list_append( trame_item->images, pixbuf );     /* Et ajout dans la liste */
@@ -616,33 +617,31 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
                                                                   /* Chargement des frames restantes (downloadées ou locales) */
     while ( Add_single_icone_to_item(trame_item, icone_id, trame_item->nbr_images) == TRUE );
   }
-/**********************************************************************************************************/
-/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                       */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference         */
-/* Sortie: reussite                                                                                       */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
+/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* Sortie: reussite                                                                                                           */
+/******************************************************************************************************************************/
  struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame,
                                               struct CMD_TYPE_MOTIF *motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
 
     if (!(trame && motif)) return(NULL);
     trame_motif = Trame_new_item();
-    if (!trame_motif) return(NULL);
+    if (!trame_motif) { printf("Trame_ajout_motif: Erreur mémoire\n"); return(NULL); }
 
     trame_motif->motif = motif;
 
     Charger_pixbuf_id( trame_motif, motif->icone_id );
-/*    Charger_gif( trame_motif, nom_fichier ); */
 
     if (!trame_motif->images)                                              /* En cas de probleme, on sort */
      { Trame_del_item(trame_motif);
        g_free(trame_motif);
+       printf("Trame_ajout_motif: Erreur images\n");
        return(NULL);
      }
     Trame_peindre_motif( trame_motif, motif->rouge0, motif->vert0, motif->bleu0 );
-#ifdef DEBUG_TRAME
-printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
-#endif
+
     trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
                                                trame_motif->pixbuf,
@@ -694,43 +693,6 @@ printf("New motif: largeur %f haut%f\n", motif->largeur, motif->hauteur );
      { goo_canvas_item_lower( trame_motif->item, NULL );
        goo_canvas_item_lower( trame->fond, NULL );
      }
-    return(trame_motif);
-  }
-/******************************************************************************************************************************/
-/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
-/* Sortie: reussite                                                                                                           */
-/******************************************************************************************************************************/
- static struct TRAME_ITEM_MOTIF *Trame_ajout_vignette ( struct TRAME *trame, struct CMD_TYPE_MOTIF *motif, gchar *file )
-  { struct TRAME_ITEM_MOTIF *trame_motif;
-
-    if (!(trame && motif)) return(NULL);
-    trame_motif = Trame_new_item();
-    if (!trame_motif) return(NULL);
-
-    trame_motif->motif = motif;
-
-    Charger_pixbuf_file( trame_motif, file );
-    if (!trame_motif->images)                                              /* En cas de probleme, on sort */
-     { Trame_del_item(trame_motif);
-       g_free(trame_motif);
-       return(NULL);
-     }
-    Trame_peindre_motif( trame_motif, motif->rouge0, motif->vert0, motif->bleu0 );
-
-    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
-    trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
-                                               trame_motif->pixbuf,
-                                               (-(gdouble)(trame_motif->gif_largeur/2)),
-                                               (-(gdouble)(trame_motif->gif_hauteur/2)),
-                                               NULL );
-
-    if (!motif->largeur) motif->largeur = trame_motif->gif_largeur;
-    if (!motif->hauteur) motif->hauteur = trame_motif->gif_hauteur;
-
-    Trame_rafraichir_motif ( trame_motif );
-
-    trame_motif->type = TYPE_MOTIF;
     return(trame_motif);
   }
 /******************************************************************************************************************************/
@@ -1022,11 +984,11 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 
     return(trame_cadran);
   }
-/**********************************************************************************************************/
-/* Trame_creer_trame: Creation d'une nouvelle trame                                                       */
-/* Entrée: les tailles x, y et la couleur de fond                                                         */
-/* Sortie: un widget GTK                                                                                  */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Trame_creer_trame: Creation d'une nouvelle trame                                                                           */
+/* Entrée: les tailles x, y et la couleur de fond                                                                             */
+/* Sortie: un widget GTK                                                                                                      */
+/******************************************************************************************************************************/
  struct TRAME *Trame_creer_trame ( guint taille_x, guint taille_y, char *coul, guint grille )
   { struct CMD_TYPE_MOTIF *motif;
     struct TRAME *trame;
@@ -1037,21 +999,63 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 
     trame->trame_widget = goo_canvas_new();
     g_object_set( trame->trame_widget, "background-color", coul, "anchor", GTK_ANCHOR_CENTER, NULL );
-    goo_canvas_set_bounds (GOO_CANVAS (trame->trame_widget), 0, 0, taille_x, taille_y);
+    goo_canvas_set_bounds (GOO_CANVAS (trame->trame_widget), 0, 0, taille_x+80, taille_y);
     trame->canvas_root = goo_canvas_get_root_item (GOO_CANVAS (trame->trame_widget));
     trame->fond = goo_canvas_rect_new (trame->canvas_root,
                                        0.0, 0.0, (double) taille_x, (double) taille_y,
                                          "stroke_color", "yellow", NULL);
     goo_canvas_item_lower( GOO_CANVAS_ITEM(trame->fond), NULL );
+
+    motif = g_try_malloc0 ( sizeof( struct TRAME_ITEM_MOTIF ) );
+    if (motif)
+     { motif->position_x = TAILLE_SYNOPTIQUE_X+30;
+       motif->position_y = TAILLE_SYNOPTIQUE_Y/2-100;
+       motif->largeur = 40;
+       motif->hauteur = 40;
+       motif->icone_id = 535;
+       motif->type_gestion = TYPE_FOND;
+       Trame_ajout_motif ( FALSE, trame, motif );
+     }
                                                                                          /* Creation de la vignette activités */
     motif = g_try_malloc0 ( sizeof( struct TRAME_ITEM_MOTIF ) );
     if (motif)
-     { motif->position_x = -50;
-       motif->position_y = -50;
-       trame->Vignette_activite = Trame_ajout_vignette ( trame, motif, "activite.gif" );
-       Trame_choisir_frame ( trame->Vignette_activite, 0, 0, 0, 0 );
+     { motif->position_x = TAILLE_SYNOPTIQUE_X+30;
+       motif->position_y = TAILLE_SYNOPTIQUE_Y/2-50;
+       motif->largeur = 40;
+       motif->hauteur = 40;
+       motif->icone_id = 3;
+       motif->type_gestion = TYPE_DYNAMIQUE;
+       trame->Vignette_activite = Trame_ajout_motif ( FALSE, trame, motif );
+       printf("Trame_vignette = %p\n", trame->Vignette_activite );
+       Trame_choisir_frame ( trame->Vignette_activite, 0, 0, 255, 0 );
      }
      
+                                                                                         /* Creation de la vignette secu bien */
+    motif = g_try_malloc0 ( sizeof( struct TRAME_ITEM_MOTIF ) );
+    if (motif)
+     { motif->position_x = TAILLE_SYNOPTIQUE_X+30;
+       motif->position_y = TAILLE_SYNOPTIQUE_Y/2+0;
+       motif->largeur = 40;
+       motif->hauteur = 40;
+       motif->icone_id = 431;
+       motif->type_gestion = TYPE_DYNAMIQUE;
+       trame->Vignette_secu_bien = Trame_ajout_motif ( FALSE, trame, motif );
+       Trame_choisir_frame ( trame->Vignette_secu_bien, 0, 0, 255, 0 );
+     }
+
+                                                                                     /* Creation de la vignette secu personne */
+    motif = g_try_malloc0 ( sizeof( struct TRAME_ITEM_MOTIF ) );
+    if (motif)
+     { motif->position_x = TAILLE_SYNOPTIQUE_X+30;
+       motif->position_y = TAILLE_SYNOPTIQUE_Y/2+50;
+       motif->largeur = 40;
+       motif->hauteur = 40;
+       motif->icone_id = 536;
+       motif->type_gestion = TYPE_DYNAMIQUE;
+       trame->Vignette_secu_personne = Trame_ajout_motif ( FALSE, trame, motif );
+       Trame_choisir_frame ( trame->Vignette_secu_personne, 0, 0, 255, 0 );
+     }
+
     if (grille)
      { for ( x=grille; x<taille_x; x+=grille )
         { for ( y=grille; y<taille_y; y+=grille )
@@ -1117,8 +1121,8 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
         }
        objet = objet->next;
      }
-    g_list_free( trame->trame_items );                                /* Raz de la g_list correspondantes */
-    Trame_del_item ( trame->Vignette_activite );
+    g_list_free( trame->trame_items );                                                    /* Raz de la g_list correspondantes */
+    /*Trame_del_item ( trame->Vignette_activite );*/
     trame->trame_items = NULL;
   }
 

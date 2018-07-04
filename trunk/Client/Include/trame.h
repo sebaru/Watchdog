@@ -210,6 +210,8 @@
     GooCanvasItem *fond;
     GList *trame_items;
     struct TRAME_ITEM_MOTIF *Vignette_activite;
+    struct TRAME_ITEM_MOTIF *Vignette_secu_bien;
+    struct TRAME_ITEM_MOTIF *Vignette_secu_personne;
   };
 
 /*********************************************** Déclaration des prototypes****************************************************/
