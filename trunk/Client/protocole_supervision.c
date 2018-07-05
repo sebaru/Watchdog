@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/protocole_supervision.c    Gestion du protocole_supervision pour Watchdog                       */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 04 avr 2009 12:13:51 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/protocole_supervision.c    Gestion du protocole_supervision pour Watchdog                                           */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          sam 04 avr 2009 12:13:51 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * protocole_supervision.c
  * This file is part of Watchdog
@@ -29,21 +29,21 @@
  #include "Erreur.h"
  #include "Reseaux.h"
 
-/********************************* Définitions des prototypes programme ***********************************/
+/******************************************** Définitions des prototypes programme ********************************************/
  #include "protocli.h"
 
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
+ extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
 
-/**********************************************************************************************************/
-/* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
-/* Entrée: la connexion avec le serveur                                                                   */
-/* Sortie: Kedal                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Gerer_protocole: Gestion de la communication entre le serveur et le client                                                 */
+/* Entrée: la connexion avec le serveur                                                                                       */
+/* Sortie: Kedal                                                                                                              */
+/******************************************************************************************************************************/
  void Gerer_protocole_supervision ( struct CONNEXION *connexion )
   { static GList *Arrivee_comment = NULL;
     static GList *Arrivee_palette = NULL;
     static GList *Arrivee_camera_sup = NULL;
-    static GList *Arrivee_scenario = NULL;
+    static GList *Arrivee_horloges = NULL;
     static int save_id = 0;
 
     switch ( Reseau_ss_tag ( connexion ) )
@@ -165,21 +165,33 @@
              }
             break;
 /******************************************** Reception des Scenario **********************************************************/
-       case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO:
-             { struct CMD_TYPE_SCENARIO *scenario;
+       case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGES:
+             { struct CMD_TYPE_MNEMO_BASE *mnemo;
                Set_progress_plus(1);
 
-               scenario = (struct CMD_TYPE_SCENARIO *)g_try_malloc0( sizeof( struct CMD_TYPE_SCENARIO ) );
-               if (!scenario) return; 
-               memcpy( scenario, connexion->donnees, sizeof(struct CMD_TYPE_SCENARIO ) );
-               Arrivee_scenario = g_list_append( Arrivee_scenario, scenario );
+               mnemo = (struct CMD_TYPE_MNEMO_BASE *)g_try_malloc0( sizeof( struct CMD_TYPE_MNEMO_BASE ) );
+               if (!mnemo) return; 
+               memcpy( mnemo, connexion->donnees, sizeof(struct CMD_TYPE_MNEMO_BASE ) );
+               Arrivee_horloges = g_list_append( Arrivee_horloges, mnemo );
              }
             break;
-       case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO_FIN:
-             { g_list_foreach( Arrivee_scenario, (GFunc)Proto_afficher_un_scenario_supervision, NULL );
-               g_list_foreach( Arrivee_scenario, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_scenario );
-               Arrivee_scenario = NULL;
+       case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGES_FIN:
+             { struct TYPE_INFO_SUPERVISION *infos;
+               struct CMD_TYPE_MNEMO_BASE *mnemo;
+               GList *liste;
+               liste = Arrivee_horloges;
+               mnemo = (struct CMD_TYPE_MNEMO_BASE *)liste->data;
+               infos = Rechercher_infos_supervision_par_id_syn ( mnemo->syn_id );
+               if (infos/* && infos->Liste_horloge*/)
+                { while (liste)
+                   { mnemo = (struct CMD_TYPE_MNEMO_BASE *)liste->data;
+                     /* Afficher dans la liste */
+                     liste=liste->next;
+                   }
+                }
+               g_list_foreach( Arrivee_horloges, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_horloges );
+               Arrivee_horloges = NULL;
              }
             break;
      }

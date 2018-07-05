@@ -30,7 +30,7 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 			  atelier_ajout_cadran.c atelier_ajout_camera_sup.c \
 			  supervision.c supervision_clic.c supervision_comment.c \
                           supervision_passerelle.c supervision_palette.c \
-                          supervision_cadran.c supervision_scenario.c \
+                          supervision_cadran.c \
 			  supervision_camera.c \
 			  trame.c \
 			  print.c

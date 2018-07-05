@@ -34,7 +34,7 @@
  #include <string.h>
 
  #define MNEMO_SQL_SELECT "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.ev_text,parent_syn.page,syn.page," \
-                          "dls.name, mnemo.tableau, mnemo.acro_syn, mnemo.ev_host, mnemo.ev_thread" \
+                          "dls.name, mnemo.tableau, mnemo.acro_syn, mnemo.ev_host, mnemo.ev_thread, syn.id" \
                           " FROM mnemos as mnemo" \
                           " INNER JOIN dls as dls ON mnemo.dls_id=dls.id" \
                           " INNER JOIN syns as syn ON dls.syn_id = syn.id" \
@@ -340,6 +340,7 @@
        mnemo->type   = atoi(db->row[1]);
        mnemo->num    = atoi(db->row[2]);
        mnemo->dls_id = atoi(db->row[3]);
+       mnemo->syn_id = atoi(db->row[14]);
      }
     return(mnemo);
   }

@@ -126,7 +126,26 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Menu_ouvrir_horloges_synoptique( struct TYPE_INFO_SUPERVISION *infos )
-  { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_HORLOGES, (gchar *)&infos->syn_id, sizeof(gint) ); }
+  { GtkWidget *dialog, *texte, *table, *bouton, *separator;
+    GtkWidget *boite, *Frame, *hboite, *menu;
+    GtkObject *adj;
+    gint cpt;
+
+    Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_HORLOGES, (gchar *)&infos->syn_id, sizeof(gint) );
+    dialog = gtk_dialog_new_with_buttons( "Liste des horloges", GTK_WINDOW(F_client),
+                                          GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                          GTK_STOCK_EDIT, GTK_RESPONSE_OK,
+                                          NULL);
+    /*g_signal_connect( dialog, "response", G_CALLBACK(CB_editer_horloge), FALSE );*/
+    g_signal_connect( dialog, "delete-event", G_CALLBACK(gtk_widget_destroy), dialog );
+
+    Frame = gtk_frame_new( _("Properties") );
+    gtk_frame_set_label_align( GTK_FRAME(Frame), 0.5, 0.5 );
+    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(dialog)->vbox ), Frame, TRUE, TRUE, 0 );
+
+    gtk_widget_show_all( dialog );
+
+  }
 /******************************************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
 /* Entrée: Le libelle a afficher dans le notebook et l'ID du synoptique                                                       */

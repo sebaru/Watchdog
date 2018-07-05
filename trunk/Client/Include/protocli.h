@@ -427,8 +427,8 @@
                                                                                                  /* Dans supervision_camera.c */
  extern void Proto_afficher_un_camera_sup_supervision( struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
 
-                                                                                               /* Dans supervision_scenario.c */
- extern void Proto_afficher_un_scenario_supervision( struct CMD_TYPE_SCENARIO *rezo_scenario );
+                                                                                               /* Dans supervision_horloges.c */
+ extern void Proto_afficher_une_horloge_supervision( struct CMD_TYPE_MNEMO_BASE *mnemo );
 
                                                                                                    /* Dans option_entreetor.c */
  extern void Get_options_DI ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );

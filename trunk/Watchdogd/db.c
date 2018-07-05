@@ -847,7 +847,17 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version=3586;
+    if (database_version < 3596)
+     { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `mnemos_Horloge` ("
+                                             "`id_mnemo` int(11) NOT NULL,"
+                                             "`heure` int(22) NOT NULL,"
+                                             "FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE"
+                                             ") ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
+                  );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version=3596;
 
     Libere_DB_SQL(&db);
 
