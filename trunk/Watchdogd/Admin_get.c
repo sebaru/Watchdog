@@ -34,10 +34,10 @@
 /* Entrée: la clef, la value et le data qui est la 'response'                                                                 */
 /* Sortie: FALSE                                                                                                              */
 /******************************************************************************************************************************/
- static gboolean Admin_get_list ( gpointer key, gpointer value, gpointer data )
+ static gboolean Admin_get_bool_list ( gpointer key, gpointer value, gpointer data )
   { gchar chaine[256];
     gchar *response = *(gchar **)data;
-    g_snprintf( chaine, sizeof(chaine), " | - %s -> %p", key, value );
+    g_snprintf( chaine, sizeof(chaine), " | - %s -> %d", key, (*(gboolean *)value ? 1 : 0) );
     response = Admin_write ( response, chaine );
     *(gchar **)data = response;
     return(FALSE);
@@ -121,7 +121,7 @@
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "list" ) )
-     { g_tree_foreach ( Partage->com_dls.Dls_data, (GTraverseFunc)Admin_get_list, &response );
+     { g_tree_foreach ( Partage->com_dls.Dls_data, (GTraverseFunc)Admin_get_bool_list, &response );
      } else
     if ( ! strcmp ( commande, "e" ) )
      { int num;

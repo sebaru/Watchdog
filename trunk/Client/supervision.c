@@ -139,7 +139,7 @@
     /*g_signal_connect( dialog, "response", G_CALLBACK(CB_editer_horloge), FALSE );*/
     g_signal_connect( dialog, "delete-event", G_CALLBACK(gtk_widget_destroy), dialog );
 
-    Frame = gtk_frame_new( _("Properties") );
+    Frame = gtk_frame_new( _("Les horloges !") );
     gtk_frame_set_label_align( GTK_FRAME(Frame), 0.5, 0.5 );
     gtk_box_pack_start( GTK_BOX( GTK_DIALOG(dialog)->vbox ), Frame, TRUE, TRUE, 0 );
 

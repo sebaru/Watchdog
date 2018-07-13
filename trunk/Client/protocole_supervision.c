@@ -172,6 +172,7 @@
                mnemo = (struct CMD_TYPE_MNEMO_BASE *)g_try_malloc0( sizeof( struct CMD_TYPE_MNEMO_BASE ) );
                if (!mnemo) return; 
                memcpy( mnemo, connexion->donnees, sizeof(struct CMD_TYPE_MNEMO_BASE ) );
+               printf(" Arrivée Horloge : %s \n", mnemo->acronyme );
                Arrivee_horloges = g_list_append( Arrivee_horloges, mnemo );
              }
             break;
@@ -180,6 +181,7 @@
                struct CMD_TYPE_MNEMO_BASE *mnemo;
                GList *liste;
                liste = Arrivee_horloges;
+               if (!liste) break;
                mnemo = (struct CMD_TYPE_MNEMO_BASE *)liste->data;
                infos = Rechercher_infos_supervision_par_id_syn ( mnemo->syn_id );
                if (infos/* && infos->Liste_horloge*/)
