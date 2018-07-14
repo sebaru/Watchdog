@@ -173,8 +173,8 @@
                struct CMD_ENREG nbr;
                struct CMD_TYPE_MNEMO_BASE *mnemo;
                gchar critere[128];
-               gint *syn_id;
-               syn_id = (gint *)connexion->donnees;                               /* Récupération du numéro du synoptique désiré */
+               gint syn_id;
+               syn_id = *(gint *)connexion->donnees;                           /* Récupération du numéro du synoptique désiré */
                g_snprintf( critere, sizeof(critere), "type=%d AND syn.id=%d", MNEMO_HORLOGE, syn_id );
                if ( ! Recuperer_mnemo_baseDB_with_conditions( &db, critere, -1, -1 ) )
                 { return; }

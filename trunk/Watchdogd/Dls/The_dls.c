@@ -798,13 +798,13 @@
     pthread_mutex_lock( &Partage->com_dls.synchro );
     while( Partage->com_dls.Reset_M )                                                                /* Reset des monostables */
      { num = GPOINTER_TO_INT(Partage->com_dls.Reset_M->data);
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: Mise a zero du bit M%03d", __func__, num );
+       Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: Mise a zero du bit M%03d", __func__, num );
        Partage->com_dls.Reset_M = g_slist_remove ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) );
        SM( num, 0 );
      }
     while( Partage->com_dls.Reset_Dls_Data )                                            /* A-t-on un monostable a éteindre ?? */
      { gboolean *data_p = Partage->com_dls.Reset_Dls_Data->data;
-       Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a 0 du bit %p", __func__, data_p );
+       Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: Mise a 0 du bit %p", __func__, data_p );
        Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, data_p ); 
        *data_p = FALSE;                                                                         /* Mise a 0 du bit monostable */
      }

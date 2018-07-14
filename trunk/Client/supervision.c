@@ -131,6 +131,7 @@
     GtkObject *adj;
     gint cpt;
 
+printf(" On veut les horloges du syn %d\n", infos->syn_id );
     Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_HORLOGES, (gchar *)&infos->syn_id, sizeof(gint) );
     dialog = gtk_dialog_new_with_buttons( "Liste des horloges", GTK_WINDOW(F_client),
                                           GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
