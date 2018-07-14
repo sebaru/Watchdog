@@ -26,7 +26,7 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 			  atelier_agrandir.c atelier_propriete_motif.c atelier_ajout_motif.c \
 			  atelier_ajout_comment.c \
                           atelier_ajout_passerelle.c atelier_propriete_passerelle.c \
-                          atelier_ajout_palette.c atelier_ajout_scenario.c \
+                          atelier_ajout_palette.c \
 			  atelier_ajout_cadran.c atelier_ajout_camera_sup.c \
 			  supervision.c supervision_clic.c supervision_comment.c \
                           supervision_passerelle.c supervision_palette.c \

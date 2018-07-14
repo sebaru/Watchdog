@@ -81,6 +81,8 @@
  struct TYPE_INFO_SUPERVISION
   { guint timer_id;                                    /* Id du timer pour l'animation des motifs sur la trame de supervision */
     guint syn_id;                                                                        /* Id du synoptique en cours de visu */
+    GtkWidget *Dialog_horloge;                                                  /* Boite de dialogue d'affichage des horloges */
+    GtkWidget *Liste_horloge;
     GtkWidget *Option_zoom;                                                               /* Choix du zoom sur la supervision */
     GtkWidget *Box_palette;                                                                   /* Widget de la boite a palette */
     GtkWidget *bouton_acq;                                                                   /* Bouton d'acquit du synoptique */
@@ -134,7 +136,6 @@
                struct TRAME_ITEM_COMMENT *trame_comment;
                struct TRAME_ITEM_CADRAN *trame_cadran;
                struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
-               struct TRAME_ITEM_SCENARIO *trame_scenario;
              };
 
        GList *items;                                                          /* Tous les items faisant parti de la selection */
@@ -310,8 +311,6 @@
                                struct TRAME_ITEM_CADRAN *trame_cadran );
  extern void Clic_sur_camera_sup ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
                                    struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
- extern void Clic_sur_scenario ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
-                                 struct TRAME_ITEM_SCENARIO *trame_scenario );
  extern gint Nouveau_groupe ( void );
  
                                                                                                   /* Dans atelier_selection.c */
@@ -382,12 +381,6 @@
  extern void Proto_afficher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *rezo_camera_sup );
  extern void Proto_cacher_un_camera_sup_atelier( struct CMD_TYPE_CAMERASUP *camera_sup );
 
-                                                                                             /* Dans atelier_ajout_scenario.c */
-/* extern struct TRAME_ITEM_SCENARIO *Id_vers_trame_camera_sup ( struct TYPE_INFO_ATELIER *infos, gint id );*/
- extern void Menu_ajouter_scenario ( void );
- extern void Proto_afficher_un_scenario_atelier( struct CMD_TYPE_SCENARIO *rezo_scenario );
- extern void Proto_cacher_un_scenario_atelier( struct CMD_TYPE_SCENARIO *scenario );
-
  extern void Creer_page_liste_histo_msgs( void );                                                  /* Dans liste_histo_msgs.c */
  extern void Proto_effacer_liste_histo_msgs( gint page_id );
  extern void Proto_afficher_un_histo_msgs( struct CMD_RESPONSE_HISTO_MSGS *response );
@@ -399,6 +392,7 @@
  extern void Proto_changer_etat_motif( struct CMD_ETAT_BIT_CTRL *etat_motif );
  extern void Proto_set_syn_vars( struct CMD_TYPE_SYN_VARS *syn_vars );
  extern struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( gint syn_id );
+ extern void Proto_afficher_une_horloge( struct TYPE_INFO_SUPERVISION *infos, struct CMD_TYPE_MNEMO_BASE *mnemo );
 
                                                                                                    /* Dans supervision_clic.c */
  extern void Clic_sur_motif_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
@@ -407,8 +401,6 @@
                                                GdkEvent *event, struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );
  extern void Clic_sur_cadran_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
                                             GdkEvent *event, struct TRAME_ITEM_CADRAN *trame_cadran );
- extern void Clic_sur_scenario_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
-                                             GdkEvent *event, struct TRAME_ITEM_SCENARIO *trame_scenario );
 
                                                                                                 /* Dans supervision_comment.c */
  extern void Proto_afficher_un_comment_supervision( struct CMD_TYPE_COMMENT *rezo_comment );

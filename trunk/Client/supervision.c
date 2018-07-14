@@ -40,6 +40,11 @@
 /********************************************* Définitions des prototypes programme *******************************************/
  #include "protocli.h"
 
+ enum
+  {  COLONNE_HORLOGE_LIBELLE,
+     NBR_COLONNE_HORLOGE
+  };
+  
 /******************************************************************************************************************************/
 /* Rechercher_infos_supervision_par_id_syn: Recherche une page synoptique par son numéro                                      */
 /* Entrée: Un numéro de synoptique                                                                                            */
@@ -121,30 +126,95 @@
  static void Menu_acquitter_synoptique( struct TYPE_INFO_SUPERVISION *infos )
   { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_ACQ_SYN, (gchar *)&infos->syn_id, sizeof(gint) ); }
 /******************************************************************************************************************************/
+/* CB_Editer_horloge: Fonction appelée qd on appuie sur un des boutons de l'interface                                         */
+/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
+/* sortie: TRUE                                                                                                               */
+/******************************************************************************************************************************/
+ static gboolean CB_Editer_horloge ( GtkDialog *dialog, gint reponse, struct TYPE_INFO_SUPERVISION *infos )
+  { switch(reponse)
+     { /*case GTK_RESPONSE_APPLY:*/
+       case GTK_RESPONSE_OK:
+             { /* Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_ADD_MESSAGE,
+                              (gchar *)&Msg, sizeof( struct CMD_TYPE_MESSAGE ) );
+               /*Valider_fichier_mp3 ( &Msg,
+                                     gnome_file_entry_get_full_path ( GNOME_FILE_ENTRY(Entry_mp3), TRUE )
+                                   );*/
+             }
+            break;
+       case GTK_RESPONSE_CANCEL:
+       default:              break;
+     }
+    gtk_widget_destroy(infos->Dialog_horloge);
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Rafraichir_visu_horloge: Met à jour l'entrée horloge correspondante                                                        */
+/* Entrée: une reference sur l'horloge                                                                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Rafraichir_visu_horloge( GtkListStore *store, GtkTreeIter *iter, struct CMD_TYPE_MNEMO_BASE *mnemo )
+  { gtk_list_store_set ( GTK_LIST_STORE(store), iter,
+                         COLONNE_HORLOGE_LIBELLE, mnemo->libelle,
+                         -1
+                       );
+  }
+/******************************************************************************************************************************/
+/* Afficher_une_horloge: Ajoute une horloge dans la liste des horloges du synoptiques                                         */
+/* Entrée: une reference sur la page et sur l'horloge                                                                         */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Proto_afficher_une_horloge( struct TYPE_INFO_SUPERVISION *infos, struct CMD_TYPE_MNEMO_BASE *mnemo )
+  { GtkListStore *store;
+    GtkTreeIter iter;
+    store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(infos->Liste_horloge) ));
+    gtk_list_store_append ( store, &iter );                                                          /* Acquisition iterateur */
+    Rafraichir_visu_horloge ( store, &iter, mnemo );
+  }
+/******************************************************************************************************************************/
 /* Menu_ouvrir_horloges_synoptique: Envoi une demande de liste des horloges liées au synoptique                               */
 /* Entrée: La page d'information synoptique                                                                                   */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Menu_ouvrir_horloges_synoptique( struct TYPE_INFO_SUPERVISION *infos )
-  { GtkWidget *dialog, *texte, *table, *bouton, *separator;
-    GtkWidget *boite, *Frame, *hboite, *menu;
-    GtkObject *adj;
-    gint cpt;
+  { GtkTreeSelection *selection;
+    GtkTreeViewColumn *colonne;
+    GtkCellRenderer *renderer;
+    GtkListStore *store;
+    GtkWidget *scroll;
 
 printf(" On veut les horloges du syn %d\n", infos->syn_id );
     Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_HORLOGES, (gchar *)&infos->syn_id, sizeof(gint) );
-    dialog = gtk_dialog_new_with_buttons( "Liste des horloges", GTK_WINDOW(F_client),
-                                          GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-                                          GTK_STOCK_EDIT, GTK_RESPONSE_OK,
-                                          NULL);
-    /*g_signal_connect( dialog, "response", G_CALLBACK(CB_editer_horloge), FALSE );*/
-    g_signal_connect( dialog, "delete-event", G_CALLBACK(gtk_widget_destroy), dialog );
+    infos->Dialog_horloge = gtk_dialog_new_with_buttons( "Liste des horloges", GTK_WINDOW(F_client),
+                                                         GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                                         GTK_STOCK_EDIT, GTK_RESPONSE_OK,
+                                                         NULL);
+    g_signal_connect( infos->Dialog_horloge, "response", G_CALLBACK(CB_Editer_horloge), infos );
+    g_signal_connect( infos->Dialog_horloge, "delete-event", G_CALLBACK(gtk_widget_destroy), infos->Dialog_horloge );
+    gtk_container_set_border_width( GTK_CONTAINER(GTK_DIALOG(infos->Dialog_horloge)->vbox), 6 );
+/***************************************************** La liste des groupes ***************************************************/
+    scroll = gtk_scrolled_window_new( NULL, NULL );
+    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
+    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(infos->Dialog_horloge)->vbox ), scroll, TRUE, TRUE, 0 );
 
-    Frame = gtk_frame_new( _("Les horloges !") );
-    gtk_frame_set_label_align( GTK_FRAME(Frame), 0.5, 0.5 );
-    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(dialog)->vbox ), Frame, TRUE, TRUE, 0 );
+    store = gtk_list_store_new ( NBR_COLONNE_HORLOGE, G_TYPE_STRING                                                /* Libelle */
+                               );
+    infos->Liste_horloge = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                      /* Creation de la vue */
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(infos->Liste_horloge) );
+    /*gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );*/
+    gtk_container_add( GTK_CONTAINER(scroll), infos->Liste_horloge );
 
-    gtk_widget_show_all( dialog );
+    renderer = gtk_cell_renderer_text_new();                                               /* Colonne du libelle de l'horloge */
+    /*g_object_set( renderer, "xalign", 0.5, NULL );*/
+    colonne = gtk_tree_view_column_new_with_attributes ( "Commande", renderer, "text", COLONNE_HORLOGE_LIBELLE, NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_HORLOGE_LIBELLE);                            /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (infos->Liste_horloge), colonne );
+
+/*    g_signal_connect( G_OBJECT(infos->Liste_horloge), "button_press_event",                          /* Gestion du menu popup */
+  /*                    G_CALLBACK(Gerer_popup_liste_horloge), NULL );
+    g_object_unref (G_OBJECT (store));                                            /* nous n'avons plus besoin de notre modele */
+
+    gtk_widget_show_all( infos->Dialog_horloge );
 
   }
 /******************************************************************************************************************************/

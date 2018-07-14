@@ -72,6 +72,7 @@
              { struct CMD_ENREG *enreg;
                enreg = (struct CMD_ENREG *)connexion->donnees;
                Set_progress_text( enreg->comment, enreg->num );
+               printf(" Loading %d '%s'\n", enreg->num, enreg->comment );
              }
             return;
      }

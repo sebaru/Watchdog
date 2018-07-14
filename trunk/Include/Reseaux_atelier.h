@@ -164,8 +164,6 @@
     SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CADRAN_FIN,                       /* Le serveur envoi des cadrans dans l'atelier client */
     SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP,                        /* Le serveur envoi des camera dans l'atelier client */
     SSTAG_SERVEUR_ADDPROGRESS_ATELIER_CAMERA_SUP_FIN,                    /* Le serveur envoi des camera dans l'atelier client */
-    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_SCENARIO,                        /* Le serveur envoi des scenario dans l'atelier client */
-    SSTAG_SERVEUR_ADDPROGRESS_ATELIER_SCENARIO_FIN,                    /* Le serveur envoi des scenario dans l'atelier client */
 
     SSTAG_CLIENT_ATELIER_DEL_MOTIF,                  /* Le client desire editer par atelier le synoptique */
     SSTAG_SERVEUR_ATELIER_DEL_MOTIF_OK,              /* Le client desire editer par atelier le synoptique */
@@ -219,12 +217,6 @@
     SSTAG_SERVEUR_ATELIER_DEL_CAMERA_SUP_OK,                                          /* Destruction OKAY */
     SSTAG_CLIENT_ATELIER_EDIT_CAMERA_SUP,
 
-    SSTAG_CLIENT_ATELIER_ADD_SCENARIO,                        /* Le client veut ajouter un scenario au syn en cours d'edition */
-    SSTAG_SERVEUR_ATELIER_ADD_SCENARIO_OK,                                         /* Le serveur valide l'ajout d'un scenario */
-    SSTAG_CLIENT_ATELIER_DEL_SCENARIO,                                                 /* Le client veut detruire un scenario */
-    SSTAG_SERVEUR_ATELIER_DEL_SCENARIO_OK,                                                                /* Destruction OKAY */
-    SSTAG_CLIENT_ATELIER_EDIT_SCENARIO,
-
     SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER,    /* Le client veut les données classe pour l'atelier */
     SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER,
     SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_FIN,
@@ -246,5 +238,4 @@
   };
 
 #endif
-/*--------------------------------------------------------------------------------------------------------*/
-
+/*----------------------------------------------------------------------------------------------------------------------------*/

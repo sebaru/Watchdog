@@ -275,11 +275,6 @@ printf("Afficher_propriete: debut\n");
                                        y = infos->Selection.trame_camera_sup->camera_sup->posy;
                                        angle = 0.0;
                                        break;
-                                  case TYPE_SCENARIO:
-                                       x = infos->Selection.trame_scenario->scenario->posx;
-                                       y = infos->Selection.trame_scenario->scenario->posy;
-                                       angle = 0.0;
-                                       break;
                                   default: printf("Clic_general: type inconnu %d\n", infos->Selection.type );
                                            x=-1; y=-1; angle = 0.0;
                                 }
@@ -540,49 +535,6 @@ printf("Afficher_propriete: debut\n");
         { goo_canvas_item_raise( trame_camera_sup->select_mi, NULL ); }
        else if (event->button.button == 3)
         { if (!Popup) Popup = gnome_popup_menu_new( Popup_camera_sup );                                      /* Creation menu */
-          gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
-
-        }
-     }
-  }
-/******************************************************************************************************************************/
-/* Clic_sur_camera_sup: Appelé quand un evenement est capté sur une camera de supervision                                     */
-/* Entrée: une structure Event                                                                                                */
-/* Sortie :rien                                                                                                               */
-/******************************************************************************************************************************/
- void Clic_sur_scenario ( GooCanvasItem *widget, GooCanvasItem *target, GdkEvent *event,
-                          struct TRAME_ITEM_SCENARIO *trame_scenario )
-  { struct TYPE_INFO_ATELIER *infos;
-    struct PAGE_NOTEBOOK *page;
-    static GtkWidget *Popup = NULL;
-    static GnomeUIInfo Popup_scenario[]=
-     { /*GNOMEUIINFO_ITEM_STOCK( _("Duplicate item"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),*/
-       GNOMEUIINFO_ITEM_STOCK( N_("Detach from group"), NULL, Detacher_selection, GNOME_STOCK_PIXMAP_CUT ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Fusionner selection"), NULL, Fusionner_selection, GNOME_STOCK_PIXMAP_TEXT_BULLETED_LIST ),
-       GNOMEUIINFO_ITEM_STOCK( N_("Duplicate selection"), NULL, Dupliquer_selection, GNOME_STOCK_PIXMAP_COPY ),
-       GNOMEUIINFO_SEPARATOR,
-       GNOMEUIINFO_ITEM_STOCK( N_("Delete selection"), NULL, Effacer_selection, GNOME_STOCK_PIXMAP_TRASH ),
-       GNOMEUIINFO_END
-     };
-
-    if (!(trame_scenario && event)) return;
-
-    page = Page_actuelle();                                                                   /* On recupere la page actuelle */
-    if (! (page && page->type==TYPE_PAGE_ATELIER) ) return;                                   /* Verification des contraintes */
-    infos = (struct TYPE_INFO_ATELIER *)page->infos;                             /* Pointeur sur les infos de la page atelier */
-
-    infos->Selection.type = TYPE_SCENARIO;
-    infos->Selection.groupe = trame_scenario->groupe_dpl;
-    infos->Selection.trame_scenario = trame_scenario;
-
-    Clic_general( infos, event );                                                                    /* Fonction de base clic */
-
-    Mettre_a_jour_description( infos, trame_scenario->scenario->num, "Scenario" );
-    if (event->type == GDK_BUTTON_PRESS)
-     { if ( event->button.button == 1)
-        { goo_canvas_item_raise( trame_scenario->select_mi, NULL ); }
-       else if (event->button.button == 3)
-        { if (!Popup) Popup = gnome_popup_menu_new( Popup_scenario );                                      /* Creation menu */
           gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client );
 
         }

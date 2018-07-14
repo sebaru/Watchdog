@@ -204,36 +204,6 @@
                Proto_cacher_un_camera_sup_atelier( cam_sup );
              }
             break;
-/********************************************* Reception des scenario *********************************************************/
-       case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_SCENARIO:
-             { struct CMD_TYPE_SCENARIO *scenario;
-               Set_progress_plus(1);
-
-               scenario = (struct CMD_TYPE_SCENARIO *)g_try_malloc0( sizeof( struct CMD_TYPE_SCENARIO ) );
-               if (!scenario) return; 
-               memcpy( scenario, connexion->donnees, sizeof(struct CMD_TYPE_SCENARIO ) );
-               Arrivee_scenario = g_list_append( Arrivee_scenario, scenario );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_ATELIER_SCENARIO_FIN:
-             { g_list_foreach( Arrivee_scenario, (GFunc)Proto_afficher_un_scenario_atelier, NULL );
-               g_list_foreach( Arrivee_scenario, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_scenario );
-               Arrivee_scenario = NULL;
-             }
-            break;
-       case SSTAG_SERVEUR_ATELIER_ADD_SCENARIO_OK:
-             { struct CMD_TYPE_SCENARIO *scenario;
-               scenario = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
-               Proto_afficher_un_scenario_atelier( scenario );
-             }
-            break;
-       case SSTAG_SERVEUR_ATELIER_DEL_SCENARIO_OK:
-             { struct CMD_TYPE_SCENARIO *scenario;
-               scenario = (struct CMD_TYPE_SCENARIO *)connexion->donnees;
-               Proto_cacher_un_scenario_atelier( scenario );
-             }
-            break;
 /******************************************** Reception des palettes **************************************/
        case SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_PALETTE:
              { struct CMD_TYPE_SYNOPTIQUE *syn;

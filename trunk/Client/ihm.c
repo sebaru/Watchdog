@@ -143,6 +143,7 @@
     gchar chaine[20];
 
     nbr_enreg += plus;
+    printf("Set_progress_plus : plus=%d, nbr=%d, max=%d\n", plus, nbr_enreg, nbr_enreg_max);
     if (nbr_enreg >= nbr_enreg_max)
      { Raz_progress_pulse(); }
     else

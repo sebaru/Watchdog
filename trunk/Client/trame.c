@@ -119,16 +119,6 @@
 /* Entrée: un item                                                                                        */
 /* Sortie: rieng                                                                                          */
 /**********************************************************************************************************/
- void Trame_del_scenario ( struct TRAME_ITEM_SCENARIO *trame_scenario )
-  {
-    if (trame_scenario->item_groupe) goo_canvas_item_remove( trame_scenario->item_groupe );
-    if (trame_scenario->select_mi) goo_canvas_item_remove( trame_scenario->select_mi );
-  }
-/**********************************************************************************************************/
-/* Trame_del_item: Renvoi un nouveau item, completement vierge                                            */
-/* Entrée: un item                                                                                        */
-/* Sortie: rieng                                                                                          */
-/**********************************************************************************************************/
  void Trame_del_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran )
   { if (trame_cadran->item_groupe) goo_canvas_item_remove( trame_cadran->item_groupe );
   }
@@ -344,24 +334,6 @@ printf("Rafraichir camera : %d %d\n", trame_camera_sup->camera_sup->posx, trame_
     cairo_matrix_scale  ( &trame_cadran->transform, 1.0, 1.0 );
 
     goo_canvas_item_set_transform ( trame_cadran->item_groupe, &trame_cadran->transform );
-  }
-/******************************************************************************************************************************/
-/* Trame_rafraichir_scenario: remet à jour la position, rotation, echelle du scenario en parametre                            */
-/* Entrée: la structure graphique TRAME_ITEM_SCENARIO                                                                         */
-/* Sortie: néant                                                                                                              */
-/******************************************************************************************************************************/
- void Trame_rafraichir_scenario( struct TRAME_ITEM_SCENARIO *trame_scenario )
-  { if (!(trame_scenario && trame_scenario->scenario)) return;
-
-    cairo_matrix_init_identity ( &trame_scenario->transform );
-    cairo_matrix_translate ( &trame_scenario->transform,
-                             (gdouble)trame_scenario->scenario->posx,
-                             (gdouble)trame_scenario->scenario->posy
-                           );
-
-    cairo_matrix_scale  ( &trame_scenario->transform, 1.0, 1.0 );
-
-    goo_canvas_item_set_transform ( trame_scenario->item_groupe, &trame_scenario->transform );
   }
 /**********************************************************************************************************/
 /* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                         */
@@ -738,57 +710,6 @@ printf("Download cam\n");
     trame->trame_items = g_list_append( trame->trame_items, trame_camera_sup );
     return(trame_camera_sup);
   }
-/******************************************************************************************************************************/
-/* Trame_ajout_camera_sup: Ajoute un camera_sup sur le visuel                                                                 */
-/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
-/* Sortie: la structure referencant la camera de supervision, ou NULL si erreur                                               */
-/******************************************************************************************************************************/
- struct TRAME_ITEM_SCENARIO *Trame_ajout_scenario ( gint flag, struct TRAME *trame,
-                                                    struct CMD_TYPE_SCENARIO *scenario )
-  { struct TRAME_ITEM_SCENARIO *trame_scenario;
-    GdkPixbuf *pixbuf;
-
-    if (!(trame && scenario)) return(NULL);
-
-    trame_scenario = g_try_malloc0( sizeof(struct TRAME_ITEM_SCENARIO) );
-    if (!trame_scenario) return(NULL);
-    trame_scenario->type = TYPE_SCENARIO;
-    trame_scenario->scenario = scenario;
-
-    pixbuf = gdk_pixbuf_new_from_file ( "2.gif", NULL );                                    /* Chargement du fichier Calendar */
-    if (!pixbuf)
-     { Download_gif ( 2, 0 );
-       pixbuf = gdk_pixbuf_new_from_file ( "2.gif", NULL );
-       if (!pixbuf) { g_free(trame_scenario); return(NULL); }
-     }
-
-    trame_scenario->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );                          /* Groupe MOTIF */
-
-    trame_scenario->item = goo_canvas_image_new ( trame_scenario->item_groupe,
-                                                  pixbuf,
-                                                  -gdk_pixbuf_get_width(pixbuf)/2.0, -gdk_pixbuf_get_height(pixbuf)/2.0,
-                                                  NULL );
-
-/*       g_snprintf( chaine, sizeof(chaine), "CAM%03d", trame_camera_sup->camera_sup->num );
-       goo_canvas_text_new ( trame_camera_sup->item_groupe, chaine, 0.0, 0.0,
-                                                         -1, GTK_ANCHOR_CENTER,
-                                                         "fill-color", "yellow",
-                                                         "font", "arial bold 14",
-                                                         NULL);*/
-
-    cairo_matrix_init_identity ( &trame_scenario->transform );
-    cairo_matrix_translate ( &trame_scenario->transform,
-                             (gdouble)trame_scenario->scenario->posx,
-                             (gdouble)trame_scenario->scenario->posy
-                           );
-
-    cairo_matrix_rotate ( &trame_scenario->transform, 0.0 );
-    cairo_matrix_scale  ( &trame_scenario->transform, 1.0, 1.0 );
-
-    goo_canvas_item_set_transform ( trame_scenario->item_groupe, &trame_scenario->transform );
-    trame->trame_items = g_list_append( trame->trame_items, trame_scenario );
-    return(trame_scenario);
-  }
 /**********************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                       */
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference         */
@@ -1082,7 +1003,6 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     struct TRAME_ITEM_PASS *trame_pass;
     struct TRAME_ITEM_CADRAN *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
-    struct TRAME_ITEM_SCENARIO *trame_scenario;
     GList *objet;
 
     objet = trame->trame_items;                                              /* Destruction des items du synoptique precedent */
@@ -1111,11 +1031,6 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                             trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
                             Trame_del_camera_sup( trame_camera_sup );
                             g_free(trame_camera_sup);
-                            break;
-          case TYPE_SCENARIO:
-                            trame_scenario = (struct TRAME_ITEM_SCENARIO *)objet->data;
-                            Trame_del_scenario( trame_scenario );
-                            g_free(trame_scenario);
                             break;
           default: printf("Trame_effacer_trame: type inconnu\n");
         }

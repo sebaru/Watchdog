@@ -310,36 +310,4 @@
         }
      }
   }
-/******************************************************************************************************************************/
-/* Clic_sur_scenario_supervision: Appelé quand un evenement est capté sur un motif de la trame supervision                    */
-/* Entrée: une structure Scenario                                                                                             */
-/* Sortie :rien                                                                                                               */
-/******************************************************************************************************************************/
- void Clic_sur_scenario_supervision ( GooCanvasItem *widget, GooCanvasItem *target,
-                                      GdkEvent *event, struct TRAME_ITEM_SCENARIO *trame_scenario )
-  { static GtkWidget *Popup = NULL;
-
-    if (!(trame_scenario && event)) return;
-    appui_scenario = trame_scenario;
-
-    if (event->type == GDK_BUTTON_PRESS)
-     { if ( ((GdkEventButton *)event)->button == 1 )                              /* Release sur le motif qui a été appuyé ?? */
-        { gint pid;
-
-          pid = fork();
-          if (pid<0) return;
-          else if (!pid)                                                                 /* Lancement de la ligne de commande */
-           {gchar chaine[256];
-            g_snprintf( chaine, sizeof(chaine),
-                        "http://%s/scenario.html?id=%d", Client.host, trame_scenario->scenario->id );
-             execlp( "firefox", "firefox", chaine, NULL );
-             _exit(0);
-           }
-        }
-       else if (event->button.button == 3)
-        { /* if (!Popup) Popup = gnome_popup_menu_new( Popup_cadran );
-          gnome_popup_menu_do_popup_modal( Popup, NULL, NULL, (GdkEventButton *)event, NULL, F_client ); */
-        }
-     }
-  }
 /*----------------------------------------------------------------------------------------------------------------------------*/

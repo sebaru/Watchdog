@@ -164,7 +164,7 @@
                Arrivee_camera_sup = NULL;
              }
             break;
-/******************************************** Reception des Scenario **********************************************************/
+/******************************************** Reception des Horloges **********************************************************/
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGES:
              { struct CMD_TYPE_MNEMO_BASE *mnemo;
                Set_progress_plus(1);
@@ -179,15 +179,14 @@
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGES_FIN:
              { struct TYPE_INFO_SUPERVISION *infos;
                struct CMD_TYPE_MNEMO_BASE *mnemo;
-               GList *liste;
-               liste = Arrivee_horloges;
+               GList *liste = Arrivee_horloges;
                if (!liste) break;
                mnemo = (struct CMD_TYPE_MNEMO_BASE *)liste->data;
                infos = Rechercher_infos_supervision_par_id_syn ( mnemo->syn_id );
-               if (infos/* && infos->Liste_horloge*/)
+               if (infos && infos->Liste_horloge)
                 { while (liste)
                    { mnemo = (struct CMD_TYPE_MNEMO_BASE *)liste->data;
-                     /* Afficher dans la liste */
+                     Proto_afficher_une_horloge( infos, mnemo );                     /* Afficher dans la liste correspondante */
                      liste=liste->next;
                    }
                 }
