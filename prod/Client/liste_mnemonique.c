@@ -65,6 +65,7 @@
     { 0x0, 0x0,    0x7FFF, 0x0    },
     { 0x0, 0xFFFF, 0xFFFF, 0x0    },
     { 0x0, 0x7FFF, 0x7FFF, 0x0    }, /* Registres */
+    { 0x0, 0xAFFF, 0x0,    0x0    }, /* Horloge */
   };
  static GdkColor COULEUR_TEXTE[NBR_TYPE_MNEMO]=
   { { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
@@ -78,6 +79,7 @@
     { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
     { 0x0, 0x0,    0x0,    0x0    },
     { 0x0, 0x0,    0x0,    0x0    }, /* Registres */
+    { 0x0, 0xFFFF, 0xFFFF, 0xFFFF }, /* Horloges */
   };
  static gchar *TYPE_BIT_INTERNE[ NBR_TYPE_MNEMO ]=          /* Type des différents bits internes utilisés */
   { "B  - Bistable",
@@ -91,6 +93,7 @@
     "CH - Compteur H",
     "CI - Compteur IMP",
     "R  - Registre",
+    "HOR- Horloge",
   };
  static gchar *TYPE_BIT_INTERNE_COURT[ NBR_TYPE_MNEMO ]=    /* Type des différents bits internes utilisés */
   { "B",
@@ -104,6 +107,7 @@
     "CH",
     "CI",
     "R",
+    "HOR",
   };
 /******************************************** Définitions des prototypes programme ********************************************/
  #include "protocli.h"
@@ -226,7 +230,7 @@
   { struct PAGE_NOTEBOOK *page = Page_actuelle();
     struct TYPE_INFO_MNEMONIQUE *infos;
     infos=page->infos;
-    Menu_ajouter_editer_mnemonique(NULL, infos->id);
+    if (page->type == TYPE_PAGE_MNEMONIQUE) Menu_ajouter_editer_mnemonique(NULL, infos->id);
   }
 /******************************************************************************************************************************/
 /* Menu_effacer_mnemonique: Retrait des mnemoniques selectionnés                                                              */
@@ -447,9 +451,12 @@
     page->infos = (struct TYPE_INFO_MNEMONIQUE *)g_try_malloc0( sizeof(struct TYPE_INFO_MNEMONIQUE) );
     if (!page->infos) { g_free(page); return; }
     infos = (struct TYPE_INFO_MNEMONIQUE *)page->infos;
+    if (plugin)
+     { infos->id   = plugin->id;
+       page->type  = TYPE_PAGE_MNEMONIQUE;
+     }
+    else page->type = TYPE_PAGE_ALL_MNEMONIQUE;
     
-    page->type  = TYPE_PAGE_MNEMONIQUE;
-    infos->id   = plugin->id;
     Liste_pages = g_list_append( Liste_pages, page );
 
     hboite = gtk_hbox_new( FALSE, 6 );
@@ -461,19 +468,19 @@
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
-    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                          /* Id */
-                                              G_TYPE_UINT,                               /* Type (entier) */
-                                              G_TYPE_STRING,                     /* Type ("bistable"... ) */
-                                              G_TYPE_STRING,                               /* Groupe_page */
-                                              G_TYPE_UINT,                                  /* Num_plugin */
-                                              G_TYPE_STRING,                                  /* Acronyme */
-                                              G_TYPE_STRING,                                   /* libellé */
-                                              G_TYPE_STRING,                                      /* host */
-                                              G_TYPE_STRING,                                    /* thread */
-                                              G_TYPE_STRING,                              /* Command_text */
-                                              G_TYPE_STRING,                                   /* Tableau */
-                                              GDK_TYPE_COLOR,                             /* couleur fond */
-                                              GDK_TYPE_COLOR                             /* couleur texte */
+    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                                              /* Id */
+                                              G_TYPE_UINT,                                                   /* Type (entier) */
+                                              G_TYPE_STRING,                                         /* Type ("bistable"... ) */
+                                              G_TYPE_STRING,                                                   /* Groupe_page */
+                                              G_TYPE_UINT,                                                      /* Num_plugin */
+                                              G_TYPE_STRING,                                                      /* Acronyme */
+                                              G_TYPE_STRING,                                                       /* libellé */
+                                              G_TYPE_STRING,                                                          /* host */
+                                              G_TYPE_STRING,                                                        /* thread */
+                                              G_TYPE_STRING,                                                  /* Command_text */
+                                              G_TYPE_STRING,                                                       /* Tableau */
+                                              GDK_TYPE_COLOR,                                                 /* couleur fond */
+                                              GDK_TYPE_COLOR                                                 /* couleur texte */
                                );
 
     infos->Liste_mnemonique = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                   /* Creation de la vue */
@@ -563,10 +570,12 @@
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_editer_mnemonique), NULL );
 
-    bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
-    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_ajouter_mnemonique), NULL );
+    if (plugin)
+     { bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
+       gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+       g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                                 G_CALLBACK(Menu_ajouter_mnemonique), NULL );
+     }
 
     bouton = gtk_button_new_from_stock( GTK_STOCK_PRINT );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
@@ -582,10 +591,18 @@
                               G_CALLBACK(Menu_effacer_mnemonique), NULL );
 
     gtk_widget_show_all( hboite );
-    g_snprintf( titre, sizeof(titre), "%s Mnemos", plugin->tech_id );
+    if (plugin) g_snprintf( titre, sizeof(titre), "%s Mnemos", plugin->tech_id );
+           else g_snprintf( titre, sizeof(titre), "Dictionnaire" );
     gtk_notebook_append_page( GTK_NOTEBOOK(Notebook), hboite, gtk_label_new ( titre ) );
   }
 /******************************************************************************************************************************/
+/* Creer_page_all_mnemonique: Demande la creation de la page de tous les mnemoniques                                          */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Creer_page_all_mnemonique( void )
+  { Creer_page_mnemonique(NULL); }
+ /******************************************************************************************************************************/
 /* Rafraichir_visu_mnemonique: Rafraichissement d'un mnemonique la liste à l'écran                                            */
 /* Entrée: une reference sur le mnemonique                                                                                    */
 /* Sortie: Néant                                                                                                              */
@@ -630,6 +647,27 @@
     GtkTreeIter iter;
 
     page = Chercher_page_notebook( TYPE_PAGE_MNEMONIQUE, mnemonique->dls_id, FALSE );
+    if (!page) return;
+
+    infos = page->infos;
+    if (!infos) return;
+
+    store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(infos->Liste_mnemonique) ));
+    gtk_list_store_append ( store, &iter );                                                          /* Acquisition iterateur */
+    Rafraichir_visu_mnemonique ( store, &iter, mnemonique );
+  }
+/******************************************************************************************************************************/
+/* Proto_afficher_tous_mnemonique: Ajoute un mnemonique dans la liste de tous les mnemoniques                                 */
+/* Entrée: une reference sur le mnemonique                                                                                    */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Proto_afficher_tous_mnemonique( struct CMD_TYPE_MNEMO_BASE *mnemonique )
+  { struct TYPE_INFO_MNEMONIQUE *infos;
+    struct PAGE_NOTEBOOK *page;
+    GtkListStore *store;
+    GtkTreeIter iter;
+
+    page = Chercher_page_notebook( TYPE_PAGE_ALL_MNEMONIQUE, 0, FALSE );
     if (!page) return;
 
     infos = page->infos;

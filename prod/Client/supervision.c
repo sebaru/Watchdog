@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/supervision.c        Affichage du synoptique de supervision                                     */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 29 mar 2009 09:54:22 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/supervision.c        Affichage du synoptique de supervision                                                         */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          dim 29 mar 2009 09:54:22 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * supervision.c
  * This file is part of Watchdog
@@ -37,14 +37,19 @@
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
 
-/********************************* Définitions des prototypes programme ***********************************/
+/********************************************* Définitions des prototypes programme *******************************************/
  #include "protocli.h"
 
-/**********************************************************************************************************/
-/* Rechercher_infos_supervision_par_id_syn: Recherche une page synoptique par son numéro                  */
-/* Entrée: Un numéro de synoptique                                                                        */
-/* Sortie: Une référence sur les champs d'information de la page en question                              */
-/**********************************************************************************************************/
+ enum
+  {  COLONNE_HORLOGE_LIBELLE,
+     NBR_COLONNE_HORLOGE
+  };
+  
+/******************************************************************************************************************************/
+/* Rechercher_infos_supervision_par_id_syn: Recherche une page synoptique par son numéro                                      */
+/* Entrée: Un numéro de synoptique                                                                                            */
+/* Sortie: Une référence sur les champs d'information de la page en question                                                  */
+/******************************************************************************************************************************/
  struct TYPE_INFO_SUPERVISION *Rechercher_infos_supervision_par_id_syn ( gint syn_id )
   { struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
@@ -61,11 +66,11 @@
      }
     return(infos);
   }
-/**********************************************************************************************************/
-/* Detruire_page_supervision: L'utilisateur veut fermer la page de supervision                            */
-/* Entrée: la page en question                                                                            */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Detruire_page_supervision: L'utilisateur veut fermer la page de supervision                                                */
+/* Entrée: la page en question                                                                                                */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Detruire_page_supervision( struct PAGE_NOTEBOOK *page )
   { struct TYPE_INFO_SUPERVISION *infos;
     infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
@@ -121,6 +126,98 @@
  static void Menu_acquitter_synoptique( struct TYPE_INFO_SUPERVISION *infos )
   { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_ACQ_SYN, (gchar *)&infos->syn_id, sizeof(gint) ); }
 /******************************************************************************************************************************/
+/* CB_Editer_horloge: Fonction appelée qd on appuie sur un des boutons de l'interface                                         */
+/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
+/* sortie: TRUE                                                                                                               */
+/******************************************************************************************************************************/
+ static gboolean CB_Editer_horloge ( GtkDialog *dialog, gint reponse, struct TYPE_INFO_SUPERVISION *infos )
+  { switch(reponse)
+     { /*case GTK_RESPONSE_APPLY:*/
+       case GTK_RESPONSE_OK:
+             { /* Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_ADD_MESSAGE,
+                              (gchar *)&Msg, sizeof( struct CMD_TYPE_MESSAGE ) );
+               /*Valider_fichier_mp3 ( &Msg,
+                                     gnome_file_entry_get_full_path ( GNOME_FILE_ENTRY(Entry_mp3), TRUE )
+                                   );*/
+             }
+            break;
+       case GTK_RESPONSE_CANCEL:
+       default:              break;
+     }
+    gtk_widget_destroy(infos->Dialog_horloge);
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Rafraichir_visu_horloge: Met à jour l'entrée horloge correspondante                                                        */
+/* Entrée: une reference sur l'horloge                                                                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Rafraichir_visu_horloge( GtkListStore *store, GtkTreeIter *iter, struct CMD_TYPE_MNEMO_BASE *mnemo )
+  { gtk_list_store_set ( GTK_LIST_STORE(store), iter,
+                         COLONNE_HORLOGE_LIBELLE, mnemo->libelle,
+                         -1
+                       );
+  }
+/******************************************************************************************************************************/
+/* Afficher_une_horloge: Ajoute une horloge dans la liste des horloges du synoptiques                                         */
+/* Entrée: une reference sur la page et sur l'horloge                                                                         */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Proto_afficher_une_horloge( struct TYPE_INFO_SUPERVISION *infos, struct CMD_TYPE_MNEMO_BASE *mnemo )
+  { GtkListStore *store;
+    GtkTreeIter iter;
+    store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(infos->Liste_horloge) ));
+    gtk_list_store_append ( store, &iter );                                                          /* Acquisition iterateur */
+    Rafraichir_visu_horloge ( store, &iter, mnemo );
+  }
+/******************************************************************************************************************************/
+/* Menu_ouvrir_horloges_synoptique: Envoi une demande de liste des horloges liées au synoptique                               */
+/* Entrée: La page d'information synoptique                                                                                   */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Menu_ouvrir_horloges_synoptique( struct TYPE_INFO_SUPERVISION *infos )
+  { GtkTreeSelection *selection;
+    GtkTreeViewColumn *colonne;
+    GtkCellRenderer *renderer;
+    GtkListStore *store;
+    GtkWidget *scroll;
+
+printf(" On veut les horloges du syn %d\n", infos->syn_id );
+    Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_HORLOGES, (gchar *)&infos->syn_id, sizeof(gint) );
+    infos->Dialog_horloge = gtk_dialog_new_with_buttons( "Liste des horloges", GTK_WINDOW(F_client),
+                                                         GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                                         GTK_STOCK_EDIT, GTK_RESPONSE_OK,
+                                                         NULL);
+    g_signal_connect( infos->Dialog_horloge, "response", G_CALLBACK(CB_Editer_horloge), infos );
+    g_signal_connect( infos->Dialog_horloge, "delete-event", G_CALLBACK(gtk_widget_destroy), infos->Dialog_horloge );
+    gtk_container_set_border_width( GTK_CONTAINER(GTK_DIALOG(infos->Dialog_horloge)->vbox), 6 );
+/***************************************************** La liste des groupes ***************************************************/
+    scroll = gtk_scrolled_window_new( NULL, NULL );
+    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
+    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(infos->Dialog_horloge)->vbox ), scroll, TRUE, TRUE, 0 );
+
+    store = gtk_list_store_new ( NBR_COLONNE_HORLOGE, G_TYPE_STRING                                                /* Libelle */
+                               );
+    infos->Liste_horloge = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                      /* Creation de la vue */
+    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(infos->Liste_horloge) );
+    /*gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );*/
+    gtk_container_add( GTK_CONTAINER(scroll), infos->Liste_horloge );
+
+    renderer = gtk_cell_renderer_text_new();                                               /* Colonne du libelle de l'horloge */
+    /*g_object_set( renderer, "xalign", 0.5, NULL );*/
+    colonne = gtk_tree_view_column_new_with_attributes ( "Commande", renderer, "text", COLONNE_HORLOGE_LIBELLE, NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_HORLOGE_LIBELLE);                            /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (infos->Liste_horloge), colonne );
+
+/*    g_signal_connect( G_OBJECT(infos->Liste_horloge), "button_press_event",                          /* Gestion du menu popup */
+  /*                    G_CALLBACK(Gerer_popup_liste_horloge), NULL );
+    g_object_unref (G_OBJECT (store));                                            /* nous n'avons plus besoin de notre modele */
+
+    gtk_widget_show_all( infos->Dialog_horloge );
+
+  }
+/******************************************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
 /* Entrée: Le libelle a afficher dans le notebook et l'ID du synoptique                                                       */
 /* Sortie: rien                                                                                                               */
@@ -149,7 +246,7 @@
     hboite = gtk_hbox_new( FALSE, 6 );
     page->child = hboite;
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
-/**************************************** Trame proprement dite *******************************************/
+/**************************************************** Trame proprement dite ***************************************************/
     
     scroll = gtk_scrolled_window_new( NULL, NULL );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_ALWAYS, GTK_POLICY_ALWAYS );
@@ -158,7 +255,7 @@
     infos->Trame = Trame_creer_trame( TAILLE_SYNOPTIQUE_X, TAILLE_SYNOPTIQUE_Y, "darkgray", 0 );
     gtk_container_add( GTK_CONTAINER(scroll), infos->Trame->trame_widget );
 
-/**************************************** Boutons de controle *********************************************/
+/************************************************** Boutons de controle *******************************************************/
     boite = gtk_vbox_new( FALSE, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
 
@@ -172,7 +269,7 @@
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_exporter_synoptique), infos );
 
-/*********************************************** Zoom *****************************************************/
+/********************************************************** Zoom **************************************************************/
     frame = gtk_frame_new ( _("Zoom") );
     gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
     gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
@@ -188,7 +285,7 @@
     g_signal_connect( G_OBJECT( infos->Option_zoom ), "value-changed",
                       G_CALLBACK( Changer_option_zoom ), infos );
 
-/************************************************* Palettes ***********************************************/
+/************************************************************* Palettes *******************************************************/
     frame = gtk_frame_new( _("Palette") );
     gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
     gtk_box_pack_start( GTK_BOX(boite), frame, FALSE, FALSE, 0 );
@@ -198,10 +295,15 @@
     gtk_container_add( GTK_CONTAINER(frame), infos->Box_palette );
 
 /******************************************************* Acquitter ************************************************************/
-    bouton = gtk_button_new_with_label( "Acquitter" );
+    infos->bouton_acq = gtk_button_new_with_label( "Acquitter" );
+    gtk_box_pack_start( GTK_BOX(boite), infos->bouton_acq, FALSE, FALSE, 0 );
+    g_signal_connect_swapped( G_OBJECT(infos->bouton_acq), "clicked",
+                              G_CALLBACK(Menu_acquitter_synoptique), infos );
+
+    bouton = gtk_button_new_with_label( "Horloges" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_acquitter_synoptique), infos );
+                              G_CALLBACK(Menu_ouvrir_horloges_synoptique), infos );
 
     gtk_widget_show_all( page->child );
 
@@ -226,9 +328,7 @@
     infos = Rechercher_infos_supervision_par_id_syn ( rezo_motif->syn_id );
     if (!(infos && infos->Trame)) return;
     motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
-    if (!motif)
-     { return;
-     }
+    if (!motif) return;
 
     memcpy( motif, rezo_motif, sizeof(struct CMD_TYPE_MOTIF) );
     trame_motif = Trame_ajout_motif ( FALSE, infos->Trame, motif );
@@ -247,11 +347,11 @@
     g_signal_connect( G_OBJECT(trame_motif->item_groupe), "button-release-event",
                       G_CALLBACK(Clic_sur_motif_supervision), trame_motif );
   }
-/**********************************************************************************************************/
-/* Changer_etat_motif: Changement d'etat d'un motif                                                       */
-/* Entrée: une reference sur le message                                                                   */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Changer_etat_motif: Changement d'etat d'un motif                                                                           */
+/* Entrée: une reference sur le message                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Changer_etat_motif( struct TRAME_ITEM_MOTIF *trame_motif, struct CMD_ETAT_BIT_CTRL *etat_motif )
   { printf("Changer_etat_motif: %d = %d %d %d etat %d (type %d) cligno=%d %s\n",
             trame_motif->motif->bit_controle,
@@ -388,6 +488,18 @@
        trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
        trame_pass->cligno3 = 1;                                                                      /* Sauvegarde etat motif */
      }
+    else if (vars->bit_danger_fixe == TRUE)
+     { trame_pass->rouge3  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert3   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno3 = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_derangement == TRUE)
+     { trame_pass->rouge3  = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->vert3   = 255;                                                                    /* Sauvegarde etat motif */
+       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
+       trame_pass->cligno3 = 1;                                                                      /* Sauvegarde etat motif */
+     }
     else if (vars->bit_derangement == TRUE)
      { trame_pass->rouge3  = 255;                                                                    /* Sauvegarde etat motif */
        trame_pass->vert3   = 255;                                                                    /* Sauvegarde etat motif */
@@ -456,6 +568,7 @@ printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, eta
     struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
     GList *liste_motifs;
+    GdkColor color;
     GList *liste;
     gint cpt;
 
@@ -463,7 +576,6 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
                    syn_vars->bit_comm_out, syn_vars->bit_defaut, syn_vars->bit_alarme,
                    syn_vars->bit_veille_partielle, syn_vars->bit_veille_totale, syn_vars->bit_alerte,
                    syn_vars->bit_derangement, syn_vars->bit_danger );
-
     cpt = 0;                                                                     /* Nous n'avons encore rien fait au debut !! */
     liste = Liste_pages;
     while(liste)                                                                  /* On parcours toutes les pages SUPERVISION */
@@ -471,6 +583,21 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
        if (page->type != TYPE_PAGE_SUPERVISION) { liste = liste->next; continue; }
 
        infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
+
+       if (infos->syn_id == syn_vars->syn_id)
+        {                                                     /* Positionnement de la couleur du bouton d'acquit du synotique */
+          if (syn_vars->bit_defaut || syn_vars->bit_alarme, syn_vars->bit_alerte, syn_vars->bit_derangement, syn_vars->bit_danger)
+           { gdk_color_parse ("blue", &color);
+             gtk_widget_modify_bg ( infos->bouton_acq, GTK_STATE_NORMAL, &color );
+           } else
+           { gtk_widget_modify_bg ( infos->bouton_acq, GTK_STATE_NORMAL, NULL ); }
+
+                                                                               /* Positionnement des vignettes du synoptiques */
+           struct CMD_ETAT_BIT_CTRL etat_motif;
+           /*etat_motif.rouge0=255;*/
+           Changer_etat_motif( infos->Trame->Vignette_activite, &etat_motif );
+          
+        }
 
        liste_motifs = infos->Trame->trame_items;                                /* On parcours tous les motifs de chaque page */
        while (liste_motifs)

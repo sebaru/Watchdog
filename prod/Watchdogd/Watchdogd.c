@@ -433,13 +433,14 @@
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
         { Sauver_compteur();
           Exporter();
-          cpt_5_minutes = Partage->top + 3000;                                             /* Sauvegarde toutes les 5 minutes */
+          cpt_5_minutes += 3000;                                                           /* Sauvegarde toutes les 5 minutes */
         }
 
        if (cpt_1_minute < Partage->top)                                                       /* Update DB toutes les minutes */
         { Gerer_histo_repeat();
           Print_SQL_status();                                                             /* Print SQL status for debugging ! */
-          cpt_1_minute = Partage->top + 600;                                                 /* Sauvegarde toutes les minutes */
+          Activer_horlogeDB();
+          cpt_1_minute += 600;                                                               /* Sauvegarde toutes les minutes */
         }
 
        usleep(1000);

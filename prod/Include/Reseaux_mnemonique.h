@@ -52,6 +52,7 @@
     MNEMO_CPTH,
     MNEMO_CPT_IMP,
     MNEMO_REGISTRE,
+    MNEMO_HORLOGE,
     NBR_TYPE_MNEMO
   };
 
@@ -61,6 +62,7 @@
     guint type;                                                                                    /* Type du bit interne lié */
     guint num;                                                                             /* Numéro du bit lié au mnemonique */
     guint dls_id;                                                                             /* Numéro du plugin DLS associé */
+    guint syn_id;                                                                             /* Numéro du synoptique associé */
     gchar  syn_parent_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar  syn_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar  dls_shortname[NBR_CARAC_PLUGIN_DLS_UTF8+1];
@@ -93,6 +95,12 @@
 /**************************************************** AddOns pour les Registres ***********************************************/
  struct CMD_TYPE_MNEMO_REGISTRE
   { gchar  unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                                          /* Km, h, ° ... */
+  };
+
+/**************************************************** AddOns pour les Horlorges ***********************************************/
+ struct CMD_TYPE_MNEMO_HORLOGE
+  { gint heure;
+    gint minute;
   };
 
 /****************************************************** Pour les compteurs d'impulsions ***************************************/
@@ -141,13 +149,16 @@
             struct CMD_TYPE_MNEMO_CPT_IMP mnemo_cptimp;
             struct CMD_TYPE_MNEMO_TEMPO mnemo_tempo;
             struct CMD_TYPE_MNEMO_REGISTRE mnemo_r;
+            struct CMD_TYPE_MNEMO_HORLOGE mnemo_horloge;
           };
   };
 
  enum 
   { SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE,                                          /* Ajout d'un groupe dans la liste cliente */
     SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE_FIN,                                      /* Ajout d'un groupe dans la liste cliente */
+    SSTAG_SERVEUR_ADDPROGRESS_ALL_MNEMONIQUE_FIN,                                  /* Ajout d'un groupe dans la liste cliente */
     SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE,                                                /* Le client demande la page mnemonique */
+    SSTAG_CLIENT_WANT_PAGE_ALL_MNEMONIQUE,                                            /* Le client demande la page mnemonique */
     SSTAG_CLIENT_ADD_MNEMONIQUE,                                               /* Le client desire ajouter un groupe watchdog */
     SSTAG_SERVEUR_ADD_MNEMONIQUE_OK,                                                       /* L'ajout du groupe est un succes */
 

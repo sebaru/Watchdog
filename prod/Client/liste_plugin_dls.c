@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/liste_plugin_dls.c        Configuration des plugin_dlss de Watchdog v2.0                        */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       ven 23 nov 2007 20:33:45 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/liste_plugin_dls.c        Configuration des plugin_dlss de Watchdog v2.0                                            */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                           ven 23 nov 2007 20:33:45 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * liste_plugin_dls.c
  * This file is part of Watchdog
@@ -39,7 +39,7 @@
  enum
   {  COLONNE_ID,
      COLONNE_ACTIVE,
-     COLONNE_TYPE,
+     COLONNE_PACKAGE,
      COLONNE_GROUPE_PAGE,
      COLONNE_SHORTNAME,
      COLONNE_TECH_ID,
@@ -47,11 +47,11 @@
      COLONNE_COMPIL_DATE,
      COLONNE_COMPIL_STATUS,
      COLONNE_COMPIL_NBR,
-     COLONNE_COLOR_FOND,
-     COLONNE_COLOR_TEXTE,
+/*     COLONNE_COLOR_FOND,
+     COLONNE_COLOR_TEXTE,*/
      NBR_COLONNE
   };
-
+#ifdef bouh
  static GdkColor COULEUR_PLUGIN_FOND[]=
   { { 0x0, 0xFFFF, 0xFFFF, 0xFFFF }, /* Module */
     { 0x0, 0x0,    0x0,    0x7FFF }, /* Sous-groupe */
@@ -64,7 +64,7 @@
     { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
     { 0x0, 0xFFFF, 0xFFFF, 0xFFFF },
   };
-
+#endif
  static gchar *DLS_COMPIL_STATUS[]=                                          /* Status en français de la derniere compilation */
   { "Never compiled yet",
     "Export from Database failed",
@@ -152,6 +152,19 @@
     g_list_free (lignes);
   }
 /******************************************************************************************************************************/
+/* Menu_editer_all_mnemo: Demande l'affichage de la page complete de tous les mnemoniques                                     */
+/* Entrée/Sortie: rien                                                                                                        */
+/******************************************************************************************************************************/
+ static void Menu_editer_all_mnemo ( void )
+  { struct CMD_TYPE_PLUGIN_DLS rezo_dls;
+
+    if (!Chercher_page_notebook (TYPE_PAGE_ALL_MNEMONIQUE, 0, TRUE))                          /* Page deja créé et affichée ? */
+     { Creer_page_all_mnemonique ();
+       Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_WANT_PAGE_ALL_MNEMONIQUE, NULL, 0 );
+       Chercher_page_notebook ( TYPE_PAGE_ALL_MNEMONIQUE, 0, TRUE );
+     }
+  }
+/******************************************************************************************************************************/
 /* Menu_refresh_plugin_D.L.S: rafraichir la liste des plugins D.L.S                                                           */
 /* Entrée : néant                                                                                                             */
 /* Sortie : néant                                                                                                             */
@@ -201,18 +214,18 @@
     gtk_widget_destroy( GTK_WIDGET(dialog) );
     return(TRUE);
   }
-/**********************************************************************************************************/
-/* Menu_ajouter_synoptique: Ajout d'un synoptique                                                         */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_ajouter_synoptique: Ajout d'un synoptique                                                                             */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static void Menu_ajouter_plugin_dls ( void )
   { Menu_ajouter_editer_plugin_dls( NULL ); }
-/**********************************************************************************************************/
-/* Menu_effacer_plugin_dls: Retrait d'un plugin dls                                                       */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_effacer_plugin_dls: Retrait d'un plugin dls                                                                           */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static void Menu_effacer_plugin_dls ( void )
   { GtkTreeSelection *selection;
     GtkWidget *dialog;
@@ -269,11 +282,11 @@
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);
   }
-/**********************************************************************************************************/
-/* Menu_editer_plugin_dls: Demande d'edition du plugin_dls selectionné                                    */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_editer_plugin_dls: Demande d'edition du plugin_dls selectionné                                                        */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static void Menu_editer_plugin_dls ( void )
   { GtkTreeSelection *selection;
     struct CMD_TYPE_PLUGIN_DLS rezo_dls;
@@ -301,11 +314,11 @@
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);
   }
-/**********************************************************************************************************/
-/* Menu_exporter_message: Exportation de la base dans un fichier texte                                    */
-/* Entrée: néant                                                                                          */
-/* Sortie: Néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Menu_exporter_message: Exportation de la base dans un fichier texte                                                        */
+/* Entrée: néant                                                                                                              */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
  static void Menu_exporter_plugin_dls( void )
   { GtkSourcePrintCompositor *compositor;
     GtkPrintOperation *print;
@@ -389,11 +402,11 @@
     g_object_unref( compositor);
     g_object_unref(buffer);
   }
-/**********************************************************************************************************/
-/* Gerer_popup_plugin_dls: Gestion du menu popup quand on clique droite sur la liste des plugin_dls       */
-/* Entrée: la liste(widget), l'evenement bouton, et les data                                              */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Gerer_popup_plugin_dls: Gestion du menu popup quand on clique droite sur la liste des plugin_dls                           */
+/* Entrée: la liste(widget), l'evenement bouton, et les data                                                                  */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static gboolean Gerer_popup_plugin_dls ( GtkWidget *widget, GdkEventButton *event, gpointer data )
   { static GtkWidget *Popup_select=NULL, *Popup_nonselect=NULL;
     GtkTreeSelection *selection;
@@ -428,11 +441,11 @@
      { Menu_editer_source_dls(); }
     return(FALSE);
   }
-/**********************************************************************************************************/
-/* Creer_page_plugin_dls: Creation de la page du notebook consacrée aux plugins plugin_dlss watchdog      */
-/* Entrée: rien                                                                                           */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Creer_page_plugin_dls: Creation de la page du notebook consacrée aux plugins plugin_dlss watchdog                          */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
  void Creer_page_plugin_dls( void )
   { GtkWidget *boite, *scroll, *hboite, *bouton, *separateur;
     GtkTreeSelection *selection;
@@ -458,16 +471,16 @@
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                                    /* Id du plugin */
                                               G_TYPE_BOOLEAN,                                                     /* Activé ? */
-                                              G_TYPE_UINT,                                                            /* Type */
+                                              G_TYPE_STRING,                                                       /* Package */
                                               G_TYPE_STRING,                                                   /* Groupe/Page */
                                               G_TYPE_STRING,                                                     /* Shortname */
                                               G_TYPE_STRING,                                                       /* Tech_id */
                                               G_TYPE_STRING,                                                           /* Nom */
                                               G_TYPE_STRING,                                                   /* Compil_date */
                                               G_TYPE_STRING,                                                 /* Compil_status */
-                                              G_TYPE_UINT,                                                      /* Compil_nbr */
-                                              GDK_TYPE_COLOR,                                                   /* Color_fond */
-                                              GDK_TYPE_COLOR                                                   /* Color_texte */
+                                              G_TYPE_UINT                                                      /* Compil_nbr */
+/*                                            GDK_TYPE_COLOR,                                                   /* Color_fond */
+/*                                            GDK_TYPE_COLOR                                                   /* Color_texte */
                                 );
 
     Liste_plugin_dls = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                          /* Creation de la vue */
@@ -493,8 +506,8 @@
     renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Tech_ID"), renderer,
                                                          "text", COLONNE_TECH_ID,
-                                                         "background-gdk", COLONNE_COLOR_FOND,
-                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,
+                                                         /*"background-gdk", COLONNE_COLOR_FOND,
+                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,*/
                                                          NULL);
     gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_TECH_ID);                                    /* On peut la trier */
@@ -503,8 +516,8 @@
     renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Groupe/Page"), renderer,
                                                          "text", COLONNE_GROUPE_PAGE,
-                                                         "background-gdk", COLONNE_COLOR_FOND,
-                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,
+                                                         /*"background-gdk", COLONNE_COLOR_FOND,
+                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,*/
                                                          NULL);
     gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_GROUPE_PAGE);                                /* On peut la trier */
@@ -513,8 +526,8 @@
     renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Shortname"), renderer,
                                                          "text", COLONNE_SHORTNAME,
-                                                         "background-gdk", COLONNE_COLOR_FOND,
-                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,
+                                                         /*"background-gdk", COLONNE_COLOR_FOND,
+                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,*/
                                                          NULL);
     gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_SHORTNAME);                                  /* On peut la trier */
@@ -523,8 +536,8 @@
     renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
     colonne = gtk_tree_view_column_new_with_attributes ( _("D.L.S Name"), renderer,
                                                          "text", COLONNE_NOM,
-                                                         "background-gdk", COLONNE_COLOR_FOND,
-                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,
+                                                         /*"background-gdk", COLONNE_COLOR_FOND,
+                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,*/
                                                          NULL);
     gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_NOM);                                        /* On peut la trier */
@@ -533,8 +546,8 @@
     renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Compilation Date"), renderer,
                                                          "text", COLONNE_COMPIL_DATE,
-                                                         "background-gdk", COLONNE_COLOR_FOND,
-                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,
+                                                         /*"background-gdk", COLONNE_COLOR_FOND,
+                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,*/
                                                          NULL);
     gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_COMPIL_DATE);                                /* On peut la trier */
@@ -543,8 +556,8 @@
     renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
     colonne = gtk_tree_view_column_new_with_attributes ( _("Compil Status"), renderer,
                                                          "text", COLONNE_COMPIL_STATUS,
-                                                         "background-gdk", COLONNE_COLOR_FOND,
-                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,
+                                                         /*"background-gdk", COLONNE_COLOR_FOND,
+                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,*/
                                                          NULL);
     gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_COMPIL_STATUS);                              /* On peut la trier */
@@ -553,8 +566,8 @@
     renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
     colonne = gtk_tree_view_column_new_with_attributes ( _("# of Compil"), renderer,
                                                          "text", COLONNE_COMPIL_NBR,
-                                                         "background-gdk", COLONNE_COLOR_FOND,
-                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,
+                                                         /*"background-gdk", COLONNE_COLOR_FOND,
+                                                         "foreground-gdk", COLONNE_COLOR_TEXTE,*/
                                                          NULL);
     gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_COMPIL_NBR);                                 /* On peut la trier */
@@ -588,6 +601,11 @@
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
                               G_CALLBACK(Menu_editer_source_dls), NULL );
+
+    bouton = gtk_button_new_with_label( "Dictionnaire" );
+    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
+    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
+                              G_CALLBACK(Menu_editer_all_mnemo), NULL );
 
     bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
@@ -633,7 +651,7 @@
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, plugin_dls->id,
                          COLONNE_ACTIVE, plugin_dls->on,
-                         COLONNE_TYPE, plugin_dls->type,
+                         COLONNE_PACKAGE, plugin_dls->package,
                          COLONNE_GROUPE_PAGE, groupe_page,
                          COLONNE_NOM, plugin_dls->nom,
                          COLONNE_SHORTNAME, plugin_dls->shortname,
@@ -641,8 +659,8 @@
                          COLONNE_COMPIL_DATE, date_compil,
                          COLONNE_COMPIL_STATUS, Dls_compil_status(plugin_dls->compil_status),
                          COLONNE_COMPIL_NBR, plugin_dls->nbr_compil,
-                         COLONNE_COLOR_FOND, &COULEUR_PLUGIN_FOND[plugin_dls->type],
-                         COLONNE_COLOR_TEXTE, &COULEUR_PLUGIN_TEXTE[plugin_dls->type],
+                         /*COLONNE_COLOR_FOND, &COULEUR_PLUGIN_FOND[plugin_dls->type],
+                         COLONNE_COLOR_TEXTE, &COULEUR_PLUGIN_TEXTE[plugin_dls->type],*/
                           -1
                        );
     g_free( date_compil );

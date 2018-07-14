@@ -840,7 +840,25 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    database_version=3555;
+    if (database_version < 3586)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` DROP `type`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` ADD `package` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'custom' AFTER `tech_id`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 3596)
+     { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `mnemos_Horloge` ("
+                                             "`id_mnemo` int(11) NOT NULL,"
+                                             "`heure` int(11) NOT NULL,"
+                                             "`minute` int(112) NOT NULL,"
+                                             "FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE"
+                                             ") ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
+                  );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    database_version=3596;
 
     Libere_DB_SQL(&db);
 

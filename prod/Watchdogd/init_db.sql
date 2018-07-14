@@ -77,8 +77,8 @@ INSERT INTO `class` (`id`, `libelle`) VALUES
 
 CREATE TABLE IF NOT EXISTS `dls` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tech_id` VARCHAR(8) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT id,
-  `type` int(11) NOT NULL,
+  `tech_id` VARCHAR(8) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
+  `package` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT "custom",
   `syn_id` int(11) NOT NULL DEFAULT '0',
   `name` text COLLATE utf8_unicode_ci NOT NULL,
   `shortname` text COLLATE utf8_unicode_ci NOT NULL,
@@ -144,6 +144,19 @@ INSERT INTO `mnemos_AnalogInput` (`id_mnemo`, `type`, `min`, `max`, `unite`) VAL
 (12, 0, 0, 100, 'bit/s'),
 (13, 0, 0, 100, 'arch'),
 (14, 0, 0, 100, 'dbs');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `mnemos_Horloge`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_Horloge` (
+  `id_mnemo` int(11) NOT NULL,
+  `heure` int(11) NOT NULL,
+  `minute` int(11) NOT NULL,
+  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 

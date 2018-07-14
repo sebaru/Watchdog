@@ -67,6 +67,7 @@
        if (chaine)
         { g_snprintf( config_cli->host, sizeof(config_cli->host), "%s", chaine ); g_free(chaine); }
 
+       g_snprintf( config_cli->target_url,  sizeof(config_cli->target_url),  "http://%s", config_cli->host  );
        chaine = g_key_file_get_string ( gkf, "SERVER", "target_url", NULL );
        if (chaine)
         { g_snprintf( config_cli->target_url, sizeof(config_cli->target_url), "%s", chaine ); g_free(chaine); }

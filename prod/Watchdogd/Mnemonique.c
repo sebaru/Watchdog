@@ -34,7 +34,7 @@
  #include <string.h>
 
  #define MNEMO_SQL_SELECT "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.ev_text,parent_syn.page,syn.page," \
-                          "dls.name, mnemo.tableau, mnemo.acro_syn, mnemo.ev_host, mnemo.ev_thread" \
+                          "dls.name, mnemo.tableau, mnemo.acro_syn, mnemo.ev_host, mnemo.ev_thread, syn.id" \
                           " FROM mnemos as mnemo" \
                           " INNER JOIN dls as dls ON mnemo.dls_id=dls.id" \
                           " INNER JOIN syns as syn ON dls.syn_id = syn.id" \
@@ -69,11 +69,11 @@
     return(retour);
   }
 /******************************************************************************************************************************/
-/* Retirer_mnemo_baseDB_for_dls: Elimination de l'ensemble des mnemo automatique d'un plugin D.L.S                            */
+/* Retirer_auto_mnemo_baseDB_for_dls: Elimination de l'ensemble des mnemo automatique d'un plugin D.L.S                       */
 /* Entrée: l'id dls des mnemos auto a supprimer                                                                               */
 /* Sortie: FALSE si probleme                                                                                                  */
 /******************************************************************************************************************************/
- gboolean Retirer_mnemo_baseDB_for_dls ( gint dls_id )
+ gboolean Retirer_auto_mnemo_baseDB_for_dls ( gint dls_id )
   { gchar requete[200];
     gboolean retour;
     struct DB *db;
@@ -84,7 +84,7 @@
        return(FALSE);
      }
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "DELETE FROM %s WHERE dls_id=%d AND created_by_user = 0", NOM_TABLE_MNEMO, dls_id );
+                "DELETE FROM %s WHERE dls_id=%d AND num=-1", NOM_TABLE_MNEMO, dls_id );
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return(retour);
@@ -117,8 +117,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO mnemos SET created_by_user='0',type='%d',num='-1',dls_id='%d',acronyme='%s',libelle='%s' "
-                " ON DUPLICATE KEY UPDATE type='%d',libelle='%s'",
-                mnemo->type, mnemo->dls_id, acro, libelle, mnemo->type, libelle );
+                " ON DUPLICATE KEY UPDATE libelle='%s'",
+                mnemo->type, mnemo->dls_id, acro, libelle, libelle );
     g_free(libelle);
     g_free(acro);
 
@@ -340,6 +340,7 @@
        mnemo->type   = atoi(db->row[1]);
        mnemo->num    = atoi(db->row[2]);
        mnemo->dls_id = atoi(db->row[3]);
+       mnemo->syn_id = atoi(db->row[14]);
      }
     return(mnemo);
   }

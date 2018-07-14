@@ -72,9 +72,6 @@
     Envoyer_camera_sup_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP,
                                                       SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP_FIN );
 
-    Envoyer_scenario_tag ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO,
-                                                    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO_FIN );
-
     g_free(client->syn_to_send);
     client->syn_to_send = NULL;
     Unref_client( client );                                                               /* Déréférence la structure cliente */
@@ -166,6 +163,29 @@
                   case MNEMO_REGISTRE:   SR( bit->num, bit->valeur );
                                          break;
                 }
+             }
+            break;
+       case SSTAG_CLIENT_WANT_HORLOGES:
+             { struct DB *db;
+               struct CMD_ENREG nbr;
+               struct CMD_TYPE_MNEMO_BASE *mnemo;
+               gchar critere[128];
+               gint syn_id;
+               syn_id = *(gint *)connexion->donnees;                           /* Récupération du numéro du synoptique désiré */
+               g_snprintf( critere, sizeof(critere), "type=%d AND syn.id=%d", MNEMO_HORLOGE, syn_id );
+               if ( ! Recuperer_mnemo_baseDB_with_conditions( &db, critere, -1, -1 ) )
+                { return; }
+
+               nbr.num = db->nbr_result;
+               g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d horloges", nbr.num );
+               Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+
+               while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL )          /* Récupération d'un mnemo dans la DB */
+                { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGES,
+                                 (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMO_BASE) );
+                  g_free(mnemo);
+                }
+               Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGES_FIN, NULL, 0 );
              }
             break;
      }

@@ -749,6 +749,22 @@
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /******************************************************************************************************************************/
+/* Envoyer_commande_dls_data: Gestion des envois de commande DLS via dls_data                                                 */
+/* Entrée/Sortie: rien                                                                                                        */
+/******************************************************************************************************************************/
+ void Envoyer_commande_dls_data ( gchar *nom, gchar *owner )
+  { gboolean *data_p=NULL;
+    Dls_data_set_bool ( nom, owner, &data_p, FALSE );
+    if (!data_p)
+     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: bit '%s_%s' not found", __func__, nom, owner );
+       return;
+     }
+    pthread_mutex_lock( &Partage->com_dls.synchro );
+    Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, data_p );
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit '%s_%s' demandée", __func__, nom, owner );
+  }
+/******************************************************************************************************************************/
 /* Set_cde_exterieure: Mise à un des bits de commande exterieure                                                              */
 /* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
@@ -758,10 +774,17 @@
     pthread_mutex_lock( &Partage->com_dls.synchro );
     while( Partage->com_dls.Set_M )                                                      /* A-t-on un monostable a allumer ?? */
      { num = GPOINTER_TO_INT( Partage->com_dls.Set_M->data );
-       Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Set_cde_exterieure: Mise a un du bit M%03d", num );
+       Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit M%03d", __func__, num );
        Partage->com_dls.Set_M   = g_slist_remove ( Partage->com_dls.Set_M,   GINT_TO_POINTER(num) );
        Partage->com_dls.Reset_M = g_slist_append ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) ); 
        SM( num, 1 );                                                                           /* Mise a un du bit monostable */
+     }
+    while( Partage->com_dls.Set_Dls_Data )                                                      /* A-t-on un monostable a allumer ?? */
+     { gboolean *data_p = Partage->com_dls.Set_Dls_Data->data;
+       Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit %p", __func__, data_p );
+       Partage->com_dls.Set_Dls_Data = g_slist_remove ( Partage->com_dls.Set_Dls_Data, data_p );
+       Partage->com_dls.Reset_Dls_Data = g_slist_append ( Partage->com_dls.Reset_Dls_Data, data_p ); 
+       *data_p = TRUE;                                                                         /* Mise a un du bit monostable */
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro ); 
   }
@@ -775,9 +798,15 @@
     pthread_mutex_lock( &Partage->com_dls.synchro );
     while( Partage->com_dls.Reset_M )                                                                /* Reset des monostables */
      { num = GPOINTER_TO_INT(Partage->com_dls.Reset_M->data);
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "Reset_cde_exterieure : Mise a zero du bit M%03d", num );
+       Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: Mise a zero du bit M%03d", __func__, num );
        Partage->com_dls.Reset_M = g_slist_remove ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) );
        SM( num, 0 );
+     }
+    while( Partage->com_dls.Reset_Dls_Data )                                            /* A-t-on un monostable a éteindre ?? */
+     { gboolean *data_p = Partage->com_dls.Reset_Dls_Data->data;
+       Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: Mise a 0 du bit %p", __func__, data_p );
+       Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, data_p ); 
+       *data_p = FALSE;                                                                         /* Mise a 0 du bit monostable */
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
@@ -885,13 +914,14 @@
   { struct timeval tv_avant, tv_apres;
     gboolean bit_comm_out, bit_defaut, bit_defaut_fixe, bit_alarme, bit_alarme_fixe;                              /* Activité */
     gboolean bit_veille_partielle, bit_veille_totale, bit_alerte, bit_alerte_fixe;             /* Synthese Sécurité des Biens */
-    gboolean bit_derangement, bit_danger;                                                  /* synthèse Sécurité des Personnes */ 
+    gboolean bit_derangement, bit_derangement_fixe, bit_danger, bit_danger_fixe;           /* synthèse Sécurité des Personnes */ 
     GSList *liste;
 
     bit_comm_out = bit_defaut = bit_defaut_fixe = bit_alarme = bit_alarme_fixe = FALSE;
-    bit_veille_partielle = bit_veille_totale = TRUE;
+    bit_veille_partielle = FALSE;
+    bit_veille_totale = TRUE;
     bit_alerte = FALSE;
-    bit_derangement = bit_danger = FALSE;
+    bit_derangement = bit_derangement_fixe = bit_danger = bit_danger_fixe = FALSE;
 
     liste = dls_tree->Liste_plugin_dls;
     while(liste)                                                                     /* On execute tous les modules un par un */
@@ -911,12 +941,14 @@
           bit_defaut_fixe      |= plugin_actuel->vars.bit_defaut_fixe;
           bit_alarme           |= plugin_actuel->vars.bit_alarme;
           bit_alarme_fixe      |= plugin_actuel->vars.bit_alarme_fixe;
-          bit_veille_partielle &= plugin_actuel->vars.bit_veille_partielle;
-          bit_veille_totale    &= plugin_actuel->vars.bit_veille_totale;
+          bit_veille_partielle |= plugin_actuel->vars.bit_veille;
+          bit_veille_totale    &= plugin_actuel->vars.bit_veille;
           bit_alerte           |= plugin_actuel->vars.bit_alerte;
           bit_alerte_fixe      |= plugin_actuel->vars.bit_alerte_fixe;
           bit_derangement      |= plugin_actuel->vars.bit_derangement;
+          bit_derangement_fixe |= plugin_actuel->vars.bit_derangement_fixe;
           bit_danger           |= plugin_actuel->vars.bit_danger;
+          bit_danger_fixe      |= plugin_actuel->vars.bit_danger_fixe;
         }
        liste = liste->next;
      }
@@ -930,7 +962,7 @@
        bit_defaut_fixe      |= sub_tree->syn_vars.bit_defaut_fixe;
        bit_alarme           |= sub_tree->syn_vars.bit_alarme;
        bit_alarme_fixe      |= sub_tree->syn_vars.bit_alarme_fixe;
-       bit_veille_partielle &= sub_tree->syn_vars.bit_veille_partielle;
+       bit_veille_partielle |= sub_tree->syn_vars.bit_veille_partielle;
        bit_veille_totale    &= sub_tree->syn_vars.bit_veille_totale;
        bit_alerte           |= sub_tree->syn_vars.bit_alerte;
        bit_alerte_fixe      |= sub_tree->syn_vars.bit_alerte_fixe;
@@ -960,11 +992,12 @@
        dls_tree->syn_vars.bit_alerte           = bit_alerte;
        dls_tree->syn_vars.bit_alerte_fixe      = bit_alerte_fixe;
        dls_tree->syn_vars.bit_derangement      = bit_derangement;
+       dls_tree->syn_vars.bit_derangement_fixe = bit_derangement_fixe;
        dls_tree->syn_vars.bit_danger           = bit_danger;
+       dls_tree->syn_vars.bit_danger_fixe      = bit_danger_fixe;
        Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_SET_SYN_VARS, "*", "ssrv",
                           &dls_tree->syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
      }
-
  }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du DLS                                                                                           */

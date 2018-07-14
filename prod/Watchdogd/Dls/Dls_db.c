@@ -70,7 +70,7 @@
 /* Sortie: -1 si pb, id sinon                                                                                                 */
 /******************************************************************************************************************************/
  static gint Ajouter_Modifier_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls, gint ajout )
-  { gchar *nom, *shortname, *tech_id;
+  { gchar *nom, *shortname, *tech_id, *package;
     gchar requete[1024];
     gboolean retour;
     struct DB *db;
@@ -92,28 +92,38 @@
     tech_id = Normaliser_chaine ( dls->tech_id );                                            /* Formatage correct des chaines */
     if (!tech_id)
      { g_free(nom);
-        g_free(shortname);
+       g_free(shortname);
        Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: Normalisation shortname impossible", __func__ );
+       return(-1);
+     }
+
+    package = Normaliser_chaine ( dls->package );                                            /* Formatage correct des chaines */
+    if (!package)
+     { g_free(nom);
+       g_free(shortname);
+       g_free(tech_id);
+       Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: Normalisation package impossible", __func__ );
        return(-1);
      }
 
     if (ajout)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "INSERT INTO %s"             
-                   "(name,shortname,tech_id,actif,syn_id,compil_date,compil_status,nbr_compil,sourcecode) "
-                   "VALUES ('%s','%s','%s','%d',%d,0,0,0,'/* Source Code */');",
-                   NOM_TABLE_DLS, nom, shortname, tech_id, dls->on, dls->syn_id );
+                   "(name,shortname,package,tech_id,actif,syn_id,compil_date,compil_status,nbr_compil,sourcecode) "
+                   "VALUES ('%s','%s','%s','%s','%d',%d,0,0,0,'/* Source Code */');",
+                   NOM_TABLE_DLS, nom, shortname, package, tech_id, dls->on, dls->syn_id );
      }
     else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                   "UPDATE %s SET "             
-                  "name='%s',shortname='%s',tech_id='%s',actif='%d',syn_id=%d WHERE id=%d",
-                   NOM_TABLE_DLS, nom, shortname, tech_id, dls->on, dls->syn_id, dls->id );
+                  "name='%s',shortname='%s',package='%s',tech_id='%s',actif='%d',syn_id=%d WHERE id=%d",
+                   NOM_TABLE_DLS, nom, shortname, package, tech_id, dls->on, dls->syn_id, dls->id );
      }
 
     g_free(nom);
     g_free(shortname);
     g_free(tech_id);
+    g_free(package);
 
     db = Init_DB_SQL();       
     if (!db)
@@ -168,7 +178,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.type,dls.syn_id,parent_syn.page,syn.page,"
+                "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.package,dls.syn_id,parent_syn.page,syn.page,"
                 "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id"
                 " FROM dls INNER JOIN syns as syn ON dls.syn_id = syn.id "
                 " INNER JOIN syns AS parent_syn ON parent_syn.id=syn.parent_id"
@@ -220,13 +230,13 @@
                        "%s: Erreur allocation mémoire", __func__ );
     else
      { g_snprintf( dls->tech_id, sizeof(dls->tech_id), "%s", db->row[11] );
+       g_snprintf( dls->package, sizeof(dls->package), "%s", db->row[4] );
        g_snprintf( dls->nom, sizeof(dls->nom), "%s", db->row[1] );
        g_snprintf( dls->shortname, sizeof(dls->shortname), "%s", db->row[2] );
        g_snprintf( dls->syn_parent_page, sizeof(dls->syn_parent_page), "%s", db->row[6] );
        g_snprintf( dls->syn_page, sizeof(dls->syn_page), "%s", db->row[7] );
        dls->id            = atoi(db->row[0]);
        dls->on            = atoi(db->row[3]);
-       dls->type          = atoi(db->row[4]);
        dls->syn_id        = atoi(db->row[5]);
        dls->compil_date   = atoi(db->row[8]);
        dls->compil_status = atoi(db->row[9]);
@@ -251,7 +261,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.type,dls.syn_id,parent_syn.page,syn.page,"
+                "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.package,dls.syn_id,parent_syn.page,syn.page,"
                 "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id"
                 " FROM %s as dls INNER JOIN %s as syn ON dls.syn_id = syn.id "
                 " INNER JOIN %s AS parent_syn ON parent_syn.id=syn.parent_id"

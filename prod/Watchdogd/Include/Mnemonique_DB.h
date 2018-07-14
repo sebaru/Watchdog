@@ -38,6 +38,7 @@
  #define NOM_TABLE_MNEMO_CPTIMP   "mnemos_CptImp"
  #define NOM_TABLE_MNEMO_TEMPO    "mnemos_Tempo"
  #define NOM_TABLE_MNEMO_REGISTRE "mnemos_Registre"
+ #define NOM_TABLE_MNEMO_HORLOGE  "mnemos_Horloge"
 
 /***************************************************** Définitions des prototypes *********************************************/
  extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB ( guint id );
@@ -47,7 +48,7 @@
  extern struct CMD_TYPE_MNEMO_BASE *Recuperer_mnemo_baseDB_suite( struct DB **db );
  extern gint Ajouter_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo );
  extern gboolean Retirer_mnemo_baseDB ( struct CMD_TYPE_MNEMO_BASE *mnemo );
- extern gboolean Retirer_mnemo_baseDB_for_dls ( gint dls_id );
+ extern gboolean Retirer_auto_mnemo_baseDB_for_dls ( gint dls_id );
  extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB_type_num ( struct CMD_TYPE_NUM_MNEMONIQUE *critere );
  extern struct CMD_TYPE_MNEMO_FULL *Rechercher_mnemo_fullDB ( guint id );
  extern gboolean Modifier_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
@@ -56,6 +57,10 @@
  extern void Charger_analogInput ( void );                                                                 /* Dans Mnemo_AI.c */
  extern struct CMD_TYPE_MNEMO_AI *Rechercher_mnemo_aiDB ( guint id );
  extern gboolean Modifier_mnemo_aiDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
+
+ extern gboolean Modifier_mnemo_horlogeDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );              /* Dans Mnemo_HORLORGES.c */
+ extern gboolean Modifier_mnemo_del_all_horlogeDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
+ extern void Activer_horlogeDB ( void );
 
 
  extern void Updater_cpt_impDB ( void );                                                              /* Dans Mnemo_CPT_IMP.c */

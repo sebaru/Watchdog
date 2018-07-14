@@ -145,6 +145,8 @@
     GTree *Dls_data;
     GSList *Set_M;                                                              /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_M;                                                      /* liste des Mxxx a désactiver à la fin du tour prg */
+    GSList *Set_Dls_Data;                                                       /* liste des Mxxx a activer au debut tour prg */
+    GSList *Reset_Dls_Data;                                               /* liste des Mxxx a désactiver à la fin du tour prg */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
     guint admin_start;                                                                              /* Demande de deconnexion */
@@ -182,6 +184,7 @@
  extern void SEA_ech( int num, float val_ech );
  extern void Envoyer_entree_furtive_dls( int num );
  extern void Envoyer_commande_dls ( int num );
+ extern void Envoyer_commande_dls_data ( gchar *nom, gchar *owner );
  extern void Dls_foreach ( void *user_data, 
                            void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
                            void (*do_tree)   (void *user_data, struct DLS_TREE *) );

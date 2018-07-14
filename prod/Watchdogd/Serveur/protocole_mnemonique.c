@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Watchdogd/Serveur/protocole_mnemonique.c    Gestion du protocole_mnemonique pour Watchdog              */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 04 avr 2009 11:13:22 CEST */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Watchdogd/Serveur/protocole_mnemonique.c    Gestion du protocole_mnemonique pour Watchdog                                  */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                          sam 04 avr 2009 11:13:22 CEST */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * protocole_mnemonique.c
  * This file is part of Watchdog
@@ -53,6 +53,13 @@
                plugin = (struct CMD_TYPE_PLUGIN_DLS *)connexion->donnees;
                client->mnemo_dls_id_to_send = plugin->id;
                Ref_client( client, "Send Mnemonique" );
+               pthread_create( &tid, NULL, (void *)Envoyer_mnemoniques_thread, client );
+               pthread_detach( tid );
+             }
+            break;
+       case SSTAG_CLIENT_WANT_PAGE_ALL_MNEMONIQUE:
+             { client->mnemo_dls_id_to_send = -1;
+               Ref_client( client, "Send All Mnemonique" );
                pthread_create( &tid, NULL, (void *)Envoyer_mnemoniques_thread, client );
                pthread_detach( tid );
              }

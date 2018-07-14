@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Client/protocole_mnemonique.c    Gestion du protocole_mnemonique pour la connexion au serveur Watchdog */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     mer. 15 déc. 2010 11:32:01 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Client/protocole_mnemonique.c    Gestion du protocole_mnemonique pour la connexion au serveur Watchdog                     */
+/* Projet WatchDog version 2.0       Gestion d'habitat                     mer. 15 déc. 2010 11:32:01 CET                     */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * protocole_mnemonique.c
  * This file is part of Watchdog
@@ -29,16 +29,16 @@
  #include "Erreur.h"
  #include "Reseaux.h"
 
-/********************************* Définitions des prototypes programme ***********************************/
+/********************************************* Définitions des prototypes programme *******************************************/
  #include "protocli.h"
 
- extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
+ extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
 
-/**********************************************************************************************************/
-/* Gerer_protocole: Gestion de la communication entre le serveur et le client                             */
-/* Entrée: la connexion avec le serveur                                                                   */
-/* Sortie: Kedal                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Gerer_protocole: Gestion de la communication entre le serveur et le client                                                 */
+/* Entrée: la connexion avec le serveur                                                                                       */
+/* Sortie: Kedal                                                                                                              */
+/******************************************************************************************************************************/
  void Gerer_protocole_mnemonique ( struct CONNEXION *connexion )
   { static GList *Arrivee_mnemonique = NULL;
 
@@ -83,6 +83,13 @@
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_MNEMONIQUE_FIN:
              { g_list_foreach( Arrivee_mnemonique, (GFunc)Proto_afficher_un_mnemonique, NULL );
+               g_list_foreach( Arrivee_mnemonique, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_mnemonique );
+               Arrivee_mnemonique = NULL;
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_ALL_MNEMONIQUE_FIN:
+             { g_list_foreach( Arrivee_mnemonique, (GFunc)Proto_afficher_tous_mnemonique, NULL );
                g_list_foreach( Arrivee_mnemonique, (GFunc)g_free, NULL );
                g_list_free( Arrivee_mnemonique );
                Arrivee_mnemonique = NULL;
