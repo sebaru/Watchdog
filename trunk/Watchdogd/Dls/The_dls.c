@@ -754,7 +754,7 @@
 /******************************************************************************************************************************/
  void Envoyer_commande_dls_data ( gchar *nom, gchar *owner )
   { gboolean *data_p=NULL;
-    Dls_data_get_bool ( nom, owner, &data_p );
+    Dls_data_set_bool ( nom, owner, &data_p, FALSE )
     if (!data_p)
      { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: bit '%s_%s' not found", __func__, nom, owner );
        return;
