@@ -41,26 +41,23 @@
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */
 /******************************************************************************************************************************/
- struct CMD_TYPE_MNEMO_AI *Rechercher_mnemo_aiDB ( guint id )
+ void Activer_horlogeDB ( void )
   { struct CMD_TYPE_MNEMO_AI *mnemo_ai;
     gchar requete[512];
     struct DB *db;
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_mnemo_aiDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
      }
  
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT %s.min,%s.max,%s.type,%s.unite"
-                " FROM %s"
-                " INNER JOIN %s ON id_mnemo = id"
-                " WHERE id_mnemo=%d LIMIT 1",
-                NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI,
-                NOM_TABLE_MNEMO_AI,                                                                                   /* FROM */
-                NOM_TABLE_MNEMO,                                                                                /* INNER JOIN */
-                id                                                                                                   /* WHERE */
+                "SELECT m.acronyme, d.tech_id"
+                " FROM %s as m INNER JOIN %s as d ON m.dls_id = dls.id"
+                " INNER JOIN %s as h ON h.id_mnemo = m.id"
+                " WHERE h.heure = AND h.minute =",
+                NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_MNEMO_HORLOGE
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */

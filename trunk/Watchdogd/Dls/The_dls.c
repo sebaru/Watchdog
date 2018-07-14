@@ -749,6 +749,22 @@
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /******************************************************************************************************************************/
+/* Envoyer_commande_dls_data: Gestion des envois de commande DLS via dls_data                                                 */
+/* Entrée/Sortie: rien                                                                                                        */
+/******************************************************************************************************************************/
+ void Envoyer_commande_dls_data ( gchar *nom, gchar *owner )
+  { gboolean *data_p;
+    Dls_data_get_bool ( nom, owner, &data_p );
+    if (!data_p)
+     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: bit '%s_%s' not found", __func__, nom, owner );
+       return;
+     }
+    pthread_mutex_lock( &Partage->com_dls.synchro );
+    Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, data_p );
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
+    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit '%s_%s' demandée", __func__, nom, owner );
+  }
+/******************************************************************************************************************************/
 /* Set_cde_exterieure: Mise à un des bits de commande exterieure                                                              */
 /* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
@@ -758,10 +774,17 @@
     pthread_mutex_lock( &Partage->com_dls.synchro );
     while( Partage->com_dls.Set_M )                                                      /* A-t-on un monostable a allumer ?? */
      { num = GPOINTER_TO_INT( Partage->com_dls.Set_M->data );
-       Info_new( Config.log, Config.log_dls, LOG_NOTICE, "Set_cde_exterieure: Mise a un du bit M%03d", num );
+       Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit M%03d", __func__, num );
        Partage->com_dls.Set_M   = g_slist_remove ( Partage->com_dls.Set_M,   GINT_TO_POINTER(num) );
        Partage->com_dls.Reset_M = g_slist_append ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) ); 
        SM( num, 1 );                                                                           /* Mise a un du bit monostable */
+     }
+    while( Partage->com_dls.Set_Dls_Data )                                                      /* A-t-on un monostable a allumer ?? */
+     { gboolean *data_p = Partage->com_dls.Set_Dls_Data->data;
+       Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit %p", __func__, data_p );
+       Partage->com_dls.Set_Dls_Data = g_slist_remove ( Partage->com_dls.Set_Dls_Data, data_p );
+       Partage->com_dls.Reset_Dls_Data = g_slist_append ( Partage->com_dls.Reset_Dls_Data, data_p ); 
+       *data_p = TRUE;                                                                         /* Mise a un du bit monostable */
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro ); 
   }
@@ -775,9 +798,15 @@
     pthread_mutex_lock( &Partage->com_dls.synchro );
     while( Partage->com_dls.Reset_M )                                                                /* Reset des monostables */
      { num = GPOINTER_TO_INT(Partage->com_dls.Reset_M->data);
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "Reset_cde_exterieure : Mise a zero du bit M%03d", num );
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: Mise a zero du bit M%03d", __func__, num );
        Partage->com_dls.Reset_M = g_slist_remove ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) );
        SM( num, 0 );
+     }
+    while( Partage->com_dls.Set_Dls_Data )                                              /* A-t-on un monostable a éteindre ?? */
+     { gboolean *data_p = Partage->com_dls.Set_Dls_Data->data;
+       Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a 0 du bit %p", data_p );
+       Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, data_p ); 
+       *data_p = FALSE;                                                                         /* Mise a 0 du bit monostable */
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
