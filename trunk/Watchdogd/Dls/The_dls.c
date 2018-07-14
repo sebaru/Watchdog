@@ -804,7 +804,7 @@
      }
     while( Partage->com_dls.Reset_Dls_Data )                                            /* A-t-on un monostable a éteindre ?? */
      { gboolean *data_p = Partage->com_dls.Reset_Dls_Data->data;
-       Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a 0 du bit %p", data_p );
+       Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a 0 du bit %p", __func__, data_p );
        Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, data_p ); 
        *data_p = FALSE;                                                                         /* Mise a 0 du bit monostable */
      }
