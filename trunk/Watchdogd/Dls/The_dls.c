@@ -802,7 +802,7 @@
        Partage->com_dls.Reset_M = g_slist_remove ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) );
        SM( num, 0 );
      }
-    while( Partage->com_dls.Set_Dls_Data )                                              /* A-t-on un monostable a éteindre ?? */
+    while( Partage->com_dls.Reset_Dls_Data )                                            /* A-t-on un monostable a éteindre ?? */
      { gboolean *data_p = Partage->com_dls.Reset_Dls_Data->data;
        Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a 0 du bit %p", data_p );
        Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, data_p ); 
