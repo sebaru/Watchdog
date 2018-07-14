@@ -52,7 +52,7 @@
  
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT m.acronyme, d.tech_id"
-                " FROM %s as m INNER JOIN %s as d ON m.dls_id = dls.id"
+                " FROM %s as m INNER JOIN %s as d ON m.dls_id = d.id"
                 " INNER JOIN %s as h ON h.id_mnemo = m.id"
                 " WHERE CURTIME() LIKE CONCAT(h.heure,':',h.minute,':%')",
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_MNEMO_HORLOGE
