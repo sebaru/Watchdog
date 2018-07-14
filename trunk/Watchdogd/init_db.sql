@@ -153,7 +153,8 @@ INSERT INTO `mnemos_AnalogInput` (`id_mnemo`, `type`, `min`, `max`, `unite`) VAL
 
 CREATE TABLE IF NOT EXISTS `mnemos_Horloge` (
   `id_mnemo` int(11) NOT NULL,
-  `heure` int(22) NOT NULL,
+  `heure` int(11) NOT NULL,
+  `minute` int(11) NOT NULL,
   FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

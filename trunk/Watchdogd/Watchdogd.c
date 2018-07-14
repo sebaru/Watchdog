@@ -433,6 +433,7 @@
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
         { Sauver_compteur();
           Exporter();
+          Activer_horlogeDB();
           cpt_5_minutes = Partage->top + 3000;                                             /* Sauvegarde toutes les 5 minutes */
         }
 

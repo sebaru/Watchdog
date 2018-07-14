@@ -35,55 +35,40 @@
 
  #include "watchdogd.h"
 
-#ifdef bouh
 /******************************************************************************************************************************/
-/* Rechercher_mnemo_aiDB: Recupération de la conf de l'entrée analogique en parametre                                         */
-/* Entrée: l'id a récupérer                                                                                                   */
-/* Sortie: une structure hébergeant l'entrée analogique                                                                       */
+/* Activer_holorgeDB: Recherche toutes les actives à date et les positionne dans la mémoire partagée                          */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Les horloges sont directement pilotée dans la structure DLS_DATA                                                   */
 /******************************************************************************************************************************/
  void Activer_horlogeDB ( void )
-  { struct CMD_TYPE_MNEMO_AI *mnemo_ai;
-    gchar requete[512];
+  { gchar requete[512];
     struct DB *db;
 
     db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(NULL);
+       return;
      }
  
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT m.acronyme, d.tech_id"
                 " FROM %s as m INNER JOIN %s as d ON m.dls_id = dls.id"
                 " INNER JOIN %s as h ON h.id_mnemo = m.id"
-                " WHERE h.heure = AND h.minute =",
+                " WHERE CURTIME() LIKE CONCAT(h.heure,':',h.minute,':%')",
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_MNEMO_HORLOGE
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
      { Libere_DB_SQL (&db);
-       return(NULL);
+       return;
      }
 
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Libere_DB_SQL( &db );
-       return(NULL);
-     }
-
-    mnemo_ai = (struct CMD_TYPE_MNEMO_AI *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_AI) );
-    if (!mnemo_ai) Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                             "Rechercher_mnemo_aiDB: Erreur allocation mémoire" );
-    else
-     { mnemo_ai->min      = atof(db->row[0]);
-       mnemo_ai->max      = atof(db->row[1]);
-       mnemo_ai->type     = atoi(db->row[2]);
-       g_snprintf( mnemo_ai->unite, sizeof(mnemo_ai->unite), "%s", db->row[3] );
+    while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Mise à un de l'horloge %s_%s", __func__, db->row[0], db->row[1] );
+       Envoyer_commande_dls_data ( db->row[0], db->row[1] );
      }
     Libere_DB_SQL( &db );
-    return(mnemo_ai);
   }
-  #endif
 /******************************************************************************************************************************/
 /* Modifier_analogInputDB: Modification d'un entreeANA Watchdog                                                               */
 /* Entrées: une structure hébergeant l'entrée analogique a modifier                                                           */

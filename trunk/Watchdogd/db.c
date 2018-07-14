@@ -850,7 +850,8 @@
     if (database_version < 3596)
      { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `mnemos_Horloge` ("
                                              "`id_mnemo` int(11) NOT NULL,"
-                                             "`heure` int(22) NOT NULL,"
+                                             "`heure` int(11) NOT NULL,"
+                                             "`minute` int(112) NOT NULL,"
                                              "FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE"
                                              ") ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;"
                   );
