@@ -41,7 +41,8 @@
  #include "protocli.h"
 
  enum
-  {  COLONNE_HORLOGE_LIBELLE,
+  {  COLONNE_HORLOGE_ID_MNEMO,
+     COLONNE_HORLOGE_LIBELLE,
      NBR_COLONNE_HORLOGE
   };
   
@@ -131,14 +132,29 @@
 /* sortie: TRUE                                                                                                               */
 /******************************************************************************************************************************/
  static gboolean CB_Editer_horloge ( GtkDialog *dialog, gint reponse, struct TYPE_INFO_SUPERVISION *infos )
-  { switch(reponse)
+  { GtkTreeSelection *selection;
+    GtkTreeModel *store;
+    GList *lignes;
+    GtkTreeIter iter;
+    switch(reponse)
      { /*case GTK_RESPONSE_APPLY:*/
        case GTK_RESPONSE_OK:
-             { /* Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_ADD_MESSAGE,
-                              (gchar *)&Msg, sizeof( struct CMD_TYPE_MESSAGE ) );
-               /*Valider_fichier_mp3 ( &Msg,
-                                     gnome_file_entry_get_full_path ( GNOME_FILE_ENTRY(Entry_mp3), TRUE )
-                                   );*/
+             { selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(infos->Liste_horloge) );
+               store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(infos->Liste_horloge) );
+               lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
+               if ( lignes )
+                { gint id_mnemo;
+                  gtk_tree_model_get_iter( store, &iter, lignes->data );  /* Recuperation ligne selectionnée */
+                  gtk_tree_model_get( store, &iter, COLONNE_HORLOGE_ID_MNEMO, &id_mnemo, -1 );       /* Recup du id */
+
+                  Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_HORLOGE,
+                                (gchar *)&id_mnemo, sizeof( gint ) );
+                  gtk_tree_selection_unselect_iter( selection, &iter );
+                  lignes = lignes->next;
+                }
+               g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
+               g_list_free (lignes);                                                   /* Liberation mémoire */
+               break;
              }
             break;
        case GTK_RESPONSE_CANCEL:
@@ -155,6 +171,7 @@
  static void Rafraichir_visu_horloge( GtkListStore *store, GtkTreeIter *iter, struct CMD_TYPE_MNEMO_BASE *mnemo )
   { gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_HORLOGE_LIBELLE, mnemo->libelle,
+                         COLONNE_HORLOGE_ID_MNEMO, mnemo->id,
                          -1
                        );
   }

@@ -851,9 +851,6 @@ CREATE TABLE IF NOT EXISTS `syns` (
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `page` text COLLATE utf8_unicode_ci NOT NULL,
   `access_level` int(11) NOT NULL DEFAULT '0',
-  `vignette_activite` int(11) NOT NULL DEFAULT '0',
-  `vignette_secu_bien` int(11) NOT NULL DEFAULT '0',
-  `vignette_secu_personne` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`parent_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;

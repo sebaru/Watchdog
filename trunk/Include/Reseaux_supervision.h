@@ -78,7 +78,7 @@
     SSTAG_CLIENT_WANT_HORLOGES,                                    /* Le client demande la liste des horloges d'un synoptique */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGES,                         /* Le serveur envoi des scenario page supervision */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGES_FIN,                     /* Le serveur envoi des scenario page supervision */
-    
+    SSTAG_CLIENT_WANT_HORLOGE,                                    /* Le client demande les ticks d'une horloge en particulier */
   };
 
 #endif
