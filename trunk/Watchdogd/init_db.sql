@@ -859,7 +859,7 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `max_nbr_E` int(11) NOT NULL,
   `map_EA` int(11) NOT NULL,
   `map_A` int(11) NOT NULL,
-  `map_AA` int(11) NOT NULL,  PRIMARY KEY (`id`),
+  `map_AA` int(11) NOT NULL,
   PRIMARY KEY (`ip`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
