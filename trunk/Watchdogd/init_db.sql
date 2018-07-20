@@ -1012,7 +1012,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `comment` varchar(240) COLLATE utf8_unicode_ci DEFAULT NULL,
   `login_failed` int(11) NOT NULL DEFAULT '0',
   `enable` tinyint(1) NOT NULL DEFAULT '0',
-  `date_create` DATETIME NOT NULL DEFAULT '0',
+  `date_create` DATETIME NOT NULL DEFAULT NOW(),
   `enable_expire` tinyint(1) NOT NULL DEFAULT '0',
   `date_expire` DATETIME DEFAULT NULL,
   `date_modif` DATETIME DEFAULT NULL,
