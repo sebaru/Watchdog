@@ -46,7 +46,6 @@ CREATE TABLE IF NOT EXISTS `class` (
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `class` (`id`, `libelle`) VALUES
-(0, 'Systeme'),
 (1, 'Divers'),
 (4, 'Etats_des_Commandes'),
 (5, 'Plans du Site'),
