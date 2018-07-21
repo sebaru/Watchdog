@@ -11,9 +11,9 @@
 
 # debug, info, notice, warning, error, critical
 log_level = notice
-log_msrv = true
-log_dls  = true
-log_arch = true
+debug_msrv = false
+debug_dls  = false
+debug_arch = false
 
 ######################################
 # Parametrage de l'instance globale
@@ -28,10 +28,16 @@ run_as      = watchdog
 instance_id = localhost
 # true s'il s'agit de l'instance master (Default true)
 instance_is_master = true
+#host de l'instance master le cas échéant
+#master_host = host
+#Repertoire hébergeant les librairies (thread)
+#library_dir =
+
 # Parametre de connexion a la base de données
-db_host     = localhost
-db_port     = 3306
-db_database = WatchdogDB
-db_password = tobechanged
-db_username = watchdog
+[DATABASE]
+
+host     = localhost
+database = WatchdogDB
+password = tobechanged
+username = watchdog
 

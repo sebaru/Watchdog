@@ -305,12 +305,14 @@
     Info_new( Config.log, Config.log_db, LOG_NOTICE,
              "Update_database_schema: Actual Database_Version detected = %05d", database_version );
 
+    if (database_version==0) goto fin;
+
     db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_db, LOG_ERR, "Update_database_schema: DB connexion failed" );
        return;
      }
-
+    
     if (database_version < 2500)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE users DROP `imsg_bit_presence`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
@@ -857,11 +859,10 @@
                   );
        Lancer_requete_SQL ( db, requete );
      }
-
-    database_version=3596;
-
     Libere_DB_SQL(&db);
 
+fin:
+    database_version=3596;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE,
