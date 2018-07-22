@@ -1,28 +1,44 @@
 #!/bin/sh
 
+echo "Creating watchdog user"
+useradd watchdog
 usermod -a -G audio watchdog
+echo "done."
+sleep 2
 
 echo "Creating systemd service"
 ln -s /usr/local/etc/Watchdogd.service /etc/systemd/system/Watchdogd.service
-systemctl daemon-reload
 systemctl enable Watchdogd.service
-echo "done."
-
-echo "Creating etc conf file"
-ln -s /usr/local/etc/watchdogd.conf.sample /etc/watchdogd.conf.sample
-ln -s /usr/local/etc/watchdogd-httpd.conf.sample /etc/watchdogd-httpd.conf.sample
 systemctl daemon-reload
 echo "done."
+sleep 2
 
+echo "Copying data files"
 sudo -u watchdog mkdir ~watchdog/Gif
 sudo -u watchdog mkdir ~watchdog/Son
-sudo -u mkdir ~watchdog/Dls
+sudo -u watchdog mkdir ~watchdog/Dls
 
-sudo -u watchdog cp -rv Gif/* ~watchdog/Gif
-sudo -u watchdog cp -rv Son/* ~watchdog/Son
+sudo -u watchdog cp -r Gif/* ~watchdog/Gif
+sudo -u watchdog cp -r Son/* ~watchdog/Son
 
-echo "Directory created and Files copied for SRV"
+echo "done."
+sleep 2
 
-echo "Create Database"
-/usr/bin/mysqladmin -u root -p create WatchdogDB
-echo "CREATE USER 'watchdog' IDENTIFIED BY 'watchdog'; GRANT ALL PRIVILEGES ON WatchdogDB.* TO watchdog; source /usr/local/share/Watchdog/init_db.sql;" | mysql -u root -p WatchdogDB
+echo "Create Database and conf file"
+systemctl restart mariadb
+CONFFILE=/etc/watchdogd.conf
+if [ ! -f $CONFFILE ];
+ then
+    echo "Creating New watchdog database passwd"
+    NEWPASSWORD=`openssl rand -base64 32`
+    sed "/usr/local/etc/watchdogd.conf.sample" -e "s#tobechanged#$NEWPASSWORD#g" > "$CONFFILE"
+   /usr/bin/mysqladmin -u root create WatchdogDB
+   echo "CREATE USER 'watchdog' IDENTIFIED BY '$NEWPASSWORD'; GRANT ALL PRIVILEGES ON WatchdogDB.* TO watchdog; FLUSH PRIVILEGES; source /usr/local/share/Watchdog/init_db.sql;" | mysql -u root WatchdogDB
+   /usr/bin/mysql_secure_installation
+fi
+echo "done."
+
+echo "Starting Watchdog"
+systemctl start Watchdogd.Service
+echo "done."
+

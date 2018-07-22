@@ -350,25 +350,6 @@ CREATE TABLE IF NOT EXISTS `gids` (
   FOREIGN KEY (`id_util`) REFERENCES `util` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
---
--- Structure de la table `histo_msgs`
---
-
-CREATE TABLE IF NOT EXISTS `histo_msgs` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_msg` int(11) NOT NULL DEFAULT '0',
-  `alive` tinyint(1) NOT NULL,
-  `nom_ack` varchar(97) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `date_create_sec` int(11) NOT NULL DEFAULT '0',
-  `date_create_usec` int(11) DEFAULT '0',
-  `date_fixe` int(11) NOT NULL DEFAULT '0',
-  `date_fin` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `date_create_sec` (`date_create_sec`),
-  KEY `alive` (`alive`),
-  FOREIGN KEY (`id_msg`) REFERENCES `msgs` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
 -- --------------------------------------------------------
 
 --
@@ -807,37 +788,6 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `ev_
 (75, 1,  57, 1, 'SYS_AUDIO_HP28', 'Ordre systeme Activation Haut Parleur HP28', ''),
 (76, 1,  58, 1, 'SYS_AUDIO_HP29', 'Ordre systeme Activation Haut Parleur HP29', ''),
 (77, 1,  59, 1, 'SYS_AUDIO_HP30', 'Ordre systeme Activation Haut Parleur HP30', ''),
-(79, 0,  39, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(80, 0,  38, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(81, 0,  37, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(82, 0,  36, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(83, 0,  35, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(84, 0,  34, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(85, 0,  33, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(86, 0,  32, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(87, 0,  31, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(88, 0,  30, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(89, 0,  29, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(90, 0,  28, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(91, 0,  27, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(92, 0,  26, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(93, 0,  25, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(94, 0,  24, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(95, 0,  23, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(96, 0,  22, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(97, 0,  21, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(98, 0,  20, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(99, 0,  19, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(100, 0, 18, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(101, 0, 17, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(102, 0, 16, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(103, 0, 15, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(104, 0, 14, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(105, 0, 13, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(106, 0, 12, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(107, 0, 11, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(108, 0, 10, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(109, 0, 09, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
 (110, 1, 07, 1, 'SYS_EVENT_NOT_FOUND', 'Event not found', ''),
 (111, 1, 08, 1, 'SYS_NEW_TICK', 'Default Command by Tick', '');
 
@@ -905,6 +855,27 @@ CREATE TABLE IF NOT EXISTS `msgs` (
 INSERT INTO `msgs` (`id`, `num`, `dls_id`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `enable`, `sms` ) VALUES
 (1, 0, 1, 'Warning, system is halting', 'Warning, system is halting', 'Warning, system is halting', 1, TRUE, FALSE ),
 (2, 1, 1, 'Warning, system is rebooting', 'Warning, system is rebooting', 'Warning, system is rebooting', 1, TRUE, FALSE );
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `histo_msgs`
+--
+
+CREATE TABLE IF NOT EXISTS `histo_msgs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_msg` int(11) NOT NULL DEFAULT '0',
+  `alive` tinyint(1) NOT NULL,
+  `nom_ack` varchar(97) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `date_create_sec` int(11) NOT NULL DEFAULT '0',
+  `date_create_usec` int(11) DEFAULT '0',
+  `date_fixe` int(11) NOT NULL DEFAULT '0',
+  `date_fin` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `date_create_sec` (`date_create_sec`),
+  KEY `alive` (`alive`),
+  FOREIGN KEY (`id_msg`) REFERENCES `msgs` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
