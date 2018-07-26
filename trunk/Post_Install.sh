@@ -39,6 +39,6 @@ fi
 echo "done."
 
 echo "Starting Watchdog"
-systemctl start Watchdogd.Service
+systemctl start Watchdogd.service
 echo "done."
 

@@ -99,7 +99,8 @@
 
 /**************************************************** AddOns pour les Horlorges ***********************************************/
  struct CMD_TYPE_MNEMO_HORLOGE
-  { gint heure;
+  { gint id;
+    gint heure;
     gint minute;
   };
 
@@ -168,7 +169,7 @@
     SSTAG_CLIENT_EDIT_MNEMONIQUE,                                                  /* Le client demande l'edition d'un groupe */
     SSTAG_SERVEUR_EDIT_MNEMONIQUE_OK,                              /* Le serveur accepte et envoi les données correspondantes */
     SSTAG_CLIENT_VALIDE_EDIT_MNEMONIQUE,                                             /* Le client renvoie les données editées */
-    SSTAG_SERVEUR_VALIDE_EDIT_MNEMONIQUE_OK,                                       /* Le serveur valide les nouvelles données */
+    SSTAG_SERVEUR_VALIDE_EDIT_MNEMONIQUE_OK,                                       /* Le serveur valide les nouvelles données */   
   };
 
 #endif

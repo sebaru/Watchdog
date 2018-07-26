@@ -183,6 +183,7 @@
  void Proto_afficher_une_horloge( struct TYPE_INFO_SUPERVISION *infos, struct CMD_TYPE_MNEMO_BASE *mnemo )
   { GtkListStore *store;
     GtkTreeIter iter;
+    printf(" print horloge infos=%p\n", infos );
     store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(infos->Liste_horloge) ));
     gtk_list_store_append ( store, &iter );                                                          /* Acquisition iterateur */
     Rafraichir_visu_horloge ( store, &iter, mnemo );
@@ -214,9 +215,12 @@ printf(" On veut les horloges du syn %d\n", infos->syn_id );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX( GTK_DIALOG(infos->Dialog_horloge)->vbox ), scroll, TRUE, TRUE, 0 );
 
-    store = gtk_list_store_new ( NBR_COLONNE_HORLOGE, G_TYPE_STRING                                                /* Libelle */
+    store = gtk_list_store_new ( NBR_COLONNE_HORLOGE, G_TYPE_INT,                                                       /* Id */
+                                                      G_TYPE_STRING                                                /* Libelle */
                                );
+
     infos->Liste_horloge = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                      /* Creation de la vue */
+
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(infos->Liste_horloge) );
     /*gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );*/
     gtk_container_add( GTK_CONTAINER(scroll), infos->Liste_horloge );

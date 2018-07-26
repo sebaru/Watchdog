@@ -106,22 +106,6 @@ CREATE TABLE IF NOT EXISTS `syns_camerasup` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `syns_scenario`
---
-
-CREATE TABLE IF NOT EXISTS `syns_scenario` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `syn_id` int(11) NOT NULL,
-  `num` int(11) NOT NULL,
-  `posx` int(11) NOT NULL,
-  `posy` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `syns_cadrans`
 --
 
@@ -307,11 +291,13 @@ INSERT INTO `mnemos_AnalogInput` (`id_mnemo`, `type`, `min`, `max`, `unite`) VAL
 --
 
 CREATE TABLE IF NOT EXISTS `mnemos_Horloge` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_mnemo` int(11) NOT NULL,
   `heure` int(11) NOT NULL,
   `minute` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
   FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 
