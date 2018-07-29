@@ -73,6 +73,15 @@
     return(FALSE);
   }
 /******************************************************************************************************************************/
+/* Http_get_session_id : Isole le SID d'une session d'une WSI                                                                 */
+/* Entrées: le WSI en question                                                                                                */
+/* Sortie : sid ou "---" si erreur                                                                                            */
+/******************************************************************************************************************************/
+ gchar *Http_get_session_id ( struct HTTP_SESSION *session )
+  { if (session) return(session->sid_string);
+    return("--- none ---");
+  }
+/******************************************************************************************************************************/
 /* Http Liberer_session : Libere la mémoire réservée par la structure session                                                 */
 /* Entrées : la session à libérer                                                                                             */
 /* Sortie : néant                                                                                                             */
