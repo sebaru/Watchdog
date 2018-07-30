@@ -539,7 +539,7 @@
     val    = Get_option_entier ( options, MODE   ); if (val    == -1) val = 0;
     coul   = Get_option_entier ( options, COLOR  ); if (coul   == -1) coul = 0;
     cligno = Get_option_entier ( options, CLIGNO ); if (cligno == -1) cligno = 0;
-    taille = 40;
+    taille = 128;
     if (Add_bit_to_list(MNEMO_MOTIF, num)) Check_ownership ( MNEMO_MOTIF, num );
     action = New_action();
     action->alors = New_chaine( taille );
@@ -554,8 +554,9 @@
        case KAKI    : rouge =   0; vert = 100; bleu =   0; break;
        default      : rouge = vert = bleu = 0;
      }
-    g_snprintf( action->alors, taille, "SI(%d,%d,%d,%d,%d,%d);",
-                num, val, rouge, vert, bleu, cligno );
+    g_snprintf( action->alors, taille,
+               " if (vars->bit_comm_out) SI(%d, 0, 0, 100, 0, 1); else SI(%d,%d,%d,%d,%d,%d);",
+                num, num, val, rouge, vert, bleu, cligno );
     return(action);
   }
 
