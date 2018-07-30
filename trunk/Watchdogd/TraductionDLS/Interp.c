@@ -287,7 +287,8 @@
     taille = 24;
     result = New_chaine( taille );
     if (Get_option_entier( options, T_EDGE_UP) == 1)
-     { Liste_edge_up_entree = g_slist_prepend ( Liste_edge_up_entree, GINT_TO_POINTER(num) );
+     { if ( g_slist_find ( Liste_edge_up_entree, GINT_TO_POINTER(num) ) == NULL )
+        { Liste_edge_up_entree = g_slist_prepend ( Liste_edge_up_entree, GINT_TO_POINTER(num) ); }
        if (barre) g_snprintf( result, taille, "!E%d_edge_up_value", num );
              else g_snprintf( result, taille, "E%d_edge_up_value", num );
      }
@@ -771,6 +772,9 @@
                  { case T_MONO: nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_M_%s;\n", alias->nom );
                                 write (fd, chaine, nb_car);
                                 break;
+                   case T_BI:   nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_B_%s;\n", alias->nom );
+                                write (fd, chaine, nb_car);
+                                break;
                    case T_HORLOGE:
                                 nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_HOR_%s;\n", alias->nom );
                                 write (fd, chaine, nb_car);
@@ -897,6 +901,12 @@
            { switch ( alias->bit )
               { case T_MONO:
                  { mnemo.type = MNEMO_MONOSTABLE;
+                   g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
+                   g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
+                   Mnemo_auto_create_for_dls ( &mnemo );
+                 }
+                case T_BI:
+                 { mnemo.type = MNEMO_BISTABLE;
                    g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
                    g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
                    Mnemo_auto_create_for_dls ( &mnemo );
