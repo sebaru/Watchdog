@@ -935,12 +935,16 @@
           gettimeofday( &tv_apres, NULL );
           plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
           plugin_actuel->starting = 0;
+
           plugin_actuel->vars.bit_acquit = 0;                                                 /* On arrete l'acquit du plugin */
+                                                                                                  /* Bit de synthese activite */
           bit_comm_out         |= plugin_actuel->vars.bit_comm_out;
           bit_defaut           |= plugin_actuel->vars.bit_defaut;
           bit_defaut_fixe      |= plugin_actuel->vars.bit_defaut_fixe;
           bit_alarme           |= plugin_actuel->vars.bit_alarme;
           bit_alarme_fixe      |= plugin_actuel->vars.bit_alarme_fixe;
+          plugin_actuel->vars.bit_activite_down = bit_comm_out | bit_defaut | bit_defaut_fixe | bit_alarme | bit_alarme_fixe;
+
           bit_veille_partielle |= plugin_actuel->vars.bit_veille;
           bit_veille_totale    &= plugin_actuel->vars.bit_veille;
           bit_alerte           |= plugin_actuel->vars.bit_alerte;
