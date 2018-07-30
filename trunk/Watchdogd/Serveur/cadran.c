@@ -106,10 +106,11 @@
             return(etat_cadran);
        case MNEMO_CPTH:
              { time_t valeur;
-               valeur = (time_t)Partage->ch[cadran->bit_controle].confDB.valeur / 60;
-               g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
-                           "%05dh", (int)valeur
-                         );
+               valeur = (time_t)Partage->ch[cadran->bit_controle].confDB.valeur;
+               if (valeur < 60)
+                { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%02d min", (int)valeur ); }
+                else
+                { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%05dh", (int)valeur/60 ); }
                cadran->val_ech = Partage->ch[cadran->bit_controle].confDB.valeur;
              }
             break;
@@ -122,8 +123,7 @@
                 { case CI_TOTALISATEUR: format = "%8.0f %s"; break;
                   default:              format = "%8.2f %s"; break;
                 }
-               g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
-                           format, valeur,
+               g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), format, valeur,
                            Partage->ci[cadran->bit_controle].confDB.unite
                          );
                cadran->val_ech = Partage->ci[cadran->bit_controle].confDB.valeur;
