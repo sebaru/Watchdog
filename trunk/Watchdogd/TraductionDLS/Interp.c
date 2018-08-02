@@ -198,64 +198,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Check_ownership: Vérifie la propriété du bit interne en action                                                             */
-/* Entrées: le type et numéro du bit interne a testet                                                                         */
-/* Sortie: FALSE si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gboolean Check_ownership ( gint type, gint num )
-  { struct CMD_TYPE_NUM_MNEMONIQUE critere;
-    struct CMD_TYPE_MNEMO_BASE *mnemo;
-    critere.type = type;
-    critere.num  = num;
-    gchar chaine[80];
-    gboolean retour;
-    retour = FALSE;
-    mnemo = Rechercher_mnemo_baseDB_type_num ( &critere );
-    Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-             "%s: Test Mnemo %d %d for id %d: mnemo %p", __func__, critere.type, critere.num, Dls_plugin.id, mnemo ); 
-    if (mnemo)
-     { if (mnemo->dls_id == Dls_plugin.id) retour=TRUE;
-       g_free(mnemo);
-     }
-    
-    if(retour == FALSE)
-     { switch (type)
-        { case MNEMO_BISTABLE:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: B%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          case MNEMO_CPTH:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: CH%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          case MNEMO_CPT_IMP:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: CI%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          case MNEMO_MONOSTABLE:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: M%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          case MNEMO_MOTIF:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: I%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          case MNEMO_REGISTRE:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: R%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          case MNEMO_SORTIE:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: A%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          case MNEMO_SORTIE_ANA:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: AA%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          case MNEMO_TEMPO:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: T%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          default: Emettre_erreur_new( "Ligne %d: Ownership problem (but bit type unknown)", DlsScanner_get_lineno() );
-               break;
-        }
-       Emettre_erreur_new( "%s", chaine );
-       return(FALSE);
-     }
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
 /* New_condition_bi: Prepare la chaine de caractere associée à la condition, en respectant les options                        */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
@@ -422,7 +364,7 @@
     int taille;
 
     taille = 20;
-    if (Add_bit_to_list(MNEMO_SORTIE, num)) Check_ownership ( MNEMO_SORTIE, num );
+    Add_bit_to_list(MNEMO_SORTIE, num);
     action = New_action();
     action->alors = New_chaine( taille );
     g_snprintf( action->alors, taille, "SA(%d,%d);", num, !barre );
@@ -456,7 +398,7 @@
     int taille;
 
     taille = 15;
-    if (Add_bit_to_list(MNEMO_MONOSTABLE, num)) Check_ownership ( MNEMO_MONOSTABLE, num );
+    Add_bit_to_list(MNEMO_MONOSTABLE, num);
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
@@ -498,7 +440,7 @@
 
     reset = Get_option_entier ( options, RESET ); if (reset == -1) reset = 0;
     taille = 15;
-    if (Add_bit_to_list(MNEMO_CPTH, num)) Check_ownership ( MNEMO_CPTH, num );
+    Add_bit_to_list(MNEMO_CPTH, num);
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
@@ -519,7 +461,7 @@
     ratio = Get_option_entier ( options, RATIO ); if (ratio == -1) ratio = 1;
 
     taille = 20;
-    if (Add_bit_to_list(MNEMO_CPT_IMP, num)) Check_ownership ( MNEMO_CPT_IMP, num );
+    Add_bit_to_list(MNEMO_CPT_IMP, num);
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
@@ -541,7 +483,7 @@
     coul   = Get_option_entier ( options, COLOR  ); if (coul   == -1) coul = 0;
     cligno = Get_option_entier ( options, CLIGNO ); if (cligno == -1) cligno = 0;
     taille = 128;
-    if (Add_bit_to_list(MNEMO_MOTIF, num)) Check_ownership ( MNEMO_MOTIF, num );
+    Add_bit_to_list(MNEMO_MOTIF, num);
     action = New_action();
     action->alors = New_chaine( taille );
     switch (coul)
@@ -570,7 +512,7 @@
   { struct ACTION *action;
     int taille;
 
-    if (Add_bit_to_list(MNEMO_TEMPO, num)) Check_ownership ( MNEMO_TEMPO, num );
+    Add_bit_to_list(MNEMO_TEMPO, num);
     action = New_action();
     taille = 40;
     action->alors = New_chaine( taille );
@@ -590,7 +532,7 @@
     int taille;
 
     taille = 20;
-    if (Add_bit_to_list(MNEMO_BISTABLE, num)) Check_ownership ( MNEMO_BISTABLE, num );
+    Add_bit_to_list(MNEMO_BISTABLE, num);
     action = New_action();
     action->alors = New_chaine( taille );
        

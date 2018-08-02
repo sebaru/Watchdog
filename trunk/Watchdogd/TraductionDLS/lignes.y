@@ -264,7 +264,6 @@ calcul_expr3:   VALF
 
 calcul_ea_result: T_REGISTRE ENTIER
                 {{ $$ = $2;
-                   Check_ownership ( MNEMO_REGISTRE, $2 );
                 }}
                 | ID
                 {{ struct ALIAS *alias;
@@ -275,7 +274,6 @@ calcul_ea_result: T_REGISTRE ENTIER
                     { switch(alias->bit)               /* On traite que ce qui peut passer en "condition" */
                        { case T_REGISTRE:
                           { $$ = alias->num;
-                            Check_ownership ( MNEMO_REGISTRE, alias->num );
                             break;
                           }
                          default: 
