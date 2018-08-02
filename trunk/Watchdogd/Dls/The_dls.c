@@ -826,8 +826,9 @@
   { void *data;
     pthread_mutex_lock( &Partage->com_dls.synchro_data );
     data = g_tree_lookup ( Partage->com_dls.Dls_data, key );
-    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : searching for key %s : %p", __func__, key, data );
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+/*    if (!data)
+     { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : searching for key %s : %p failed.", __func__, key, data ); }*/
     return(data);
   }
  void Dls_data_set_bool ( gchar *nom, gchar *owner, gboolean **data_p, gboolean valeur )
