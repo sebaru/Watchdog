@@ -73,8 +73,8 @@
  extern void Emettre_erreur_new( gchar *format, ... );
  extern void Emettre_init_alias( void );
  extern struct COMPARATEUR *New_comparateur( void );
- extern gchar *New_condition_bi( int barre, int num, GList *options );
  extern gchar *New_condition_entree( int barre, int num, GList *options );
+ extern gchar *New_condition_bi( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_mono( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_horloge( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_vars( int barre, gchar *nom );
@@ -88,6 +88,7 @@
  extern struct ACTION *New_action_icone( int num, GList *options );
  extern struct ACTION *New_action_tempo( int num, GList *options );
  extern struct ACTION *New_action_bi( int num, int barre );
+ extern struct ACTION *New_action_bi_by_alias( struct ALIAS *alias, gint barre );
  extern struct ACTION *New_action_cpt_h( int num, GList *options );
  extern struct ACTION *New_action_cpt_imp( int num, GList *options );
  extern gboolean New_alias( char *nom, int bit, int num, int barre, GList *options );

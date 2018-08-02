@@ -362,17 +362,6 @@ unite:          modulateur ENTIER HEURE ENTIER
                 {{ if ($1) $$ = g_strdup("!vars->bit_activite_down");
                       else $$ = g_strdup("vars->bit_activite_down");
                 }}
-                | barre T_BI ENTIER liste_options
-                {{ $$ = New_condition_bi ( $1, $3, $4 );
-                   Liberer_options($4);
-                }}
-                | barre T_MONO ENTIER
-                {{ int taille;
-                   taille = 10;
-                   $$ = New_chaine( taille ); /* 10 caractères max */
-                   if ($1) g_snprintf( $$, taille, "!M(%d)", $3 );
-                   else g_snprintf( $$, taille, "M(%d)", $3 );
-                }}
                 | barre ENTREE ENTIER liste_options
                 {{ $$ = New_condition_entree ( $1, $3, $4 );
                    Liberer_options($4);
@@ -498,10 +487,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                             break;
                           }
                          case T_BI:
-                          { if ( (alias->barre && $1) || (!alias->barre && !$1))
-                             { $$ = New_condition_bi( 0, alias->num, $3 ); }
-                            else
-                             { $$ = New_condition_bi( 1, alias->num, $3 ); }
+                          { $$ = New_condition_bi( $1, alias, $3 );
                             break;
                           }
                          case T_MONO:
@@ -698,10 +684,10 @@ une_action:     barre SORTIE ENTIER
                        { case T_TEMPO: $$=New_action_tempo( alias->num, options );   break;
                          case T_MSG  : $$=New_action_msg( alias->num );              break;
                          case SORTIE : $$=New_action_sortie( alias->num, $1 );       break;
-                         case T_BI     : if (alias->num >= NBR_BIT_BISTABLE_RESERVED)
-                                        { $$=New_action_bi( alias->num, $1 ); }
+                         case T_BI   : if (alias->num >= NBR_BIT_BISTABLE_RESERVED || alias->num==-1)
+                                        { $$=New_action_bi_by_alias( alias, $1 ); }
                                        else
-                                        { Emettre_erreur_new( "Ligne %d: 'B%04d' could not be set (system bit)", DlsScanner_get_lineno(), alias->bit );
+                                        { Emettre_erreur_new( "Ligne %d: 'B%04d' could not be set (system bit)", DlsScanner_get_lineno(), alias->num );
                                           $$=New_action();
                                           taille = 2;
                                           $$->alors = New_chaine( taille );

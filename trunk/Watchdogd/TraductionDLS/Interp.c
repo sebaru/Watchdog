@@ -202,7 +202,7 @@
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_bi( int barre, int num, GList *options )
+ static gchar *New_condition_bi_old( int barre, int num, GList *options )
   { gchar *result;
     gint taille;
     taille = 24;
@@ -216,6 +216,25 @@
     else { if (barre) g_snprintf( result, taille, "!B(%d)", num );
                  else g_snprintf( result, taille, "B(%d)", num );
          }
+    return(result);
+  }
+/******************************************************************************************************************************/
+/* New_condition_bi: Prepare la chaine de caractere associée à la condition, en respectant les options                        */
+/* Entrées: numero du bit bistable et sa liste d'options                                                                      */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_bi( int barre, struct ALIAS *alias, GList *options )
+  { gchar *result;
+    gint taille;
+    if (alias->num != -1) /* Alias par numéro ? */
+     { return(New_condition_bi_old( barre, alias->num, options)); }
+    else /* Alias par nom */
+     { taille = 100;
+       result = New_chaine( taille ); /* 10 caractères max */
+       if ( (!barre && !alias->barre) || (barre && alias->barre) )
+            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_B_%s )", alias->nom, Dls_plugin.tech_id, alias->nom ); }
+       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_B_%s )", alias->nom, Dls_plugin.tech_id, alias->nom ); }
+     }
     return(result);
   }
 /******************************************************************************************************************************/
@@ -538,6 +557,28 @@
        
     g_snprintf( action->alors, taille, "SB(%d,%d);", num, !barre );
     return(action);
+  }
+/******************************************************************************************************************************/
+/* New_action_mono: Prepare une struct action avec une commande SM                                                            */
+/* Entrées: numero du monostable, sa logique                                                                                  */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
+ struct ACTION *New_action_bi_by_alias( struct ALIAS *alias, gint barre )
+  { struct ACTION *action;
+    int taille;
+
+    if (alias->num != -1) /* Alias par numéro ? */
+     { return(New_action_bi ( alias->num, barre )); }
+    else /* Alias par nom */
+     { taille = 100;
+       action = New_action();
+       action->alors = New_chaine( taille );
+       action->sinon = New_chaine( taille );
+
+       g_snprintf( action->alors, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_B_%s, %d );", alias->nom, Dls_plugin.tech_id, alias->nom, !barre );
+       g_snprintf( action->sinon, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_B_%s, %d );", alias->nom, Dls_plugin.tech_id, alias->nom, barre );
+       return(action);
+     }
   }
 /******************************************************************************************************************************/
 /* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
