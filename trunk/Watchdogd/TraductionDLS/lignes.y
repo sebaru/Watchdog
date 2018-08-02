@@ -358,8 +358,9 @@ unite:          modulateur ENTIER HEURE ENTIER
                 | T_OSYN_ACQ
                 {{ $$ = g_strdup("vars->bit_acquit");
                 }}
-                | T_ACT_DOWN
-                {{ $$ = g_strdup("vars->bit_activite_down");
+                | barre T_ACT_DOWN
+                {{ if ($1) $$ = g_strdup("!vars->bit_activite_down");
+                      else $$ = g_strdup("vars->bit_activite_down");
                 }}
                 | barre T_BI ENTIER liste_options
                 {{ $$ = New_condition_bi ( $1, $3, $4 );
