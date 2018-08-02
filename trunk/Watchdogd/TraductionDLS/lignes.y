@@ -335,9 +335,9 @@ unite:          modulateur ENTIER HEURE ENTIER
                 }}
                 | T_START
                 {{ int taille;
-                   taille = 10;
+                   taille = 20;
                    $$ = New_chaine(taille);
-                   g_snprintf( $$, taille, "(start)" );
+                   g_snprintf( $$, taille, "(vars->starting)" );
                 }}
                 | T_TRUE
                 {{ int taille;

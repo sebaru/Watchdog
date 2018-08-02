@@ -754,10 +754,10 @@
           gchar *Fonction= " gint Get_Tableau_bit(int n) { return(Tableau_bit[n]); }\n"
                            " gint Get_Tableau_num(int n) { return(Tableau_num[n]); }\n"
                            " gint Get_Tableau_msg(int n) { return(Tableau_msg[n]); }\n";
-          gchar *Start_Go = " void Go ( gint start, gint debug, struct DLS_TO_PLUGIN *vars )\n"
+          gchar *Start_Go = " void Go ( struct DLS_TO_PLUGIN *vars )\n"
                             "  {\n"
                             "    Update_edge_up_value();\n"
-                            "    if (debug) Dls_print_debug( Dls_id, (int *)&Tableau_bit, (int *)&Tableau_num, (float *)&Tableau_val );\n";
+                            "    if (vars->debug) Dls_print_debug( Dls_id, (int *)&Tableau_bit, (int *)&Tableau_num, (float *)&Tableau_val );\n";
           gchar *End_Go =   "  }\n";
           gchar chaine[4096];
           gint cpt=0;                                                                                   /* Compteur d'actions */

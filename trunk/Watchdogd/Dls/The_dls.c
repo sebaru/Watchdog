@@ -931,10 +931,10 @@
        if (plugin_actuel->plugindb.on && plugin_actuel->go)
         { gettimeofday( &tv_avant, NULL );
           Partage->top_cdg_plugin_dls = 0;                                                      /* On reset le cdg plugin DLS */
-          plugin_actuel->go( plugin_actuel->starting, plugin_actuel->debug, &plugin_actuel->vars );     /* On appel le plugin */
+          plugin_actuel->go( &plugin_actuel->vars );     /* On appel le plugin */
           gettimeofday( &tv_apres, NULL );
           plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
-          plugin_actuel->starting = 0;
+          plugin_actuel->vars.starting = 0;
 
           plugin_actuel->vars.bit_acquit = 0;                                                 /* On arrete l'acquit du plugin */
                                                                                                   /* Bit de synthese activite */

@@ -90,7 +90,7 @@
 
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%06d.so", dls->plugindb.id );
     strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );                 /* Init des variables communes */
-    dls->starting = 1;                                                             /* au chargement, le bit de start vaut 1 ! */
+    dls->vars.starting = 1;                                                        /* au chargement, le bit de start vaut 1 ! */
     dls->conso    = 0.0;
 
     retour = FALSE;                                                                          /* Par défaut, on retourne FALSE */
@@ -348,15 +348,15 @@
           else if (Check_action_bit_use( plugin ) == TRUE)
            { plugin->plugindb.on = TRUE;
              plugin->conso = 0.0;
-             plugin->starting = 1;
              plugin->start_date = time(NULL);
+             plugin->vars.starting = 1;
              Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: id %06d started (%s)", __func__, plugin->plugindb.id, plugin->plugindb.nom );
            }
           else
            { plugin->plugindb.on = 0;
              plugin->start_date = 0;
              plugin->conso = 0.0;
-             plugin->starting = 0;
+             plugin->vars.starting = 0;
              Info_new( Config.log, Config.log_dls, LOG_WARNING,
                       "%s: Candidat %06d -> bit(s) set but not owned by itself... Disabling", __func__, plugin->plugindb.id ); 
            }

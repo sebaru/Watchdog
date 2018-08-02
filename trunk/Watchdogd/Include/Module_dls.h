@@ -30,7 +30,9 @@
  #include <glib.h>
 
  struct DLS_TO_PLUGIN                                                 /* structure dechange de données entre DLS et le plugin */
-  { gboolean bit_comm_out;
+  { gint starting;                                      /* 1 si les bits internes "start" du plugins doivent etre positionnés */
+    gboolean debug;                                                 /* TRUE si le plugin doit logguer ses changements de bits */
+    gboolean bit_comm_out;
     gboolean bit_defaut;
     gboolean bit_defaut_fixe;
     gboolean bit_alarme;
@@ -40,10 +42,10 @@
     gboolean bit_alerte;
     gboolean bit_alerte_fixe;
     gboolean bit_derangement;
-    gboolean bit_danger;
-    gboolean bit_acquit;
     gboolean bit_derangement_fixe;
+    gboolean bit_danger;
     gboolean bit_danger_fixe;
+    gboolean bit_acquit;
     gboolean bit_activite_down;
   };
 

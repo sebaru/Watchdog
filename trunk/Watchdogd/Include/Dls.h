@@ -39,10 +39,8 @@
   { struct CMD_TYPE_PLUGIN_DLS plugindb;
     gchar nom_fichier[60];                                                                                  /* Nom du fichier */
     time_t start_date;                                                                  /* time_t date de demarrage du plugin */
-    gint starting;                                      /* 1 si les bits internes "start" du plugins doivent etre positionnés */
-    gboolean debug;                                                 /* TRUE si le plugin doit logguer ses changements de bits */
     void *handle;                                                                              /* Handle du fichier librairie */
-    void (*go)(gint,gint,struct DLS_TO_PLUGIN *);                                         /* Fonction de traitement du module */
+    void (*go)(struct DLS_TO_PLUGIN *);                                                   /* Fonction de traitement du module */
     float conso;                                                                         /* Consommation temporelle du plugin */
     gint (*Get_Tableau_bit)(gint);                                             /* Fonction d'identification des bits utilisés */
     gint (*Get_Tableau_num)(gint);                                             /* Fonction d'identification des bits utilisés */
