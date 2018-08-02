@@ -53,6 +53,7 @@
     dls->vars.starting = 1;                                                        /* au chargement, le bit de start vaut 1 ! */
     dls->conso    = 0.0;
 
+    if (Config.compil) Compiler_source_dls( FALSE, dls->plugindb.id, NULL, 0 );
     retour = FALSE;                                                                          /* Par défaut, on retourne FALSE */
     dls->handle = dlopen( nom_fichier_absolu, RTLD_GLOBAL | RTLD_NOW );                     /* Ouverture du fichier librairie */
     if (!dls->handle)
