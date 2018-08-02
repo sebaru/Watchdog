@@ -573,10 +573,9 @@
      { taille = 100;
        action = New_action();
        action->alors = New_chaine( taille );
-       action->sinon = New_chaine( taille );
+       action->sinon = NULL;
 
        g_snprintf( action->alors, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_B_%s, %d );", alias->nom, Dls_plugin.tech_id, alias->nom, !barre );
-       g_snprintf( action->sinon, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_B_%s, %d );", alias->nom, Dls_plugin.tech_id, alias->nom, barre );
        return(action);
      }
   }
