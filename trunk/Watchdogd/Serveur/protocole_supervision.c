@@ -191,7 +191,7 @@
        case SSTAG_CLIENT_WANT_HORLOGE:
              { struct DB *db;
                struct CMD_ENREG nbr;
-               struct CMD_TYPE_MNEMO_BASE *mnemo;
+               struct CMD_TYPE_MNEMO_FULL *mnemo;
                gchar critere[128];
                gint id_mnemo;
                id_mnemo = *(gint *)connexion->donnees;                   /* Récupération de l'id du mnemo associé à l'horloge */

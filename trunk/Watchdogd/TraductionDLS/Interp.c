@@ -830,6 +830,9 @@
            { g_snprintf(chaine, sizeof(chaine),
                       " static int B%d_edge_up_value = 0;\n", GPOINTER_TO_INT(liste->data) );
              write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+             g_snprintf(chaine, sizeof(chaine),
+                      " static int B%d_verrou = 0;\n", GPOINTER_TO_INT(liste->data) );
+             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
              liste = liste->next;
            }
 
@@ -838,6 +841,9 @@
            { g_snprintf(chaine, sizeof(chaine),
                       " static int E%d_edge_up_value = 0;\n", GPOINTER_TO_INT(liste->data) );
              write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+             g_snprintf(chaine, sizeof(chaine),
+                      " static int E%d_verrou = 0;\n", GPOINTER_TO_INT(liste->data) );
+             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
              liste = liste->next;
            }
 
@@ -845,20 +851,20 @@
           g_snprintf(chaine, sizeof(chaine),
                     "/*******************************************************/\n"
                     " static void Update_edge_up_value (void)\n"
-                    "  { int new_value=0;\n" );
+                    "  { \n" );
           write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
 
           liste = Liste_edge_up_bi;                                /* Initialise les fonctions de gestion des fronts montants */
           while(liste)
            { gchar chaine[1024];
              g_snprintf(chaine, sizeof(chaine),
-                      " new_value = B(%d);\n"
-                      " if (new_value == 0) B%d_edge_up_value = 0;\n"
-                      " else { if (B%d_edge_up_value==0 && new_value == 1) { B%d_edge_up_value=1; }\n"
-                      "                                               else { B%d_edge_up_value=0; }\n"
+                      " if (B(%d) == 0)\n"
+                      "      { B%d_verrou = 0; B%d_edge_up_value = 0; }\n"
+                      " else { if (B%d_verrou=0) { B%d_verrou=1; B%d_edge_up_value=1; }\n"
+                      "                     else { B%d_edge_up_value=0; }\n"
                       "      }\n",
-                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
-                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
+                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
+                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
                       GPOINTER_TO_INT(liste->data) );
              write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
              liste = liste->next;
@@ -867,13 +873,13 @@
           while(liste)
            { gchar chaine[1024];
              g_snprintf(chaine, sizeof(chaine),
-                      " new_value = E(%d);\n"
-                      " if (new_value == 0) E%d_edge_up_value = 0;\n"
-                      " else { if (E%d_edge_up_value==0 && new_value == 1) { E%d_edge_up_value=1; }\n"
-                      "                                               else { E%d_edge_up_value=0; }\n"
+                      " if (E(%d) == 0)\n"
+                      "      { E%d_verrou = 0; E%d_edge_up_value = 0; }\n"
+                      " else { if (E%d_verrou=0) { E%d_verrou=1; E%d_edge_up_value=1; }\n"
+                      "                     else { E%d_edge_up_value=0; }\n"
                       "      }\n",
-                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
-                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
+                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
+                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
                       GPOINTER_TO_INT(liste->data) );
              write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
              liste = liste->next;
