@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/HttpMobile/HttpMobile.h        Déclaration structure internes des WebServices                                    */
+/* Watchdogd/HttpMobile/Http.h        Déclaration structure internes des WebServices                                          */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                       mer. 24 avril 2013 18:48:19 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * httpmobile.h
+ * http.h
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -118,7 +118,6 @@
  extern gint Http_Traiter_request_body_completion_cli ( struct lws *wsi );
  extern gint Http_Traiter_request_body_postfile ( struct lws *wsi, void *data, size_t taille );
  extern gint Http_Traiter_request_body_completion_postfile ( struct lws *wsi );
- extern gint Http_Traiter_request_getui ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gint Http_Traiter_request_setm ( struct lws *wsi );
  extern gboolean Get_phpsessionid_cookie ( struct lws *wsi );
   
@@ -126,9 +125,5 @@
  extern void Http_Check_sessions ( void );
  extern void Http_Liberer_session ( struct HTTP_SESSION *session );
  extern void Http_Close_session ( struct lws *wsi, struct HTTP_SESSION *session );
-
- extern gint Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip );
- extern gint Http_Traiter_request_body_login ( struct lws *wsi, void *data, size_t taille );
- extern gint Http_Traiter_request_body_completion_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

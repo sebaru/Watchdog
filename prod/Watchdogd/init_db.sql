@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `cameras` (
   `location` varchar(600) NOT NULL,
   `libelle` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -46,7 +46,6 @@ CREATE TABLE IF NOT EXISTS `class` (
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `class` (`id`, `libelle`) VALUES
-(0, 'Systeme'),
 (1, 'Divers'),
 (4, 'Etats_des_Commandes'),
 (5, 'Plans du Site'),
@@ -72,6 +71,146 @@ INSERT INTO `class` (`id`, `libelle`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `syns`
+--
+
+CREATE TABLE IF NOT EXISTS `syns` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent_id` int(11) NOT NULL,
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
+  `page` text COLLATE utf8_unicode_ci NOT NULL,
+  `access_level` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`parent_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+INSERT INTO `syns` (`id`, `parent_id`, `libelle`, `page`, `access_level` ) VALUES
+(1, 1, 'Accueil', 'Defaut Page', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `syns_camerasup`
+--
+
+CREATE TABLE IF NOT EXISTS `syns_camerasup` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `syn_id` int(11) NOT NULL,
+  `camera_src_id` int(11) NOT NULL,
+  `posx` int(11) NOT NULL,
+  `posy` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`camera_src_id`) REFERENCES `cameras` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `syns_cadrans`
+--
+
+CREATE TABLE IF NOT EXISTS `syns_cadrans` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `syn_id` int(11) NOT NULL DEFAULT '0',
+  `bitctrl` int(11) NOT NULL DEFAULT '0',
+  `posx` int(11) NOT NULL DEFAULT '0',
+  `posy` int(11) NOT NULL DEFAULT '0',
+  `type` int(11) NOT NULL DEFAULT '0',
+  `angle` float NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+
+--
+-- Structure de la table `syns_comments`
+--
+
+CREATE TABLE IF NOT EXISTS `syns_comments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `syn_id` int(11) NOT NULL DEFAULT '0',
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
+  `font` text COLLATE utf8_unicode_ci NOT NULL,
+  `rouge` int(11) NOT NULL DEFAULT '0',
+  `vert` int(11) NOT NULL DEFAULT '0',
+  `bleu` int(11) NOT NULL DEFAULT '0',
+  `posx` int(11) NOT NULL DEFAULT '0',
+  `posy` int(11) NOT NULL DEFAULT '0',
+  `angle` float NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `syns_motifs`
+--
+
+CREATE TABLE IF NOT EXISTS `syns_motifs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `icone` int(11) NOT NULL DEFAULT '0',
+  `syn_id` int(11) NOT NULL DEFAULT '0',
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
+  `access_level` int(11) NOT NULL DEFAULT '0',
+  `bitctrl` int(11) NOT NULL DEFAULT '0',
+  `bitclic` int(11) NOT NULL DEFAULT '0',
+  `bitclic2` int(11) NOT NULL DEFAULT '0',
+  `rafraich` int(11) NOT NULL DEFAULT '0',
+  `posx` int(11) NOT NULL DEFAULT '0',
+  `posy` int(11) NOT NULL DEFAULT '0',
+  `larg` float NOT NULL DEFAULT '0',
+  `haut` float NOT NULL DEFAULT '0',
+  `angle` float NOT NULL DEFAULT '0',
+  `dialog` int(11) NOT NULL DEFAULT '0',
+  `gestion` int(11) NOT NULL DEFAULT '0',
+  `rouge` int(11) NOT NULL DEFAULT '0',
+  `vert` int(11) NOT NULL DEFAULT '0',
+  `bleu` int(11) NOT NULL DEFAULT '0',
+  `layer` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `syns_palettes`
+--
+
+CREATE TABLE IF NOT EXISTS `syns_palettes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `syn_id` int(11) NOT NULL DEFAULT '0',
+  `syn_cible_id` int(11) NOT NULL DEFAULT '0',
+  `pos` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `syns_pass`
+--
+
+CREATE TABLE IF NOT EXISTS `syns_pass` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `syn_id` int(11) NOT NULL DEFAULT '0',
+  `syn_cible_id` int(11) NOT NULL DEFAULT '0',
+  `posx` int(11) NOT NULL DEFAULT '0',
+  `posy` int(11) NOT NULL DEFAULT '0',
+  `angle` float NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `dls`
 --
 
@@ -90,8 +229,8 @@ CREATE TABLE IF NOT EXISTS `dls` (
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-INSERT INTO `dls` (`id`, `type`, `syn_id`, `name`, `shortname`, `tech_id`, `actif`, `compil_date`, `compil_status` ) VALUES
-(1, 0, 1, 'Système', 'Système', 'SYS', FALSE, 0, 0);
+INSERT INTO `dls` (`id`, `syn_id`, `name`, `shortname`, `tech_id`, `actif`, `compil_date`, `compil_status` ) VALUES
+(1, 1, 'Système', 'Système', 'SYS', FALSE, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -152,11 +291,13 @@ INSERT INTO `mnemos_AnalogInput` (`id_mnemo`, `type`, `min`, `max`, `unite`) VAL
 --
 
 CREATE TABLE IF NOT EXISTS `mnemos_Horloge` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_mnemo` int(11) NOT NULL,
   `heure` int(11) NOT NULL,
   `minute` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
   FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 
@@ -194,25 +335,6 @@ CREATE TABLE IF NOT EXISTS `gids` (
   `gids` int(11) NOT NULL DEFAULT '0',
   FOREIGN KEY (`id_util`) REFERENCES `util` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Structure de la table `histo_msgs`
---
-
-CREATE TABLE IF NOT EXISTS `histo_msgs` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_msg` int(11) NOT NULL DEFAULT '0',
-  `alive` tinyint(1) NOT NULL,
-  `nom_ack` varchar(97) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `date_create_sec` int(11) NOT NULL DEFAULT '0',
-  `date_create_usec` int(11) DEFAULT '0',
-  `date_fixe` int(11) NOT NULL DEFAULT '0',
-  `date_fin` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `date_create_sec` (`date_create_sec`),
-  KEY `alive` (`alive`),
-  FOREIGN KEY (`id_msg`) REFERENCES `msgs` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -574,7 +696,7 @@ CREATE TABLE IF NOT EXISTS `mnemos` (
   FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
-INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `command_text`) VALUES
+INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `ev_text`) VALUES
 (01, 0,   0, 1, 'SYS_TOGGLE_RUN', 'Change d''Ã©tat tous les tours programme', ''),
 (02, 0,   1, 1, 'SYS_ALWAYS_0', 'Toujours Ã  0', ''),
 (03, 0,   2, 1, 'SYS_ALWAYS_1', 'Toujours Ã  1', ''),
@@ -652,37 +774,6 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `com
 (75, 1,  57, 1, 'SYS_AUDIO_HP28', 'Ordre systeme Activation Haut Parleur HP28', ''),
 (76, 1,  58, 1, 'SYS_AUDIO_HP29', 'Ordre systeme Activation Haut Parleur HP29', ''),
 (77, 1,  59, 1, 'SYS_AUDIO_HP30', 'Ordre systeme Activation Haut Parleur HP30', ''),
-(79, 0,  39, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(80, 0,  38, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(81, 0,  37, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(82, 0,  36, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(83, 0,  35, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(84, 0,  34, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(85, 0,  33, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(86, 0,  32, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(87, 0,  31, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(88, 0,  30, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(89, 0,  29, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(90, 0,  28, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(91, 0,  27, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(92, 0,  26, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(93, 0,  25, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(94, 0,  24, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(95, 0,  23, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(96, 0,  22, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(97, 0,  21, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(98, 0,  20, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(99, 0,  19, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(100, 0, 18, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(101, 0, 17, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(102, 0, 16, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(103, 0, 15, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(104, 0, 14, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(105, 0, 13, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(106, 0, 12, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(107, 0, 11, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(108, 0, 10, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
-(109, 0, 09, 1, 'SYS_RESERVED', 'Reserved for internal use', ''),
 (110, 1, 07, 1, 'SYS_EVENT_NOT_FOUND', 'Event not found', ''),
 (111, 1, 08, 1, 'SYS_NEW_TICK', 'Default Command by Tick', '');
 
@@ -704,8 +795,8 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `max_nbr_E` int(11) NOT NULL,
   `map_EA` int(11) NOT NULL,
   `map_A` int(11) NOT NULL,
-  `map_AA` int(11) NOT NULL,  PRIMARY KEY (`id`),
-  PRIMARY KEY `ip` (`ip`)
+  `map_AA` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -750,6 +841,27 @@ CREATE TABLE IF NOT EXISTS `msgs` (
 INSERT INTO `msgs` (`id`, `num`, `dls_id`, `libelle`, `libelle_audio`, `libelle_sms`, `type`, `enable`, `sms` ) VALUES
 (1, 0, 1, 'Warning, system is halting', 'Warning, system is halting', 'Warning, system is halting', 1, TRUE, FALSE ),
 (2, 1, 1, 'Warning, system is rebooting', 'Warning, system is rebooting', 'Warning, system is rebooting', 1, TRUE, FALSE );
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `histo_msgs`
+--
+
+CREATE TABLE IF NOT EXISTS `histo_msgs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_msg` int(11) NOT NULL DEFAULT '0',
+  `alive` tinyint(1) NOT NULL,
+  `nom_ack` varchar(97) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `date_create_sec` int(11) NOT NULL DEFAULT '0',
+  `date_create_usec` int(11) DEFAULT '0',
+  `date_fixe` int(11) NOT NULL DEFAULT '0',
+  `date_fin` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `date_create_sec` (`date_create_sec`),
+  KEY `alive` (`alive`),
+  FOREIGN KEY (`id_msg`) REFERENCES `msgs` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -842,205 +954,6 @@ CREATE TABLE IF NOT EXISTS `rfxcom` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `syns`
---
-
-CREATE TABLE IF NOT EXISTS `syns` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `parent_id` int(11) NOT NULL,
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `page` text COLLATE utf8_unicode_ci NOT NULL,
-  `access_level` int(11) NOT NULL DEFAULT '0',
-  `vignette_activite` int(11) NOT NULL DEFAULT '0',
-  `vignette_secu_bien` int(11) NOT NULL DEFAULT '0',
-  `vignette_secu_personne` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`parent_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-INSERT INTO `syns` (`id`, `parent_id`, `libelle`, `page`, `access_level` ) VALUES
-(1, 1, 'Accueil', 'Defaut Page', 0);
-
--- --------------------------------------------------------
-
---
--- Structure de la table `syns_camerasup`
---
-
-CREATE TABLE IF NOT EXISTS `syns_camerasup` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `syn_id` int(11) NOT NULL,
-  `camera_src_id` int(11) NOT NULL,
-  `posx` int(11) NOT NULL,
-  `posy` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`camera_src_id`) REFERENCES `cameras` (`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `syns_scenario`
---
-
-CREATE TABLE IF NOT EXISTS `syns_scenario` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `syn_id` int(11) NOT NULL,
-  `num` int(11) NOT NULL,
-  `posx` int(11) NOT NULL,
-  `posy` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `syns_cadrans`
---
-
-CREATE TABLE IF NOT EXISTS `syns_cadrans` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `syn_id` int(11) NOT NULL DEFAULT '0',
-  `bitctrl` int(11) NOT NULL DEFAULT '0',
-  `posx` int(11) NOT NULL DEFAULT '0',
-  `posy` int(11) NOT NULL DEFAULT '0',
-  `type` int(11) NOT NULL DEFAULT '0',
-  `angle` float NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
-
---
--- Structure de la table `syns_comments`
---
-
-CREATE TABLE IF NOT EXISTS `syns_comments` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `syn_id` int(11) NOT NULL DEFAULT '0',
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `font` text COLLATE utf8_unicode_ci NOT NULL,
-  `rouge` int(11) NOT NULL DEFAULT '0',
-  `vert` int(11) NOT NULL DEFAULT '0',
-  `bleu` int(11) NOT NULL DEFAULT '0',
-  `posx` int(11) NOT NULL DEFAULT '0',
-  `posy` int(11) NOT NULL DEFAULT '0',
-  `angle` float NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `syns_motifs`
---
-
-CREATE TABLE IF NOT EXISTS `syns_motifs` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `icone` int(11) NOT NULL DEFAULT '0',
-  `syn_id` int(11) NOT NULL DEFAULT '0',
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `access_level` int(11) NOT NULL DEFAULT '0',
-  `bitctrl` int(11) NOT NULL DEFAULT '0',
-  `bitclic` int(11) NOT NULL DEFAULT '0',
-  `bitclic2` int(11) NOT NULL DEFAULT '0',
-  `rafraich` int(11) NOT NULL DEFAULT '0',
-  `posx` int(11) NOT NULL DEFAULT '0',
-  `posy` int(11) NOT NULL DEFAULT '0',
-  `larg` float NOT NULL DEFAULT '0',
-  `haut` float NOT NULL DEFAULT '0',
-  `angle` float NOT NULL DEFAULT '0',
-  `dialog` int(11) NOT NULL DEFAULT '0',
-  `gestion` int(11) NOT NULL DEFAULT '0',
-  `rouge` int(11) NOT NULL DEFAULT '0',
-  `vert` int(11) NOT NULL DEFAULT '0',
-  `bleu` int(11) NOT NULL DEFAULT '0',
-  `layer` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `syns_palettes`
---
-
-CREATE TABLE IF NOT EXISTS `syns_palettes` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `syn_id` int(11) NOT NULL DEFAULT '0',
-  `syn_cible_id` int(11) NOT NULL DEFAULT '0',
-  `pos` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `syns_pass`
---
-
-CREATE TABLE IF NOT EXISTS `syns_pass` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `syn_id` int(11) NOT NULL DEFAULT '0',
-  `syn_cible_id` int(11) NOT NULL DEFAULT '0',
-  `posx` int(11) NOT NULL DEFAULT '0',
-  `posy` int(11) NOT NULL DEFAULT '0',
-  `angle` float NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
-
---
--- Structure de la table `syns_scenario`
---
-
-CREATE TABLE IF NOT EXISTS `syns_scenario` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `syn_id` int(11) NOT NULL DEFAULT '0',
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `posx` int(11) NOT NULL DEFAULT '0',
-  `posy` int(11) NOT NULL DEFAULT '0',
-  `angle` float NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
-
--- --------------------------------------------------------
-
-
---
--- Structure de la table `scenario_ticks`
---
-
-CREATE TABLE IF NOT EXISTS `scenario_ticks` (
-  `id` int(11) NOT NULL,
-  `syns_scenario_id` int(11) NOT NULL,
-  `minute` int(11) NOT NULL,
-  `heure` int(11) NOT NULL,
-  `jour` int(11) NOT NULL,
-  `date` int(11) NOT NULL,
-  `mois` int(11) NOT NULL,
-  `mnemo_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`), KEY(`syns_scenario_id`),
-  FOREIGN KEY (`syns_scenario_id`) REFERENCES `syns_scenario` (`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `users`
 --
 
@@ -1056,7 +969,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `comment` varchar(240) COLLATE utf8_unicode_ci DEFAULT NULL,
   `login_failed` int(11) NOT NULL DEFAULT '0',
   `enable` tinyint(1) NOT NULL DEFAULT '0',
-  `date_create` DATETIME NOT NULL DEFAULT '0',
+  `date_create` DATETIME NOT NULL DEFAULT NOW(),
   `enable_expire` tinyint(1) NOT NULL DEFAULT '0',
   `date_expire` DATETIME DEFAULT NULL,
   `date_modif` DATETIME DEFAULT NULL,
@@ -1072,8 +985,8 @@ CREATE TABLE IF NOT EXISTS `users` (
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `users` (`id`, `access_level`, `name`, `phphash`, `mustchangepwd`, `cansetpwd`, `salt`, `hash`, `comment`, `login_failed`, `enable`, `date_create`, `enable_expire`, `date_expire`, `date_modif`) VALUES
-(0, 10, 'root', '$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a', 1, 1, '9311D076CDB709623503B3D3461EA8E9DFE842076C8A6B348AA78215BF7B7B797ABBE33F29CDF86B88F1B2D6071D4916ACAD1C997B832AE774D3AB4186077386', '529612B992460427C7C6FF21F5AC6965C36A735B8AB813FC3FF083AA3D2D19190AB1A700BEE2ADFA9D797F301C2E3D491D12AA04C69C7652CE875721E1E6F1B4', 'Utilisateur Root', 0, 1, 0, 0, 0, 0),
-(1, 0, 'guest', '$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a', 0, 0, '0FE3B94BCC1E52AC4BEE0DE31D6306890854EAFC77F855FBD9D17BB0D7256A5E23ED8D58FA85E345FE71D046211745B6B50382CD939DC7FDAA2FBE6B7D586069', '6E14D7124DF5FC4C018D845F351553F751265C37834455B96EE3014BCA7CFE53B87CAD8FFA739B39C4A5BCD61E267560EAA7F2AEFFAB3C457B1E0F6BE5BCF8C4', 'Utilisateur Guest', 0, 1, 0, 0, 0, 0);
+(0, 10, 'root', '$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a', 1, 1, '9311D076CDB709623503B3D3461EA8E9DFE842076C8A6B348AA78215BF7B7B797ABBE33F29CDF86B88F1B2D6071D4916ACAD1C997B832AE774D3AB4186077386', '529612B992460427C7C6FF21F5AC6965C36A735B8AB813FC3FF083AA3D2D19190AB1A700BEE2ADFA9D797F301C2E3D491D12AA04C69C7652CE875721E1E6F1B4', 'Utilisateur Root', 0, 1, NOW(), 0, 0, 0),
+(1, 0, 'guest', '$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a', 0, 0, '0FE3B94BCC1E52AC4BEE0DE31D6306890854EAFC77F855FBD9D17BB0D7256A5E23ED8D58FA85E345FE71D046211745B6B50382CD939DC7FDAA2FBE6B7D586069', '6E14D7124DF5FC4C018D845F351553F751265C37834455B96EE3014BCA7CFE53B87CAD8FFA739B39C4A5BCD61E267560EAA7F2AEFFAB3C457B1E0F6BE5BCF8C4', 'Utilisateur Guest', 0, 1, NOW(), 0, 0, 0);
 
 
 -- --------------------------------------------------------

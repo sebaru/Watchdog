@@ -344,9 +344,7 @@
                       "CB_http: data received" );
 		          break;
        case LWS_CALLBACK_HTTP_BODY:
-             { if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
-                { return( Http_Traiter_request_body_login ( wsi, data, taille ) ); }                /* Utilisation ud lws_spa */
-               else if ( ! strcasecmp ( pss->url, "/postfile" ) )
+             { if ( ! strcasecmp ( pss->url, "/postfile" ) )
                 { return( Http_Traiter_request_body_postfile ( wsi, data, taille ) ); }             /* Utilisation ud lws_spa */
                else if ( ! strcasecmp ( pss->url, "/cli" ) )
                 { return( Http_Traiter_request_body_cli ( wsi, data, taille ) ); }                  /* Utilisation ud lws_spa */
@@ -357,9 +355,7 @@
              { lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
                                            (char *)&remote_name, sizeof(remote_name),
                                            (char *)&remote_ip, sizeof(remote_ip) );
-               if ( ! strcasecmp ( pss->url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
-                { return( Http_Traiter_request_body_completion_login ( wsi, remote_name, remote_ip ) ); }
-               else if ( ! strcasecmp ( pss->url, "/postfile" ) )
+               if ( ! strcasecmp ( pss->url, "/postfile" ) )
                 { return( Http_Traiter_request_body_completion_postfile ( wsi ) ); }
                else if ( ! strcasecmp ( pss->url, "/cli" ) )
                 { return( Http_Traiter_request_body_completion_cli ( wsi ) ); }
@@ -384,8 +380,6 @@
                   if (retour != 0) return(1);                             /* Si erreur (<0) ou si ok (>0), on ferme la socket */
                   return(0);                    /* si besoin de plus de temps, on laisse la ws http ouverte pour libwebsocket */
                 }
-               else if ( ! strcasecmp ( url, "/ws/login" ) )                               /* si OK, on poursuit la connexion */
-                { return( Http_Traiter_request_login ( session, wsi, remote_name, remote_ip ) ); }
                else if ( ! strcasecmp ( url, "/ws/logoff" ) )
                 { if (session) Http_Close_session ( wsi, session ); }
                else if ( ! strcasecmp ( url, "/status" ) )
@@ -411,7 +405,7 @@
                else                                                                                             /* Par défaut */
                 { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Request from %s/%s (sid %s): %s",
                             __func__, remote_name, remote_ip, Http_get_session_id(session), url );
-                  return( Http_Traiter_request_getui ( wsi, remote_name, remote_ip, url+1 ) );
+                  return(1);
                 }
                return(1);                                                                    /* Par défaut, on clot la socket */
              }

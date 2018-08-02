@@ -266,7 +266,8 @@
     taille = 24;
     result = New_chaine( taille );
     if (Get_option_entier( options, T_EDGE_UP) == 1)
-     { Liste_edge_up_bi = g_slist_prepend ( Liste_edge_up_bi, GINT_TO_POINTER(num) );
+     { if ( g_slist_find ( Liste_edge_up_bi, GINT_TO_POINTER(num) ) == NULL )
+         { Liste_edge_up_bi = g_slist_prepend ( Liste_edge_up_bi, GINT_TO_POINTER(num) ); }
        if (barre) g_snprintf( result, taille, "!B%d_edge_up_value", num );
              else g_snprintf( result, taille, "B%d_edge_up_value", num );
      }
@@ -286,7 +287,8 @@
     taille = 24;
     result = New_chaine( taille );
     if (Get_option_entier( options, T_EDGE_UP) == 1)
-     { Liste_edge_up_entree = g_slist_prepend ( Liste_edge_up_entree, GINT_TO_POINTER(num) );
+     { if ( g_slist_find ( Liste_edge_up_entree, GINT_TO_POINTER(num) ) == NULL )
+        { Liste_edge_up_entree = g_slist_prepend ( Liste_edge_up_entree, GINT_TO_POINTER(num) ); }
        if (barre) g_snprintf( result, taille, "!E%d_edge_up_value", num );
              else g_snprintf( result, taille, "E%d_edge_up_value", num );
      }
@@ -538,7 +540,7 @@
     val    = Get_option_entier ( options, MODE   ); if (val    == -1) val = 0;
     coul   = Get_option_entier ( options, COLOR  ); if (coul   == -1) coul = 0;
     cligno = Get_option_entier ( options, CLIGNO ); if (cligno == -1) cligno = 0;
-    taille = 40;
+    taille = 128;
     if (Add_bit_to_list(MNEMO_MOTIF, num)) Check_ownership ( MNEMO_MOTIF, num );
     action = New_action();
     action->alors = New_chaine( taille );
@@ -553,8 +555,9 @@
        case KAKI    : rouge =   0; vert = 100; bleu =   0; break;
        default      : rouge = vert = bleu = 0;
      }
-    g_snprintf( action->alors, taille, "SI(%d,%d,%d,%d,%d,%d);",
-                num, val, rouge, vert, bleu, cligno );
+    g_snprintf( action->alors, taille,
+               " if (vars->bit_comm_out) SI(%d, 0, 0, 100, 0, 1); else SI(%d,%d,%d,%d,%d,%d);",
+                num, num, val, rouge, vert, bleu, cligno );
     return(action);
   }
 
@@ -769,6 +772,9 @@
                  { case T_MONO: nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_M_%s;\n", alias->nom );
                                 write (fd, chaine, nb_car);
                                 break;
+                   case T_BI:   nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_B_%s;\n", alias->nom );
+                                write (fd, chaine, nb_car);
+                                break;
                    case T_HORLOGE:
                                 nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_HOR_%s;\n", alias->nom );
                                 write (fd, chaine, nb_car);
@@ -824,6 +830,9 @@
            { g_snprintf(chaine, sizeof(chaine),
                       " static int B%d_edge_up_value = 0;\n", GPOINTER_TO_INT(liste->data) );
              write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+             g_snprintf(chaine, sizeof(chaine),
+                      " static int B%d_verrou = 0;\n", GPOINTER_TO_INT(liste->data) );
+             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
              liste = liste->next;
            }
 
@@ -832,6 +841,9 @@
            { g_snprintf(chaine, sizeof(chaine),
                       " static int E%d_edge_up_value = 0;\n", GPOINTER_TO_INT(liste->data) );
              write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+             g_snprintf(chaine, sizeof(chaine),
+                      " static int E%d_verrou = 0;\n", GPOINTER_TO_INT(liste->data) );
+             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
              liste = liste->next;
            }
 
@@ -839,20 +851,20 @@
           g_snprintf(chaine, sizeof(chaine),
                     "/*******************************************************/\n"
                     " static void Update_edge_up_value (void)\n"
-                    "  { int new_value=0;\n" );
+                    "  { \n" );
           write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
 
           liste = Liste_edge_up_bi;                                /* Initialise les fonctions de gestion des fronts montants */
           while(liste)
            { gchar chaine[1024];
              g_snprintf(chaine, sizeof(chaine),
-                      " new_value = B(%d);\n"
-                      " if (new_value == 0) B%d_edge_up_value = 0;\n"
-                      " else { if (B%d_edge_up_value==0 && new_value == 1) { B%d_edge_up_value=1; }\n"
-                      "                                               else { B%d_edge_up_value=0; }\n"
+                      " if (B(%d) == 0)\n"
+                      "      { B%d_verrou = 0; B%d_edge_up_value = 0; }\n"
+                      " else { if (B%d_verrou=0) { B%d_verrou=1; B%d_edge_up_value=1; }\n"
+                      "                     else { B%d_edge_up_value=0; }\n"
                       "      }\n",
-                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
-                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
+                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
+                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
                       GPOINTER_TO_INT(liste->data) );
              write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
              liste = liste->next;
@@ -861,13 +873,13 @@
           while(liste)
            { gchar chaine[1024];
              g_snprintf(chaine, sizeof(chaine),
-                      " new_value = E(%d);\n"
-                      " if (new_value == 0) E%d_edge_up_value = 0;\n"
-                      " else { if (E%d_edge_up_value==0 && new_value == 1) { E%d_edge_up_value=1; }\n"
-                      "                                               else { E%d_edge_up_value=0; }\n"
+                      " if (E(%d) == 0)\n"
+                      "      { E%d_verrou = 0; E%d_edge_up_value = 0; }\n"
+                      " else { if (E%d_verrou=0) { E%d_verrou=1; E%d_edge_up_value=1; }\n"
+                      "                     else { E%d_edge_up_value=0; }\n"
                       "      }\n",
-                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
-                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
+                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
+                      GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
                       GPOINTER_TO_INT(liste->data) );
              write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
              liste = liste->next;
@@ -895,6 +907,12 @@
            { switch ( alias->bit )
               { case T_MONO:
                  { mnemo.type = MNEMO_MONOSTABLE;
+                   g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
+                   g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
+                   Mnemo_auto_create_for_dls ( &mnemo );
+                 }
+                case T_BI:
+                 { mnemo.type = MNEMO_BISTABLE;
                    g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
                    g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
                    Mnemo_auto_create_for_dls ( &mnemo );

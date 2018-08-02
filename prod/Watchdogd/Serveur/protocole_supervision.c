@@ -188,6 +188,27 @@
                Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGES_FIN, NULL, 0 );
              }
             break;
+       case SSTAG_CLIENT_WANT_HORLOGE:
+             { struct DB *db;
+               struct CMD_ENREG nbr;
+               struct CMD_TYPE_MNEMO_FULL *mnemo;
+               gchar critere[128];
+               gint id_mnemo;
+               id_mnemo = *(gint *)connexion->donnees;                   /* Récupération de l'id du mnemo associé à l'horloge */
+
+               if ( ! Recuperer_horloge_by_id_mnemo ( &db, id_mnemo ) ) return;
+               nbr.num = db->nbr_result;
+               g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d ticks", nbr.num );
+               Envoi_client ( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_NBR_ENREG, (gchar *)&nbr, sizeof(struct CMD_ENREG) );
+
+               while ( (mnemo = Recuperer_horlogeDB_suite( &db )) != NULL )             /* Récupération d'un mnemo dans la DB */
+                { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGE,
+                                 (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMO_FULL) );
+                  g_free(mnemo);
+                }
+               Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGE_FIN, NULL, 0 );
+             }
+            break;
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

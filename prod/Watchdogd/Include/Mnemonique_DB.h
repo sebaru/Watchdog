@@ -58,8 +58,10 @@
  extern struct CMD_TYPE_MNEMO_AI *Rechercher_mnemo_aiDB ( guint id );
  extern gboolean Modifier_mnemo_aiDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
 
- extern gboolean Modifier_mnemo_horlogeDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );              /* Dans Mnemo_HORLORGES.c */
- extern gboolean Modifier_mnemo_del_all_horlogeDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
+ extern gboolean Modifier_mnemo_horlogeDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );               /* Dans Mnemo_HORLOGES.c */
+ extern gboolean Retirer_horlogeDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
+ extern gboolean Recuperer_horloge_by_id_mnemo ( struct DB **db_retour, gint id_mnemo );
+ extern struct CMD_TYPE_MNEMO_FULL *Recuperer_horlogeDB_suite( struct DB **db_orig );
  extern void Activer_horlogeDB ( void );
 
 

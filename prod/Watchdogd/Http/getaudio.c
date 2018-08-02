@@ -44,13 +44,11 @@
     gint retour;
 
     if ( strstr( url, ".." ) )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "Http_Traiter_request_getaudio : Wrong URL containing '..' (%s)", url );
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : Wrong URL containing '..' (%s)", __func__, url );
        return(1);
      }
 
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "Http_Traiter_request_getaudio : URL Parsing filename=%s", url );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s : URL Parsing filename=%s", __func__, url );
 
     g_snprintf( fichier, sizeof(fichier), "Son/%s.mp3", url );
 

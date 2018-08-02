@@ -40,70 +40,6 @@
   };
 
 /******************************************************************************************************************************/
-/* Groups_to_xml: Renvoi la liste des groupes de l'utilisateur, au format XML                                                 */
-/* Entrée : l'utilisateur                                                                                                     */
-/* Sortie : xmlBuffer, ou NULL si erreur                                                                                      */
-/******************************************************************************************************************************/
- xmlBufferPtr Groups_to_xml ( struct CMD_TYPE_UTILISATEUR *util )
-  { xmlTextWriterPtr writer;
-    xmlBufferPtr buf;
-    gint cpt;
-
-    buf = xmlBufferCreate();                                                                        /* Creation du buffer xml */
-    if (buf == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "%s: XML Buffer creation failed", __func__ );
-       return(NULL);
-     }
-
-    if ( (writer = xmlNewTextWriterMemory(buf, 0)) == NULL )                                         /* Creation du write XML */
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: XML Writer creation failed", __func__ );
-       xmlBufferFree(buf);
-       return(NULL);
-     }
-
-    if ( xmlTextWriterStartDocument(writer, NULL, "UTF-8", "yes" ) < 0 )                              /* Creation du document */
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: XML Start document failed", __func__ );
-       xmlBufferFree(buf);
-       return(NULL);
-     }
-
-    if (xmlTextWriterStartElement(writer, (const unsigned char *) "Groups") < 0)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: XML Failed to Start element Groups", __func__ );
-       xmlBufferFree(buf);
-       return(NULL);
-     }
-
-/*
- *     cpt=0;
-    while ( util->gids[cpt] )
-     { xmlTextWriterWriteFormatElement( writer, (const unsigned char *)"group", "%06d", util->gids[cpt] );
-       cpt++;
-     }
-*/
-    if (xmlTextWriterEndDocument(writer)<0)                                                                   /* End document */
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "%s: Failed to end Document", __func__ );
-       xmlBufferFree(buf);
-       return(NULL);
-     }
-
-    xmlFreeTextWriter(writer);                                                                    /* Libération du writer XML */
-    return(buf);
-  }
-/******************************************************************************************************************************/
-/* Http_get_session_id : Isole le SID d'une session d'une WSI                                                                 */
-/* Entrées: le WSI en question                                                                                                */
-/* Sortie : sid ou "---" si erreur                                                                                            */
-/******************************************************************************************************************************/
- gchar *Http_get_session_id ( struct HTTP_SESSION *session )
-	 { if (session) return(session->sid_string);
-    return("--- none ---");
-  }
-/******************************************************************************************************************************/
 /* Http_get_session : Vérifie le numéro de session en parametre                                                               */
 /* Entrées: le SID a tester                                                                                                   */
 /* Sortie : la session, ou NULL si non trouvée                                                                                */
@@ -135,6 +71,15 @@
         }       
      }
     return(FALSE);
+  }
+/******************************************************************************************************************************/
+/* Http_get_session_id : Isole le SID d'une session d'une WSI                                                                 */
+/* Entrées: le WSI en question                                                                                                */
+/* Sortie : sid ou "---" si erreur                                                                                            */
+/******************************************************************************************************************************/
+ gchar *Http_get_session_id ( struct HTTP_SESSION *session )
+  { if (session) return(session->sid_string);
+    return("--- none ---");
   }
 /******************************************************************************************************************************/
 /* Http Liberer_session : Libere la mémoire réservée par la structure session                                                 */
@@ -232,131 +177,5 @@ search_again:
      { Http_Liberer_session(session);
        goto search_again;
      }
-  }
-
-/******************************************************************************************************************************/
-/* Http_Traiter_request_login: Traite une requete de login                                                                    */
-/* Entrées: la connexion MHD                                                                                                  */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- gint Http_Traiter_request_login ( struct HTTP_SESSION *session, struct lws *wsi, gchar *remote_name, gchar *remote_ip )
-  { struct HTTP_PER_SESSION_DATA *pss;
-
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-             "Http_Traiter_request_login: HTTP request from %s(%s)",
-              remote_name, remote_ip );
-
-    if (session) Http_Liberer_session ( session );                                     /* si session existante, on la termine */
-    pss = lws_wsi_user ( wsi );
-    g_snprintf( pss->url, sizeof(pss->url), "/ws/login" );
-    return(0);                                                        /* si pas de session, on continue de traiter la request */
-  }
-/******************************************************************************************************************************/
-/* Http_Traiter_request_body_login: Traite une requete de login phase 2 (reception body)                                      */
-/* Entrées: la connexion wsi, et les data recue et leur taille                                                                */
-/* Sortie : 1 si pb                                                                                                           */
-/******************************************************************************************************************************/
- gint Http_Traiter_request_body_login ( struct lws *wsi, void *data, size_t taille )
-  { struct HTTP_PER_SESSION_DATA *pss;
-    pss = lws_wsi_user ( wsi );
-    if (!pss->spa)
-     {	pss->spa = lws_spa_create(wsi, PARAM_LOGIN, NBR_PARAM_LOGIN, 256, NULL, pss );
-    			if (!pss->spa)	return(1);
-     }
-    return(lws_spa_process(pss->spa, data, taille));
-  }
-/******************************************************************************************************************************/
-/* Http_Traiter_request_login: Traite une requete de login                                                                    */
-/* Entrées: la connexion MHD                                                                                                  */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- gint Http_Traiter_request_body_completion_login ( struct lws *wsi, gchar *remote_name, gchar *remote_ip )
-  { gchar buffer[4096], username[80], password[80];
-    unsigned char header[512], *header_cur, *header_end;
-    struct HTTP_PER_SESSION_DATA *pss;
-    struct CMD_TYPE_UTILISATEUR *util;
-    struct HTTP_SESSION *session;
-    gint retour, taille;
-
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %s) HTTP request from %s(%s)", __func__,
-              Http_get_session_id(NULL), remote_name, remote_ip );
-
-    pss = lws_wsi_user ( wsi );
-    lws_spa_finalize(pss->spa);
-
-    g_snprintf( username, sizeof(username), lws_spa_get_string ( pss->spa, PARAM_LOGIN_USERNAME ) );
-    g_snprintf( password, sizeof(password), lws_spa_get_string ( pss->spa, PARAM_LOGIN_PASSWORD ) );
-
-    header_cur = header;                                                             /* Préparation des headers de la réponse */
-    header_end = header + sizeof(header);
-
-    util = Rechercher_utilisateurDB_by_name( username );
-    if (!util)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                "%s: (sid %s) Username '%s' not found", __func__,
-                 Http_get_session_id(NULL), username );
-       retour = lws_add_http_header_status( wsi, 401, &header_cur, header_end );                              /* Unauthorized */
-       retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
-       *header_cur='\0';                                                                            /* Caractere null d'arret */
-       lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-     }
-    else if ( Check_utilisateur_password( util, password ) == FALSE )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-                "%s: (sid %s) Wrong Password for user '%s'", __func__,
-                 Http_get_session_id(NULL), username );
-       retour = lws_add_http_header_status( wsi, 401, &header_cur, header_end );                              /* Unauthorized */
-       retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
-       *header_cur='\0';                                                                            /* Caractere null d'arret */
-       lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-     }
-    else
-     { xmlBufferPtr buf;
-       buf = Groups_to_xml ( util );
-       if (!buf)
-        { g_free(util);
-          retour = lws_add_http_header_status( wsi, 501, &header_cur, header_end );                           /* Server Error */
-          retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
-          *header_cur='\0';                                                                         /* Caractere null d'arret */
-          lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-        }
-       else
-        { session = Http_new_session ( wsi, remote_name, remote_ip );
-          if (!session)
-           { xmlBufferFree(buf);
-             g_free(util);
-             retour = lws_add_http_header_status( wsi, 501, &header_cur, header_end );                        /* Server Error */
-             retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
-             *header_cur='\0';                                                                      /* Caractere null d'arret */
-             lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-           }
-          else                                                          /* Checking OK, create session and send habilitations */
-           { const char *content_type = "application/xml";
-             gchar cookie[512];
-
-             session->util = util;                                                  /* Sauvegarde de la structure utilisateur */
-             g_snprintf( session->sid_string, sizeof(session->sid_string), "%.12s:%s:%s:%s",
-                         session->sid, session->remote_ip, session->remote_name, session->util->nom );
-
-             g_snprintf ( cookie, sizeof(cookie), "sid=%s; Max-Age=%d; ", session->sid, 60*60*12 );
-             retour = lws_add_http_header_status( wsi, 200, &header_cur, header_end );
-             retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_SET_COOKIE, (const unsigned char *)cookie, strlen(cookie),
-                                                    &header_cur, header_end );
-             retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, HTTP_CONTENT_XML, strlen(HTTP_CONTENT_XML),
-                                                    &header_cur, header_end );
-             retour = lws_add_http_header_content_length ( wsi, buf->use, &header_cur, header_end );
-             retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
-             *header_cur='\0';                                                                      /* Caractere null d'arret */
-             lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-             lws_write ( wsi, buf->content, buf->use, LWS_WRITE_HTTP);                                      /* Send to client */
-             xmlBufferFree(buf);                                      /* Libération du buffer dont nous n'avons plus besoin ! */
-             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-                      "%s: (sid %s), New Session Cookie", __func__,
-                       Http_get_session_id(session) );
-          }
-        }
-     }
-    lws_spa_destroy ( pss->spa	);
-    return(1);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

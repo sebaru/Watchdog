@@ -63,8 +63,8 @@
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CADRAN_FIN,                        /* Le serveur envoi des cadrans page supervision */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP,                         /* Le serveur envoi des camera page supervision */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP_FIN,                     /* Le serveur envoi des camera page supervision */
-    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO,                         /* Le serveur envoi des scenario page supervision */
-    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_SCENARIO_FIN,                     /* Le serveur envoi des scenario page supervision */
+    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGE,                                     /* Le serveur envoi des ticks horloges */
+    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGE_FIN,                                    /* Fin de l'envoi des ticks horloge */
 
     SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,                            /* Un motif à changé d'etat, nous l'envoyons au client */
     SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN,                          /* Reponse si le numero Ixxx n'est pas utilisé dans le client */
@@ -78,7 +78,7 @@
     SSTAG_CLIENT_WANT_HORLOGES,                                    /* Le client demande la liste des horloges d'un synoptique */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGES,                         /* Le serveur envoi des scenario page supervision */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGES_FIN,                     /* Le serveur envoi des scenario page supervision */
-    
+    SSTAG_CLIENT_WANT_HORLOGE,                                    /* Le client demande les ticks d'une horloge en particulier */
   };
 
 #endif

@@ -9,4 +9,3 @@ dnf install -y gtksourceview2-devel goocanvas-devel libgnomeui-devel  json-glib-
 dnf install -y pulseaudio alsa-utils alsa-firmware mpg123
 dnf install -y sox
 pip3 install google_speech
-

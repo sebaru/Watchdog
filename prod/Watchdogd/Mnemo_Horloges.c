@@ -101,7 +101,7 @@
 /* Entrées: une structure hébergeant l'entrée analogique a modifier                                                           */
 /* Sortie: FALSE si pb                                                                                                        */
 /******************************************************************************************************************************/
- gboolean Modifier_mnemo_del_all_horlogeDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
+ gboolean Retirer_horlogeDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { gchar requete[1024];
     gboolean retour;
     struct DB *db;
@@ -113,62 +113,70 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "DELETE FROM %s WHERE id_mnemo=%d ",
-                NOM_TABLE_MNEMO_HORLOGE, mnemo_full->mnemo_base.id
+                "DELETE FROM %s WHERE id=%d ",
+                NOM_TABLE_MNEMO_HORLOGE, mnemo_full->mnemo_horloge.id
               );
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return(retour);
   }
-  #ifdef bouh
 /******************************************************************************************************************************/
-/* Charger_analogInput: Chargement des infos sur les Entrees ANA                                                              */
-/* Entrée: rien                                                                                                               */
-/* Sortie: rien                                                                                                               */
+/* Recuperer_mnemo_base_db: Récupération de la liste des mnemos de base                                                       */
+/* Entrée: un pointeur vers la nouvelle connexion base de données                                                             */
+/* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- void Charger_analogInput ( void )
-  { gchar requete[512];
+ gboolean Recuperer_horloge_by_id_mnemo ( struct DB **db_retour, gint id_mnemo )
+  { gchar requete[1024];
+    gboolean retour;
     struct DB *db;
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT h.id, m.id,mnemo.libelle, s.id" 
+                " FROM mnemos as mnemo" 
+                " INNER JOIN horloges as h ON h.id_memo = m.id" 
+                " INNER JOIN dls as d ON m.dls_id=d.id" 
+                " INNER JOIN syns as s ON d.syn_id = s.id" 
+                " WHERE m.id='%d'", id_mnemo
+              );                                                                                    /* order by test 25/01/06 */
+
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_analogInput: Connexion DB impossible" );
-       return;
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
      }
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT num,min,max,%s.type,%s.unite"
-                " FROM %s"
-                " INNER JOIN %s ON id_mnemo = id ORDER BY num",
-                NOM_TABLE_MNEMO_AI, NOM_TABLE_MNEMO_AI,
-                NOM_TABLE_MNEMO,                                                                                      /* FROM */
-                NOM_TABLE_MNEMO_AI                                                                              /* INNER JOIN */
-              );
-
-    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
-     { Libere_DB_SQL (&db);
-       return;
-     }
-
-    while ( Recuperer_ligne_SQL(db) )                                                      /* Chargement d'une ligne resultat */
-     { gint num;
-       num = atoi( db->row[0] );
-       if (num < NBR_ENTRE_ANA)
-        { Partage->ea[num].confDB.min  = atof(db->row[1]);
-          Partage->ea[num].confDB.max      = atof(db->row[2]);
-          Partage->ea[num].confDB.type     = atoi(db->row[3]);
-          g_snprintf( Partage->ea[num].confDB.unite, sizeof(Partage->ea[num].confDB.unite), "%s", db->row[4] );
-          Partage->ea[num].last_arch = 0;                             /* Mise à zero du champ de la derniere date d'archivage */
-          Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                   "Charger_analogInput: Chargement config EA[%04d]=%d", num );
-        }
-       else
-        { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-			       "Charger_analogInput: num (%d) out of range (max=%d)", num, NBR_ENTRE_ANA ); }
-     }
-    Libere_DB_SQL (&db);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Charger_analogInput: DB reloaded" );
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
   }
-  #endif
+/******************************************************************************************************************************/
+/* Recuperer_mnemo_base_DB_suite: Fonction itérative de récupération des mnémoniques de base                                  */
+/* Entrée: un pointeur sur la connexion de baase de données                                                                   */
+/* Sortie: une structure nouvellement allouée                                                                                 */
+/******************************************************************************************************************************/
+ struct CMD_TYPE_MNEMO_FULL *Recuperer_horlogeDB_suite( struct DB **db_orig )
+  { struct CMD_TYPE_MNEMO_FULL *mnemo;
+    struct DB *db;
+
+    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       return(NULL);
+     }
+
+    mnemo = (struct CMD_TYPE_MNEMO_FULL *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_FULL) );
+    if (!mnemo) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
+    else                                                                                /* Recopie dans la nouvelle structure */
+     { g_snprintf( mnemo->mnemo_base.libelle, sizeof(mnemo->mnemo_base.libelle), "%s", db->row[2] );
+       mnemo->mnemo_horloge.id  = atoi(db->row[0]);
+       mnemo->mnemo_base.id     = atoi(db->row[1]);
+       mnemo->mnemo_base.syn_id = atoi(db->row[3]);
+     }
+    return(mnemo);
+  }
 /*----------------------------------------------------------------------------------------------------------------------------*/
