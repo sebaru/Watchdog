@@ -89,7 +89,7 @@ listeAlias:     un_alias listeAlias
                 
 un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                 {{ int taille;
-                   if ( New_alias($2, $4, -1, 0, $5) == FALSE )                                              /* Deja defini ? */
+                   if ( New_alias(ALIAS_TYPE_DYNAMIC, $2, $4, -1, 0, $5) == FALSE )                         /* Deja defini ? */
                     { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
                 }}
                 | T_STATIC ID EQUIV barre alias_bit ENTIER PVIRGULE
@@ -97,7 +97,7 @@ un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                    switch($5)
                     { case ENTREE:
                       case SORTIE:
-                      case T_BI  : if ( New_alias($2, $5, $6, $4, NULL) == FALSE )                           /* Deja defini ? */
+                      case T_BI  : if ( New_alias(ALIAS_TYPE_STATIC, $2, $5, $6, $4, NULL) == FALSE )       /* Deja defini ? */
                                     { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
                                    break;
                       case T_TEMPO :
@@ -110,7 +110,7 @@ un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                       case ICONE : if ($4==1)                                             /* Barre = 1 ?? */
                                     { Emettre_erreur_new( "Ligne %d: Use of '/%s' is forbidden", DlsScanner_get_lineno(), $2 ); }
                                    else
-                                    { if (New_alias($2, $5, $6, 0, NULL) == FALSE)
+                                    { if (New_alias(ALIAS_TYPE_STATIC, $2, $5, $6, 0, NULL) == FALSE)
                                        { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
                                     }
                                    break;
@@ -606,8 +606,6 @@ une_action:     barre SORTIE ENTIER
                          $$->sinon = NULL;
                        }
                   }}
-                | T_MONO ENTIER
-                  {{ $$=New_action_mono($2);           }}
                 | ICONE ENTIER liste_options
                   {{ $$=New_action_icone($2, $3);
                      Liberer_options($3);
@@ -684,7 +682,7 @@ une_action:     barre SORTIE ENTIER
                        { case T_TEMPO: $$=New_action_tempo( alias->num, options );   break;
                          case T_MSG  : $$=New_action_msg( alias->num );              break;
                          case SORTIE : $$=New_action_sortie( alias->num, $1 );       break;
-                         case T_BI   : if (alias->num >= NBR_BIT_BISTABLE_RESERVED || alias->num==-1)
+                         case T_BI   : if (alias->num >= NBR_BIT_BISTABLE_RESERVED || alias->type==ALIAS_TYPE_DYNAMIC)
                                         { $$=New_action_bi_by_alias( alias, $1 ); }
                                        else
                                         { Emettre_erreur_new( "Ligne %d: 'B%04d' could not be set (system bit)", DlsScanner_get_lineno(), alias->num );

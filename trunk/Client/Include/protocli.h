@@ -96,9 +96,7 @@
 
  struct TYPE_INFO_SOURCE_DLS
   { GtkWidget *text;                                  /* Pour les plugins DLS, ici est placé le widget TextView correspondant */
-    guint id;                                       /* Pour les plugins DLS, ici est stocké l'id du plugin en cours d'edition */
-    gchar plugin_name[80];
-    gchar package[130];
+    struct CMD_TYPE_PLUGIN_DLS rezo_dls;
     GtkWidget *F_mnemo;
     GtkWidget *Option_type;
     GtkWidget *Spin_num;

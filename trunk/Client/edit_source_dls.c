@@ -193,7 +193,7 @@
        return;
      }
 
-    g_snprintf( url, sizeof(url), "https://packages.abls-habitat.fr/%s", infos->package );
+    g_snprintf( url, sizeof(url), "https://packages.abls-habitat.fr/%s", infos->rezo_dls.package );
     Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Trying to get %s", __func__, url );
 
     curl_easy_setopt(curl, CURLOPT_URL, url );
@@ -320,7 +320,7 @@
 
     buffer_envoi     = (gchar *)edit_dls + sizeof(struct CMD_TYPE_SOURCE_DLS);
     taille_max       = Client.connexion->taille_bloc - sizeof(struct CMD_TYPE_SOURCE_DLS);
-    edit_dls->id     = ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->id;
+    edit_dls->id     = ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->rezo_dls.id;
     edit_dls->taille = 0;
                                                                               /* Demande de suppression du fichier source DLS */
     Envoi_serveur( TAG_DLS, SSTAG_CLIENT_VALIDE_EDIT_SOURCE_DLS_DEB,
@@ -412,7 +412,7 @@
                                           NULL);
    gtk_file_chooser_set_do_overwrite_confirmation (GTK_FILE_CHOOSER (dialog), TRUE);
 
-   g_snprintf( fichier, sizeof(fichier), "%04d-%s.dls", infos->id, infos->plugin_name );
+   g_snprintf( fichier, sizeof(fichier), "%04d-%s.dls", infos->rezo_dls.id, infos->rezo_dls.nom );
    gtk_file_chooser_set_current_folder ( GTK_FILE_CHOOSER (dialog), g_get_home_dir() );
    gtk_file_chooser_set_current_name ( GTK_FILE_CHOOSER (dialog), fichier );
 
@@ -437,6 +437,18 @@
    gtk_widget_destroy (dialog);
  }
 /******************************************************************************************************************************/
+/* Get_mnemo_CB : demande l'affichage de la page des mnemos associée au plugin en cours de redaction                          */
+/* Entrée : la page d'infos liée au plugin.                                                                                   */
+/* Sortie : néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Get_mnemo_CB ( struct TYPE_INFO_SOURCE_DLS *infos )
+  { if (!Chercher_page_notebook (TYPE_PAGE_MNEMONIQUE, infos->rezo_dls.id, TRUE))             /* Page deja créé et affichée ? */
+     { Creer_page_mnemonique ( &infos->rezo_dls );
+       Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE, (gchar *)&infos->rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+       Chercher_page_notebook ( TYPE_PAGE_MNEMONIQUE, infos->rezo_dls.id, TRUE );
+     }
+  }
+/******************************************************************************************************************************/
 /* Creer_page_plugin_dls: Creation de la page du notebook consacrée aux plugins plugin_dlss watchdog                          */
 /* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
@@ -450,7 +462,7 @@
     gchar titre[NBR_CARAC_PLUGIN_DLS_UTF8 + 10];
     GdkColor color;
 
-    if ( Chercher_page_notebook ( TYPE_PAGE_SOURCE_DLS, rezo_dls->id, TRUE ) ) return; /* Page deja créé ? */
+    if ( Chercher_page_notebook ( TYPE_PAGE_SOURCE_DLS, rezo_dls->id, TRUE ) ) return;                    /* Page deja créé ? */
 
     page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
@@ -459,16 +471,14 @@
     infos = (struct TYPE_INFO_SOURCE_DLS *)page->infos;
     
     page->type = TYPE_PAGE_SOURCE_DLS;
-    infos->id = rezo_dls->id;
-    g_snprintf( infos->plugin_name, sizeof(infos->plugin_name), "%s", rezo_dls->nom );
-    g_snprintf( infos->package, sizeof(infos->package), "%s", rezo_dls->package );
+    memcpy ( &infos->rezo_dls, rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
     Liste_pages = g_list_append( Liste_pages, page );
 
-    hboite = gtk_hbox_new( FALSE, 6 );                           /* Initialisation des parametres de page */
-    page->child = hboite;                                           /* Sauvegarde pour destruction future */
+    hboite = gtk_hbox_new( FALSE, 6 );                                               /* Initialisation des parametres de page */
+    page->child = hboite;                                                               /* Sauvegarde pour destruction future */
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     
-/***************************************** La liste des plugin_dls ****************************************/
+/************************************************** La liste des plugin_dls ***************************************************/
     scroll = gtk_scrolled_window_new( NULL, NULL );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
@@ -515,10 +525,10 @@
     separateur = gtk_hseparator_new();
     gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
 
-/*    bouton = gtk_button_new_from_stock( GTK_STOCK_DIRECTORY );
+    bouton = gtk_button_new_with_label( "Mnemoniques" );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_reinstall_package), page );*/
+                              G_CALLBACK(Get_mnemo_CB), page->infos );
 
     bouton = gtk_button_new_from_stock( GTK_STOCK_REFRESH );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );

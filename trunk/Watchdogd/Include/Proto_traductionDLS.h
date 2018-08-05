@@ -57,8 +57,14 @@
           };
   };
 
+ enum
+  { ALIAS_TYPE_STATIC,
+    ALIAS_TYPE_DYNAMIC
+  };
+
  struct ALIAS
-  { gchar *nom;
+  { gint type;                                                                                 /* Alias static ou dynamique ? */
+    gchar *nom;
     gint bit;                                                                                /* Type de tableau (E/A/B/M....) */
     gint num;                                                                                  /* Numero du bit interne ciblé */
     int barre;                                                                               /* Represente la negation ou pas */
@@ -83,7 +89,6 @@
  extern struct ACTION *New_action_sortie( int num, int barre );
  extern struct ACTION *New_action_vars_mono( gchar *nom );
  extern struct ACTION *New_action_activite_fixe( void );
- extern struct ACTION *New_action_mono( int num );
  extern struct ACTION *New_action_mono_by_alias( struct ALIAS *alias );
  extern struct ACTION *New_action_icone( int num, GList *options );
  extern struct ACTION *New_action_tempo( int num, GList *options );
@@ -91,7 +96,7 @@
  extern struct ACTION *New_action_bi_by_alias( struct ALIAS *alias, gint barre );
  extern struct ACTION *New_action_cpt_h( int num, GList *options );
  extern struct ACTION *New_action_cpt_imp( int num, GList *options );
- extern gboolean New_alias( char *nom, int bit, int num, int barre, GList *options );
+ extern gboolean New_alias(  gint type, char *nom, int bit, int num, int barre, GList *options );
  extern struct ALIAS *Get_alias_par_nom( char *nom );
  extern struct OPTION *New_option( void );
  /*extern int Get_option_entier( GList *liste_options, gint type );*/

@@ -390,7 +390,7 @@
     return(action);
   }
 /******************************************************************************************************************************/
-/* New_action_mono: Prepare une struct action avec une commande SM                                                            */
+/* New_action_vars_mono: Prepare une struct action avec une commande SM                                                       */
 /* Entrées: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
@@ -412,31 +412,20 @@
 /* Entrées: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- struct ACTION *New_action_mono( int num )
-  { struct ACTION *action;
-    int taille;
-
-    taille = 15;
-    Add_bit_to_list(MNEMO_MONOSTABLE, num);
-    action = New_action();
-    action->alors = New_chaine( taille );
-    action->sinon = New_chaine( taille );
-
-    g_snprintf( action->alors, taille, "SM(%d,1);", num );
-    g_snprintf( action->sinon, taille, "SM(%d,0);", num );
-    return(action);
-  }
-/******************************************************************************************************************************/
-/* New_action_mono: Prepare une struct action avec une commande SM                                                            */
-/* Entrées: numero du monostable, sa logique                                                                                  */
-/* Sortie: la structure action                                                                                                */
-/******************************************************************************************************************************/
  struct ACTION *New_action_mono_by_alias( struct ALIAS *alias )
   { struct ACTION *action;
     int taille;
 
-    if (alias->num != -1) /* Alias par numéro ? */
-     { return(New_action_mono ( alias->num )); }
+    if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par numéro ? */
+     { taille = 15;
+       Add_bit_to_list(MNEMO_MONOSTABLE, alias->num);
+       action = New_action();
+       action->alors = New_chaine( taille );
+       action->sinon = New_chaine( taille );
+
+       g_snprintf( action->alors, taille, "SM(%d,1);", alias->num );
+       g_snprintf( action->sinon, taille, "SM(%d,0);", alias->num );
+     }
     else /* Alias par nom */
      { taille = 100;
        action = New_action();
@@ -584,16 +573,17 @@
 /* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
 /* Sortie: False si il existe deja, true sinon                                                                                */
 /******************************************************************************************************************************/
- gboolean New_alias( char *nom, int bit, int num, int barre, GList *options )
+ gboolean New_alias( gint type, char *nom, int bit, int num, int barre, GList *options )
   { struct ALIAS *alias;
 
     if (Get_alias_par_nom( nom )) return(FALSE);                                                         /* ID deja definit ? */
 
     alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
     if (!alias) { return(FALSE); }
-    alias->nom = nom;
-    alias->bit = bit;
-    alias->num = num;
+    alias->type = type;
+    alias->nom  = nom;
+    alias->bit  = bit;
+    alias->num  = num;
     alias->barre = barre;
     alias->options = options;
     alias->used = 0;
