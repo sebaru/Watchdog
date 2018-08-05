@@ -193,7 +193,8 @@
        return;
      }
 
-    g_snprintf( url, sizeof(url), "https://packages.abls-habitat.fr/%s", infos->rezo_dls.package );
+    g_snprintf( url, sizeof(url), "https://packages.abls-habitat.fr/%s.dls", infos->rezo_dls.package );
+    printf("URL = %s\n", url );
     Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Trying to get %s", __func__, url );
 
     curl_easy_setopt(curl, CURLOPT_URL, url );

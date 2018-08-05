@@ -120,8 +120,8 @@
 /******************************************************************************************************************************/
  static void Menu_editer_mnemo ( void )
   { struct CMD_TYPE_PLUGIN_DLS rezo_dls;
+    gchar *nom, *tech_id, *package;
     GtkTreeSelection *selection;
-    gchar *nom, *tech_id;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
@@ -137,12 +137,15 @@
     gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
     gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_dls.id, -1 );                                          /* Recup du id */
     gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, -1 );                                         /* Recup du id */
+    gtk_tree_model_get( store, &iter, COLONNE_PACKAGE, &package, -1 );                                         /* Recup du id */
     gtk_tree_model_get( store, &iter, COLONNE_NOM, &nom, -1 );
 
     g_snprintf( rezo_dls.nom, sizeof(rezo_dls.nom), "%s", nom );
     g_snprintf( rezo_dls.tech_id, sizeof(rezo_dls.tech_id), "%s", tech_id );
+    g_snprintf( rezo_dls.package, sizeof(rezo_dls.package), "%s", package );
     g_free( nom );
     g_free( tech_id );
+    g_free( package );
     if (!Chercher_page_notebook (TYPE_PAGE_MNEMONIQUE, rezo_dls.id, TRUE))                    /* Page deja créé et affichée ? */
      { Creer_page_mnemonique ( &rezo_dls );
        Envoi_serveur( TAG_MNEMONIQUE, SSTAG_CLIENT_WANT_PAGE_MNEMONIQUE, (gchar *)&rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
@@ -253,10 +256,10 @@
  static void Menu_editer_source_dls ( void )
   { GtkTreeSelection *selection;
     struct CMD_TYPE_PLUGIN_DLS rezo_dls;
+    gchar *nom, *tech_id, *package;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
-    gchar *nom, *tech_id;
     guint nbr;
 
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_plugin_dls) );
@@ -269,12 +272,16 @@
     gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
     gtk_tree_model_get( store, &iter, COLONNE_ID, &rezo_dls.id, -1 );                                          /* Recup du id */
     gtk_tree_model_get( store, &iter, COLONNE_TECH_ID, &tech_id, -1 );                                         /* Recup du id */
+    gtk_tree_model_get( store, &iter, COLONNE_PACKAGE, &package, -1 );                                         /* Recup du id */
     gtk_tree_model_get( store, &iter, COLONNE_NOM, &nom, -1 );
 
-    memcpy( &rezo_dls.nom, nom, sizeof(rezo_dls.nom) );
-    memcpy( &rezo_dls.tech_id, tech_id, sizeof(rezo_dls.tech_id) );
+    g_snprintf( rezo_dls.nom, sizeof(rezo_dls.nom), "%s", nom );
+    g_snprintf( rezo_dls.tech_id, sizeof(rezo_dls.tech_id), "%s", tech_id );
+    g_snprintf( rezo_dls.package, sizeof(rezo_dls.package), "%s", package );
+
     g_free( nom );
     g_free( tech_id );
+    g_free( package );
     if (!Chercher_page_notebook (TYPE_PAGE_SOURCE_DLS, rezo_dls.id, TRUE))/* Page deja créé et affichée ? */
      { Creer_page_source_dls ( &rezo_dls );
      Envoi_serveur( TAG_DLS, SSTAG_CLIENT_WANT_SOURCE_DLS, (gchar *)&rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
@@ -531,6 +538,14 @@
                                                          NULL);
     gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_SHORTNAME);                                  /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Package"), renderer,
+                                                         "text", COLONNE_PACKAGE,
+                                                         NULL);
+    gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_PACKAGE);                                    /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
