@@ -680,7 +680,6 @@ CREATE TABLE IF NOT EXISTS `icons_new` (
 
 CREATE TABLE IF NOT EXISTS `mnemos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `created_by_user` int(1) NOT NULL DEFAULT '1',
   `type` int(11) NOT NULL DEFAULT '0',
   `num` int(11) NOT NULL DEFAULT '0',
   `dls_id` int(11) NOT NULL DEFAULT '0',

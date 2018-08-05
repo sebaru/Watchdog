@@ -34,7 +34,7 @@
  #include <string.h>
 
  #define MNEMO_SQL_SELECT "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.ev_text,parent_syn.page,syn.page," \
-                          "dls.name, mnemo.tableau, mnemo.acro_syn, mnemo.ev_host, mnemo.ev_thread, syn.id" \
+                          "dls.name, mnemo.tableau, mnemo.acro_syn, mnemo.ev_host, mnemo.ev_thread, syn.id, dls.tech_id" \
                           " FROM mnemos as mnemo" \
                           " INNER JOIN dls as dls ON mnemo.dls_id=dls.id" \
                           " INNER JOIN syns as syn ON dls.syn_id = syn.id" \
@@ -116,7 +116,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos SET created_by_user='0',type='%d',num='-1',dls_id='%d',acronyme='%s',libelle='%s' "
+                "INSERT INTO mnemos SET type='%d',num='-1',dls_id='%d',acronyme='%s',libelle='%s' "
                 " ON DUPLICATE KEY UPDATE libelle='%s'",
                 mnemo->type, mnemo->dls_id, acro, libelle, libelle );
     g_free(libelle);
@@ -166,14 +166,14 @@
 
     if (ajout == TRUE)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "INSERT INTO %s(created_by_user,type,num,dls_id,acronyme,libelle,ev_host,ev_thread,ev_text,tableau,acro_syn) VALUES "
-                   "('1',%d,%d,%d,'%s','%s','%s','%s','%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
+                   "INSERT INTO %s(type,num,dls_id,acronyme,libelle,ev_host,ev_thread,ev_text,tableau,acro_syn) VALUES "
+                   "(%d,%d,%d,'%s','%s','%s','%s','%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
                    mnemo->num, mnemo->dls_id, acro, libelle, ev_host, ev_thread, ev_text, tableau, acro_syn );
      } else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "UPDATE %s SET "             
                    "type=%d,libelle='%s',acronyme='%s',ev_host='%s',ev_thread='%s',ev_text='%s',dls_id=%d,num=%d,tableau='%s',"
-                   "acro_syn='%s',created_by_user='1' "
+                   "acro_syn='%s' "
                    "WHERE id=%d",
                    NOM_TABLE_MNEMO, mnemo->type, libelle, acro, ev_host, ev_thread, ev_text, 
                    mnemo->dls_id, mnemo->num, tableau, acro_syn, mnemo->id );
@@ -336,6 +336,7 @@
        g_snprintf( mnemo->acro_syn,        sizeof(mnemo->acro_syn),        "%s", db->row[11] );
        g_snprintf( mnemo->ev_host,         sizeof(mnemo->ev_host),         "%s", db->row[12] );
        g_snprintf( mnemo->ev_thread,       sizeof(mnemo->ev_thread),       "%s", db->row[13] );
+       g_snprintf( mnemo->dls_tech_id,     sizeof(mnemo->dls_tech_id),     "%s", db->row[15] );
        mnemo->id     = atoi(db->row[0]);
        mnemo->type   = atoi(db->row[1]);
        mnemo->num    = atoi(db->row[2]);

@@ -67,6 +67,7 @@
     gchar  syn_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar  dls_shortname[NBR_CARAC_PLUGIN_DLS_UTF8+1];
     gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gchar  dls_tech_id[25];
     gchar  libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
     gchar  ev_host[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];
     gchar  ev_thread[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1];

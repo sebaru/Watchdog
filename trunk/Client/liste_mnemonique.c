@@ -44,6 +44,7 @@
      COLONNE_GROUPE_PAGE_DLS,
      COLONNE_NUM_PLUGIN,
      COLONNE_ACRONYME,
+     COLONNE_TECH_ID,
      COLONNE_LIBELLE,
      COLONNE_EV_HOST,
      COLONNE_EV_THREAD,
@@ -474,6 +475,7 @@
                                               G_TYPE_STRING,                                                   /* Groupe_page */
                                               G_TYPE_UINT,                                                      /* Num_plugin */
                                               G_TYPE_STRING,                                                      /* Acronyme */
+                                              G_TYPE_STRING,                                                       /* Tech_ID */
                                               G_TYPE_STRING,                                                       /* libellé */
                                               G_TYPE_STRING,                                                          /* host */
                                               G_TYPE_STRING,                                                        /* thread */
@@ -509,6 +511,13 @@
                                                          "text", COLONNE_ACRONYME,
                                                          NULL);
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_ACRONYME);                                   /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (infos->Liste_mnemonique), colonne );
+
+    renderer = gtk_cell_renderer_text_new();                                              /* Colonne du libelle de mnemonique */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("Tech ID"), renderer,
+                                                         "text", COLONNE_TECH_ID,
+                                                         NULL);
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_TECH_ID);                                    /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (infos->Liste_mnemonique), colonne );
 
     renderer = gtk_cell_renderer_text_new();                                              /* Colonne du libelle de mnemonique */
@@ -625,6 +634,7 @@
                          COLONNE_GROUPE_PAGE_DLS, groupe_page,
                          COLONNE_NUM_PLUGIN,      mnemonique->dls_id,
                          COLONNE_ACRONYME,        mnemonique->acronyme,
+                         COLONNE_TECH_ID,         mnemonique->dls_tech_id,
                          COLONNE_LIBELLE,         mnemonique->libelle,
                          COLONNE_EV_HOST,         mnemonique->ev_host,
                          COLONNE_EV_THREAD,       mnemonique->ev_thread,

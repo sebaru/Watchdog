@@ -861,6 +861,11 @@
      }
     Libere_DB_SQL(&db);
 
+    if (database_version < 3641)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos` DROP `created_by_user`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+       
 fin:
     database_version=3596;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
