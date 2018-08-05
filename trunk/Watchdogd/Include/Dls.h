@@ -141,6 +141,7 @@
     struct DLS_TREE *Dls_tree;                                                                       /* Arbre d'execution DLS */
     pthread_mutex_t synchro_data;                                      /* Mutex pour les acces concurrents à l'arbre des data */
     GTree *Dls_data;
+    GTree *Dls_data_tempo;                                                                   /* Arbres des temporisations DLS */
     GSList *Set_M;                                                              /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_M;                                                      /* liste des Mxxx a désactiver à la fin du tour prg */
     GSList *Set_Dls_Data;                                                       /* liste des Mxxx a activer au debut tour prg */

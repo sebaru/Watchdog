@@ -477,22 +477,13 @@
        Partage->audit_bit_interne_per_sec++;
      }
   }
-/**********************************************************************************************************/
-/* STR: Positionnement d'une Tempo retard DLS                                                             */
-/* Entrée: numero, etat                                                                                   */
-/* Sortie: Neant                                                                                          */
-/**********************************************************************************************************/
- void ST( int num, int etat )
-  { struct TEMPO *tempo;
-
-    if (num<0 || num>=NBR_TEMPO)
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "STR: num %d out of range", num ); }
-       return;
-     }
-    tempo = &Partage->Tempo_R[num];                                       /* Récupération de la structure */
-
-    if (tempo->status == TEMPO_NOT_COUNTING && etat == 1)
+/******************************************************************************************************************************/
+/* STR_local: Positionnement d'une Tempo retard DLS                                                                           */
+/* Entrée: la structure tempo et son etat                                                                                     */
+/* Sortie: Neant                                                                                                              */
+/******************************************************************************************************************************/
+ static void ST_local( struct TEMPO *tempo, int etat )
+  { if (tempo->status == TEMPO_NOT_COUNTING && etat == 1)
      { tempo->status = TEMPO_WAIT_FOR_DELAI_ON;
        tempo->date_on = Partage->top + tempo->confDB.delai_on;
      }
@@ -548,6 +539,22 @@
 
     if (tempo->status == TEMPO_WAIT_FOR_COND_OFF && etat == 0 )
      { tempo->status = TEMPO_NOT_COUNTING; }
+  }
+/******************************************************************************************************************************/
+/* STR: Positionnement d'une Tempo retard DLS                                                                                 */
+/* Entrée: numero, etat                                                                                                       */
+/* Sortie: Neant                                                                                                              */
+/******************************************************************************************************************************/
+ void ST( int num, int etat )
+  { struct TEMPO *tempo;
+
+    if (num<0 || num>=NBR_TEMPO)
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "STR: num %d out of range", num ); }
+       return;
+     }
+    tempo = &Partage->Tempo_R[num];                                                  /* Récupération de la structure statique */
+    ST_local ( tempo, etat );
   }
 /******************************************************************************************************************************/
 /* SA: Positionnement d'un actionneur DLS                                                                                     */
@@ -861,11 +868,56 @@
     return(FALSE);    
   }
 /******************************************************************************************************************************/
+/* Dls_data_set_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
+/* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
+/******************************************************************************************************************************/
+ void Dls_data_set_tempo ( gchar *nom, gchar *owner, struct TEMPO **tempo_p, gboolean etat )
+  { if (!tempo_p || !*tempo_p)
+     { gchar chaine[80];
+       struct TEMPO *tempo;
+       g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
+       tempo = g_tree_lookup ( Partage->com_dls.Dls_data_tempo, chaine );
+       if (!tempo)
+        { tempo = g_malloc ( sizeof(struct TEMPO) );
+          if (!tempo) { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for %s", __func__, chaine ); return; }
+          g_tree_insert ( Partage->com_dls.Dls_data_tempo, g_strdup(chaine), tempo );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding key %s : %p", __func__, chaine, tempo );
+        }
+       if (tempo_p) *tempo_p = tempo;                                               /* Sauvegarde pour acceleration si besoin */
+      }
+     ST_local ( *tempo_p, etat );                                                                 /* Recopie dans la variable */
+  }
+ gboolean Dls_data_get_tempo ( gchar *nom, gchar *owner, struct TEMPO **tempo_p )
+  { gchar chaine[80];
+    struct TEMPO *tempo;
+    if (tempo_p && *tempo_p)                                                         /* Si pointeur d'acceleration disponible */
+     { tempo = *tempo_p;
+       return (tempo->state);
+     }
+    g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
+    tempo = g_tree_lookup ( Partage->com_dls.Dls_data_tempo, chaine );
+    if (tempo)
+     { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : key %s found val %p", __func__, chaine, tempo );
+       return(tempo->state);
+     }
+    return(FALSE);    
+  }
+/******************************************************************************************************************************/
 /* Dls_data_free_data: Libere la memoire pour les clefs et data contenu dans l'arbre Dls_data. Appellé par g_tree_foreach     */
 /* Entrée : la clef a libérer, la value qui va avec et un pointer non utilisé                                                 */
 /* Sortie : FALSE pour poursuivre le cheminement de l'arbre                                                                   */
 /******************************************************************************************************************************/
  static gboolean Dls_data_free_data (gpointer key, gpointer value, gpointer data)
+  { g_free(key);
+    g_free(value);
+    return(FALSE);
+  }
+/******************************************************************************************************************************/
+/* Dls_data_free_data: Libere la memoire pour les clefs et data contenu dans l'arbre Dls_data. Appellé par g_tree_foreach     */
+/* Entrée : la clef a libérer, la value qui va avec et un pointer non utilisé                                                 */
+/* Sortie : FALSE pour poursuivre le cheminement de l'arbre                                                                   */
+/******************************************************************************************************************************/
+ static gboolean Dls_data_free_all_data (gpointer key, gpointer value, gpointer data)
   { g_free(key);
     g_free(value);
     return(FALSE);
@@ -1015,6 +1067,7 @@
     Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
     Partage->com_dls.Thread_run         = TRUE;                                                         /* Le thread tourne ! */
     Partage->com_dls.Dls_data = g_tree_new ( (GCompareFunc) strcmp ); 
+    Partage->com_dls.Dls_data_tempo = g_tree_new ( (GCompareFunc) strcmp ); 
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                                          /* Chargement des modules dls */
     SB_SYS(1, 0);                                                                                      /* B1 est toujours à 0 */
@@ -1065,6 +1118,8 @@
     Decharger_plugins();                                                                      /* Dechargement des modules DLS */
     g_tree_foreach (Partage->com_dls.Dls_data, Dls_data_free_data, NULL );
     g_tree_destroy (Partage->com_dls.Dls_data);
+    g_tree_foreach (Partage->com_dls.Dls_data_tempo, Dls_data_free_all_data, NULL );
+    g_tree_destroy (Partage->com_dls.Dls_data_tempo);
     Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: DLS Down (%p)", __func__, pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
