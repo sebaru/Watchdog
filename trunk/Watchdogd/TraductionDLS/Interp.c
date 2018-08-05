@@ -283,6 +283,19 @@
    return(result);
  }
 /******************************************************************************************************************************/
+/* New_condition_tempo: Prepare la chaine de caractere associée à la condition, en respectant les options                     */
+/* Entrées: l'alias de la temporisatio et sa liste d'options                                                                  */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_tempo( int barre, struct ALIAS *alias, GList *options )
+  { gchar *result;
+    gint taille;
+    taille = 128;
+    result = New_chaine( taille );
+    g_snprintf( result, taille, "%sDls_data_get_tempo ( \"%s\", \"%s\", &_T_%s )",
+                (barre==1 ? "!" : ""), alias->nom, Dls_plugin.tech_id, alias->nom );
+  }
+/******************************************************************************************************************************/
 /* New_condition_horloge: Prepare la chaine de caractere associée à la condition, en respectant les options                   */
 /* Entrées: l'alias de l'horloge et sa liste d'options                                                                        */
 /* Sortie: la chaine de caractere en C                                                                                        */
@@ -516,17 +529,25 @@
 /* Entrées: numero de la tempo, sa consigne                                                                                   */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- struct ACTION *New_action_tempo( int num, GList *options )
+ struct ACTION *New_action_tempo( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
-    int taille;
+    int taille, daa, dma, dMa, dad;
 
-    Add_bit_to_list(MNEMO_TEMPO, num);
+    daa = Get_option_entier ( options, T_DAA );   if (daa == -1) daa = 0;
+    dma = Get_option_entier ( options, T_DMINA ); if (dma == -1) dma = 0;
+    dMa = Get_option_entier ( options, T_DMAXA ); if (dMa == -1) dMa = 0;
+    dad = Get_option_entier ( options, T_DAD );   if (dad == -1) dad = 0;
+
     action = New_action();
-    taille = 40;
+    taille = 128;
     action->alors = New_chaine( taille );
-    g_snprintf( action->alors, taille, "ST(%d,1);", num );
+    g_snprintf( action->alors, taille, "Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s, 1, %d, %d, %d, %d )",
+                                        alias->nom, Dls_plugin.tech_id, alias->nom,
+                                        daa, dma, dMa, dad );
     action->sinon = New_chaine( taille );
-    g_snprintf( action->sinon, taille, "ST(%d,0);", num );
+    g_snprintf( action->sinon, taille, "Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s, 0, %d, %d, %d, %d )",
+                                        alias->nom, Dls_plugin.tech_id, alias->nom,
+                                        daa, dma, dMa, dad );
     return(action);
   }
 /******************************************************************************************************************************/
@@ -727,12 +748,16 @@
           liste = Alias;
           while(liste)
            { alias = (struct ALIAS *)liste->data;
-             if (alias->num == -1)                                       /* alias par nom ? creation du pointeur de raccourci */
+             if (alias->type == ALIAS_TYPE_DYNAMIC)                      /* alias par nom ? creation du pointeur de raccourci */
               { switch (alias->bit)
                  { case T_MONO: nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_M_%s;\n", alias->nom );
                                 write (fd, chaine, nb_car);
                                 break;
                    case T_BI:   nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_B_%s;\n", alias->nom );
+                                write (fd, chaine, nb_car);
+                                break;
+                   case T_TEMPO:
+                                nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_T_%s;\n", alias->nom );
                                 write (fd, chaine, nb_car);
                                 break;
                    case T_HORLOGE:

@@ -82,6 +82,7 @@
  extern gchar *New_condition_entree( int barre, int num, GList *options );
  extern gchar *New_condition_bi( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_mono( int barre, struct ALIAS *alias, GList *options );
+ extern gchar *New_condition_tempo( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_horloge( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_vars( int barre, gchar *nom );
  extern struct ACTION *New_action( void );
@@ -91,7 +92,7 @@
  extern struct ACTION *New_action_activite_fixe( void );
  extern struct ACTION *New_action_mono_by_alias( struct ALIAS *alias );
  extern struct ACTION *New_action_icone( int num, GList *options );
- extern struct ACTION *New_action_tempo( int num, GList *options );
+ extern struct ACTION *New_action_tempo( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_bi_by_alias( struct ALIAS *alias, gint barre );
  extern struct ACTION *New_action_cpt_h( int num, GList *options );
  extern struct ACTION *New_action_cpt_imp( int num, GList *options );

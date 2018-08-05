@@ -46,7 +46,7 @@
 %token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_TOP_ALERTE T_HORLOGE
 %token <val>    T_SPERS_DER T_SPERS_DERF T_SPERS_DAN T_SPERS_DANF T_OSYN_ACQ
 %token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_DOWN
-%token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LIBELLE
+%token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LIBELLE T_DAA T_DMINA T_DMAXA T_DAD
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL T_TRUE T_FALSE
 %type  <val>    ordre
@@ -100,11 +100,11 @@ un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                       case T_BI  : if ( New_alias(ALIAS_TYPE_STATIC, $2, $5, $6, $4, NULL) == FALSE )       /* Deja defini ? */
                                     { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
                                    break;
-                      case T_TEMPO :
                       case EANA  :
                       case T_MONO  :
                       case CPT_H :
                       case T_CPT_IMP:
+                      case T_TEMPO:
                       case T_MSG :
                       case T_REGISTRE :
                       case ICONE : if ($4==1)                                             /* Barre = 1 ?? */
@@ -408,14 +408,6 @@ unite:          modulateur ENTIER HEURE ENTIER
                       case T_EGAL     : g_snprintf( $$, taille, "CI(%d)==%f", $1, $3 ); break;
                     }
                 }}
-                | barre T_TEMPO ENTIER liste_options 
-                {{ int taille;
-                   taille = 40;
-                   $$ = New_chaine( taille ); /* 10 caractères max */
-                   g_snprintf( $$, taille, "%sT(%d)",
-                               ($1==1 ? "!" : ""), $3 );
-                   Liberer_options($4);
-                }}
                 | barre T_ACT_COMOUT
                   {{ $$=New_condition_vars( $1, "vars->bit_comm_out"); }}
                 | barre T_ACT_DEF
@@ -474,10 +466,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                        } 
                       else switch(alias->bit)                              /* On traite que ce qui peut passer en "condition" */
                        { case T_TEMPO :
-                          { taille = 40;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
-                            g_snprintf( $$, taille, "%sT(%d)", ($1==1 ? "!" : ""), alias->num );
-                            break;
+                          { $$ = New_condition_tempo( $1, alias, $3 );
                           }
                          case ENTREE:
                           { if ( (alias->barre && $1) || (!alias->barre && !$1))
@@ -597,10 +586,6 @@ une_action:     barre SORTIE ENTIER
                   {{ $$=New_action_icone($2, $3);
                      Liberer_options($3);
                   }}
-                | T_TEMPO ENTIER liste_options
-                  {{ $$=New_action_tempo($2, $3);
-                     Liberer_options($3);
-                  }}
                 | CPT_H ENTIER liste_options
                   {{ $$=New_action_cpt_h($2, $3);
                      Liberer_options($3);
@@ -666,7 +651,7 @@ une_action:     barre SORTIE ENTIER
                          $$->sinon = NULL;
                        }
                       else switch(alias->bit)
-                       { case T_TEMPO: $$=New_action_tempo( alias->num, options );   break;
+                       { case T_TEMPO: $$=New_action_tempo( alias, options );        break;
                          case T_MSG  : $$=New_action_msg( alias->num );              break;
                          case SORTIE : $$=New_action_sortie( alias->num, $1 );       break;
                          case T_BI   : if (alias->num >= NBR_BIT_BISTABLE_RESERVED || alias->type==ALIAS_TYPE_DYNAMIC)
@@ -784,6 +769,26 @@ une_option:     MODE T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->type = T_EDGE_UP;
                    $$->entier = 1;
+                }}
+                | T_DAA T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->type = T_DAA;
+                   $$->entier = $3;
+                }}
+                | T_DMINA T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->type = T_DMINA;
+                   $$->entier = $3;
+                }}
+                | T_DMAXA T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->type = T_DMAXA;
+                   $$->entier = $3;
+                }}
+                | T_DAD T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->type = T_DAD;
+                   $$->entier = $3;
                 }}
                 ;
 

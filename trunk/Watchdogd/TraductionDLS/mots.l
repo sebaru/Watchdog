@@ -119,6 +119,10 @@ blanc         [\t ]+
 "cligno"                   { DlsScanner_lval.val = CLIGNO;      return CLIGNO;      }
 "edge_up"                  { DlsScanner_lval.val = T_EDGE_UP;   return T_EDGE_UP;   }
 "libelle"                  { DlsScanner_lval.val = T_LIBELLE;   return T_LIBELLE;   }
+"daa"                      { DlsScanner_lval.val = T_DAA;       return T_DAA;       }
+"dma"                      { DlsScanner_lval.val = T_DMINA;     return T_DMINA;     }
+"dMa"                      { DlsScanner_lval.val = T_DMAXA;     return T_DMAXA;     }
+"dad"                      { DlsScanner_lval.val = T_DAD;       return T_DAD;       }
  /*********************************************** Le reste ************************************************/
 "#define"                  { DlsScanner_lval.val = T_DEFINE;    return T_DEFINE;    }
 "#static"                  { DlsScanner_lval.val = T_STATIC;    return T_STATIC;    }

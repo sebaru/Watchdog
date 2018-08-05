@@ -871,7 +871,8 @@
 /* Dls_data_set_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
- void Dls_data_set_tempo ( gchar *nom, gchar *owner, struct TEMPO **tempo_p, gboolean etat )
+ void Dls_data_set_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p, gboolean etat,
+                            gint delai_on, gint min_on, gint max_on, gint delai_off)
   { if (!tempo_p || !*tempo_p)
      { gchar chaine[80];
        struct TEMPO *tempo;
@@ -880,18 +881,22 @@
        if (!tempo)
         { tempo = g_malloc ( sizeof(struct TEMPO) );
           if (!tempo) { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for %s", __func__, chaine ); return; }
+          tempo->confDB.delai_on = delai_on;
+          tempo->confDB.min_on = min_on;
+          tempo->confDB.max_on = max_on;
+          tempo->confDB.delai_off = delai_off;
           g_tree_insert ( Partage->com_dls.Dls_data_tempo, g_strdup(chaine), tempo );
           Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding key %s : %p", __func__, chaine, tempo );
         }
-       if (tempo_p) *tempo_p = tempo;                                               /* Sauvegarde pour acceleration si besoin */
+       if (tempo_p) *tempo_p = (gpointer)tempo;                                     /* Sauvegarde pour acceleration si besoin */
       }
-     ST_local ( *tempo_p, etat );                                                                 /* Recopie dans la variable */
+     ST_local ( (struct TEMPO *)*tempo_p, etat );                                                 /* Recopie dans la variable */
   }
- gboolean Dls_data_get_tempo ( gchar *nom, gchar *owner, struct TEMPO **tempo_p )
+ gboolean Dls_data_get_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p )
   { gchar chaine[80];
     struct TEMPO *tempo;
     if (tempo_p && *tempo_p)                                                         /* Si pointeur d'acceleration disponible */
-     { tempo = *tempo_p;
+     { tempo = (struct TEMPO *)*tempo_p;
        return (tempo->state);
      }
     g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );

@@ -53,6 +53,9 @@
  extern gboolean Dls_get_top_alerte ( void );
  extern gboolean Dls_data_get_bool ( gchar *nom, gchar *owner, gboolean **data_p );
  extern void     Dls_data_set_bool ( gchar *nom, gchar *owner, gboolean **data_p, gboolean valeur );
+ extern void     Dls_data_set_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p, gboolean etat,
+                                      gint delai_on, gint min_on, gint max_on, gint delai_off);
+ extern gboolean Dls_data_get_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p );
  extern int E( int num );
  extern int B( int num );
  extern int M( int num );
