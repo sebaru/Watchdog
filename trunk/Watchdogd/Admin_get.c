@@ -55,6 +55,7 @@
      { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'GET'" );
 
        response = Admin_write ( response, " | - new_b $name $owner    - Get bistable $name_$owner" );
+       response = Admin_write ( response, " | - new_t $name $owner    - Get Tempo $name_$owner" );
        response = Admin_write ( response, " | - list                  - List all running bits" );
        response = Admin_write ( response, " | - e $num                - Get E[$num]" );
        response = Admin_write ( response, " | - ea $num               - Get EA[$num]" );
@@ -88,6 +89,27 @@
         { g_snprintf( chaine, sizeof(chaine), " | - T -> num '%d' out of range", num );
           response = Admin_write ( response, chaine );
 	       }
+     } else
+    if ( ! strcmp ( commande, "new_t" ) )
+     { gchar nom[80], owner[80];
+       if (sscanf ( ligne, "%s %s %s", commande, nom, owner ) == 3)                      /* Découpage de la ligne de commande */
+        { struct TEMPO *tempo;
+          Dls_data_get_tempo ( nom, owner, (gpointer)&tempo );
+          if (tempo)
+           { g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s -> delai_on=%d min_on=%d max_on=%d delai_off=%d", nom, owner,
+			                   tempo->confDB.delai_on, tempo->confDB.min_on, tempo->confDB.max_on, tempo->confDB.delai_off );
+             response = Admin_write ( response, chaine );
+             g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", nom, owner,
+                      tempo->state, tempo->status, tempo->date_on,
+                      (tempo->date_on > Partage->top ? (tempo->date_on - Partage->top)/10.0 : 0.0),
+                      tempo->date_off,
+                     (tempo->date_off > Partage->top ? (tempo->date_off - Partage->top)/10.0 : 0.0) );
+             response = Admin_write ( response, chaine );
+           } else
+           { g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s not found", nom, owner );
+             response = Admin_write ( response, chaine );
+	          }
+        }
      } else
     if ( ! strcmp ( commande, "i" ) )
      { int num;

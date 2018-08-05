@@ -888,7 +888,7 @@
              retour = TRAD_DLS_WARNING;
            }
           mnemo.dls_id = id;
-          if (alias->num == -1)                                                       /* Pour les alias Dynamiques uniquement */
+          if (alias->type == ALIAS_TYPE_DYNAMIC)                                      /* Pour les alias Dynamiques uniquement */
            { switch ( alias->bit )
               { case T_MONO:
                  { mnemo.type = MNEMO_MONOSTABLE;
@@ -898,6 +898,12 @@
                  }
                 case T_BI:
                  { mnemo.type = MNEMO_BISTABLE;
+                   g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
+                   g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
+                   Mnemo_auto_create_for_dls ( &mnemo );
+                 }
+                case T_TEMPO:
+                 { mnemo.type = MNEMO_TEMPO;
                    g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
                    g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
                    Mnemo_auto_create_for_dls ( &mnemo );
