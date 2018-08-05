@@ -54,7 +54,7 @@
     TEMPO_WAIT_FOR_MIN_ON,                                             /* Delai de MAU dépassé, en attente du creneau minimum */
     TEMPO_WAIT_FOR_MAX_ON,                                          /* Creneau minimum atteint, en attente du creneau maximum */
     TEMPO_WAIT_FOR_DELAI_OFF,                                    /* Creneau max atteint, en attente du delai de remise a zero */
-    TEMPO_WAIT_FOR_COND_OFF                                               /* Atteint que la condition soit tombée avant reset */
+    TEMPO_WAIT_FOR_COND_OFF                                                /* Attend que la condition soit tombée avant reset */
   };
 
  struct TEMPO                                                                               /* Définition d'une temporisation */

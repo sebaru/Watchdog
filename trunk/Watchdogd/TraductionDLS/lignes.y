@@ -467,6 +467,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                       else switch(alias->bit)                              /* On traite que ce qui peut passer en "condition" */
                        { case T_TEMPO :
                           { $$ = New_condition_tempo( $1, alias, $3 );
+                            break;
                           }
                          case ENTREE:
                           { if ( (alias->barre && $1) || (!alias->barre && !$1))
