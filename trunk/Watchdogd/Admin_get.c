@@ -93,7 +93,7 @@
     if ( ! strcmp ( commande, "new_t" ) )
      { gchar nom[80], owner[80];
        if (sscanf ( ligne, "%s %s %s", commande, nom, owner ) == 3)                      /* Découpage de la ligne de commande */
-        { struct TEMPO *tempo;
+        { struct TEMPO *tempo = NULL;
           Dls_data_get_tempo ( nom, owner, (gpointer)&tempo );
           if (tempo)
            { g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s -> delai_on=%d min_on=%d max_on=%d delai_off=%d", nom, owner,
