@@ -900,6 +900,7 @@
     tempo = g_tree_lookup ( Partage->com_dls.Dls_data_tempo, chaine );
     if (tempo)
      { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : key %s found val %p", __func__, chaine, tempo );
+       if (tempo_p) *tempo_p = (gpointer)tempo;                                     /* Sauvegarde pour acceleration si besoin */
        return(tempo->state);
      }
     return(FALSE);    
