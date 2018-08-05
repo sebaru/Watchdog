@@ -294,6 +294,7 @@
     result = New_chaine( taille );
     g_snprintf( result, taille, "%sDls_data_get_tempo ( \"%s\", \"%s\", &_T_%s )",
                 (barre==1 ? "!" : ""), alias->nom, Dls_plugin.tech_id, alias->nom );
+    return(result);
   }
 /******************************************************************************************************************************/
 /* New_condition_horloge: Prepare la chaine de caractere associée à la condition, en respectant les options                   */
