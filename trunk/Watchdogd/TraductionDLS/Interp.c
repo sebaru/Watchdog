@@ -529,24 +529,6 @@
     g_snprintf( action->sinon, taille, "ST(%d,0);", num );
     return(action);
   }
-
-/******************************************************************************************************************************/
-/* New_action_bi: Prepare une struct action avec une commande SB                                                              */
-/* Entrées: numero du bistable, sa logique                                                                                    */
-/* Sortie: la structure action                                                                                                */
-/******************************************************************************************************************************/
- struct ACTION *New_action_bi( int num, int barre )
-  { struct ACTION *action;
-    int taille;
-
-    taille = 20;
-    Add_bit_to_list(MNEMO_BISTABLE, num);
-    action = New_action();
-    action->alors = New_chaine( taille );
-       
-    g_snprintf( action->alors, taille, "SB(%d,%d);", num, !barre );
-    return(action);
-  }
 /******************************************************************************************************************************/
 /* New_action_mono: Prepare une struct action avec une commande SM                                                            */
 /* Entrées: numero du monostable, sa logique                                                                                  */
@@ -556,8 +538,14 @@
   { struct ACTION *action;
     int taille;
 
-    if (alias->num != -1) /* Alias par numéro ? */
-     { return(New_action_bi ( alias->num, barre )); }
+    if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par numéro ? */
+     { taille = 20;
+       Add_bit_to_list(MNEMO_BISTABLE, alias->num);
+       action = New_action();
+       action->alors = New_chaine( taille );
+       
+       g_snprintf( action->alors, taille, "SB(%d,%d);", alias->num, !barre );
+     }
     else /* Alias par nom */
      { taille = 100;
        action = New_action();

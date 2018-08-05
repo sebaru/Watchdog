@@ -593,19 +593,6 @@ action:         action VIRGULE une_action
 
 une_action:     barre SORTIE ENTIER
                   {{ $$=New_action_sortie($3, $1);     }}
-                | barre T_BI ENTIER
-                  {{ if ($3 >= NBR_BIT_BISTABLE_RESERVED)
-                       { $$=New_action_bi($3, $1); }
-                     else
-                       { guint taille;
-                         Emettre_erreur_new( "Ligne %d: 'B%04d' could not be set (system bit)", DlsScanner_get_lineno(), $3 );
-                         $$=New_action();
-                         taille = 2;
-                         $$->alors = New_chaine( taille );
-                         g_snprintf( $$->alors, taille, " " ); 
-                         $$->sinon = NULL;
-                       }
-                  }}
                 | ICONE ENTIER liste_options
                   {{ $$=New_action_icone($2, $3);
                      Liberer_options($3);
