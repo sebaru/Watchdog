@@ -861,10 +861,7 @@
     if (data_p && *data_p) return (**data_p);                                        /* Si pointeur d'acceleration disponible */
     g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
     data = Dls_data_get( chaine );
-    if (data)
-     { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : key %s found val %d", __func__, chaine, *data );
-       return(*data);
-     }
+    if (data) { return(*data); }
     return(FALSE);    
   }
 /******************************************************************************************************************************/
@@ -879,7 +876,7 @@
        g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
        tempo = g_tree_lookup ( Partage->com_dls.Dls_data_tempo, chaine );
        if (!tempo)
-        { tempo = g_malloc ( sizeof(struct TEMPO) );
+        { tempo = g_malloc0 ( sizeof(struct TEMPO) );
           if (!tempo) { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for %s", __func__, chaine ); return; }
           tempo->confDB.delai_on = delai_on;
           tempo->confDB.min_on = min_on;

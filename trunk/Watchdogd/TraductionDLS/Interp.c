@@ -757,7 +757,7 @@
                                 write (fd, chaine, nb_car);
                                 break;
                    case T_TEMPO:
-                                nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_T_%s;\n", alias->nom );
+                                nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_T_%s;\n", alias->nom );
                                 write (fd, chaine, nb_car);
                                 break;
                    case T_HORLOGE:

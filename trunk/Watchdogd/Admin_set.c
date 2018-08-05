@@ -151,6 +151,7 @@
        int val;
        if (sscanf ( ligne, "%s %s %s", commande, nom, owner ) == 3)                      /* Découpage de la ligne de commande */
         { Envoyer_commande_dls_data ( nom, owner );
+          g_snprintf( chaine, sizeof(chaine), " | - %s_%s set to 1", nom, owner, val );
         }
        else { g_snprintf( chaine, sizeof(chaine), " | - Wrong number of parameters" ); }
        response = Admin_write ( response, chaine );
