@@ -560,23 +560,20 @@
   { struct ACTION *action;
     int taille;
 
+    action = New_action();
     if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par numéro ? */
      { taille = 20;
        Add_bit_to_list(MNEMO_BISTABLE, alias->num);
-       action = New_action();
        action->alors = New_chaine( taille );
-       
        g_snprintf( action->alors, taille, "SB(%d,%d);", alias->num, !barre );
      }
     else /* Alias par nom */
      { taille = 100;
        action = New_action();
        action->alors = New_chaine( taille );
-       action->sinon = NULL;
-
        g_snprintf( action->alors, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_B_%s, %d );", alias->nom, Dls_plugin.tech_id, alias->nom, !barre );
-       return(action);
      }
+    return(action);
   }
 /******************************************************************************************************************************/
 /* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
