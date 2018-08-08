@@ -292,8 +292,14 @@
     gint taille;
     taille = 128;
     result = New_chaine( taille );
-    g_snprintf( result, taille, "%sDls_data_get_tempo ( \"%s\", \"%s\", &_T_%s )",
-                (barre==1 ? "!" : ""), alias->nom, Dls_plugin.tech_id, alias->nom );
+    if ( alias->type == ALIAS_TYPE_DYNAMIC)
+     { g_snprintf( result, taille, "%sDls_data_get_tempo ( \"%s\", \"%s\", &_T_%s )",
+                   (barre==1 ? "!" : ""), alias->nom, Dls_plugin.tech_id, alias->nom );
+     }
+    else
+     { g_snprintf( result, taille, "%sT(%d)",
+                   (alias->barre==1 ? "!" : ""), alias->num );
+     }
     return(result);
   }
 /******************************************************************************************************************************/
@@ -852,8 +858,8 @@
              g_snprintf(chaine, sizeof(chaine),
                       " if (B(%d) == 0)\n"
                       "      { B%d_verrou = 0; B%d_edge_up_value = 0; }\n"
-                      " else { if (B%d_verrou=0) { B%d_verrou=1; B%d_edge_up_value=1; }\n"
-                      "                     else { B%d_edge_up_value=0; }\n"
+                      " else { if (B%d_verrou==0) { B%d_verrou=1; B%d_edge_up_value=1; }\n"
+                      "                      else { B%d_edge_up_value=0; }\n"
                       "      }\n",
                       GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
                       GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
@@ -867,8 +873,8 @@
              g_snprintf(chaine, sizeof(chaine),
                       " if (E(%d) == 0)\n"
                       "      { E%d_verrou = 0; E%d_edge_up_value = 0; }\n"
-                      " else { if (E%d_verrou=0) { E%d_verrou=1; E%d_edge_up_value=1; }\n"
-                      "                     else { E%d_edge_up_value=0; }\n"
+                      " else { if (E%d_verrou==0) { E%d_verrou=1; E%d_edge_up_value=1; }\n"
+                      "                      else { E%d_edge_up_value=0; }\n"
                       "      }\n",
                       GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
                       GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
