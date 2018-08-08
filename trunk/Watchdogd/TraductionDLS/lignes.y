@@ -362,6 +362,13 @@ unite:          modulateur ENTIER HEURE ENTIER
                 {{ if ($1) $$ = g_strdup("!vars->bit_activite_down");
                       else $$ = g_strdup("vars->bit_activite_down");
                 }}
+                | barre T_BI ENTIER
+                {{ int taille;
+                   taille = 10;
+                   $$ = New_chaine( taille );
+                   if ($1) { g_snprintf( $$, taille, "!B(%d)", $3 ); }
+                   else    { g_snprintf( $$, taille, "B(%d)", $3 ); }
+                }}
                 | barre ENTREE ENTIER liste_options
                 {{ $$ = New_condition_entree ( $1, $3, $4 );
                    Liberer_options($4);
