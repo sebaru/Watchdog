@@ -541,14 +541,23 @@
 
     action = New_action();
     taille = 128;
-    action->alors = New_chaine( taille );
-    g_snprintf( action->alors, taille, "Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s, 1, %d, %d, %d, %d );",
-                                        alias->nom, Dls_plugin.tech_id, alias->nom,
-                                        daa, dma, dMa, dad );
-    action->sinon = New_chaine( taille );
-    g_snprintf( action->sinon, taille, "Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s, 0, %d, %d, %d, %d );",
-                                        alias->nom, Dls_plugin.tech_id, alias->nom,
-                                        daa, dma, dMa, dad );
+    if (alias->type == ALIAS_TYPE_DYNAMIC)
+     { action->alors = New_chaine( taille );
+       g_snprintf( action->alors, taille, "Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s, 1, %d, %d, %d, %d );",
+                                           alias->nom, Dls_plugin.tech_id, alias->nom,
+                                           daa, dma, dMa, dad );
+       action->sinon = New_chaine( taille );
+       g_snprintf( action->sinon, taille, "Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s, 0, %d, %d, %d, %d );",
+                                           alias->nom, Dls_plugin.tech_id, alias->nom,
+                                           daa, dma, dMa, dad );
+     }
+    else
+     { taille = 40;
+       action->alors = New_chaine( taille );
+       g_snprintf( action->alors, taille, "ST(%d,1);", alias->num );
+       action->sinon = New_chaine( taille );
+       g_snprintf( action->sinon, taille, "ST(%d,0);", alias->num );
+    }
     return(action);
   }
 /******************************************************************************************************************************/
