@@ -217,7 +217,7 @@
        return(NULL);
      }
 
-    g_snprintf( sid, sizeof(sid), "sid=%s", Client.sid );
+/*    g_snprintf( sid, sizeof(sid), "sid=%s", Client.sid );
     curl_easy_setopt(curl, CURLOPT_COOKIE, sid);                           /* Active la gestion des cookies pour la connexion */
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &erreur );
     curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
@@ -253,7 +253,7 @@
        return(FALSE);
      }
 
-    g_snprintf( url, sizeof(url), "%s/%s", Config_cli.target_url, uri );
+    g_snprintf( url, sizeof(url), "http://%s:5560/%s", Client.host, uri );
     curl_easy_setopt(curl, CURLOPT_URL, url );
     if (post == TRUE)
      { curl_easy_setopt(curl, CURLOPT_POST, 1 );

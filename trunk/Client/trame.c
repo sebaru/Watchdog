@@ -39,7 +39,7 @@
  #include <fcntl.h>
 
  #include "trame.h"
- #define DEBUG_TRAME
+/* #define DEBUG_TRAME*/
 /********************************* Définitions des prototypes programme ***********************************/
  #include "Config_cli.h"
  #include "protocli.h"
@@ -486,7 +486,7 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
        return(FALSE);
      }
 
-    g_snprintf( url, sizeof(url), "%s/ws/gif/%d/%d", Config_cli.target_url, id, mode );
+    g_snprintf( url, sizeof(url), "http://%s:5560/ws/gif/%d/%d", Client.host, id, mode );
     Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "Trying to get %s", url );
     curl_easy_setopt(curl, CURLOPT_URL, url );
        /*curl_easy_setopt(curl, CURLOPT_POST, 1 );

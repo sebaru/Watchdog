@@ -251,6 +251,7 @@ printf(" On veut les horloges du syn %d\n", infos->syn_id );
     static gint init_timer;
     GdkColor color;
 
+    printf("Creation page synoptique %d\n", syn_id );
     page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
     
