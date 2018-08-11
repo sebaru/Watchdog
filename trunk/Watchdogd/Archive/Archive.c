@@ -148,7 +148,7 @@
 /******************************************************************************************************************************/
  void Run_arch ( void )
   { struct DB *db;
-    gint top, last_update;
+    gint top, last_update, nb_enreg;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Starting" );
@@ -206,7 +206,8 @@
        Info_new( Config.log, Config.log_arch, LOG_DEBUG,
                 "%s: Traitement de %05d archive(s)", __func__, Partage->com_arch.taille_arch );
        top = Partage->top;
-       while (Partage->com_arch.liste_arch && Partage->com_arch.Thread_run == TRUE)
+       nb_enreg = 0;                                                       /* Au début aucun enregistrement est passé a la DB */
+       while (Partage->com_arch.liste_arch && Partage->com_arch.Thread_run == TRUE && nb_enreg<1000)
         { pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
           arch = Partage->com_arch.liste_arch->data;                                                  /* Recuperation du arch */
           Partage->com_arch.liste_arch = g_slist_remove ( Partage->com_arch.liste_arch, arch );
@@ -214,11 +215,12 @@
           pthread_mutex_unlock( &Partage->com_arch.synchro );
           Ajouter_archDB ( db, arch );
           g_free(arch);
-          Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                   "%s: Reste %d archives a traiter", __func__, Partage->com_arch.taille_arch );
+          nb_enreg++;                        /* Permet de limiter a au plus 1000 enregistrement histoire de limiter la famine */
         }
        Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                "%s: Traitement en %06.1fs", __func__, (Partage->top-top)/10.0 );
+                "%s: Traitement de %s enregistrement en %06.1fs", __func__, nb_enreg, (Partage->top-top)/10.0 );
+       Info_new( Config.log, Config.log_arch, LOG_DEBUG,
+                "%s: Reste %d archives a traiter", __func__, Partage->com_arch.taille_arch );
        Libere_DB_SQL( &db );
        SEA ( NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );                                      /* pour historique */
      }

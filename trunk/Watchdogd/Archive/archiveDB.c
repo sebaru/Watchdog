@@ -56,6 +56,8 @@
                    "  PARTITION BY LINEAR KEY (date_time) PARTITIONS 12;",
                    NOM_TABLE_ARCH, arch->type, arch->num );
        Lancer_requete_SQL ( db, table );                                                       /* Execution de la requete SQL */
+       Info_new( Config.log, Config.log_arch, LOG_NOTICE,
+                "%s: Creation de la table %s_%03d_%06d avant Insert", __func__, NOM_TABLE_ARCH, arch->type, arch->num );
        Lancer_requete_SQL ( db, requete );                             /* Une fois la table créé, on peut y stocker l'archive */
 	 }
 
