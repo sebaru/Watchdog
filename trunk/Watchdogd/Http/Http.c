@@ -403,8 +403,9 @@
                   return(0);
                 }
                else                                                                                             /* Par défaut */
-                { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Request from %s/%s (sid %s): %s",
+                { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Unknown Request from %s/%s (sid %s): %s",
                             __func__, remote_name, remote_ip, Http_get_session_id(session), url );
+                  Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ); /* Bad Request */
                   return(1);
                 }
                return(1);                                                                    /* Par défaut, on clot la socket */
