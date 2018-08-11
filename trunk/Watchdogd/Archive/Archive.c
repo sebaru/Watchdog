@@ -218,7 +218,7 @@
           nb_enreg++;                        /* Permet de limiter a au plus 1000 enregistrement histoire de limiter la famine */
         }
        Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                "%s: Traitement de %s enregistrement en %06.1fs", __func__, nb_enreg, (Partage->top-top)/10.0 );
+                "%s: Traitement de %d enregistrement en %06.1fs", __func__, nb_enreg, (Partage->top-top)/10.0 );
        Info_new( Config.log, Config.log_arch, LOG_DEBUG,
                 "%s: Reste %d archives a traiter", __func__, Partage->com_arch.taille_arch );
        Libere_DB_SQL( &db );
