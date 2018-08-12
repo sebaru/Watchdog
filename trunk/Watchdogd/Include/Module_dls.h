@@ -56,6 +56,8 @@
  extern void     Dls_data_set_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p, gboolean etat,
                                       gint delai_on, gint min_on, gint max_on, gint delai_off);
  extern gboolean Dls_data_get_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p );
+ extern void     Dls_data_set_AI ( gchar *nom, gchar *tech_id, float val_avant_ech, gpointer **ai_p );
+ extern gfloat   Dls_data_get_AI ( gchar *nom, gchar *tech_id, gpointer **ai_p );
  extern int E( int num );
  extern int B( int num );
  extern int M( int num );

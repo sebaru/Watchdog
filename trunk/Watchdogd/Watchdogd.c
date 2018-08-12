@@ -315,6 +315,9 @@
        zmq_from_master = New_zmq ( ZMQ_SUB, "listen-to-master" );
        Connect_zmq ( zmq_from_master, "tcp", Config.master_host, 5555 );
      }
+/************************************* Création des zones de bits internes dynamiques *****************************************/
+    Partage->Dls_data_AI = NULL;
+
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single == FALSE)                                                                    /* Si demarrage des thread */
      { if (!Config.instance_is_master)
@@ -463,6 +466,12 @@
      { Close_zmq( Partage->com_msrv.zmq_to_master );
        Close_zmq( zmq_from_master );
      }
+/********************************* Dechargement des zones de bits internes dynamiques *****************************************/
+    g_slist_foreach (Partage->Dls_data_DI, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_DI);
+    g_slist_foreach (Partage->Dls_data_AI, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_AI);
+
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
     pthread_exit( NULL );
   }

@@ -31,8 +31,7 @@
  #define ARCHIVE_EA_TEMPS_SI_CONSTANT  3000                                    /* Si constant, archivage toutes les 5 minutes */
  #define ARCHIVE_EA_TEMPS_SI_VARIABLE    50                                   /* Si variable, archivage toutes les 5 secondes */
  #define ARCHIVE_DEFAUT_RETENTION       400                              /* Nom de jours par défaut de retention des archives */
-
- #define NUM_EA_SYS_ARCHREQUEST         126                      /* Numéro d'EA de reference pour le nbr de request archivage */
+ #define ARCHIVE_DEFAULT_BUFFER_SIZE   500000
 
  #define NOM_TABLE_ARCH    "histo_bit"
 
@@ -42,6 +41,7 @@
     guint  type;                                                                                 /* Type de bit: E ? B ? EA ? */
     guint  num;                                                                /* Numero de l'entrée analogique photographiée */
     gfloat valeur;                                                                           /* Valeur de l'entrée analogique */
+    gchar acro[30];
   };
 
  struct COM_ARCH                                                                                   /* Communication vers ARCH */
@@ -49,6 +49,7 @@
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     GSList *liste_arch;                                                                   /* liste de struct ARCHDB a traiter */
     gint taille_arch;
+    gint max_buffer_size;                                                   /* Taille max de la liste des archives avant drop */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
     gint  duree_retention;                                              /* Duree de retention des données d'archive, en jours */
@@ -64,6 +65,7 @@
  extern gboolean Arch_Lire_config ( void );
  extern gint Arch_Clear_list ( void );
  extern void Ajouter_arch( gint type, gint num, gfloat valeur );
+ extern void Ajouter_arch_by_nom( gchar *nom, gchar *tech_id, gfloat valeur );
  extern void Ajouter_archDB ( struct DB *db, struct ARCHDB *arch );
  extern gchar *Admin_arch ( gchar *responose, gchar *ligne );
  extern void Arch_Update_SQL_Partitions_thread ( void );

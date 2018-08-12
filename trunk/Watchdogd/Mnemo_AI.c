@@ -86,6 +86,47 @@
     return(mnemo_ai);
   }
 /******************************************************************************************************************************/
+/* Charger_conf_ai: Recupération de la conf de l'entrée analogique en parametre                                               */
+/* Entrée: l'id a récupérer                                                                                                   */
+/* Sortie: une structure hébergeant l'entrée analogique                                                                       */
+/******************************************************************************************************************************/
+ void Charger_conf_AI ( struct ANALOG_INPUT *ai )
+  { gchar requete[512];
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return;
+     }
+ 
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT a.min,a.max,a.type,a.unite"
+                " FROM %s as a"
+                " INNER JOIN mnemos as m ON a.id_mnemo = m.id"
+                " INNER JOIN dls as d ON m.dls_id = d.id"
+                " WHERE d.tech_id='%s' AND m.acronyme='%s' LIMIT 1",
+                NOM_TABLE_MNEMO_AI, ai->nom, ai->tech_id
+              );
+
+    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
+     { Libere_DB_SQL (&db);
+       return;
+     }
+
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Libere_DB_SQL( &db );
+       return;
+     }
+
+    ai->confDB.min      = atof(db->row[0]);
+    ai->confDB.max      = atof(db->row[1]);
+    ai->confDB.type     = atoi(db->row[2]);
+    g_snprintf( ai->confDB.unite, sizeof(ai->confDB.unite), "%s", db->row[3] );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AI '%s:%s' loaded", __func__, ai->nom, ai->tech_id );
+  }
+/******************************************************************************************************************************/
 /* Modifier_analogInputDB: Modification d'un entreeANA Watchdog                                                               */
 /* Entrées: une structure hébergeant l'entrée analogique a modifier                                                           */
 /* Sortie: FALSE si pb                                                                                                        */

@@ -56,6 +56,7 @@
 
        response = Admin_write ( response, " | - new_b $name $owner    - Get bistable $name_$owner" );
        response = Admin_write ( response, " | - new_t $name $owner    - Get Tempo $name_$owner" );
+       response = Admin_write ( response, " | - new_ea $name $owner   - Get Analog Input $name_$owner" );
        response = Admin_write ( response, " | - list                  - List all running bits" );
        response = Admin_write ( response, " | - e $num                - Get E[$num]" );
        response = Admin_write ( response, " | - ea $num               - Get EA[$num]" );

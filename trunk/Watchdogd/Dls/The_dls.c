@@ -865,6 +865,118 @@
     return(FALSE);    
   }
 /******************************************************************************************************************************/
+/* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_AI ( gchar *nom, gchar *tech_id, float val_avant_ech, gpointer **ai_p )
+  { struct ANALOG_INPUT *ai;
+    gboolean need_arch;
+
+    if (!ai_p || !*ai_p)
+     { GSList *liste;
+       liste = Partage->Dls_data_AI;
+       while (liste)
+        { ai = (struct ANALOG_INPUT *)liste->data;
+          if ( !strcmp ( ai->nom, nom ) && !strcmp( ai->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+       
+       if (!liste)
+        { ai = g_malloc0 ( sizeof(struct ANALOG_INPUT) );
+          if (!ai)
+           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, nom, tech_id );
+             return;
+           }
+          g_snprintf( ai->nom,     sizeof(ai->nom), "%s", nom );
+          g_snprintf( ai->tech_id, sizeof(ai->tech_id), "%s", tech_id );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding AI '%s:%s'", __func__, nom, tech_id );
+          Charger_conf_AI ( ai );                                                     /* Chargment de la conf AI depuis la DB */
+        }
+       if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */
+      }
+    else ai = (struct ANALOG_INPUT *)*ai_p;
+
+    need_arch = FALSE;
+    if (ai->val_avant_ech != val_avant_ech)
+     { ai->val_avant_ech = val_avant_ech;                                           /* Archive au mieux toutes les 5 secondes */
+       if ( ai->last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top ) { need_arch = TRUE; }
+
+       switch ( ai->confDB.type )
+        { case ENTREEANA_NON_INTERP:
+               ai->val_ech = val_avant_ech;                                                        /* Pas d'interprétation !! */
+               ai->inrange = 1;
+               break;
+          case ENTREEANA_4_20_MA_10BITS:
+               if (val_avant_ech < 100)                                                /* 204) Modification du range pour 4mA */
+                { ai->val_ech = 0.0;                                                                    /* Valeur à l'echelle */ 
+                  ai->inrange = 0;
+                }
+               else
+                { if (val_avant_ech < 204) val_avant_ech = 204;                                         /* Valeur à l'echelle */ 
+                  ai->val_ech = (gfloat) ((val_avant_ech-204)*(ai->confDB.max - ai->confDB.min))/820.0 + ai->confDB.min;
+                  ai->inrange = 1;
+                }
+               break;
+          case ENTREEANA_4_20_MA_12BITS:
+               if (val_avant_ech < 400)
+                { ai->val_ech = 0.0;                                                                    /* Valeur à l'echelle */ 
+                  ai->inrange = 0;
+                }
+               else
+                { if (val_avant_ech < 816) val_avant_ech = 816;                                         /* Valeur à l'echelle */ 
+                  ai->val_ech = (gfloat) ((val_avant_ech-816)*(ai->confDB.max - ai->confDB.min))/3280.0 + ai->confDB.min;
+                  ai->inrange = 1;
+                }
+               break;
+          case ENTREEANA_WAGO_750455:                                                                              /* 4/20 mA */
+               ai->val_ech = (gfloat) (val_avant_ech*(ai->confDB.max - ai->confDB.min))/4095.0 + ai->confDB.min;
+               ai->inrange = 1;
+               break;
+          case ENTREEANA_WAGO_750461:                                                                          /* Borne PT100 */
+               if (val_avant_ech > -32767 && val_avant_ech < 8500)
+                { ai->val_ech = (gfloat)(val_avant_ech/10.0);                                           /* Valeur à l'echelle */ 
+                  ai->inrange = 1;
+                }
+               else ai->inrange = 0;
+               break;
+          default:
+               ai->val_ech = 0.0;
+               ai->inrange = 0;
+        }
+     }
+    else if ( ai->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
+     { need_arch = TRUE; }                                                               /* Archive au pire toutes les 10 min */
+
+    if (need_arch)
+     { Ajouter_arch_by_nom( ai->nom, ai->tech_id, ai->val_ech );                                       /* Archivage si besoin */
+       ai->last_arch = Partage->top;
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
+/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ gfloat Dls_data_get_AI ( gchar *nom, gchar *tech_id, gpointer **ai_p )
+  { struct ANALOG_INPUT *ai;
+    if (!ai_p || !*ai_p)                                                           /* Si pointeur d'acceleration indisponible */
+     { GSList *liste;
+       liste = Partage->Dls_data_AI;
+       while (liste)
+        { ai = (struct ANALOG_INPUT *)liste->data;
+          if ( !strcmp ( ai->nom, nom ) && !strcmp( ai->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+       
+       if (!liste) return(0.0);
+       if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */
+      }
+    else ai = (struct ANALOG_INPUT *)*ai_p;
+    return( ai->val_ech );    
+  }
+/******************************************************************************************************************************/
 /* Dls_data_set_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/

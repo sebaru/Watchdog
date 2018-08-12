@@ -48,6 +48,7 @@
     g_snprintf( Partage->com_arch.archdb_password, sizeof(Partage->com_arch.archdb_password), "%s", Config.db_password );
     g_snprintf( Partage->com_arch.archdb_host, sizeof(Partage->com_arch.archdb_host), "%s", Config.db_host );
     Partage->com_arch.archdb_port = Config.db_port;
+    Partage->com_arch.max_buffer_size = ARCHIVE_DEFAULT_BUFFER_SIZE;
     Partage->com_arch.duree_retention = ARCHIVE_DEFAUT_RETENTION;
 
     if ( ! Recuperer_configDB( &db, "arch" ) )                                              /* Connexion a la base de données */
@@ -67,6 +68,8 @@
         { g_snprintf( Partage->com_arch.archdb_host, sizeof(Partage->com_arch.archdb_host), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "port" ) )
         { Partage->com_arch.archdb_port = atoi(valeur);  }
+       else if ( ! g_ascii_strcasecmp ( nom, "max_buffer_size" ) )
+        { Partage->com_arch.max_buffer_size = atoi(valeur);  }
        else if ( ! g_ascii_strcasecmp ( nom, "days" ) )
         { Partage->com_arch.duree_retention = atoi(valeur);  }
        else
@@ -93,40 +96,17 @@
        Partage->com_arch.taille_arch--;
      }
     pthread_mutex_unlock( &Partage->com_arch.synchro );
-    Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-             "%s: Clear %05d archive(s)", __func__, save_nbr );
+    Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Clear %05d archive(s)", __func__, save_nbr );
     return(save_nbr);
  }
 /******************************************************************************************************************************/
 /* Ajouter_arch: Ajoute une archive dans la base de données                                                                   */
 /* Entrées: le type de bit, le numéro du bit, et sa valeur                                                                    */
 /******************************************************************************************************************************/
- void Ajouter_arch( gint type, gint num, gfloat valeur )
+ static void Ajouter_arch_all( gint type, gint num, gchar *nom, gchar *tech_id, gfloat valeur )
   { static gint last_log = 0, taille_buf = 500000;
     struct timeval tv;
     struct ARCHDB *arch;
-
-    if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
-    else if (Partage->com_arch.taille_arch > taille_buf)
-     { if ( last_log + 600 < Partage->top )
-        { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                   "Ajouter_arch: DROP arch (taille>%d) type=%d, num=%d", taille_buf, type, num );
-          last_log = Partage->top;
-        }
-       return;
-     }
-    else if (Partage->com_arch.Thread_run == FALSE)                                      /* Si administratively DOWN, on sort */
-     { if ( last_log + 600 < Partage->top )
-        { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                   "Ajouter_arch: Thread is down. Dropping type=%d, num=%d", type, num );
-          last_log = Partage->top;
-        }
-       return;
-     }
-    else
-     { Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                "Ajouter_arch: Add Arch a traiter type=%d, num=%d", type, num );
-     }
 
     arch = (struct ARCHDB *)g_try_malloc0( sizeof(struct ARCHDB) );
     if (!arch) return;
@@ -134,6 +114,7 @@
     gettimeofday( &tv, NULL );                                                                   /* On prend l'heure actuelle */
     arch->type      = type;
     arch->num       = num;
+    if (nom) g_snprintf( arch->acro, sizeof(arch->acro), "%s:%s", nom, tech_id );
     arch->valeur    = valeur;
     arch->date_sec  = tv.tv_sec;
     arch->date_usec = tv.tv_usec;
@@ -144,10 +125,69 @@
     pthread_mutex_unlock( &Partage->com_arch.synchro );
   }
 /******************************************************************************************************************************/
+/* Ajouter_arch: Ajoute une archive dans la base de données                                                                   */
+/* Entrées: le type de bit, le numéro du bit, et sa valeur                                                                    */
+/******************************************************************************************************************************/
+ void Ajouter_arch( gint type, gint num, gfloat valeur )
+  { static gint last_log = 0;
+    struct timeval tv;
+    struct ARCHDB *arch;
+
+    if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
+    else if (Partage->com_arch.taille_arch > Partage->com_arch.max_buffer_size)
+     { if ( last_log + 600 < Partage->top )
+        { Info_new( Config.log, Config.log_arch, LOG_INFO,
+                   "%s: DROP arch (taille>%d) type=%d, num=%d", __func__, Partage->com_arch.max_buffer_size, type, num );
+          last_log = Partage->top;
+        }
+       return;
+     }
+    else if (Partage->com_arch.Thread_run == FALSE)                                      /* Si administratively DOWN, on sort */
+     { if ( last_log + 600 < Partage->top )
+        { Info_new( Config.log, Config.log_arch, LOG_INFO,
+                   "%s: Thread is down. Dropping type=%d, num=%d", __func__, type, num );
+          last_log = Partage->top;
+        }
+       return;
+     }
+    Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Add Arch in list: type=%d, num=%d", __func__, type, num );
+    Ajouter_arch_all( type, num, NULL, NULL, valeur );
+  }
+/******************************************************************************************************************************/
+/* Ajouter_arch: Ajoute une archive dans la base de données                                                                   */
+/* Entrées: le type de bit, le numéro du bit, et sa valeur                                                                    */
+/******************************************************************************************************************************/
+ void Ajouter_arch_by_nom( gchar *nom, gchar *tech_id, gfloat valeur )
+  { static gint last_log = 0;
+    struct timeval tv;
+    struct ARCHDB *arch;
+
+    if (Config.instance_is_master == FALSE) return;                                  /* Les instances Slave n'archivent pas ! */
+    else if (Partage->com_arch.taille_arch > Partage->com_arch.max_buffer_size)
+     { if ( last_log + 600 < Partage->top )
+        { Info_new( Config.log, Config.log_arch, LOG_INFO,
+                   "%s: DROP arch (taille>%d) '%s:%s'", __func__, Partage->com_arch.max_buffer_size, nom, tech_id );
+          last_log = Partage->top;
+        }
+       return;
+     }
+    else if (Partage->com_arch.Thread_run == FALSE)                                      /* Si administratively DOWN, on sort */
+     { if ( last_log + 600 < Partage->top )
+        { Info_new( Config.log, Config.log_arch, LOG_INFO,
+                   "%s: Thread is down. Dropping '%s:%s'", __func__, Partage->com_arch.max_buffer_size, nom, tech_id );
+          last_log = Partage->top;
+        }
+       return;
+     }
+    Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Add Arch in list: '%s:%s'", __func__, nom, tech_id );
+    Ajouter_arch_all( -1, -1, nom, tech_id, valeur );
+  }
+/******************************************************************************************************************************/
 /* Main: Fonction principale du thread                                                                                        */
 /******************************************************************************************************************************/
  void Run_arch ( void )
-  { struct DB *db;
+  { static gpointer *arch_request_number;
+	struct DB *db;
     gint top, last_update, nb_enreg;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 
@@ -157,23 +197,16 @@
     Partage->com_arch.liste_arch  = NULL;                                                     /* Initialisation des variables */
     Partage->com_arch.Thread_run  = TRUE;                                                               /* Le thread tourne ! */
     Partage->com_arch.taille_arch = 0;
-    Info_new( Config.log, Config.log_arch, LOG_NOTICE,
-              "Run_arch: Demarrage . . . TID = %p", pthread_self() );
+    Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
     last_update = Partage->top;
     while(Partage->com_arch.Thread_run == TRUE)                                              /* On tourne tant que necessaire */
      { struct ARCHDB *arch;
 
-       if (Partage->com_arch.Thread_reload)                                                             /* On a recu RELOAD ? */
-        { Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Run_arch: RELOAD" );
-          Partage->com_arch.Thread_reload = FALSE;
-        }
-
        if (Partage->com_arch.Thread_reload)                                                          /* On a recu reload ?? */
-        { Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Run_arch: SIGUSR1" );
+        { Info_new( Config.log, Config.log_arch, LOG_NOTICE, "Run_arch: RELOAD" );
           pthread_mutex_lock( &Partage->com_arch.synchro );                                                  /* lockage futex */
-          Info_new( Config.log, Config.log_arch, LOG_INFO,
-                   "Run_arch: Reste %03d a traiter",
+          Info_new( Config.log, Config.log_arch, LOG_INFO, "Run_arch: Reste %03d a traiter",
                     g_slist_length(Partage->com_arch.liste_arch) );
           pthread_mutex_unlock( &Partage->com_arch.synchro );
           Partage->com_arch.Thread_reload = FALSE;
@@ -197,14 +230,13 @@
 
        db = Init_ArchDB_SQL();       
        if (!db)
-        { Info_new( Config.log, Config.log_arch, LOG_ERR, 
-                   "%s: Unable to open database %s/%s/%s", __func__,
+        { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Unable to open database %s/%s/%s", __func__,
                     Partage->com_arch.archdb_host, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
           sleep(10);
           continue;
         }
-       Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                "%s: Traitement de %05d archive(s)", __func__, Partage->com_arch.taille_arch );
+       Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Traitement de %05d archive(s)", __func__,
+                 Partage->com_arch.taille_arch );
        top = Partage->top;
        nb_enreg = 0;                                                       /* Au début aucun enregistrement est passé a la DB */
        while (Partage->com_arch.liste_arch && Partage->com_arch.Thread_run == TRUE && nb_enreg<1000)
@@ -217,12 +249,10 @@
           g_free(arch);
           nb_enreg++;                        /* Permet de limiter a au plus 1000 enregistrement histoire de limiter la famine */
         }
-       Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                "%s: Traitement de %d enregistrement en %06.1fs", __func__, nb_enreg, (Partage->top-top)/10.0 );
-       Info_new( Config.log, Config.log_arch, LOG_DEBUG,
-                "%s: Reste %d archives a traiter", __func__, Partage->com_arch.taille_arch );
+       Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Traitement de %d enregistrement en %06.1fs. Reste %d", __func__,
+                 nb_enreg, (Partage->top-top)/10.0, Partage->com_arch.taille_arch );
        Libere_DB_SQL( &db );
-       SEA ( NUM_EA_SYS_ARCHREQUEST, Partage->com_arch.taille_arch );                                      /* pour historique */
+       Dls_data_set_AI ( "ARCH_REQUEST_NUMBER", "SYS", 1.0*Partage->com_arch.taille_arch, &arch_request_number );                                      /* pour historique */
      }
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Cleaning Arch List before stop", __func__);

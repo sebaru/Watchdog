@@ -859,23 +859,24 @@
                   );
        Lancer_requete_SQL ( db, requete );
      }
-    Libere_DB_SQL(&db);
 
     if (database_version < 3641)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos` DROP `created_by_user`" );
        Lancer_requete_SQL ( db, requete );
      }
        
+    if (database_version < 3663)
+     { g_snprintf( requete, sizeof(requete), "UPDATE mnemos set nom='ARCH_REQUEST_NUMBER' WHERE id=13" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    Libere_DB_SQL(&db);
 fin:
-    database_version=3596;
+    database_version=3663;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
-     { Info_new( Config.log, Config.log_db, LOG_NOTICE,
-                "Update_database_schema: updating Database_version to %s OK", chaine );
-     }
+     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
     else
-     { Info_new( Config.log, Config.log_db, LOG_NOTICE,
-                "Update_database_schema: updating Database_version to %s FAILED", chaine );
-     }
+     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s FAILED", __func__, chaine ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

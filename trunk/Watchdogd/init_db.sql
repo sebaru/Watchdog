@@ -708,7 +708,7 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `ev_
 (10, 5, 123, 1, 'SYS_DLS_WAIT', 'Number of milli-second to wait to get target turn/sec', ''),
 (11, 5, 124, 1, 'SYS_TOUR_DLS_PER_SEC', 'Number of D.L.S turn in second', ''),
 (12, 5, 125, 1, 'SYS_BITS_PER_SEC', 'Number of bits toggled in one second', ''),
-(13, 5, 126, 1, 'SYS_ARCHREQUEST', 'Number of ArchiveRequest to proceed', ''),
+(13, 5,  -1, 1, 'ARCH_REQUEST_NUMBER', 'Number of ArchiveRequest to proceed', ''),
 (14, 5, 127, 1, 'SYS_DBREQUEST_SIMULT', 'Number of simultaneous SQL request', ''),
 (15, 7,   1, 1, 'SYS_I1', 'Motif toujours en mode 1 couleur rouge', ''),
 (16, 7,   4, 1, 'SYS_I4', 'rÃ©servÃ©', ''),
