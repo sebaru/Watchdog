@@ -48,7 +48,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  gchar *Admin_get ( gchar *response, gchar *ligne )
-  { gchar commande[128], chaine[128];
+  { gchar commande[128], chaine[256];
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
@@ -57,6 +57,7 @@
        response = Admin_write ( response, " | - new_b $name $owner    - Get bistable $name_$owner" );
        response = Admin_write ( response, " | - new_t $name $owner    - Get Tempo $name_$owner" );
        response = Admin_write ( response, " | - new_ea $name $owner   - Get Analog Input $name_$owner" );
+       response = Admin_write ( response, " | - list_ea               - List all dynamic Digital Input" );
        response = Admin_write ( response, " | - list                  - List all running bits" );
        response = Admin_write ( response, " | - e $num                - Get E[$num]" );
        response = Admin_write ( response, " | - ea $num               - Get EA[$num]" );
@@ -167,6 +168,22 @@
         } else
         { g_snprintf( chaine, sizeof(chaine), " | - EA -> num '%d' out of range (max=%d)", num, NBR_ENTRE_ANA ); }
        response = Admin_write ( response, chaine );
+     } else
+    if ( ! strcmp ( commande, "list_ea" ) )
+     { GSList *liste;
+       liste = Partage->Dls_data_AI;
+       while (liste)
+        { struct ANALOG_INPUT *ai = liste->data;
+          g_snprintf( chaine, sizeof(chaine),
+                      " | - EA '%s:%s' = %8.2f %s, val_avant_ech=%8.2f, inrange=%d\n"
+                      "                  type=%d, last_arch=%d (%ds ago), min=%8.2f, max=%8.2f",
+                      ai->tech_id, ai->nom, ai->val_ech, ai->confDB.unite, ai->val_avant_ech, ai->inrange,
+                      ai->confDB.type, ai->last_arch, (Partage->top - ai->last_arch)/10,
+                      ai->confDB.min, ai->confDB.max 
+                    );
+          response = Admin_write ( response, chaine );
+          liste = g_slist_next(liste);
+        }
      } else
     if ( ! strcmp ( commande, "r" ) )
      { int num;

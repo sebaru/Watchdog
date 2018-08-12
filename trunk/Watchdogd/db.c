@@ -866,7 +866,15 @@
      }
        
     if (database_version < 3663)
-     { g_snprintf( requete, sizeof(requete), "UPDATE mnemos set nom='ARCH_REQUEST_NUMBER' WHERE id=13" );
+     { g_snprintf( requete, sizeof(requete), "UPDATE mnemos SET num='-1', nom='ARCH_REQUEST_NUMBER' WHERE id=13" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE mnemos SET num='-1', nom='DLS_BIT_PER_SEC' WHERE id=12" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE mnemos SET num='-1', nom='DLS_TOUR_PER_SEC' WHERE id=11" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE mnemos SET num='-1', nom='DLS_WAIT' WHERE id=10" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE mnemos SET num='-1', nom='DB_REQUEST_SIMULT' WHERE id=14" );
        Lancer_requete_SQL ( db, requete );
      }
 

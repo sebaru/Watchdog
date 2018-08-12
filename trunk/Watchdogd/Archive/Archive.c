@@ -114,7 +114,8 @@
     gettimeofday( &tv, NULL );                                                                   /* On prend l'heure actuelle */
     arch->type      = type;
     arch->num       = num;
-    if (nom) g_snprintf( arch->acro, sizeof(arch->acro), "%s:%s", nom, tech_id );
+    if (nom)     g_snprintf( arch->nom,     sizeof(arch->nom),     "%s", nom );
+    if (tech_id) g_snprintf( arch->tech_id, sizeof(arch->tech_id), "%s", tech_id );
     arch->valeur    = valeur;
     arch->date_sec  = tv.tv_sec;
     arch->date_usec = tv.tv_usec;
@@ -166,7 +167,7 @@
     else if (Partage->com_arch.taille_arch > Partage->com_arch.max_buffer_size)
      { if ( last_log + 600 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                   "%s: DROP arch (taille>%d) '%s:%s'", __func__, Partage->com_arch.max_buffer_size, nom, tech_id );
+                   "%s: DROP arch (taille>%d) '%s:%s'", __func__, Partage->com_arch.max_buffer_size, tech_id, nom );
           last_log = Partage->top;
         }
        return;
@@ -174,12 +175,12 @@
     else if (Partage->com_arch.Thread_run == FALSE)                                      /* Si administratively DOWN, on sort */
      { if ( last_log + 600 < Partage->top )
         { Info_new( Config.log, Config.log_arch, LOG_INFO,
-                   "%s: Thread is down. Dropping '%s:%s'", __func__, Partage->com_arch.max_buffer_size, nom, tech_id );
+                   "%s: Thread is down. Dropping '%s:%s'", __func__, Partage->com_arch.max_buffer_size, tech_id, nom );
           last_log = Partage->top;
         }
        return;
      }
-    Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Add Arch in list: '%s:%s'", __func__, nom, tech_id );
+    Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Add Arch in list: '%s:%s'", __func__, tech_id, nom );
     Ajouter_arch_all( -1, -1, nom, tech_id, valeur );
   }
 /******************************************************************************************************************************/
@@ -187,7 +188,7 @@
 /******************************************************************************************************************************/
  void Run_arch ( void )
   { static gpointer *arch_request_number;
-	struct DB *db;
+	   struct DB *db;
     gint top, last_update, nb_enreg;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );
 

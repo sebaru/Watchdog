@@ -892,7 +892,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding AI '%s:%s'", __func__, nom, tech_id );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding AI '%s:%s'", __func__, tech_id, nom );
           Charger_conf_AI ( ai );                                                     /* Chargment de la conf AI depuis la DB */
         }
        if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */

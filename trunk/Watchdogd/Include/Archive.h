@@ -41,7 +41,8 @@
     guint  type;                                                                                 /* Type de bit: E ? B ? EA ? */
     guint  num;                                                                /* Numero de l'entrée analogique photographiée */
     gfloat valeur;                                                                           /* Valeur de l'entrée analogique */
-    gchar acro[30];
+    gchar  nom[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gchar  tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
   };
 
  struct COM_ARCH                                                                                   /* Communication vers ARCH */

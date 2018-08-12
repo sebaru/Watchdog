@@ -182,7 +182,8 @@
 /* Entrée: numero du signal à gerer                                                                                           */
 /******************************************************************************************************************************/
  static void Traitement_signaux( int num )
-  { char chaine[50];
+  { static gpointer *dls_wait, *dls_tour_per_sec, *dls_bit_per_sec;
+    char chaine[50];
     if (num == SIGALRM)
      { Partage->top++;
        if (!Partage->top)                                             /* Si on passe par zero, on le dit (DEBUG interference) */
@@ -196,17 +197,17 @@
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
           Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
           Partage->audit_bit_interne_per_sec = 0;
-          SEA ( NUM_EA_SYS_BITS_PER_SEC, Partage->audit_bit_interne_per_sec_hold );                             /* historique */
+          Dls_data_set_AI ( "BIT_PER_SEC", "SYS", Partage->audit_bit_interne_per_sec_hold, &dls_bit_per_sec );  /* historique */
 
           Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
           Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
           Partage->audit_tour_dls_per_sec = 0;
-          SEA ( NUM_EA_SYS_TOUR_DLS_PER_SEC, Partage->audit_tour_dls_per_sec_hold );                            /* historique */
+          Dls_data_set_AI ( "DLS_TOUR_PER_SEC", "SYS", Partage->audit_tour_dls_per_sec_hold, &dls_tour_per_sec );
           if (Partage->audit_tour_dls_per_sec_hold > 100)                                           /* Moyennage tour DLS/sec */
            { Partage->com_dls.temps_sched += 50; }
           else if (Partage->audit_tour_dls_per_sec_hold < 80)
            { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
-          SEA ( NUM_EA_SYS_DLS_WAIT, Partage->com_dls.temps_sched );                                            /* historique */
+          Dls_data_set_AI ( "DLS_WAIT", "SYS", Partage->com_dls.temps_sched, &dls_wait );                       /* historique */
         }
 
        Partage->top_cdg_plugin_dls++;                                                            /* Chien de garde plugin DLS */
@@ -572,7 +573,7 @@
      { printf( "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
     else
      { printf( "Chdir %s successfull. PID=%d\n", Config.home, getpid() ); }
-
+    fflush(0);
     return(fg);
   }
 /******************************************************************************************************************************/
