@@ -908,26 +908,29 @@
                    g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
                    g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
                    Mnemo_auto_create_for_dls ( &mnemo );
+                   break;
                  }
                 case T_BI:
                  { mnemo.type = MNEMO_BISTABLE;
                    g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
                    g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
                    Mnemo_auto_create_for_dls ( &mnemo );
+                   break;
                  }
                 case T_TEMPO:
                  { mnemo.type = MNEMO_TEMPO;
                    g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
                    g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
                    Mnemo_auto_create_for_dls ( &mnemo );
+                   break;
                  }
                 case T_HORLOGE:
                  { mnemo.type = MNEMO_HORLOGE;
                    g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
                    g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
                    Mnemo_auto_create_for_dls ( &mnemo );
+                   break;
                  }
-                break;
               }
            }
           liste = liste->next;
