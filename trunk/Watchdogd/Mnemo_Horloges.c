@@ -64,7 +64,8 @@
      }
 
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Mise à un de l'horloge %s_%s", __func__, db->row[0], db->row[1] );
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Mise à un de l'horloge %s 1/2", __func__, db->row[0] );
+       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Mise à un de l'horloge %s 2/2", __func__, db->row[1] );
        Envoyer_commande_dls_data ( db->row[0], db->row[1] );
      }
     Libere_DB_SQL( &db );
