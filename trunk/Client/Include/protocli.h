@@ -469,9 +469,10 @@
  extern void Proto_afficher_mnemo_camera ( int tag, struct CMD_TYPE_MNEMO_BASE *mnemo );
 
  extern void Creer_page_horloge ( gchar *libelle, guint id_mnemo );                                         /* Dans Horloge.c */
- extern void Proto_afficher_un_tick( struct TYPE_INFO_HORLOGE *infos, struct CMD_TYPE_MNEMO_FULL *mnemo );
- extern struct TYPE_INFO_HORLOGE *Rechercher_infos_horloge_par_id_mnemo ( gint id_mnemo );
-
+ extern void Proto_afficher_un_tick( struct CMD_TYPE_MNEMO_FULL *mnemo );
+ extern void Proto_cacher_un_tick( struct CMD_TYPE_MNEMO_FULL *mnemo );
+ extern void Proto_rafraichir_un_tick( struct CMD_TYPE_MNEMO_FULL *mnemo );
+ 
  extern void Menu_ajouter_editer_horloge ( struct CMD_TYPE_MNEMO_FULL *edit_horloge, gint id_mnemo);  /* Dans ajout_horloge.c */
 
  #endif

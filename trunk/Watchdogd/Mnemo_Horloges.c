@@ -164,11 +164,9 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT h.id, m.id, m.libelle, s.id" 
+                "SELECT h.id, h.heure, h.minute" 
                 " FROM mnemos as m" 
                 " INNER JOIN %s as h ON h.id_mnemo = m.id" 
-                " INNER JOIN dls as d ON m.dls_id = d.id" 
-                " INNER JOIN syns as s ON d.syn_id = s.id" 
                 " WHERE m.id='%d'", NOM_TABLE_MNEMO_HORLOGE, id_mnemo
               );                                                                                    /* order by test 25/01/06 */
 
@@ -215,22 +213,9 @@
        return(NULL);
      }
 
-    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Liberer_resultat_SQL (db);
-       Libere_DB_SQL( &db );
-       return(NULL);
-     }
-
-    mnemo = (struct CMD_TYPE_MNEMO_FULL *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_FULL) );
-    if (!mnemo) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
-    else                                                                                /* Recopie dans la nouvelle structure */
-     { mnemo->mnemo_horloge.id     = atoi(db->row[0]);
-       mnemo->mnemo_horloge.heure  = atoi(db->row[1]);
-       mnemo->mnemo_horloge.minute = atoi(db->row[2]);
-     }
-    Libere_DB_SQL(&db);
-    return ( mnemo );
+    mnemo = Recuperer_horlogeDB_suite( &db );
+    Libere_DB_SQL (&db);
+    return(mnemo);
   }
 /******************************************************************************************************************************/
 /* Recuperer_mnemo_base_DB_suite: Fonction itérative de récupération des mnémoniques de base                                  */
@@ -252,10 +237,9 @@
     mnemo = (struct CMD_TYPE_MNEMO_FULL *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_FULL) );
     if (!mnemo) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
     else                                                                                /* Recopie dans la nouvelle structure */
-     { g_snprintf( mnemo->mnemo_base.libelle, sizeof(mnemo->mnemo_base.libelle), "%s", db->row[2] );
-       mnemo->mnemo_horloge.id  = atoi(db->row[0]);
-       mnemo->mnemo_base.id     = atoi(db->row[1]);
-       mnemo->mnemo_base.syn_id = atoi(db->row[3]);
+     { mnemo->mnemo_horloge.id     = atoi(db->row[0]);
+       mnemo->mnemo_horloge.heure  = atoi(db->row[1]);
+       mnemo->mnemo_horloge.minute = atoi(db->row[2]);
      }
     return(mnemo);
   }

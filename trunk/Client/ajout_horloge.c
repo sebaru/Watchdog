@@ -98,6 +98,7 @@
     else
      { memset (&Horloge, 0, sizeof(struct CMD_TYPE_MNEMO_FULL) );                                             /* Sinon RAZ structure */
        Horloge.mnemo_base.id = id_mnemo;
+       printf("%s: Add horloge for mnemo %d\n", __func__, id_mnemo );
        F_ajout = gtk_dialog_new_with_buttons( _("Add a horloge"), GTK_WINDOW(F_client),
                                               GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
                                               GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,

@@ -209,22 +209,42 @@
              }
             break;
        case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGE_FIN:
-             { struct TYPE_INFO_HORLOGE *infos;
-               struct CMD_TYPE_MNEMO_FULL *mnemo;
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
                GList *liste = Arrivee_horloge;
                if (!liste) break;
                mnemo = (struct CMD_TYPE_MNEMO_FULL *)liste->data;
-               infos = Rechercher_infos_horloge_par_id_mnemo ( mnemo->mnemo_base.id );
-               if (infos)
-                { while (liste)
-                   { mnemo = (struct CMD_TYPE_MNEMO_FULL *)liste->data;
-                     Proto_afficher_un_tick( infos, mnemo );                         /* Afficher dans la liste correspondante */
-                     liste=liste->next;
-                   }
+               while (liste)
+                { mnemo = (struct CMD_TYPE_MNEMO_FULL *)liste->data;
+                  Proto_afficher_un_tick( mnemo );                                   /* Afficher dans la liste correspondante */
+                  liste=liste->next;
                 }
                g_list_foreach( Arrivee_horloge, (GFunc)g_free, NULL );
                g_list_free( Arrivee_horloge );
                Arrivee_horloge = NULL;
+             }
+            break;
+       case SSTAG_SERVEUR_ADD_HORLOGE_OK:
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
+               Proto_afficher_un_tick( mnemo );
+             }
+            break;
+       case SSTAG_SERVEUR_DEL_HORLOGE_OK:
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
+               Proto_cacher_un_tick( mnemo );
+             }
+            break;
+       case SSTAG_SERVEUR_EDIT_HORLOGE_OK:
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
+               Menu_ajouter_editer_horloge( mnemo, 0 );
+             }
+            break;
+       case SSTAG_SERVEUR_VALIDE_EDIT_HORLOGE_OK:
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
+               Proto_rafraichir_un_tick( mnemo );
              }
             break;
      }

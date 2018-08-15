@@ -48,27 +48,6 @@
   };
   
 /******************************************************************************************************************************/
-/* Rechercher_infos_supervision_par_id_syn: Recherche une page synoptique par son numéro                                      */
-/* Entrée: Un numéro de synoptique                                                                                            */
-/* Sortie: Une référence sur les champs d'information de la page en question                                                  */
-/******************************************************************************************************************************/
- struct TYPE_INFO_HORLOGE *Rechercher_infos_horloge_par_id_mnemo ( gint id_mnemo )
-  { struct TYPE_INFO_HORLOGE *infos;
-    struct PAGE_NOTEBOOK *page;
-    GList *liste;
-    liste = Liste_pages;
-    infos = NULL;
-    while( liste )
-     { page = (struct PAGE_NOTEBOOK *)liste->data;
-       if ( page->type == TYPE_PAGE_HORLOGE )                                            /* Est-ce bien une page d'horloge ?? */
-        { infos = (struct TYPE_INFO_HORLOGE *)page->infos;
-          if (infos->id_mnemo == id_mnemo) break;                                            /* Nous avons trouvé le mnemo !! */
-        }
-       liste = liste->next;                                                                            /* On passe au suivant */
-     }
-    return(infos);
-  }
-/******************************************************************************************************************************/
 /* Menu_ajouter_horloge: Ajout d'un horloge                                                                             */
 /* Entrée: rien                                                                                                               */
 /* Sortie: Niet                                                                                                               */
@@ -77,6 +56,7 @@
   { struct PAGE_NOTEBOOK *page = Page_actuelle();
     struct TYPE_INFO_HORLOGE *infos;
     infos=page->infos;
+    printf("%s: id=%d\n", __func__, infos->id_mnemo );
     if (page->type == TYPE_PAGE_HORLOGE) Menu_ajouter_editer_horloge(NULL, infos->id_mnemo);
   }
 /******************************************************************************************************************************/
@@ -176,7 +156,6 @@
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                                              /* Id */
-                                              G_TYPE_STRING,                                                       /* Libelle */
                                               G_TYPE_UINT,                                                           /* Heure */
                                               G_TYPE_UINT                                                           /* Minute */
                                );
@@ -232,7 +211,7 @@
     bouton = gtk_button_new_from_stock( GTK_STOCK_ADD );
     gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_ajouter_editer_horloge), NULL );
+                              G_CALLBACK(Menu_ajouter_horloge), NULL );
 
     separateur = gtk_hseparator_new();
     gtk_box_pack_start( GTK_BOX(boite), separateur, FALSE, FALSE, 0 );
@@ -264,12 +243,89 @@
 /* Entrée: une reference sur la page et sur l'horloge                                                                         */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
- void Proto_afficher_un_tick( struct TYPE_INFO_HORLOGE *infos, struct CMD_TYPE_MNEMO_FULL *mnemo )
-  { GtkListStore *store;
+ void Proto_afficher_un_tick( struct CMD_TYPE_MNEMO_FULL *mnemo )
+  { struct PAGE_NOTEBOOK *page;
+    struct TYPE_INFO_HORLOGE *infos;
+    GtkListStore *store;
     GtkTreeIter iter;
+
+    page = Chercher_page_notebook ( TYPE_PAGE_HORLOGE, mnemo->mnemo_base.id, TRUE );
+    if (!page) return;
+
+    infos = page->infos;
+    if (!infos) return;
+
     printf(" print tick infos=%p\n", infos );
     store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(infos->Liste_horloge) ));
     gtk_list_store_append ( store, &iter );                                                          /* Acquisition iterateur */
     Rafraichir_visu_tick ( store, &iter, mnemo );
+  }
+/******************************************************************************************************************************/
+/* Cacher_un_mnemonique: Enleve un mnemonique de la liste des mnemoniques                                                     */
+/* Entrée: une reference sur le mnemonique                                                                                    */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Proto_cacher_un_tick( struct CMD_TYPE_MNEMO_FULL *mnemo )
+  { struct TYPE_INFO_HORLOGE *infos;
+    struct PAGE_NOTEBOOK *page;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
+    gboolean valide;
+    gint id;
+
+    page = Chercher_page_notebook( TYPE_PAGE_HORLOGE, mnemo->mnemo_horloge.id, FALSE );
+    if (!page) return;
+
+    infos = page->infos;
+    if (!infos) return;
+
+    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(infos->Liste_horloge) );
+    valide = gtk_tree_model_get_iter_first( store, &iter );
+
+    while ( valide )
+     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
+       if ( id == mnemo->mnemo_horloge.id )
+        { printf("elimination horloge %d\n", mnemo->mnemo_horloge.id );
+          break;
+        }
+       valide = gtk_tree_model_iter_next( store, &iter );
+     }
+
+    if (valide)
+     { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); }
+  }
+/******************************************************************************************************************************/
+/* Proto_rafrachir_un_mnemonique: Rafraichissement du mnemonique en parametre                                                 */
+/* Entrée: une reference sur le mnemonique                                                                                    */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void Proto_rafraichir_un_tick( struct CMD_TYPE_MNEMO_FULL *mnemo )
+  { struct TYPE_INFO_HORLOGE *infos;
+    struct PAGE_NOTEBOOK *page;
+    GtkTreeModel *store;
+    GtkTreeIter iter;
+    gboolean valide;
+    gint id;
+
+    page = Chercher_page_notebook( TYPE_PAGE_HORLOGE, mnemo->mnemo_horloge.id, FALSE );
+    if (!page) return;
+
+    infos = page->infos;
+    if (!infos) return;
+
+    store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(infos->Liste_horloge) );
+    valide = gtk_tree_model_get_iter_first( store, &iter );
+
+    while ( valide )
+     { gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );
+       if ( id == mnemo->mnemo_horloge.id )
+        { printf("maj horloge %d\n", mnemo->mnemo_horloge.id );
+          break;
+        }
+       valide = gtk_tree_model_iter_next( store, &iter );
+     }
+
+    if (valide)
+     { Rafraichir_visu_tick( GTK_LIST_STORE(store), &iter, mnemo ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
