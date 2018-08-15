@@ -139,21 +139,22 @@
     switch(reponse)
      { /*case GTK_RESPONSE_APPLY:*/
        case GTK_RESPONSE_OK:
-             { selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(infos->Liste_horloge) );
+             { gchar *libelle;
+               selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(infos->Liste_horloge) );
                store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(infos->Liste_horloge) );
-               lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
+               lignes    = gtk_tree_selection_get_selected_rows ( selection, NULL );
                if ( lignes )
                 { gint id_mnemo;
-                  gtk_tree_model_get_iter( store, &iter, lignes->data );  /* Recuperation ligne selectionnée */
-                  gtk_tree_model_get( store, &iter, COLONNE_HORLOGE_ID_MNEMO, &id_mnemo, -1 );       /* Recup du id */
-
-                  Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_HORLOGE,
-                                (gchar *)&id_mnemo, sizeof( gint ) );
+                  gtk_tree_model_get_iter( store, &iter, lignes->data );                   /* Recuperation ligne selectionnée */
+                  gtk_tree_model_get( store, &iter, COLONNE_HORLOGE_ID_MNEMO, &id_mnemo, -1 );                 /* Recup du id */
+                  gtk_tree_model_get( store, &iter, COLONNE_HORLOGE_LIBELLE, &libelle, -1 );
+                  Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_HORLOGE, (gchar *)&id_mnemo, sizeof( gint ) );
                   gtk_tree_selection_unselect_iter( selection, &iter );
-                  lignes = lignes->next;
+                  Creer_page_horloge ( libelle, id_mnemo );
                 }
                g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-               g_list_free (lignes);                                                   /* Liberation mémoire */
+               g_list_free (lignes);                                                                    /* Liberation mémoire */
+               g_free(libelle);               
                break;
              }
             break;

@@ -70,6 +70,7 @@
     TYPE_PAGE_RFXCOM,                                                                    /* Page affichant les modules RFXCOM */
 #endif
     TYPE_PAGE_ADMIN,                                               /* Page de gestion des commandes/requests d'administration */
+    TYPE_PAGE_HORLOGE
   };
 
  struct PAGE_NOTEBOOK
@@ -87,6 +88,11 @@
     GtkWidget *Box_palette;                                                                   /* Widget de la boite a palette */
     GtkWidget *bouton_acq;                                                                   /* Bouton d'acquit du synoptique */
     struct TRAME *Trame;                                                                   /* La trame de fond de supervision */
+  };
+
+ struct TYPE_INFO_HORLOGE
+  { guint id_mnemo;
+    GtkWidget *Liste_horloge;
   };
 
  struct TYPE_INFO_MNEMONIQUE
@@ -465,6 +471,12 @@
                                                                                                        /* Dans ajout_camera.c */
  extern void Menu_ajouter_editer_camera ( struct CMD_TYPE_CAMERA *edit_camera );
  extern void Proto_afficher_mnemo_camera ( int tag, struct CMD_TYPE_MNEMO_BASE *mnemo );
+
+ extern void Creer_page_horloge ( gchar *libelle, guint id_mnemo );                                         /* Dans Horloge.c */
+ extern void Proto_afficher_un_tick( struct TYPE_INFO_HORLOGE *infos, struct CMD_TYPE_MNEMO_FULL *mnemo );
+ extern struct TYPE_INFO_HORLOGE *Rechercher_infos_horloge_par_id_mnemo ( gint id_mnemo );
+
+ extern void Menu_ajouter_editer_horloge ( struct CMD_TYPE_MNEMO_FULL *edit_horloge, gint id_mnemo);  /* Dans ajout_horloge.c */
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -74,8 +74,8 @@
 /* Entrées: une structure hébergeant l'entrée analogique a modifier                                                           */
 /* Sortie: FALSE si pb                                                                                                        */
 /******************************************************************************************************************************/
- gboolean Modifier_mnemo_add_horlogeDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
-  { gchar requete[1024];
+ gboolean Ajouter_mnemo_horlogeDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
+  { gchar requete[256];
     gboolean retour;
     struct DB *db;
 
@@ -90,6 +90,32 @@
                 "('%d','%d','%d') ",
                 NOM_TABLE_MNEMO_HORLOGE, mnemo_full->mnemo_base.id, 
                 mnemo_full->mnemo_horloge.heure, mnemo_full->mnemo_horloge.minute
+              );
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return(retour);
+  }
+/******************************************************************************************************************************/
+/* Modifier_analogInputDB: Modification d'un entreeANA Watchdog                                                               */
+/* Entrées: une structure hébergeant l'entrée analogique a modifier                                                           */
+/* Sortie: FALSE si pb                                                                                                        */
+/******************************************************************************************************************************/
+ gboolean Modifier_mnemo_horlogeDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
+  { gchar requete[256];
+    gboolean retour;
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "UPDATE %s SET heure='%d',minute='%d' WHERE id='%d' ",
+                NOM_TABLE_MNEMO_HORLOGE, mnemo_full->mnemo_horloge.heure, mnemo_full->mnemo_horloge.minute,
+                mnemo_full->mnemo_horloge.id
               );
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */

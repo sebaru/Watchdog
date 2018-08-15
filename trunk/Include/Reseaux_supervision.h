@@ -79,6 +79,10 @@
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGES,                         /* Le serveur envoi des scenario page supervision */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGES_FIN,                     /* Le serveur envoi des scenario page supervision */
     SSTAG_CLIENT_WANT_HORLOGE,                                    /* Le client demande les ticks d'une horloge en particulier */
+    SSTAG_CLIENT_EDIT_HORLOGE,                                                       /* Le client souhaite editer une horloge */
+    SSTAG_CLIENT_VALIDE_EDIT_HORLOGE,
+    SSTAG_CLIENT_ADD_HORLOGE,
+    SSTAG_CLIENT_DEL_HORLOGE,
   };
 
 #endif

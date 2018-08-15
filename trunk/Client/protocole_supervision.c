@@ -44,6 +44,7 @@
     static GList *Arrivee_palette = NULL;
     static GList *Arrivee_camera_sup = NULL;
     static GList *Arrivee_horloges = NULL;
+    static GList *Arrivee_horloge = NULL;
     static int save_id = 0;
 
     switch ( Reseau_ss_tag ( connexion ) )
@@ -193,6 +194,37 @@
                g_list_foreach( Arrivee_horloges, (GFunc)g_free, NULL );
                g_list_free( Arrivee_horloges );
                Arrivee_horloges = NULL;
+             }
+            break;
+/******************************************** Reception des Ticks *************************************************************/
+       case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGE:
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
+               Set_progress_plus(1);
+
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)g_try_malloc0( sizeof( struct CMD_TYPE_MNEMO_FULL ) );
+               if (!mnemo) return; 
+               memcpy( mnemo, connexion->donnees, sizeof(struct CMD_TYPE_MNEMO_FULL) );
+               printf(" Arrivée Tick : %s %d:%d\n", mnemo->mnemo_base.acronyme, mnemo->mnemo_horloge.heure, mnemo->mnemo_horloge.minute );
+               Arrivee_horloge = g_list_append( Arrivee_horloge, mnemo );
+             }
+            break;
+       case SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGE_FIN:
+             { struct TYPE_INFO_HORLOGE *infos;
+               struct CMD_TYPE_MNEMO_FULL *mnemo;
+               GList *liste = Arrivee_horloge;
+               if (!liste) break;
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)liste->data;
+               infos = Rechercher_infos_horloge_par_id_mnemo ( mnemo->mnemo_base.id );
+               if (infos)
+                { while (liste)
+                   { mnemo = (struct CMD_TYPE_MNEMO_FULL *)liste->data;
+                     Proto_afficher_un_tick( infos, mnemo );                         /* Afficher dans la liste correspondante */
+                     liste=liste->next;
+                   }
+                }
+               g_list_foreach( Arrivee_horloge, (GFunc)g_free, NULL );
+               g_list_free( Arrivee_horloge );
+               Arrivee_horloge = NULL;
              }
             break;
      }

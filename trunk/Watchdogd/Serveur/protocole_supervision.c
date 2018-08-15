@@ -209,6 +209,24 @@
                Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGE_FIN, NULL, 0 );
              }
             break;
+       case SSTAG_CLIENT_VALIDE_EDIT_HORLOGE:
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
+               Modifier_mnemo_horlogeDB( mnemo );
+             }
+            break;
+       case SSTAG_CLIENT_ADD_HORLOGE:
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
+               Ajouter_mnemo_horlogeDB( mnemo );
+             }
+            break;
+       case SSTAG_CLIENT_DEL_HORLOGE:
+             { struct CMD_TYPE_MNEMO_FULL mnemo;
+               mnemo.mnemo_horloge.id = *(gint *)connexion->donnees;
+               Retirer_horlogeDB ( &mnemo );
+             }
+            break;
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

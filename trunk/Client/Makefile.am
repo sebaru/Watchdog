@@ -11,7 +11,7 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
                           protocole_dls.c protocole_utilisateur.c protocole_mnemonique.c \
                           protocole_message.c protocole_connexion.c \
                           protocole_supervision.c protocole_histo.c \
-                          protocole_atelier.c \
+                          protocole_atelier.c horloge.c ajout_horloge.c \
 			  protocole_synoptique.c protocole_admin.c \
                           menu.c timer.c admin.c \
 			  liste_util.c ajout_util.c \
