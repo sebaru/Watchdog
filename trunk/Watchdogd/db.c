@@ -851,6 +851,7 @@
 
     if (database_version < 3596)
      { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `mnemos_Horloge` ("
+                                             "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                                              "`id_mnemo` int(11) NOT NULL,"
                                              "`heure` int(11) NOT NULL,"
                                              "`minute` int(112) NOT NULL,"
