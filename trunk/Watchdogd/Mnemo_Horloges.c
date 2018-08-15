@@ -166,7 +166,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT h.id, m.id, m.libelle, s.id" 
                 " FROM mnemos as m" 
-                " INNER JOIN %s as h ON h.id_memo = m.id" 
+                " INNER JOIN %s as h ON h.id_mnemo = m.id" 
                 " INNER JOIN dls as d ON m.dls_id = d.id" 
                 " INNER JOIN syns as s ON d.syn_id = s.id" 
                 " WHERE m.id='%d'", NOM_TABLE_MNEMO_HORLOGE, id_mnemo
