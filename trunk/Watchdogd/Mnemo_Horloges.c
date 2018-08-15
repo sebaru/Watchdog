@@ -196,12 +196,10 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT h.id, m.id,mnemo.libelle, s.id" 
-                " FROM mnemos as mnemo" 
-                " INNER JOIN horloges as h ON h.id_memo = m.id" 
-                " INNER JOIN dls as d ON m.dls_id=d.id" 
-                " INNER JOIN syns as s ON d.syn_id = s.id" 
-                " WHERE h.id='%d'", id
+                "SELECT h.id, h.heure, h.minute" 
+                " FROM mnemos as m" 
+                " INNER JOIN %s as h ON h.id_mnemo = m.id" 
+                " WHERE h.id='%d'", NOM_TABLE_MNEMO_HORLOGE, id
               );                                                                                    /* order by test 25/01/06 */
 
 
@@ -212,8 +210,25 @@
      }
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    if (retour == FALSE) Libere_DB_SQL (&db);
-    mnemo = Recuperer_horlogeDB_suite( &db );
+    if (retour == FALSE)
+     { Libere_DB_SQL (&db);
+       return(NULL);
+     }
+
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       return(NULL);
+     }
+
+    mnemo = (struct CMD_TYPE_MNEMO_FULL *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_FULL) );
+    if (!mnemo) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
+    else                                                                                /* Recopie dans la nouvelle structure */
+     { mnemo->mnemo_horloge.id     = atoi(db->row[0]);
+       mnemo->mnemo_horloge.heure  = atoi(db->row[1]);
+       mnemo->mnemo_horloge.minute = atoi(db->row[2]);
+     }
     Libere_DB_SQL(&db);
     return ( mnemo );
   }
