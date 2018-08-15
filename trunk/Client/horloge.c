@@ -86,7 +86,7 @@
 
     gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
     gtk_tree_model_get( store, &iter, COLONNE_ID, &mnemo.mnemo_horloge.id, -1 );                               /* Recup du id */
-
+    mnemo.mnemo_base.id = infos->id_mnemo;
     Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_DEL_HORLOGE, (gchar *)&mnemo, sizeof(struct CMD_TYPE_MNEMO_FULL) );
   }
 /******************************************************************************************************************************/
@@ -273,7 +273,7 @@
     gboolean valide;
     gint id;
 
-    page = Chercher_page_notebook( TYPE_PAGE_HORLOGE, mnemo->mnemo_horloge.id, FALSE );
+    page = Chercher_page_notebook( TYPE_PAGE_HORLOGE, mnemo->mnemo_base.id, FALSE );
     if (!page) return;
 
     infos = page->infos;
@@ -307,7 +307,7 @@
     gboolean valide;
     gint id;
 
-    page = Chercher_page_notebook( TYPE_PAGE_HORLOGE, mnemo->mnemo_horloge.id, FALSE );
+    page = Chercher_page_notebook( TYPE_PAGE_HORLOGE, mnemo->mnemo_base.id, FALSE );
     if (!page) return;
 
     infos = page->infos;
