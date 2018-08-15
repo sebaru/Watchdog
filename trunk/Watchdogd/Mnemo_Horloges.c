@@ -74,10 +74,11 @@
 /* Entrées: une structure hébergeant l'entrée analogique a modifier                                                           */
 /* Sortie: FALSE si pb                                                                                                        */
 /******************************************************************************************************************************/
- gboolean Ajouter_mnemo_horlogeDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
+ gint Ajouter_mnemo_horlogeDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
   { gchar requete[256];
     gboolean retour;
     struct DB *db;
+    gint id;
 
     db = Init_DB_SQL();       
     if (!db)
@@ -93,8 +94,13 @@
               );
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if ( retour == FALSE )
+     { Libere_DB_SQL(&db); 
+       return(-1);
+     }
+    id = Recuperer_last_ID_SQL ( db );
     Libere_DB_SQL(&db);
-    return(retour);
+    return(id);
   }
 /******************************************************************************************************************************/
 /* Modifier_analogInputDB: Modification d'un entreeANA Watchdog                                                               */
@@ -177,6 +183,39 @@
     if (retour == FALSE) Libere_DB_SQL (&db);
     *db_retour = db;
     return ( retour );
+  }
+/******************************************************************************************************************************/
+/* Recuperer_mnemo_base_db: Récupération de la liste des mnemos de base                                                       */
+/* Entrée: un pointeur vers la nouvelle connexion base de données                                                             */
+/* Sortie: FALSE si erreur                                                                                                    */
+/******************************************************************************************************************************/
+ struct CMD_TYPE_MNEMO_FULL *Rechercher_horloge_by_id ( gint id )
+  { struct CMD_TYPE_MNEMO_FULL *mnemo;
+    gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT h.id, m.id,mnemo.libelle, s.id" 
+                " FROM mnemos as mnemo" 
+                " INNER JOIN horloges as h ON h.id_memo = m.id" 
+                " INNER JOIN dls as d ON m.dls_id=d.id" 
+                " INNER JOIN syns as s ON d.syn_id = s.id" 
+                " WHERE h.id='%d'", id
+              );                                                                                    /* order by test 25/01/06 */
+
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    mnemo = Recuperer_horlogeDB_suite( &db );
+    Libere_DB_SQL(&db);
+    return ( mnemo );
   }
 /******************************************************************************************************************************/
 /* Recuperer_mnemo_base_DB_suite: Fonction itérative de récupération des mnémoniques de base                                  */

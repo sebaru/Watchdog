@@ -212,19 +212,33 @@
        case SSTAG_CLIENT_VALIDE_EDIT_HORLOGE:
              { struct CMD_TYPE_MNEMO_FULL *mnemo;
                mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
-               Modifier_mnemo_horlogeDB( mnemo );
+               if (Modifier_mnemo_horlogeDB( mnemo ) == TRUE)
+                { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_VALIDE_EDIT_HORLOGE_OK,
+                                 (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMO_FULL) );
+                }
              }
             break;
        case SSTAG_CLIENT_ADD_HORLOGE:
              { struct CMD_TYPE_MNEMO_FULL *mnemo;
+               gint id;
                mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
-               Ajouter_mnemo_horlogeDB( mnemo );
+               id = Ajouter_mnemo_horlogeDB( mnemo );
+               if (id>0)
+                { mnemo = Rechercher_horloge_by_id ( id );
+                  if (mnemo)
+                   { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADD_HORLOGE_OK,
+                                    (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMO_FULL) );
+                   }
+                }
              }
             break;
        case SSTAG_CLIENT_DEL_HORLOGE:
-             { struct CMD_TYPE_MNEMO_FULL mnemo;
-               mnemo.mnemo_horloge.id = *(gint *)connexion->donnees;
-               Retirer_horlogeDB ( &mnemo );
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
+               if (Retirer_horlogeDB ( mnemo ) == TRUE)
+                { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_DEL_HORLOGE_OK,
+                                 (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMO_FULL) );
+                }
              }
             break;
      }

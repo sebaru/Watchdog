@@ -87,12 +87,13 @@
  static void Menu_effacer_horloge ( void )
   { struct TYPE_INFO_HORLOGE *infos;
     struct PAGE_NOTEBOOK *page = Page_actuelle();
+    struct CMD_TYPE_MNEMO_FULL mnemo;
     GtkTreeSelection *selection;
     GtkTreeModel *store;
     GList *lignes;
     GtkTreeIter iter;
     GtkWidget *dialog;
-    guint nbr, id;
+    guint nbr;
 
     infos = page->infos;
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(infos->Liste_horloge) );
@@ -104,12 +105,12 @@
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
 
     gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
-    gtk_tree_model_get( store, &iter, COLONNE_ID, &id, -1 );                                                   /* Recup du id */
+    gtk_tree_model_get( store, &iter, COLONNE_ID, &mnemo.mnemo_horloge.id, -1 );                               /* Recup du id */
 
-    Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_DEL_HORLOGE, (gchar *)&id, sizeof(gint) );
+    Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_DEL_HORLOGE, (gchar *)&mnemo, sizeof(struct CMD_TYPE_MNEMO_FULL) );
   }
 /******************************************************************************************************************************/
-/* Menu_editer_horloge: Demande d'edition du horloge selectionné                                                        */
+/* Menu_editer_horloge: Demande d'edition du horloge selectionné                                                              */
 /* Entrée: rien                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
@@ -117,6 +118,7 @@
   { GtkTreeSelection *selection;
     struct PAGE_NOTEBOOK *page = Page_actuelle();
     struct TYPE_INFO_HORLOGE *infos;
+    struct CMD_TYPE_MNEMO_FULL mnemo;
     gint id_horloge;
     GtkTreeModel *store;
     GtkTreeIter iter;
@@ -132,9 +134,9 @@
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
     gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
-    gtk_tree_model_get( store, &iter, COLONNE_ID, &id_horloge, -1 );                                           /* Recup du id */
+    gtk_tree_model_get( store, &iter, COLONNE_ID, &mnemo.mnemo_horloge.id, -1 );                                           /* Recup du id */
 
-    Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_EDIT_HORLOGE, (gchar *)&id_horloge, sizeof(gint) );
+    Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_EDIT_HORLOGE, (gchar *)&mnemo, sizeof(struct CMD_TYPE_MNEMO_FULL) );
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
     g_list_free (lignes);                                                                               /* Liberation mémoire */
   }
