@@ -164,7 +164,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT h.id, h.heure, h.minute" 
+                "SELECT h.id, m.id, h.heure, h.minute" 
                 " FROM mnemos as m" 
                 " INNER JOIN %s as h ON h.id_mnemo = m.id" 
                 " WHERE m.id='%d'", NOM_TABLE_MNEMO_HORLOGE, id_mnemo
@@ -194,7 +194,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT h.id, h.heure, h.minute" 
+                "SELECT h.id, m.id, h.heure, h.minute" 
                 " FROM mnemos as m" 
                 " INNER JOIN %s as h ON h.id_mnemo = m.id" 
                 " WHERE h.id='%d'", NOM_TABLE_MNEMO_HORLOGE, id
@@ -238,8 +238,9 @@
     if (!mnemo) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
     else                                                                                /* Recopie dans la nouvelle structure */
      { mnemo->mnemo_horloge.id     = atoi(db->row[0]);
-       mnemo->mnemo_horloge.heure  = atoi(db->row[1]);
-       mnemo->mnemo_horloge.minute = atoi(db->row[2]);
+       mnemo->mnemo_base.id        = atoi(db->row[1]);
+       mnemo->mnemo_horloge.heure  = atoi(db->row[2]);
+       mnemo->mnemo_horloge.minute = atoi(db->row[3]);
      }
     return(mnemo);
   }

@@ -204,7 +204,9 @@
                mnemo = (struct CMD_TYPE_MNEMO_FULL *)g_try_malloc0( sizeof( struct CMD_TYPE_MNEMO_FULL ) );
                if (!mnemo) return; 
                memcpy( mnemo, connexion->donnees, sizeof(struct CMD_TYPE_MNEMO_FULL) );
-               printf(" Arrivée Tick : %s %d:%d\n", mnemo->mnemo_base.acronyme, mnemo->mnemo_horloge.heure, mnemo->mnemo_horloge.minute );
+               printf(" Arrivée Tick : %s mnemo_id %d, id %d, %d:%d\n", mnemo->mnemo_base.acronyme,
+                        mnemo->mnemo_base.id, mnemo->mnemo_horloge.id,
+                        mnemo->mnemo_horloge.heure, mnemo->mnemo_horloge.minute );
                Arrivee_horloge = g_list_append( Arrivee_horloge, mnemo );
              }
             break;
