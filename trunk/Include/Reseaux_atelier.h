@@ -82,9 +82,6 @@
     gchar   libelle[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];                                         /* Libelle du synoptique cible */
     guint   position_x;                                                                          /* en abscisses et ordonnées */
     guint   position_y;
-    guint   vignette_activite;                                                        /* Numéro Ixxx du premier bit de retour */
-    guint   vignette_secu_bien;                                                        /* Numéro Ixxx du second bit de retour */
-    guint   vignette_secu_personne;                                                     /* Numéro Ixxx du 3ieme bit de retour */
     gfloat  angle;
   };
 
@@ -177,9 +174,6 @@
     SSTAG_CLIENT_TYPE_NUM_MNEMONIQUE_EA,                          /* Le client desire un mnémonique EAxxx */
     SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE_EA,
     
-    SSTAG_CLIENT_TYPE_NUM_MNEMONIQUE_PASS,                         /* Le client desire un mnémonique Ixxx */
-    SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE_PASS,
-
     SSTAG_CLIENT_WANT_PAGE_CLASSE_FOR_ATELIER,        /* Le client veut les données classe pour l'atelier */
     SSTAG_SERVEUR_ADDPROGRESS_CLASSE_FOR_ATELIER, /* Le serveur envoie les données classes pour l'atelier */
     SSTAG_SERVEUR_ADDPROGRESS_CLASSE_FOR_ATELIER_FIN,

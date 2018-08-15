@@ -347,10 +347,6 @@
  extern void Changer_couleur_motif_directe( struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Proto_afficher_mnemo_atelier ( int tag, struct CMD_TYPE_MNEMO_BASE *mnemo );
 
-                                                                                       /* Dans atelier_propriete_passerelle.c */
- extern void Editer_propriete_pass ( struct TRAME_ITEM_PASS *trame_pass );
- extern void Proto_afficher_mnemo_atelier_pass ( struct CMD_TYPE_MNEMO_BASE *mnemo );
-
  extern void Creer_fenetre_ajout_motif ( void );                                                /* Dans atelier_ajout_motif.c */
  extern void Detruire_fenetre_ajout_motif ( void );
  extern void Choisir_motif_a_ajouter ( void );

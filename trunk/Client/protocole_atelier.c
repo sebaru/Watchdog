@@ -71,12 +71,6 @@
                Proto_afficher_mnemo_cadran_atelier( mnemo );
              }
             break;
-       case SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE_PASS:
-             { struct CMD_TYPE_MNEMO_BASE *mnemo;
-               mnemo = (struct CMD_TYPE_MNEMO_BASE *)connexion->donnees;
-               Proto_afficher_mnemo_atelier_pass( mnemo );
-             }
-            break;
        case SSTAG_SERVEUR_ATELIER_ADD_MOTIF_OK:
              { struct CMD_TYPE_MOTIF *motif;
                motif = (struct CMD_TYPE_MOTIF *)connexion->donnees;

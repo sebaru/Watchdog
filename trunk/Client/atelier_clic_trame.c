@@ -132,9 +132,8 @@
 
 printf("Afficher_propriete: debut\n");
     switch (infos->Selection.type)
-     { case TYPE_MOTIF      : Editer_propriete_TOR( infos->Selection.trame_motif );          break;
-       case TYPE_CADRAN    : Menu_ajouter_editer_cadran( infos->Selection.trame_cadran ); break;
-       case TYPE_PASSERELLE : Editer_propriete_pass( infos->Selection.trame_pass );          break;
+     { case TYPE_MOTIF      : Editer_propriete_TOR( infos->Selection.trame_motif );        break;
+       case TYPE_CADRAN     : Menu_ajouter_editer_cadran( infos->Selection.trame_cadran ); break;
        default: printf("Afficher_propriete: Type de selection inconnu\n");
      }
   }
