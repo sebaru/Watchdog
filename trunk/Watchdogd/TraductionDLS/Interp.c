@@ -298,7 +298,7 @@
      }
     else
      { g_snprintf( result, taille, "%sT(%d)",
-                   (alias->barre==1 ? "!" : ""), alias->num );
+                   (barre==1 ? "!" : ""), alias->num );
      }
     return(result);
   }
