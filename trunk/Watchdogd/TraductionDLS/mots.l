@@ -42,7 +42,7 @@
 digit         [0-9]+
 digitf        [-]?[0-9]+[.[0-9]+]?
 id            [a-zA-Z][a-zA-Z_0-9-]+[a-zA-Z0-9]
-chaine        [a-zA-Z_0-9' ()=,;:!ιθ]*
+chaine        [^"]*
 blanc         [\t ]+
 
  /* Noms des environnements */
