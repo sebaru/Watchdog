@@ -82,13 +82,13 @@
  extern gboolean Check_utilisateur_password( struct CMD_TYPE_UTILISATEUR *util, gchar *pwd );
  extern gchar *Rechercher_util_by_phpsessionid( gchar *ssid );
 
- extern gboolean Raz_login_failed( guint id );                                     /* Dans login_failed.c */
- extern gboolean Ajouter_one_login_failed( guint id, gint max_login_failed );
+ extern gboolean Raz_login_attemps( guint id );                                     /* Dans login_attemps.c */
+ extern gboolean Ajouter_one_login_attemps( guint id, gint max_login_attemps );
 
 
  extern gchar *Groupes_vers_string ( guint *source );
- extern gint Get_login_failed( guint id );
- extern gboolean Ajouter_one_login_failed( guint id, gint max_login_failed );
+ extern gint Get_login_attemps( guint id );
+ extern gboolean Ajouter_one_login_attemps( guint id, gint max_login_attemps );
  extern gboolean Set_compte_actif( guint id, gboolean enable );
  extern guint *String_vers_groupes ( gchar *source );
  extern gboolean Set_compte_actif( guint id, gboolean enable );

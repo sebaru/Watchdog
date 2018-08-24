@@ -1,10 +1,10 @@
 /**********************************************************************************************************/
-/* Watchdogd/Utilisateur/login_failed.c    Interface DB mots de passe pour watchdog2.0                    */
+/* Watchdogd/Utilisateur/login_attemps.c    Interface DB mots de passe pour watchdog2.0                    */
 /* Projet WatchDog version 2.0       Gestion d'habitat                      ven 03 avr 2009 20:35:05 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
- * login_failed.c
+ * login_attemps.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -32,11 +32,11 @@
  #include "watchdogd.h"
 
 /**********************************************************************************************************/
-/* Get_login_failed: Recupere la valeur du login failed                                                   */
+/* Get_login_attemps: Recupere la valeur du login failed                                                   */
 /* Entrées: un log, une db et nom d'utilisateur                                                           */
 /* Sortie: le nombre de login failed, -1 si erreur                                                        */
 /**********************************************************************************************************/
- gint Get_login_failed( guint id )
+ gint Get_login_attemps( guint id )
   { gchar requete[200];
     gint nbr_login;
     struct DB *db;
@@ -45,12 +45,12 @@
      { return(0); }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT login_failed FROM %s WHERE id=%d",
+                "SELECT login_attemps FROM %s WHERE id=%d",
                 NOM_TABLE_UTIL, id );
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Get_login_failed: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Get_login_attemps: DB connexion failed" );
        return(-1);
      }
 
@@ -62,7 +62,7 @@
     Recuperer_ligne_SQL(db);                                     /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Libere_DB_SQL( &db );
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Get_login_failed: USER %03d not found in DB", id );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Get_login_attemps: USER %03d not found in DB", id );
        return(-1);
      }
 
@@ -71,11 +71,11 @@
     return( nbr_login );
   }
 /**********************************************************************************************************/
-/* Ajouter_one_login_failed: Ajoute 1 au login failed de l'utilisateur                                    */
-/* Entrées: un log, une db et nom d'utilisateur, un max_login_failed                                      */
+/* Ajouter_one_login_attemps: Ajoute 1 au login failed de l'utilisateur                                    */
+/* Entrées: un log, une db et nom d'utilisateur, un max_login_attemps                                      */
 /* Sortie: le nombre de login failed                                                                      */
 /**********************************************************************************************************/
- gboolean Ajouter_one_login_failed( guint id, gint max_login_failed )
+ gboolean Ajouter_one_login_attemps( guint id, gint max_login_attemps )
   { gchar requete[200];
     gboolean retour;
     struct DB *db;
@@ -84,42 +84,42 @@
      { return(FALSE); }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET login_failed = login_failed+1 WHERE id=%d",
+                "UPDATE %s SET login_attemps = login_attemps+1 WHERE id=%d",
                 NOM_TABLE_UTIL, id );
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_one_login_failed: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_one_login_attemps: DB connexion failed" );
        return(FALSE);
      }
 
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
 
-    if (Get_login_failed( id )>=max_login_failed)                              /* Desactivation du compte */
+    if (Get_login_attemps( id )>=max_login_attemps)                              /* Desactivation du compte */
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                "Ajouter_one_login_failed: Desactivation compte sur trop login failed for id=%d", id );
+                "Ajouter_one_login_attemps: Desactivation compte sur trop login failed for id=%d", id );
        Set_compte_actif( id, FALSE );
      }
     return(retour);
   }
 /**********************************************************************************************************/
-/* Raz_login_failed: Reset le login failed d'un utilisateur                                               */
+/* Raz_login_attemps: Reset le login failed d'un utilisateur                                               */
 /* Entrées: un log, une db et nom d'utilisateur                                                           */
 /* Sortie: le nombre de login failed                                                                      */
 /**********************************************************************************************************/
- gboolean Raz_login_failed( guint id )
+ gboolean Raz_login_attemps( guint id )
   { gchar requete[200];
     gboolean retour;
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET login_failed = 0 WHERE id=%d",
+                "UPDATE %s SET login_attemps = 0 WHERE id=%d",
                 NOM_TABLE_UTIL, id );
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Raz_login_failed: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Raz_login_attemps: DB connexion failed" );
        return(FALSE);
      }
 

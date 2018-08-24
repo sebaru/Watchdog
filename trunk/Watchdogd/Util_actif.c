@@ -45,7 +45,7 @@
      { return(TRUE); }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET enable = '%d', login_failed = 0 WHERE id=%d",
+                "UPDATE %s SET enable = '%d', login_attemps = 0 WHERE id=%d",
                 NOM_TABLE_UTIL, enable, id );
 
     db = Init_DB_SQL();       

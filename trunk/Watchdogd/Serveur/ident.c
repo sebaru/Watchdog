@@ -43,7 +43,7 @@
      { return; }
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
              "Autoriser_autorisation: RAZ 'login failed' for %d", client->util->id );
-    Raz_login_failed( client->util->id );
+    Raz_login_attemps( client->util->id );
   }
 /******************************************************************************************************************************/
 /* Proto_set_password: changement de password                                                                                 */
@@ -136,7 +136,7 @@
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  
                   "Tester_autorisation: Password error for '%s'(id=%d)", client->util->nom, client->util->id );
           Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
-          Ajouter_one_login_failed( client->util->id, Config.max_login_failed );                                 /* Dommage ! */
+          Ajouter_one_login_attemps( client->util->id, Config.max_login_attemps );                                 /* Dommage ! */
           Client_mode (client, DECONNECTE);
           return(FALSE);
         }

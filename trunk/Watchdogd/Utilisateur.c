@@ -222,7 +222,7 @@
                    "ssrv_bit_presence='%d'",
 
 
-                   "(username,access_level,mustchangepwd,cansetpwd,comment,login_failed,enable,"
+                   "(username,access_level,mustchangepwd,cansetpwd,comment,login_attemps,enable,"
                    "date_create,enable_expire,date_expire,date_modif,sms_enable,phone,sms_allow_cde,"
                    "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence)"
                    "VALUES ('%s', '%d', 1, 1, '%s', 0, 1, NOW(), %d, FROM_UNIXTIME('%d'), '%d','%d','%s','%d','%d','%s','%d','%d','%d' );",
