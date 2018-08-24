@@ -968,7 +968,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `hash` varchar(130) COLLATE utf8_unicode_ci NOT NULL,
   `phphash` VARCHAR(130) COLLATE utf8_unicode_ci NOT NULL,
   `comment` varchar(240) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `login_failed` int(11) NOT NULL DEFAULT '0',
+  `login_attemps` int(11) NOT NULL DEFAULT '0',
   `enable` tinyint(1) NOT NULL DEFAULT '0',
   `date_create` DATETIME NOT NULL DEFAULT NOW(),
   `enable_expire` tinyint(1) NOT NULL DEFAULT '0',
@@ -982,7 +982,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   `imsg_allow_cde` tinyint(1) NOT NULL DEFAULT '0',
   `imsg_available` tinyint(1) NOT NULL DEFAULT '0',
   `ssrv_bit_presence` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  PRIMARY KEY(`email`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `users` (`id`, `access_level`, `username`, `phphash`, `mustchangepwd`, `cansetpwd`, `salt`, `hash`, `comment`, `login_failed`, `enable`, `date_create`, `enable_expire`, `date_expire`, `date_modif`) VALUES

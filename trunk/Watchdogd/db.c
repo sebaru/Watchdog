@@ -887,13 +887,31 @@
      }
 
     if (database_version < 3682)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `phone` `phone` VARCHAR(80) DEFAULT ''" );
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `sms_phone` `phone` VARCHAR(80) DEFAULT ''" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE users ALTER TABLE users DROP `jabberid`" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `name` `username` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL" );
        Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `login_failed` `login_attempts` int(11) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users ADD  `username` varchar(100) DEFAULT NULL; "
+                                             "ALTER TABLE users ADD  `ip_address` varchar(45) NOT NULL; "
+                                             "ALTER TABLE users ADD  `email` varchar(254) NOT NULL; "
+                                             "ALTER TABLE users ADD  `activation_code` varchar(40) DEFAULT NULL; "
+                                             "ALTER TABLE users ADD  `forgotten_password_code` varchar(40) DEFAULT NULL; "
+                                             "ALTER TABLE users ADD  `forgotten_password_time` int(11) unsigned DEFAULT NULL; "
+                                             "ALTER TABLE users ADD  `remember_code` varchar(40) DEFAULT NULL; "
+                                             "ALTER TABLE users ADD  `created_on` int(11) unsigned NOT NULL; "
+                                             "ALTER TABLE users ADD  `last_login` int(11) unsigned DEFAULT NULL; "
+                                             "ALTER TABLE users ADD  `active` tinyint(1) unsigned DEFAULT NULL; "
+                                             "ALTER TABLE users ADD  `first_name` varchar(50) DEFAULT NULL; "
+                                             "ALTER TABLE users ADD  `last_name` varchar(50) DEFAULT NULL; "
+                                             "ALTER TABLE users ADD  `company` varchar(100) DEFAULT NULL; "
+                                             "ALTER TABLE users ADD `password` varchar(255) NOT NULL; ");
+       Lancer_requete_SQL ( db, requete );
      }
+
     Libere_DB_SQL(&db);
 fin:
     database_version=3682;

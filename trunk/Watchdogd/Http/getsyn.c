@@ -141,23 +141,6 @@
        json_builder_end_array (builder);                                                                  /* End Motifs Array */
      }
 
-/*-------------------------------------------------------- Dumping scenario --------------------------------------------------*/
-    if ( Recuperer_scenarioDB( &db, id_syn ) )
-     { struct CMD_TYPE_SCENARIO *scenario;
-       json_builder_set_member_name  ( builder, "scenarios" );
-       json_builder_begin_array (builder);                                                         /* Création du noeud Motif */
-       while( (scenario = Recuperer_scenarioDB_suite( &db )) )
-        { json_builder_begin_object (builder);                                                 /* Contenu du contenu du noeud */
-          json_builder_set_member_name  ( builder, "id" );           json_builder_add_int_value    ( builder, scenario->id );
-          json_builder_set_member_name  ( builder, "syn_id" );       json_builder_add_int_value    ( builder, scenario->syn_id );
-          json_builder_set_member_name  ( builder, "posx" );         json_builder_add_int_value    ( builder, scenario->posx );
-          json_builder_set_member_name  ( builder, "posy" );         json_builder_add_int_value    ( builder, scenario->posy );
-          json_builder_end_object (builder);                                                                /* End Passerelle */
-          g_free(scenario);
-        }
-       json_builder_end_array (builder);                                                                  /* End Motifs Array */
-     }
-
     json_builder_end_object (builder);                                                                        /* End Document */
 
     gen = json_generator_new ();                                                                      /* Creating JSON buffer */
