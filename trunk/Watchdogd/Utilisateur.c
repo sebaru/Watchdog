@@ -215,14 +215,14 @@
     if (ajout)
      { g_snprintf( requete, sizeof(requete),                                               /* Requete SQL */
                    "INSERT INTO %s SET"             
-                   "name='%s',access_level='%d',comment='%s',mustchangepwd=%d,comment='%s',enable=%d, enable_expire=%d,"
+                   "username='%s',access_level='%d',comment='%s',mustchangepwd=%d,comment='%s',enable=%d, enable_expire=%d,"
                    "cansetpwd=%d,date_expire='%d',date_modif='%d',"
                    "sms_enable='%d',phone='%s',sms_allow_cde='%d',"
                    "imsg_enable='%d',imsg_jabberid='%s',imsg_allow_cde='%d',imsg_available='%d',"
                    "ssrv_bit_presence='%d'",
 
 
-                   "(name,access_level,mustchangepwd,cansetpwd,comment,login_failed,enable,"
+                   "(username,access_level,mustchangepwd,cansetpwd,comment,login_failed,enable,"
                    "date_create,enable_expire,date_expire,date_modif,sms_enable,phone,sms_allow_cde,"
                    "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence)"
                    "VALUES ('%s', '%d', 1, 1, '%s', 0, 1, NOW(), %d, FROM_UNIXTIME('%d'), '%d','%d','%s','%d','%d','%s','%d','%d','%d' );",
@@ -482,7 +482,7 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT name,id,mustchangepwd,comment,enable,access_level,UNIX_TIMESTAMP(date_create),"
+                "SELECT username,id,mustchangepwd,comment,enable,access_level,UNIX_TIMESTAMP(date_create),"
                 "enable_expire,UNIX_TIMESTAMP(date_expire),cansetpwd,UNIX_TIMESTAMP(date_modif),salt,hash,sms_enable,phone,sms_allow_cde,"
                 "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence "
                 "FROM %s WHERE id=%d LIMIT 1", NOM_TABLE_UTIL, id );
@@ -520,7 +520,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT name,id,mustchangepwd,comment,enable,access_level,UNIX_TIMESTAMP(date_create),"
+                "SELECT username,id,mustchangepwd,comment,enable,access_level,UNIX_TIMESTAMP(date_create),"
                 "enable_expire,UNIX_TIMESTAMP(date_expire),cansetpwd,UNIX_TIMESTAMP(date_modif),salt,hash,sms_enable,phone,sms_allow_cde,"
                 "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence "
                 "FROM %s WHERE name='%s' LIMIT 1", NOM_TABLE_UTIL, nom );
@@ -558,7 +558,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT name FROM %s AS user JOIN users_sessions AS session ON user.name = session.login"
+                "SELECT username FROM %s AS user JOIN users_sessions AS session ON user.name = session.login"
                 " AND user.enable=1 AND user.mustchangepwd=0 AND session.id='%s'", NOM_TABLE_UTIL, sid );
     g_free(sid);
 

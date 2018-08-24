@@ -48,7 +48,7 @@
     guint    date_modif;
     guint    date_expire;
     gboolean sms_enable;
-    gchar    sms_phone[80];
+    gchar    phone[80];
     gboolean sms_allow_cde;
     gboolean imsg_enable;
     gchar    imsg_jabberid[80];

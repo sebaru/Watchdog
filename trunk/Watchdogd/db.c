@@ -887,7 +887,11 @@
      }
 
     if (database_version < 3682)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `sms_phone` `phone` VARCHAR(80) DEFAULT ''" );
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `phone` `phone` VARCHAR(80) DEFAULT ''" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users ALTER TABLE users DROP `jabberid`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `name` `username` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL" );
        Lancer_requete_SQL ( db, requete );
      }
     Libere_DB_SQL(&db);

@@ -603,13 +603,18 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
     if (!trame_motif) { printf("Trame_ajout_motif: Erreur mémoire\n"); return(NULL); }
 
     trame_motif->motif = motif;
+printf("Nouveau motif : id=%d, mnemo_type=%d, mnemo_id=%d\n", motif->id, motif->mnemo_type, motif->mnemo_id );
+    if (motif->mnemo_id==0)                                                               /* Chargement de l'icone id associé */
+     { Charger_pixbuf_id( trame_motif, motif->icone_id ); }
+    else                                                                                    /* Si motif relié à un mnemonique */
+     { switch (motif->mnemo_type)
+        { case MNEMO_HORLOGE: Charger_pixbuf_file ( trame_motif, "Horloge.svg" ); break;
+        }
+     }
 
-    Charger_pixbuf_id( trame_motif, motif->icone_id );
-
-    if (!trame_motif->images)                                              /* En cas de probleme, on sort */
+    if (!trame_motif->images)                                                                  /* En cas de probleme, on sort */
      { Trame_del_item(trame_motif);
        g_free(trame_motif);
-       printf("Trame_ajout_motif: Erreur images\n");
        return(NULL);
      }
     Trame_peindre_motif( trame_motif, motif->rouge0, motif->vert0, motif->bleu0 );

@@ -48,7 +48,7 @@
  static GtkWidget *Entry_nom;                                                  /* Le nom de l'utilisateur */
  static GtkWidget *Entry_last;                                                   /* L'id de l'utilisateur */
  static GtkWidget *Entry_comment;                                  /* Commentaire associé à l'utilisateur */
- static GtkWidget *Entry_sms_phone;                                   /* n° de telephone de l'utilisateur */
+ static GtkWidget *Entry_phone;                                   /* n° de telephone de l'utilisateur */
  static GtkWidget *Entry_imsg_jabberid;                 /* n° de messagerie instantannée de l'utilisateur */
  static GtkWidget *Check_enable;                                 /* Le compte utilisateur est-il enable ? */
  static GtkWidget *Check_cansetpwd;                       /* L'utilisateur peut-il changer son password ? */
@@ -142,7 +142,7 @@
  static void Changer_sms_enable ( void )
   { gboolean enable;
     enable = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(Check_sms_enable));
-    gtk_widget_set_sensitive( Entry_sms_phone, enable );
+    gtk_widget_set_sensitive( Entry_phone, enable );
     gtk_widget_set_sensitive( Check_sms_allow_cde, enable );
   }
 /**********************************************************************************************************/
@@ -168,8 +168,8 @@
                 "%s", gtk_entry_get_text(GTK_ENTRY(Entry_nom) ) );
     g_snprintf( Edit_util.commentaire, sizeof(Edit_util.commentaire),
                 "%s", gtk_entry_get_text(GTK_ENTRY(Entry_comment) ) );
-    g_snprintf( Edit_util.sms_phone, sizeof(Edit_util.sms_phone),
-                "%s", gtk_entry_get_text(GTK_ENTRY(Entry_sms_phone) ) );
+    g_snprintf( Edit_util.phone, sizeof(Edit_util.phone),
+                "%s", gtk_entry_get_text(GTK_ENTRY(Entry_phone) ) );
     g_snprintf( Edit_util.imsg_jabberid, sizeof(Edit_util.imsg_jabberid),
                 "%s", gtk_entry_get_text(GTK_ENTRY(Entry_imsg_jabberid) ) );
 
@@ -320,9 +320,9 @@
     gtk_table_attach_defaults( GTK_TABLE(table), Check_sms_enable, 0, 1, i, i+1 );
     g_signal_connect( G_OBJECT(Check_sms_enable), "clicked",
                       G_CALLBACK(Changer_sms_enable), NULL );
-    Entry_sms_phone = gtk_entry_new();
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_sms_phone, 1, 3, i, i+1 );
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_sms_phone), 80 );
+    Entry_phone = gtk_entry_new();
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_phone, 1, 3, i, i+1 );
+    gtk_entry_set_max_length( GTK_ENTRY(Entry_phone), 80 );
 
     Check_sms_allow_cde = gtk_check_button_new_with_label ( _("Allow CDE") );
     gtk_table_attach_defaults( GTK_TABLE(table), Check_sms_allow_cde, 3, 4, i, i+1 );
@@ -358,7 +358,7 @@
        g_snprintf( chaine, sizeof(chaine), "%d", edit_util->id );
        gtk_entry_set_text( GTK_ENTRY(Entry_comment), edit_util->commentaire );
        gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_access_level), edit_util->access_level );
-       gtk_entry_set_text( GTK_ENTRY(Entry_sms_phone), edit_util->sms_phone );
+       gtk_entry_set_text( GTK_ENTRY(Entry_phone), edit_util->phone );
        gtk_entry_set_text( GTK_ENTRY(Entry_imsg_jabberid), edit_util->imsg_jabberid );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_enable),        edit_util->enable );
        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(Check_mustchangepwd), edit_util->mustchangepwd );

@@ -960,7 +960,7 @@ CREATE TABLE IF NOT EXISTS `rfxcom` (
 
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
+  `username` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
   `access_level` int(11) NOT NULL DEFAULT '0',
   `mustchangepwd` tinyint(1) NOT NULL DEFAULT '0',
   `cansetpwd` tinyint(1) NOT NULL DEFAULT '0',
