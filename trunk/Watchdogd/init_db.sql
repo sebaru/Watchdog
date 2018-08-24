@@ -170,8 +170,10 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `vert` int(11) NOT NULL DEFAULT '0',
   `bleu` int(11) NOT NULL DEFAULT '0',
   `layer` int(11) NOT NULL DEFAULT '0',
+  `mnemo_id` int(11) NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -973,7 +975,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `date_expire` DATETIME DEFAULT NULL,
   `date_modif` DATETIME DEFAULT NULL,
   `sms_enable` tinyint(1) NOT NULL DEFAULT '0',
-  `sms_phone` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
+  `phone` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `sms_allow_cde` tinyint(1) NOT NULL DEFAULT '0',
   `imsg_enable` tinyint(1) NOT NULL DEFAULT '0',
   `imsg_jabberid` varchar(80) COLLATE utf8_unicode_ci NOT NULL,

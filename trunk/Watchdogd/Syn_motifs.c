@@ -84,9 +84,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s(icone,syn_id,libelle,access_level,bitctrl,bitclic,posx,posy,larg,haut,angle,"
-                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer) VALUES "
-                "('%d','%d','%s','%d','%d','%d','%d','%d','%f','%f','%f','%d','%d','%d','%d','%d','%d','%d','%d')",
+                "INSERT INTO %s SET icone='%d',syn_id='%d',libelle='%s',access_level='%d',bitctrl='%d',bitclic='%d',"
+                "posx='%d',posy='%d',larg='%f',haut='%f',angle='%f',"
+                "dialog='%d',gestion='%d',rouge='%d',vert='%d',bleu='%d',bitclic2='%d',rafraich='%d',layer='%d' ",
                 NOM_TABLE_MOTIF,
                 motif->icone_id, motif->syn_id, libelle, motif->access_level,
                 motif->bit_controle, motif->bit_clic,
@@ -95,6 +95,11 @@
                 motif->rouge0, motif->vert0, motif->bleu0, motif->bit_clic2, motif->rafraich,
                 motif->layer );
     g_free(libelle);
+    if (motif->mnemo_id>0)
+     { gchar chaine[20];
+       g_snprintf( chaine, sizeof(chaine), ",mnemo_id='%d'", motif->mnemo_id );
+       g_strlcat ( requete, chaine, sizeof(requete) );
+     }
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if ( retour == FALSE )
@@ -122,9 +127,10 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,libelle,icone,syn_id,access_level,bitctrl,bitclic,posx,posy,larg,haut,angle,"
-                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer"
-                " FROM %s WHERE syn_id='%d' ORDER BY layer", NOM_TABLE_MOTIF, id_syn );
+                "SELECT sm.id,sm.libelle,icone,syn_id,access_level,bitctrl,bitclic,posx,posy,larg,haut,angle,"
+                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer,mnemo_id,m.libelle,m.type"
+                " FROM syns_motifs AS sm LEFT JOIN mnemos AS m ON sm.mnemo_id = m.id"
+                " WHERE syn_id='%d' ORDER BY layer", id_syn );
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if (retour == FALSE) Libere_DB_SQL (&db);
@@ -151,7 +157,7 @@
     motif = (struct CMD_TYPE_MOTIF *)g_try_malloc0( sizeof(struct CMD_TYPE_MOTIF) );
     if (!motif) Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
     else
-     { memcpy( &motif->libelle, db->row[1], sizeof(motif->libelle) );                            /* Recopie dans la structure */
+     { g_snprintf ( motif->libelle, sizeof(motif->libelle), "%s", db->row[1] );                  /* Recopie dans la structure */
        motif->id           = atoi(db->row[0]);
        motif->icone_id     = atoi(db->row[2]);                                                  /* Correspond au fichier .gif */
        motif->syn_id       = atoi(db->row[3]);
@@ -171,6 +177,11 @@
        motif->bleu0        = atoi(db->row[16]);
        motif->rafraich     = atoi(db->row[18]);
        motif->layer        = atoi(db->row[19]);
+       if (db->row[20])
+        { motif->mnemo_id = atoi(db->row[20]);
+          g_snprintf ( motif->mnemo_libelle, sizeof(motif->mnemo_libelle), "%s", db->row[21] );  /* Recopie dans la structure */
+          motif->mnemo_type = atoi(db->row[22]);
+        } else motif->mnemo_id = 0;
      }
     return(motif);
   }
@@ -191,9 +202,10 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,libelle,icone,syn_id,access_level,bitctrl,bitclic,posx,posy,larg,haut,angle,"
-                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer"
-                " FROM %s WHERE id=%d", NOM_TABLE_MOTIF, id );
+                "SELECT sm.id,sm.libelle,icone,syn_id,access_level,bitctrl,bitclic,posx,posy,larg,haut,angle,"
+                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer,mnemo_id,m.libelle,m.type"
+                " FROM syns_motifs AS sm LEFT JOIN mnemos AS m ON sm.mnemo_id = m.id"
+                " WHERE id=%d", id );
 
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { Libere_DB_SQL( &db );

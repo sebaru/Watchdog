@@ -49,7 +49,7 @@
     gboolean user_enable;
     gchar    user_comment[80];
     gboolean user_sms_enable;
-    gchar    user_sms_phone[80];
+    gchar    user_phone[80];
     gboolean user_sms_allow_cde;
   };
 

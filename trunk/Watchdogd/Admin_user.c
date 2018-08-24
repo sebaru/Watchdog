@@ -60,7 +60,7 @@
               " |---------------------------------------------------------------------------------------\n"
               " [%03d]%12s -> enable=%d, expire=%d, date_expire = %s, mustchangepwd = %s, cansetpwd = %s\n"
               " |               -> date_creation = %s, date_modif = %s\n"
-              " |               -> sms_enable  = %d, sms_allow_cde  = %d, sms_phone = %s\n"
+              " |               -> sms_enable  = %d, sms_allow_cde  = %d, phone = %s\n"
               " |               -> imsg_enable = %d, imsg_allow_cde = %d, imsg_jabber_id = %s\n"
               " |               -> imsg_available = %d\n"
               " |               -> ssrv_bit_presence = B%04d (=%d)\n"
@@ -69,7 +69,7 @@
               " |----------------> %s\n",
                 util->id, util->nom, util->enable, util->expire, date_expire, (util->mustchangepwd ? "TRUE" : "FALSE"),
                 (util->cansetpwd ? "TRUE" : "FALSE"), date_creation, date_modif,
-                util->sms_enable, util->sms_allow_cde, util->sms_phone,
+                util->sms_enable, util->sms_allow_cde, util->phone,
                 util->imsg_enable, util->imsg_allow_cde, util->imsg_jabberid,
                 util->imsg_available,
                 util->ssrv_bit_presence, B(util->ssrv_bit_presence),

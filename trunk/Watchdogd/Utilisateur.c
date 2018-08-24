@@ -194,7 +194,7 @@
        return(-1);
      }
 
-    phone = Normaliser_chaine ( util->sms_phone );
+    phone = Normaliser_chaine ( util->phone );
     if (!phone)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "Ajouter_Modifier_utilisateurDB: Normalisation phone impossible" );
@@ -217,13 +217,13 @@
                    "INSERT INTO %s SET"             
                    "name='%s',access_level='%d',comment='%s',mustchangepwd=%d,comment='%s',enable=%d, enable_expire=%d,"
                    "cansetpwd=%d,date_expire='%d',date_modif='%d',"
-                   "sms_enable='%d',sms_phone='%s',sms_allow_cde='%d',"
+                   "sms_enable='%d',phone='%s',sms_allow_cde='%d',"
                    "imsg_enable='%d',imsg_jabberid='%s',imsg_allow_cde='%d',imsg_available='%d',"
                    "ssrv_bit_presence='%d'",
 
 
                    "(name,access_level,mustchangepwd,cansetpwd,comment,login_failed,enable,"
-                   "date_create,enable_expire,date_expire,date_modif,sms_enable,sms_phone,sms_allow_cde,"
+                   "date_create,enable_expire,date_expire,date_modif,sms_enable,phone,sms_allow_cde,"
                    "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence)"
                    "VALUES ('%s', '%d', 1, 1, '%s', 0, 1, NOW(), %d, FROM_UNIXTIME('%d'), '%d','%d','%s','%d','%d','%s','%d','%d','%d' );",
                    NOM_TABLE_UTIL, nom, util->access_level,
@@ -238,7 +238,7 @@
                    "UPDATE %s SET "             
                    "access_level='%d', mustchangepwd=%d,comment='%s',enable=%d, enable_expire=%d,"
                    "cansetpwd=%d,date_expire=FROM_UNIXTIME('%d'),date_modif=NOW(),"
-                   "sms_enable='%d',sms_phone='%s',sms_allow_cde='%d',"
+                   "sms_enable='%d',phone='%s',sms_allow_cde='%d',"
                    "imsg_enable='%d',imsg_jabberid='%s',imsg_allow_cde='%d',imsg_available='%d',"
                    "ssrv_bit_presence='%d'",
                    NOM_TABLE_UTIL, util->access_level, util->mustchangepwd, comment,
@@ -411,7 +411,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT name,id,mustchangepwd,comment,enable,access_level,UNIX_TIMESTAMP(date_create),"
-                "enable_expire,UNIX_TIMESTAMP(date_expire),cansetpwd,UNIX_TIMESTAMP(date_modif),salt,hash,sms_enable,sms_phone,sms_allow_cde,"
+                "enable_expire,UNIX_TIMESTAMP(date_expire),cansetpwd,UNIX_TIMESTAMP(date_modif),salt,hash,sms_enable,phone,sms_allow_cde,"
                 "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence "
                 "FROM %s", NOM_TABLE_UTIL );
 
@@ -449,7 +449,7 @@
     else
      { g_snprintf( util->nom,          sizeof(util->nom),           "%s", db->row[0] );/* Recopie dans la structure */
        g_snprintf( util->commentaire,  sizeof(util->commentaire),   "%s", db->row[3] );
-       g_snprintf( util->sms_phone,    sizeof(util->sms_phone),     "%s", db->row[14]);
+       g_snprintf( util->phone,    sizeof(util->phone),     "%s", db->row[14]);
        g_snprintf( util->imsg_jabberid,sizeof(util->imsg_jabberid), "%s", db->row[17]);
        memcpy( &util->salt, db->row[11], sizeof(util->salt)-1 );
        memcpy( &util->hash, db->row[12], sizeof(util->hash)-1 );
@@ -483,7 +483,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT name,id,mustchangepwd,comment,enable,access_level,UNIX_TIMESTAMP(date_create),"
-                "enable_expire,UNIX_TIMESTAMP(date_expire),cansetpwd,UNIX_TIMESTAMP(date_modif),salt,hash,sms_enable,sms_phone,sms_allow_cde,"
+                "enable_expire,UNIX_TIMESTAMP(date_expire),cansetpwd,UNIX_TIMESTAMP(date_modif),salt,hash,sms_enable,phone,sms_allow_cde,"
                 "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence "
                 "FROM %s WHERE id=%d LIMIT 1", NOM_TABLE_UTIL, id );
 
@@ -521,7 +521,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT name,id,mustchangepwd,comment,enable,access_level,UNIX_TIMESTAMP(date_create),"
-                "enable_expire,UNIX_TIMESTAMP(date_expire),cansetpwd,UNIX_TIMESTAMP(date_modif),salt,hash,sms_enable,sms_phone,sms_allow_cde,"
+                "enable_expire,UNIX_TIMESTAMP(date_expire),cansetpwd,UNIX_TIMESTAMP(date_modif),salt,hash,sms_enable,phone,sms_allow_cde,"
                 "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence "
                 "FROM %s WHERE name='%s' LIMIT 1", NOM_TABLE_UTIL, nom );
     g_free(name);

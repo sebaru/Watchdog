@@ -115,7 +115,7 @@
        return(FALSE);
      }
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+    g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                 "INSERT INTO mnemos SET type='%d',num='-1',dls_id='%d',acronyme='%s',libelle='%s' "
                 " ON DUPLICATE KEY UPDATE libelle='%s'",
                 mnemo->type, mnemo->dls_id, acro, libelle, libelle );
@@ -128,7 +128,16 @@
        return(FALSE);
      }
 
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    Lancer_requete_SQL ( db, "START TRANSACTION" );                                            /* Execution de la requete SQL */
+    Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
+    if (mnemo->type == MNEMO_HORLOGE)
+     { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
+                   "INSERT INTO syns_motifs "
+                          "SET mnemo_id=LAST_INSERT_ID(),libelle='Horloge',syn_id='%d',posx='150,0',posy='150,0'; ",
+                   mnemo->syn_id );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+    retour = Lancer_requete_SQL ( db, "COMMIT;" );                                             /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return (retour);
   }

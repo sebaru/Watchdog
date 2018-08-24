@@ -51,10 +51,10 @@
               " | ---------------------------------\n"
               " | [%03d]%12s -> user_enable   = %d\n"
               " |               -> sms_enable    = %d\n"
-              " |               -> sms_phone     = %s\n"
+              " |               -> phone     = %s\n"
               " |               -> sms_allow_cde = %d\n"
               " |----------------> %s",
-                sms->user_id, sms->user_name, sms->user_enable, sms->user_sms_enable, sms->user_sms_phone,
+                sms->user_id, sms->user_name, sms->user_enable, sms->user_sms_enable, sms->user_phone,
                 sms->user_sms_allow_cde, sms->user_comment
               );
     response = Admin_write ( response, chaine );

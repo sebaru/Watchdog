@@ -900,7 +900,8 @@
            { Emettre_erreur_new( "Warning: %s not used", alias->nom );
              retour = TRAD_DLS_WARNING;
            }
-          mnemo.dls_id = id;
+          mnemo.dls_id = Dls_plugin.id;
+          mnemo.syn_id = Dls_plugin.syn_id;
           if (alias->type == ALIAS_TYPE_DYNAMIC)                                      /* Pour les alias Dynamiques uniquement */
            { switch ( alias->bit )
               { case T_MONO:

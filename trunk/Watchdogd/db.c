@@ -879,9 +879,20 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 3681)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs ADD `mnemo_id` int(11) UNIQUE NULL DEFAULT NULL" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs ADD CONSTRAINT FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 3682)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `sms_phone` `phone` VARCHAR(80) DEFAULT ''" );
+       Lancer_requete_SQL ( db, requete );
+     }
     Libere_DB_SQL(&db);
 fin:
-    database_version=3663;
+    database_version=3682;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
