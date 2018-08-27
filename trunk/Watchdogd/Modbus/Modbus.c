@@ -293,6 +293,8 @@
     module->date_retente = Partage->top + MODBUS_RETRY;
     for ( cpt = module->modbus.map_EA; cpt<module->nbr_entree_ana; cpt++)
      { SEA_range( cpt, 0 ); }
+    g_free(module->DI);
+    g_free(module->AI);
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
              "%s : Module %d disconnected", __func__, module->modbus.id );
     SB( module->modbus.bit, 0 );                                                  /* Mise a zero du bit interne lié au module */
@@ -373,6 +375,8 @@
     module->transaction_id = 1;
     module->started = TRUE;
     module->mode = MODBUS_GET_DESCRIPTION;
+    module->DI = NULL;
+    module->AI = NULL;
 
     return(TRUE);
   }
@@ -826,6 +830,47 @@
     else module->request = TRUE;                                              /* Une requete a élé lancée */
   }
 /******************************************************************************************************************************/
+/* Modbus_do_mapping : mappe les entrees/sorties Wago avec la zone de mémoire interne dynamique                               */
+/* Entrée : la structure referencant le module                                                                                */
+/* Sortie : rien                                                                                                              */
+/******************************************************************************************************************************/
+ static void Modbus_do_mapping ( struct MODULE_MODBUS *module )
+  { struct CMD_TYPE_MNEMO_BASE *mnemo;
+    gchar critere[80];
+    struct DB *db;
+    gint cpt;
+
+    module->AI = (gpointer *)g_try_malloc0( sizeof(gpointer) * module->nbr_entree_ana );
+    if (!module->AI)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Memory Error for AI", __func__ );
+       return;
+     }
+    module->DI = (gpointer *)g_try_malloc0( sizeof(gpointer) * module->nbr_entree_tor );
+    if (!module->DI)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Memory Error DI", __func__ );
+       return;
+     }
+    for (cpt=0; cpt<module->nbr_entree_ana; cpt++)
+     { g_snprintf( critere, sizeof(critere),"%s_EA%d", module->modbus.libelle, cpt);
+       if (Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ))
+        { while ( (mnemo=Recuperer_mnemo_baseDB_suite ( &db )) != NULL )
+           { Dls_data_set_AI ( mnemo->acronyme, mnemo->dls_tech_id, 0.0, (gpointer)&module->AI[cpt] );
+             g_free(mnemo);
+           }
+        }
+     }
+    for (cpt=0; cpt<module->nbr_entree_tor; cpt++)
+     { g_snprintf( critere, sizeof(critere),"%s_E%d", module->modbus.libelle, cpt);
+       if (Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ))
+        { while ( (mnemo=Recuperer_mnemo_baseDB_suite ( &db )) != NULL )
+           { Dls_data_set_bool ( mnemo->acronyme, mnemo->dls_tech_id, (gpointer)&module->DI[cpt], FALSE );
+             g_free(mnemo);
+           }
+        }
+     }
+
+  }
+/******************************************************************************************************************************/
 /* Recuperer_borne: Recupere les informations d'une borne MODBUS                                                              */
 /* Entrée: identifiants des modules et borne                                                                                  */
 /* Sortie: ?                                                                                                                  */
@@ -977,13 +1022,14 @@
                                              else module->nbr_entree_tor = nbr;
                   if (module->modbus.max_nbr_E>0)
                    { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                               "%s: Get number Entree TOR = %d", __func__, module->nbr_entree_tor );
+                               "%s: Get number Entree TOR = %d (forced)", __func__, module->nbr_entree_tor );
                    }
                   else
                    { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                               "%s: Get number Entree TOR = %d (forced)", __func__, module->nbr_entree_tor );
+                               "%s: Get number Entree TOR = %d", __func__, module->nbr_entree_tor );
                    }
                   module->mode = MODBUS_GET_NBR_DO;
+                  Modbus_do_mapping( module );                                     /* Initialise le mapping des I/O du module */
                 }
                break;
           case MODBUS_GET_NBR_DO:
