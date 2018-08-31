@@ -842,6 +842,7 @@
   { if (!data_p || !*data_p)
      { gchar chaine[80];
        gboolean *data;
+       if ( !(nom && owner) ) return;
        g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
        data = Dls_data_get( chaine );
        if (!data)
@@ -874,6 +875,7 @@
 
     if (!ai_p || !*ai_p)
      { GSList *liste;
+       if ( !(nom && tech_id) ) return;
        liste = Partage->Dls_data_AI;
        while (liste)
         { ai = (struct ANALOG_INPUT *)liste->data;
