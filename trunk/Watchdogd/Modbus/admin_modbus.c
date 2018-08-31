@@ -88,9 +88,9 @@
                 module->modbus.id, module->modbus.libelle,  Modbus_mode_to_string(module), module->modbus.date_create );
     response = Admin_write ( response, chaine );
 
-    g_snprintf( chaine, sizeof(chaine), " | - enable = %d, started = %d (bit B%04d=%d), watchdog = %03d, IP = %s",
+    g_snprintf( chaine, sizeof(chaine), " | - enable = %d, started = %d (bit B%04d=%d), watchdog = %03d, Hostname = %s",
                 module->modbus.enable, module->started, module->modbus.bit, B(module->modbus.bit),
-                module->modbus.watchdog, module->modbus.ip );
+                module->modbus.watchdog, module->modbus.hostname );
     response = Admin_write ( response, chaine );
 
     if (module->modbus.max_nbr_E>0)
@@ -229,8 +229,8 @@
     else if ( ! strcmp( param, "max_nbr_E" ) ) { module->modbus.max_nbr_E = valeur; }
     else if ( ! strcmp( param, "libelle" ) )
      { g_snprintf( module->modbus.libelle, sizeof(module->modbus.libelle), "%s", valeur_char ); }
-    else if ( ! strcmp( param, "ip" ) )
-     { g_snprintf( module->modbus.ip, sizeof(module->modbus.ip), "%s", valeur_char ); }
+    else if ( ! strcmp( param, "hostname" ) )
+     { g_snprintf( module->modbus.hostname, sizeof(module->modbus.hostname), "%s", valeur_char ); }
     else
      { g_snprintf( chaine, sizeof(chaine),
                  " | - Parameter %s not known for MODBUS id %s ('modbus set list' can help)", param, id_char );
@@ -284,7 +284,7 @@
 
        memset( &modbus, 0, sizeof(struct MODBUSDB) );
        if (sscanf ( ligne, "%s %s %s", commande,                                         /* Découpage de la ligne de commande */
-                    modbus.ip, modbus.libelle
+                    modbus.hostname, modbus.libelle
                   ) != 3) return(response);
        modbus.watchdog = 40;
        retour = Ajouter_modbusDB ( &modbus );
@@ -292,7 +292,7 @@
         { response = Admin_write ( response, " | - Error, MODBUS not added" ); }
        else
         { gchar chaine[80];
-          g_snprintf( chaine, sizeof(chaine), " | - MODBUS %s added. New ID=%d", modbus.ip, retour );
+          g_snprintf( chaine, sizeof(chaine), " | - MODBUS '%s' added. New ID=%d", modbus.hostname, retour );
           response = Admin_write ( response, chaine );
         }
      }
@@ -308,21 +308,21 @@
         { response = Admin_write ( response, " | - Error, MODBUS not erased" ); }
        else
         { gchar chaine[80];
-          g_snprintf( chaine, sizeof(chaine), " | -MODBUS %d erased", modbus.id );
+          g_snprintf( chaine, sizeof(chaine), " | - MODBUS '%d' erased", modbus.id );
           response = Admin_write ( response, chaine );
         }
      }
     else if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'MODBUS'" );
-       response = Admin_write ( response, " | - add $ip $libelle     - Ajoute un module modbus" );
-       response = Admin_write ( response, " | - set $id $champ $val  - Set $val to $champ for module $id" );
-       response = Admin_write ( response, " | - set list             - List parameter that can be set" );
-       response = Admin_write ( response, " | - del $id              - Erase module $id" );
-       response = Admin_write ( response, " | - start $id            - Demarre le module $id" );
-       response = Admin_write ( response, " | - stop $id             - Arrete le module $id" );
-       response = Admin_write ( response, " | - show $id             - Affiche les informations du modbus $id" );
-       response = Admin_write ( response, " | - list                 - Liste les modules MODBUS" );
-       response = Admin_write ( response, " | - reload               - Recharge la configuration" );
+       response = Admin_write ( response, " | - add $hostname $libelle - Ajoute un module modbus" );
+       response = Admin_write ( response, " | - set $id $champ $val    - Set $val to $champ for module $id" );
+       response = Admin_write ( response, " | - set list               - List parameter that can be set" );
+       response = Admin_write ( response, " | - del $id                - Erase module $id" );
+       response = Admin_write ( response, " | - start $id              - Demarre le module $id" );
+       response = Admin_write ( response, " | - stop $id               - Arrete le module $id" );
+       response = Admin_write ( response, " | - show $id               - Affiche les informations du modbus $id" );
+       response = Admin_write ( response, " | - list                   - Liste les modules MODBUS" );
+       response = Admin_write ( response, " | - reload                 - Recharge la configuration" );
      }
     else
      { gchar chaine[128];

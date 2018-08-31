@@ -788,7 +788,7 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `date_create` datetime NOT NULL,
   `enable` tinyint(1) NOT NULL,
-  `ip` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  `hostname` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',
   `watchdog` int(11) NOT NULL,
   `bit` int(11) NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,

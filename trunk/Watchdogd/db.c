@@ -912,9 +912,14 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 3687)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` CHANGE `ip` `hostname` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT ''" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
     Libere_DB_SQL(&db);
+
 fin:
-    database_version=3682;
+    database_version=3687;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
