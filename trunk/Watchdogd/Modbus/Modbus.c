@@ -854,7 +854,7 @@
      { g_snprintf( critere, sizeof(critere),"%s_EA%d", module->modbus.libelle, cpt);
        if (Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ))
         { while ( (mnemo=Recuperer_mnemo_baseDB_suite ( &db )) != NULL )
-           { Dls_data_set_AI ( mnemo->acronyme, mnemo->dls_tech_id, 0.0, (gpointer)&module->AI[cpt] );
+           { Dls_data_set_AI ( mnemo->acronyme, mnemo->dls_tech_id, (gpointer)&module->AI[cpt], 0.0 );
              g_free(mnemo);
            }
         }
@@ -903,6 +903,7 @@
                cpt_e = module->modbus.map_E;
                for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<module->nbr_entree_tor; cpt++)
                 { SE( cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) );
+                  Dls_data_set_bool ( NULL, NULL, (gpointer)&module->DI[cpt], (module->response.data[ cpt_byte ] & cpt_poid) );
                   cpt_e++;
                   cpt_poid = cpt_poid << 1;
                   if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
@@ -919,6 +920,7 @@
                              reponse  = module->response.data[ 2*cpt + 1 ] << 5;
                              reponse |= module->response.data[ 2*cpt + 2 ] >> 3;
                              SEA( cpt_e, reponse );
+                             Dls_data_set_AI ( NULL, NULL, (gpointer)&module->AI[cpt], reponse );
                            }
                           else SEA_range( cpt_e, 0 );
                           break;

@@ -868,7 +868,7 @@
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_AI ( gchar *nom, gchar *tech_id, float val_avant_ech, gpointer **ai_p )
+ void Dls_data_set_AI ( gchar *nom, gchar *tech_id, gpointer **ai_p, float val_avant_ech )
   { struct ANALOG_INPUT *ai;
     gboolean need_arch;
 
