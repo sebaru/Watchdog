@@ -538,24 +538,25 @@
 /******************************************************************************************************************************/
  struct ACTION *New_action_tempo( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
-    int taille, daa, dma, dMa, dad;
+    int taille, daa, dma, dMa, dad, random;
 
-    daa = Get_option_entier ( options, T_DAA );   if (daa == -1) daa = 0;
-    dma = Get_option_entier ( options, T_DMINA ); if (dma == -1) dma = 0;
-    dMa = Get_option_entier ( options, T_DMAXA ); if (dMa == -1) dMa = 0;
-    dad = Get_option_entier ( options, T_DAD );   if (dad == -1) dad = 0;
+    daa    = Get_option_entier ( options, T_DAA );      if (daa == -1)    daa = 0;
+    dma    = Get_option_entier ( options, T_DMINA );    if (dma == -1)    dma = 0;
+    dMa    = Get_option_entier ( options, T_DMAXA );    if (dMa == -1)    dMa = 0;
+    dad    = Get_option_entier ( options, T_DAD );      if (dad == -1)    dad = 0;
+    random = Get_option_entier ( options, T_RANDOM );   if (random == -1) random = 0;
 
     action = New_action();
     taille = 128;
     if (alias->type == ALIAS_TYPE_DYNAMIC)
      { action->alors = New_chaine( taille );
-       g_snprintf( action->alors, taille, "Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s, 1, %d, %d, %d, %d );",
+       g_snprintf( action->alors, taille, "Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s, 1, %d, %d, %d, %d, %d );",
                                            alias->nom, Dls_plugin.tech_id, alias->nom,
-                                           daa, dma, dMa, dad );
+                                           daa, dma, dMa, dad, random );
        action->sinon = New_chaine( taille );
-       g_snprintf( action->sinon, taille, "Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s, 0, %d, %d, %d, %d );",
+       g_snprintf( action->sinon, taille, "Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s, 0, %d, %d, %d, %d, %d );",
                                            alias->nom, Dls_plugin.tech_id, alias->nom,
-                                           daa, dma, dMa, dad );
+                                           daa, dma, dMa, dad, random );
      }
     else
      { taille = 40;

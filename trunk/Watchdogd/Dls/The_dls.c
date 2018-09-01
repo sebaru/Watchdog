@@ -35,7 +35,7 @@
  #include <sys/time.h>
  #include <sys/prctl.h>
  #include <semaphore.h>
-
+ 
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
@@ -483,8 +483,15 @@
 /* Sortie: Neant                                                                                                              */
 /******************************************************************************************************************************/
  static void ST_local( struct TEMPO *tempo, int etat )
-  { if (tempo->status == TEMPO_NOT_COUNTING && etat == 1)
+  { static guint seed;
+    if (tempo->status == TEMPO_NOT_COUNTING && etat == 1)
      { tempo->status = TEMPO_WAIT_FOR_DELAI_ON;
+       if (tempo->confDB.random)
+        { tempo->confDB.delai_on  = tempo->confDB.random * (double)(rand_r(&seed)/RAND_MAX);
+          tempo->confDB.min_on    = 0;
+          tempo->confDB.max_on    = 0;
+          tempo->confDB.delai_off = 0;
+        }
        tempo->date_on = Partage->top + tempo->confDB.delai_on;
      }
 
@@ -983,7 +990,7 @@
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
  void Dls_data_set_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p, gboolean etat,
-                            gint delai_on, gint min_on, gint max_on, gint delai_off)
+                            gint delai_on, gint min_on, gint max_on, gint delai_off, gint random)
   { if (!tempo_p || !*tempo_p)
      { gchar chaine[80];
        struct TEMPO *tempo;
@@ -992,10 +999,11 @@
        if (!tempo)
         { tempo = g_malloc0 ( sizeof(struct TEMPO) );
           if (!tempo) { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for %s", __func__, chaine ); return; }
-          tempo->confDB.delai_on = delai_on;
-          tempo->confDB.min_on = min_on;
-          tempo->confDB.max_on = max_on;
+          tempo->confDB.delai_on  = delai_on;
+          tempo->confDB.min_on    = min_on;
+          tempo->confDB.max_on    = max_on;
           tempo->confDB.delai_off = delai_off;
+          tempo->confDB.random    = random;
           g_tree_insert ( Partage->com_dls.Dls_data_tempo, g_strdup(chaine), tempo );
           Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding key %s : %p", __func__, chaine, tempo );
         }

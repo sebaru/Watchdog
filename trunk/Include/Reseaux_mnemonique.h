@@ -132,6 +132,7 @@
     guint delai_off;                                                  /* delai avant mise à zero (fixé par option mnémonique) */
     guint min_on;                            /* Durée minimale pendant laquelle la tempo sera ON (fixé par option mnémonique) */
     guint max_on;                            /* Durée maximale pendant laquelle la tempo sera ON (fixé par option mnémonique) */
+    guint random;                                         /* Est-ce une tempo random ? si oui, est la dynamique max du random */
   };
 
 /******************************************************* Suite des structures *************************************************/
