@@ -51,7 +51,6 @@
  enum
   { TYPE_PAGE_PLUGIN_DLS,                                                                         /* Listes des plugins D.L.S */
     TYPE_PAGE_HISTO,                                                               /* Page de garde: messages au fil de l'eau */
-    TYPE_PAGE_UTIL,                                                                        /* Liste des utilisateurs Watchdog */
     TYPE_PAGE_MESSAGE,                                                                       /* Edition des messages Watchdog */
     TYPE_PAGE_SYNOPTIQUE,                                                     /* Edition des noms/mnémoniques des synoptiques */
     TYPE_PAGE_ALL_MNEMONIQUE,                                                /* Page de visualisation de tous les mnemoniques */
@@ -196,7 +195,6 @@
  extern void Gerer_protocole_gtk_message ( struct CONNEXION *connexion );
  extern void Gerer_protocole_icone ( struct CONNEXION *connexion );
  extern void Gerer_protocole_dls ( struct CONNEXION *connexion );
- extern void Gerer_protocole_utilisateur ( struct CONNEXION *connexion );
  extern void Gerer_protocole_message ( struct CONNEXION *connexion );
  extern void Gerer_protocole_synoptique ( struct CONNEXION *connexion );
  extern void Gerer_protocole_mnemonique ( struct CONNEXION *connexion );
@@ -213,13 +211,6 @@
 
  extern void Proto_afficher_un_admin( struct CMD_TYPE_ADMIN *admin );                                         /* Dans admin.c */ 
  extern void Creer_page_admin( void );
-
- extern void Proto_afficher_un_utilisateur( struct CMD_TYPE_UTILISATEUR *util );                         /* Dans liste_util.c */ 
- extern void Proto_cacher_un_utilisateur( struct CMD_TYPE_UTILISATEUR *util );
- extern void Proto_rafraichir_un_utilisateur( struct CMD_TYPE_UTILISATEUR *util );
- extern void Creer_page_utilisateur( void );
-
- extern void Menu_ajouter_editer_utilisateur ( struct CMD_TYPE_UTILISATEUR *edit_util );                      /* ajout_util.c */
 
  extern void Proto_afficher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );                      /* Dans liste_plugin_dls.c */ 
  extern void Proto_cacher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );
@@ -286,7 +277,6 @@
 
  extern void Menu_want_plugin_dls ( void );                                                                    /* Dans menu.c */
  extern void Menu_want_client_leger ( void );
- extern void Menu_want_util ( void );
  extern void Menu_want_message ( void );
  extern void Menu_want_icone ( void );
  extern void Menu_want_synoptique ( void );

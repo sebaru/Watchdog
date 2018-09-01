@@ -14,7 +14,7 @@ Watchdogd_SOURCES = Watchdogd.c process.c \
 		    Mnemo_Tempo.c Histo_msgs.c Camera.c distrib_Events.c \
                     distrib_MSGxxx.c distrib_Ixxx.c \
                     Admin.c Admin_running.c Admin_process.c Admin_dls.c Admin_set.c Admin_get.c Admin_dbcfg.c Admin_user.c \
-                    Utilisateur.c Util_login_failed.c Util_actif.c Util_groupe.c \
+                    Utilisateur.c \
                     Synoptiques.c Syn_motifs.c Syn_comment.c Syn_passerelle.c Syn_palette.c Syn_cadran.c Syn_camera_sup.c
 
 Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
@@ -24,11 +24,11 @@ Watchdogd_LDADD   = Dls/libwatchdog-dls.la \
 
 # rdynamic pour autoriser l'utilsation des fonctions du thread principal par les librairies dlopened
 Watchdogd_LDFLAGS = -rdynamic -lpopt \
-                   `pkg-config --libs glib-2.0 gthread-2.0 libcurl openssl libxml-2.0 libczmq` \
+                   `pkg-config --libs glib-2.0 gthread-2.0 libcurl openssl libxml-2.0 libczmq libcrypt` \
                    `libgcrypt-config --libs` \
                    `mysql_config --libs`
 
-Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libcurl openssl libxml-2.0 libczmq` \
+Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libcurl openssl libxml-2.0 libczmq libcrypt` \
                    `libgcrypt-config --cflags` \
                    `mysql_config --cflags`
 

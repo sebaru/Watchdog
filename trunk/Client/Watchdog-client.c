@@ -53,12 +53,6 @@
  static gboolean Arret = FALSE;
 
 /***************************************************** Définition du menu *****************************************************/
- GnomeUIInfo Menu_habilitation[]=                                                   /*!< Définition du menu des habilitations */
-  { GNOMEUIINFO_ITEM_STOCK( N_("_Users"), N_("Edit users"),
-                            Menu_want_util, GNOME_STOCK_TEXT_BULLETED_LIST ),
-    GNOMEUIINFO_END
-  };
-
  GnomeUIInfo Menu_lowlevel[]=                                            /*!< Définition du menu lowlevel */
   { GNOMEUIINFO_ITEM_STOCK( N_("_Camera"), N_("Edit Camera"),
                             Menu_want_camera, GNOME_STOCK_PIXMAP_MIC ),
@@ -87,7 +81,6 @@
                             Menu_want_plugin_dls, GNOME_STOCK_PIXMAP_EXEC ),
     GNOMEUIINFO_SUBTREE(N_("_Synoptiques"), Menu_synoptique),
     GNOMEUIINFO_SEPARATOR,
-    GNOMEUIINFO_SUBTREE(N_("_Habilitations"), Menu_habilitation),
     GNOMEUIINFO_SUBTREE(N_("_Low level"), Menu_lowlevel),
     GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_SUBTREE(N_("_Client leger"), Menu_client_leger),
@@ -105,9 +98,6 @@
                             Deconnecter, GNOME_STOCK_PIXMAP_CLOSE ),
     GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_SUBTREE(N_("_View"), Menu_view),
-    GNOMEUIINFO_ITEM_STOCK( N_("Change Password"), N_("Change the password"),
-                            Changer_password, GNOME_STOCK_PIXMAP_PROPERTIES ),
-    GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_ITEM_STOCK( N_("_Quit"), N_("Disconnect and quit"), Fermer_client, GNOME_STOCK_PIXMAP_EXIT ),
     GNOMEUIINFO_END
   };

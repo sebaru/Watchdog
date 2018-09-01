@@ -41,26 +41,6 @@
     if ( Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_AUTORISE,
                        (gchar *)&ident, sizeof(struct REZO_SRV_IDENT) ) )
      { return; }
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-             "Autoriser_autorisation: RAZ 'login failed' for %d", client->util->id );
-    Raz_login_attemps( client->util->id );
-  }
-/******************************************************************************************************************************/
-/* Proto_set_password: changement de password                                                                                 */
-/* Entrée/Sortie: rien                                                                                                        */
-/******************************************************************************************************************************/
- void Proto_set_password ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *util )
-  { if (util->id != client->util->id)                                                            /* Le client est-il le bon ? */
-     { Client_mode ( client, DECONNECTE );
-       return;
-     }
-    
-    if (Modifier_utilisateurDB_set_password( client->util, util->hash ))                      /* Le password est dans le hash */
-     { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_PWDCHANGED, NULL, 0 );
-       Client_mode ( client, DECONNECTE );                                         /* On deconnecte le client tout de suite ! */
-     }
-    else
-     { Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_CANNOTCHANGEPWD, NULL, 0 ); }
   }
 /******************************************************************************************************************************/
 /* Tester_autorisation: envoi de l'autorisation ou non au client                                                              */
@@ -110,22 +90,14 @@
      }
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-             "Tester_autorisation: User '%s' (id=%d) found in database. Checking parameters.",
-              client->util->nom, client->util->id );
+             "%s: User '%s' (id=%d) found in database. Checking parameters.", __func__,
+              client->util->username, client->util->id );
 
 /*********************************************************** Compte du client *************************************************/
     if (!client->util->enable)                                                 /* Est-ce que son compte est toujours actif ?? */
      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  
-                "Tester_autorisation: Account disabled for %s(id=%d)", client->util->nom, client->util->id );
+                "%s: Account disabled for %s(id=%d)", __func__, client->util->username, client->util->id );
        Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_ACCOUNT_DISABLED, NULL, 0 );
-       Client_mode (client, DECONNECTE);
-       return(FALSE);
-     }
-
-    if (client->util->expire && client->util->date_expire<time(NULL) )                       /* Expiration temporel du compte */
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING, 
-                "Tester_autorisation: Account expired for %s(id=%d)", client->util->nom, client->util->id );
-       Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_ACCOUNT_EXPIRED, NULL, 0 );
        Client_mode (client, DECONNECTE);
        return(FALSE);
      }
@@ -134,26 +106,16 @@
     if (!client->certif)                                                                            /* si pas de certificat ! */
      { if ( Check_utilisateur_password( client->util, ident->passwd ) == FALSE )                     /* Comparaison des codes */
         { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  
-                  "Tester_autorisation: Password error for '%s'(id=%d)", client->util->nom, client->util->id );
+                  "%s: Password error for '%s'(id=%d)", __func__, client->util->username, client->util->id );
           Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_REFUSE, NULL, 0 );
-          Ajouter_one_login_attemps( client->util->id, Config.max_login_attemps );                                 /* Dommage ! */
           Client_mode (client, DECONNECTE);
           return(FALSE);
         }
      }
 
-    if (client->util->mustchangepwd)                                        /* L'utilisateur doit-il changer son mot de passe */
-     { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_WARNING,  
-                "Tester_autorisation: User '%s'(id=%d) has to change his password",
-                 client->util->nom, client->util->id );
-       Envoi_client( client, TAG_CONNEXION, SSTAG_SERVEUR_NEEDCHANGEPWD, NULL, 0 );
-       Client_mode (client, WAIT_FOR_NEWPWD);
-       return(FALSE);
-     }
-
     Autoriser_client ( client );
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_INFO,
-             "Tester_autorisation: Autorisation sent for %s(id=%d)", client->util->nom, client->util->id );
+             "%s: Autorisation sent for %s(id=%d)", __func__, client->util->username, client->util->id );
                                                                                /* Le client est connecté, on en informe D.L.S */
     if (client->util->ssrv_bit_presence) SB(client->util->ssrv_bit_presence, 1);
     Client_mode (client, VALIDE);

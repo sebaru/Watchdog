@@ -47,7 +47,7 @@
  static gchar *Admin_dls_list_dls_tree ( gchar *response_src, gint dls_id, gint syn_id, struct DLS_TREE *dls_tree )
   { gchar *response = response_src;
     gboolean found = FALSE;
-    gchar chaine[128];
+    gchar chaine[256];
     GSList *liste;
 
     liste = dls_tree->Liste_plugin_dls;
@@ -68,7 +68,9 @@
                       dls_tree->syn_vars.syn_id, dls->plugindb.id, dls->plugindb.on, date, dls->conso, dls->plugindb.shortname );
           response = Admin_write ( response, chaine );
           g_snprintf( chaine, sizeof(chaine),
-                      " |         debug=%d, comm_out=%d, defaut=%d/%d, alarme=%d/%d, veille=%d, alerte=%d/%d, derangement=%d/%d, danger=%d/%d",
+                      " |                               debug = %d, comm_out = %d, defaut = %d/%d, alarme = %d/%d\n"
+                      " |                               veille = %d, alerte = %d/%d\n"
+                      " |                               derangement = %d/%d, danger = %d/%d",
                       dls->vars.debug, dls->vars.bit_comm_out, dls->vars.bit_defaut, dls->vars.bit_defaut_fixe,
                       dls->vars.bit_alarme, dls->vars.bit_alarme_fixe,
                       dls->vars.bit_veille,
@@ -82,8 +84,8 @@
     if (found)
      { g_snprintf( chaine, sizeof(chaine),
                    " | - SYN[%05d] - comm_out = %d, defaut = %d/%d, alarme = %d/%d\n"
-                   " |               veille = %d/%d, alerte = %d/%d"
-                   " |               derangement = %d/%d, danger = %d/%d",
+                   " |                veille = %d/%d, alerte = %d/%d\n"
+                   " |                derangement = %d/%d, danger = %d/%d",
                       dls_tree->syn_vars.syn_id, dls_tree->syn_vars.bit_comm_out,
                       dls_tree->syn_vars.bit_defaut, dls_tree->syn_vars.bit_defaut_fixe,
                       dls_tree->syn_vars.bit_alarme, dls_tree->syn_vars.bit_alarme_fixe,

@@ -63,7 +63,7 @@
     liste = Cfg_http.Liste_sessions;
     while ( liste )
      { session = (struct HTTP_SESSION *)liste->data;
-       g_snprintf( chaine, sizeof(chaine), " | ------------ ID = %s -------------", (session->util ? session->util->nom : "Unknown") );
+       g_snprintf( chaine, sizeof(chaine), " | ------------ ID = %s -------------", (session->util ? session->util->username : "Unknown") );
        Admin_write( response, chaine );
        g_snprintf( chaine, sizeof(chaine), " | - session_id    = %s", session->sid );
        Admin_write( response, chaine );
@@ -97,13 +97,13 @@ search_again:
     while ( liste )
      { session = (struct HTTP_SESSION *)liste->data;
        if ( ! strncmp ( session->sid, id, strlen(id) ) ) break;
-       if ( session->util && ( ! strcmp ( session->util->nom, id ) ) ) break;
+       if ( session->util && ( ! strcmp ( session->util->username, id ) ) ) break;
        liste = liste->next;
      }
     pthread_mutex_unlock( &Cfg_http.lib->synchro );
     if (liste)
      { g_snprintf( chaine, sizeof(chaine), " | - Session %sl(%s) from %s/%s killed",
-                   session->sid, (session->util ? session->util->nom : "nouser"), session->remote_name, session->remote_ip );
+                   session->sid, (session->util ? session->util->username : "nouser"), session->remote_name, session->remote_ip );
        Admin_write( response, chaine );
        Http_Liberer_session ( session );
        goto search_again;

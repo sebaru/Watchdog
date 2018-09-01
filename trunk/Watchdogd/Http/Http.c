@@ -143,7 +143,7 @@
     pss = lws_wsi_user ( wsi );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
              "%s: (sid %s) Sending Response code '%d' for '%s' ", __func__, Http_get_session_id(pss->session), code,
-             (pss->session ? (pss->session->util ? pss->session->util->nom : "--no user--") : "--no session--")
+             (pss->session ? (pss->session->util ? pss->session->util->username : "--no user--") : "--no session--")
             );
 
     header_cur = header;
@@ -167,7 +167,7 @@
     pss = lws_wsi_user ( wsi );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
              "%s: (sid %s) Sending Response code '%d' for '%s' (taille_buf=%d)", __func__, Http_get_session_id(pss->session), code,
-             (pss->session ? (pss->session->util ? pss->session->util->nom : "--no user--") : "--no session--"), taille_buf
+             (pss->session ? (pss->session->util ? pss->session->util->username : "--no user--") : "--no session--"), taille_buf
             );
 
     header_cur = header;
@@ -258,7 +258,7 @@
              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: No PHPSESSID. Killing.", __func__ );
                return(1);
              }
-            util = Rechercher_util_by_phpsessionid ( pss->sid );
+/*            util = Rechercher_util_by_phpsessionid ( pss->sid );*/
             if (!util)
              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: No user found for session %s.", __func__, pss->sid );
                return(1);

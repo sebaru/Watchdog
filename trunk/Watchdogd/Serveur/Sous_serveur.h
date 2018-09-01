@@ -82,7 +82,6 @@
  extern void Gerer_protocole_atelier( struct CLIENT *client );
  extern void Gerer_protocole_icone( struct CLIENT *client );
  extern void Gerer_protocole_dls( struct CLIENT *client );
- extern void Gerer_protocole_utilisateur( struct CLIENT *client );
  extern void Gerer_protocole_message( struct CLIENT *client );
  extern void Gerer_protocole_mnemonique( struct CLIENT *client );
  extern void Gerer_protocole_supervision( struct CLIENT *client );
@@ -107,16 +106,8 @@
 
                                                                                                               /* Dans ident.c */
  extern gboolean Tester_autorisation ( struct CLIENT *client, struct REZO_CLI_IDENT *ident );
- extern void Proto_set_password ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *util );
 
  extern void Client_mode ( struct CLIENT *client, gint mode );                                              /* Dans Serveur.c */
-
- extern void *Envoyer_utilisateurs_thread ( struct CLIENT *client );                                     /* Dans envoi_util.c */
- extern void Proto_ajouter_utilisateur ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *rezo_util );
- extern void Proto_effacer_utilisateur ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *rezo_util );
- extern void Proto_editer_utilisateur ( struct CLIENT *client, struct CMD_TYPE_UTILISATEUR *rezo_util );
- extern void Proto_valider_editer_utilisateur ( struct CLIENT *client,
-                                                struct CMD_TYPE_UTILISATEUR *rezo_util );
 
  extern void *Envoyer_plugins_dls_thread ( struct CLIENT *client );                                       /* Dans envoi_dls.c */
  extern void *Envoyer_plugins_dls_pour_message_thread ( struct CLIENT *client );

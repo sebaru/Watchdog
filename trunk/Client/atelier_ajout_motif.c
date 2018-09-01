@@ -201,8 +201,7 @@
                                  add_motif.angle = 0.0; /*infos->Adj_angle->value;*/
                                  add_motif.type_dialog = 0;               /* Type de la boite de dialogue */
                                  add_motif.type_gestion = 0;
-                                 add_motif.position_x = TAILLE_SYNOPTIQUE_X/2;
-                                 add_motif.position_y = TAILLE_SYNOPTIQUE_Y/2;
+                                 /*add_motif.position_x et posy positionné par le serveur */
                                  add_motif.largeur = Trame_motif_p0->gif_largeur;
                                  add_motif.hauteur = Trame_motif_p0->gif_hauteur;
                                  add_motif.rouge0 = 255;
