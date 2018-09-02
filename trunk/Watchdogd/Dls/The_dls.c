@@ -487,7 +487,9 @@
     if (tempo->status == TEMPO_NOT_COUNTING && etat == 1)
      { tempo->status = TEMPO_WAIT_FOR_DELAI_ON;
        if (tempo->confDB.random)
-        { tempo->confDB.delai_on  = tempo->confDB.random * (double)(rand_r(&seed)/RAND_MAX);
+        { gfloat ratio;
+          ratio = (gfloat)rand_r(&seed)/RAND_MAX;
+          tempo->confDB.delai_on  = (gint)(tempo->confDB.random * ratio);
           tempo->confDB.min_on    = 0;
           tempo->confDB.max_on    = 0;
           tempo->confDB.delai_off = 0;
