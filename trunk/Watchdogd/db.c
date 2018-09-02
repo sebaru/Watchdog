@@ -911,10 +911,15 @@
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
 
+    if (database_version < 3694)
+     { g_snprintf( requete, sizeof(requete), "UPDATE dls SET nbr_ligne = LENGTH(`sourcecode`)-LENGTH(REPLACE(`sourcecode`,'\n',''));" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
     Libere_DB_SQL(&db);
 
 fin:
-    database_version=3693;
+    database_version=3694;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
