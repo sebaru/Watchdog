@@ -895,19 +895,8 @@
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `login_failed` `login_attempts` int(11) NOT NULL DEFAULT '0'" );
        Lancer_requete_SQL ( db, requete );
-       g_snprintf( requete, sizeof(requete), "ALTER TABLE users ADD  `username` varchar(100) DEFAULT NULL; "
-                                             "ALTER TABLE users ADD  `ip_address` varchar(45) NOT NULL; "
-                                             "ALTER TABLE users ADD  `email` varchar(254) NOT NULL; "
-                                             "ALTER TABLE users ADD  `activation_code` varchar(40) DEFAULT NULL; "
-                                             "ALTER TABLE users ADD  `forgotten_password_code` varchar(40) DEFAULT NULL; "
-                                             "ALTER TABLE users ADD  `forgotten_password_time` int(11) unsigned DEFAULT NULL; "
-                                             "ALTER TABLE users ADD  `remember_code` varchar(40) DEFAULT NULL; "
-                                             "ALTER TABLE users ADD  `created_on` int(11) unsigned NOT NULL; "
-                                             "ALTER TABLE users ADD  `last_login` int(11) unsigned DEFAULT NULL; "
-                                             "ALTER TABLE users ADD  `active` tinyint(1) unsigned DEFAULT NULL; "
-                                             "ALTER TABLE users ADD  `first_name` varchar(50) DEFAULT NULL; "
-                                             "ALTER TABLE users ADD  `last_name` varchar(50) DEFAULT NULL; "
-                                             "ALTER TABLE users ADD  `company` varchar(100) DEFAULT NULL; "
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users ADD `username` varchar(100) DEFAULT NULL; "
+                                             "ALTER TABLE users ADD `email` varchar(254) NOT NULL; "
                                              "ALTER TABLE users ADD `password` varchar(255) NOT NULL; ");
        Lancer_requete_SQL ( db, requete );
      }
@@ -916,10 +905,16 @@
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` CHANGE `ip` `hostname` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT ''" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
+
+    if (database_version < 3693)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls ADD `nbr_ligne` int(11) NOT NULL DEFAULT '0' AFTER `sourcecode`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
     Libere_DB_SQL(&db);
 
 fin:
-    database_version=3687;
+    database_version=3693;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }

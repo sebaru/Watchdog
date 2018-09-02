@@ -62,6 +62,7 @@
     guint compil_date;                                                                        /* Date de derniere compilation */
     guint compil_status;                                                                    /* Statut de derniere compilation */
     guint nbr_compil;                                                                         /* Nombre de compilation totale */
+    guint nbr_ligne;                                                                               /* Nombre de ligne de code */
   };
  
  struct CMD_TYPE_SOURCE_DLS
@@ -79,7 +80,6 @@
     DLS_COMPIL_OK_WITH_WARNINGS,
     DLS_COMPIL_OK,
     DLS_COMPIL_WARNING_FUNCTION_MISSING,
-    DLS_COMPIL_ERROR_BIT_SET_BUT_NOT_OWNED,
     NBR_DLS_COMPIL_STATUS
   };
 

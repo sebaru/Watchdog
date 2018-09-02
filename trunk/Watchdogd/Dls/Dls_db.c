@@ -179,7 +179,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.package,dls.syn_id,parent_syn.page,syn.page,"
-                "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id"
+                "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id,nbr_ligne"
                 " FROM dls INNER JOIN syns as syn ON dls.syn_id = syn.id "
                 " INNER JOIN syns AS parent_syn ON parent_syn.id=syn.parent_id"
                 " %s "
@@ -241,6 +241,7 @@
        dls->compil_date   = atoi(db->row[8]);
        dls->compil_status = atoi(db->row[9]);
        dls->nbr_compil    = atoi(db->row[10]);
+       dls->nbr_ligne     = atoi(db->row[12]);
      }
     return( dls );
   }
@@ -262,7 +263,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT dls.id,dls.name,dls.shortname,dls.actif,dls.package,dls.syn_id,parent_syn.page,syn.page,"
-                "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id"
+                "dls.compil_date,dls.compil_status,dls.nbr_compil,tech_id,nbr_ligne"
                 " FROM %s as dls INNER JOIN %s as syn ON dls.syn_id = syn.id "
                 " INNER JOIN %s AS parent_syn ON parent_syn.id=syn.parent_id"
                 " WHERE dls.id = %d",
@@ -291,7 +292,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "
-                "compil_date='%d', compil_status='%d', nbr_compil=nbr_compil+1 WHERE id=%d",
+                "compil_date='%d', compil_status='%d', nbr_compil=nbr_compil+1, "
+                "nbr_ligne = LENGTH(`sourcecode`)-LENGTH(REPLACE(`sourcecode`,'\n',''))+1 WHERE id=%d",
                 NOM_TABLE_DLS, (gint)time(NULL), status, id );
 
     db = Init_DB_SQL();       

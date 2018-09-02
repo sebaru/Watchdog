@@ -364,12 +364,10 @@
      }
 
     retour = Traduire_DLS( id );                                                                            /* Traduction DLS */
-    Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-             "%s: fin traduction %06d : %d", __func__, id, retour );
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: fin traduction %06d : %d", __func__, id, retour );
 
     if (retour == TRAD_DLS_ERROR_FILE)                                                /* Retour de la traduction D.L.S vers C */
-     { Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-               "%s: envoi erreur file Traduction D.L.S %06d", id );
+     { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: envoi erreur file Traduction D.L.S %06d", id );
       Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_LOAD_SOURCE );
       return( DLS_COMPIL_ERROR_LOAD_SOURCE );
      }

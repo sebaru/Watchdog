@@ -47,6 +47,7 @@
      COLONNE_COMPIL_DATE,
      COLONNE_COMPIL_STATUS,
      COLONNE_COMPIL_NBR,
+     COLONNE_NBR_LIGNE,
 /*     COLONNE_COLOR_FOND,
      COLONNE_COLOR_TEXTE,*/
      NBR_COLONNE
@@ -485,7 +486,8 @@
                                               G_TYPE_STRING,                                                           /* Nom */
                                               G_TYPE_STRING,                                                   /* Compil_date */
                                               G_TYPE_STRING,                                                 /* Compil_status */
-                                              G_TYPE_UINT                                                      /* Compil_nbr */
+                                              G_TYPE_UINT,                                                      /* Compil_nbr */
+                                              G_TYPE_UINT                                                        /* nbr ligne */
 /*                                            GDK_TYPE_COLOR,                                                   /* Color_fond */
 /*                                            GDK_TYPE_COLOR                                                   /* Color_texte */
                                 );
@@ -588,6 +590,14 @@
     gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_COMPIL_NBR);                                 /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
 
+    renderer = gtk_cell_renderer_text_new();                                                  /* Colonne du nom de plugin_dls */
+    colonne = gtk_tree_view_column_new_with_attributes ( _("# of lines"), renderer,
+                                                         "text", COLONNE_NBR_LIGNE,
+                                                         NULL);
+    gtk_tree_view_column_set_reorderable(colonne, TRUE);                                       /* On peut deplacer la colonne */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_NBR_LIGNE);                                  /* On peut la trier */
+    gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_plugin_dls), colonne );
+
     /*gtk_tree_view_set_reorderable( GTK_TREE_VIEW(Liste_plugin_dls), TRUE );*/
     gtk_tree_view_set_rules_hint( GTK_TREE_VIEW(Liste_plugin_dls), TRUE );                                 /* Pour faire beau */
 
@@ -674,6 +684,7 @@
                          COLONNE_COMPIL_DATE, date_compil,
                          COLONNE_COMPIL_STATUS, Dls_compil_status(plugin_dls->compil_status),
                          COLONNE_COMPIL_NBR, plugin_dls->nbr_compil,
+                         COLONNE_NBR_LIGNE, plugin_dls->nbr_ligne,
                          /*COLONNE_COLOR_FOND, &COULEUR_PLUGIN_FOND[plugin_dls->type],
                          COLONNE_COLOR_TEXTE, &COULEUR_PLUGIN_TEXTE[plugin_dls->type],*/
                           -1
