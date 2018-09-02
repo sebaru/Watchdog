@@ -133,8 +133,8 @@
     if (mnemo->type == MNEMO_HORLOGE)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "INSERT INTO syns_motifs "
-                   "SET mnemo_id=LAST_INSERT_ID(),libelle='Horloge',syn_id='%d',posx='150,0',posy='150,0',"
-                   "larg = '15.0', haut = '15.0'",
+                   "SET mnemo_id=LAST_INSERT_ID(),libelle='Horloge',syn_id='%d',"
+                   "posx = '150.0', posy = '150.0', larg = '15.0', haut = '15.0'",
                    mnemo->syn_id );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
