@@ -80,7 +80,7 @@
  gboolean Recuperer_imsgpDB ( struct DB *db )
   { gchar requete[512];
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,name,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available "
+                "SELECT id,username,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available "
                 " FROM %s as user ORDER BY user.name",
                 NOM_TABLE_UTIL );
 
@@ -94,7 +94,7 @@
  static gboolean Recuperer_all_available_imsgDB ( struct DB *db )
   { gchar requete[512];
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,name,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available "
+                "SELECT id,username,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available "
                 " FROM %s as user WHERE enable=1 AND imsg_enable=1 AND imsg_available=1 ORDER BY user.name",
                 NOM_TABLE_UTIL );
 
@@ -166,7 +166,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT id,name,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available "
+                "SELECT id,username,enable,comment,imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available "
                 " FROM %s as user WHERE enable=1 AND imsg_allow_cde=1 AND imsg_jabberid LIKE '%s' LIMIT 1",
                 NOM_TABLE_UTIL, jabberid );
     g_free(jabberid);
