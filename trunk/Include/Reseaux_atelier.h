@@ -58,6 +58,7 @@
     gint    mnemo_id;
     gchar   mnemo_libelle [ NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8+1 ];
     gint    mnemo_type;
+    gchar   mnemo_acro_syn [ NBR_CARAC_ACRO_SYN_MNEMONIQUE_UTF8 + 1 ];
   };
  struct CMD_TYPE_MOTIFS
   { guint nbr_motifs;                                                         /* Nombre de structure CMD_TYPE_MOTIF suivantes */

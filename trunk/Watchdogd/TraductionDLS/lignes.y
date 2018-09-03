@@ -46,7 +46,7 @@
 %token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_TOP_ALERTE T_HORLOGE
 %token <val>    T_SPERS_DER T_SPERS_DERF T_SPERS_DAN T_SPERS_DANF T_OSYN_ACQ
 %token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_DOWN
-%token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LIBELLE T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM
+%token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL T_TRUE T_FALSE
 %type  <val>    ordre
@@ -741,6 +741,11 @@ une_option:     MODE T_EGAL ENTIER
                 | T_LIBELLE T_EGAL T_CHAINE
                 {{ $$=New_option();
                    $$->type = T_LIBELLE;
+                   $$->chaine = $3;
+                }}
+                | T_ETIQUETTE T_EGAL T_CHAINE
+                {{ $$=New_option();
+                   $$->type = T_ETIQUETTE;
                    $$->chaine = $3;
                 }}
                 | CLIGNO

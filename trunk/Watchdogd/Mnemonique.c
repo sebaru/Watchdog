@@ -95,7 +95,7 @@
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
  gboolean Mnemo_auto_create_for_dls ( struct CMD_TYPE_MNEMO_BASE *mnemo )
-  { gchar *acro, *libelle;
+  { gchar *acro, *libelle, *acro_syn;
     gchar requete[1024];
     gboolean retour;
     struct DB *db;
@@ -111,16 +111,26 @@
     if ( !libelle )
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "%s: Normalisation impossible. Mnemo NOT added nor modified.", __func__ );
+       g_free(acro);
+       return(FALSE);
+     }
+
+    acro_syn   = Normaliser_chaine ( mnemo->acro_syn );                                      /* Formatage correct des chaines */
+    if ( !acro_syn )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation impossible. Mnemo NOT added nor modified.", __func__ );
+       g_free(acro);
        g_free(libelle);
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                "INSERT INTO mnemos SET type='%d',num='-1',dls_id='%d',acronyme='%s',libelle='%s' "
-                " ON DUPLICATE KEY UPDATE libelle='%s'",
-                mnemo->type, mnemo->dls_id, acro, libelle, libelle );
+                "INSERT INTO mnemos SET type='%d',num='-1',dls_id='%d',acronyme='%s',libelle='%s',acro_syn='%s' "
+                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), acro_syn=VALUES(acro_syn)",
+                mnemo->type, mnemo->dls_id, acro, libelle, acro_syn );
     g_free(libelle);
     g_free(acro);
+    g_free(acro_syn);
 
     db = Init_DB_SQL();       
     if (!db)
@@ -134,7 +144,7 @@
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "INSERT INTO syns_motifs "
                    "SET mnemo_id=LAST_INSERT_ID(),libelle='Horloge',syn_id='%d',"
-                   "posx = '150.0', posy = '150.0', larg = '15.0', haut = '15.0'",
+                   "posx = '150.0', posy = '150.0', larg = '50.0', haut = '50.0'",
                    mnemo->syn_id );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
@@ -162,8 +172,7 @@
     ev_thread  = Normaliser_chaine ( mnemo->ev_thread );                                     /* Formatage correct des chaines */
     ev_host    = Normaliser_chaine ( mnemo->ev_host );                                       /* Formatage correct des chaines */
     if ( !(libelle && acro && ev_text && ev_thread && ev_host && tableau && acro_syn) )
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "%s: Normalisation impossible. Mnemo NOT added nor modified.", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible. Mnemo NOT added nor modified.", __func__ );
        if (libelle)   g_free(libelle);
        if (acro)      g_free(acro);
        if (tableau)   g_free(tableau);

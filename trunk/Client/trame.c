@@ -629,6 +629,18 @@ printf("Nouveau motif : id=%d, mnemo_type=%d, mnemo_id=%d\n", motif->id, motif->
     if (!motif->largeur) motif->largeur = trame_motif->gif_largeur;
     if (!motif->hauteur) motif->hauteur = trame_motif->gif_hauteur;
 
+    if (motif->mnemo_id)
+     { switch (motif->mnemo_type)
+        { case MNEMO_HORLOGE:
+           {  trame_motif->item_acro_syn = goo_canvas_text_new ( trame_motif->item_groupe,
+                                                                 motif->mnemo_acro_syn, 30.0, 00.0, -1, GTK_ANCHOR_WEST,
+                                                                "font", "arial", "fill_color", "yellow",
+                                                                 NULL );
+              break;
+           }
+        }
+     }
+    
     if ( flag )
      { GdkPixbuf *pixbuf;
 

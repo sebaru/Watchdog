@@ -909,6 +909,7 @@
                  { mnemo.type = MNEMO_MONOSTABLE;
                    g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
                    g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
+                   g_snprintf( mnemo.acro_syn, sizeof(mnemo.acro_syn), "%s", Get_option_chaine( alias->options, T_ETIQUETTE ) );
                    Mnemo_auto_create_for_dls ( &mnemo );
                    break;
                  }
@@ -916,6 +917,7 @@
                  { mnemo.type = MNEMO_BISTABLE;
                    g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
                    g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
+                   g_snprintf( mnemo.acro_syn, sizeof(mnemo.acro_syn), "%s", Get_option_chaine( alias->options, T_ETIQUETTE ) );
                    Mnemo_auto_create_for_dls ( &mnemo );
                    break;
                  }
@@ -930,6 +932,7 @@
                  { mnemo.type = MNEMO_HORLOGE;
                    g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
                    g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
+                   g_snprintf( mnemo.acro_syn, sizeof(mnemo.acro_syn), "%s", Get_option_chaine( alias->options, T_ETIQUETTE ) );
                    Mnemo_auto_create_for_dls ( &mnemo );
                    break;
                  }

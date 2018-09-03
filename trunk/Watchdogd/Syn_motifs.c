@@ -128,7 +128,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT sm.id,sm.libelle,icone,syn_id,access_level,bitctrl,bitclic,posx,posy,larg,haut,angle,"
-                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer,mnemo_id,m.libelle,m.type"
+                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer,mnemo_id,m.libelle,m.type,m.acro_syn"
                 " FROM syns_motifs AS sm LEFT JOIN mnemos AS m ON sm.mnemo_id = m.id"
                 " WHERE syn_id='%d' ORDER BY layer", id_syn );
 
@@ -180,6 +180,7 @@
        if (db->row[20])
         { motif->mnemo_id = atoi(db->row[20]);
           g_snprintf ( motif->mnemo_libelle, sizeof(motif->mnemo_libelle), "%s", db->row[21] );  /* Recopie dans la structure */
+          g_snprintf ( motif->mnemo_acro_syn, sizeof(motif->mnemo_acro_syn), "%s", db->row[22] );/* Recopie dans la structure */
           motif->mnemo_type = atoi(db->row[22]);
         } else motif->mnemo_id = 0;
      }
