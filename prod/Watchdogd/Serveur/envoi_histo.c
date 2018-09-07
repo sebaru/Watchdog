@@ -45,7 +45,7 @@
     if (!rezo_histo) return;
     time( (time_t *)&rezo_histo->date_fixe );
     rezo_histo->alive = TRUE;                                                          /* Le message est toujours d'actualité */
-    g_snprintf( rezo_histo->nom_ack, sizeof(rezo_histo->nom_ack), "%s", client->util->nom );
+    g_snprintf( rezo_histo->nom_ack, sizeof(rezo_histo->nom_ack), "%s", client->util->username );
 
     retour = Modifier_histo_msgsDB ( rezo_histo );
     if (retour==FALSE)

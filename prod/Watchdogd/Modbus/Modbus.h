@@ -95,7 +95,7 @@
     gboolean enable;                                                                           /* Le module doit-il tourner ? */
     guint watchdog;                                           /* Le module doit-il etre auto-supervisé ? en dixeme de seconde */
     guint bit;                                                           /* Bit interne B d'etat communication avec le module */
-    gchar ip[32];                                                                             /* Adresses IP du module MODBUS */
+    gchar hostname[32];                                                                       /* Adresses IP du module MODBUS */
     gchar libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                                                    /* Libelle du modbus */
     guint map_E;
     guint max_nbr_E;
@@ -123,6 +123,8 @@
     gboolean do_check_eana;                                                           /* Interrogation des bornes EANA ou non */
     gboolean request;                                    /* Une requete a-t'elle été envoyée, et donc en attente de réponse ? */
     struct TRAME_MODBUS_REPONSE response;
+    gpointer *DI;                                                              /* Tableau dynamique d'accès aux bits internes */
+    gpointer *AI;                                                              /* Tableau dynamique d'accès aux bits internes */
   };
 
 /****************************************************** Déclaration des prototypes ********************************************/

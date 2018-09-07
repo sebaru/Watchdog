@@ -30,6 +30,7 @@
 
  #define NBR_CARAC_PLUGIN_DLS       40                                                                 /* Nom d'un plugin DLS */
  #define NBR_CARAC_PLUGIN_DLS_UTF8  (2*NBR_CARAC_PLUGIN_DLS)
+ #define NBR_CARAC_PLUGIN_DLS_TECHID  25
 
  #define NBR_BIT_DLS           10000
 
@@ -51,7 +52,7 @@
  struct CMD_TYPE_PLUGIN_DLS
   { gchar nom[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
     gchar shortname[ NBR_CARAC_PLUGIN_DLS_UTF8 + 1 ];
-    gchar tech_id[25];
+    gchar tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gchar package[130];
     gchar syn_parent_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
     gchar syn_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
@@ -61,6 +62,7 @@
     guint compil_date;                                                                        /* Date de derniere compilation */
     guint compil_status;                                                                    /* Statut de derniere compilation */
     guint nbr_compil;                                                                         /* Nombre de compilation totale */
+    guint nbr_ligne;                                                                               /* Nombre de ligne de code */
   };
  
  struct CMD_TYPE_SOURCE_DLS
@@ -78,7 +80,6 @@
     DLS_COMPIL_OK_WITH_WARNINGS,
     DLS_COMPIL_OK,
     DLS_COMPIL_WARNING_FUNCTION_MISSING,
-    DLS_COMPIL_ERROR_BIT_SET_BUT_NOT_OWNED,
     NBR_DLS_COMPIL_STATUS
   };
 

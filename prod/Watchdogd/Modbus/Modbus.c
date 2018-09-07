@@ -107,7 +107,7 @@
 /******************************************************************************************************************************/
  static gint Ajouter_modifier_modbusDB ( struct MODBUSDB *modbus, gboolean ajout )
   { gchar requete[2048];
-    gchar *libelle, *ip;
+    gchar *libelle, *hostname;
     gboolean retour_sql;
     struct DB *db;
     gint retour;
@@ -118,9 +118,9 @@
        return(-1);
      }
 
-    ip = Normaliser_chaine ( modbus->ip );                                                   /* Formatage correct des chaines */
-    if (!ip)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: Normalisation ip impossible", __func__ );
+    hostname = Normaliser_chaine ( modbus->hostname );                                                   /* Formatage correct des chaines */
+    if (!hostname)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: Normalisation hostname impossible", __func__ );
        Libere_DB_SQL( &db );
        w_free(libelle, "free libelle");
        return(-1);
@@ -128,24 +128,24 @@
 
     if ( ajout == TRUE )
      { g_snprintf( requete, sizeof(requete),
-                  "INSERT INTO %s(instance_id,date_create,enable,ip,bit,watchdog,libelle,map_E,map_EA,map_A,map_AA,max_nbr_E) "
+                  "INSERT INTO %s(instance_id,date_create,enable,hostname,bit,watchdog,libelle,map_E,map_EA,map_A,map_AA,max_nbr_E) "
                   "VALUES ('%s',NOW(),'%d','%s',%d,%d,'%s','%d','%d','%d','%d','%d')",
-                   NOM_TABLE_MODULE_MODBUS, g_get_host_name(), modbus->enable, ip, modbus->bit, modbus->watchdog, libelle,
+                   NOM_TABLE_MODULE_MODBUS, g_get_host_name(), modbus->enable, hostname, modbus->bit, modbus->watchdog, libelle,
                    modbus->map_E, modbus->map_EA, modbus->map_A, modbus->map_AA, modbus->max_nbr_E
                  );
      }
     else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                   "UPDATE %s SET "             
-                  "enable='%d',ip='%s',bit='%d',watchdog='%d',libelle='%s',"
+                  "enable='%d',hostname='%s',bit='%d',watchdog='%d',libelle='%s',"
                   "map_E='%d',map_EA='%d',map_A='%d',map_AA='%d',max_nbr_E='%d'"
                   " WHERE id=%d",
                    NOM_TABLE_MODULE_MODBUS,
-                   modbus->enable, ip, modbus->bit, modbus->watchdog, libelle,
+                   modbus->enable, hostname, modbus->bit, modbus->watchdog, libelle,
                    modbus->map_E, modbus->map_EA, modbus->map_A, modbus->map_AA, modbus->max_nbr_E,
                    modbus->id );
       }
-    w_free(ip, "free ip");
+    w_free(hostname, "free hostname");
     w_free(libelle, "free libelle2");
 
     db = Init_DB_SQL();       
@@ -187,7 +187,7 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,date_create,enable,ip,bit,watchdog,libelle,map_E,map_EA,map_A,map_AA,max_nbr_E "
+                "SELECT id,date_create,enable,hostname,bit,watchdog,libelle,map_E,map_EA,map_A,map_AA,max_nbr_E "
                 " FROM %s ORDER BY libelle",
                 NOM_TABLE_MODULE_MODBUS );
 
@@ -212,7 +212,7 @@
                           "%s: Erreur allocation mémoire", __func__ );
     else
      { g_snprintf( modbus->libelle, sizeof(modbus->libelle), "%s", db->row[6] );
-       g_snprintf( modbus->ip, sizeof(modbus->ip), "%s", db->row[3] );
+       g_snprintf( modbus->hostname, sizeof(modbus->hostname), "%s", db->row[3] );
        g_snprintf( modbus->date_create, sizeof(modbus->date_create), "%s", db->row[1] );
        modbus->id       = atoi(db->row[0]);
        modbus->enable   = atoi(db->row[2]);
@@ -293,6 +293,8 @@
     module->date_retente = Partage->top + MODBUS_RETRY;
     for ( cpt = module->modbus.map_EA; cpt<module->nbr_entree_ana; cpt++)
      { SEA_range( cpt, 0 ); }
+    g_free(module->DI);
+    g_free(module->AI);
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
              "%s : Module %d disconnected", __func__, module->modbus.id );
     SB( module->modbus.bit, 0 );                                                  /* Mise a zero du bit interne lié au module */
@@ -318,13 +320,13 @@
     sndtimeout.tv_usec =  0;
 
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-             "%s: Trying to connect module %d to %s", __func__, module->modbus.id, module->modbus.ip );
+             "%s: Trying to connect module %d to %s", __func__, module->modbus.id, module->modbus.hostname );
 
-    s = getaddrinfo( module->modbus.ip, "502", &hints, &result);
+    s = getaddrinfo( module->modbus.hostname, "502", &hints, &result);
     if (s != 0)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                 "%s: getaddrinfo Failed for module %d (%s) (%s)", __func__,
-                 module->modbus.id, module->modbus.ip, gai_strerror(s) );
+                 module->modbus.id, module->modbus.hostname, gai_strerror(s) );
        return(FALSE);
      }
 
@@ -338,28 +340,28 @@
        if (connexion == -1)
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                    "%s: Socket creation failed for modbus %d (%s)", __func__,
-                    module->modbus.id, module->modbus.ip );
+                    module->modbus.id, module->modbus.hostname );
           continue;
         }
 
        if ( setsockopt ( connexion, SOL_SOCKET, SO_SNDTIMEO, (char *)&sndtimeout, sizeof(sndtimeout)) < 0 )
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                    "%s: Socket Set Options failed for modbus %d (%s)", __func__,
-                    module->modbus.id, module->modbus.ip );
+                    module->modbus.id, module->modbus.hostname );
           continue;
         }
         
        if (connect(connexion, rp->ai_addr, rp->ai_addrlen) != -1)
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
                    "%s: %d (%s) family=%d", __func__,
-                    module->modbus.id, module->modbus.ip, rp->ai_family );
+                    module->modbus.id, module->modbus.hostname, rp->ai_family );
 
           break;  /* Success */
         }
        else
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
                    "%s: connexion refused by module %d (%s) family=%d error '%s'", __func__,
-                    module->modbus.id, module->modbus.ip, rp->ai_family, strerror(errno) );
+                    module->modbus.id, module->modbus.hostname, rp->ai_family, strerror(errno) );
         }
        close(connexion);                                                       /* Suppression de la socket qui n'a pu aboutir */
      }
@@ -373,6 +375,8 @@
     module->transaction_id = 1;
     module->started = TRUE;
     module->mode = MODBUS_GET_DESCRIPTION;
+    module->DI = NULL;
+    module->AI = NULL;
 
     return(TRUE);
   }
@@ -386,7 +390,7 @@
     Deconnecter_module  ( module );                                                      /* Deconnexion du module en question */
     Cfg_modbus.Modules_MODBUS = g_slist_remove ( Cfg_modbus.Modules_MODBUS, module );
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-             "%s: Dechargement module %d (%s)", __func__, module->modbus.id, module->modbus.ip );
+             "%s: Dechargement module %d (%s)", __func__, module->modbus.id, module->modbus.hostname );
     w_free(module, "free module");
   }
 /******************************************************************************************************************************/
@@ -439,7 +443,7 @@
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                "%s: failed for module %d (%s): error %d", __func__,
-               module->modbus.id, module->modbus.ip, retour );
+               module->modbus.id, module->modbus.hostname, retour );
        Deconnecter_module( module );
      }
     else
@@ -468,7 +472,7 @@
     if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                "%s: failed for module %d (%s): error %d", __func__,
-               module->modbus.id, module->modbus.ip, retour );
+               module->modbus.id, module->modbus.hostname, retour );
        Deconnecter_module( module );
      }
     else
@@ -826,6 +830,47 @@
     else module->request = TRUE;                                              /* Une requete a élé lancée */
   }
 /******************************************************************************************************************************/
+/* Modbus_do_mapping : mappe les entrees/sorties Wago avec la zone de mémoire interne dynamique                               */
+/* Entrée : la structure referencant le module                                                                                */
+/* Sortie : rien                                                                                                              */
+/******************************************************************************************************************************/
+ static void Modbus_do_mapping ( struct MODULE_MODBUS *module )
+  { struct CMD_TYPE_MNEMO_BASE *mnemo;
+    gchar critere[80];
+    struct DB *db;
+    gint cpt;
+
+    module->AI = (gpointer *)g_try_malloc0( sizeof(gpointer) * module->nbr_entree_ana );
+    if (!module->AI)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Memory Error for AI", __func__ );
+       return;
+     }
+    module->DI = (gpointer *)g_try_malloc0( sizeof(gpointer) * module->nbr_entree_tor );
+    if (!module->DI)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Memory Error DI", __func__ );
+       return;
+     }
+    for (cpt=0; cpt<module->nbr_entree_ana; cpt++)
+     { g_snprintf( critere, sizeof(critere),"%s_EA%d", module->modbus.libelle, cpt);
+       if (Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ))
+        { while ( (mnemo=Recuperer_mnemo_baseDB_suite ( &db )) != NULL )
+           { Dls_data_set_AI ( mnemo->acronyme, mnemo->dls_tech_id, (gpointer)&module->AI[cpt], 0.0 );
+             g_free(mnemo);
+           }
+        }
+     }
+    for (cpt=0; cpt<module->nbr_entree_tor; cpt++)
+     { g_snprintf( critere, sizeof(critere),"%s_E%d", module->modbus.libelle, cpt);
+       if (Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ))
+        { while ( (mnemo=Recuperer_mnemo_baseDB_suite ( &db )) != NULL )
+           { Dls_data_set_bool ( mnemo->acronyme, mnemo->dls_tech_id, (gpointer)&module->DI[cpt], FALSE );
+             g_free(mnemo);
+           }
+        }
+     }
+
+  }
+/******************************************************************************************************************************/
 /* Recuperer_borne: Recupere les informations d'une borne MODBUS                                                              */
 /* Entrée: identifiants des modules et borne                                                                                  */
 /* Sortie: ?                                                                                                                  */
@@ -858,6 +903,7 @@
                cpt_e = module->modbus.map_E;
                for ( cpt_poid = 1, cpt_byte = 1, cpt = 0; cpt<module->nbr_entree_tor; cpt++)
                 { SE( cpt_e, ( module->response.data[ cpt_byte ] & cpt_poid ) );
+                  Dls_data_set_bool ( NULL, NULL, (gpointer)&module->DI[cpt], (module->response.data[ cpt_byte ] & cpt_poid) );
                   cpt_e++;
                   cpt_poid = cpt_poid << 1;
                   if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
@@ -874,6 +920,7 @@
                              reponse  = module->response.data[ 2*cpt + 1 ] << 5;
                              reponse |= module->response.data[ 2*cpt + 2 ] >> 3;
                              SEA( cpt_e, reponse );
+                             Dls_data_set_AI ( NULL, NULL, (gpointer)&module->AI[cpt], reponse );
                            }
                           else SEA_range( cpt_e, 0 );
                           break;
@@ -977,13 +1024,14 @@
                                              else module->nbr_entree_tor = nbr;
                   if (module->modbus.max_nbr_E>0)
                    { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                               "%s: Get number Entree TOR = %d", __func__, module->nbr_entree_tor );
+                               "%s: Get number Entree TOR = %d (forced)", __func__, module->nbr_entree_tor );
                    }
                   else
                    { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                               "%s: Get number Entree TOR = %d (forced)", __func__, module->nbr_entree_tor );
+                               "%s: Get number Entree TOR = %d", __func__, module->nbr_entree_tor );
                    }
                   module->mode = MODBUS_GET_NBR_DO;
+                  Modbus_do_mapping( module );                                     /* Initialise le mapping des I/O du module */
                 }
                break;
           case MODBUS_GET_NBR_DO:

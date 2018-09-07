@@ -57,8 +57,14 @@
           };
   };
 
+ enum
+  { ALIAS_TYPE_STATIC,
+    ALIAS_TYPE_DYNAMIC
+  };
+
  struct ALIAS
-  { gchar *nom;
+  { gint type;                                                                                 /* Alias static ou dynamique ? */
+    gchar *nom;
     gint bit;                                                                                /* Type de tableau (E/A/B/M....) */
     gint num;                                                                                  /* Numero du bit interne ciblé */
     int barre;                                                                               /* Represente la negation ou pas */
@@ -73,10 +79,10 @@
  extern void Emettre_erreur_new( gchar *format, ... );
  extern void Emettre_init_alias( void );
  extern struct COMPARATEUR *New_comparateur( void );
- extern gboolean Check_ownership ( gint type, gint num );
- extern gchar *New_condition_bi( int barre, int num, GList *options );
  extern gchar *New_condition_entree( int barre, int num, GList *options );
+ extern gchar *New_condition_bi( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_mono( int barre, struct ALIAS *alias, GList *options );
+ extern gchar *New_condition_tempo( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_horloge( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_vars( int barre, gchar *nom );
  extern struct ACTION *New_action( void );
@@ -84,14 +90,13 @@
  extern struct ACTION *New_action_sortie( int num, int barre );
  extern struct ACTION *New_action_vars_mono( gchar *nom );
  extern struct ACTION *New_action_activite_fixe( void );
- extern struct ACTION *New_action_mono( int num );
  extern struct ACTION *New_action_mono_by_alias( struct ALIAS *alias );
  extern struct ACTION *New_action_icone( int num, GList *options );
- extern struct ACTION *New_action_tempo( int num, GList *options );
- extern struct ACTION *New_action_bi( int num, int barre );
+ extern struct ACTION *New_action_tempo( struct ALIAS *alias, GList *options );
+ extern struct ACTION *New_action_bi_by_alias( struct ALIAS *alias, gint barre );
  extern struct ACTION *New_action_cpt_h( int num, GList *options );
  extern struct ACTION *New_action_cpt_imp( int num, GList *options );
- extern gboolean New_alias( char *nom, int bit, int num, int barre, GList *options );
+ extern gboolean New_alias(  gint type, char *nom, int bit, int num, int barre, GList *options );
  extern struct ALIAS *Get_alias_par_nom( char *nom );
  extern struct OPTION *New_option( void );
  /*extern int Get_option_entier( GList *liste_options, gint type );*/

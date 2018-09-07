@@ -54,7 +54,7 @@
     gboolean log_dls;                                                             /* TRUE si log_override */
     gboolean log_arch;                                                            /* TRUE si log_override */
     gboolean log_db;                                                          /* TRUE si log des acces DB */
-    guint max_login_failed;   /* a virer */                            /* Nombre maximum d'echec de login */
+    guint max_login_attempts;   /* a virer */                            /* Nombre maximum d'echec de login */
     struct LOG *log;                                                         /* Pour l'affichage des logs */
     gint single;                                                                /* Demarrage des thread ? */
     gint compil;                                            /* Compilation des plugins DLS au demarrage ? */

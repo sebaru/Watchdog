@@ -48,13 +48,16 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  gchar *Admin_get ( gchar *response, gchar *ligne )
-  { gchar commande[128], chaine[128];
+  { gchar commande[128], chaine[256];
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'GET'" );
 
        response = Admin_write ( response, " | - new_b $name $owner    - Get bistable $name_$owner" );
+       response = Admin_write ( response, " | - new_t $name $owner    - Get Tempo $name_$owner" );
+       response = Admin_write ( response, " | - new_ea $name $owner   - Get Analog Input $name_$owner" );
+       response = Admin_write ( response, " | - list_ea               - List all dynamic Digital Input" );
        response = Admin_write ( response, " | - list                  - List all running bits" );
        response = Admin_write ( response, " | - e $num                - Get E[$num]" );
        response = Admin_write ( response, " | - ea $num               - Get EA[$num]" );
@@ -88,6 +91,27 @@
         { g_snprintf( chaine, sizeof(chaine), " | - T -> num '%d' out of range", num );
           response = Admin_write ( response, chaine );
 	       }
+     } else
+    if ( ! strcmp ( commande, "new_t" ) )
+     { gchar nom[80], owner[80];
+       if (sscanf ( ligne, "%s %s %s", commande, nom, owner ) == 3)                      /* Découpage de la ligne de commande */
+        { struct TEMPO *tempo = NULL;
+          Dls_data_get_tempo ( nom, owner, (gpointer)&tempo );
+          if (tempo)
+           { g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s -> delai_on=%d min_on=%d max_on=%d delai_off=%d", nom, owner,
+			                   tempo->confDB.delai_on, tempo->confDB.min_on, tempo->confDB.max_on, tempo->confDB.delai_off );
+             response = Admin_write ( response, chaine );
+             g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", nom, owner,
+                      tempo->state, tempo->status, tempo->date_on,
+                      (tempo->date_on > Partage->top ? (tempo->date_on - Partage->top)/10.0 : 0.0),
+                      tempo->date_off,
+                     (tempo->date_off > Partage->top ? (tempo->date_off - Partage->top)/10.0 : 0.0) );
+             response = Admin_write ( response, chaine );
+           } else
+           { g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s not found", nom, owner );
+             response = Admin_write ( response, chaine );
+	          }
+        }
      } else
     if ( ! strcmp ( commande, "i" ) )
      { int num;
@@ -144,6 +168,22 @@
         } else
         { g_snprintf( chaine, sizeof(chaine), " | - EA -> num '%d' out of range (max=%d)", num, NBR_ENTRE_ANA ); }
        response = Admin_write ( response, chaine );
+     } else
+    if ( ! strcmp ( commande, "list_ea" ) )
+     { GSList *liste;
+       liste = Partage->Dls_data_AI;
+       while (liste)
+        { struct ANALOG_INPUT *ai = liste->data;
+          g_snprintf( chaine, sizeof(chaine),
+                      " | - EA '%s:%s' = %8.2f %s, val_avant_ech=%8.2f, inrange=%d\n"
+                      "                  type=%d, last_arch=%d (%ds ago), min=%8.2f, max=%8.2f",
+                      ai->tech_id, ai->nom, ai->val_ech, ai->confDB.unite, ai->val_avant_ech, ai->inrange,
+                      ai->confDB.type, ai->last_arch, (Partage->top - ai->last_arch)/10,
+                      ai->confDB.min, ai->confDB.max 
+                    );
+          response = Admin_write ( response, chaine );
+          liste = g_slist_next(liste);
+        }
      } else
     if ( ! strcmp ( commande, "r" ) )
      { int num;

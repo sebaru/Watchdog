@@ -46,7 +46,7 @@
 %token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_TOP_ALERTE T_HORLOGE
 %token <val>    T_SPERS_DER T_SPERS_DERF T_SPERS_DAN T_SPERS_DANF T_OSYN_ACQ
 %token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_DOWN
-%token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LIBELLE
+%token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL T_TRUE T_FALSE
 %type  <val>    ordre
@@ -89,7 +89,7 @@ listeAlias:     un_alias listeAlias
                 
 un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                 {{ int taille;
-                   if ( New_alias($2, $4, -1, 0, $5) == FALSE )                                              /* Deja defini ? */
+                   if ( New_alias(ALIAS_TYPE_DYNAMIC, $2, $4, -1, 0, $5) == FALSE )                         /* Deja defini ? */
                     { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
                 }}
                 | T_STATIC ID EQUIV barre alias_bit ENTIER PVIRGULE
@@ -97,20 +97,20 @@ un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                    switch($5)
                     { case ENTREE:
                       case SORTIE:
-                      case T_BI  : if ( New_alias($2, $5, $6, $4, NULL) == FALSE )                           /* Deja defini ? */
+                      case T_BI  : if ( New_alias(ALIAS_TYPE_STATIC, $2, $5, $6, $4, NULL) == FALSE )       /* Deja defini ? */
                                     { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
                                    break;
-                      case T_TEMPO :
                       case EANA  :
                       case T_MONO  :
                       case CPT_H :
                       case T_CPT_IMP:
+                      case T_TEMPO:
                       case T_MSG :
                       case T_REGISTRE :
                       case ICONE : if ($4==1)                                             /* Barre = 1 ?? */
                                     { Emettre_erreur_new( "Ligne %d: Use of '/%s' is forbidden", DlsScanner_get_lineno(), $2 ); }
                                    else
-                                    { if (New_alias($2, $5, $6, 0, NULL) == FALSE)
+                                    { if (New_alias(ALIAS_TYPE_STATIC, $2, $5, $6, 0, NULL) == FALSE)
                                        { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
                                     }
                                    break;
@@ -264,7 +264,6 @@ calcul_expr3:   VALF
 
 calcul_ea_result: T_REGISTRE ENTIER
                 {{ $$ = $2;
-                   Check_ownership ( MNEMO_REGISTRE, $2 );
                 }}
                 | ID
                 {{ struct ALIAS *alias;
@@ -275,7 +274,6 @@ calcul_ea_result: T_REGISTRE ENTIER
                     { switch(alias->bit)               /* On traite que ce qui peut passer en "condition" */
                        { case T_REGISTRE:
                           { $$ = alias->num;
-                            Check_ownership ( MNEMO_REGISTRE, alias->num );
                             break;
                           }
                          default: 
@@ -335,9 +333,9 @@ unite:          modulateur ENTIER HEURE ENTIER
                 }}
                 | T_START
                 {{ int taille;
-                   taille = 10;
+                   taille = 20;
                    $$ = New_chaine(taille);
-                   g_snprintf( $$, taille, "(start)" );
+                   g_snprintf( $$, taille, "(vars->starting)" );
                 }}
                 | T_TRUE
                 {{ int taille;
@@ -360,19 +358,16 @@ unite:          modulateur ENTIER HEURE ENTIER
                 | T_OSYN_ACQ
                 {{ $$ = g_strdup("vars->bit_acquit");
                 }}
-                | T_ACT_DOWN
-                {{ $$ = g_strdup("vars->bit_activite_down");
+                | barre T_ACT_DOWN
+                {{ if ($1) $$ = g_strdup("!vars->bit_activite_down");
+                      else $$ = g_strdup("vars->bit_activite_down");
                 }}
-                | barre T_BI ENTIER liste_options
-                {{ $$ = New_condition_bi ( $1, $3, $4 );
-                   Liberer_options($4);
-                }}
-                | barre T_MONO ENTIER
+                | barre T_BI ENTIER
                 {{ int taille;
                    taille = 10;
-                   $$ = New_chaine( taille ); /* 10 caractères max */
-                   if ($1) g_snprintf( $$, taille, "!M(%d)", $3 );
-                   else g_snprintf( $$, taille, "M(%d)", $3 );
+                   $$ = New_chaine( taille );
+                   if ($1) { g_snprintf( $$, taille, "!B(%d)", $3 ); }
+                   else    { g_snprintf( $$, taille, "B(%d)", $3 ); }
                 }}
                 | barre ENTREE ENTIER liste_options
                 {{ $$ = New_condition_entree ( $1, $3, $4 );
@@ -419,14 +414,6 @@ unite:          modulateur ENTIER HEURE ENTIER
                       case SUP_OU_EGAL: g_snprintf( $$, taille, "CI(%d)>=%f", $1, $3 ); break;
                       case T_EGAL     : g_snprintf( $$, taille, "CI(%d)==%f", $1, $3 ); break;
                     }
-                }}
-                | barre T_TEMPO ENTIER liste_options 
-                {{ int taille;
-                   taille = 40;
-                   $$ = New_chaine( taille ); /* 10 caractères max */
-                   g_snprintf( $$, taille, "%sT(%d)",
-                               ($1==1 ? "!" : ""), $3 );
-                   Liberer_options($4);
                 }}
                 | barre T_ACT_COMOUT
                   {{ $$=New_condition_vars( $1, "vars->bit_comm_out"); }}
@@ -486,9 +473,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                        } 
                       else switch(alias->bit)                              /* On traite que ce qui peut passer en "condition" */
                        { case T_TEMPO :
-                          { taille = 40;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
-                            g_snprintf( $$, taille, "%sT(%d)", ($1==1 ? "!" : ""), alias->num );
+                          { $$ = New_condition_tempo( $1, alias, $3 );
                             break;
                           }
                          case ENTREE:
@@ -499,10 +484,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                             break;
                           }
                          case T_BI:
-                          { if ( (alias->barre && $1) || (!alias->barre && !$1))
-                             { $$ = New_condition_bi( 0, alias->num, $3 ); }
-                            else
-                             { $$ = New_condition_bi( 1, alias->num, $3 ); }
+                          { $$ = New_condition_bi( $1, alias, $3 );
                             break;
                           }
                          case T_MONO:
@@ -608,27 +590,8 @@ action:         action VIRGULE une_action
 
 une_action:     barre SORTIE ENTIER
                   {{ $$=New_action_sortie($3, $1);     }}
-                | barre T_BI ENTIER
-                  {{ if ($3 >= NBR_BIT_BISTABLE_RESERVED)
-                       { $$=New_action_bi($3, $1); }
-                     else
-                       { guint taille;
-                         Emettre_erreur_new( "Ligne %d: 'B%04d' could not be set (system bit)", DlsScanner_get_lineno(), $3 );
-                         $$=New_action();
-                         taille = 2;
-                         $$->alors = New_chaine( taille );
-                         g_snprintf( $$->alors, taille, " " ); 
-                         $$->sinon = NULL;
-                       }
-                  }}
-                | T_MONO ENTIER
-                  {{ $$=New_action_mono($2);           }}
                 | ICONE ENTIER liste_options
                   {{ $$=New_action_icone($2, $3);
-                     Liberer_options($3);
-                  }}
-                | T_TEMPO ENTIER liste_options
-                  {{ $$=New_action_tempo($2, $3);
                      Liberer_options($3);
                   }}
                 | CPT_H ENTIER liste_options
@@ -696,13 +659,13 @@ une_action:     barre SORTIE ENTIER
                          $$->sinon = NULL;
                        }
                       else switch(alias->bit)
-                       { case T_TEMPO: $$=New_action_tempo( alias->num, options );   break;
+                       { case T_TEMPO: $$=New_action_tempo( alias, options );        break;
                          case T_MSG  : $$=New_action_msg( alias->num );              break;
                          case SORTIE : $$=New_action_sortie( alias->num, $1 );       break;
-                         case T_BI     : if (alias->num >= NBR_BIT_BISTABLE_RESERVED)
-                                        { $$=New_action_bi( alias->num, $1 ); }
+                         case T_BI   : if (alias->num >= NBR_BIT_BISTABLE_RESERVED || alias->type==ALIAS_TYPE_DYNAMIC)
+                                        { $$=New_action_bi_by_alias( alias, $1 ); }
                                        else
-                                        { Emettre_erreur_new( "Ligne %d: 'B%04d' could not be set (system bit)", DlsScanner_get_lineno(), alias->bit );
+                                        { Emettre_erreur_new( "Ligne %d: 'B%04d' could not be set (system bit)", DlsScanner_get_lineno(), alias->num );
                                           $$=New_action();
                                           taille = 2;
                                           $$->alors = New_chaine( taille );
@@ -780,6 +743,11 @@ une_option:     MODE T_EGAL ENTIER
                    $$->type = T_LIBELLE;
                    $$->chaine = $3;
                 }}
+                | T_ETIQUETTE T_EGAL T_CHAINE
+                {{ $$=New_option();
+                   $$->type = T_ETIQUETTE;
+                   $$->chaine = $3;
+                }}
                 | CLIGNO
                 {{ $$=New_option();
                    $$->type = CLIGNO;
@@ -814,6 +782,31 @@ une_option:     MODE T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->type = T_EDGE_UP;
                    $$->entier = 1;
+                }}
+                | T_DAA T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->type = T_DAA;
+                   $$->entier = $3;
+                }}
+                | T_DMINA T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->type = T_DMINA;
+                   $$->entier = $3;
+                }}
+                | T_DMAXA T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->type = T_DMAXA;
+                   $$->entier = $3;
+                }}
+                | T_DAD T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->type = T_DAD;
+                   $$->entier = $3;
+                }}
+                | T_RANDOM T_EGAL ENTIER
+                {{ $$=New_option();
+                   $$->type = T_RANDOM;
+                   $$->entier = $3;
                 }}
                 ;
 

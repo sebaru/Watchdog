@@ -83,6 +83,7 @@
     GooCanvasItem *select_hd;
     GooCanvasItem *select_bg;
     GooCanvasItem *select_bd;
+    GooCanvasItem *item_acro_syn;
     GList *images;                                                         /* Toutes les images présentes dans le fichier GIF */
     GList *image;                                                                     /* Image en cours d'affichage à l'écran */
     GdkPixbuf *pixbuf;                                                               /* Pixbuf colorié et visualisé à l'écran */

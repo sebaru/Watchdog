@@ -30,7 +30,9 @@
  #include <glib.h>
 
  struct DLS_TO_PLUGIN                                                 /* structure dechange de données entre DLS et le plugin */
-  { gboolean bit_comm_out;
+  { gint starting;                                      /* 1 si les bits internes "start" du plugins doivent etre positionnés */
+    gboolean debug;                                                 /* TRUE si le plugin doit logguer ses changements de bits */
+    gboolean bit_comm_out;
     gboolean bit_defaut;
     gboolean bit_defaut_fixe;
     gboolean bit_alarme;
@@ -40,10 +42,10 @@
     gboolean bit_alerte;
     gboolean bit_alerte_fixe;
     gboolean bit_derangement;
-    gboolean bit_danger;
-    gboolean bit_acquit;
     gboolean bit_derangement_fixe;
+    gboolean bit_danger;
     gboolean bit_danger_fixe;
+    gboolean bit_acquit;
     gboolean bit_activite_down;
   };
 
@@ -51,6 +53,11 @@
  extern gboolean Dls_get_top_alerte ( void );
  extern gboolean Dls_data_get_bool ( gchar *nom, gchar *owner, gboolean **data_p );
  extern void     Dls_data_set_bool ( gchar *nom, gchar *owner, gboolean **data_p, gboolean valeur );
+ extern void     Dls_data_set_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p, gboolean etat,
+                                      gint delai_on, gint min_on, gint max_on, gint delai_off, gint random);
+ extern gboolean Dls_data_get_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p );
+ extern void     Dls_data_set_AI ( gchar *nom, gchar *tech_id, gpointer **ai_p, float val_avant_ech );
+ extern gfloat   Dls_data_get_AI ( gchar *nom, gchar *tech_id, gpointer **ai_p );
  extern int E( int num );
  extern int B( int num );
  extern int M( int num );

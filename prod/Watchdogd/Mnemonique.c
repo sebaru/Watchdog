@@ -34,7 +34,7 @@
  #include <string.h>
 
  #define MNEMO_SQL_SELECT "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.ev_text,parent_syn.page,syn.page," \
-                          "dls.name, mnemo.tableau, mnemo.acro_syn, mnemo.ev_host, mnemo.ev_thread, syn.id" \
+                          "dls.name, mnemo.tableau, mnemo.acro_syn, mnemo.ev_host, mnemo.ev_thread, syn.id, dls.tech_id" \
                           " FROM mnemos as mnemo" \
                           " INNER JOIN dls as dls ON mnemo.dls_id=dls.id" \
                           " INNER JOIN syns as syn ON dls.syn_id = syn.id" \
@@ -95,7 +95,7 @@
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
  gboolean Mnemo_auto_create_for_dls ( struct CMD_TYPE_MNEMO_BASE *mnemo )
-  { gchar *acro, *libelle;
+  { gchar *acro, *libelle, *acro_syn;
     gchar requete[1024];
     gboolean retour;
     struct DB *db;
@@ -111,16 +111,26 @@
     if ( !libelle )
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
                 "%s: Normalisation impossible. Mnemo NOT added nor modified.", __func__ );
+       g_free(acro);
+       return(FALSE);
+     }
+
+    acro_syn   = Normaliser_chaine ( mnemo->acro_syn );                                      /* Formatage correct des chaines */
+    if ( !acro_syn )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation impossible. Mnemo NOT added nor modified.", __func__ );
+       g_free(acro);
        g_free(libelle);
        return(FALSE);
      }
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos SET created_by_user='0',type='%d',num='-1',dls_id='%d',acronyme='%s',libelle='%s' "
-                " ON DUPLICATE KEY UPDATE libelle='%s'",
-                mnemo->type, mnemo->dls_id, acro, libelle, libelle );
+    g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
+                "INSERT INTO mnemos SET type='%d',num='-1',dls_id='%d',acronyme='%s',libelle='%s',acro_syn='%s' "
+                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle), acro_syn=VALUES(acro_syn)",
+                mnemo->type, mnemo->dls_id, acro, libelle, acro_syn );
     g_free(libelle);
     g_free(acro);
+    g_free(acro_syn);
 
     db = Init_DB_SQL();       
     if (!db)
@@ -128,7 +138,17 @@
        return(FALSE);
      }
 
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    Lancer_requete_SQL ( db, "START TRANSACTION" );                                            /* Execution de la requete SQL */
+    Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
+    if (mnemo->type == MNEMO_HORLOGE)
+     { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
+                   "INSERT INTO syns_motifs "
+                   "SET mnemo_id=LAST_INSERT_ID(),libelle='Horloge',syn_id='%d',"
+                   "posx = '150.0', posy = '150.0', larg = '50.0', haut = '50.0'",
+                   mnemo->syn_id );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+    retour = Lancer_requete_SQL ( db, "COMMIT;" );                                             /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return (retour);
   }
@@ -152,8 +172,7 @@
     ev_thread  = Normaliser_chaine ( mnemo->ev_thread );                                     /* Formatage correct des chaines */
     ev_host    = Normaliser_chaine ( mnemo->ev_host );                                       /* Formatage correct des chaines */
     if ( !(libelle && acro && ev_text && ev_thread && ev_host && tableau && acro_syn) )
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "%s: Normalisation impossible. Mnemo NOT added nor modified.", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible. Mnemo NOT added nor modified.", __func__ );
        if (libelle)   g_free(libelle);
        if (acro)      g_free(acro);
        if (tableau)   g_free(tableau);
@@ -166,14 +185,14 @@
 
     if (ajout == TRUE)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "INSERT INTO %s(created_by_user,type,num,dls_id,acronyme,libelle,ev_host,ev_thread,ev_text,tableau,acro_syn) VALUES "
-                   "('1',%d,%d,%d,'%s','%s','%s','%s','%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
+                   "INSERT INTO %s(type,num,dls_id,acronyme,libelle,ev_host,ev_thread,ev_text,tableau,acro_syn) VALUES "
+                   "(%d,%d,%d,'%s','%s','%s','%s','%s','%s','%s')", NOM_TABLE_MNEMO, mnemo->type,
                    mnemo->num, mnemo->dls_id, acro, libelle, ev_host, ev_thread, ev_text, tableau, acro_syn );
      } else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "UPDATE %s SET "             
                    "type=%d,libelle='%s',acronyme='%s',ev_host='%s',ev_thread='%s',ev_text='%s',dls_id=%d,num=%d,tableau='%s',"
-                   "acro_syn='%s',created_by_user='1' "
+                   "acro_syn='%s' "
                    "WHERE id=%d",
                    NOM_TABLE_MNEMO, mnemo->type, libelle, acro, ev_host, ev_thread, ev_text, 
                    mnemo->dls_id, mnemo->num, tableau, acro_syn, mnemo->id );
@@ -336,6 +355,7 @@
        g_snprintf( mnemo->acro_syn,        sizeof(mnemo->acro_syn),        "%s", db->row[11] );
        g_snprintf( mnemo->ev_host,         sizeof(mnemo->ev_host),         "%s", db->row[12] );
        g_snprintf( mnemo->ev_thread,       sizeof(mnemo->ev_thread),       "%s", db->row[13] );
+       g_snprintf( mnemo->dls_tech_id,     sizeof(mnemo->dls_tech_id),     "%s", db->row[15] );
        mnemo->id     = atoi(db->row[0]);
        mnemo->type   = atoi(db->row[1]);
        mnemo->num    = atoi(db->row[2]);

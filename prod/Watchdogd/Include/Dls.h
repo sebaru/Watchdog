@@ -39,10 +39,8 @@
   { struct CMD_TYPE_PLUGIN_DLS plugindb;
     gchar nom_fichier[60];                                                                                  /* Nom du fichier */
     time_t start_date;                                                                  /* time_t date de demarrage du plugin */
-    gint starting;                                      /* 1 si les bits internes "start" du plugins doivent etre positionnés */
-    gboolean debug;                                                 /* TRUE si le plugin doit logguer ses changements de bits */
     void *handle;                                                                              /* Handle du fichier librairie */
-    void (*go)(gint,gint,struct DLS_TO_PLUGIN *);                                         /* Fonction de traitement du module */
+    void (*go)(struct DLS_TO_PLUGIN *);                                                   /* Fonction de traitement du module */
     float conso;                                                                         /* Consommation temporelle du plugin */
     gint (*Get_Tableau_bit)(gint);                                             /* Fonction d'identification des bits utilisés */
     gint (*Get_Tableau_num)(gint);                                             /* Fonction d'identification des bits utilisés */
@@ -56,7 +54,7 @@
     TEMPO_WAIT_FOR_MIN_ON,                                             /* Delai de MAU dépassé, en attente du creneau minimum */
     TEMPO_WAIT_FOR_MAX_ON,                                          /* Creneau minimum atteint, en attente du creneau maximum */
     TEMPO_WAIT_FOR_DELAI_OFF,                                    /* Creneau max atteint, en attente du delai de remise a zero */
-    TEMPO_WAIT_FOR_COND_OFF                                               /* Atteint que la condition soit tombée avant reset */
+    TEMPO_WAIT_FOR_COND_OFF                                                /* Attend que la condition soit tombée avant reset */
   };
 
  struct TEMPO                                                                               /* Définition d'une temporisation */
@@ -74,6 +72,8 @@
 
  struct ANALOG_INPUT
   { struct CMD_TYPE_MNEMO_AI confDB;
+    gchar nom[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gchar tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gfloat  val_ech;
     gfloat  val_avant_ech;
     guint   last_arch;                                                                         /* Date de la derniere archive */
@@ -143,6 +143,7 @@
     struct DLS_TREE *Dls_tree;                                                                       /* Arbre d'execution DLS */
     pthread_mutex_t synchro_data;                                      /* Mutex pour les acces concurrents à l'arbre des data */
     GTree *Dls_data;
+    GTree *Dls_data_tempo;                                                                   /* Arbres des temporisations DLS */
     GSList *Set_M;                                                              /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_M;                                                      /* liste des Mxxx a désactiver à la fin du tour prg */
     GSList *Set_Dls_Data;                                                       /* liste des Mxxx a activer au debut tour prg */
@@ -174,21 +175,18 @@
  extern void Reseter_un_plugin ( gint id );                                                                 /* Dans plugins.c */
  
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
- extern int EA_inrange( int num );
- extern float EA_ech( int num );
  extern int A( int num );
+ extern int EA_inrange( int num );
  extern void SB_SYS( int num, int etat );
  extern void SE( int num, int etat );
  extern void SEA( int num, float val_avant_ech );
  extern void SEA_range( int num, int range );
  extern void SEA_ech( int num, float val_ech );
- extern void Envoyer_entree_furtive_dls( int num );
  extern void Envoyer_commande_dls ( int num );
  extern void Envoyer_commande_dls_data ( gchar *nom, gchar *owner );
  extern void Dls_foreach ( void *user_data, 
                            void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
                            void (*do_tree)   (void *user_data, struct DLS_TREE *) );
- extern void Dls_data_set_bool ( gchar *nom, gchar *owner, gboolean **data_p, gboolean valeur );
 
  extern void Prendre_heure ( void );                                                                          /* Dans heure.c */ 
  #endif

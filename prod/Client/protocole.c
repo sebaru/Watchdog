@@ -41,7 +41,7 @@
  #include "protocli.h"
 
  extern GtkWidget *Barre_status;                                         /* Barre d'etat de l'application */
- extern struct CLIENT Client;                           /* Identifiant de l'utilisateur en cours */
+ extern struct CLIENT Client;                                    /* Identifiant de l'utilisateur en cours */
  extern struct CONFIG_CLI Config_cli;                          /* Configuration generale cliente watchdog */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
 
@@ -78,7 +78,6 @@
                               return;
       case TAG_ICONE       : Gerer_protocole_icone        ( connexion ); break;
       case TAG_DLS         : Gerer_protocole_dls          ( connexion ); break;
-      case TAG_UTILISATEUR : Gerer_protocole_utilisateur  ( connexion ); break;
       case TAG_MESSAGE     : Gerer_protocole_message      ( connexion ); break;
       case TAG_MNEMONIQUE  : Gerer_protocole_mnemonique   ( connexion ); break;
       case TAG_SYNOPTIQUE  : Gerer_protocole_synoptique   ( connexion ); break;

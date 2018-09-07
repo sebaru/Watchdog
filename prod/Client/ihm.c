@@ -217,8 +217,12 @@ printf("searching page %d %d\n", type, id );
                   if ( ((struct TYPE_INFO_MNEMONIQUE *)page->infos)->id != id )
                    { liste = liste->next; continue; }
                   break;
+             case TYPE_PAGE_HORLOGE:
+                  if ( ((struct TYPE_INFO_HORLOGE *)page->infos)->id_mnemo != id )
+                   { liste = liste->next; continue; }
+                  break;
              case TYPE_PAGE_SOURCE_DLS:
-                  if ( ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->id != id )
+                  if ( ((struct TYPE_INFO_SOURCE_DLS *)page->infos)->rezo_dls.id != id )
                    { liste = liste->next; continue; }
                   break;
              default: break;

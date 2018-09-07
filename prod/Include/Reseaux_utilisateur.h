@@ -1,8 +1,8 @@
-/**********************************************************************************************************/
-/* Include/Reseaux_utilisateur.h:   Sous_tag de utilisateur pour watchdog 2.0 par lefevre Sebastien       */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       mar 21 fév 2006 13:46:48 CET */
-/* Auteur: LEFEVRE Sebastien                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Include/Reseaux_utilisateur.h:   Sous_tag de utilisateur pour watchdog 2.0 par lefevre Sebastien                           */
+/* Projet WatchDog version 2.0       Gestion d'habitat                                           mar 21 fév 2006 13:46:48 CET */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
 /*
  * Reseaux_utilisateur.h
  * This file is part of Watchdog
@@ -35,18 +35,14 @@
 
  struct CMD_TYPE_UTILISATEUR
   { guint    id;
-    gchar    nom[ NBR_CARAC_LOGIN_UTF8+1 ];
-    gchar    salt[ 2*EVP_MAX_MD_SIZE+1 ];
-    gchar    hash[ 2*EVP_MAX_MD_SIZE+1 ];
+    gchar    username[ NBR_CARAC_LOGIN_UTF8+1 ];
+    gchar    email[80];
+    gchar    hash[255];
     gchar    commentaire[ NBR_CARAC_COMMENTAIRE_UTF8+1 ];
     guint    access_level;
     gboolean enable;
-    gboolean expire;
-    gboolean cansetpwd;
-    gboolean mustchangepwd;                                /* L'utilisateut doit changer son mot de passe */
-    guint    date_creation;
+    guint    date_create;
     guint    date_modif;
-    guint    date_expire;
     gboolean sms_enable;
     gchar    sms_phone[80];
     gboolean sms_allow_cde;

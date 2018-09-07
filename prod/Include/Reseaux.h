@@ -35,7 +35,6 @@
  #include "Reseaux_gtk_message.h"
  #include "Reseaux_connexion.h"
  #include "Reseaux_icone.h"
- #include "Reseaux_utilisateur.h"
  #include "Reseaux_synoptique.h"
  #include "Reseaux_dls.h"
  #include "Reseaux_message.h"
@@ -83,7 +82,6 @@
     TAG_CONNEXION,                                                                                  /* Gestion des connexions */
     TAG_ICONE,                                                                                          /* Gestion des icones */
     TAG_DLS,                                                                        /* Gestion des plugins et des sources DLS */
-    TAG_UTILISATEUR,                                                                      /* Gestion des utilisateurs/groupes */
     TAG_SYNOPTIQUE,                                                                                /* Gestion des synoptiques */
     TAG_MNEMONIQUE,                                                                                /* Gestion des mnemoniques */
     TAG_MESSAGE,                                                                                      /* Gestion des messages */

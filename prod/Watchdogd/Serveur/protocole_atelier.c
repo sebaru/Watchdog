@@ -184,15 +184,6 @@
                                                  client, mnemo );
              }
             break;
-       case SSTAG_CLIENT_TYPE_NUM_MNEMONIQUE_PASS:
-             { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
-               mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;
-               Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                         "Le client desire le mnemonique %d %d", mnemo->type, mnemo->num );
-               Proto_envoyer_type_num_mnemo_tag( TAG_ATELIER, SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE_PASS,
-                                                         client, mnemo );
-             }
-            break;
 /************************************************* Gestion des commentaires synoptiques ***************************************/
        case SSTAG_CLIENT_ATELIER_ADD_COMMENT: 
              { struct CMD_TYPE_COMMENT *comment;

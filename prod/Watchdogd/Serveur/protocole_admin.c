@@ -51,7 +51,7 @@
              { Envoi_client( client, TAG_ADMIN, SSTAG_SERVEUR_CREATE_PAGE_ADMIN_OK, NULL, 0 );
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE,
                         "Gerer_protocole_admin: Acces to Watchdog CLI granted to %s@%s",
-                         client->util->nom, client->machine );
+                         client->util->username, client->machine );
              }
             break;
        case SSTAG_CLIENT_REQUEST:
@@ -59,7 +59,7 @@
                gchar *response;
                admin = (struct CMD_TYPE_ADMIN *)connexion->donnees;
                Envoyer_reseau ( connexion, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_START, NULL, 0 );         /* Debut de la reponse */
-               response = Processer_commande_admin ( client->util->nom, client->machine, admin->buffer );
+               response = Processer_commande_admin ( client->util->username, client->machine, admin->buffer );
                Envoyer_reseau ( connexion, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_BUFFER, response, strlen(response)+1 );
                g_free(response);
                Envoyer_reseau ( connexion, TAG_ADMIN, SSTAG_SERVEUR_RESPONSE_STOP, NULL, 0 );            /* Fin de la reponse */

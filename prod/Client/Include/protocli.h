@@ -51,7 +51,6 @@
  enum
   { TYPE_PAGE_PLUGIN_DLS,                                                                         /* Listes des plugins D.L.S */
     TYPE_PAGE_HISTO,                                                               /* Page de garde: messages au fil de l'eau */
-    TYPE_PAGE_UTIL,                                                                        /* Liste des utilisateurs Watchdog */
     TYPE_PAGE_MESSAGE,                                                                       /* Edition des messages Watchdog */
     TYPE_PAGE_SYNOPTIQUE,                                                     /* Edition des noms/mnémoniques des synoptiques */
     TYPE_PAGE_ALL_MNEMONIQUE,                                                /* Page de visualisation de tous les mnemoniques */
@@ -70,6 +69,7 @@
     TYPE_PAGE_RFXCOM,                                                                    /* Page affichant les modules RFXCOM */
 #endif
     TYPE_PAGE_ADMIN,                                               /* Page de gestion des commandes/requests d'administration */
+    TYPE_PAGE_HORLOGE
   };
 
  struct PAGE_NOTEBOOK
@@ -89,6 +89,11 @@
     struct TRAME *Trame;                                                                   /* La trame de fond de supervision */
   };
 
+ struct TYPE_INFO_HORLOGE
+  { guint id_mnemo;
+    GtkWidget *Liste_horloge;
+  };
+
  struct TYPE_INFO_MNEMONIQUE
   { gint id;                                                 /* ID du module DLS dont les mnemoniques sont en cours d'edition */
     GtkWidget *Liste_mnemonique;                                      /* GtkTreeView pour la gestion des mnemoniques Watchdog */
@@ -96,9 +101,7 @@
 
  struct TYPE_INFO_SOURCE_DLS
   { GtkWidget *text;                                  /* Pour les plugins DLS, ici est placé le widget TextView correspondant */
-    guint id;                                       /* Pour les plugins DLS, ici est stocké l'id du plugin en cours d'edition */
-    gchar plugin_name[80];
-    gchar package[130];
+    struct CMD_TYPE_PLUGIN_DLS rezo_dls;
     GtkWidget *F_mnemo;
     GtkWidget *Option_type;
     GtkWidget *Spin_num;
@@ -192,7 +195,6 @@
  extern void Gerer_protocole_gtk_message ( struct CONNEXION *connexion );
  extern void Gerer_protocole_icone ( struct CONNEXION *connexion );
  extern void Gerer_protocole_dls ( struct CONNEXION *connexion );
- extern void Gerer_protocole_utilisateur ( struct CONNEXION *connexion );
  extern void Gerer_protocole_message ( struct CONNEXION *connexion );
  extern void Gerer_protocole_synoptique ( struct CONNEXION *connexion );
  extern void Gerer_protocole_mnemonique ( struct CONNEXION *connexion );
@@ -209,13 +211,6 @@
 
  extern void Proto_afficher_un_admin( struct CMD_TYPE_ADMIN *admin );                                         /* Dans admin.c */ 
  extern void Creer_page_admin( void );
-
- extern void Proto_afficher_un_utilisateur( struct CMD_TYPE_UTILISATEUR *util );                         /* Dans liste_util.c */ 
- extern void Proto_cacher_un_utilisateur( struct CMD_TYPE_UTILISATEUR *util );
- extern void Proto_rafraichir_un_utilisateur( struct CMD_TYPE_UTILISATEUR *util );
- extern void Creer_page_utilisateur( void );
-
- extern void Menu_ajouter_editer_utilisateur ( struct CMD_TYPE_UTILISATEUR *edit_util );                      /* ajout_util.c */
 
  extern void Proto_afficher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );                      /* Dans liste_plugin_dls.c */ 
  extern void Proto_cacher_un_plugin_dls( struct CMD_TYPE_PLUGIN_DLS *dls );
@@ -282,7 +277,6 @@
 
  extern void Menu_want_plugin_dls ( void );                                                                    /* Dans menu.c */
  extern void Menu_want_client_leger ( void );
- extern void Menu_want_util ( void );
  extern void Menu_want_message ( void );
  extern void Menu_want_icone ( void );
  extern void Menu_want_synoptique ( void );
@@ -342,10 +336,6 @@
  extern void Editer_propriete_TOR ( struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Changer_couleur_motif_directe( struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Proto_afficher_mnemo_atelier ( int tag, struct CMD_TYPE_MNEMO_BASE *mnemo );
-
-                                                                                       /* Dans atelier_propriete_passerelle.c */
- extern void Editer_propriete_pass ( struct TRAME_ITEM_PASS *trame_pass );
- extern void Proto_afficher_mnemo_atelier_pass ( struct CMD_TYPE_MNEMO_BASE *mnemo );
 
  extern void Creer_fenetre_ajout_motif ( void );                                                /* Dans atelier_ajout_motif.c */
  extern void Detruire_fenetre_ajout_motif ( void );
@@ -467,6 +457,13 @@
                                                                                                        /* Dans ajout_camera.c */
  extern void Menu_ajouter_editer_camera ( struct CMD_TYPE_CAMERA *edit_camera );
  extern void Proto_afficher_mnemo_camera ( int tag, struct CMD_TYPE_MNEMO_BASE *mnemo );
+
+ extern void Creer_page_horloge ( gchar *libelle, guint id_mnemo );                                         /* Dans Horloge.c */
+ extern void Proto_afficher_un_tick( struct CMD_TYPE_MNEMO_FULL *mnemo );
+ extern void Proto_cacher_un_tick( struct CMD_TYPE_MNEMO_FULL *mnemo );
+ extern void Proto_rafraichir_un_tick( struct CMD_TYPE_MNEMO_FULL *mnemo );
+ 
+ extern void Menu_ajouter_editer_horloge ( struct CMD_TYPE_MNEMO_FULL *edit_horloge, gint id_mnemo);  /* Dans ajout_horloge.c */
 
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

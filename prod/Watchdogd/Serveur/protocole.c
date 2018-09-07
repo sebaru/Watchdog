@@ -59,20 +59,15 @@
             switch ( Reseau_tag(connexion) )
              { case TAG_ICONE       : Gerer_protocole_icone        ( client ); break;
                case TAG_DLS         : Gerer_protocole_dls          ( client ); break;
-               case TAG_UTILISATEUR : Gerer_protocole_utilisateur  ( client ); break;
                case TAG_MESSAGE     : Gerer_protocole_message      ( client ); break;
                case TAG_MNEMONIQUE  : Gerer_protocole_mnemonique   ( client ); break;
                case TAG_SYNOPTIQUE  : Gerer_protocole_synoptique   ( client ); break;
                case TAG_SUPERVISION : Gerer_protocole_supervision  ( client ); break;
                case TAG_HISTO       : Gerer_protocole_histo        ( client ); break;
                case TAG_ATELIER     : Gerer_protocole_atelier      ( client ); break;
-               case TAG_LOWLEVEL      : Gerer_protocole_lowlevel     ( client ); break;
+               case TAG_LOWLEVEL    : Gerer_protocole_lowlevel     ( client ); break;
                case TAG_ADMIN       : Gerer_protocole_admin        ( client ); break;
-               case TAG_CONNEXION   : if (Reseau_ss_tag(connexion) == SSTAG_CLIENT_SETPASSWORD )
-                                       { struct CMD_TYPE_UTILISATEUR *util;
-                                         util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
-                                         Proto_set_password( client, util );
-                                       }
+               case TAG_CONNEXION   : break;
              }
           }
 /************************************** Client en attente identification **********************************/
@@ -87,13 +82,6 @@
                pthread_create( &tid, NULL, (void *)Envoyer_histo_thread, client );
                pthread_detach( tid );
              }
-          }
-/************************************** Client en attente nouveau password ********************************/
-    else if ( client->mode == WAIT_FOR_NEWPWD && Reseau_tag(connexion)    == TAG_CONNEXION
-                                              && Reseau_ss_tag(connexion) == SSTAG_CLIENT_SETPASSWORD )
-          { struct CMD_TYPE_UTILISATEUR *util;
-            util = (struct CMD_TYPE_UTILISATEUR *)connexion->donnees;
-            Proto_set_password( client, util );
           }
   }
 /**********************************************************************************************************/

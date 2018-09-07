@@ -139,21 +139,22 @@
     switch(reponse)
      { /*case GTK_RESPONSE_APPLY:*/
        case GTK_RESPONSE_OK:
-             { selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(infos->Liste_horloge) );
+             { gchar *libelle;
+               selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(infos->Liste_horloge) );
                store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(infos->Liste_horloge) );
-               lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
+               lignes    = gtk_tree_selection_get_selected_rows ( selection, NULL );
                if ( lignes )
                 { gint id_mnemo;
-                  gtk_tree_model_get_iter( store, &iter, lignes->data );  /* Recuperation ligne selectionnée */
-                  gtk_tree_model_get( store, &iter, COLONNE_HORLOGE_ID_MNEMO, &id_mnemo, -1 );       /* Recup du id */
-
-                  Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_HORLOGE,
-                                (gchar *)&id_mnemo, sizeof( gint ) );
+                  gtk_tree_model_get_iter( store, &iter, lignes->data );                   /* Recuperation ligne selectionnée */
+                  gtk_tree_model_get( store, &iter, COLONNE_HORLOGE_ID_MNEMO, &id_mnemo, -1 );                 /* Recup du id */
+                  gtk_tree_model_get( store, &iter, COLONNE_HORLOGE_LIBELLE, &libelle, -1 );
+                  Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_HORLOGE, (gchar *)&id_mnemo, sizeof( gint ) );
                   gtk_tree_selection_unselect_iter( selection, &iter );
-                  lignes = lignes->next;
+                  Creer_page_horloge ( libelle, id_mnemo );
                 }
                g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-               g_list_free (lignes);                                                   /* Liberation mémoire */
+               g_list_free (lignes);                                                                    /* Liberation mémoire */
+               g_free(libelle);               
                break;
              }
             break;
@@ -251,6 +252,7 @@ printf(" On veut les horloges du syn %d\n", infos->syn_id );
     static gint init_timer;
     GdkColor color;
 
+    printf("Creation page synoptique %d\n", syn_id );
     page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
     
@@ -536,6 +538,129 @@ printf(" On veut les horloges du syn %d\n", infos->syn_id );
     Trame_peindre_pass_3 ( trame_pass, trame_pass->rouge3, trame_pass->vert3, trame_pass->bleu3 );
  }
 /******************************************************************************************************************************/
+/* Changer_etat_passerelle: Changement d'etat d'une passerelle (toutes les vignettes)                                         */
+/* Entrée: une reference sur la passerelle, l'etat attendu                                                                    */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Changer_etat_etiquette( struct TYPE_INFO_SUPERVISION *infos, struct CMD_TYPE_SYN_VARS *vars )
+  { struct CMD_ETAT_BIT_CTRL etat_motif;
+    printf("Changer_etat_etiquette syn %d!\n", vars->syn_id );
+    etat_motif.etat = 0;
+    if (vars->bit_comm_out == TRUE)  /****************************  Vignette Activite *****************************************/
+     { etat_motif.rouge  = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.vert   = 100;                                                                    /* Sauvegarde etat motif */
+       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_alarme == TRUE)
+     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.vert   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.cligno = 1;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_alarme_fixe == TRUE)
+     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.vert   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_defaut == TRUE)
+     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.vert   = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.cligno = 1;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_defaut_fixe == TRUE)
+     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.vert   = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else
+     { etat_motif.rouge  = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.vert   = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    Changer_etat_motif( infos->Trame->Vignette_activite, &etat_motif );
+
+    if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Personnes **************************/
+     { etat_motif.rouge  = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.vert   = 100;                                                                    /* Sauvegarde etat motif */
+       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_alerte == TRUE)
+     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.vert   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.cligno = 1;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_alerte_fixe == TRUE)
+     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.vert   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_veille_totale == TRUE)
+     { etat_motif.rouge  = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.vert   = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_veille_partielle == TRUE)
+     { etat_motif.rouge  = 127;                                                                    /* Sauvegarde etat motif */
+       etat_motif.vert   = 127;                                                                    /* Sauvegarde etat motif */
+       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else
+     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.vert   = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.bleu   = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    Changer_etat_motif( infos->Trame->Vignette_secu_personne, &etat_motif );
+
+    if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Biens ******************************/
+     { etat_motif.rouge  = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.vert   = 100;                                                                    /* Sauvegarde etat motif */
+       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_danger == TRUE)
+     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.vert   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.cligno = 1;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_danger_fixe == TRUE)
+     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.vert   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_derangement == TRUE)
+     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.vert   = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.cligno = 1;                                                                      /* Sauvegarde etat motif */
+     }
+    else if (vars->bit_derangement == TRUE)
+     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.vert   = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    else
+     { etat_motif.rouge  = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.vert   = 255;                                                                    /* Sauvegarde etat motif */
+       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
+       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
+     }
+    Changer_etat_motif( infos->Trame->Vignette_secu_bien, &etat_motif );
+ }
+/******************************************************************************************************************************/
 /* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                                       */
 /* Entrée: une reference sur le message                                                                                       */
 /* Sortie: Néant                                                                                                              */
@@ -614,10 +739,7 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
            { gtk_widget_modify_bg ( infos->bouton_acq, GTK_STATE_NORMAL, NULL ); }
 
                                                                                /* Positionnement des vignettes du synoptiques */
-           struct CMD_ETAT_BIT_CTRL etat_motif;
-           /*etat_motif.rouge0=255;*/
-           Changer_etat_motif( infos->Trame->Vignette_activite, &etat_motif );
-          
+           Changer_etat_etiquette( infos, syn_vars );
         }
 
        liste_motifs = infos->Trame->trame_items;                                /* On parcours tous les motifs de chaque page */

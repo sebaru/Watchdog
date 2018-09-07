@@ -198,69 +198,11 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Check_ownership: Vérifie la propriété du bit interne en action                                                             */
-/* Entrées: le type et numéro du bit interne a testet                                                                         */
-/* Sortie: FALSE si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gboolean Check_ownership ( gint type, gint num )
-  { struct CMD_TYPE_NUM_MNEMONIQUE critere;
-    struct CMD_TYPE_MNEMO_BASE *mnemo;
-    critere.type = type;
-    critere.num  = num;
-    gchar chaine[80];
-    gboolean retour;
-    retour = FALSE;
-    mnemo = Rechercher_mnemo_baseDB_type_num ( &critere );
-    Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-             "%s: Test Mnemo %d %d for id %d: mnemo %p", __func__, critere.type, critere.num, Dls_plugin.id, mnemo ); 
-    if (mnemo)
-     { if (mnemo->dls_id == Dls_plugin.id) retour=TRUE;
-       g_free(mnemo);
-     }
-    
-    if(retour == FALSE)
-     { switch (type)
-        { case MNEMO_BISTABLE:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: B%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          case MNEMO_CPTH:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: CH%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          case MNEMO_CPT_IMP:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: CI%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          case MNEMO_MONOSTABLE:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: M%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          case MNEMO_MOTIF:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: I%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          case MNEMO_REGISTRE:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: R%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          case MNEMO_SORTIE:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: A%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          case MNEMO_SORTIE_ANA:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: AA%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          case MNEMO_TEMPO:
-               g_snprintf( chaine, sizeof(chaine), "Ligne %d: T%04d not owned by plugin", DlsScanner_get_lineno(), num );
-               break;
-          default: Emettre_erreur_new( "Ligne %d: Ownership problem (but bit type unknown)", DlsScanner_get_lineno() );
-               break;
-        }
-       Emettre_erreur_new( "%s", chaine );
-       return(FALSE);
-     }
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
 /* New_condition_bi: Prepare la chaine de caractere associée à la condition, en respectant les options                        */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_bi( int barre, int num, GList *options )
+ static gchar *New_condition_bi_old( int barre, int num, GList *options )
   { gchar *result;
     gint taille;
     taille = 24;
@@ -274,6 +216,25 @@
     else { if (barre) g_snprintf( result, taille, "!B(%d)", num );
                  else g_snprintf( result, taille, "B(%d)", num );
          }
+    return(result);
+  }
+/******************************************************************************************************************************/
+/* New_condition_bi: Prepare la chaine de caractere associée à la condition, en respectant les options                        */
+/* Entrées: numero du bit bistable et sa liste d'options                                                                      */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_bi( int barre, struct ALIAS *alias, GList *options )
+  { gchar *result;
+    gint taille;
+    if (alias->num != -1) /* Alias par numéro ? */
+     { return(New_condition_bi_old( barre, alias->num, options)); }
+    else /* Alias par nom */
+     { taille = 100;
+       result = New_chaine( taille ); /* 10 caractères max */
+       if ( (!barre && !alias->barre) || (barre && alias->barre) )
+            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_B_%s )", alias->nom, Dls_plugin.tech_id, alias->nom ); }
+       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_B_%s )", alias->nom, Dls_plugin.tech_id, alias->nom ); }
+     }
     return(result);
   }
 /******************************************************************************************************************************/
@@ -321,6 +282,26 @@
      }
    return(result);
  }
+/******************************************************************************************************************************/
+/* New_condition_tempo: Prepare la chaine de caractere associée à la condition, en respectant les options                     */
+/* Entrées: l'alias de la temporisatio et sa liste d'options                                                                  */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_tempo( int barre, struct ALIAS *alias, GList *options )
+  { gchar *result;
+    gint taille;
+    taille = 128;
+    result = New_chaine( taille );
+    if ( alias->type == ALIAS_TYPE_DYNAMIC)
+     { g_snprintf( result, taille, "%sDls_data_get_tempo ( \"%s\", \"%s\", &_T_%s )",
+                   (barre==1 ? "!" : ""), alias->nom, Dls_plugin.tech_id, alias->nom );
+     }
+    else
+     { g_snprintf( result, taille, "%sT(%d)",
+                   (barre==1 ? "!" : ""), alias->num );
+     }
+    return(result);
+  }
 /******************************************************************************************************************************/
 /* New_condition_horloge: Prepare la chaine de caractere associée à la condition, en respectant les options                   */
 /* Entrées: l'alias de l'horloge et sa liste d'options                                                                        */
@@ -422,14 +403,14 @@
     int taille;
 
     taille = 20;
-    if (Add_bit_to_list(MNEMO_SORTIE, num)) Check_ownership ( MNEMO_SORTIE, num );
+    Add_bit_to_list(MNEMO_SORTIE, num);
     action = New_action();
     action->alors = New_chaine( taille );
     g_snprintf( action->alors, taille, "SA(%d,%d);", num, !barre );
     return(action);
   }
 /******************************************************************************************************************************/
-/* New_action_mono: Prepare une struct action avec une commande SM                                                            */
+/* New_action_vars_mono: Prepare une struct action avec une commande SM                                                       */
 /* Entrées: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
@@ -451,31 +432,20 @@
 /* Entrées: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- struct ACTION *New_action_mono( int num )
-  { struct ACTION *action;
-    int taille;
-
-    taille = 15;
-    if (Add_bit_to_list(MNEMO_MONOSTABLE, num)) Check_ownership ( MNEMO_MONOSTABLE, num );
-    action = New_action();
-    action->alors = New_chaine( taille );
-    action->sinon = New_chaine( taille );
-
-    g_snprintf( action->alors, taille, "SM(%d,1);", num );
-    g_snprintf( action->sinon, taille, "SM(%d,0);", num );
-    return(action);
-  }
-/******************************************************************************************************************************/
-/* New_action_mono: Prepare une struct action avec une commande SM                                                            */
-/* Entrées: numero du monostable, sa logique                                                                                  */
-/* Sortie: la structure action                                                                                                */
-/******************************************************************************************************************************/
  struct ACTION *New_action_mono_by_alias( struct ALIAS *alias )
   { struct ACTION *action;
     int taille;
 
-    if (alias->num != -1) /* Alias par numéro ? */
-     { return(New_action_mono ( alias->num )); }
+    if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par numéro ? */
+     { taille = 15;
+       Add_bit_to_list(MNEMO_MONOSTABLE, alias->num);
+       action = New_action();
+       action->alors = New_chaine( taille );
+       action->sinon = New_chaine( taille );
+
+       g_snprintf( action->alors, taille, "SM(%d,1);", alias->num );
+       g_snprintf( action->sinon, taille, "SM(%d,0);", alias->num );
+     }
     else /* Alias par nom */
      { taille = 100;
        action = New_action();
@@ -498,7 +468,7 @@
 
     reset = Get_option_entier ( options, RESET ); if (reset == -1) reset = 0;
     taille = 15;
-    if (Add_bit_to_list(MNEMO_CPTH, num)) Check_ownership ( MNEMO_CPTH, num );
+    Add_bit_to_list(MNEMO_CPTH, num);
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
@@ -519,7 +489,7 @@
     ratio = Get_option_entier ( options, RATIO ); if (ratio == -1) ratio = 1;
 
     taille = 20;
-    if (Add_bit_to_list(MNEMO_CPT_IMP, num)) Check_ownership ( MNEMO_CPT_IMP, num );
+    Add_bit_to_list(MNEMO_CPT_IMP, num);
     action = New_action();
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
@@ -541,7 +511,7 @@
     coul   = Get_option_entier ( options, COLOR  ); if (coul   == -1) coul = 0;
     cligno = Get_option_entier ( options, CLIGNO ); if (cligno == -1) cligno = 0;
     taille = 128;
-    if (Add_bit_to_list(MNEMO_MOTIF, num)) Check_ownership ( MNEMO_MOTIF, num );
+    Add_bit_to_list(MNEMO_MOTIF, num);
     action = New_action();
     action->alors = New_chaine( taille );
     switch (coul)
@@ -566,35 +536,59 @@
 /* Entrées: numero de la tempo, sa consigne                                                                                   */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- struct ACTION *New_action_tempo( int num, GList *options )
+ struct ACTION *New_action_tempo( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
-    int taille;
+    int taille, daa, dma, dMa, dad, random;
 
-    if (Add_bit_to_list(MNEMO_TEMPO, num)) Check_ownership ( MNEMO_TEMPO, num );
+    daa    = Get_option_entier ( options, T_DAA );      if (daa == -1)    daa = 0;
+    dma    = Get_option_entier ( options, T_DMINA );    if (dma == -1)    dma = 0;
+    dMa    = Get_option_entier ( options, T_DMAXA );    if (dMa == -1)    dMa = 0;
+    dad    = Get_option_entier ( options, T_DAD );      if (dad == -1)    dad = 0;
+    random = Get_option_entier ( options, T_RANDOM );   if (random == -1) random = 0;
+
     action = New_action();
-    taille = 40;
-    action->alors = New_chaine( taille );
-    g_snprintf( action->alors, taille, "ST(%d,1);", num );
-    action->sinon = New_chaine( taille );
-    g_snprintf( action->sinon, taille, "ST(%d,0);", num );
+    taille = 128;
+    if (alias->type == ALIAS_TYPE_DYNAMIC)
+     { action->alors = New_chaine( taille );
+       g_snprintf( action->alors, taille, "Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s, 1, %d, %d, %d, %d, %d );",
+                                           alias->nom, Dls_plugin.tech_id, alias->nom,
+                                           daa, dma, dMa, dad, random );
+       action->sinon = New_chaine( taille );
+       g_snprintf( action->sinon, taille, "Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s, 0, %d, %d, %d, %d, %d );",
+                                           alias->nom, Dls_plugin.tech_id, alias->nom,
+                                           daa, dma, dMa, dad, random );
+     }
+    else
+     { taille = 40;
+       action->alors = New_chaine( taille );
+       g_snprintf( action->alors, taille, "ST(%d,1);", alias->num );
+       action->sinon = New_chaine( taille );
+       g_snprintf( action->sinon, taille, "ST(%d,0);", alias->num );
+    }
     return(action);
   }
-
 /******************************************************************************************************************************/
-/* New_action_bi: Prepare une struct action avec une commande SB                                                              */
-/* Entrées: numero du bistable, sa logique                                                                                    */
+/* New_action_mono: Prepare une struct action avec une commande SM                                                            */
+/* Entrées: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- struct ACTION *New_action_bi( int num, int barre )
+ struct ACTION *New_action_bi_by_alias( struct ALIAS *alias, gint barre )
   { struct ACTION *action;
     int taille;
 
-    taille = 20;
-    if (Add_bit_to_list(MNEMO_BISTABLE, num)) Check_ownership ( MNEMO_BISTABLE, num );
     action = New_action();
-    action->alors = New_chaine( taille );
-       
-    g_snprintf( action->alors, taille, "SB(%d,%d);", num, !barre );
+    if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par numéro ? */
+     { taille = 20;
+       Add_bit_to_list(MNEMO_BISTABLE, alias->num);
+       action->alors = New_chaine( taille );
+       g_snprintf( action->alors, taille, "SB(%d,%d);", alias->num, !barre );
+     }
+    else /* Alias par nom */
+     { taille = 100;
+       action = New_action();
+       action->alors = New_chaine( taille );
+       g_snprintf( action->alors, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_B_%s, %d );", alias->nom, Dls_plugin.tech_id, alias->nom, !barre );
+     }
     return(action);
   }
 /******************************************************************************************************************************/
@@ -602,16 +596,17 @@
 /* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
 /* Sortie: False si il existe deja, true sinon                                                                                */
 /******************************************************************************************************************************/
- gboolean New_alias( char *nom, int bit, int num, int barre, GList *options )
+ gboolean New_alias( gint type, char *nom, int bit, int num, int barre, GList *options )
   { struct ALIAS *alias;
 
     if (Get_alias_par_nom( nom )) return(FALSE);                                                         /* ID deja definit ? */
 
     alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
     if (!alias) { return(FALSE); }
-    alias->nom = nom;
-    alias->bit = bit;
-    alias->num = num;
+    alias->type = type;
+    alias->nom  = nom;
+    alias->bit  = bit;
+    alias->num  = num;
     alias->barre = barre;
     alias->options = options;
     alias->used = 0;
@@ -754,10 +749,10 @@
           gchar *Fonction= " gint Get_Tableau_bit(int n) { return(Tableau_bit[n]); }\n"
                            " gint Get_Tableau_num(int n) { return(Tableau_num[n]); }\n"
                            " gint Get_Tableau_msg(int n) { return(Tableau_msg[n]); }\n";
-          gchar *Start_Go = " void Go ( gint start, gint debug, struct DLS_TO_PLUGIN *vars )\n"
+          gchar *Start_Go = " void Go ( struct DLS_TO_PLUGIN *vars )\n"
                             "  {\n"
                             "    Update_edge_up_value();\n"
-                            "    if (debug) Dls_print_debug( Dls_id, (int *)&Tableau_bit, (int *)&Tableau_num, (float *)&Tableau_val );\n";
+                            "    if (vars->debug) Dls_print_debug( Dls_id, (int *)&Tableau_bit, (int *)&Tableau_num, (float *)&Tableau_val );\n";
           gchar *End_Go =   "  }\n";
           gchar chaine[4096];
           gint cpt=0;                                                                                   /* Compteur d'actions */
@@ -767,12 +762,16 @@
           liste = Alias;
           while(liste)
            { alias = (struct ALIAS *)liste->data;
-             if (alias->num == -1)                                       /* alias par nom ? creation du pointeur de raccourci */
+             if (alias->type == ALIAS_TYPE_DYNAMIC)                      /* alias par nom ? creation du pointeur de raccourci */
               { switch (alias->bit)
                  { case T_MONO: nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_M_%s;\n", alias->nom );
                                 write (fd, chaine, nb_car);
                                 break;
                    case T_BI:   nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_B_%s;\n", alias->nom );
+                                write (fd, chaine, nb_car);
+                                break;
+                   case T_TEMPO:
+                                nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_T_%s;\n", alias->nom );
                                 write (fd, chaine, nb_car);
                                 break;
                    case T_HORLOGE:
@@ -860,8 +859,8 @@
              g_snprintf(chaine, sizeof(chaine),
                       " if (B(%d) == 0)\n"
                       "      { B%d_verrou = 0; B%d_edge_up_value = 0; }\n"
-                      " else { if (B%d_verrou=0) { B%d_verrou=1; B%d_edge_up_value=1; }\n"
-                      "                     else { B%d_edge_up_value=0; }\n"
+                      " else { if (B%d_verrou==0) { B%d_verrou=1; B%d_edge_up_value=1; }\n"
+                      "                      else { B%d_edge_up_value=0; }\n"
                       "      }\n",
                       GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
                       GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
@@ -875,8 +874,8 @@
              g_snprintf(chaine, sizeof(chaine),
                       " if (E(%d) == 0)\n"
                       "      { E%d_verrou = 0; E%d_edge_up_value = 0; }\n"
-                      " else { if (E%d_verrou=0) { E%d_verrou=1; E%d_edge_up_value=1; }\n"
-                      "                     else { E%d_edge_up_value=0; }\n"
+                      " else { if (E%d_verrou==0) { E%d_verrou=1; E%d_edge_up_value=1; }\n"
+                      "                      else { E%d_edge_up_value=0; }\n"
                       "      }\n",
                       GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
                       GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data), GPOINTER_TO_INT(liste->data),
@@ -902,28 +901,41 @@
            { Emettre_erreur_new( "Warning: %s not used", alias->nom );
              retour = TRAD_DLS_WARNING;
            }
-          mnemo.dls_id = id;
-          if (alias->num == -1)                                                       /* Pour les alias Dynamiques uniquement */
+          mnemo.dls_id = Dls_plugin.id;
+          mnemo.syn_id = Dls_plugin.syn_id;
+          if (alias->type == ALIAS_TYPE_DYNAMIC)                                      /* Pour les alias Dynamiques uniquement */
            { switch ( alias->bit )
               { case T_MONO:
                  { mnemo.type = MNEMO_MONOSTABLE;
                    g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
                    g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
+                   g_snprintf( mnemo.acro_syn, sizeof(mnemo.acro_syn), "%s", Get_option_chaine( alias->options, T_ETIQUETTE ) );
                    Mnemo_auto_create_for_dls ( &mnemo );
+                   break;
                  }
                 case T_BI:
                  { mnemo.type = MNEMO_BISTABLE;
                    g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
                    g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
+                   g_snprintf( mnemo.acro_syn, sizeof(mnemo.acro_syn), "%s", Get_option_chaine( alias->options, T_ETIQUETTE ) );
                    Mnemo_auto_create_for_dls ( &mnemo );
+                   break;
+                 }
+                case T_TEMPO:
+                 { mnemo.type = MNEMO_TEMPO;
+                   g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
+                   g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
+                   Mnemo_auto_create_for_dls ( &mnemo );
+                   break;
                  }
                 case T_HORLOGE:
                  { mnemo.type = MNEMO_HORLOGE;
                    g_snprintf( mnemo.acronyme, sizeof(mnemo.acronyme), "%s", alias->nom );
                    g_snprintf( mnemo.libelle, sizeof(mnemo.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
+                   g_snprintf( mnemo.acro_syn, sizeof(mnemo.acro_syn), "%s", Get_option_chaine( alias->options, T_ETIQUETTE ) );
                    Mnemo_auto_create_for_dls ( &mnemo );
+                   break;
                  }
-                break;
               }
            }
           liste = liste->next;

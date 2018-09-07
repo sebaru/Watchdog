@@ -46,82 +46,6 @@
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
  extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
 /******************************************************************************************************************************/
-/* Changer_password: procedure de changement de password de l'utilisateur                                                     */
-/* Entrée: un identifiant utilisateur, et son ancien password                                                                 */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gboolean Changer_password ( void )
-  { GtkWidget *dialog, *Entry_code1, *Entry_code2;
-    GtkWidget *table, *texte, *boite, *frame;
-    gint retour;
-
-    dialog = gtk_message_dialog_new( GTK_WINDOW(F_client), GTK_DIALOG_DESTROY_WITH_PARENT,
-                                     GTK_MESSAGE_QUESTION, GTK_BUTTONS_OK_CANCEL,
-                                     _("You have to change your password") );
-    gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
-
-    frame = gtk_frame_new( _("Put your new password") );
-    gtk_frame_set_label_align( GTK_FRAME(frame), 0.5, 0.5 );
-    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(dialog)->vbox ), frame, TRUE, TRUE, 0 );
-
-    boite = gtk_vbox_new( FALSE, 6 );
-    gtk_container_set_border_width( GTK_CONTAINER(boite), 6 );
-    gtk_container_add( GTK_CONTAINER(frame), boite );
-
-    table = gtk_table_new( 2, 3, TRUE );                                                      /* Table des entrys identifiant */
-    gtk_box_pack_start( GTK_BOX(boite), table, TRUE, TRUE, 0 );
-    gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
-    gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
-
-    texte = gtk_label_new( _("New password") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 0, 1 );
-
-    Entry_code1 = gtk_entry_new();
-    gtk_entry_set_visibility( GTK_ENTRY(Entry_code1), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_code1, 1, 3, 0, 1 );
-
-    texte = gtk_label_new( _("New password\n(again)") );
-    gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
-
-    Entry_code2 = gtk_entry_new();
-    gtk_entry_set_visibility( GTK_ENTRY(Entry_code2), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_code2, 1, 3, 1, 2 );
-
-    g_signal_connect_swapped( Entry_code1, "activate", (GCallback)gtk_widget_grab_focus, Entry_code2 );
-one_again:
-    gtk_widget_grab_focus( Entry_code1 );
-    gtk_widget_show_all( frame );
-    retour = gtk_dialog_run( GTK_DIALOG(dialog) );                                     /* Attente de reponse de l'utilisateur */
-
-    switch(retour)
-     { case GTK_RESPONSE_CANCEL:                                                                             /* Si annulation */
-       default: gtk_widget_destroy( dialog );
-                return(FALSE);
-       case GTK_RESPONSE_OK:
-        { gchar *code1, *code2;
-
-          code1 = (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_code1) );
-          code2 = (gchar *)gtk_entry_get_text( GTK_ENTRY(Entry_code2) );
-
-          if ( g_utf8_collate(code1, code2) )
-           { GtkWidget *erreur;
-             erreur = gtk_message_dialog_new( GTK_WINDOW(dialog), GTK_DIALOG_DESTROY_WITH_PARENT,
-                                              GTK_MESSAGE_INFO, GTK_BUTTONS_OK,
-                                              _("Passwords do not match") );
-             gtk_dialog_run( GTK_DIALOG(erreur) );
-             gtk_widget_destroy(erreur);
-             goto one_again;
-           }
-
-          g_snprintf( Client.util.hash, sizeof(Client.util.hash), "%s", code1 );
-          Envoi_serveur( TAG_CONNEXION, SSTAG_CLIENT_SETPASSWORD,
-                        (gchar *)&Client.util, sizeof(struct CMD_TYPE_UTILISATEUR) );
-          gtk_widget_destroy( dialog );                                                            /* Fermeture de la fenetre */
-         }
-      }
-     return(TRUE);                                                                                /* Normalement, ident=0 ici */
-  }
-/******************************************************************************************************************************/
 /* Deconnecter: libere la mémoire et deconnecte le client                                                                     */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
@@ -159,84 +83,6 @@ one_again:
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Demander_cookie_thread: Envoi une demande de cookie au serveur (url légère)                                                */
-/* Entrée : Néant                                                                                                             */
-/* Sortie : Néant. Le cookie dans Client.ident est mis à jour si reponse                                                      */
-/******************************************************************************************************************************/
- void Demander_cookie_thread ( void )
-  { gchar erreur[CURL_ERROR_SIZE+1], url[128];
-    struct curl_httppost *formpost;
-    struct curl_httppost *lastptr;
-    long http_response;
-    CURLcode res;
-    CURL *curl;
-
-    curl = curl_easy_init();
-    if (!curl)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "%s: cURL init failed", __func__ );
-       return;
-     }
-
-    g_snprintf( url, sizeof(url), "%s/ws/login", Config_cli.target_url );
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Trying to get %s", __func__, url );
-
-    formpost = lastptr = NULL;                         /* Envoi d'une requete sur l'url client léger pour récupérer le cookie */
-    curl_formadd( &formpost, &lastptr,
-                  CURLFORM_COPYNAME,     "version",
-                  CURLFORM_COPYCONTENTS, Client.ident.version,
-                  CURLFORM_END); 
-    curl_formadd( &formpost, &lastptr,
-                  CURLFORM_COPYNAME,     "username",
-                  CURLFORM_COPYCONTENTS, Client.ident.nom,
-                  CURLFORM_END); 
-    curl_formadd( &formpost, &lastptr,
-                  CURLFORM_COPYNAME,     "password",
-                  CURLFORM_COPYCONTENTS, Client.ident.passwd,
-                  CURLFORM_END); 
-    curl_easy_setopt(curl, CURLOPT_URL, url );
-    curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
-    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "" );                               /* Active le moteur de gestion des cookies */
-    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );
-    /*curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_gif_data );*/
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT );
-    res = curl_easy_perform(curl);
-    if (res)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
-                "%s: Could not connect to %s (%s)", __func__, url, erreur);
-     }
-    else if (curl_easy_getinfo( curl, CURLINFO_RESPONSE_CODE, &http_response ) != CURLE_OK)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
-                "%s: Wrong Credentials for %s", __func__, url );
-     }
-    else                                                                  
-     { struct curl_slist *cookies = NULL;
-       Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,                                 /* Récupération du cookie */
-                "%s: Connected to %s", __func__, url );
-       res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
-       if(res==0 && cookies!=NULL)
-        { while(cookies)
-           { gchar domaine[80], subdomaine[10], path[80], secure[10], expiry[20], name[80], value[256];
-             Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
-                      "%s: Parsing cookie %s", __func__, cookies->data );
-             if ( sscanf ( cookies->data, "%s %s %s %s %s %s %s", domaine, subdomaine, path, secure, expiry, name, value) != 7 )
-              { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "%s: sscanf failed", __func__ ); }
-             else
-              { if ( ! strcmp( name, "sid" ) )
-                 { Info_new( Config_cli.log, Config_cli.log_override, LOG_NOTICE, "%s: get SID '%s'", __func__, value );
-                   g_snprintf( Client.sid, sizeof(Client.sid), "%s", value );
-                 }
-              }
-             cookies = cookies->next;
-           }
-         curl_slist_free_all(cookies);
-        }
-     }
-    curl_easy_cleanup(curl);
-    curl_formfree(formpost);
-  }
-/******************************************************************************************************************************/
 /* Envoyer_authentification: envoi de l'authentification cliente au serveur                                                   */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
@@ -266,10 +112,6 @@ one_again:
     Client.mode = ATTENTE_AUTORISATION;
     Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
              "Envoyer_identification: Client en mode ATTENTE_AUTORISATION" );
-
-    pthread_create( &tid, NULL, (void *)Demander_cookie_thread, NULL );
-    pthread_detach( tid );
-
   }
 /******************************************************************************************************************************/
 /* Connecter: Tentative de connexion au serveur                                                                               */
@@ -567,12 +409,9 @@ encore:
          { gtk_widget_destroy( F_ident );
            return;
          }
-    else { g_snprintf( Client.host, sizeof(Client.host),
-                      "%s", gtk_entry_get_text( GTK_ENTRY(Entry_host) ) );
-           g_snprintf( Client.ident.nom, sizeof(Client.ident.nom),
-                      "%s", gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
-           g_snprintf( Client.ident.passwd, sizeof(Client.ident.passwd),
-                      "%s", gtk_entry_get_text( GTK_ENTRY(Entry_code) ) );
+    else { g_snprintf( Client.host, sizeof(Client.host), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_host) ) );
+           g_snprintf( Client.ident.nom, sizeof(Client.ident.nom), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_nom) ) );
+           g_snprintf( Client.ident.passwd, sizeof(Client.ident.passwd), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_code) ) );
 
            gtk_widget_destroy( F_ident );                                                          /* Fermeture de la fenetre */
            if (Connecter_au_serveur())                                              /* Essai de connexion au serveur Watchdog */

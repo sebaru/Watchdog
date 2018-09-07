@@ -61,7 +61,6 @@
     gboolean ssl_needed_with_cert;
     gchar host[TAILLE_NOM_SERVEUR+1];                                               /* Nom du serveur sur lequel se connecter */
     struct CMD_TYPE_UTILISATEUR util;
-    gchar sid[256];                                                                                    /* Cookie de session ! */
   };
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

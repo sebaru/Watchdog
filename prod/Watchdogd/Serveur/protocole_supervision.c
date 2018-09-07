@@ -209,6 +209,38 @@
                Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGE_FIN, NULL, 0 );
              }
             break;
+       case SSTAG_CLIENT_VALIDE_EDIT_HORLOGE:
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
+               if (Modifier_mnemo_horlogeDB( mnemo ) == TRUE)
+                { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_VALIDE_EDIT_HORLOGE_OK,
+                                 (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMO_FULL) );
+                }
+             }
+            break;
+       case SSTAG_CLIENT_ADD_HORLOGE:
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
+               gint id;
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
+               id = Ajouter_mnemo_horlogeDB( mnemo );
+               if (id>0)
+                { mnemo = Rechercher_horloge_by_id ( id );
+                  if (mnemo)
+                   { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_ADD_HORLOGE_OK,
+                                    (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMO_FULL) );
+                   }
+                }
+             }
+            break;
+       case SSTAG_CLIENT_DEL_HORLOGE:
+             { struct CMD_TYPE_MNEMO_FULL *mnemo;
+               mnemo = (struct CMD_TYPE_MNEMO_FULL *)connexion->donnees;
+               if (Retirer_horlogeDB ( mnemo ) == TRUE)
+                { Envoi_client ( client, TAG_SUPERVISION, SSTAG_SERVEUR_DEL_HORLOGE_OK,
+                                 (gchar *)mnemo, sizeof(struct CMD_TYPE_MNEMO_FULL) );
+                }
+             }
+            break;
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

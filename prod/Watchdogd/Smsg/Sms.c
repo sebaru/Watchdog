@@ -86,8 +86,8 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,name,enable,comment,sms_enable,sms_phone,sms_allow_cde "
-                " FROM %s as user ORDER BY user.name",
+                "SELECT id,username,enable,comment,sms_enable,sms_phone,sms_allow_cde "
+                " FROM %s as user ORDER BY username",
                 NOM_TABLE_UTIL );
 
     return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
@@ -101,8 +101,8 @@
   { gchar requete[512];
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,name,enable,comment,sms_enable,sms_phone,sms_allow_cde "
-                " FROM %s as user WHERE enable=1 AND sms_enable=1 ORDER BY user.name",
+                "SELECT id,username,enable,comment,sms_enable,sms_phone,sms_allow_cde "
+                " FROM %s as user WHERE enable=1 AND sms_enable=1 ORDER BY username",
                 NOM_TABLE_UTIL );
 
     return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
@@ -124,7 +124,7 @@
     sms = (struct SMSDB *)g_try_malloc0( sizeof(struct SMSDB) );
     if (!sms) Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
     else
-     { g_snprintf( sms->user_sms_phone, sizeof(sms->user_sms_phone), "%s", db->row[5] );
+     { g_snprintf( sms->user_phone, sizeof(sms->user_phone), "%s", db->row[5] );
        g_snprintf( sms->user_name,      sizeof(sms->user_name),      "%s", db->row[1] );
        g_snprintf( sms->user_comment,   sizeof(sms->user_comment),   "%s", db->row[3] );
        sms->user_id            = atoi(db->row[0]);
@@ -152,9 +152,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,name,enable,comment,sms_enable,sms_phone,sms_allow_cde "
-                " FROM %s as user WHERE enable=1 AND sms_allow_cde=1 AND sms_phone LIKE '%s'"
-                " ORDER BY user.name LIMIT 1",
+                "SELECT id,username,enable,comment,sms_enable,sms_phone,sms_allow_cde "
+                " FROM %s as user WHERE enable=1 AND sms_allow_cde=1 AND phone LIKE '%s'"
+                " ORDER BY username LIMIT 1",
                 NOM_TABLE_UTIL, phone );
     g_free(phone);
 
@@ -391,14 +391,14 @@
     while ( (sms = Smsg_Recuperer_smsDB_suite( db )) != NULL)
      { switch (msg->sms)
         { case MSG_SMS_YES:
-               if ( Envoi_sms_gsm   ( msg, sms->user_sms_phone ) == FALSE )
-                { Envoi_sms_smsbox( msg, sms->user_sms_phone ); }
+               if ( Envoi_sms_gsm   ( msg, sms->user_phone ) == FALSE )
+                { Envoi_sms_smsbox( msg, sms->user_phone ); }
                break;
           case MSG_SMS_GSM_ONLY:
-               Envoi_sms_gsm   ( msg, sms->user_sms_phone );
+               Envoi_sms_gsm   ( msg, sms->user_phone );
                break;
           case MSG_SMS_SMSBOX_ONLY:
-               Envoi_sms_smsbox( msg, sms->user_sms_phone );
+               Envoi_sms_smsbox( msg, sms->user_phone );
                break;
         }
        /*sleep(5);*/
@@ -456,7 +456,7 @@
      
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE,
              "%s : Received %s from %s(%s). Processing...", __func__,
-              texte, sms->user_name, sms->user_sms_phone );
+              texte, sms->user_name, sms->user_phone );
     g_free(sms);
     g_snprintf(chaine, sizeof(chaine), "Processing: %s", texte );                           /* Envoi de l'acquit de reception */
     Envoyer_smsg_gsm_text ( chaine );

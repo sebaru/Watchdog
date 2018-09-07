@@ -170,8 +170,10 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `vert` int(11) NOT NULL DEFAULT '0',
   `bleu` int(11) NOT NULL DEFAULT '0',
   `layer` int(11) NOT NULL DEFAULT '0',
+  `mnemo_id` int(11) NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+  FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -226,6 +228,7 @@ CREATE TABLE IF NOT EXISTS `dls` (
   `compil_status` int(11) NOT NULL,
   `nbr_compil` int(11) NOT NULL DEFAULT '0',
   `sourcecode` MEDIUMTEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT "/* Default ! */",
+  `nbr_ligne` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
@@ -680,7 +683,6 @@ CREATE TABLE IF NOT EXISTS `icons_new` (
 
 CREATE TABLE IF NOT EXISTS `mnemos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `created_by_user` int(1) NOT NULL DEFAULT '1',
   `type` int(11) NOT NULL DEFAULT '0',
   `num` int(11) NOT NULL DEFAULT '0',
   `dls_id` int(11) NOT NULL DEFAULT '0',
@@ -706,11 +708,11 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `ev_
 (07, 0,   6, 1, 'SYS_TICK_0.3S', 'Cligno toutes les 3 dixièmes de seconde', ''),
 (08, 0,   7, 1, 'SYS_SHUTDOWN', 'System is halting', ''),
 (09, 0,   8, 1, 'SYS_REBOOT', 'System is rebooting', ''),
-(10, 5, 123, 1, 'SYS_DLS_WAIT', 'Number of milli-second to wait to get target turn/sec', ''),
-(11, 5, 124, 1, 'SYS_TOUR_DLS_PER_SEC', 'Number of D.L.S turn in second', ''),
-(12, 5, 125, 1, 'SYS_BITS_PER_SEC', 'Number of bits toggled in one second', ''),
-(13, 5, 126, 1, 'SYS_ARCHREQUEST', 'Number of ArchiveRequest to proceed', ''),
-(14, 5, 127, 1, 'SYS_DBREQUEST_SIMULT', 'Number of simultaneous SQL request', ''),
+(10, 5,  -1, 1, 'DLS_WAIT', 'Number of milli-second to wait to get target turn/sec', ''),
+(11, 5,  -1, 1, 'DLS_TOUR_PER_SEC', 'Number of D.L.S turn in second', ''),
+(12, 5,  -1, 1, 'DLS_BIT_PER_SEC', 'Number of bits toggled in one second', ''),
+(13, 5,  -1, 1, 'ARCH_REQUEST_NUMBER', 'Number of ArchiveRequest to proceed', ''),
+(14, 5,  -1, 1, 'DB_REQUEST_SIMULT', 'Number of simultaneous SQL request', ''),
 (15, 7,   1, 1, 'SYS_I1', 'Motif toujours en mode 1 couleur rouge', ''),
 (16, 7,   4, 1, 'SYS_I4', 'rÃ©servÃ©', ''),
 (17, 7,   3, 1, 'SYS_I3', 'rÃ©servÃ©', ''),
@@ -787,7 +789,7 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `date_create` datetime NOT NULL,
   `enable` tinyint(1) NOT NULL,
-  `ip` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
+  `hostname` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',
   `watchdog` int(11) NOT NULL,
   `bit` int(11) NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
@@ -959,19 +961,13 @@ CREATE TABLE IF NOT EXISTS `rfxcom` (
 
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
+  `username` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
   `access_level` int(11) NOT NULL DEFAULT '0',
-  `mustchangepwd` tinyint(1) NOT NULL DEFAULT '0',
-  `cansetpwd` tinyint(1) NOT NULL DEFAULT '0',
-  `salt` varchar(130) COLLATE utf8_unicode_ci NOT NULL,
-  `hash` varchar(130) COLLATE utf8_unicode_ci NOT NULL,
-  `phphash` VARCHAR(130) COLLATE utf8_unicode_ci NOT NULL,
+  `hash` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `comment` varchar(240) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `login_failed` int(11) NOT NULL DEFAULT '0',
+  `login_attempts` int(11) NOT NULL DEFAULT '0',
   `enable` tinyint(1) NOT NULL DEFAULT '0',
   `date_create` DATETIME NOT NULL DEFAULT NOW(),
-  `enable_expire` tinyint(1) NOT NULL DEFAULT '0',
-  `date_expire` DATETIME DEFAULT NULL,
   `date_modif` DATETIME DEFAULT NULL,
   `sms_enable` tinyint(1) NOT NULL DEFAULT '0',
   `sms_phone` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
@@ -981,26 +977,21 @@ CREATE TABLE IF NOT EXISTS `users` (
   `imsg_allow_cde` tinyint(1) NOT NULL DEFAULT '0',
   `imsg_available` tinyint(1) NOT NULL DEFAULT '0',
   `ssrv_bit_presence` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  PRIMARY KEY(`username`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
-INSERT INTO `users` (`id`, `access_level`, `name`, `phphash`, `mustchangepwd`, `cansetpwd`, `salt`, `hash`, `comment`, `login_failed`, `enable`, `date_create`, `enable_expire`, `date_expire`, `date_modif`) VALUES
-(0, 10, 'root', '$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a', 1, 1, '9311D076CDB709623503B3D3461EA8E9DFE842076C8A6B348AA78215BF7B7B797ABBE33F29CDF86B88F1B2D6071D4916ACAD1C997B832AE774D3AB4186077386', '529612B992460427C7C6FF21F5AC6965C36A735B8AB813FC3FF083AA3D2D19190AB1A700BEE2ADFA9D797F301C2E3D491D12AA04C69C7652CE875721E1E6F1B4', 'Utilisateur Root', 0, 1, NOW(), 0, 0, 0),
-(1, 0, 'guest', '$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a', 0, 0, '0FE3B94BCC1E52AC4BEE0DE31D6306890854EAFC77F855FBD9D17BB0D7256A5E23ED8D58FA85E345FE71D046211745B6B50382CD939DC7FDAA2FBE6B7D586069', '6E14D7124DF5FC4C018D845F351553F751265C37834455B96EE3014BCA7CFE53B87CAD8FFA739B39C4A5BCD61E267560EAA7F2AEFFAB3C457B1E0F6BE5BCF8C4', 'Utilisateur Guest', 0, 1, NOW(), 0, 0, 0);
-
-
--- --------------------------------------------------------
-
---
--- Structure de la table `users_sessions`
---
+INSERT INTO `users` (`id`, `enable`, `access_level`, `username`, `hash`, `comment`, `date_create`, `date_modif`) VALUES
+(0, 1, 10, 'root', '$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a', 'Root user ', NOW(), NOW()),
+(1, 1, 0, 'guest', '$2y$10$9TVOoxmzBJTl6knJ0plKHOCsoSvSSMiPrldhanBKVApFIF3083x6a', 'Guest user ', NOW(), NOW());
 
 CREATE TABLE `users_sessions` (
-  `id` varchar(128) NOT NULL,
-  `login` varchar(32) NOT NULL,
+  `id` VARCHAR(128) NOT NULL,
+  `login` VARCHAR(32) NOT NULL,
   `last_date` datetime NOT NULL,
-  `remote_addr` varchar(50) NOT NULL,
-  `x_forwarded_for` varchar(50) NOT NULL,
+  `remote_addr` VARCHAR(50) NOT NULL,
+  `x_forwarded_for` VARCHAR(50) NOT NULL,
   `data` text NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+

@@ -8,4 +8,4 @@ dnf install -y lirc-devel loudmouth-devel libxml2-devel libgnomeui-devel popt-de
 dnf install -y gtksourceview2-devel goocanvas-devel libgnomeui-devel  json-glib-devel gammu-devel
 dnf install -y pulseaudio alsa-utils alsa-firmware mpg123
 dnf install -y sox
-pip3 install google_speech
+pip3 install google_speech google-cloud-speech

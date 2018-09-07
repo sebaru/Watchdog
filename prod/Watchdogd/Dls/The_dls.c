@@ -35,7 +35,7 @@
  #include <sys/time.h>
  #include <sys/prctl.h>
  #include <semaphore.h>
-
+ 
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
@@ -477,23 +477,23 @@
        Partage->audit_bit_interne_per_sec++;
      }
   }
-/**********************************************************************************************************/
-/* STR: Positionnement d'une Tempo retard DLS                                                             */
-/* Entrée: numero, etat                                                                                   */
-/* Sortie: Neant                                                                                          */
-/**********************************************************************************************************/
- void ST( int num, int etat )
-  { struct TEMPO *tempo;
-
-    if (num<0 || num>=NBR_TEMPO)
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "STR: num %d out of range", num ); }
-       return;
-     }
-    tempo = &Partage->Tempo_R[num];                                       /* Récupération de la structure */
-
+/******************************************************************************************************************************/
+/* STR_local: Positionnement d'une Tempo retard DLS                                                                           */
+/* Entrée: la structure tempo et son etat                                                                                     */
+/* Sortie: Neant                                                                                                              */
+/******************************************************************************************************************************/
+ static void ST_local( struct TEMPO *tempo, int etat )
+  { static guint seed;
     if (tempo->status == TEMPO_NOT_COUNTING && etat == 1)
      { tempo->status = TEMPO_WAIT_FOR_DELAI_ON;
+       if (tempo->confDB.random)
+        { gfloat ratio;
+          ratio = (gfloat)rand_r(&seed)/RAND_MAX;
+          tempo->confDB.delai_on  = (gint)(tempo->confDB.random * ratio);
+          tempo->confDB.min_on    = 0;
+          tempo->confDB.max_on    = 0;
+          tempo->confDB.delai_off = 0;
+        }
        tempo->date_on = Partage->top + tempo->confDB.delai_on;
      }
 
@@ -548,6 +548,22 @@
 
     if (tempo->status == TEMPO_WAIT_FOR_COND_OFF && etat == 0 )
      { tempo->status = TEMPO_NOT_COUNTING; }
+  }
+/******************************************************************************************************************************/
+/* STR: Positionnement d'une Tempo retard DLS                                                                                 */
+/* Entrée: numero, etat                                                                                                       */
+/* Sortie: Neant                                                                                                              */
+/******************************************************************************************************************************/
+ void ST( int num, int etat )
+  { struct TEMPO *tempo;
+
+    if (num<0 || num>=NBR_TEMPO)
+     { if (!(Partage->top % 600))
+        { Info_new( Config.log, Config.log_dls, LOG_INFO, "STR: num %d out of range", num ); }
+       return;
+     }
+    tempo = &Partage->Tempo_R[num];                                                  /* Récupération de la structure statique */
+    ST_local ( tempo, etat );
   }
 /******************************************************************************************************************************/
 /* SA: Positionnement d'un actionneur DLS                                                                                     */
@@ -826,14 +842,16 @@
   { void *data;
     pthread_mutex_lock( &Partage->com_dls.synchro_data );
     data = g_tree_lookup ( Partage->com_dls.Dls_data, key );
-    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : searching for key %s : %p", __func__, key, data );
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+/*    if (!data)
+     { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : searching for key %s : %p failed.", __func__, key, data ); }*/
     return(data);
   }
  void Dls_data_set_bool ( gchar *nom, gchar *owner, gboolean **data_p, gboolean valeur )
   { if (!data_p || !*data_p)
      { gchar chaine[80];
        gboolean *data;
+       if ( !(nom && owner) ) return;
        g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
        data = Dls_data_get( chaine );
        if (!data)
@@ -853,9 +871,161 @@
     if (data_p && *data_p) return (**data_p);                                        /* Si pointeur d'acceleration disponible */
     g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
     data = Dls_data_get( chaine );
-    if (data)
-     { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : key %s found val %d", __func__, chaine, *data );
-       return(*data);
+    if (data) { return(*data); }
+    return(FALSE);    
+  }
+/******************************************************************************************************************************/
+/* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_AI ( gchar *nom, gchar *tech_id, gpointer **ai_p, float val_avant_ech )
+  { struct ANALOG_INPUT *ai;
+    gboolean need_arch;
+
+    if (!ai_p || !*ai_p)
+     { GSList *liste;
+       if ( !(nom && tech_id) ) return;
+       liste = Partage->Dls_data_AI;
+       while (liste)
+        { ai = (struct ANALOG_INPUT *)liste->data;
+          if ( !strcmp ( ai->nom, nom ) && !strcmp( ai->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+       
+       if (!liste)
+        { ai = g_malloc0 ( sizeof(struct ANALOG_INPUT) );
+          if (!ai)
+           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, nom, tech_id );
+             return;
+           }
+          g_snprintf( ai->nom,     sizeof(ai->nom), "%s", nom );
+          g_snprintf( ai->tech_id, sizeof(ai->tech_id), "%s", tech_id );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding AI '%s:%s'", __func__, tech_id, nom );
+          Charger_conf_AI ( ai );                                                     /* Chargment de la conf AI depuis la DB */
+        }
+       if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */
+      }
+    else ai = (struct ANALOG_INPUT *)*ai_p;
+
+    need_arch = FALSE;
+    if (ai->val_avant_ech != val_avant_ech)
+     { ai->val_avant_ech = val_avant_ech;                                           /* Archive au mieux toutes les 5 secondes */
+       if ( ai->last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top ) { need_arch = TRUE; }
+
+       switch ( ai->confDB.type )
+        { case ENTREEANA_NON_INTERP:
+               ai->val_ech = val_avant_ech;                                                        /* Pas d'interprétation !! */
+               ai->inrange = 1;
+               break;
+          case ENTREEANA_4_20_MA_10BITS:
+               if (val_avant_ech < 100)                                                /* 204) Modification du range pour 4mA */
+                { ai->val_ech = 0.0;                                                                    /* Valeur à l'echelle */ 
+                  ai->inrange = 0;
+                }
+               else
+                { if (val_avant_ech < 204) val_avant_ech = 204;                                         /* Valeur à l'echelle */ 
+                  ai->val_ech = (gfloat) ((val_avant_ech-204)*(ai->confDB.max - ai->confDB.min))/820.0 + ai->confDB.min;
+                  ai->inrange = 1;
+                }
+               break;
+          case ENTREEANA_4_20_MA_12BITS:
+               if (val_avant_ech < 400)
+                { ai->val_ech = 0.0;                                                                    /* Valeur à l'echelle */ 
+                  ai->inrange = 0;
+                }
+               else
+                { if (val_avant_ech < 816) val_avant_ech = 816;                                         /* Valeur à l'echelle */ 
+                  ai->val_ech = (gfloat) ((val_avant_ech-816)*(ai->confDB.max - ai->confDB.min))/3280.0 + ai->confDB.min;
+                  ai->inrange = 1;
+                }
+               break;
+          case ENTREEANA_WAGO_750455:                                                                              /* 4/20 mA */
+               ai->val_ech = (gfloat) (val_avant_ech*(ai->confDB.max - ai->confDB.min))/4095.0 + ai->confDB.min;
+               ai->inrange = 1;
+               break;
+          case ENTREEANA_WAGO_750461:                                                                          /* Borne PT100 */
+               if (val_avant_ech > -32767 && val_avant_ech < 8500)
+                { ai->val_ech = (gfloat)(val_avant_ech/10.0);                                           /* Valeur à l'echelle */ 
+                  ai->inrange = 1;
+                }
+               else ai->inrange = 0;
+               break;
+          default:
+               ai->val_ech = 0.0;
+               ai->inrange = 0;
+        }
+     }
+    else if ( ai->last_arch + ARCHIVE_EA_TEMPS_SI_CONSTANT < Partage->top )
+     { need_arch = TRUE; }                                                               /* Archive au pire toutes les 10 min */
+
+    if (need_arch)
+     { Ajouter_arch_by_nom( ai->nom, ai->tech_id, ai->val_ech );                                       /* Archivage si besoin */
+       ai->last_arch = Partage->top;
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
+/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ gfloat Dls_data_get_AI ( gchar *nom, gchar *tech_id, gpointer **ai_p )
+  { struct ANALOG_INPUT *ai;
+    if (!ai_p || !*ai_p)                                                           /* Si pointeur d'acceleration indisponible */
+     { GSList *liste;
+       liste = Partage->Dls_data_AI;
+       while (liste)
+        { ai = (struct ANALOG_INPUT *)liste->data;
+          if ( !strcmp ( ai->nom, nom ) && !strcmp( ai->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+       
+       if (!liste) return(0.0);
+       if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */
+      }
+    else ai = (struct ANALOG_INPUT *)*ai_p;
+    return( ai->val_ech );    
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
+/* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
+/******************************************************************************************************************************/
+ void Dls_data_set_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p, gboolean etat,
+                            gint delai_on, gint min_on, gint max_on, gint delai_off, gint random)
+  { if (!tempo_p || !*tempo_p)
+     { gchar chaine[80];
+       struct TEMPO *tempo;
+       g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
+       tempo = g_tree_lookup ( Partage->com_dls.Dls_data_tempo, chaine );
+       if (!tempo)
+        { tempo = g_malloc0 ( sizeof(struct TEMPO) );
+          if (!tempo) { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for %s", __func__, chaine ); return; }
+          tempo->confDB.delai_on  = delai_on;
+          tempo->confDB.min_on    = min_on;
+          tempo->confDB.max_on    = max_on;
+          tempo->confDB.delai_off = delai_off;
+          tempo->confDB.random    = random;
+          g_tree_insert ( Partage->com_dls.Dls_data_tempo, g_strdup(chaine), tempo );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding key %s : %p", __func__, chaine, tempo );
+        }
+       if (tempo_p) *tempo_p = (gpointer)tempo;                                     /* Sauvegarde pour acceleration si besoin */
+      }
+     ST_local ( (struct TEMPO *)*tempo_p, etat );                                                 /* Recopie dans la variable */
+  }
+ gboolean Dls_data_get_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p )
+  { gchar chaine[80];
+    struct TEMPO *tempo;
+    if (tempo_p && *tempo_p)                                                         /* Si pointeur d'acceleration disponible */
+     { tempo = (struct TEMPO *)*tempo_p;
+       return (tempo->state);
+     }
+    g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
+    tempo = g_tree_lookup ( Partage->com_dls.Dls_data_tempo, chaine );
+    if (tempo)
+     { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : key %s found val %p", __func__, chaine, tempo );
+       if (tempo_p) *tempo_p = (gpointer)tempo;                                     /* Sauvegarde pour acceleration si besoin */
+       return(tempo->state);
      }
     return(FALSE);    
   }
@@ -865,6 +1035,16 @@
 /* Sortie : FALSE pour poursuivre le cheminement de l'arbre                                                                   */
 /******************************************************************************************************************************/
  static gboolean Dls_data_free_data (gpointer key, gpointer value, gpointer data)
+  { g_free(key);
+    g_free(value);
+    return(FALSE);
+  }
+/******************************************************************************************************************************/
+/* Dls_data_free_data: Libere la memoire pour les clefs et data contenu dans l'arbre Dls_data. Appellé par g_tree_foreach     */
+/* Entrée : la clef a libérer, la value qui va avec et un pointer non utilisé                                                 */
+/* Sortie : FALSE pour poursuivre le cheminement de l'arbre                                                                   */
+/******************************************************************************************************************************/
+ static gboolean Dls_data_free_all_data (gpointer key, gpointer value, gpointer data)
   { g_free(key);
     g_free(value);
     return(FALSE);
@@ -931,10 +1111,10 @@
        if (plugin_actuel->plugindb.on && plugin_actuel->go)
         { gettimeofday( &tv_avant, NULL );
           Partage->top_cdg_plugin_dls = 0;                                                      /* On reset le cdg plugin DLS */
-          plugin_actuel->go( plugin_actuel->starting, plugin_actuel->debug, &plugin_actuel->vars );     /* On appel le plugin */
+          plugin_actuel->go( &plugin_actuel->vars );     /* On appel le plugin */
           gettimeofday( &tv_apres, NULL );
           plugin_actuel->conso+=Chrono( &tv_avant, &tv_apres );
-          plugin_actuel->starting = 0;
+          plugin_actuel->vars.starting = 0;
 
           plugin_actuel->vars.bit_acquit = 0;                                                 /* On arrete l'acquit du plugin */
                                                                                                   /* Bit de synthese activite */
@@ -1014,6 +1194,7 @@
     Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
     Partage->com_dls.Thread_run         = TRUE;                                                         /* Le thread tourne ! */
     Partage->com_dls.Dls_data = g_tree_new ( (GCompareFunc) strcmp ); 
+    Partage->com_dls.Dls_data_tempo = g_tree_new ( (GCompareFunc) strcmp ); 
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                                          /* Chargement des modules dls */
     SB_SYS(1, 0);                                                                                      /* B1 est toujours à 0 */
@@ -1064,6 +1245,8 @@
     Decharger_plugins();                                                                      /* Dechargement des modules DLS */
     g_tree_foreach (Partage->com_dls.Dls_data, Dls_data_free_data, NULL );
     g_tree_destroy (Partage->com_dls.Dls_data);
+    g_tree_foreach (Partage->com_dls.Dls_data_tempo, Dls_data_free_all_data, NULL );
+    g_tree_destroy (Partage->com_dls.Dls_data_tempo);
     Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: DLS Down (%p)", __func__, pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

@@ -35,7 +35,6 @@
  
  struct CONFIG_CLI
   { gchar host[TAILLE_NOM_SERVEUR+1];                                                             /* Serveur Watchdog distant */
-    gchar target_url[TAILLE_NOM_SERVEUR+1];                                                       /* Serveur Watchdog distant */
     gchar user[NBR_CARAC_LOGIN_UTF8+1]; 
     gchar passwd[TAILLE_NOM_SERVEUR+1];                                                           /* Serveur Watchdog distant */
     guint port_ihm;                                                              /* Port TCP du service IHM (5558 par défaut) */

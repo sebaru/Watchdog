@@ -36,7 +36,7 @@
 /* Entrée: un log et une database, un flag d'ajout/edition, et la structure arch                                              */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
- void Ajouter_archDB ( struct DB *db, struct ARCHDB *arch )
+ void Ajouter_archDB_by_num ( struct DB *db, struct ARCHDB *arch )
   { gchar requete[512], table[512];
 
     setlocale ( LC_NUMERIC, "C" );
@@ -56,9 +56,51 @@
                    "  PARTITION BY LINEAR KEY (date_time) PARTITIONS 12;",
                    NOM_TABLE_ARCH, arch->type, arch->num );
        Lancer_requete_SQL ( db, table );                                                       /* Execution de la requete SQL */
+       Info_new( Config.log, Config.log_arch, LOG_NOTICE,
+                "%s: Creation de la table %s_%03d_%06d avant Insert", __func__, NOM_TABLE_ARCH, arch->type, arch->num );
        Lancer_requete_SQL ( db, requete );                             /* Une fois la table créé, on peut y stocker l'archive */
-	 }
+	    }
+  }
+/******************************************************************************************************************************/
+/* Ajouter_archDB: Ajout d'une entree archive dans la Base de Données                                                         */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure arch                                              */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ void Ajouter_archDB_by_nom ( struct DB *db, struct ARCHDB *arch )
+  { gchar requete[512], table[512];
 
+    setlocale ( LC_NUMERIC, "C" );
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "INSERT INTO %s_%s_%s(date_time,valeur) VALUES "
+                "(FROM_UNIXTIME(%d.%d),'%f')",
+                NOM_TABLE_ARCH, arch->tech_id, arch->nom, arch->date_sec, arch->date_usec, arch->valeur );
+
+    if (Lancer_requete_SQL ( db, requete )==FALSE)                                             /* Execution de la requete SQL */
+     {                               /* Si erreur, c'est peut etre parce que la table n'existe pas, on tente donc de la créer */
+       g_snprintf( table, sizeof(table),                                                                       /* Requete SQL */
+                   "CREATE TABLE `%s_%s_%s`("
+                   "`date_time` datetime(6) DEFAULT NULL,"
+                   "`valeur` float NOT NULL DEFAULT '0',"
+                   "KEY `index_date` (`date_time`)"
+                   ") ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
+                   "  PARTITION BY LINEAR KEY (date_time) PARTITIONS 12;",
+                   NOM_TABLE_ARCH, arch->tech_id, arch->nom );
+       Lancer_requete_SQL ( db, table );                                                       /* Execution de la requete SQL */
+       Info_new( Config.log, Config.log_arch, LOG_NOTICE,
+                "%s: Creation de la table %s_%s_%s avant Insert", __func__, NOM_TABLE_ARCH, arch->tech_id, arch->nom );
+       Lancer_requete_SQL ( db, requete );                             /* Une fois la table créé, on peut y stocker l'archive */
+	    }
+  }
+/******************************************************************************************************************************/
+/* Ajouter_archDB: Ajout d'une entree archive dans la Base de Données                                                         */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure arch                                              */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ void Ajouter_archDB ( struct DB *db, struct ARCHDB *arch )
+  { gchar requete[512], table[512];
+
+    if (arch->num == -1) Ajouter_archDB_by_nom ( db, arch );
+                    else Ajouter_archDB_by_num ( db, arch );
   }
 /******************************************************************************************************************************/
 /* Arch_Update_SQL_Partitions: Appelé une fois par jour pour faire des opérations de menage dans les tables d'archivages      */

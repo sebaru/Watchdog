@@ -65,6 +65,8 @@
     gint id;
 
     rezo_motif->access_level = ACCESS_LEVEL_ALL;                         /* Par défaut, tout le monde peut acceder a ce motif */
+    rezo_motif->position_x = 150;
+    rezo_motif->position_y = 150;
     id = Ajouter_motifDB ( rezo_motif );
     if (id == -1)
      { struct CMD_GTK_MESSAGE erreur;

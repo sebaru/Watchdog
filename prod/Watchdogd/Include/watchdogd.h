@@ -59,10 +59,6 @@
  #define VERROU_SERVEUR              "watchdogd.lock"
  #define FICHIER_EXPORT              "export.wdg"
 
- #define NUM_EA_SYS_BITS_PER_SEC        125                    /* Numéro d'EA de reference pour le nbr de bit dls par seconde */
- #define NUM_EA_SYS_TOUR_DLS_PER_SEC    124                   /* Numéro d'EA de reference pour le nbr de tour dls par seconde */
- #define NUM_EA_SYS_DLS_WAIT            123                      /* Numéro d'EA de reference pour le temps d'attente par tour */
-
  #define MAX_ENREG_QUEUE               1500      /* (a virer) Nombre maximum d'enregistrement dans une queue de communication */
 
  struct LIBRAIRIE
@@ -139,6 +135,9 @@
     struct I_MOTIF i[ NBR_BIT_CONTROLE ];                                                               /* DLS=rw, Sserveur=r */
     struct TEMPO Tempo_R[NBR_TEMPO];
     struct REGISTRE registre[NBR_REGISTRE];
+    GSList *Dls_data_DI;                                                                   /* Arbre des entrees dynamique TOR */
+    GSList *Dls_data_AI;                                                                   /* Arbre des entrees dynamique ANA */
+
   };
 
 /************************************************ Définitions des prototypes **************************************************/

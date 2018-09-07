@@ -45,11 +45,11 @@
     liste = Cfg_ssrv.Clients;
     while ( liste )                              /* Parcours de la liste des ssrv (et donc de clients) */
      { client = (struct CLIENT *)liste->data;
-       if ( (! strcmp ( client->util->nom, name ) ) || (! strcmp ( name, "all" )) )
+       if ( (! strcmp ( client->util->username, name ) ) || (! strcmp ( name, "all" )) )
         { Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_WARNING,
                        (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
           g_snprintf( chaine, sizeof(chaine), " | - SSRV%06d - %s@%s", client->ssrv_id,
-                      (client->util ? client->util->nom : "unknown"), client->machine );
+                      (client->util ? client->util->username : "unknown"), client->machine );
           response = Admin_write ( response, chaine );
         }
        liste = g_slist_next(liste);
@@ -79,7 +79,7 @@
                    " | - SSRV%06d - v%s - AccessLevel %02d - mode %02d (%s) ref %d defaut %02d date %s - %s@%s",
                    client->ssrv_id, client->ident.version, (client->util ? client->util->access_level : -1),
                    client->mode, Mode_vers_string(client->mode), client->struct_used, client->defaut, date,
-                  (client->util ? client->util->nom : "unknown"), client->machine
+                  (client->util ? client->util->username : "unknown"), client->machine
                  );
        response = Admin_write ( response, chaine );
        liste = g_slist_next(liste);
@@ -104,10 +104,10 @@
     liste = Cfg_ssrv.Clients;
     while ( liste )                                                     /* Parcours de la liste des ssrv (et donc de clients) */
      { client = (struct CLIENT *)liste->data;
-       if ( ! strcmp ( client->util->nom, name ) )
+       if ( ! strcmp ( client->util->username, name ) )
         { Client_mode ( client, DECONNECTE );
           g_snprintf( chaine, sizeof(chaine), " | - Killed session : SSRV%06d - %s@%s", client->ssrv_id,
-                      (client->util ? client->util->nom : "unknown"), client->machine );
+                      (client->util ? client->util->username : "unknown"), client->machine );
           response = Admin_write ( response, chaine );
         }
        liste = g_slist_next(liste);
@@ -135,7 +135,7 @@
        if ( client->ssrv_id == id )
         { Client_mode ( client, DECONNECTE );
           g_snprintf( chaine, sizeof(chaine), " | - Killed session : SSRV%06d - %s@%s", client->ssrv_id,
-                      (client->util ? client->util->nom : "unknown"), client->machine );
+                      (client->util ? client->util->username : "unknown"), client->machine );
           response = Admin_write ( response, chaine );
         }
        liste = g_slist_next(liste);

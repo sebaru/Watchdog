@@ -36,44 +36,36 @@
 /* Sortie: Le buffer de reponse complété                                                                                      */
 /******************************************************************************************************************************/
  static gchar *Admin_print_user ( gchar *response, struct CMD_TYPE_UTILISATEUR *util )
-  { gchar date_expire[20], date_creation[20], date_modif[20];
+  { gchar date_create[20], date_modif[20];
     gchar chaine[1024];
     struct tm *temps;
     time_t time;
-
-    time = util->date_expire;
-    temps = localtime( (time_t *)&time );
-    if (temps) { strftime  ( date_expire, sizeof(date_expire), "%F %T", temps ); }
-    else       { g_snprintf( date_expire, sizeof(date_expire), "Erreur" );    }
 
     time = util->date_modif;
     temps = localtime( (time_t *)&time );
     if (temps) { strftime  ( date_modif, sizeof(date_modif), "%F %T", temps ); }
     else       { g_snprintf( date_modif, sizeof(date_modif), "Erreur" );    }
 
-    time = util->date_creation;
+    time = util->date_create;
     temps = localtime( (time_t *)&time );
-    if (temps) { strftime  ( date_creation, sizeof(date_creation), "%F %T", temps ); }
-    else       { g_snprintf( date_creation, sizeof(date_creation), "Erreur" );    }
+    if (temps) { strftime  ( date_create, sizeof(date_create), "%F %T", temps ); }
+    else       { g_snprintf( date_create, sizeof(date_create), "Erreur" );    }
 
     g_snprintf( chaine, sizeof(chaine),
               " |---------------------------------------------------------------------------------------\n"
-              " [%03d]%12s -> enable=%d, expire=%d, date_expire = %s, mustchangepwd = %s, cansetpwd = %s\n"
-              " |               -> date_creation = %s, date_modif = %s\n"
-              " |               -> sms_enable  = %d, sms_allow_cde  = %d, sms_phone = %s\n"
-              " |               -> imsg_enable = %d, imsg_allow_cde = %d, imsg_jabber_id = %s\n"
-              " |               -> imsg_available = %d\n"
-              " |               -> ssrv_bit_presence = B%04d (=%d)\n"
-              " |               -> salt=%s\n"
-              " |               -> hash=%s\n"
-              " |----------------> %s\n",
-                util->id, util->nom, util->enable, util->expire, date_expire, (util->mustchangepwd ? "TRUE" : "FALSE"),
-                (util->cansetpwd ? "TRUE" : "FALSE"), date_creation, date_modif,
+              " [%03d]%12s -> enable=%d, date_create = %s, date_modif = %s\n"
+              " |                 -> sms_enable  = %d, sms_allow_cde  = %d, sms_phone = %s\n"
+              " |                 -> imsg_enable = %d, imsg_allow_cde = %d, imsg_jabber_id = %s\n"
+              " |                 -> imsg_available = %d\n"
+              " |                 -> ssrv_bit_presence = B%04d (=%d)\n"
+              " |                 -> hash=%s\n"
+              " |                 -> %s\n",
+                util->id, util->username, util->enable, date_create, date_modif,
                 util->sms_enable, util->sms_allow_cde, util->sms_phone,
                 util->imsg_enable, util->imsg_allow_cde, util->imsg_jabberid,
                 util->imsg_available,
                 util->ssrv_bit_presence, B(util->ssrv_bit_presence),
-                util->salt, util->hash, util->commentaire
+                util->hash, util->commentaire
               );
     response = Admin_write ( response, chaine );
     return(response);
@@ -115,14 +107,10 @@
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, " |  -- Watchdog ADMIN -- Help du mode 'running'" );
-       response = Admin_write ( response, " | - add $name $comment         - Add user $name with $commment" );
        response = Admin_write ( response, " | - del $name                  - Erase user $name" );
        response = Admin_write ( response, " | - enable $name               - Allow user $name to connect" );
        response = Admin_write ( response, " | - disable $name              - Deny user $id to connect $name" );
-       response = Admin_write ( response, " | - cansetpwd $name $bool      - Set CanSetPwd flag to true or false" );
-       response = Admin_write ( response, " | - mustchangepwd $name $bool  - Set CanSetPwd flag to true or false" );
        response = Admin_write ( response, " | - list                       - Liste les users Watchdog" );
-       response = Admin_write ( response, " | - passwd $name $pwd          - Set password $pwd to user $name" );
        response = Admin_write ( response, " | - show $name                 - Show user $name" );
        response = Admin_write ( response, " | - help                       - This help" );
      } else
@@ -160,7 +148,7 @@
              response = Admin_write ( response, chaine );
            }
           else
-           { g_snprintf( chaine, sizeof(chaine), " | - User %s (id=%d) removed", util->nom, util->id );
+           { g_snprintf( chaine, sizeof(chaine), " | - User %s (id=%d) removed", util->username, util->id );
              response = Admin_write ( response, chaine );
            }
           g_free(util);
@@ -168,108 +156,29 @@
      } else
     if ( ! strcmp ( commande, "enable" ) )
      { struct CMD_TYPE_UTILISATEUR util;
-       sscanf ( ligne, "%s %s", commande, util.nom );                /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %s", commande, util.username );                /* Découpage de la ligne de commande */
        util.id = -1;                                            /* suppression par nom plutot que par id */
        util.enable = TRUE;
        if (Set_enable_utilisateurDB ( &util ) == FALSE)
-        { g_snprintf( chaine, sizeof(chaine), " | - User %s couldn't be enabled", util.nom );
+        { g_snprintf( chaine, sizeof(chaine), " | - User %s couldn't be enabled", util.username );
           response = Admin_write ( response, chaine );
         }
        else
-        { g_snprintf( chaine, sizeof(chaine), " | - User %s enabled", util.nom );
+        { g_snprintf( chaine, sizeof(chaine), " | - User %s enabled", util.username );
           response = Admin_write ( response, chaine );
         }
      } else
     if ( ! strcmp ( commande, "disable" ) )
      { struct CMD_TYPE_UTILISATEUR util;
-       sscanf ( ligne, "%s %s", commande, util.nom );                                    /* Découpage de la ligne de commande */
+       sscanf ( ligne, "%s %s", commande, util.username );                                    /* Découpage de la ligne de commande */
        util.id = -1;                                                                 /* suppression par nom plutot que par id */
        util.enable = FALSE;
        if (Set_enable_utilisateurDB ( &util ) == FALSE)
-        { g_snprintf( chaine, sizeof(chaine), " | - User %s couldn't be disabled", util.nom );
+        { g_snprintf( chaine, sizeof(chaine), " | - User %s couldn't be disabled", util.username );
           response = Admin_write ( response, chaine );
         }
        else
-        { g_snprintf( chaine, sizeof(chaine), " | - User %s disabled", util.nom );
-          response = Admin_write ( response, chaine );
-        }
-     } else
-    if ( ! strcmp ( commande, "add" ) )
-     { struct CMD_TYPE_UTILISATEUR util;
-       memset ( &util, 0, sizeof( struct CMD_TYPE_UTILISATEUR ) );
-       sscanf ( ligne, "%s %s %[^]", commande, util.nom, util.commentaire );             /* Découpage de la ligne de commande */
-       if (Ajouter_utilisateurDB ( &util ) == -1)
-        { g_snprintf( chaine, sizeof(chaine), " | - User %s couldn't be added in Database", util.nom );
-          response = Admin_write ( response, chaine );
-        }
-       else
-        { g_snprintf( chaine, sizeof(chaine), " | - User %s added. UID = %d", util.nom, util.id );
-          response = Admin_write ( response, chaine );
-        }
-     } else
-    if ( ! strcmp ( commande, "cansetpwd" ) )
-     { struct CMD_TYPE_UTILISATEUR *util;
-       gchar name[80], cansetpwd[80];
-
-       sscanf ( ligne, "%s %s %s", commande, name, cansetpwd );                          /* Découpage de la ligne de commande */
-
-       util = Rechercher_utilisateurDB_by_name ( name );
-       if (!util)
-        { g_snprintf( chaine, sizeof(chaine), " | - User %s not found in Database", name );
-          response = Admin_write ( response, chaine );
-        }
-       else
-        { if (!strcmp( cansetpwd, "true" ) ) util->cansetpwd = 1;
-                                        else util->cansetpwd = 0;
-          if( Modifier_utilisateurDB_set_cansetpwd( util ) )
-           { g_snprintf( chaine, sizeof(chaine), " | - Flag CanSetPwd set to %d for user %s",
-                         util->cansetpwd, util->nom ); }
-          else
-           { g_snprintf( chaine, sizeof(chaine), " | - Error while setting CanSetPwd" ); }
-          g_free(util);
-          response = Admin_write ( response, chaine );
-        }
-     } else
-    if ( ! strcmp ( commande, "mustchangepwd" ) )
-     { struct CMD_TYPE_UTILISATEUR *util;
-       gchar name[80], mustchangepwd[80];
-
-       sscanf ( ligne, "%s %s %s", commande, name, mustchangepwd );                      /* Découpage de la ligne de commande */
-
-       util = Rechercher_utilisateurDB_by_name ( name );
-       if (!util)
-        { g_snprintf( chaine, sizeof(chaine), " | - User %s not found in Database", name );
-          response = Admin_write ( response, chaine );
-        }
-       else
-        { if (!strcmp( mustchangepwd, "true" ) ) util->mustchangepwd = 1;
-                                            else util->mustchangepwd = 0;
-          if( Modifier_utilisateurDB_set_mustchangepwd( util ) )
-           { g_snprintf( chaine, sizeof(chaine), " | - Flag MustChangePwd set to %d for user %s",
-                         util->mustchangepwd, util->nom ); }
-          else
-           { g_snprintf( chaine, sizeof(chaine), " | - Error while setting MustChangePwd" ); }
-          g_free(util);
-          response = Admin_write ( response, chaine );
-        }
-     } else
-    if ( ! strcmp ( commande, "passwd" ) )
-     { struct CMD_TYPE_UTILISATEUR *util;
-       gchar name[80], pwd[80];
-
-       sscanf ( ligne, "%s %s %s", commande, name, pwd );                                /* Découpage de la ligne de commande */
-
-       util = Rechercher_utilisateurDB_by_name ( name );
-       if (!util)
-        { g_snprintf( chaine, sizeof(chaine), " | - User %s not found in Database", name );
-          response = Admin_write ( response, chaine );
-        }
-       else
-        { if( Modifier_utilisateurDB_set_password( util, pwd ) )
-           { g_snprintf( chaine, sizeof(chaine), " | - Password set for user %s", util->nom ); }
-          else
-           { g_snprintf( chaine, sizeof(chaine), " | - Error while setting password" ); }
-          g_free(util);
+        { g_snprintf( chaine, sizeof(chaine), " | - User %s disabled", util.username );
           response = Admin_write ( response, chaine );
         }
      } else

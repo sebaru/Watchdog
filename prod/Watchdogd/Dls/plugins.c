@@ -40,46 +40,6 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Check_action_bit_use: Vérifie que les bits d'actions positionnés par le module sont bien owné par celui-ci                 */
-/* Entrée: Le plugin D.L.S                                                                                                    */
-/* Sortie: FALSE si problème                                                                                                  */
-/******************************************************************************************************************************/
- static gboolean Check_action_bit_use ( struct PLUGIN_DLS *dls )
-  { gint cpt, dls_id;
-    if(!dls) return(FALSE);
-    if(!dls->Get_Tableau_bit) return(TRUE);
-    if(!dls->Get_Tableau_num) return(TRUE);
-    if(!dls->Get_Tableau_msg) return(TRUE);
-
-    for ( cpt=0; dls->Get_Tableau_bit(cpt) != -1; cpt++ )                                          /* Check des bits internes */
-     { struct CMD_TYPE_NUM_MNEMONIQUE critere;
-       struct CMD_TYPE_MNEMO_BASE *mnemo;
-       critere.type = dls->Get_Tableau_bit(cpt);
-       critere.num  = dls->Get_Tableau_num(cpt);
-       mnemo = Rechercher_mnemo_baseDB_type_num ( &critere );
-       Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-                "%s: Test Mnemo %d %d for id %d: mnemo %p", __func__,
-                 dls->Get_Tableau_bit(cpt), dls->Get_Tableau_num(cpt), dls->plugindb.id, mnemo ); 
-       if (!mnemo) return(FALSE);
-       dls_id = mnemo->dls_id;
-       g_free(mnemo);
-       if (dls_id != dls->plugindb.id) return(FALSE);
-     }
-
-    for ( cpt=0; dls->Get_Tableau_msg(cpt) != -1; cpt++ )                                          /* Check des bits internes */
-     { struct CMD_TYPE_MESSAGE *message;
-       message = Rechercher_messageDB ( dls->Get_Tableau_msg(cpt) );
-       Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-                "%s: Test MSG %d for id %d: mnemo %p", __func__, dls->Get_Tableau_msg(cpt), dls->plugindb.id, message ); 
-       if (!message) return(FALSE);
-       dls_id = message->dls_id;
-       g_free(message);
-       if (dls_id != dls->plugindb.id) return(FALSE);
-     }
-
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
 /* Charger_un_plugin_par_nom: Ouverture d'un plugin dont le nom est en parametre                                              */
 /* Entrée: Le plugin D.L.S                                                                                                    */
 /* Sortie: FALSE si problème                                                                                                  */
@@ -90,9 +50,10 @@
 
     g_snprintf( nom_fichier_absolu, sizeof(nom_fichier_absolu), "Dls/libdls%06d.so", dls->plugindb.id );
     strncpy( dls->nom_fichier, nom_fichier_absolu, sizeof(dls->nom_fichier) );                 /* Init des variables communes */
-    dls->starting = 1;                                                             /* au chargement, le bit de start vaut 1 ! */
+    dls->vars.starting = 1;                                                        /* au chargement, le bit de start vaut 1 ! */
     dls->conso    = 0.0;
 
+    if (Config.compil) Compiler_source_dls( FALSE, dls->plugindb.id, NULL, 0 );
     retour = FALSE;                                                                          /* Par défaut, on retourne FALSE */
     dls->handle = dlopen( nom_fichier_absolu, RTLD_GLOBAL | RTLD_NOW );                     /* Ouverture du fichier librairie */
     if (!dls->handle)
@@ -129,20 +90,6 @@
              Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING );
            }
          }
-       
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d loaded (%s) checking bits (start=%d)", __func__,
-                 dls->plugindb.id, dls->plugindb.shortname, dls->plugindb.on );
-       retour = TRUE;
-
-       if (Check_action_bit_use( dls ) == FALSE )
-        { Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                   "%s: plugin %06d -> bit(s) set but not owned by itself... Disabling", __func__, dls->plugindb.id ); 
-          Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_ERROR_BIT_SET_BUT_NOT_OWNED );
-          dls->plugindb.on=FALSE;
-        }
-       else Info_new( Config.log, Config.log_dls, LOG_INFO,
-                     "%s: plugin %06d -> bit(s) ownership OK", __func__, dls->plugindb.id ); 
-
      }
     if (dls->plugindb.on) dls->start_date = time(NULL);
                      else dls->start_date = 0;
@@ -345,20 +292,12 @@
              plugin->conso = 0.0;
              Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: id %06d stopped (%s)", __func__, plugin->plugindb.id, plugin->plugindb.nom );
            }
-          else if (Check_action_bit_use( plugin ) == TRUE)
+          else
            { plugin->plugindb.on = TRUE;
              plugin->conso = 0.0;
-             plugin->starting = 1;
              plugin->start_date = time(NULL);
+             plugin->vars.starting = 1;
              Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: id %06d started (%s)", __func__, plugin->plugindb.id, plugin->plugindb.nom );
-           }
-          else
-           { plugin->plugindb.on = 0;
-             plugin->start_date = 0;
-             plugin->conso = 0.0;
-             plugin->starting = 0;
-             Info_new( Config.log, Config.log_dls, LOG_WARNING,
-                      "%s: Candidat %06d -> bit(s) set but not owned by itself... Disabling", __func__, plugin->plugindb.id ); 
            }
           return(TRUE);
         }
@@ -425,12 +364,10 @@
      }
 
     retour = Traduire_DLS( id );                                                                            /* Traduction DLS */
-    Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-             "%s: fin traduction %06d : %d", __func__, id, retour );
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: fin traduction %06d : %d", __func__, id, retour );
 
     if (retour == TRAD_DLS_ERROR_FILE)                                                /* Retour de la traduction D.L.S vers C */
-     { Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-               "%s: envoi erreur file Traduction D.L.S %06d", id );
+     { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: envoi erreur file Traduction D.L.S %06d", id );
       Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_LOAD_SOURCE );
       return( DLS_COMPIL_ERROR_LOAD_SOURCE );
      }

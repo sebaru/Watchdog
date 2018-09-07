@@ -34,7 +34,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static gchar *Admin_arch_testdb ( gchar *response )
-  { gchar chaine[80];
+  { gchar chaine[256];
     struct DB*db;
     db = Init_ArchDB_SQL();       
     if (!db)
@@ -43,7 +43,7 @@
        response = Admin_write ( response, chaine );
        return(response);
      }
-    g_snprintf( chaine, sizeof(chaine), " | - Response to DB OK (Host=%s:%d, User=%s DB=%s)",
+    g_snprintf( chaine, sizeof(chaine), " | - Response to DB OK (Host='%s':%d, User='%s' DB='%s')",
                 Partage->com_arch.archdb_host, Partage->com_arch.archdb_port, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );
     response = Admin_write ( response, chaine );
     Libere_DB_SQL( &db );

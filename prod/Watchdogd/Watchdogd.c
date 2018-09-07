@@ -182,8 +182,9 @@
 /* Entrée: numero du signal à gerer                                                                                           */
 /******************************************************************************************************************************/
  static void Traitement_signaux( int num )
-  { char chaine[50];
-    if (num == SIGALRM)
+  { static gpointer *dls_wait, *dls_tour_per_sec, *dls_bit_per_sec;
+    char chaine[50];
+    if (num == SIGALRM && Partage->com_msrv.Thread_run == TRUE)
      { Partage->top++;
        if (!Partage->top)                                             /* Si on passe par zero, on le dit (DEBUG interference) */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Timer: Partage->top = 0 !!", __func__ ); }
@@ -196,17 +197,17 @@
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
           Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
           Partage->audit_bit_interne_per_sec = 0;
-          SEA ( NUM_EA_SYS_BITS_PER_SEC, Partage->audit_bit_interne_per_sec_hold );                             /* historique */
+          Dls_data_set_AI ( "BIT_PER_SEC", "SYS", &dls_bit_per_sec, Partage->audit_bit_interne_per_sec_hold );  /* historique */
 
           Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
           Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
           Partage->audit_tour_dls_per_sec = 0;
-          SEA ( NUM_EA_SYS_TOUR_DLS_PER_SEC, Partage->audit_tour_dls_per_sec_hold );                            /* historique */
+          Dls_data_set_AI ( "DLS_TOUR_PER_SEC", "SYS", &dls_tour_per_sec, Partage->audit_tour_dls_per_sec_hold );
           if (Partage->audit_tour_dls_per_sec_hold > 100)                                           /* Moyennage tour DLS/sec */
            { Partage->com_dls.temps_sched += 50; }
           else if (Partage->audit_tour_dls_per_sec_hold < 80)
            { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
-          SEA ( NUM_EA_SYS_DLS_WAIT, Partage->com_dls.temps_sched );                                            /* historique */
+          Dls_data_set_AI ( "DLS_WAIT", "SYS", &dls_wait, Partage->com_dls.temps_sched );                       /* historique */
         }
 
        Partage->top_cdg_plugin_dls++;                                                            /* Chien de garde plugin DLS */
@@ -315,6 +316,9 @@
        zmq_from_master = New_zmq ( ZMQ_SUB, "listen-to-master" );
        Connect_zmq ( zmq_from_master, "tcp", Config.master_host, 5555 );
      }
+/************************************* Création des zones de bits internes dynamiques *****************************************/
+    Partage->Dls_data_AI = NULL;
+
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single == FALSE)                                                                    /* Si demarrage des thread */
      { if (!Config.instance_is_master)
@@ -463,6 +467,12 @@
      { Close_zmq( Partage->com_msrv.zmq_to_master );
        Close_zmq( zmq_from_master );
      }
+/********************************* Dechargement des zones de bits internes dynamiques *****************************************/
+    g_slist_foreach (Partage->Dls_data_DI, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_DI);
+    g_slist_foreach (Partage->Dls_data_AI, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_AI);
+
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
     pthread_exit( NULL );
   }
@@ -563,7 +573,7 @@
      { printf( "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
     else
      { printf( "Chdir %s successfull. PID=%d\n", Config.home, getpid() ); }
-
+    fflush(0);
     return(fg);
   }
 /******************************************************************************************************************************/

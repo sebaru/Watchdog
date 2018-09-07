@@ -108,7 +108,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT sp.id,sp.syn_id,sp.syn_cible_id,s.page,"
-                "sp.posx,sp.posy,sp.angle,s.vignette_activite,s.vignette_secu_bien,s.vignette_secu_personne"
+                "sp.posx,sp.posy,sp.angle"
                 " FROM %s as s INNER JOIN %s as sp ON s.id=sp.syn_cible_id WHERE sp.syn_id=%d",
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE, id_syn );
 
@@ -143,9 +143,6 @@
        passerelle->position_x     = atoi(db->row[4]);                                            /* en abscisses et ordonnées */
        passerelle->position_y     = atoi(db->row[5]);
        passerelle->angle          = atof(db->row[6]);
-       passerelle->vignette_activite      = atoi(db->row[7]);                                                   /* Ixxx, Cxxx */
-       passerelle->vignette_secu_bien     = atoi(db->row[8]);                                                   /* Ixxx, Cxxx */
-       passerelle->vignette_secu_personne = atoi(db->row[9]);                                                  /* Ixxx, Cxxx */
        memcpy ( &passerelle->libelle, db->row[3], sizeof(passerelle->libelle) );
      }
     return(passerelle);
@@ -168,7 +165,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT sp.id,sp.syn_id,sp.syn_cible_id,s.page,"
-                "sp.posx,sp.posy,sp.angle,s.vignette_activite,s.vignette_secu_bien,s.vignette_secu_personne"
+                "sp.posx,sp.posy,sp.angle"
                 " FROM %s as s INNER JOIN %s as sp ON s.id=sp.syn_cible_id WHERE sp.id=%d",
                 NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE, id );
 
@@ -199,10 +196,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s as s INNER JOIN %s as sp ON s.id=sp.syn_cible_id SET "             
-                "vignette_activite=%d, vignette_secu_bien=%d, vignette_secu_personne=%d,"
                 "posx=%d,posy=%d,angle='%f'"
                 " WHERE sp.id=%d;", NOM_TABLE_SYNOPTIQUE, NOM_TABLE_PASSERELLE,
-                passerelle->vignette_activite, passerelle->vignette_secu_bien, passerelle->vignette_secu_personne,
                 passerelle->position_x, passerelle->position_y, passerelle->angle,
                 passerelle->id );
 

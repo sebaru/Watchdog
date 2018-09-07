@@ -851,6 +851,7 @@
 
     if (database_version < 3596)
      { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `mnemos_Horloge` ("
+                                             "`id` int(11) PRIMARY KEY AUTO_INCREMENT,"
                                              "`id_mnemo` int(11) NOT NULL,"
                                              "`heure` int(11) NOT NULL,"
                                              "`minute` int(112) NOT NULL,"
@@ -859,18 +860,70 @@
                   );
        Lancer_requete_SQL ( db, requete );
      }
+
+    if (database_version < 3641)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos` DROP `created_by_user`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+       
+    if (database_version < 3663)
+     { g_snprintf( requete, sizeof(requete), "UPDATE mnemos SET num='-1', nom='ARCH_REQUEST_NUMBER' WHERE id=13" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE mnemos SET num='-1', nom='DLS_BIT_PER_SEC' WHERE id=12" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE mnemos SET num='-1', nom='DLS_TOUR_PER_SEC' WHERE id=11" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE mnemos SET num='-1', nom='DLS_WAIT' WHERE id=10" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE mnemos SET num='-1', nom='DB_REQUEST_SIMULT' WHERE id=14" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 3681)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs ADD `mnemo_id` int(11) UNIQUE NULL DEFAULT NULL" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs ADD CONSTRAINT FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 3682)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `sms_phone` `phone` VARCHAR(80) DEFAULT ''" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users ALTER TABLE users DROP `jabberid`" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `name` `username` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users CHANGE `login_failed` `login_attempts` int(11) NOT NULL DEFAULT '0'" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE users ADD `username` varchar(100) DEFAULT NULL; "
+                                             "ALTER TABLE users ADD `email` varchar(254) NOT NULL; "
+                                             "ALTER TABLE users ADD `password` varchar(255) NOT NULL; ");
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 3687)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE `modbus_modules` CHANGE `ip` `hostname` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT ''" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 3693)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls ADD `nbr_ligne` int(11) NOT NULL DEFAULT '0' AFTER `sourcecode`" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
+    if (database_version < 3694)
+     { g_snprintf( requete, sizeof(requete), "UPDATE dls SET nbr_ligne = LENGTH(`sourcecode`)-LENGTH(REPLACE(`sourcecode`,'\n',''));" );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+
     Libere_DB_SQL(&db);
 
 fin:
-    database_version=3596;
+    database_version=3694;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
-     { Info_new( Config.log, Config.log_db, LOG_NOTICE,
-                "Update_database_schema: updating Database_version to %s OK", chaine );
-     }
+     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
     else
-     { Info_new( Config.log, Config.log_db, LOG_NOTICE,
-                "Update_database_schema: updating Database_version to %s FAILED", chaine );
-     }
+     { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s FAILED", __func__, chaine ); }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
