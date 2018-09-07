@@ -184,7 +184,7 @@
  static void Traitement_signaux( int num )
   { static gpointer *dls_wait, *dls_tour_per_sec, *dls_bit_per_sec;
     char chaine[50];
-    if (num == SIGALRM)
+    if (num == SIGALRM && Partage->com_msrv.Thread_run == TRUE)
      { Partage->top++;
        if (!Partage->top)                                             /* Si on passe par zero, on le dit (DEBUG interference) */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Timer: Partage->top = 0 !!", __func__ ); }

@@ -180,7 +180,7 @@
        if (db->row[20])
         { motif->mnemo_id = atoi(db->row[20]);
           g_snprintf ( motif->mnemo_libelle, sizeof(motif->mnemo_libelle), "%s", db->row[21] );  /* Recopie dans la structure */
-          g_snprintf ( motif->mnemo_acro_syn, sizeof(motif->mnemo_acro_syn), "%s", db->row[22] );/* Recopie dans la structure */
+          g_snprintf ( motif->mnemo_acro_syn, sizeof(motif->mnemo_acro_syn), "%s", db->row[23] );/* Recopie dans la structure */
           motif->mnemo_type = atoi(db->row[22]);
         } else motif->mnemo_id = 0;
      }

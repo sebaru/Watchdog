@@ -64,7 +64,6 @@
   { if ( motif && (motif->largeur>TAILLE_ICONE_X || motif->hauteur>TAILLE_ICONE_Y ) )
      { double facteur;
        facteur = (gdouble)motif->hauteur/motif->largeur;
-       printf("Reduire en vignette: facteur = %f\n", facteur );
        if (facteur>=1.0)
         { motif->largeur = (guint)((double)TAILLE_ICONE_Y/facteur);
           motif->hauteur = TAILLE_ICONE_Y;
@@ -73,7 +72,6 @@
         { motif->largeur = TAILLE_ICONE_X;
           motif->hauteur = (guint)((double)TAILLE_ICONE_X*facteur);
         }
-       printf("Reduire en vignette : new=%f, new_y=%f\n", motif->largeur, motif->hauteur );
      }
   }
 /**********************************************************************************************************/
@@ -138,11 +136,11 @@
  void Trame_del_commentaire ( struct TRAME_ITEM_COMMENT *trame_comm )
   { if (trame_comm->item_groupe) goo_canvas_item_remove( trame_comm->item_groupe );
   }
-/**********************************************************************************************************/
-/* Trame_rafraichir_motif: remet à jour la position, rotation, echelle du motif en parametre              */
-/* Entrée: la structure graphique TRAME_MOTIF                                                             */
-/* Sortie: néant                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Trame_rafraichir_motif: remet à jour la position, rotation, echelle du motif en parametre                                  */
+/* Entrée: la structure graphique TRAME_MOTIF                                                                                 */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
  void Trame_rafraichir_motif ( struct TRAME_ITEM_MOTIF *trame_motif )
   { if (!(trame_motif && trame_motif->motif && trame_motif->image)) return;
 
@@ -151,12 +149,17 @@
                              (gdouble)trame_motif->motif->position_x,
                              (gdouble)trame_motif->motif->position_y
                            );
-
-    cairo_matrix_rotate ( &trame_motif->transform, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
-    cairo_matrix_scale  ( &trame_motif->transform,
-                           (gdouble)trame_motif->motif->largeur/trame_motif->gif_largeur,
-                           (gdouble)trame_motif->motif->hauteur/trame_motif->gif_hauteur
-                        );
+    if (trame_motif->motif->mnemo_id!=0)                      /* Les motifs spéciaux ne tournent pas, et pas de zoom non plus */
+     { cairo_matrix_rotate ( &trame_motif->transform, 0.0 );
+       cairo_matrix_scale  ( &trame_motif->transform, 1.0, 1.0 );
+     }
+    else
+     { cairo_matrix_rotate ( &trame_motif->transform, (gdouble)trame_motif->motif->angle*FACTEUR_PI );
+       cairo_matrix_scale  ( &trame_motif->transform,
+                              (gdouble)trame_motif->motif->largeur/trame_motif->gif_largeur,
+                              (gdouble)trame_motif->motif->hauteur/trame_motif->gif_hauteur
+                           );
+     }
 
     goo_canvas_item_set_transform ( trame_motif->item_groupe, &trame_motif->transform );
 
@@ -218,7 +221,6 @@
 /******************************************************************************************************************************/
  void Trame_rafraichir_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup )
   { if (!(trame_camera_sup && trame_camera_sup->camera_sup)) return;
-printf("Rafraichir camera : %d %d\n", trame_camera_sup->camera_sup->posx, trame_camera_sup->camera_sup->posy );
     cairo_matrix_init_identity ( &trame_camera_sup->transform );
     cairo_matrix_translate ( &trame_camera_sup->transform,
                              (gdouble)trame_camera_sup->camera_sup->posx,
@@ -433,8 +435,6 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     for (cpt_frame=1; ; cpt_frame++)
      {
        g_snprintf( from_fichier, sizeof(from_fichier), "%s.%02d", fichier, cpt_frame );
-printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
-
        source = open( from_fichier, O_RDONLY );
        if (source<0) return;
        else { close(source);
@@ -594,24 +594,60 @@ printf("Charger_pixbuf_file: test ouverture %s\n", from_fichier );
 /* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
 /* Sortie: reussite                                                                                                           */
 /******************************************************************************************************************************/
- struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame,
-                                              struct CMD_TYPE_MOTIF *motif )
+ static struct TRAME_ITEM_MOTIF *Trame_ajout_motif_special ( struct TRAME *trame, struct TRAME_ITEM_MOTIF *trame_motif )
+  { gdouble haut = 0.0, larg = 0.0;
+
+    switch (trame_motif->motif->mnemo_type)
+     { case MNEMO_HORLOGE: Charger_pixbuf_file ( trame_motif, "Horloge.svg" );
+                           haut = larg = 40.0;
+                           break;
+     }
+
+    Trame_peindre_motif( trame_motif, trame_motif->motif->rouge0, trame_motif->motif->vert0, trame_motif->motif->bleu0 );
+
+    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
+    trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe, trame_motif->pixbuf, 
+                                                  (-(gdouble)(larg/2)),
+                                                  (-(gdouble)(haut/2)),
+                                                  "scale-to-fit", TRUE, "height", haut, "width", larg,
+                                                  NULL );
+    switch (trame_motif->motif->mnemo_type)
+     { case MNEMO_HORLOGE:
+        {  goo_canvas_text_new ( trame_motif->item_groupe,
+                                 trame_motif->motif->mnemo_acro_syn, 30.0, 0.0, -1, GTK_ANCHOR_WEST,
+                                "font", "courier bold 16", "fill-color", "yellow",
+                                NULL );
+           break;
+        }
+     }
+
+    trame_motif->motif->largeur = larg;
+    trame_motif->motif->hauteur = haut;
+
+    Trame_rafraichir_motif ( trame_motif );
+    trame->trame_items = g_list_append( trame->trame_items, trame_motif );
+    return(trame_motif);
+  }
+/******************************************************************************************************************************/
+/* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
+/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* Sortie: reussite                                                                                                           */
+/******************************************************************************************************************************/
+ struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame, struct CMD_TYPE_MOTIF *motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
 
     if (!(trame && motif)) return(NULL);
+
     trame_motif = Trame_new_item();
     if (!trame_motif) { printf("Trame_ajout_motif: Erreur mémoire\n"); return(NULL); }
 
     trame_motif->motif = motif;
-printf("Nouveau motif : id=%d, mnemo_type=%d, mnemo_id=%d\n", motif->id, motif->mnemo_type, motif->mnemo_id );
-    if (motif->mnemo_id==0)                                                               /* Chargement de l'icone id associé */
-     { Charger_pixbuf_id( trame_motif, motif->icone_id ); }
-    else                                                                                    /* Si motif relié à un mnemonique */
-     { switch (motif->mnemo_type)
-        { case MNEMO_HORLOGE: Charger_pixbuf_file ( trame_motif, "Horloge.svg" ); break;
-        }
-     }
+    trame_motif->type = TYPE_MOTIF;
 
+    if (motif->mnemo_id!=0)                                                               /* Chargement de l'icone id associé */
+     { return ( Trame_ajout_motif_special ( trame, trame_motif ) ); }
+
+    Charger_pixbuf_id( trame_motif, motif->icone_id );
     if (!trame_motif->images)                                                                  /* En cas de probleme, on sort */
      { Trame_del_item(trame_motif);
        g_free(trame_motif);
@@ -629,18 +665,6 @@ printf("Nouveau motif : id=%d, mnemo_type=%d, mnemo_id=%d\n", motif->id, motif->
     if (!motif->largeur) motif->largeur = trame_motif->gif_largeur;
     if (!motif->hauteur) motif->hauteur = trame_motif->gif_hauteur;
 
-    if (motif->mnemo_id)
-     { switch (motif->mnemo_type)
-        { case MNEMO_HORLOGE:
-           {  trame_motif->item_acro_syn = goo_canvas_text_new ( trame_motif->item_groupe,
-                                                                 motif->mnemo_acro_syn, 30.0, 00.0, -1, GTK_ANCHOR_WEST,
-                                                                "font", "arial", "fill_color", "yellow",
-                                                                 NULL );
-              break;
-           }
-        }
-     }
-    
     if ( flag )
      { GdkPixbuf *pixbuf;
 
@@ -676,7 +700,6 @@ printf("Nouveau motif : id=%d, mnemo_type=%d, mnemo_id=%d\n", motif->id, motif->
 
     Trame_rafraichir_motif ( trame_motif );
 
-    trame_motif->type = TYPE_MOTIF;
     trame->trame_items = g_list_append( trame->trame_items, trame_motif );
     if (trame_motif->motif->type_gestion == TYPE_FOND)
      { goo_canvas_item_lower( trame_motif->item, NULL );
@@ -699,11 +722,9 @@ printf("Nouveau motif : id=%d, mnemo_type=%d, mnemo_id=%d\n", motif->id, motif->
     trame_camera_sup = g_try_malloc0( sizeof(struct TRAME_ITEM_CAMERA_SUP) );
     if (!trame_camera_sup) return(NULL);
     trame_camera_sup->camera_sup = camera_sup;
-printf("Test ajout cam\n");
     pixbuf = gdk_pixbuf_new_from_file ( "1.gif", NULL );                                      /* Chargement du fichier Camera */
     if (!pixbuf)
      { Download_gif ( 1, 0 );
-printf("Download cam\n");
        pixbuf = gdk_pixbuf_new_from_file ( "1.gif", NULL );                                   /* Chargement du fichier Camera */
        if (!pixbuf) { g_free(trame_camera_sup); return(NULL); }
      }
@@ -964,7 +985,6 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
        motif->icone_id = 3;
        motif->type_gestion = TYPE_DYNAMIQUE;
        trame->Vignette_activite = Trame_ajout_motif ( FALSE, trame, motif );
-       printf("Trame_vignette = %p\n", trame->Vignette_activite );
        Trame_choisir_frame ( trame->Vignette_activite, 0, 0, 255, 0 );
      }
      
@@ -1024,8 +1044,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 
     objet = trame->trame_items;                                              /* Destruction des items du synoptique precedent */
     while(objet)
-     { printf("Trame_effacer_trame: objet = %p data=%p  type=%d\n", objet, objet->data, *((gint *)objet->data) );
-       switch ( *((gint *)objet->data) )
+     { switch ( *((gint *)objet->data) )
         { case TYPE_PASSERELLE:
                             trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
                             Trame_del_passerelle( trame_pass );

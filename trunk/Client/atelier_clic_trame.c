@@ -341,10 +341,10 @@ printf("Afficher_propriete: debut\n");
     Mettre_a_jour_description( infos, trame_motif->motif->icone_id, trame_motif->motif->libelle );
     if (event->type == GDK_BUTTON_PRESS)
      { if ( event->button.button == 1)
-        { goo_canvas_item_raise( trame_motif->select_hg, NULL );
-          goo_canvas_item_raise( trame_motif->select_hd, NULL );
-          goo_canvas_item_raise( trame_motif->select_bg, NULL );
-          goo_canvas_item_raise( trame_motif->select_bd, NULL );
+        { if (trame_motif->select_hg) goo_canvas_item_raise( trame_motif->select_hg, NULL );
+          if (trame_motif->select_hd) goo_canvas_item_raise( trame_motif->select_hd, NULL );
+          if (trame_motif->select_hg) goo_canvas_item_raise( trame_motif->select_bg, NULL );
+          if (trame_motif->select_bd) goo_canvas_item_raise( trame_motif->select_bd, NULL );
         }
        else if (event->button.button == 3)
         { if (!Popup) Popup = gnome_popup_menu_new( Popup_motif );                       /* Creation menu */
