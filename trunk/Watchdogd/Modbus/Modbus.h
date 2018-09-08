@@ -123,8 +123,8 @@
     gboolean do_check_eana;                                                           /* Interrogation des bornes EANA ou non */
     gboolean request;                                    /* Une requete a-t'elle été envoyée, et donc en attente de réponse ? */
     struct TRAME_MODBUS_REPONSE response;
-    gpointer *DI;                                                              /* Tableau dynamique d'accès aux bits internes */
-    gpointer *AI;                                                              /* Tableau dynamique d'accès aux bits internes */
+    gpointer **DI;                                                             /* Tableau dynamique d'accès aux bits internes */
+    gpointer **AI;                                                             /* Tableau dynamique d'accès aux bits internes */
   };
 
 /****************************************************** Déclaration des prototypes ********************************************/

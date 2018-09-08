@@ -242,7 +242,7 @@
        case SIGUSR2: Info_new( Config.log, Config.log_msrv, LOG_INFO, "Recu SIGUSR2: Reloading THREAD in progress" );
                      Partage->com_msrv.Thread_reload = TRUE;
                      break;
-       default: Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Recu signal", num ); break;
+       default: Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Recu signal %d", num ); break;
      }
   }
 /******************************************************************************************************************************/

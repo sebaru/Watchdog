@@ -840,12 +840,12 @@
     struct DB *db;
     gint cpt;
 
-    module->AI = (gpointer *)g_try_malloc0( sizeof(gpointer) * module->nbr_entree_ana );
+    module->AI = g_try_malloc0( sizeof(gpointer) * module->nbr_entree_ana );
     if (!module->AI)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Memory Error for AI", __func__ );
        return;
      }
-    module->DI = (gpointer *)g_try_malloc0( sizeof(gpointer) * module->nbr_entree_tor );
+    module->DI = g_try_malloc0( sizeof(gpointer) * module->nbr_entree_tor );
     if (!module->DI)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Memory Error DI", __func__ );
        return;
@@ -854,7 +854,7 @@
      { g_snprintf( critere, sizeof(critere),"%s_EA%d", module->modbus.libelle, cpt);
        if (Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ))
         { while ( (mnemo=Recuperer_mnemo_baseDB_suite ( &db )) != NULL )
-           { Dls_data_set_AI ( mnemo->acronyme, mnemo->dls_tech_id, (gpointer)&module->AI[cpt], 0.0 );
+           { Dls_data_set_AI ( mnemo->acronyme, mnemo->dls_tech_id, &module->AI[cpt], 0.0 );
              g_free(mnemo);
            }
         }
@@ -863,7 +863,7 @@
      { g_snprintf( critere, sizeof(critere),"%s_E%d", module->modbus.libelle, cpt);
        if (Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ))
         { while ( (mnemo=Recuperer_mnemo_baseDB_suite ( &db )) != NULL )
-           { Dls_data_set_bool ( mnemo->acronyme, mnemo->dls_tech_id, (gpointer)&module->DI[cpt], FALSE );
+           { Dls_data_set_bool ( mnemo->acronyme, mnemo->dls_tech_id, (gboolean **)&module->DI[cpt], FALSE );
              g_free(mnemo);
            }
         }
@@ -1087,22 +1087,17 @@
           return;
         }
 
-       cpt = read( module->connexion,
-                   (unsigned char *)&module->response +
-                                     module->nbr_oct_lu,
-                    bute-module->nbr_oct_lu );
+       cpt = read( module->connexion, (unsigned char *)&module->response + module->nbr_oct_lu, bute-module->nbr_oct_lu );
        if (cpt>=0)
         { module->nbr_oct_lu += cpt;
-          if (module->nbr_oct_lu >= 
-              TAILLE_ENTETE_MODBUS + ntohs(module->response.taille))
-           { 
-             Processer_trame( module );                                             /* Si l'on a trouvé une trame complète !! */
+          if (module->nbr_oct_lu >= TAILLE_ENTETE_MODBUS + ntohs(module->response.taille))
+           { Processer_trame( module );                                             /* Si l'on a trouvé une trame complète !! */
              module->nbr_oct_lu = 0;
            }
         }
        else
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                    "%s: wrong trame ID for %d. Get %d, error %s", __func__,
+                    "%s: Read Error for %d. Get %d, error %s", __func__,
                     module->modbus.id, cpt, strerror(errno) );
           Deconnecter_module ( module );
         }
