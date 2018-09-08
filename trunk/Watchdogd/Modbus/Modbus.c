@@ -683,7 +683,7 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                            /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "%s: failed %d (error %d)", __func__, module->modbus.id, retour );
+               "%s: failed %d (error %d - '%s')", __func__, module->modbus.id, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
@@ -868,7 +868,6 @@
            }
         }
      }
-
   }
 /******************************************************************************************************************************/
 /* Recuperer_borne: Recupere les informations d'une borne MODBUS                                                              */
