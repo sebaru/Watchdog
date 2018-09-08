@@ -951,7 +951,7 @@
                chaine[2] = ntohs( (gint16)module->response.data[3] );
                chaine[taille] = 0;
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                         "Processer_trame: Get Description (size %d) %s", taille, (gchar *) chaine );
+                         "%s: Module %d Get Description (size %d) '%s'", __func__, module->modbus.id, taille, chaine );
                module->mode = MODBUS_GET_FIRMWARE;
                break;
             }
@@ -965,13 +965,13 @@
                chaine[2] = ntohs( (gint16)module->response.data[3] );
                chaine[taille] = 0;
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                         "Processer_trame: Get Firmware (size %d) %s", taille, (gchar *) chaine );
+                         "%s: Module %d Get Firmware (size %d) %s", __func__, module->modbus.id, taille, chaine );
                module->mode = MODBUS_INIT_WATCHDOG1;
                break;
             }
           case MODBUS_INIT_WATCHDOG1:
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-                        "Processer_trame: Watchdog1 = %d %d",
+                        "%s: Module %d Watchdog1 = %d %d", __func__, module->modbus.id,
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 0) ),
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
                        );
@@ -979,7 +979,7 @@
                break;
           case MODBUS_INIT_WATCHDOG2:
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-                        "Processer_trame: Watchdog2 = %d %d",
+                        "%s: Module %d Watchdog2 = %d %d", __func__, module->modbus.id,
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 0) ),
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
                        );
@@ -987,7 +987,7 @@
                break;
           case MODBUS_INIT_WATCHDOG3:
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-                        "Processer_trame: Watchdog3 = %d %d",
+                        "%s: Module %d Watchdog3 = %d %d", __func__, module->modbus.id,
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 0) ),
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
                        );
@@ -995,7 +995,7 @@
                break;
           case MODBUS_INIT_WATCHDOG4:
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-                        "Processer_trame: Watchdog4 = %d %d",
+                        "%s: Module %d Watchdog4 = %d %d", __func__, module->modbus.id,
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 0) ),
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
                        );
@@ -1003,15 +1003,15 @@
                break;
           case MODBUS_GET_NBR_AI:
                module->nbr_entree_ana = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) ) / 16;
-               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "Processer_trame: Get number Entree ANA = %d",
-                         module->nbr_entree_ana
+               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Module %d Get number Entree ANA = %d",
+                         __func__, module->modbus.id, module->nbr_entree_ana
                        );
                module->mode = MODBUS_GET_NBR_AO;
                break;
           case MODBUS_GET_NBR_AO:
                module->nbr_sortie_ana = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) ) / 16;
-               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "Processer_trame: Get number Sortie ANA = %d",
-                         module->nbr_sortie_ana
+               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Module %d Get number Sortie ANA = %d",
+                         __func__, module->modbus.id, module->nbr_sortie_ana
                        );
                module->mode = MODBUS_GET_NBR_DI;
                break;
@@ -1022,11 +1022,13 @@
                                              else module->nbr_entree_tor = nbr;
                   if (module->modbus.max_nbr_E>0)
                    { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                               "%s: Get number Entree TOR = %d (forced)", __func__, module->nbr_entree_tor );
+                               "%s: Module %d Get number Entree TOR = %d (forced)", __func__,
+                               module->modbus.id, module->nbr_entree_tor );
                    }
                   else
                    { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                               "%s: Get number Entree TOR = %d", __func__, module->nbr_entree_tor );
+                               "%s: Module %d Get number Entree TOR = %d", __func__,
+                               module->modbus.id, module->nbr_entree_tor );
                    }
                   module->mode = MODBUS_GET_NBR_DO;
                   Modbus_do_mapping( module );                                     /* Initialise le mapping des I/O du module */
@@ -1035,7 +1037,7 @@
           case MODBUS_GET_NBR_DO:
                module->nbr_sortie_tor = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) );
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                         "%s: Get number Sortie TOR = %d", __func__, module->nbr_sortie_tor );
+                         "%s: Module %d Get number Sortie TOR = %d", __func__, module->modbus.id, module->nbr_sortie_tor );
                module->mode = MODBUS_GET_DI;
                break;
         }
