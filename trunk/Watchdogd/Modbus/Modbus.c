@@ -483,7 +483,7 @@
 /******************************************************************************************************************************/
 /* Interroger_borne: Interrogation d'une borne du module                                                                      */
 /* Entrée: identifiants des modules et borne                                                                                  */
-/* Sortie: ?                                                                                                                  */
+/* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Init_watchdog1( struct MODULE_MODBUS *module )
   { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
@@ -495,7 +495,7 @@
     requete.taille         = htons( 0x0006 );                                               /* taille, en comptant le unit_id */
     requete.unit_id        = 0x00;                                                                                    /* 0xFF */
     requete.fct            = MBUS_WRITE_REGISTER;
-    requete.adresse        = htons( 0x100A );
+    requete.adresse        = htons( 0x100A );                                                                   /* Stop Timer */
     requete.valeur         = htons( 0x0000 );
 
     retour = write ( module->connexion, &requete, 12 );
@@ -510,26 +510,26 @@
        module->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
-/**********************************************************************************************************/
-/* Interroger_borne: Interrogation d'une borne du module                                                  */
-/* Entrée: identifiants des modules et borne                                                              */
-/* Sortie: ?                                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Interroger_borne: Interrogation d'une borne du module                                                                      */
+/* Entrée: identifiants des modules et borne                                                                                  */
+/* Sortie: ?                                                                                                                  */
+/******************************************************************************************************************************/
  static void Init_watchdog2( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+  { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint retour;
 
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
-    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
-    requete.taille         = htons( 0x0006 );                           /* taille, en comptant le unit_id */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.proto_id       = 0x00;                                                                            /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x0006 );                                               /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                                    /* 0xFF */
     requete.fct            = MBUS_WRITE_REGISTER;
-    requete.adresse        = htons( 0x1009 );
+    requete.adresse        = htons( 0x1009 );                                   /* Close MODBUS socket after watchdog timeout */
     requete.valeur         = htons( 0x0001 );
 
     retour = write ( module->connexion, &requete, 12 );
-    if ( retour != 12 )                                                            /* Envoi de la requete */
+    if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                "%s: 'close modbus tcp on watchdog' failed for %d (error %d)", __func__,
                module->modbus.id, retour );
@@ -541,26 +541,29 @@
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
-/**********************************************************************************************************/
-/* Interroger_borne: Interrogation d'une borne du module                                                  */
-/* Entrée: identifiants des modules et borne                                                              */
-/* Sortie: ?                                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Interroger_borne: Interrogation d'une borne du module                                                                      */
+/* Entrée: identifiants des modules et borne                                                                                  */
+/* Sortie: This register stores the watchdog timeout value as an unsigned 16 bit value. The Description default value is 0.   */
+/* Setting this value will not trigger the watchdog. However, a non zero value must be stored in this register before the     */
+/* watchdog can be triggered. The time value is stored in multiples of 100ms (e.g., 0x0009 is .9 seconds). It is not possible */
+/* to modify this value while the watchdog is running                                                                         */
+/******************************************************************************************************************************/
  static void Init_watchdog3( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+  { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint retour;
 
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
-    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
-    requete.taille         = htons( 0x0006 );                           /* taille, en comptant le unit_id */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.proto_id       = 0x00;                                                                            /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x0006 );                                               /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                                    /* 0xFF */
     requete.fct            = MBUS_WRITE_REGISTER;
-    requete.adresse        = htons( 0x1000 );
-    requete.valeur         = htons( module->modbus.watchdog );                          /* coupure sortie */
+    requete.adresse        = htons( 0x1000 );                                                       /* Watchdog Time register */
+    requete.valeur         = htons( module->modbus.watchdog );                     /* coupure sortie, en 100ième de secondes  */
 
     retour = write ( module->connexion, &requete, 12 );
-    if ( retour != 12 )                                                            /* Envoi de la requete */
+    if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                "%s: 'init watchdog timer' failed for %d (error %d)", __func__,
                module->modbus.id, retour );
@@ -572,26 +575,26 @@
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
-/**********************************************************************************************************/
-/* Interroger_borne: Interrogation d'une borne du module                                                  */
-/* Entrée: identifiants des modules et borne                                                              */
-/* Sortie: ?                                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Interroger_borne: Interrogation d'une borne du module                                                                      */
+/* Entrée: identifiants des modules et borne                                                                                  */
+/* Sortie: ?                                                                                                                  */
+/******************************************************************************************************************************/
  static void Init_watchdog4( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+  { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint retour;
 
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
-    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
-    requete.taille         = htons( 0x0006 );                           /* taille, en comptant le unit_id */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.proto_id       = 0x00;                                                                            /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x0006 );                                               /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                                    /* 0xFF */
     requete.fct            = MBUS_WRITE_REGISTER;
     requete.adresse        = htons( 0x100A );
-    requete.valeur         = htons( 0x0001 );                                              /* Start Timer */
+    requete.valeur         = htons( 0x0001 );                                                                  /* Start Timer */
 
     retour = write ( module->connexion, &requete, 12 );
-    if ( retour != 12 )                                                            /* Envoi de la requete */
+    if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                 "%s: 'watchdog start' failed for %d (error %d)", __func__,
                  module->modbus.id, retour );
@@ -712,7 +715,7 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                            /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                 "%s: failed %d (error %d, '%s')", __func__, module->modbus.id, retour, strerror(errno) );
+                 "%s: write error Module %d (error %d, '%s')", __func__, module->modbus.id, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
