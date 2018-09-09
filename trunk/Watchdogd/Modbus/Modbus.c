@@ -812,7 +812,7 @@
 /* Entrée: identifiants des modules et borne                                                                                  */
 /* Sortie: ?                                                                                                                  */
 /******************************************************************************************************************************/
- static void Processer_trame( struct MODULE_MODBUS *module )
+ static void Modbus_Processer_trame( struct MODULE_MODBUS *module )
   { module->nbr_oct_lu = 0;
     module->request = FALSE;                                                                     /* Une requete a été traitée */
 
@@ -1032,7 +1032,7 @@
        if (cpt>=0)
         { module->nbr_oct_lu += cpt;
           if (module->nbr_oct_lu >= TAILLE_ENTETE_MODBUS + ntohs(module->response.taille))
-           { Processer_trame( module );                                             /* Si l'on a trouvé une trame complète !! */
+           { Modbus_Processer_trame( module );                                      /* Si l'on a trouvé une trame complète !! */
              module->nbr_oct_lu = 0;
            }
         }
