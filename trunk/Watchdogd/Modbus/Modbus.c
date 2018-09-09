@@ -882,7 +882,8 @@
            }
         }
      }
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: Module '%s' : mapping done", __func__, module->libelle );
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: Module '%s' : mapping done", __func__,
+              module->modbus.libelle );
   }
 /******************************************************************************************************************************/
 /* Recuperer_borne: Recupere les informations d'une borne MODBUS                                                              */
