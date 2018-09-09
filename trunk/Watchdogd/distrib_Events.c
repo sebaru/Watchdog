@@ -33,39 +33,6 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Map_event_to_mnemo: Associe l'event en parametre aux mnemoniques D.L.S                                                     */
-/* Entrée: l'evenement à traiter                                                                                              */
-/* Sortie: le mnemo en question, ou NULL si non-trouvé (ou multi trouvailles)                                                 */
-/******************************************************************************************************************************/
- struct CMD_TYPE_MNEMO_BASE *Map_event_to_mnemo( gchar *thread, gchar *event, gint *retour_nbr )
-  { struct CMD_TYPE_MNEMO_BASE *mnemo, *result_mnemo = NULL;
-    gint nbr_result;
-    struct DB *db;
-
-    if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, thread, event ) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                 "%s: Error searching Database for '%s'", __func__, event );
-       return(NULL);
-     }
-    *retour_nbr = nbr_result = db->nbr_result;
-          
-    if ( nbr_result == 0 )                                                                  /* Si pas d'enregistrement trouvé */
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                "%s: No match found for '%s'", __func__, event );
-       return(NULL);
-     }
-
-    while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "%s: Match found for '%s' Type %d Num %d - %s", __func__,
-                 event, mnemo->type, mnemo->num, mnemo->libelle );
-       if (result_mnemo != NULL) { g_free(result_mnemo); }
-       result_mnemo = mnemo;                                                                                /* Last result OK */
-     }
-
-    return (result_mnemo);                                           /* A-t'on le seul et unique Mnemo associé à cet event ?? */
-  }
-/******************************************************************************************************************************/
 /* Gerer_arrive_Axxx_dls: Gestion de l'arrive des sorties depuis DLS (Axxx = 1)                                               */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/

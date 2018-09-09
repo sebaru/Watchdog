@@ -270,15 +270,15 @@
 
     commande = Normaliser_chaine ( commande_pure );
     if (!commande)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                 "%s: Normalisation impossible commande", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible commande", __func__ );
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete), MNEMO_SQL_SELECT                                                     /* Requete SQL */
-               " WHERE (mnemo.ev_host='*' OR mnemo.ev_host='%s') AND (mnemo.ev_thread='*' OR mnemo.ev_thread='%s') AND mnemo.ev_text = '%s'",
-               g_get_host_name(), thread, commande_pure );
-
+               " WHERE (mnemo.ev_host='*' OR mnemo.ev_host='%s') AND (mnemo.ev_thread='*' OR mnemo.ev_thread='%s')"
+               " AND mnemo.ev_text LIKE '%s'",
+               g_get_host_name(), thread, commande );
+    g_free(commande);
     db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );

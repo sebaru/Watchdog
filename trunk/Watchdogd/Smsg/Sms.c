@@ -445,7 +445,7 @@
   { struct CMD_TYPE_MNEMO_BASE *mnemo;
     struct SMSDB *sms;
     gchar chaine[160];
-    gint nbr;
+    struct DB *db;
 
     sms = Smsg_is_recipient_authorized ( from );
     if ( sms == NULL )
@@ -480,43 +480,51 @@
        return;
      }
 
-    mnemo = Map_event_to_mnemo( NOM_THREAD, texte, &nbr );
-    if (nbr==0)
-     { g_snprintf(chaine, sizeof(chaine), "No event found for '%s'", texte );              /* Envoi de l'erreur si pas trouvé */
-       Envoyer_smsg_gsm_text ( chaine );
+    if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, texte ) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte );
        return;
      }
-     
-    if (nbr>1)
+          
+    if ( db->result == 0 )                                                                  /* Si pas d'enregistrement trouvé */
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: No match found for '%s'", __func__, texte );
+       g_snprintf(chaine, sizeof(chaine), "No event found for '%s'", texte );              /* Envoi de l'erreur si pas trouvé */
+       Envoyer_smsg_gsm_text ( chaine );
+     }
+    else if (db->result > 1)
      { g_snprintf(chaine, sizeof(chaine), "Too many events found for '%s'", texte );             /* Envoi de l'erreur si trop */
        Envoyer_smsg_gsm_text ( chaine );
-       g_free(mnemo);
-       return;
      }
+    else
+     { while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
+        { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Match found for '%s' Type %d Num %d - %s", __func__,
+                    texte, mnemo->type, mnemo->num, mnemo->libelle );
 
-    if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
-     { switch( mnemo->type )
-        { case MNEMO_MONOSTABLE:
-               Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                         "%s: From %s -> Mise à un du bit M%03d", __func__, from, mnemo->num );
-               Envoyer_commande_dls(mnemo->num);
-               break;
-          default:
-          Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                    "%s: From %s -> Error, type of mnemo not handled", __func__, from );
+          if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
+           { switch( mnemo->type )
+              { case MNEMO_MONOSTABLE:
+                     Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                               "%s: From %s -> Mise à un du bit M%03d", __func__, from, mnemo->num );
+                     Envoyer_commande_dls(mnemo->num);
+                     break;
+                default:
+                     Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                               "%s: From %s -> Error, type of mnemo not handled", __func__, from );
+              }
+           }
+          else /* Envoi au master via thread HTTP */
+           { if (mnemo->type == MNEMO_MONOSTABLE)
+              { struct ZMQ_SET_BIT bit;
+                bit.type = mnemo->type;
+                bit.num = mnemo->num;
+                Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, TAG_ZMQ_SET_BIT, "*", "*", &bit, sizeof(struct ZMQ_SET_BIT) );
+              }
+             else Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                           "%s: From %s -> Error, type of mnemo not handled", __func__, from );
+           }
+          g_free(mnemo);
         }
      }
-    else /* Envoi au master via thread HTTP */
-     { if (mnemo->type == MNEMO_MONOSTABLE)
-        { struct ZMQ_SET_BIT bit;
-          bit.type = mnemo->type;
-          bit.num = mnemo->num;
-          Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, TAG_ZMQ_SET_BIT, "*", "*", &bit, sizeof(struct ZMQ_SET_BIT) );
-        }
-       else Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                     "%s: From %s -> Error, type of mnemo not handled", __func__, from );
-     }
-    g_free(mnemo);
+    Libere_DB_SQL ( &db );
   }
 /******************************************************************************************************************************/
 /* Smsg_disconnect: Se deconnecte du telephone ou de la clef 3G                                                               */

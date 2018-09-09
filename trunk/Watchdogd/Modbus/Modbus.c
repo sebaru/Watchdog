@@ -870,6 +870,7 @@
            }
         }
      }
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: mapping done", __func__ );
   }
 /******************************************************************************************************************************/
 /* Recuperer_borne: Recupere les informations d'une borne MODBUS                                                              */
@@ -1034,7 +1035,6 @@
                                module->modbus.id, module->nbr_entree_tor );
                    }
                   module->mode = MODBUS_GET_NBR_DO;
-                  Modbus_do_mapping( module );                                     /* Initialise le mapping des I/O du module */
                 }
                break;
           case MODBUS_GET_NBR_DO:
@@ -1042,6 +1042,7 @@
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
                          "%s: Module %d Get number Sortie TOR = %d", __func__, module->modbus.id, module->nbr_sortie_tor );
                module->mode = MODBUS_GET_DI;
+               Modbus_do_mapping( module );                                        /* Initialise le mapping des I/O du module */
                break;
         }
      }
@@ -1225,8 +1226,7 @@
              "%s: Preparing to stop . . . TID = %p", __func__, pthread_self() );
     Decharger_tous_MODBUS();
 end:
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
-             "%s: Down . . . TID = %p", __func__, pthread_self() );
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_modbus.lib->Thread_run = FALSE;                                                         /* Le thread ne tourne plus ! */
     Cfg_modbus.lib->TID = 0;                                                  /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
