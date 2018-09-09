@@ -762,8 +762,8 @@
        return;
      }
 
-/******************************* Recherche des event text a raccrocher aux bits internes **************************************/
-    g_snprintf( critere, sizeof(critere),"%s_EA%%", module->modbus.libelle ); 
+/******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
+    g_snprintf( critere, sizeof(critere),"%s_AI%%", module->modbus.libelle ); 
     if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
     else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
@@ -772,7 +772,7 @@
        if ( mnemo->type == MNEMO_ENTREE_ANA )
         { gchar debut[80];
           gint num;
-          if ( sscanf ( mnemo->ev_text, "%s_EA%d", debut, &num ) == 2 )                       /* Découpage de la ligne ev_text */
+          if ( sscanf ( mnemo->ev_text, "%s_AI%d", debut, &num ) == 2 )                       /* Découpage de la ligne ev_text */
            { if (num<module->nbr_entree_ana)
               { Dls_data_set_AI ( mnemo->dls_tech_id, mnemo->acronyme, &module->AI[num], 0.0 ); }
              else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
@@ -782,14 +782,24 @@
        g_free(mnemo);
      }
 
-    for (cpt=0; cpt<module->nbr_entree_tor; cpt++)
-     { g_snprintf( critere, sizeof(critere),"%s_E%d", module->modbus.libelle, cpt);
-       if (Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ))
-        { while ( (mnemo=Recuperer_mnemo_baseDB_suite ( &db )) != NULL )
-           { Dls_data_set_bool ( mnemo->acronyme, mnemo->dls_tech_id, (gboolean **)&module->DI[cpt], FALSE );
-             g_free(mnemo);
+/******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
+    g_snprintf( critere, sizeof(critere),"%s_DI%%", module->modbus.libelle ); 
+    if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
+    else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: Match found '%s' Type %d Num %d '%s:%s' - %s", __func__,
+                 mnemo->ev_text, mnemo->type, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme, mnemo->libelle );
+       if ( mnemo->type == MNEMO_ENTREE_ANA )
+        { gchar debut[80];
+          gint num;
+          if ( sscanf ( mnemo->ev_text, "%s_DI%d", debut, &num ) == 2 )                       /* Découpage de la ligne ev_text */
+           { if (num<module->nbr_entree_tor)
+              { Dls_data_set_bool ( mnemo->acronyme, mnemo->dls_tech_id, (gboolean **)&module->DI[cpt], FALSE ); }
+             else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
+                            mnemo->ev_text, num, module->nbr_entree_tor );
            }
         }
+       g_free(mnemo);
      }
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: Module '%s' : mapping done", __func__,
               module->modbus.libelle );

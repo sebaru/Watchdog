@@ -485,7 +485,7 @@
        return;
      }
           
-    if ( db->nbr_result == 0 )                                                                  /* Si pas d'enregistrement trouvé */
+    if ( db->nbr_result == 0 )                                                              /* Si pas d'enregistrement trouvé */
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: No match found for '%s'", __func__, texte );
        g_snprintf(chaine, sizeof(chaine), "No event found for '%s'", texte );              /* Envoi de l'erreur si pas trouvé */
        Envoyer_smsg_gsm_text ( chaine );
