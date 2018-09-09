@@ -778,10 +778,11 @@
              else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
                             mnemo->ev_text, num, module->nbr_entree_ana );
            }
+          else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__,
+                         mnemo->ev_text );
         }
        g_free(mnemo);
      }
-
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     g_snprintf( critere, sizeof(critere),"%s_DI%%", module->modbus.libelle ); 
     if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
@@ -789,7 +790,7 @@
     else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: Match found '%s' Type %d Num %d '%s:%s' - %s", __func__,
                  mnemo->ev_text, mnemo->type, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme, mnemo->libelle );
-       if ( mnemo->type == MNEMO_ENTREE_ANA )
+       if ( mnemo->type == MNEMO_ENTREE )
         { gchar debut[80];
           gint num;
           if ( sscanf ( mnemo->ev_text, "%s_DI%d", debut, &num ) == 2 )                       /* Découpage de la ligne ev_text */
@@ -798,6 +799,8 @@
              else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
                             mnemo->ev_text, num, module->nbr_entree_tor );
            }
+          else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__,
+                         mnemo->ev_text );
         }
        g_free(mnemo);
      }

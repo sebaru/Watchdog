@@ -177,7 +177,7 @@
           g_snprintf( chaine, sizeof(chaine),
                       " | - EA '%s:%s' = %8.2f %s, val_avant_ech=%8.2f, inrange=%d\n"
                       "                  type=%d, last_arch=%d (%ds ago), min=%8.2f, max=%8.2f",
-                      ai->dls_tech_id, ai->dls_tech_id, ai->val_ech, ai->confDB.unite, ai->val_avant_ech, ai->inrange,
+                      ai->dls_tech_id, ai->acronyme, ai->val_ech, ai->confDB.unite, ai->val_avant_ech, ai->inrange,
                       ai->confDB.type, ai->last_arch, (Partage->top - ai->last_arch)/10,
                       ai->confDB.min, ai->confDB.max 
                     );
