@@ -853,15 +853,27 @@
        return;
      }
 
-    for (cpt=0; cpt<module->nbr_entree_ana; cpt++)
-     { g_snprintf( critere, sizeof(critere),"%s_EA%d", module->modbus.libelle, cpt);
-       if (Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ))
-        { while ( (mnemo=Recuperer_mnemo_baseDB_suite ( &db )) != NULL )
-           { Dls_data_set_AI ( mnemo->dls_tech_id, mnemo->acronyme,  &module->AI[cpt], 0.0 );
-             g_free(mnemo);
+/******************************* Recherche des event text a raccrocher aux bits internes **************************************/
+    g_snprintf( critere, sizeof(critere),"%s_EA%", module->modbus.libelle ); 
+    if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
+    else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: Match found '%s' Type %d Num %d '%s:%s' - %s", __func__,
+                 mnemo->ev_text, mnemo->type, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme, mnemo->libelle );
+       if ( mnemo->type == MNEMO_ENTREE_ANA )
+        { gchar debut[80];
+          gint num;
+          g_snprintf( critere, sizeof(critere),"%s_EA%%d", module->modbus.libelle );
+          if ( sscanf ( mnemo->ev_text, "%s_EA%d", debut, &num ) == 2 )                       /* Découpage de la ligne ev_text */
+           { if (num<module->nbr_entree_ana)
+              { Dls_data_set_AI ( mnemo->dls_tech_id, mnemo->acronyme, &module->AI[num], 0.0 ); }
+             else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: evant '%s': num %d out of range '%d'", __func__,
+                            mnemo->ev_text, num, module->nbr_entree_ana );
            }
         }
+       g_free(mnemo);
      }
+
     for (cpt=0; cpt<module->nbr_entree_tor; cpt++)
      { g_snprintf( critere, sizeof(critere),"%s_E%d", module->modbus.libelle, cpt);
        if (Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ))
