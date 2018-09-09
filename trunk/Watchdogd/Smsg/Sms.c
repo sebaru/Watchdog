@@ -489,10 +489,12 @@
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: No match found for '%s'", __func__, texte );
        g_snprintf(chaine, sizeof(chaine), "No event found for '%s'", texte );              /* Envoi de l'erreur si pas trouvé */
        Envoyer_smsg_gsm_text ( chaine );
+       Libere_DB_SQL ( &db );
      }
     else if (db->nbr_result > 1)
      { g_snprintf(chaine, sizeof(chaine), "Too many events found for '%s'", texte );             /* Envoi de l'erreur si trop */
        Envoyer_smsg_gsm_text ( chaine );
+       Libere_DB_SQL ( &db );
      }
     else
      { while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
@@ -524,7 +526,6 @@
           g_free(mnemo);
         }
      }
-    Libere_DB_SQL ( &db );
   }
 /******************************************************************************************************************************/
 /* Smsg_disconnect: Se deconnecte du telephone ou de la clef 3G                                                               */
@@ -703,7 +704,6 @@
          
 /****************************************************** Lecture de SMS ********************************************************/
        Lire_sms_gsm();
-       sleep(1);
 
 /********************************************************* Envoi de SMS *******************************************************/
        if (Recv_zmq ( zmq_admin, &buffer, sizeof(buffer)) > 0 )                           /* As-t'on recu un paquet d'admin ? */
