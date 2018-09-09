@@ -127,6 +127,20 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AI '%s:%s' loaded", __func__, ai->dls_tech_id, ai->acronyme );
   }
 /******************************************************************************************************************************/
+/* Dls_data_load_AI: Charge une configuration spécifique d'entrée analogique                                                  */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Charger_conf_AI_by_name ( gchar *dls_tech_id, gchar *acronyme )
+  { GSList *liste;
+    liste = Partage->Dls_data_AI;
+    while (liste)
+     { struct ANALOG_INPUT *ai = liste->data;
+       if( !strcmp( ai->dls_tech_id, dls_tech_id ) && !strcmp( ai->acronyme, acronyme ) )
+        { Charger_conf_AI ( ai ); }
+       liste = g_slist_next(liste);
+     }
+  }
+/******************************************************************************************************************************/
 /* Modifier_analogInputDB: Modification d'un entreeANA Watchdog                                                               */
 /* Entrées: une structure hébergeant l'entrée analogique a modifier                                                           */
 /* Sortie: FALSE si pb                                                                                                        */
@@ -162,6 +176,7 @@
     g_free(unite);
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
+    Charger_conf_AI_by_name ( mnemo_full->mnemo_base.dls_tech_id, mnemo_full->mnemo_base.acronyme );
     return(retour);
   }
 /******************************************************************************************************************************/
