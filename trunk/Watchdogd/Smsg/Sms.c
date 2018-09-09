@@ -504,8 +504,8 @@
           if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
            { switch( mnemo->type )
               { case MNEMO_MONOSTABLE:
-                     Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                               "%s: From %s -> Mise à un du bit M%03d", __func__, from, mnemo->num );
+                     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: From %s -> Mise à un du bit M%03d %s:%s", __func__,
+                               from, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme );
                      if (mnemo->num != -1) Envoyer_commande_dls ( mnemo->num );
                                       else Envoyer_commande_dls_data ( mnemo->acronyme, mnemo->dls_tech_id );
                      break;
@@ -519,6 +519,8 @@
               { struct ZMQ_SET_BIT bit;
                 bit.type = mnemo->type;
                 bit.num = mnemo->num;
+                g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", mnemo->dls_tech_id );
+                g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", mnemo->acronyme );
                 Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, TAG_ZMQ_SET_BIT, g_get_host_name(), NOM_THREAD,
                                     &bit, sizeof(struct ZMQ_SET_BIT) );
               }
@@ -568,6 +570,7 @@
                 "%s: FindGammuRC Failed (%s)", __func__, GSM_ErrorString(error) );
        if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
    	   Smsg_disconnect();
+       sleep(2);
        return(FALSE);
      }
    
@@ -577,6 +580,7 @@
                 "%s: ReadConfig Failed (%s)", __func__, GSM_ErrorString(error) );
        if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
    	   Smsg_disconnect();
+       sleep(2);
        return(FALSE);
      }
 
@@ -589,6 +593,7 @@
                 "%s: InitConnection Failed (%s)", __func__, GSM_ErrorString(error) );
        if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
    	   Smsg_disconnect();
+       sleep(2);
        return(FALSE);
      }
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s: Connection OK", __func__ );
