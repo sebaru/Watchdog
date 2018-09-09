@@ -50,8 +50,10 @@
   };
 
  struct ZMQ_SET_BIT
-  { gint type;
-    gint num;
+  { gint  type;
+    gint  num;
+    gchar acronyme [ NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1 ];
+    gchar dls_tech_id [ NBR_CARAC_PLUGIN_DLS_TECHID ];
   };
 
  enum

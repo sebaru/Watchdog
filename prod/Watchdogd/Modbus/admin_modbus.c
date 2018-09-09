@@ -286,7 +286,7 @@
        if (sscanf ( ligne, "%s %s %s", commande,                                         /* Découpage de la ligne de commande */
                     modbus.hostname, modbus.libelle
                   ) != 3) return(response);
-       modbus.watchdog = 40;
+       modbus.watchdog = 600;
        retour = Ajouter_modbusDB ( &modbus );
        if (retour == -1)
         { response = Admin_write ( response, " | - Error, MODBUS not added" ); }

@@ -253,7 +253,7 @@
        Info_new( Config.log, Config.log_arch, LOG_DEBUG, "%s: Traitement de %d enregistrement en %06.1fs. Reste %d", __func__,
                  nb_enreg, (Partage->top-top)/10.0, Partage->com_arch.taille_arch );
        Libere_DB_SQL( &db );                                                                               /* pour historique */
-       Dls_data_set_AI ( "ARCH_REQUEST_NUMBER", "SYS", &arch_request_number, 1.0*Partage->com_arch.taille_arch );
+       Dls_data_set_AI ( "SYS", "ARCH_REQUEST_NUMBER", &arch_request_number, 1.0*Partage->com_arch.taille_arch );
      }
 
     Info_new( Config.log, Config.log_arch, LOG_NOTICE, "%s: Cleaning Arch List before stop", __func__);

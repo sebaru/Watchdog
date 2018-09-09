@@ -162,7 +162,6 @@
  extern gboolean Decharger_librairie_par_prompt ( gchar *nom_fichier );
 
  extern void Gerer_arrive_Axxx_dls ( void );                                                         /* Dans distrib_Events.c */
- extern struct CMD_TYPE_MNEMO_BASE *Map_event_to_mnemo( gchar *thread, gchar *event, gint *retour_nbr );
 
  extern void Gerer_arrive_MSGxxx_dls ( void );                                                       /* Dans distrib_MSGxxx.c */
  extern void Gerer_histo_repeat ( void );

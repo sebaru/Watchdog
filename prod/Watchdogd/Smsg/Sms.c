@@ -153,7 +153,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT id,username,enable,comment,sms_enable,sms_phone,sms_allow_cde "
-                " FROM %s as user WHERE enable=1 AND sms_allow_cde=1 AND phone LIKE '%s'"
+                " FROM %s as user WHERE enable=1 AND sms_allow_cde=1 AND sms_phone LIKE '%s'"
                 " ORDER BY username LIMIT 1",
                 NOM_TABLE_UTIL, phone );
     g_free(phone);
@@ -445,7 +445,7 @@
   { struct CMD_TYPE_MNEMO_BASE *mnemo;
     struct SMSDB *sms;
     gchar chaine[160];
-    gint nbr;
+    struct DB *db;
 
     sms = Smsg_is_recipient_authorized ( from );
     if ( sms == NULL )
@@ -480,43 +480,56 @@
        return;
      }
 
-    mnemo = Map_event_to_mnemo( NOM_THREAD, texte, &nbr );
-    if (nbr==0)
-     { g_snprintf(chaine, sizeof(chaine), "No event found for '%s'", texte );              /* Envoi de l'erreur si pas trouvé */
-       Envoyer_smsg_gsm_text ( chaine );
+    if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, texte ) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte );
        return;
      }
-     
-    if (nbr>1)
+          
+    if ( db->nbr_result == 0 )                                                              /* Si pas d'enregistrement trouvé */
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: No match found for '%s'", __func__, texte );
+       g_snprintf(chaine, sizeof(chaine), "No event found for '%s'", texte );              /* Envoi de l'erreur si pas trouvé */
+       Envoyer_smsg_gsm_text ( chaine );
+       Libere_DB_SQL ( &db );
+     }
+    else if (db->nbr_result > 1)
      { g_snprintf(chaine, sizeof(chaine), "Too many events found for '%s'", texte );             /* Envoi de l'erreur si trop */
        Envoyer_smsg_gsm_text ( chaine );
-       g_free(mnemo);
-       return;
+       Libere_DB_SQL ( &db );
      }
+    else
+     { while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
+        { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Match found for '%s' Type %d Num %d - %s", __func__,
+                    texte, mnemo->type, mnemo->num, mnemo->libelle );
 
-    if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
-     { switch( mnemo->type )
-        { case MNEMO_MONOSTABLE:
-               Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                         "%s: From %s -> Mise à un du bit M%03d", __func__, from, mnemo->num );
-               Envoyer_commande_dls(mnemo->num);
-               break;
-          default:
-          Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                    "%s: From %s -> Error, type of mnemo not handled", __func__, from );
+          if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
+           { switch( mnemo->type )
+              { case MNEMO_MONOSTABLE:
+                     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: From %s -> Mise à un du bit M%03d %s:%s", __func__,
+                               from, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme );
+                     if (mnemo->num != -1) Envoyer_commande_dls ( mnemo->num );
+                                      else Envoyer_commande_dls_data ( mnemo->acronyme, mnemo->dls_tech_id );
+                     break;
+                default:
+                     Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                               "%s: From %s -> Error, type of mnemo not handled", __func__, from );
+              }
+           }
+          else /* Envoi au master via thread HTTP */
+           { if (mnemo->type == MNEMO_MONOSTABLE)
+              { struct ZMQ_SET_BIT bit;
+                bit.type = mnemo->type;
+                bit.num = mnemo->num;
+                g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", mnemo->dls_tech_id );
+                g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", mnemo->acronyme );
+                Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, TAG_ZMQ_SET_BIT, g_get_host_name(), NOM_THREAD,
+                                    &bit, sizeof(struct ZMQ_SET_BIT) );
+              }
+             else Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                           "%s: From %s -> Error, type of mnemo not handled", __func__, from );
+           }
+          g_free(mnemo);
         }
      }
-    else /* Envoi au master via thread HTTP */
-     { if (mnemo->type == MNEMO_MONOSTABLE)
-        { struct ZMQ_SET_BIT bit;
-          bit.type = mnemo->type;
-          bit.num = mnemo->num;
-          Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, TAG_ZMQ_SET_BIT, "*", "*", &bit, sizeof(struct ZMQ_SET_BIT) );
-        }
-       else Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                     "%s: From %s -> Error, type of mnemo not handled", __func__, from );
-     }
-    g_free(mnemo);
   }
 /******************************************************************************************************************************/
 /* Smsg_disconnect: Se deconnecte du telephone ou de la clef 3G                                                               */
@@ -557,6 +570,7 @@
                 "%s: FindGammuRC Failed (%s)", __func__, GSM_ErrorString(error) );
        if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
    	   Smsg_disconnect();
+       sleep(2);
        return(FALSE);
      }
    
@@ -566,6 +580,7 @@
                 "%s: ReadConfig Failed (%s)", __func__, GSM_ErrorString(error) );
        if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
    	   Smsg_disconnect();
+       sleep(2);
        return(FALSE);
      }
 
@@ -578,6 +593,7 @@
                 "%s: InitConnection Failed (%s)", __func__, GSM_ErrorString(error) );
        if (GSM_IsConnected(s))	GSM_TerminateConnection(s);
    	   Smsg_disconnect();
+       sleep(2);
        return(FALSE);
      }
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s: Connection OK", __func__ );
@@ -695,7 +711,6 @@
          
 /****************************************************** Lecture de SMS ********************************************************/
        Lire_sms_gsm();
-       sleep(1);
 
 /********************************************************* Envoi de SMS *******************************************************/
        if (Recv_zmq ( zmq_admin, &buffer, sizeof(buffer)) > 0 )                           /* As-t'on recu un paquet d'admin ? */

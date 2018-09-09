@@ -122,7 +122,7 @@
     if (!hostname)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: Normalisation hostname impossible", __func__ );
        Libere_DB_SQL( &db );
-       w_free(libelle, "free libelle");
+       g_free(libelle);
        return(-1);
      }
 
@@ -145,8 +145,8 @@
                    modbus->map_E, modbus->map_EA, modbus->map_A, modbus->map_AA, modbus->max_nbr_E,
                    modbus->id );
       }
-    w_free(hostname, "free hostname");
-    w_free(libelle, "free libelle2");
+    g_free(hostname);
+    g_free(libelle);
 
     db = Init_DB_SQL();       
     if (!db)
@@ -207,7 +207,7 @@
        return(NULL);
      }
 
-    modbus = (struct MODBUSDB *)w_malloc0( sizeof(struct MODBUSDB), "new modbus" );
+    modbus = (struct MODBUSDB *)g_try_malloc0( sizeof(struct MODBUSDB) );
     if (!modbus) Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR,
                           "%s: Erreur allocation mémoire", __func__ );
     else
@@ -225,55 +225,6 @@
        modbus->max_nbr_E= atoi(db->row[11]);
      }
     return(modbus);
-  }
-/******************************************************************************************************************************/
-/* Charger_tous_Modbus: Requete la DB pour charger les modules et les bornes modbus                                           */
-/* Entrée: rien                                                                                                               */
-/* Sortie: le nombre de modules trouvé                                                                                        */
-/******************************************************************************************************************************/
- static gboolean Charger_tous_MODBUS ( void  )
-  { struct DB *db;
-    gint cpt;
-
-    db = Init_DB_SQL();       
-    if (!db) return(FALSE);
-
-/*************************************************** Chargement des modules ***************************************************/
-    if ( ! Recuperer_modbusDB( db ) )
-     { Libere_DB_SQL( &db );
-       return(FALSE);
-     }
-
-    Cfg_modbus.Modules_MODBUS = NULL;
-    cpt = 0;
-    for ( ; ; )
-     { struct MODULE_MODBUS *module;
-       struct MODBUSDB *modbus;
-
-       modbus = Recuperer_modbusDB_suite( db );
-       if (!modbus) break;
-
-       module = (struct MODULE_MODBUS *)w_malloc0( sizeof(struct MODULE_MODBUS), "new module" );
-       if (!module)                                                   /* Si probleme d'allocation mémoire */
-        { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR,
-                   "%s: Erreur allocation mémoire struct MODULE_MODBUS", __func__ );
-          w_free(modbus, "free modbus");
-          Libere_DB_SQL( &db );
-          return(FALSE);
-        }
-       memcpy( &module->modbus, modbus, sizeof(struct MODBUSDB) );
-       w_free(modbus, "free modbus");
-       cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
-                                                                        /* Ajout dans la liste de travail */
-       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, 
-                "%s: id=%d, enable=%d", __func__, module->modbus.id, module->modbus.enable );
-
-       Cfg_modbus.Modules_MODBUS = g_slist_prepend ( Cfg_modbus.Modules_MODBUS, module );
-     }
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-             "%s: %d modules MODBUS found  !", __func__, cpt );
-    Libere_DB_SQL( &db );
-    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                                         */
@@ -381,48 +332,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Decharger_un_modbus: Decharge (libere la mémoire) un module modbus                                                         */
-/* Entrée: le module à decharger                                                                                              */
-/* Sortie: une GList                                                                                                          */
-/******************************************************************************************************************************/
- static void Decharger_un_MODBUS ( struct MODULE_MODBUS *module )
-  { if (!module) return;
-    Deconnecter_module  ( module );                                                      /* Deconnexion du module en question */
-    Cfg_modbus.Modules_MODBUS = g_slist_remove ( Cfg_modbus.Modules_MODBUS, module );
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-             "%s: Dechargement module %d (%s)", __func__, module->modbus.id, module->modbus.hostname );
-    w_free(module, "free module");
-  }
-/******************************************************************************************************************************/
-/* Decharger_tous_modbus: Decharge l'ensemble des modules MODBUS                                                              */
-/* Entrée: rien                                                                                                               */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- static void Decharger_tous_MODBUS ( void  )
-  { struct MODULE_MODBUS *module;
-    while ( Cfg_modbus.Modules_MODBUS )
-     { module = (struct MODULE_MODBUS *)Cfg_modbus.Modules_MODBUS->data;
-       Decharger_un_MODBUS ( module );
-     }
-  }
-/******************************************************************************************************************************/
-/* Modbus_is_actif: Renvoi TRUE si au moins un des modules modbus est actif                                                   */
-/* Entrée: rien                                                                                                               */
-/* Sortie: TRUE/FALSE                                                                                                         */
-/******************************************************************************************************************************/
- static gboolean Modbus_is_actif ( void )
-  { GSList *liste;
-    liste = Cfg_modbus.Modules_MODBUS;
-    while ( liste )
-     { struct MODULE_MODBUS *module;
-       module = ((struct MODULE_MODBUS *)liste->data);
-
-       if (module->modbus.enable) return(TRUE);
-       liste = liste->next;
-     }
-    return(FALSE);
-  }
-/******************************************************************************************************************************/
 /* Interroger_description : envoie une commande d'identification au module                                                    */
 /* Entrée: L'id de la transmission, et la trame a transmettre                                                                 */
 /******************************************************************************************************************************/
@@ -483,7 +392,7 @@
 /******************************************************************************************************************************/
 /* Interroger_borne: Interrogation d'une borne du module                                                                      */
 /* Entrée: identifiants des modules et borne                                                                                  */
-/* Sortie: ?                                                                                                                  */
+/* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Init_watchdog1( struct MODULE_MODBUS *module )
   { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
@@ -495,7 +404,7 @@
     requete.taille         = htons( 0x0006 );                                               /* taille, en comptant le unit_id */
     requete.unit_id        = 0x00;                                                                                    /* 0xFF */
     requete.fct            = MBUS_WRITE_REGISTER;
-    requete.adresse        = htons( 0x100A );
+    requete.adresse        = htons( 0x100A );                                                                   /* Stop Timer */
     requete.valeur         = htons( 0x0000 );
 
     retour = write ( module->connexion, &requete, 12 );
@@ -510,26 +419,26 @@
        module->request = TRUE;                                                                    /* Une requete a élé lancée */
      }
   }
-/**********************************************************************************************************/
-/* Interroger_borne: Interrogation d'une borne du module                                                  */
-/* Entrée: identifiants des modules et borne                                                              */
-/* Sortie: ?                                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Interroger_borne: Interrogation d'une borne du module                                                                      */
+/* Entrée: identifiants des modules et borne                                                                                  */
+/* Sortie: ?                                                                                                                  */
+/******************************************************************************************************************************/
  static void Init_watchdog2( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+  { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint retour;
 
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
-    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
-    requete.taille         = htons( 0x0006 );                           /* taille, en comptant le unit_id */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.proto_id       = 0x00;                                                                            /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x0006 );                                               /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                                    /* 0xFF */
     requete.fct            = MBUS_WRITE_REGISTER;
-    requete.adresse        = htons( 0x1009 );
+    requete.adresse        = htons( 0x1009 );                                   /* Close MODBUS socket after watchdog timeout */
     requete.valeur         = htons( 0x0001 );
 
     retour = write ( module->connexion, &requete, 12 );
-    if ( retour != 12 )                                                            /* Envoi de la requete */
+    if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                "%s: 'close modbus tcp on watchdog' failed for %d (error %d)", __func__,
                module->modbus.id, retour );
@@ -541,26 +450,29 @@
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
-/**********************************************************************************************************/
-/* Interroger_borne: Interrogation d'une borne du module                                                  */
-/* Entrée: identifiants des modules et borne                                                              */
-/* Sortie: ?                                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Interroger_borne: Interrogation d'une borne du module                                                                      */
+/* Entrée: identifiants des modules et borne                                                                                  */
+/* Sortie: This register stores the watchdog timeout value as an unsigned 16 bit value. The Description default value is 0.   */
+/* Setting this value will not trigger the watchdog. However, a non zero value must be stored in this register before the     */
+/* watchdog can be triggered. The time value is stored in multiples of 100ms (e.g., 0x0009 is .9 seconds). It is not possible */
+/* to modify this value while the watchdog is running                                                                         */
+/******************************************************************************************************************************/
  static void Init_watchdog3( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+  { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint retour;
 
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
-    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
-    requete.taille         = htons( 0x0006 );                           /* taille, en comptant le unit_id */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.proto_id       = 0x00;                                                                            /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x0006 );                                               /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                                    /* 0xFF */
     requete.fct            = MBUS_WRITE_REGISTER;
-    requete.adresse        = htons( 0x1000 );
-    requete.valeur         = htons( module->modbus.watchdog );                          /* coupure sortie */
+    requete.adresse        = htons( 0x1000 );                                                       /* Watchdog Time register */
+    requete.valeur         = htons( module->modbus.watchdog );                     /* coupure sortie, en 100ième de secondes  */
 
     retour = write ( module->connexion, &requete, 12 );
-    if ( retour != 12 )                                                            /* Envoi de la requete */
+    if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                "%s: 'init watchdog timer' failed for %d (error %d)", __func__,
                module->modbus.id, retour );
@@ -572,26 +484,26 @@
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
-/**********************************************************************************************************/
-/* Interroger_borne: Interrogation d'une borne du module                                                  */
-/* Entrée: identifiants des modules et borne                                                              */
-/* Sortie: ?                                                                                              */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Interroger_borne: Interrogation d'une borne du module                                                                      */
+/* Entrée: identifiants des modules et borne                                                                                  */
+/* Sortie: ?                                                                                                                  */
+/******************************************************************************************************************************/
  static void Init_watchdog4( struct MODULE_MODBUS *module )
-  { struct TRAME_MODBUS_REQUETE requete;                                 /* Definition d'une trame MODBUS */
+  { struct TRAME_MODBUS_REQUETE requete;                                                     /* Definition d'une trame MODBUS */
     gint retour;
 
     module->transaction_id++;
     requete.transaction_id = htons(module->transaction_id);
-    requete.proto_id       = 0x00;                                                        /* -> 0 = MOBUS */
-    requete.taille         = htons( 0x0006 );                           /* taille, en comptant le unit_id */
-    requete.unit_id        = 0x00;                                                                /* 0xFF */
+    requete.proto_id       = 0x00;                                                                            /* -> 0 = MOBUS */
+    requete.taille         = htons( 0x0006 );                                               /* taille, en comptant le unit_id */
+    requete.unit_id        = 0x00;                                                                                    /* 0xFF */
     requete.fct            = MBUS_WRITE_REGISTER;
     requete.adresse        = htons( 0x100A );
-    requete.valeur         = htons( 0x0001 );                                              /* Start Timer */
+    requete.valeur         = htons( 0x0001 );                                                                  /* Start Timer */
 
     retour = write ( module->connexion, &requete, 12 );
-    if ( retour != 12 )                                                            /* Envoi de la requete */
+    if ( retour != 12 )                                                                                /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
                 "%s: 'watchdog start' failed for %d (error %d)", __func__,
                  module->modbus.id, retour );
@@ -683,7 +595,7 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                            /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "%s: failed %d (error %d)", __func__, module->modbus.id, retour );
+               "%s: failed %d (error %d - '%s')", __func__, module->modbus.id, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
@@ -712,13 +624,12 @@
     retour = write ( module->connexion, &requete, 12 );
     if ( retour != 12 )                                                            /* Envoi de la requete */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-               "Interroger_nbr_sortie_TOR: failed %d (error %d)",
-                module->modbus.id, retour );
+                 "%s: write error Module %d (error %d, '%s')", __func__, module->modbus.id, retour, strerror(errno) );
        Deconnecter_module( module );
      }
     else
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-               "Interroger_nbr_sortie_TOR: OK for %d", module->modbus.id );
+                 "%s: OK for %d", __func__, module->modbus.id );
        module->request = TRUE;                                                /* Une requete a élé lancée */
      }
   }
@@ -840,42 +751,68 @@
     struct DB *db;
     gint cpt;
 
-    module->AI = (gpointer *)g_try_malloc0( sizeof(gpointer) * module->nbr_entree_ana );
+    module->AI = g_try_malloc0( sizeof(gpointer) * module->nbr_entree_ana );
     if (!module->AI)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Memory Error for AI", __func__ );
        return;
      }
-    module->DI = (gpointer *)g_try_malloc0( sizeof(gpointer) * module->nbr_entree_tor );
+    module->DI = g_try_malloc0( sizeof(gpointer) * module->nbr_entree_tor );
     if (!module->DI)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Memory Error DI", __func__ );
        return;
      }
-    for (cpt=0; cpt<module->nbr_entree_ana; cpt++)
-     { g_snprintf( critere, sizeof(critere),"%s_EA%d", module->modbus.libelle, cpt);
-       if (Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ))
-        { while ( (mnemo=Recuperer_mnemo_baseDB_suite ( &db )) != NULL )
-           { Dls_data_set_AI ( mnemo->acronyme, mnemo->dls_tech_id, (gpointer)&module->AI[cpt], 0.0 );
-             g_free(mnemo);
-           }
-        }
-     }
-    for (cpt=0; cpt<module->nbr_entree_tor; cpt++)
-     { g_snprintf( critere, sizeof(critere),"%s_E%d", module->modbus.libelle, cpt);
-       if (Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ))
-        { while ( (mnemo=Recuperer_mnemo_baseDB_suite ( &db )) != NULL )
-           { Dls_data_set_bool ( mnemo->acronyme, mnemo->dls_tech_id, (gpointer)&module->DI[cpt], FALSE );
-             g_free(mnemo);
-           }
-        }
-     }
 
+/******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
+    g_snprintf( critere, sizeof(critere),"%s:AI%%", module->modbus.libelle ); 
+    if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
+    else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: Match found '%s' Type %d Num %d '%s:%s' - %s", __func__,
+                 mnemo->ev_text, mnemo->type, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme, mnemo->libelle );
+       if ( mnemo->type == MNEMO_ENTREE_ANA )
+        { gchar debut[80];
+          gint num;
+          if ( sscanf ( mnemo->ev_text, "%[^:]:AI%d", debut, &num ) == 2 )                       /* Découpage de la ligne ev_text */
+           { if (num<module->nbr_entree_ana)
+              { Dls_data_set_AI ( mnemo->dls_tech_id, mnemo->acronyme, &module->AI[num], 0.0 ); }
+             else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
+                            mnemo->ev_text, num, module->nbr_entree_ana );
+           }
+          else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__,
+                         mnemo->ev_text );
+        }
+       g_free(mnemo);
+     }
+/******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
+    g_snprintf( critere, sizeof(critere),"%s:DI%%", module->modbus.libelle ); 
+    if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
+    else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: Match found '%s' Type %d Num %d '%s:%s' - %s", __func__,
+                 mnemo->ev_text, mnemo->type, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme, mnemo->libelle );
+       if ( mnemo->type == MNEMO_ENTREE )
+        { gchar debut[80];
+          gint num;
+          if ( sscanf ( mnemo->ev_text, "%[^:]:DI%d", debut, &num ) == 2 )                       /* Découpage de la ligne ev_text */
+           { if (num<module->nbr_entree_tor)
+              { Dls_data_set_bool ( mnemo->acronyme, mnemo->dls_tech_id, (gboolean **)&module->DI[cpt], FALSE ); }
+             else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
+                            mnemo->ev_text, num, module->nbr_entree_tor );
+           }
+          else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__,
+                         mnemo->ev_text );
+        }
+       g_free(mnemo);
+     }
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: Module '%s' : mapping done", __func__,
+              module->modbus.libelle );
   }
 /******************************************************************************************************************************/
 /* Recuperer_borne: Recupere les informations d'une borne MODBUS                                                              */
 /* Entrée: identifiants des modules et borne                                                                                  */
 /* Sortie: ?                                                                                                                  */
 /******************************************************************************************************************************/
- static void Processer_trame( struct MODULE_MODBUS *module )
+ static void Modbus_Processer_trame( struct MODULE_MODBUS *module )
   { module->nbr_oct_lu = 0;
     module->request = FALSE;                                                                     /* Une requete a été traitée */
 
@@ -920,7 +857,7 @@
                              reponse  = module->response.data[ 2*cpt + 1 ] << 5;
                              reponse |= module->response.data[ 2*cpt + 2 ] >> 3;
                              SEA( cpt_e, reponse );
-                             Dls_data_set_AI ( NULL, NULL, (gpointer)&module->AI[cpt], reponse );
+                             Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse );
                            }
                           else SEA_range( cpt_e, 0 );
                           break;
@@ -929,6 +866,7 @@
                              reponse  = module->response.data[ 2*cpt + 1 ] << 8;
                              reponse |= module->response.data[ 2*cpt + 2 ];
                              SEA ( cpt_e, 1.0*reponse );
+                             Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse );
                            }
                           break;
                      default : SEA_range( cpt_e, 0 );
@@ -953,7 +891,7 @@
                chaine[2] = ntohs( (gint16)module->response.data[3] );
                chaine[taille] = 0;
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                         "Processer_trame: Get Description (size %d) %s", taille, (gchar *) chaine );
+                         "%s: Module %d Get Description (size %d) '%s'", __func__, module->modbus.id, taille, chaine );
                module->mode = MODBUS_GET_FIRMWARE;
                break;
             }
@@ -967,13 +905,13 @@
                chaine[2] = ntohs( (gint16)module->response.data[3] );
                chaine[taille] = 0;
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                         "Processer_trame: Get Firmware (size %d) %s", taille, (gchar *) chaine );
+                         "%s: Module %d Get Firmware (size %d) %s", __func__, module->modbus.id, taille, chaine );
                module->mode = MODBUS_INIT_WATCHDOG1;
                break;
             }
           case MODBUS_INIT_WATCHDOG1:
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-                        "Processer_trame: Watchdog1 = %d %d",
+                        "%s: Module %d Watchdog1 = %d %d", __func__, module->modbus.id,
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 0) ),
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
                        );
@@ -981,7 +919,7 @@
                break;
           case MODBUS_INIT_WATCHDOG2:
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-                        "Processer_trame: Watchdog2 = %d %d",
+                        "%s: Module %d Watchdog2 = %d %d", __func__, module->modbus.id,
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 0) ),
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
                        );
@@ -989,7 +927,7 @@
                break;
           case MODBUS_INIT_WATCHDOG3:
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-                        "Processer_trame: Watchdog3 = %d %d",
+                        "%s: Module %d Watchdog3 = %d %d", __func__, module->modbus.id,
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 0) ),
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
                        );
@@ -997,7 +935,7 @@
                break;
           case MODBUS_INIT_WATCHDOG4:
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-                        "Processer_trame: Watchdog4 = %d %d",
+                        "%s: Module %d Watchdog4 = %d %d", __func__, module->modbus.id,
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 0) ),
                          ntohs( *(gint16 *)((gchar *)&module->response.data + 2) )
                        );
@@ -1005,15 +943,15 @@
                break;
           case MODBUS_GET_NBR_AI:
                module->nbr_entree_ana = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) ) / 16;
-               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "Processer_trame: Get number Entree ANA = %d",
-                         module->nbr_entree_ana
+               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Module %d Get number Entree ANA = %d",
+                         __func__, module->modbus.id, module->nbr_entree_ana
                        );
                module->mode = MODBUS_GET_NBR_AO;
                break;
           case MODBUS_GET_NBR_AO:
                module->nbr_sortie_ana = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) ) / 16;
-               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "Processer_trame: Get number Sortie ANA = %d",
-                         module->nbr_sortie_ana
+               Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Module %d Get number Sortie ANA = %d",
+                         __func__, module->modbus.id, module->nbr_sortie_ana
                        );
                module->mode = MODBUS_GET_NBR_DI;
                break;
@@ -1024,21 +962,23 @@
                                              else module->nbr_entree_tor = nbr;
                   if (module->modbus.max_nbr_E>0)
                    { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                               "%s: Get number Entree TOR = %d (forced)", __func__, module->nbr_entree_tor );
+                               "%s: Module %d Get number Entree TOR = %d (forced)", __func__,
+                               module->modbus.id, module->nbr_entree_tor );
                    }
                   else
                    { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                               "%s: Get number Entree TOR = %d", __func__, module->nbr_entree_tor );
+                               "%s: Module %d Get number Entree TOR = %d", __func__,
+                               module->modbus.id, module->nbr_entree_tor );
                    }
                   module->mode = MODBUS_GET_NBR_DO;
-                  Modbus_do_mapping( module );                                     /* Initialise le mapping des I/O du module */
                 }
                break;
           case MODBUS_GET_NBR_DO:
                module->nbr_sortie_tor = ntohs( *(gint16 *)((gchar *)&module->response.data + 1) );
                Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                         "%s: Get number Sortie TOR = %d", __func__, module->nbr_sortie_tor );
+                         "%s: Module %d Get number Sortie TOR = %d", __func__, module->modbus.id, module->nbr_sortie_tor );
                module->mode = MODBUS_GET_DI;
+               Modbus_do_mapping( module );                                        /* Initialise le mapping des I/O du module */
                break;
         }
      }
@@ -1088,26 +1028,157 @@
           return;
         }
 
-       cpt = read( module->connexion,
-                   (unsigned char *)&module->response +
-                                     module->nbr_oct_lu,
-                    bute-module->nbr_oct_lu );
+       cpt = read( module->connexion, (unsigned char *)&module->response + module->nbr_oct_lu, bute-module->nbr_oct_lu );
        if (cpt>=0)
         { module->nbr_oct_lu += cpt;
-          if (module->nbr_oct_lu >= 
-              TAILLE_ENTETE_MODBUS + ntohs(module->response.taille))
-           { 
-             Processer_trame( module );                                             /* Si l'on a trouvé une trame complète !! */
+          if (module->nbr_oct_lu >= TAILLE_ENTETE_MODBUS + ntohs(module->response.taille))
+           { Modbus_Processer_trame( module );                                      /* Si l'on a trouvé une trame complète !! */
              module->nbr_oct_lu = 0;
            }
         }
        else
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                    "%s: wrong trame ID for %d. Get %d, error %s", __func__,
+                    "%s: Read Error for %d. Get %d, error %s", __func__,
                     module->modbus.id, cpt, strerror(errno) );
           Deconnecter_module ( module );
         }
       }
+  }
+/******************************************************************************************************************************/
+/* Run_modbus_thread: Fait tourner un module modbus particulier                                                               */
+/******************************************************************************************************************************/
+ static void Run_modbus_thread ( struct MODULE_MODBUS *module )
+  { gchar thread_name[30];
+    g_snprintf( thread_name, sizeof(thread_name), "W-MODBUS%02d", module->modbus.id );
+    prctl(PR_SET_NAME, thread_name, 0, 0, 0 );
+    module->TID = pthread_self();                                                           /* Sauvegarde du TID pour le pere */
+    
+    while(Cfg_modbus.lib->Thread_run == TRUE && Cfg_modbus.lib->Thread_reload == FALSE)      /* On tourne tant que necessaire */
+     { sched_yield();
+
+       if ( module->modbus.enable == FALSE && module->started )                                     /* Module a deconnecter ! */
+        { Deconnecter_module ( module );
+          continue;
+        }
+
+       if ( module->modbus.enable == FALSE ||                          /* Si module DOWN ou si UP mais dans le delai de retry */
+            Partage->top < module->date_retente )                                  /* Si attente retente, on change de module */
+        { continue; }
+
+/********************************************* Début de l'interrogation du module *********************************************/
+       if ( ! module->started )                                                                  /* Communication OK ou non ? */
+        { if ( ! Connecter_module( module ) )
+           { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
+                       "%s: Module %03d DOWN. retrying in %ds", __func__, module->modbus.id, MODBUS_RETRY/10 );
+             module->date_retente = Partage->top + MODBUS_RETRY;
+           }
+        }
+       else
+        { if ( module->request )                                                         /* Requete en cours pour ce module ? */
+           { Recuperer_reponse_module ( module ); }
+          else 
+           { if (module->date_next_eana<Partage->top)                                  /* Gestion décalée des I/O Analogiques */
+              { module->date_next_eana = Partage->top + MBUS_TEMPS_UPDATE_IO_ANA;                       /* Tous les 2 dixieme */
+                module->do_check_eana = TRUE;
+              }
+             switch (module->mode)
+              { case MODBUS_GET_DESCRIPTION: Interroger_description( module ); break;
+                case MODBUS_GET_FIRMWARE   : Interroger_firmware( module ); break;
+                case MODBUS_INIT_WATCHDOG1 : Init_watchdog1( module ); break;
+                case MODBUS_INIT_WATCHDOG2 : Init_watchdog2( module ); break;
+                case MODBUS_INIT_WATCHDOG3 : Init_watchdog3( module ); break;
+                case MODBUS_INIT_WATCHDOG4 : Init_watchdog4( module ); break;
+                case MODBUS_GET_NBR_AI     : Interroger_nbr_entree_ANA( module ); break;
+                case MODBUS_GET_NBR_AO     : Interroger_nbr_sortie_ANA( module ); break;
+                case MODBUS_GET_NBR_DI     : Interroger_nbr_entree_TOR( module ); break;
+                case MODBUS_GET_NBR_DO     : Interroger_nbr_sortie_TOR( module ); break;
+                case MODBUS_GET_DI         : if (module->nbr_entree_tor) Interroger_entree_tor( module );
+                                             else module->mode = MODBUS_GET_AI;
+                                             break;
+                case MODBUS_GET_AI         : if (module->nbr_entree_ana && module->do_check_eana)
+                                                  Interroger_entree_ana( module );
+                                             else module->mode = MODBUS_SET_DO;
+                                             break;
+                case MODBUS_SET_DO         : if (module->nbr_sortie_tor) Interroger_sortie_tor( module );
+                                             else module->mode = MODBUS_SET_AO;
+                                             break;
+                case MODBUS_SET_AO         : if (module->nbr_sortie_ana && module->do_check_eana)
+                                              { Interroger_sortie_ana( module );
+                                              }
+                                             else module->mode = MODBUS_GET_DI;
+                                             module->do_check_eana = FALSE;                              /* Le check est fait */
+                                             break;
+                
+              }
+           }
+       }
+     }
+    pthread_exit(GINT_TO_POINTER(0));
+  }        
+/******************************************************************************************************************************/
+/* Charger_tous_Modbus: Requete la DB pour charger les modules et les bornes modbus                                           */
+/* Entrée: rien                                                                                                               */
+/* Sortie: le nombre de modules trouvé                                                                                        */
+/******************************************************************************************************************************/
+ static gboolean Charger_tous_MODBUS ( void  )
+  { struct MODBUSDB *modbus;
+    struct DB *db;
+    gint cpt;
+
+    db = Init_DB_SQL();       
+    if (!db) return(FALSE);
+
+/*************************************************** Chargement des modules ***************************************************/
+    if ( ! Recuperer_modbusDB( db ) )
+     { Libere_DB_SQL( &db );
+       return(FALSE);
+     }
+
+    Cfg_modbus.Modules_MODBUS = NULL;
+    cpt = 0;
+    while ( (modbus = Recuperer_modbusDB_suite(db)) != NULL )
+     { struct MODULE_MODBUS *module;
+       pthread_t tid;
+
+       module = (struct MODULE_MODBUS *)g_try_malloc0( sizeof(struct MODULE_MODBUS) );
+       if (!module)                                                                       /* Si probleme d'allocation mémoire */
+        { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR,
+                   "%s: Erreur allocation mémoire struct MODULE_MODBUS", __func__ );
+          g_free(modbus);
+          Libere_DB_SQL( &db );
+          return(FALSE);
+        }
+       memcpy( &module->modbus, modbus, sizeof(struct MODBUSDB) );
+       g_free(modbus);
+       cpt++;                                                                  /* Nous avons ajouté un module dans la liste ! */
+                                                                                            /* Ajout dans la liste de travail */
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, 
+                "%s: id=%d, enable=%d", __func__, module->modbus.id, module->modbus.enable );
+       pthread_create( &tid, NULL, (void *)Run_modbus_thread, module );
+       Cfg_modbus.Modules_MODBUS = g_slist_prepend ( Cfg_modbus.Modules_MODBUS, module );
+     }
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
+             "%s: %d modules MODBUS found  !", __func__, cpt );
+    Libere_DB_SQL( &db );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Decharger_tous_modbus: Decharge l'ensemble des modules MODBUS                                                              */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Decharger_tous_MODBUS ( void  )
+  { struct MODULE_MODBUS *module;
+    while ( Cfg_modbus.Modules_MODBUS )
+     { module = (struct MODULE_MODBUS *)Cfg_modbus.Modules_MODBUS->data;
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
+                 "%s: Wait for sub-process end : W-MODBUS%02d '%s'", __func__, module->modbus.id, module->modbus.hostname );
+       pthread_join( module->TID, NULL );                                                              /* Attente fin du fils */
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
+                 "%s: Sub-process ended : W-MODBUS%02d '%s'", __func__, module->modbus.id, module->modbus.hostname );
+       Cfg_modbus.Modules_MODBUS = g_slist_remove ( Cfg_modbus.Modules_MODBUS, module );
+       g_free(module);
+     }
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du MODBUS                                                                                        */
@@ -1120,6 +1191,7 @@
     memset( &Cfg_modbus, 0, sizeof(Cfg_modbus) );                                   /* Mise a zero de la structure de travail */
     Cfg_modbus.lib = lib;                                          /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_modbus.lib->TID = pthread_self();                                                   /* Sauvegarde du TID pour le pere */
+reload:
     Modbus_Lire_config ();                                                  /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
@@ -1142,93 +1214,19 @@
        Cfg_modbus.lib->Thread_run = FALSE;                                                      /* Le thread ne tourne plus ! */
      }
 
-    while(lib->Thread_run == TRUE)                                                           /* On tourne tant que necessaire */
-     { usleep(10000);
-
-       if (lib->Thread_reload == TRUE)
-        { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
-          Modbus_Lire_config();
-          Decharger_tous_MODBUS();
-          Charger_tous_MODBUS();
-          lib->Thread_reload = FALSE;
-        }
-
-       if (Cfg_modbus.Modules_MODBUS == NULL ||                                     /* Si pas de module référencés, on attend */
-           Modbus_is_actif() == FALSE)
-        { sleep(2); continue; }
-
-       liste = Cfg_modbus.Modules_MODBUS;
-       while (liste && (lib->Thread_run == TRUE) && (Cfg_modbus.lib->Thread_reload == FALSE) )
-        { module = (struct MODULE_MODBUS *)liste->data;
-
-          if ( module->modbus.enable == FALSE && module->started )                                  /* Module a deconnecter ! */
-           { Deconnecter_module  ( module );
-             liste = liste->next;                                          /* On prépare le prochain accès au prochain module */
-             continue;
-           }
-
-          if ( module->modbus.enable == FALSE ||                       /* Si module DOWN ou si UP mais dans le delai de retry */
-               Partage->top < module->date_retente )                               /* Si attente retente, on change de module */
-           { liste = liste->next;                                          /* On prépare le prochain accès au prochain module */
-             continue;
-           }
-
-/********************************************* Début de l'interrogation du module *********************************************/
-          if ( ! module->started )                                                               /* Communication OK ou non ? */
-           { if ( ! Connecter_module( module ) )
-              { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                          "%s: Module %03d DOWN. retrying in %ds", __func__, module->modbus.id, MODBUS_RETRY/10 );
-                module->date_retente = Partage->top + MODBUS_RETRY;
-              }
-           }
-          else
-           { if ( module->request )                                                      /* Requete en cours pour ce module ? */
-              { Recuperer_reponse_module ( module ); }
-             else 
-              { if (module->date_next_eana<Partage->top)                               /* Gestion décalée des I/O Analogiques */
-                 { module->date_next_eana = Partage->top + MBUS_TEMPS_UPDATE_IO_ANA;                    /* Tous les 2 dixieme */
-                   module->do_check_eana = TRUE;
-                 }
-                switch (module->mode)
-                 { case MODBUS_GET_DESCRIPTION: Interroger_description( module ); break;
-                   case MODBUS_GET_FIRMWARE   : Interroger_firmware( module ); break;
-                   case MODBUS_INIT_WATCHDOG1 : Init_watchdog1( module ); break;
-                   case MODBUS_INIT_WATCHDOG2 : Init_watchdog2( module ); break;
-                   case MODBUS_INIT_WATCHDOG3 : Init_watchdog3( module ); break;
-                   case MODBUS_INIT_WATCHDOG4 : Init_watchdog4( module ); break;
-                   case MODBUS_GET_NBR_AI     : Interroger_nbr_entree_ANA( module ); break;
-                   case MODBUS_GET_NBR_AO     : Interroger_nbr_sortie_ANA( module ); break;
-                   case MODBUS_GET_NBR_DI     : Interroger_nbr_entree_TOR( module ); break;
-                   case MODBUS_GET_NBR_DO     : Interroger_nbr_sortie_TOR( module ); break;
-                   case MODBUS_GET_DI         : if (module->nbr_entree_tor) Interroger_entree_tor( module );
-                                                else module->mode = MODBUS_GET_AI;
-                                                break;
-                   case MODBUS_GET_AI         : if (module->nbr_entree_ana && module->do_check_eana)
-                                                     Interroger_entree_ana( module );
-                                                else module->mode = MODBUS_SET_DO;
-                                                break;
-                   case MODBUS_SET_DO         : if (module->nbr_sortie_tor) Interroger_sortie_tor( module );
-                                                else module->mode = MODBUS_SET_AO;
-                                                break;
-                   case MODBUS_SET_AO         : if (module->nbr_sortie_ana && module->do_check_eana)
-                                                 { Interroger_sortie_ana( module );
-                                                 }
-                                                else module->mode = MODBUS_GET_DI;
-                                                module->do_check_eana = FALSE;                           /* Le check est fait */
-                                                break;
-                   
-                 }
-              }
-           }
-          liste = liste->next;                                             /* On prépare le prochain accès au prochain module */
-        }
+    while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
+     { usleep(100000);
      }
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
              "%s: Preparing to stop . . . TID = %p", __func__, pthread_self() );
     Decharger_tous_MODBUS();
+    if (lib->Thread_reload == TRUE)
+     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
+       lib->Thread_reload = FALSE;
+       goto reload;
+     }
 end:
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
-             "%s: Down . . . TID = %p", __func__, pthread_self() );
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_modbus.lib->Thread_run = FALSE;                                                         /* Le thread ne tourne plus ! */
     Cfg_modbus.lib->TID = 0;                                                  /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

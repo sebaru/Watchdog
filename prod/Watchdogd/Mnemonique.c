@@ -191,8 +191,8 @@
      } else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "UPDATE %s SET "             
-                   "type=%d,libelle='%s',acronyme='%s',ev_host='%s',ev_thread='%s',ev_text='%s',dls_id=%d,num=%d,tableau='%s',"
-                   "acro_syn='%s' "
+                   "type=%d,libelle='%s',acronyme='%s',ev_host='%s',ev_thread='%s',ev_text='%s',dls_id=%d,"
+                   "num=IF(num='-1', '-1','%d'),tableau='%s',acro_syn='%s' "
                    "WHERE id=%d",
                    NOM_TABLE_MNEMO, mnemo->type, libelle, acro, ev_host, ev_thread, ev_text, 
                    mnemo->dls_id, mnemo->num, tableau, acro_syn, mnemo->id );
@@ -270,15 +270,15 @@
 
     commande = Normaliser_chaine ( commande_pure );
     if (!commande)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-                 "%s: Normalisation impossible commande", __func__ );
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible commande", __func__ );
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete), MNEMO_SQL_SELECT                                                     /* Requete SQL */
-               " WHERE (mnemo.ev_host='*' OR mnemo.ev_host='%s') AND (mnemo.ev_thread='*' OR mnemo.ev_thread='%s') AND mnemo.ev_text = '%s'",
-               g_get_host_name(), thread, commande_pure );
-
+               " WHERE (mnemo.ev_host='*' OR mnemo.ev_host='%s') AND (mnemo.ev_thread='*' OR mnemo.ev_thread='%s')"
+               " AND mnemo.ev_text LIKE '%s'",
+               g_get_host_name(), thread, commande );
+    g_free(commande);
     db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
