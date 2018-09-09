@@ -506,7 +506,8 @@
               { case MNEMO_MONOSTABLE:
                      Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
                                "%s: From %s -> Mise à un du bit M%03d", __func__, from, mnemo->num );
-                     Envoyer_commande_dls(mnemo->num);
+                     if (mnemo->num != -1) Envoyer_commande_dls ( mnemo->num );
+                                      else Envoyer_commande_dls_data ( mnemo->acronyme, mnemo->dls_tech_id );
                      break;
                 default:
                      Info_new( Config.log, Config.log_msrv, LOG_ERR,
@@ -518,7 +519,8 @@
               { struct ZMQ_SET_BIT bit;
                 bit.type = mnemo->type;
                 bit.num = mnemo->num;
-                Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, TAG_ZMQ_SET_BIT, "*", "*", &bit, sizeof(struct ZMQ_SET_BIT) );
+                Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, TAG_ZMQ_SET_BIT, g_get_host_name(), NOM_THREAD,
+                                    &bit, sizeof(struct ZMQ_SET_BIT) );
               }
              else Info_new( Config.log, Config.log_msrv, LOG_ERR,
                            "%s: From %s -> Error, type of mnemo not handled", __func__, from );
