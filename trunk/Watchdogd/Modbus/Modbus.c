@@ -854,7 +854,7 @@
      }
 
 /******************************* Recherche des event text a raccrocher aux bits internes **************************************/
-    g_snprintf( critere, sizeof(critere),"%s_EA%", module->modbus.libelle ); 
+    g_snprintf( critere, sizeof(critere),"%s_EA%%", module->modbus.libelle ); 
     if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
     else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
@@ -863,11 +863,10 @@
        if ( mnemo->type == MNEMO_ENTREE_ANA )
         { gchar debut[80];
           gint num;
-          g_snprintf( critere, sizeof(critere),"%s_EA%%d", module->modbus.libelle );
           if ( sscanf ( mnemo->ev_text, "%s_EA%d", debut, &num ) == 2 )                       /* Découpage de la ligne ev_text */
            { if (num<module->nbr_entree_ana)
               { Dls_data_set_AI ( mnemo->dls_tech_id, mnemo->acronyme, &module->AI[num], 0.0 ); }
-             else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: evant '%s': num %d out of range '%d'", __func__,
+             else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: event '%s': num %d out of range '%d'", __func__,
                             mnemo->ev_text, num, module->nbr_entree_ana );
            }
         }
@@ -883,7 +882,7 @@
            }
         }
      }
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: mapping done", __func__ );
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: Module '%s' : mapping done", __func__, module->libelle );
   }
 /******************************************************************************************************************************/
 /* Recuperer_borne: Recupere les informations d'une borne MODBUS                                                              */
