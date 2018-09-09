@@ -153,7 +153,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT id,username,enable,comment,sms_enable,sms_phone,sms_allow_cde "
-                " FROM %s as user WHERE enable=1 AND sms_allow_cde=1 AND phone LIKE '%s'"
+                " FROM %s as user WHERE enable=1 AND sms_allow_cde=1 AND sms_phone LIKE '%s'"
                 " ORDER BY username LIMIT 1",
                 NOM_TABLE_UTIL, phone );
     g_free(phone);
@@ -485,12 +485,12 @@
        return;
      }
           
-    if ( db->result == 0 )                                                                  /* Si pas d'enregistrement trouvé */
+    if ( db->nbr_result == 0 )                                                                  /* Si pas d'enregistrement trouvé */
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: No match found for '%s'", __func__, texte );
        g_snprintf(chaine, sizeof(chaine), "No event found for '%s'", texte );              /* Envoi de l'erreur si pas trouvé */
        Envoyer_smsg_gsm_text ( chaine );
      }
-    else if (db->result > 1)
+    else if (db->nbr_result > 1)
      { g_snprintf(chaine, sizeof(chaine), "Too many events found for '%s'", texte );             /* Envoi de l'erreur si trop */
        Envoyer_smsg_gsm_text ( chaine );
      }
