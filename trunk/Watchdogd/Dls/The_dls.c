@@ -893,7 +893,7 @@
         }
        
        if (!liste)
-        { ai = g_malloc0 ( sizeof(struct ANALOG_INPUT) );
+        { ai = g_try_malloc0 ( sizeof(struct ANALOG_INPUT) );
           if (!ai)
            { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, dls_tech_id );
              return;

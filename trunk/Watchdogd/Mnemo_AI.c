@@ -106,7 +106,7 @@
                 " INNER JOIN mnemos as m ON a.id_mnemo = m.id"
                 " INNER JOIN dls as d ON m.dls_id = d.id"
                 " WHERE d.tech_id='%s' AND m.acronyme='%s' LIMIT 1",
-                NOM_TABLE_MNEMO_AI, ai->acronyme, ai->dls_tech_id
+                NOM_TABLE_MNEMO_AI, ai->dls_tech_id, ai->acronyme
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
