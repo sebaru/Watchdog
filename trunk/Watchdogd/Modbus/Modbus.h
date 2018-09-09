@@ -106,7 +106,7 @@
 
  struct MODULE_MODBUS
   { struct MODBUSDB modbus;
-
+    pthread_t TID;                                                                 /* Tid du thread gérant le module unitaire */
     gboolean started;                                                                                      /* Est-il actif ?? */
     gint connexion;                                                                                     /* FD de connexion IP */
     gint mode;                                                                    /* Mode dans le processus de connexion WAGO */

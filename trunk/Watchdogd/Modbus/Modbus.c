@@ -227,55 +227,6 @@
     return(modbus);
   }
 /******************************************************************************************************************************/
-/* Charger_tous_Modbus: Requete la DB pour charger les modules et les bornes modbus                                           */
-/* Entrée: rien                                                                                                               */
-/* Sortie: le nombre de modules trouvé                                                                                        */
-/******************************************************************************************************************************/
- static gboolean Charger_tous_MODBUS ( void  )
-  { struct DB *db;
-    gint cpt;
-
-    db = Init_DB_SQL();       
-    if (!db) return(FALSE);
-
-/*************************************************** Chargement des modules ***************************************************/
-    if ( ! Recuperer_modbusDB( db ) )
-     { Libere_DB_SQL( &db );
-       return(FALSE);
-     }
-
-    Cfg_modbus.Modules_MODBUS = NULL;
-    cpt = 0;
-    for ( ; ; )
-     { struct MODULE_MODBUS *module;
-       struct MODBUSDB *modbus;
-
-       modbus = Recuperer_modbusDB_suite( db );
-       if (!modbus) break;
-
-       module = (struct MODULE_MODBUS *)w_malloc0( sizeof(struct MODULE_MODBUS), "new module" );
-       if (!module)                                                   /* Si probleme d'allocation mémoire */
-        { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR,
-                   "%s: Erreur allocation mémoire struct MODULE_MODBUS", __func__ );
-          w_free(modbus, "free modbus");
-          Libere_DB_SQL( &db );
-          return(FALSE);
-        }
-       memcpy( &module->modbus, modbus, sizeof(struct MODBUSDB) );
-       w_free(modbus, "free modbus");
-       cpt++;                                              /* Nous avons ajouté un module dans la liste ! */
-                                                                        /* Ajout dans la liste de travail */
-       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, 
-                "%s: id=%d, enable=%d", __func__, module->modbus.id, module->modbus.enable );
-
-       Cfg_modbus.Modules_MODBUS = g_slist_prepend ( Cfg_modbus.Modules_MODBUS, module );
-     }
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-             "%s: %d modules MODBUS found  !", __func__, cpt );
-    Libere_DB_SQL( &db );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
 /* Deconnecter: Deconnexion du module                                                                                         */
 /* Entrée: un id                                                                                                              */
 /* Sortie: néant                                                                                                              */
@@ -379,48 +330,6 @@
     module->AI = NULL;
 
     return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Decharger_un_modbus: Decharge (libere la mémoire) un module modbus                                                         */
-/* Entrée: le module à decharger                                                                                              */
-/* Sortie: une GList                                                                                                          */
-/******************************************************************************************************************************/
- static void Decharger_un_MODBUS ( struct MODULE_MODBUS *module )
-  { if (!module) return;
-    Deconnecter_module  ( module );                                                      /* Deconnexion du module en question */
-    Cfg_modbus.Modules_MODBUS = g_slist_remove ( Cfg_modbus.Modules_MODBUS, module );
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
-             "%s: Dechargement module %d (%s)", __func__, module->modbus.id, module->modbus.hostname );
-    w_free(module, "free module");
-  }
-/******************************************************************************************************************************/
-/* Decharger_tous_modbus: Decharge l'ensemble des modules MODBUS                                                              */
-/* Entrée: rien                                                                                                               */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- static void Decharger_tous_MODBUS ( void  )
-  { struct MODULE_MODBUS *module;
-    while ( Cfg_modbus.Modules_MODBUS )
-     { module = (struct MODULE_MODBUS *)Cfg_modbus.Modules_MODBUS->data;
-       Decharger_un_MODBUS ( module );
-     }
-  }
-/******************************************************************************************************************************/
-/* Modbus_is_actif: Renvoi TRUE si au moins un des modules modbus est actif                                                   */
-/* Entrée: rien                                                                                                               */
-/* Sortie: TRUE/FALSE                                                                                                         */
-/******************************************************************************************************************************/
- static gboolean Modbus_is_actif ( void )
-  { GSList *liste;
-    liste = Cfg_modbus.Modules_MODBUS;
-    while ( liste )
-     { struct MODULE_MODBUS *module;
-       module = ((struct MODULE_MODBUS *)liste->data);
-
-       if (module->modbus.enable) return(TRUE);
-       liste = liste->next;
-     }
-    return(FALSE);
   }
 /******************************************************************************************************************************/
 /* Interroger_description : envoie une commande d'identification au module                                                    */
@@ -866,7 +775,7 @@
           if ( sscanf ( mnemo->ev_text, "%s_EA%d", debut, &num ) == 2 )                       /* Découpage de la ligne ev_text */
            { if (num<module->nbr_entree_ana)
               { Dls_data_set_AI ( mnemo->dls_tech_id, mnemo->acronyme, &module->AI[num], 0.0 ); }
-             else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: event '%s': num %d out of range '%d'", __func__,
+             else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
                             mnemo->ev_text, num, module->nbr_entree_ana );
            }
         }
@@ -882,7 +791,7 @@
            }
         }
      }
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: Module '%s' : mapping done", __func__,
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: Module '%s' : mapping done", __func__,
               module->modbus.libelle );
   }
 /******************************************************************************************************************************/
@@ -1122,6 +1031,142 @@
       }
   }
 /******************************************************************************************************************************/
+/* Run_modbus_thread: Fait tourner un module modbus particulier                                                               */
+/******************************************************************************************************************************/
+ static void Run_modbus_thread ( struct MODULE_MODBUS *module )
+  { gchar thread_name[30];
+    g_snprintf( thread_name, sizeof(thread_name), "W-MODBUS%02d", module->modbus.id );
+    prctl(PR_SET_NAME, thread_name, 0, 0, 0 );
+    module->TID = pthread_self();                                                           /* Sauvegarde du TID pour le pere */
+    
+    while(Cfg_modbus.lib->Thread_run == TRUE && Cfg_modbus.lib->Thread_reload == FALSE)      /* On tourne tant que necessaire */
+     { sched_yield();
+
+       if ( module->modbus.enable == FALSE && module->started )                                     /* Module a deconnecter ! */
+        { Deconnecter_module ( module );
+          continue;
+        }
+
+       if ( module->modbus.enable == FALSE ||                          /* Si module DOWN ou si UP mais dans le delai de retry */
+            Partage->top < module->date_retente )                                  /* Si attente retente, on change de module */
+        { continue; }
+
+/********************************************* Début de l'interrogation du module *********************************************/
+       if ( ! module->started )                                                                  /* Communication OK ou non ? */
+        { if ( ! Connecter_module( module ) )
+           { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
+                       "%s: Module %03d DOWN. retrying in %ds", __func__, module->modbus.id, MODBUS_RETRY/10 );
+             module->date_retente = Partage->top + MODBUS_RETRY;
+           }
+        }
+       else
+        { if ( module->request )                                                         /* Requete en cours pour ce module ? */
+           { Recuperer_reponse_module ( module ); }
+          else 
+           { if (module->date_next_eana<Partage->top)                                  /* Gestion décalée des I/O Analogiques */
+              { module->date_next_eana = Partage->top + MBUS_TEMPS_UPDATE_IO_ANA;                       /* Tous les 2 dixieme */
+                module->do_check_eana = TRUE;
+              }
+             switch (module->mode)
+              { case MODBUS_GET_DESCRIPTION: Interroger_description( module ); break;
+                case MODBUS_GET_FIRMWARE   : Interroger_firmware( module ); break;
+                case MODBUS_INIT_WATCHDOG1 : Init_watchdog1( module ); break;
+                case MODBUS_INIT_WATCHDOG2 : Init_watchdog2( module ); break;
+                case MODBUS_INIT_WATCHDOG3 : Init_watchdog3( module ); break;
+                case MODBUS_INIT_WATCHDOG4 : Init_watchdog4( module ); break;
+                case MODBUS_GET_NBR_AI     : Interroger_nbr_entree_ANA( module ); break;
+                case MODBUS_GET_NBR_AO     : Interroger_nbr_sortie_ANA( module ); break;
+                case MODBUS_GET_NBR_DI     : Interroger_nbr_entree_TOR( module ); break;
+                case MODBUS_GET_NBR_DO     : Interroger_nbr_sortie_TOR( module ); break;
+                case MODBUS_GET_DI         : if (module->nbr_entree_tor) Interroger_entree_tor( module );
+                                             else module->mode = MODBUS_GET_AI;
+                                             break;
+                case MODBUS_GET_AI         : if (module->nbr_entree_ana && module->do_check_eana)
+                                                  Interroger_entree_ana( module );
+                                             else module->mode = MODBUS_SET_DO;
+                                             break;
+                case MODBUS_SET_DO         : if (module->nbr_sortie_tor) Interroger_sortie_tor( module );
+                                             else module->mode = MODBUS_SET_AO;
+                                             break;
+                case MODBUS_SET_AO         : if (module->nbr_sortie_ana && module->do_check_eana)
+                                              { Interroger_sortie_ana( module );
+                                              }
+                                             else module->mode = MODBUS_GET_DI;
+                                             module->do_check_eana = FALSE;                              /* Le check est fait */
+                                             break;
+                
+              }
+           }
+       }
+     }
+    pthread_exit(GINT_TO_POINTER(0));
+  }        
+/******************************************************************************************************************************/
+/* Charger_tous_Modbus: Requete la DB pour charger les modules et les bornes modbus                                           */
+/* Entrée: rien                                                                                                               */
+/* Sortie: le nombre de modules trouvé                                                                                        */
+/******************************************************************************************************************************/
+ static gboolean Charger_tous_MODBUS ( void  )
+  { struct MODBUSDB *modbus;
+    struct DB *db;
+    gint cpt;
+
+    db = Init_DB_SQL();       
+    if (!db) return(FALSE);
+
+/*************************************************** Chargement des modules ***************************************************/
+    if ( ! Recuperer_modbusDB( db ) )
+     { Libere_DB_SQL( &db );
+       return(FALSE);
+     }
+
+    Cfg_modbus.Modules_MODBUS = NULL;
+    cpt = 0;
+    while ( (modbus = Recuperer_modbusDB_suite(db)) != NULL )
+     { struct MODULE_MODBUS *module;
+       pthread_t tid;
+
+       module = (struct MODULE_MODBUS *)w_malloc0( sizeof(struct MODULE_MODBUS), "new module" );
+       if (!module)                                                                       /* Si probleme d'allocation mémoire */
+        { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR,
+                   "%s: Erreur allocation mémoire struct MODULE_MODBUS", __func__ );
+          w_free(modbus, "free modbus");
+          Libere_DB_SQL( &db );
+          return(FALSE);
+        }
+       memcpy( &module->modbus, modbus, sizeof(struct MODBUSDB) );
+       w_free(modbus, "free modbus");
+       cpt++;                                                                  /* Nous avons ajouté un module dans la liste ! */
+                                                                                            /* Ajout dans la liste de travail */
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, 
+                "%s: id=%d, enable=%d", __func__, module->modbus.id, module->modbus.enable );
+       pthread_create( &tid, NULL, (void *)Run_modbus_thread, module );
+       Cfg_modbus.Modules_MODBUS = g_slist_prepend ( Cfg_modbus.Modules_MODBUS, module );
+     }
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
+             "%s: %d modules MODBUS found  !", __func__, cpt );
+    Libere_DB_SQL( &db );
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Decharger_tous_modbus: Decharge l'ensemble des modules MODBUS                                                              */
+/* Entrée: rien                                                                                                               */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Decharger_tous_MODBUS ( void  )
+  { struct MODULE_MODBUS *module;
+    while ( Cfg_modbus.Modules_MODBUS )
+     { module = (struct MODULE_MODBUS *)Cfg_modbus.Modules_MODBUS->data;
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG,
+                 "%s: Wait for sub-process end : W-MODBUS%02d '%s'", __func__, module->modbus.id, module->modbus.hostname );
+       pthread_join( module->TID, NULL );                                                              /* Attente fin du fils */
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
+                 "%s: Sub-process ended : W-MODBUS%02d '%s'", __func__, module->modbus.id, module->modbus.hostname );
+       Cfg_modbus.Modules_MODBUS = g_slist_remove ( Cfg_modbus.Modules_MODBUS, module );
+       w_free(module, "free module");
+     }
+  }
+/******************************************************************************************************************************/
 /* Main: Fonction principale du MODBUS                                                                                        */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
@@ -1132,6 +1177,7 @@
     memset( &Cfg_modbus, 0, sizeof(Cfg_modbus) );                                   /* Mise a zero de la structure de travail */
     Cfg_modbus.lib = lib;                                          /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_modbus.lib->TID = pthread_self();                                                   /* Sauvegarde du TID pour le pere */
+reload:
     Modbus_Lire_config ();                                                  /* Lecture de la configuration logiciel du thread */
 
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
@@ -1154,90 +1200,17 @@
        Cfg_modbus.lib->Thread_run = FALSE;                                                      /* Le thread ne tourne plus ! */
      }
 
-    while(lib->Thread_run == TRUE)                                                           /* On tourne tant que necessaire */
-     { usleep(10000);
-
-       if (lib->Thread_reload == TRUE)
-        { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
-          Modbus_Lire_config();
-          Decharger_tous_MODBUS();
-          Charger_tous_MODBUS();
-          lib->Thread_reload = FALSE;
-        }
-
-       if (Cfg_modbus.Modules_MODBUS == NULL ||                                     /* Si pas de module référencés, on attend */
-           Modbus_is_actif() == FALSE)
-        { sleep(2); continue; }
-
-       liste = Cfg_modbus.Modules_MODBUS;
-       while (liste && (lib->Thread_run == TRUE) && (Cfg_modbus.lib->Thread_reload == FALSE) )
-        { module = (struct MODULE_MODBUS *)liste->data;
-
-          if ( module->modbus.enable == FALSE && module->started )                                  /* Module a deconnecter ! */
-           { Deconnecter_module  ( module );
-             liste = liste->next;                                          /* On prépare le prochain accès au prochain module */
-             continue;
-           }
-
-          if ( module->modbus.enable == FALSE ||                       /* Si module DOWN ou si UP mais dans le delai de retry */
-               Partage->top < module->date_retente )                               /* Si attente retente, on change de module */
-           { liste = liste->next;                                          /* On prépare le prochain accès au prochain module */
-             continue;
-           }
-
-/********************************************* Début de l'interrogation du module *********************************************/
-          if ( ! module->started )                                                               /* Communication OK ou non ? */
-           { if ( ! Connecter_module( module ) )
-              { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-                          "%s: Module %03d DOWN. retrying in %ds", __func__, module->modbus.id, MODBUS_RETRY/10 );
-                module->date_retente = Partage->top + MODBUS_RETRY;
-              }
-           }
-          else
-           { if ( module->request )                                                      /* Requete en cours pour ce module ? */
-              { Recuperer_reponse_module ( module ); }
-             else 
-              { if (module->date_next_eana<Partage->top)                               /* Gestion décalée des I/O Analogiques */
-                 { module->date_next_eana = Partage->top + MBUS_TEMPS_UPDATE_IO_ANA;                    /* Tous les 2 dixieme */
-                   module->do_check_eana = TRUE;
-                 }
-                switch (module->mode)
-                 { case MODBUS_GET_DESCRIPTION: Interroger_description( module ); break;
-                   case MODBUS_GET_FIRMWARE   : Interroger_firmware( module ); break;
-                   case MODBUS_INIT_WATCHDOG1 : Init_watchdog1( module ); break;
-                   case MODBUS_INIT_WATCHDOG2 : Init_watchdog2( module ); break;
-                   case MODBUS_INIT_WATCHDOG3 : Init_watchdog3( module ); break;
-                   case MODBUS_INIT_WATCHDOG4 : Init_watchdog4( module ); break;
-                   case MODBUS_GET_NBR_AI     : Interroger_nbr_entree_ANA( module ); break;
-                   case MODBUS_GET_NBR_AO     : Interroger_nbr_sortie_ANA( module ); break;
-                   case MODBUS_GET_NBR_DI     : Interroger_nbr_entree_TOR( module ); break;
-                   case MODBUS_GET_NBR_DO     : Interroger_nbr_sortie_TOR( module ); break;
-                   case MODBUS_GET_DI         : if (module->nbr_entree_tor) Interroger_entree_tor( module );
-                                                else module->mode = MODBUS_GET_AI;
-                                                break;
-                   case MODBUS_GET_AI         : if (module->nbr_entree_ana && module->do_check_eana)
-                                                     Interroger_entree_ana( module );
-                                                else module->mode = MODBUS_SET_DO;
-                                                break;
-                   case MODBUS_SET_DO         : if (module->nbr_sortie_tor) Interroger_sortie_tor( module );
-                                                else module->mode = MODBUS_SET_AO;
-                                                break;
-                   case MODBUS_SET_AO         : if (module->nbr_sortie_ana && module->do_check_eana)
-                                                 { Interroger_sortie_ana( module );
-                                                 }
-                                                else module->mode = MODBUS_GET_DI;
-                                                module->do_check_eana = FALSE;                           /* Le check est fait */
-                                                break;
-                   
-                 }
-              }
-           }
-          liste = liste->next;                                             /* On prépare le prochain accès au prochain module */
-        }
+    while(lib->Thread_run == TRUE && lib->Thread_reload == FALSE)                            /* On tourne tant que necessaire */
+     { usleep(100000);
      }
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
              "%s: Preparing to stop . . . TID = %p", __func__, pthread_self() );
     Decharger_tous_MODBUS();
+    if (lib->Thread_reload == TRUE)
+     { Info_new( Config.log, lib->Thread_debug, LOG_NOTICE, "%s: Reloading", __func__ );
+       lib->Thread_reload = FALSE;
+       goto reload;
+     }
 end:
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_modbus.lib->Thread_run = FALSE;                                                         /* Le thread ne tourne plus ! */
