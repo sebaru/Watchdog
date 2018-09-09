@@ -852,11 +852,12 @@
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Memory Error DI", __func__ );
        return;
      }
+
     for (cpt=0; cpt<module->nbr_entree_ana; cpt++)
      { g_snprintf( critere, sizeof(critere),"%s_EA%d", module->modbus.libelle, cpt);
        if (Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ))
         { while ( (mnemo=Recuperer_mnemo_baseDB_suite ( &db )) != NULL )
-           { Dls_data_set_AI ( mnemo->acronyme, mnemo->dls_tech_id, &module->AI[cpt], 0.0 );
+           { Dls_data_set_AI ( mnemo->dls_tech_id, mnemo->acronyme,  &module->AI[cpt], 0.0 );
              g_free(mnemo);
            }
         }

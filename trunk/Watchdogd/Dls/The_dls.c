@@ -878,32 +878,32 @@
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_AI ( gchar *nom, gchar *tech_id, gpointer **ai_p, float val_avant_ech )
+ void Dls_data_set_AI ( gchar *dls_tech_id, gchar *acronyme, gpointer **ai_p, float val_avant_ech )
   { struct ANALOG_INPUT *ai;
     gboolean need_arch;
 
     if (!ai_p || !*ai_p)
      { GSList *liste;
-       if ( !(nom && tech_id) ) return;
+       if ( !(acronyme && dls_tech_id) ) return;
        liste = Partage->Dls_data_AI;
        while (liste)
         { ai = (struct ANALOG_INPUT *)liste->data;
-          if ( !strcmp ( ai->nom, nom ) && !strcmp( ai->tech_id, tech_id ) ) break;
+          if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->dls_tech_id, dls_tech_id ) ) break;
           liste = g_slist_next(liste);
         }
        
        if (!liste)
         { ai = g_malloc0 ( sizeof(struct ANALOG_INPUT) );
           if (!ai)
-           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, nom, tech_id );
+           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, dls_tech_id );
              return;
            }
-          g_snprintf( ai->nom,     sizeof(ai->nom), "%s", nom );
-          g_snprintf( ai->tech_id, sizeof(ai->tech_id), "%s", tech_id );
+          g_snprintf( ai->acronyme,    sizeof(ai->acronyme),    "%s", acronyme );
+          g_snprintf( ai->dls_tech_id, sizeof(ai->dls_tech_id), "%s", dls_tech_id );
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding AI '%s:%s'", __func__, tech_id, nom );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding AI '%s:%s'", __func__, dls_tech_id, acronyme );
           Charger_conf_AI ( ai );                                                     /* Chargment de la conf AI depuis la DB */
         }
        if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */
@@ -962,7 +962,7 @@
      { need_arch = TRUE; }                                                               /* Archive au pire toutes les 10 min */
 
     if (need_arch)
-     { Ajouter_arch_by_nom( ai->nom, ai->tech_id, ai->val_ech );                                       /* Archivage si besoin */
+     { Ajouter_arch_by_nom( ai->acronyme, ai->dls_tech_id, ai->val_ech );                              /* Archivage si besoin */
        ai->last_arch = Partage->top;
      }
   }
@@ -970,14 +970,14 @@
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gfloat Dls_data_get_AI ( gchar *nom, gchar *tech_id, gpointer **ai_p )
+ gfloat Dls_data_get_AI ( gchar *acronyme, gchar *dls_tech_id, gpointer **ai_p )
   { struct ANALOG_INPUT *ai;
     if (!ai_p || !*ai_p)                                                           /* Si pointeur d'acceleration indisponible */
      { GSList *liste;
        liste = Partage->Dls_data_AI;
        while (liste)
         { ai = (struct ANALOG_INPUT *)liste->data;
-          if ( !strcmp ( ai->nom, nom ) && !strcmp( ai->tech_id, tech_id ) ) break;
+          if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->dls_tech_id, dls_tech_id ) ) break;
           liste = g_slist_next(liste);
         }
        

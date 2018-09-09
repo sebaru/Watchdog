@@ -184,8 +184,10 @@
  static void Traitement_signaux( int num )
   { static gpointer *dls_wait, *dls_tour_per_sec, *dls_bit_per_sec;
     char chaine[50];
-    if (num == SIGALRM && Partage->com_msrv.Thread_run == TRUE)
+    if (num == SIGALRM)
      { Partage->top++;
+       if (Partage->com_msrv.Thread_run != TRUE) return;
+
        if (!Partage->top)                                             /* Si on passe par zero, on le dit (DEBUG interference) */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Timer: Partage->top = 0 !!", __func__ ); }
        if (!(Partage->top%5))                                                              /* Cligno toutes les demi-secondes */
@@ -197,17 +199,17 @@
           Partage->audit_bit_interne_per_sec_hold += Partage->audit_bit_interne_per_sec;
           Partage->audit_bit_interne_per_sec_hold = Partage->audit_bit_interne_per_sec_hold >> 1;
           Partage->audit_bit_interne_per_sec = 0;
-          Dls_data_set_AI ( "BIT_PER_SEC", "SYS", &dls_bit_per_sec, Partage->audit_bit_interne_per_sec_hold );  /* historique */
+          Dls_data_set_AI ( "SYS", "BIT_PER_SEC", &dls_bit_per_sec, Partage->audit_bit_interne_per_sec_hold );  /* historique */
 
           Partage->audit_tour_dls_per_sec_hold += Partage->audit_tour_dls_per_sec;
           Partage->audit_tour_dls_per_sec_hold = Partage->audit_tour_dls_per_sec_hold >> 1;
           Partage->audit_tour_dls_per_sec = 0;
-          Dls_data_set_AI ( "DLS_TOUR_PER_SEC", "SYS", &dls_tour_per_sec, Partage->audit_tour_dls_per_sec_hold );
+          Dls_data_set_AI ( "SYS", "DLS_TOUR_PER_SEC", &dls_tour_per_sec, Partage->audit_tour_dls_per_sec_hold );
           if (Partage->audit_tour_dls_per_sec_hold > 100)                                           /* Moyennage tour DLS/sec */
            { Partage->com_dls.temps_sched += 50; }
           else if (Partage->audit_tour_dls_per_sec_hold < 80)
            { if (Partage->com_dls.temps_sched) Partage->com_dls.temps_sched -= 10; }
-          Dls_data_set_AI ( "DLS_WAIT", "SYS", &dls_wait, Partage->com_dls.temps_sched );                       /* historique */
+          Dls_data_set_AI ( "SYS", "DLS_WAIT", &dls_wait, Partage->com_dls.temps_sched );                       /* historique */
         }
 
        Partage->top_cdg_plugin_dls++;                                                            /* Chien de garde plugin DLS */
