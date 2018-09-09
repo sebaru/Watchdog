@@ -122,7 +122,7 @@
     if (!hostname)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: Normalisation hostname impossible", __func__ );
        Libere_DB_SQL( &db );
-       w_free(libelle, "free libelle");
+       g_free(libelle);
        return(-1);
      }
 
@@ -145,8 +145,8 @@
                    modbus->map_E, modbus->map_EA, modbus->map_A, modbus->map_AA, modbus->max_nbr_E,
                    modbus->id );
       }
-    w_free(hostname, "free hostname");
-    w_free(libelle, "free libelle2");
+    g_free(hostname);
+    g_free(libelle);
 
     db = Init_DB_SQL();       
     if (!db)
@@ -207,7 +207,7 @@
        return(NULL);
      }
 
-    modbus = (struct MODBUSDB *)w_malloc0( sizeof(struct MODBUSDB), "new modbus" );
+    modbus = (struct MODBUSDB *)g_try_malloc0( sizeof(struct MODBUSDB) );
     if (!modbus) Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR,
                           "%s: Erreur allocation mémoire", __func__ );
     else
@@ -1126,16 +1126,16 @@
      { struct MODULE_MODBUS *module;
        pthread_t tid;
 
-       module = (struct MODULE_MODBUS *)w_malloc0( sizeof(struct MODULE_MODBUS), "new module" );
+       module = (struct MODULE_MODBUS *)g_try_malloc0( sizeof(struct MODULE_MODBUS) );
        if (!module)                                                                       /* Si probleme d'allocation mémoire */
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR,
                    "%s: Erreur allocation mémoire struct MODULE_MODBUS", __func__ );
-          w_free(modbus, "free modbus");
+          g_free(modbus);
           Libere_DB_SQL( &db );
           return(FALSE);
         }
        memcpy( &module->modbus, modbus, sizeof(struct MODBUSDB) );
-       w_free(modbus, "free modbus");
+       g_free(modbus);
        cpt++;                                                                  /* Nous avons ajouté un module dans la liste ! */
                                                                                             /* Ajout dans la liste de travail */
        Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, 
@@ -1163,7 +1163,7 @@
        Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
                  "%s: Sub-process ended : W-MODBUS%02d '%s'", __func__, module->modbus.id, module->modbus.hostname );
        Cfg_modbus.Modules_MODBUS = g_slist_remove ( Cfg_modbus.Modules_MODBUS, module );
-       w_free(module, "free module");
+       g_free(module);
      }
   }
 /******************************************************************************************************************************/
