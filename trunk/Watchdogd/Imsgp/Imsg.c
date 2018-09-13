@@ -263,7 +263,8 @@
                   Imsgp_Envoi_message_to( from, chaine );
                   Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
                              "%s: Mise a un du bit M%03d by %s", __func__, result_mnemo->num, imsg->user_name );
-                  Envoyer_commande_dls(result_mnemo->num); 
+                  if (result_mnemo->num!=-1) Envoyer_commande_dls(result_mnemo->num); 
+                                        else Envoyer_commande_dls_data (result_mnemo->dls_tech_id, result_mnemo->acronyme); 
                   break;
              case MNEMO_ENTREE:
                   g_snprintf( chaine, sizeof(chaine), " Result = %d", E(result_mnemo->num) );
