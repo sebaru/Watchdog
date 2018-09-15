@@ -772,13 +772,13 @@
   { gboolean *data_p=NULL;
     Dls_data_set_bool ( nom, owner, &data_p, FALSE );
     if (!data_p)
-     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: bit '%s_%s' not found", __func__, nom, owner );
+     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: bit '%s:%s' not found", __func__, owner, nom );
        return;
      }
     pthread_mutex_lock( &Partage->com_dls.synchro );
     Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, data_p );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
-    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit '%s_%s' demandée", __func__, nom, owner );
+    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit '%s:%s' demandée", __func__, owner, nom );
   }
 /******************************************************************************************************************************/
 /* Set_cde_exterieure: Mise à un des bits de commande exterieure                                                              */
@@ -1100,7 +1100,7 @@
     bit_comm_out = bit_defaut = bit_defaut_fixe = bit_alarme = bit_alarme_fixe = FALSE;
     bit_veille_partielle = FALSE;
     bit_veille_totale = TRUE;
-    bit_alerte = FALSE;
+    bit_alerte = bit_alerte_fixe = FALSE;
     bit_derangement = bit_derangement_fixe = bit_danger = bit_danger_fixe = FALSE;
 
     liste = dls_tree->Liste_plugin_dls;
@@ -1151,7 +1151,9 @@
        bit_alerte           |= sub_tree->syn_vars.bit_alerte;
        bit_alerte_fixe      |= sub_tree->syn_vars.bit_alerte_fixe;
        bit_derangement      |= sub_tree->syn_vars.bit_derangement;
+       bit_derangement_fixe |= sub_tree->syn_vars.bit_derangement_fixe;
        bit_danger           |= sub_tree->syn_vars.bit_danger;
+       bit_danger_fixe      |= sub_tree->syn_vars.bit_danger_fixe;
        liste = liste->next;
      }
 
@@ -1165,7 +1167,9 @@
          bit_alerte           != dls_tree->syn_vars.bit_alerte ||
          bit_alerte_fixe      != dls_tree->syn_vars.bit_alerte_fixe ||
          bit_derangement      != dls_tree->syn_vars.bit_derangement ||
-         bit_danger           != dls_tree->syn_vars.bit_danger )
+         bit_derangement_fixe != dls_tree->syn_vars.bit_derangement_fixe ||
+         bit_danger           != dls_tree->syn_vars.bit_danger ||
+         bit_danger_fixe      != dls_tree->syn_vars.bit_danger_fixe )
      { dls_tree->syn_vars.bit_comm_out         = bit_comm_out;                           /* Recopie et envoi aux threads SSRV */
        dls_tree->syn_vars.bit_defaut           = bit_defaut;
        dls_tree->syn_vars.bit_defaut_fixe      = bit_defaut_fixe;

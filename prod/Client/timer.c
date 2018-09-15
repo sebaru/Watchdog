@@ -35,69 +35,30 @@
 /********************************* Définitions des prototypes programme ***********************************/
  #include "protocli.h"
 
-/**********************************************************************************************************/
-/* Timer_motif: gestion des échéances temporelles des motifs.                                             */
-/* Entree: trame_motif                                                                                    */
-/* Sortie: TRUE                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Timer_motif: gestion des échéances temporelles des motifs.                                                                 */
+/* Entree: trame_motif                                                                                                        */
+/* Sortie: TRUE                                                                                                               */
+/******************************************************************************************************************************/
  static void Timer_pass( struct TRAME_ITEM_PASS *trame_pass, gint cligno )
-  {                                                                 /* Premier rectangle de la passerelle */
-     if (trame_pass->cligno1 == 1 && !cligno &&                                    /* Gestion clignotement */
-        (trame_pass->en_cours_rouge1 != 100 ||
-         trame_pass->en_cours_vert1  != 100 ||
-         trame_pass->en_cours_bleu1  != 100
-        )
-       )
-     { Trame_peindre_pass_1 ( trame_pass, 100, 100, 100 ); }
-
-    if ( cligno && (trame_pass->en_cours_rouge1 != trame_pass->rouge1 ||
-                    trame_pass->en_cours_vert1  != trame_pass->vert1  ||
-                    trame_pass->en_cours_bleu1  != trame_pass->bleu1
-                   )
-       )
-     { Trame_peindre_pass_1 ( trame_pass, trame_pass->rouge1,
-                                          trame_pass->vert1,
-                                          trame_pass->bleu1 );
+  {         
+    if (trame_pass->cligno1 == TRUE && cligno != trame_pass->en_cours_cligno1)      /* Gestion clignotement Vignette Activité */
+     { if (cligno) g_object_set ( trame_pass->item_1, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+              else g_object_set ( trame_pass->item_1, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+       trame_pass->en_cours_cligno1 = cligno;
      }
 
-                                                                   /* Deuxieme rectangle de la passerelle */
-    if (trame_pass->cligno2 == 1 && !cligno &&                                     /* Gestion clignotement */
-        (trame_pass->en_cours_rouge2 != 100 ||
-         trame_pass->en_cours_vert2  != 100 ||
-         trame_pass->en_cours_bleu2  != 100
-        )
-       )
-     { Trame_peindre_pass_2 ( trame_pass, 0, 0, 0 ); }
-
-    if ( cligno && (trame_pass->en_cours_rouge2 != trame_pass->rouge2 ||
-                    trame_pass->en_cours_vert2  != trame_pass->vert2  ||
-                    trame_pass->en_cours_bleu2  != trame_pass->bleu2
-                   )
-       )
-     { Trame_peindre_pass_2 ( trame_pass, trame_pass->rouge2,
-                                        trame_pass->vert2,
-                                        trame_pass->bleu2 );
+    if (trame_pass->cligno2 == TRUE && cligno != trame_pass->en_cours_cligno2)     /* Gestion clignotement Vignette Secu Biens*/
+     { if (cligno) g_object_set ( trame_pass->item_2, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+              else g_object_set ( trame_pass->item_2, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+       trame_pass->en_cours_cligno2 = cligno;
      }
 
-/***************************************** Gestion de la vignette Sécurité des Personnes ******************/
-    if (trame_pass->cligno3 == 1 && !cligno &&                                     /* Gestion clignotement */
-        (trame_pass->en_cours_rouge3 != 100 ||
-         trame_pass->en_cours_vert3  != 100 ||
-         trame_pass->en_cours_bleu3  != 100
-        )
-       )
-     { Trame_peindre_pass_3 ( trame_pass, 0, 0, 0 ); }
-
-    if ( cligno && (trame_pass->en_cours_rouge3 != trame_pass->rouge3 ||
-                    trame_pass->en_cours_vert3  != trame_pass->vert3  ||
-                    trame_pass->en_cours_bleu3  != trame_pass->bleu3
-                   )
-       )
-     { Trame_peindre_pass_3 ( trame_pass, trame_pass->rouge3,
-                                        trame_pass->vert3,
-                                        trame_pass->bleu3 );
+    if (trame_pass->cligno3 == TRUE && cligno != trame_pass->en_cours_cligno3)     /* Gestion clignotement Vignette Secu Pers */
+     { if (cligno) g_object_set ( trame_pass->item_3, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+              else g_object_set ( trame_pass->item_3, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+       trame_pass->en_cours_cligno3 = cligno;
      }
-
   }
 /**********************************************************************************************************/
 /* Timer_motif: gestion des échéances temporelles des motifs.                                             */

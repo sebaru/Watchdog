@@ -964,6 +964,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `username` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
   `access_level` int(11) NOT NULL DEFAULT '0',
   `hash` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `email` varchar(120) COLLATE utf8_unicode_ci DEFAULT NULL,
   `comment` varchar(240) COLLATE utf8_unicode_ci DEFAULT NULL,
   `login_attempts` int(11) NOT NULL DEFAULT '0',
   `enable` tinyint(1) NOT NULL DEFAULT '0',

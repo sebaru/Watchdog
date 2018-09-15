@@ -137,12 +137,14 @@
                        (gchar *)&nbr, sizeof(struct CMD_ENREG) );
      }
 
-    while ( (pass = Recuperer_passerelleDB_suite( &db )) )
+    client->Liste_pass = g_slist_prepend( client->Liste_pass, GINT_TO_POINTER(pass->syn_id) );/* Pour update de la page source */
+
+    while ( (pass = Recuperer_passerelleDB_suite( &db )) )                                      /* Et toutes les pages filles */
      { if (tag == TAG_SUPERVISION)
         { if ( ! g_slist_find( client->Liste_pass, GINT_TO_POINTER(pass->syn_cible_id) ) )
            { client->Liste_pass = g_slist_prepend( client->Liste_pass, GINT_TO_POINTER(pass->syn_cible_id) );
              Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                      "liste des bit init passerelles, add syn_cible_id '%d' length=%d", pass->syn_cible_id, g_slist_length(client->Liste_pass) );
+                      "%s: add syn_cible_id '%d' length=%d", __func__, pass->syn_cible_id, g_slist_length(client->Liste_pass) );
            }
          }
        Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "%s: pass %d (%s) to client %s", __func__,
