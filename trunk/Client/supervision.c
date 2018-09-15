@@ -424,118 +424,44 @@ printf(" On veut les horloges du syn %d\n", infos->syn_id );
   { printf("Changer_etat_passerelle syn %d!\n", vars->syn_id );
 
     if (vars->bit_comm_out == TRUE)  /****************************  Vignette Activite *****************************************/
-     { trame_pass->rouge1  = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->vert1   = 100;                                                                    /* Sauvegarde etat motif */
-       trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno1 = 0;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_peindre_pass_1 ( trame_pass, "kaki", TRUE ); }
     else if (vars->bit_alarme == TRUE)
-     { trame_pass->rouge1  = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->vert1   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno1 = 1;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_peindre_pass_1 ( trame_pass, "rouge", TRUE ); }
     else if (vars->bit_alarme_fixe == TRUE)
-     { trame_pass->rouge1  = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->vert1   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno1 = 0;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_peindre_pass_1 ( trame_pass, "rouge", FALSE ); }
     else if (vars->bit_defaut == TRUE)
-     { trame_pass->rouge1  = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->vert1   = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno1 = 1;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_peindre_pass_1 ( trame_pass, "jaune", TRUE );  }
     else if (vars->bit_defaut_fixe == TRUE)
-     { trame_pass->rouge1  = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->vert1   = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno1 = 0;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_peindre_pass_1 ( trame_pass, "jaune", FALSE ); }
     else
-     { trame_pass->rouge1  = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->vert1   = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->bleu1   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno1 = 0;                                                                      /* Sauvegarde etat motif */
-     }
-    Trame_peindre_pass_1 ( trame_pass, trame_pass->rouge1, trame_pass->vert1, trame_pass->bleu1 );
+     { Trame_peindre_pass_1 ( trame_pass, "vert", FALSE ); }
+    
 
     if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Personnes **************************/
-     { trame_pass->rouge2  = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->vert2   = 100;                                                                    /* Sauvegarde etat motif */
-       trame_pass->bleu2   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno2 = 0;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_peindre_pass_2 ( trame_pass, "kaki", TRUE ); }
     else if (vars->bit_alerte == TRUE)
-     { trame_pass->rouge2  = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->vert2   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->bleu2   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno2 = 1;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_peindre_pass_2 ( trame_pass, "rouge", TRUE ); }
     else if (vars->bit_alerte_fixe == TRUE)
-     { trame_pass->rouge2  = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->vert2   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->bleu2   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno2 = 0;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_peindre_pass_2 ( trame_pass, "rouge", FALSE ); }
     else if (vars->bit_veille_totale == TRUE)
-     { trame_pass->rouge2  = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->vert2   = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->bleu2   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno2 = 0;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_peindre_pass_2 ( trame_pass, "vert", FALSE ); }
     else if (vars->bit_veille_partielle == TRUE)
-     { trame_pass->rouge2  = 127;                                                                    /* Sauvegarde etat motif */
-       trame_pass->vert2   = 127;                                                                    /* Sauvegarde etat motif */
-       trame_pass->bleu2   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno2 = 0;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_peindre_pass_2 ( trame_pass, "orange", FALSE ); }
     else
-     { trame_pass->rouge2  = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->vert2   = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->bleu2   = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->cligno1 = 0;                                                                      /* Sauvegarde etat motif */
-     }
-    Trame_peindre_pass_2 ( trame_pass, trame_pass->rouge2, trame_pass->vert2, trame_pass->bleu2 );
+     { Trame_peindre_pass_2 ( trame_pass, "blanc", FALSE ); }
 
     if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Biens ******************************/
-     { trame_pass->rouge3  = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->vert3   = 100;                                                                    /* Sauvegarde etat motif */
-       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno3 = 0;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_peindre_pass_3 ( trame_pass, "kaki", TRUE ); }
     else if (vars->bit_danger == TRUE)
-     { trame_pass->rouge3  = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->vert3   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno3 = 1;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_peindre_pass_3 ( trame_pass, "rouge", TRUE ); }
     else if (vars->bit_danger_fixe == TRUE)
-     { trame_pass->rouge3  = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->vert3   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno3 = 0;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_peindre_pass_3 ( trame_pass, "rouge", FALSE ); }
     else if (vars->bit_derangement == TRUE)
-     { trame_pass->rouge3  = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->vert3   = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno3 = 1;                                                                      /* Sauvegarde etat motif */
-     }
-    else if (vars->bit_derangement == TRUE)
-     { trame_pass->rouge3  = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->vert3   = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno3 = 0;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_peindre_pass_3 ( trame_pass, "jaune", TRUE );  }
+    else if (vars->bit_derangement_fixe == TRUE)
+     { Trame_peindre_pass_3 ( trame_pass, "jaune", FALSE );  }
     else
-     { trame_pass->rouge3  = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->vert3   = 255;                                                                    /* Sauvegarde etat motif */
-       trame_pass->bleu3   = 0;                                                                      /* Sauvegarde etat motif */
-       trame_pass->cligno3 = 0;                                                                      /* Sauvegarde etat motif */
-     }
-    Trame_peindre_pass_3 ( trame_pass, trame_pass->rouge3, trame_pass->vert3, trame_pass->bleu3 );
+     { Trame_peindre_pass_3 ( trame_pass, "vert", FALSE ); }
  }
 /******************************************************************************************************************************/
 /* Changer_etat_passerelle: Changement d'etat d'une passerelle (toutes les vignettes)                                         */

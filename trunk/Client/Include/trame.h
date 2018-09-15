@@ -121,27 +121,12 @@
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
     struct CMD_TYPE_PASSERELLE *pass;
-    gint   cligno1;                                                                                   /* Etat cligno du motif */
-    guchar rouge1;                                                                               /* Couleur attendue du motif */
-    guchar vert1;
-    guchar bleu1;
-    guchar en_cours_rouge1;                                                                      /* Couleur actuelle du motif */
-    guchar en_cours_vert1;
-    guchar en_cours_bleu1;
-    gint   cligno2;                                                                                   /* Etat cligno du motif */
-    guchar rouge2;                                                                               /* Couleur attendue du motif */
-    guchar vert2;
-    guchar bleu2;
-    guchar en_cours_rouge2;                                                                      /* Couleur actuelle du motif */
-    guchar en_cours_vert2;
-    guchar en_cours_bleu2;
-    gint   cligno3;                                                                                   /* Etat cligno du motif */
-    guchar rouge3;                                                                               /* Couleur attendue du motif */
-    guchar vert3;
-    guchar bleu3;
-    guchar en_cours_rouge3;                                                                      /* Couleur actuelle du motif */
-    guchar en_cours_vert3;
-    guchar en_cours_bleu3;
+    gboolean cligno1;                                                                                 /* Etat cligno du motif */
+    gboolean en_cours_cligno1;                                                                   /* Couleur attendue du motif */
+    gboolean cligno2;                                                                                 /* Etat cligno du motif */
+    gboolean en_cours_cligno2;                                                                   /* Couleur attendue du motif */
+    gboolean cligno3;                                                                                 /* Etat cligno du motif */
+    gboolean en_cours_cligno3;                                                                   /* Couleur attendue du motif */
     gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
     gint selection;
   };
@@ -210,9 +195,9 @@
  extern void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num,
                                    guchar r, guchar v, guchar b );
  extern void Trame_peindre_motif ( struct TRAME_ITEM_MOTIF *trame_motif, guchar r, guchar v, guchar b );
- extern void Trame_peindre_pass_1 ( struct TRAME_ITEM_PASS *trame_pass, guchar r, guchar v, guchar b );
- extern void Trame_peindre_pass_2 ( struct TRAME_ITEM_PASS *trame_pass, guchar r, guchar v, guchar b );
- extern void Trame_peindre_pass_3 ( struct TRAME_ITEM_PASS *trame_pass, guchar r, guchar v, guchar b );
+ extern void Trame_peindre_pass_1 ( struct TRAME_ITEM_PASS *trame_pass, gchar *couleur, gboolean cligno );
+ extern void Trame_peindre_pass_2 ( struct TRAME_ITEM_PASS *trame_pass, gchar *couleur, gboolean cligno );
+ extern void Trame_peindre_pass_3 ( struct TRAME_ITEM_PASS *trame_pass, gchar *couleur, gboolean cligno );
  extern void Charger_gif ( struct TRAME_ITEM_MOTIF *trame_item, gchar *nom_fichier );
  extern void Charger_pixbuf_file ( struct TRAME_ITEM_MOTIF *trame_item, gchar *fichier );
  extern struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame,

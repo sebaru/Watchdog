@@ -36,8 +36,8 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Retirer_cadranDB: Elimination d'un cadran                                                                                */
-/* Entrée: un cadran                                                                                                         */
+/* Retirer_cadranDB: Elimination d'un cadran                                                                                  */
+/* Entrée: un cadran                                                                                                          */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Retirer_cadranDB ( struct CMD_TYPE_CADRAN *cadran )
@@ -183,8 +183,8 @@
      }
 
     cadran = Recuperer_cadranDB_suite( &db );
-    Libere_DB_SQL( &db );
     if (!cadran) Info_new( Config.log, Config.log_dls, LOG_INFO, "Rechercher_cadranDB: Capteur %03d not found in DB", id );
+    else Libere_DB_SQL( &db );
     return(cadran);
   }
 /******************************************************************************************************************************/

@@ -772,13 +772,13 @@
   { gboolean *data_p=NULL;
     Dls_data_set_bool ( nom, owner, &data_p, FALSE );
     if (!data_p)
-     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: bit '%s_%s' not found", __func__, nom, owner );
+     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: bit '%s:%s' not found", __func__, owner, nom );
        return;
      }
     pthread_mutex_lock( &Partage->com_dls.synchro );
     Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, data_p );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
-    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit '%s_%s' demandée", __func__, nom, owner );
+    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit '%s:%s' demandée", __func__, owner, nom );
   }
 /******************************************************************************************************************************/
 /* Set_cde_exterieure: Mise à un des bits de commande exterieure                                                              */

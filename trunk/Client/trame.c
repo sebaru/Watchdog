@@ -271,54 +271,6 @@
     goo_canvas_item_set_transform ( trame_pass->item_groupe, &trame_pass->transform );
   }
 /**********************************************************************************************************/
-/* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                         */
-/* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                        */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- void Trame_peindre_pass_1 ( struct TRAME_ITEM_PASS *trame_pass, guchar r, guchar v, guchar b )
-  { guint couleur;
-
-    if (!(trame_pass && trame_pass->pass)) return;
-    couleur = ((guint)r<<24) + ((guint)v<<16) + ((guint)b<<8) + 0xFF;
-    g_object_set( G_OBJECT(trame_pass->item_1), "fill_color_rgba", couleur, NULL );
-
-    trame_pass->en_cours_rouge1 = r;                        /* Sauvegarde de la couleur actuelle du motif */
-    trame_pass->en_cours_vert1  = v;
-    trame_pass->en_cours_bleu1  = b;
-  }
-/**********************************************************************************************************/
-/* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                         */
-/* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                        */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- void Trame_peindre_pass_2 ( struct TRAME_ITEM_PASS *trame_pass, guchar r, guchar v, guchar b )
-  { guint couleur;
-
-    if (!(trame_pass && trame_pass->pass)) return;
-    couleur = ((guint)r<<24) + ((guint)v<<16) + ((guint)b<<8) + 0xFF;
-    g_object_set( G_OBJECT(trame_pass->item_2), "fill_color_rgba", couleur, NULL );
-
-    trame_pass->en_cours_rouge2 = r;                        /* Sauvegarde de la couleur actuelle du motif */
-    trame_pass->en_cours_vert2  = v;
-    trame_pass->en_cours_bleu2  = b;
-  }
-/**********************************************************************************************************/
-/* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                         */
-/* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                        */
-/* Sortie: rien                                                                                           */
-/**********************************************************************************************************/
- void Trame_peindre_pass_3 ( struct TRAME_ITEM_PASS *trame_pass, guchar r, guchar v, guchar b )
-  { guint couleur;
-
-    if (!(trame_pass && trame_pass->pass)) return;
-    couleur = ((guint)r<<24) + ((guint)v<<16) + ((guint)b<<8) + 0xFF;
-    g_object_set( G_OBJECT(trame_pass->item_3), "fill_color_rgba", couleur, NULL );
-
-    trame_pass->en_cours_rouge3 = r;                        /* Sauvegarde de la couleur actuelle du motif */
-    trame_pass->en_cours_vert3  = v;
-    trame_pass->en_cours_bleu3  = b;
-  }
-/**********************************************************************************************************/
 /* Trame_rafraichir_cadran: remet à jour la position, rotation, echelle du cadran en parametre          */
 /* Entrée: la structure graphique TRAME_ITEM_CADRAN                                                      */
 /* Sortie: néant                                                                                          */
@@ -442,19 +394,16 @@ printf("Charger_pixbuf_file: %s\n", fichier );
             }
      }
   }
-/**********************************************************************************************************/
-/* Satellite_Receive_response : Recupere la reponse du serveur (master)                                   */
-/* Entrée : Les informations à sauvegarder                                                                */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Satellite_Receive_response : Recupere la reponse du serveur (master)                                                       */
+/* Entrée : Les informations à sauvegarder                                                                                    */
+/******************************************************************************************************************************/
  static size_t CB_Receive_gif_data( char *ptr, size_t size, size_t nmemb, void *userdata )
   { gchar *new_buffer;
-    Info_new( Config_cli.log, FALSE, LOG_DEBUG,
-              "CB_Receive_gif_data: Récupération de %d*%d octets depuis le master", size, nmemb );
-    new_buffer = g_try_realloc ( Gif_received_buffer,
-                                 Gif_received_size +  size*nmemb );
+    Info_new( Config_cli.log, FALSE, LOG_DEBUG, "%s: %d*%d octets received", __func__, size, nmemb );
+    new_buffer = g_try_realloc ( Gif_received_buffer, Gif_received_size +  size*nmemb );
     if (!new_buffer)                                                 /* Si erreur, on arrete le transfert */
-     { Info_new( Config_cli.log, FALSE, LOG_ERR,
-                "CB_Receive_gif_data: Memory Error realloc (%s).", strerror(errno) );
+     { Info_new( Config_cli.log, FALSE, LOG_ERR, "%s: Memory Error realloc (%s).", __func__, strerror(errno) );
        g_free(Gif_received_buffer);
        Gif_received_buffer = NULL;
        return(-1);
@@ -487,7 +436,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
      }
 
     g_snprintf( url, sizeof(url), "http://%s:5560/ws/gif/%d/%d", Client.host, id, mode );
-    Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "Trying to get %s", url );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Trying to get %s", __func__, url );
     curl_easy_setopt(curl, CURLOPT_URL, url );
        /*curl_easy_setopt(curl, CURLOPT_POST, 1 );
        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, (void *)buf->content);
@@ -508,7 +457,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 
     res = curl_easy_perform(curl);
     if (res)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "Download_gif : Error : Could not connect" );
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "%s: Error : Could not connect", __func__ );
        curl_easy_cleanup(curl);
        if (Gif_received_buffer) { g_free(Gif_received_buffer); }
        return(FALSE);
@@ -519,7 +468,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
 
     if (http_response != 200)                                                                /* HTTP 200 OK ? */
      { Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
-                "Download_gif : Gif %s not received (HTTP_CODE = %d)!", url, http_response );
+                "%s: Gif %s not received (HTTP_CODE = %d)!", __func__, url, http_response );
        if (Gif_received_buffer) { g_free(Gif_received_buffer); }
        return(FALSE);
      }
@@ -529,7 +478,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
        if (mode) g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif.%02d", id, mode );
             else g_snprintf( nom_fichier, sizeof(nom_fichier), "%d.gif", id );
        Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
-                "Download_gif : Saving GIF id %d, mode %d, size %d -> %s", id, mode, Gif_received_size, nom_fichier );
+                "%s: Saving GIF id %d, mode %d, size %d -> %s", __func__, id, mode, Gif_received_size, nom_fichier );
        unlink(nom_fichier);
        fd = open( nom_fichier, O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR );
        if (fd>0)
@@ -544,6 +493,73 @@ printf("Charger_pixbuf_file: %s\n", fichier );
        Gif_received_buffer = NULL;
        if (fd<=0) return(FALSE);
      }
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Download_icon : Tente de récupérer un fichier depuis le serveur commun abls-habitat.fr                                     */
+/* Entrée: le nom de fichier a télécharger                                                                                    */
+/* Sortie: FALSE si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ static gboolean Download_icon ( gchar *file )
+  { gchar erreur[CURL_ERROR_SIZE+1];
+    struct curl_slist *slist = NULL;
+    long http_response;
+    gchar url[128];
+    CURLcode res;
+    CURL *curl;
+
+    Gif_received_buffer = NULL;                                                         /* Init du tampon de reception à NULL */
+    Gif_received_size = 0;                                                              /* Init du tampon de reception à NULL */
+    http_response = 0;
+
+    curl = curl_easy_init();                                                                /* Preparation de la requete CURL */
+    if (!curl)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "%s: cURL init failed for %s", __func__, file );
+       return(FALSE);
+     }
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Trying to download %s", __func__, file );
+
+    g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/%s", file );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Trying to get %s", __func__, url );
+    curl_easy_setopt(curl, CURLOPT_URL, url );
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_gif_data );
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT);
+
+    res = curl_easy_perform(curl);
+    if (res)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "%s: Error : Could not connect", __func__ );
+       curl_easy_cleanup(curl);
+       if (Gif_received_buffer) { g_free(Gif_received_buffer); }
+       return(FALSE);
+     }
+    if (curl_easy_getinfo( curl, CURLINFO_RESPONSE_CODE, &http_response ) != CURLE_OK) http_response = 401;
+    curl_easy_cleanup(curl);
+    curl_slist_free_all(slist);
+
+    if (http_response != 200)                                                                                /* HTTP 200 OK ? */
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG,
+                "%s: URL %s not received (HTTP_CODE = %d)!", __func__, url, http_response );
+       if (Gif_received_buffer) { g_free(Gif_received_buffer); }
+       return(FALSE);
+     }
+    else
+     { gint fd;
+       Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Saving FILE %s", __func__, file );
+       unlink(file);
+       fd = open( file, O_WRONLY | O_CREAT, S_IWUSR | S_IRUSR );
+       if (fd>0)
+        { write( fd, Gif_received_buffer, Gif_received_size );
+          close (fd);
+        }
+       else
+        { Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Unable to save file %s", __func__, file ); }
+       g_free(Gif_received_buffer);
+       Gif_received_buffer = NULL;
+       if (fd<=0) return(FALSE);
+     }
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO, "%s: %s downloaded", __func__, file );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -588,6 +604,24 @@ printf("Charger_pixbuf_file: %s\n", fichier );
      }
                                                                   /* Chargement des frames restantes (downloadées ou locales) */
     while ( Add_single_icone_to_item(trame_item, icone_id, trame_item->nbr_images) == TRUE );
+  }
+/******************************************************************************************************************************/
+/* Charger_pixbuf: Tente de charger un ensemble de pixbuf representant un icone                                               */
+/* Entrée: flag=1 si on doit creer les boutons resize, une structure MOTIF, la trame de reference                             */
+/* Sortie: reussite                                                                                                           */
+/******************************************************************************************************************************/
+ static GdkPixbuf *Charger_svg_pixbuf ( gchar *nom, gchar *couleur, gint mode, gint taille_x, gint taille_y )
+  { GdkPixbuf *pixbuf;
+    gchar file[80];
+    gboolean local_found;
+    if (mode==0) { g_snprintf(file, sizeof(file), "%s_%s.svg", nom, couleur ); }
+            else { g_snprintf(file, sizeof(file), "%s_%d_%s.svg", nom, mode, couleur ); }
+    pixbuf = gdk_pixbuf_new_from_file_at_size( file, taille_x, taille_y, NULL );
+
+    if (pixbuf) return(pixbuf);                                                       /* Si trouvé en local, on charge direct */
+
+    if (Download_icon ( file )) { pixbuf = gdk_pixbuf_new_from_file_at_size( file, taille_x, taille_y, NULL ); }
+    return(pixbuf);
   }
 /******************************************************************************************************************************/
 /* Trame_ajout_motif: Ajoute un motif sur le visuel                                                                           */
@@ -816,15 +850,16 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     Trame_rafraichir_comment ( trame_comm );
     return(trame_comm);
   }
-/**********************************************************************************************************/
-/* Trame_ajout_passerelle: Ajoute une passerelle sur le visuel                                            */
-/* Entrée: une structure passerelle, la trame de reference                                                */
-/* Sortie: reussite                                                                                       */
-/**********************************************************************************************************/
- struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame,
-                                                  struct CMD_TYPE_PASSERELLE *pass )
+/******************************************************************************************************************************/
+/* Trame_ajout_passerelle: Ajoute une passerelle sur le visuel                                                                */
+/* Entrée: une structure passerelle, la trame de reference                                                                    */
+/* Sortie: reussite                                                                                                           */
+/******************************************************************************************************************************/
+ struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame, struct CMD_TYPE_PASSERELLE *pass )
   { struct TRAME_ITEM_PASS *trame_pass;
-    gdouble taillex, tailley;
+    struct TRAME_ITEM_MOTIF *trame_motif;
+    struct CMD_TYPE_MOTIF *motif;
+    gint taillex, tailley;
        
     if (!(trame && pass)) return(NULL);
     trame_pass = g_try_malloc0( sizeof(struct TRAME_ITEM_PASS) );
@@ -833,6 +868,18 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     trame_pass->pass = pass;
 
     trame_pass->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );     /* Groupe PASSERELLE */
+
+    tailley = 15;
+    taillex = strlen(pass->libelle) * 11;
+    trame_pass->item_fond = goo_canvas_rect_new( trame_pass->item_groupe,
+                                                 (double)-60.0,
+                                                 (double)-(tailley/2+10.0),
+                                                 (double)+taillex+78.0,
+                                                 (double)(tailley+16),
+                                                 "stroke-color", "yellow",
+                                                 "fill-color", "blue",
+                                                 NULL);
+
     trame_pass->item_texte = goo_canvas_text_new( trame_pass->item_groupe,
                                                   pass->libelle, 10.0, 0.0,
                                                   -1, GTK_ANCHOR_WEST,
@@ -840,38 +887,14 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                   "fill-color", "white",
                                                   NULL);
 
-    trame_pass->item_1 = goo_canvas_ellipse_new( trame_pass->item_groupe,
-                                                        -35.0, 0.0, 8.0, 8.0,
-                                                        "fill-color", "red",
-                                                        "stroke-color", "yellow",
-                                                        NULL);
+    trame_pass->item_1 = goo_canvas_image_new ( trame_pass->item_groupe, NULL, -58.0, -15.0, NULL );
+    Trame_peindre_pass_1 ( trame_pass, "vert", FALSE );
 
-    trame_pass->item_2 = goo_canvas_rect_new( trame_pass->item_groupe,
-                                                        -24.0, -8.0, 12.0, 16.0,
-                                                        "fill-color", "green",
-                                                        "stroke-color", "yellow",
-                                                        NULL);
+    trame_pass->item_2 = goo_canvas_image_new ( trame_pass->item_groupe, NULL, -32.0, -13.0, NULL );
+    Trame_peindre_pass_2 ( trame_pass, "vert", FALSE );
 
-    trame_pass->item_3 =  goo_canvas_polyline_new( trame_pass->item_groupe, TRUE, 3,
-                                                            -7.0, +8.0,
-                                                            +1.0, -8.0,
-                                                            +9.0, +8.0,
-                                                            "fill-color", "green",
-                                                            "stroke-color", "yellow",
-                                                            NULL);
-
-    tailley = 15;
-    taillex = strlen(pass->libelle) * 11;
-    trame_pass->item_fond = goo_canvas_rect_new( trame_pass->item_groupe,
-                                                 (double)-47.0,
-                                                 (double)-(tailley/2+5.0),
-                                                 (double)+taillex+62.0,
-                                                 (double)(tailley+10),
-                                                 "stroke-color", "yellow",
-                                                 "fill-color", "blue",
-                                                 NULL);
-
-    goo_canvas_item_lower ( trame_pass->item_fond, NULL );
+    trame_pass->item_3 = goo_canvas_image_new ( trame_pass->item_groupe, NULL, -10.0, -10.0, NULL );
+    Trame_peindre_pass_3 ( trame_pass, "vert", FALSE );
 
     if ( flag )
      { trame_pass->select_mi = goo_canvas_rect_new (trame_pass->item_groupe,
@@ -888,6 +911,42 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     trame->trame_items = g_list_append( trame->trame_items, trame_pass );
 
     return(trame_pass);
+  }
+/******************************************************************************************************************************/
+/* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                                             */
+/* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                                            */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Trame_peindre_pass_1 ( struct TRAME_ITEM_PASS *trame_pass, gchar *couleur, gboolean cligno )
+  { GdkPixbuf *pixbuf;
+    if (!(trame_pass && trame_pass->pass)) return;
+    pixbuf = Charger_svg_pixbuf ( "Pignon", couleur, 0, 25, 25 );
+    g_object_set( G_OBJECT(trame_pass->item_1), "pixbuf", pixbuf, NULL );
+    trame_pass->cligno1 = cligno;
+  }
+/******************************************************************************************************************************/
+/* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                                             */
+/* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                                            */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Trame_peindre_pass_2 ( struct TRAME_ITEM_PASS *trame_pass, gchar *couleur, gboolean cligno )
+  { GdkPixbuf *pixbuf;
+    if (!(trame_pass && trame_pass->pass)) return;
+    pixbuf = Charger_svg_pixbuf ( "Bouclier2", couleur, 0, 20, 20 );
+    g_object_set( G_OBJECT(trame_pass->item_2), "pixbuf", pixbuf, NULL );
+    trame_pass->cligno2 = cligno;
+  }
+/******************************************************************************************************************************/
+/* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                                             */
+/* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                                            */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Trame_peindre_pass_3 ( struct TRAME_ITEM_PASS *trame_pass, gchar *couleur, gboolean cligno )
+  { GdkPixbuf *pixbuf;
+    if (!(trame_pass && trame_pass->pass)) return;
+    pixbuf = Charger_svg_pixbuf ( "Croix_rouge", couleur, 0, 15, 15 );
+    g_object_set( G_OBJECT(trame_pass->item_3), "pixbuf", pixbuf, NULL );
+    trame_pass->cligno3 = cligno;
   }
 /******************************************************************************************************************************/
 /* Trame_ajout_cadran: Ajoute un cadran sur le visuel                                                                         */
