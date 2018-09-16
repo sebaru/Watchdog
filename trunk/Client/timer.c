@@ -40,25 +40,9 @@
 /* Entree: trame_motif                                                                                                        */
 /* Sortie: TRUE                                                                                                               */
 /******************************************************************************************************************************/
- static void Timer_pass( struct TRAME_ITEM_PASS *trame_pass, gint cligno )
-  {         
-    if (trame_pass->cligno1 == TRUE && cligno != trame_pass->en_cours_cligno1)      /* Gestion clignotement Vignette Activité */
-     { if (cligno) g_object_set ( trame_pass->item_1, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-              else g_object_set ( trame_pass->item_1, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-       trame_pass->en_cours_cligno1 = cligno;
-     }
-
-    if (trame_pass->cligno2 == TRUE && cligno != trame_pass->en_cours_cligno2)     /* Gestion clignotement Vignette Secu Biens*/
-     { if (cligno) g_object_set ( trame_pass->item_2, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-              else g_object_set ( trame_pass->item_2, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-       trame_pass->en_cours_cligno2 = cligno;
-     }
-
-    if (trame_pass->cligno3 == TRUE && cligno != trame_pass->en_cours_cligno3)     /* Gestion clignotement Vignette Secu Pers */
-     { if (cligno) g_object_set ( trame_pass->item_3, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-              else g_object_set ( trame_pass->item_3, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-       trame_pass->en_cours_cligno3 = cligno;
-     }
+ static void Timer_svg( struct TRAME_ITEM_SVG *trame_svg, gboolean cligno )
+  { if (cligno) g_object_set ( trame_svg->item, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+           else g_object_set ( trame_svg->item, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
   }
 /**********************************************************************************************************/
 /* Timer_motif: gestion des échéances temporelles des motifs.                                             */
@@ -179,8 +163,9 @@
     struct TRAME_ITEM_PASS *trame_pass;
     struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
-    static gint nbr_cligno = 0;
+    static gboolean hidden=FALSE;
     GList *liste_motifs;
+    GSList *liste_timer;
 
     if (Client.mode != VALIDE) return(TRUE);
 
@@ -192,25 +177,28 @@
     infos = (struct TYPE_INFO_SUPERVISION *)page->infos;
     if (! (infos && infos->Trame) ) return(TRUE);
 
-    nbr_cligno++;                                                                    /* Gestion du cligno */
-    if (nbr_cligno==2) nbr_cligno=0;
-
     liste_motifs = infos->Trame->trame_items;
     while (liste_motifs)
      { switch( *((gint *)liste_motifs->data) )
         { case TYPE_MOTIF      : trame_motif = (struct TRAME_ITEM_MOTIF *)liste_motifs->data;
-                                 Timer_motif( trame_motif, (nbr_cligno < 1 ? 1 : 0) );
+                                 Timer_motif( trame_motif, hidden );
                                  break;
           case TYPE_COMMENTAIRE:                                
           case TYPE_CADRAN:      break;
-          case TYPE_PASSERELLE : trame_pass = (struct TRAME_ITEM_PASS *)liste_motifs->data;
-                                 Timer_pass( trame_pass, (nbr_cligno < 1 ? 1 : 0) );
-                                 break;
           case TYPE_CAMERA_SUP : break;
           default: printf("Timer: type inconnu\n" );
         }
        liste_motifs=liste_motifs->next;
      }
+
+    liste_timer = infos->Trame->Liste_timer;
+    while (liste_timer)
+     { struct TRAME_ITEM_SVG *trame_svg = liste_timer->data;
+       Timer_svg( trame_svg, hidden );
+       liste_timer = g_slist_next ( liste_timer );
+     }
+
+    if (hidden) hidden=FALSE; else hidden=TRUE;
     return(TRUE);
   }
-/*--------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------------*/

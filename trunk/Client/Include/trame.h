@@ -67,8 +67,17 @@
         TYPE_COMMENTAIRE,
         TYPE_MOTIF,
         TYPE_CADRAN,
-        TYPE_CAMERA_SUP,
+        TYPE_CAMERA_SUP
       };
+
+ struct TRAME_ITEM_SVG
+  { struct TRAME *trame;                                                             /* Lien de rollback vers la trame source */
+    GooCanvasItem *item;
+    gchar svg_name [80];
+    gboolean cligno;
+    gint taillex;
+    gint tailley;
+  };
 
  struct TRAME_ITEM_MOTIF
   { gint type;                                                                                              /* Type de l'item */
@@ -111,22 +120,15 @@
   };
 
  struct TRAME_ITEM_PASS
-  { gint type;                                                                                              /* Type de l'item */
-    GooCanvasItem *item_groupe;
+  { GooCanvasItem *item_groupe;
     GooCanvasItem *item_texte;
-    GooCanvasItem *item_1;
-    GooCanvasItem *item_2;
-    GooCanvasItem *item_3;
+    struct TRAME_ITEM_SVG *item_1;
+    struct TRAME_ITEM_SVG *item_2;
+    struct TRAME_ITEM_SVG *item_3;
     GooCanvasItem *item_fond;
     GooCanvasItem *select_mi;
     cairo_matrix_t transform;
     struct CMD_TYPE_PASSERELLE *pass;
-    gboolean cligno1;                                                                                 /* Etat cligno du motif */
-    gboolean en_cours_cligno1;                                                                   /* Couleur attendue du motif */
-    gboolean cligno2;                                                                                 /* Etat cligno du motif */
-    gboolean en_cours_cligno2;                                                                   /* Couleur attendue du motif */
-    gboolean cligno3;                                                                                 /* Etat cligno du motif */
-    gboolean en_cours_cligno3;                                                                   /* Couleur attendue du motif */
     gint   groupe_dpl;                                                                      /* Groupe de deplacement du motif */
     gint selection;
   };
@@ -181,6 +183,8 @@
     GtkWidget *trame_widget;
     GooCanvasItem *fond;
     GList *trame_items;
+    GSList *Liste_passerelles;
+    GSList *Liste_timer;
     struct TRAME_ITEM_MOTIF *Vignette_activite;
     struct TRAME_ITEM_MOTIF *Vignette_secu_bien;
     struct TRAME_ITEM_MOTIF *Vignette_secu_personne;
@@ -195,9 +199,7 @@
  extern void Trame_choisir_frame ( struct TRAME_ITEM_MOTIF *trame_motif, gint num,
                                    guchar r, guchar v, guchar b );
  extern void Trame_peindre_motif ( struct TRAME_ITEM_MOTIF *trame_motif, guchar r, guchar v, guchar b );
- extern void Trame_peindre_pass_1 ( struct TRAME_ITEM_PASS *trame_pass, gchar *couleur, gboolean cligno );
- extern void Trame_peindre_pass_2 ( struct TRAME_ITEM_PASS *trame_pass, gchar *couleur, gboolean cligno );
- extern void Trame_peindre_pass_3 ( struct TRAME_ITEM_PASS *trame_pass, gchar *couleur, gboolean cligno );
+ extern void Trame_set_svg ( struct TRAME_ITEM_SVG *trame_svg, gchar *couleur, gint mode, gboolean cligno );
  extern void Charger_gif ( struct TRAME_ITEM_MOTIF *trame_item, gchar *nom_fichier );
  extern void Charger_pixbuf_file ( struct TRAME_ITEM_MOTIF *trame_item, gchar *fichier );
  extern struct TRAME_ITEM_MOTIF *Trame_ajout_motif ( gint flag, struct TRAME *trame,
@@ -214,7 +216,7 @@
  extern struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
                                                                struct CMD_TYPE_CAMERASUP *camera_sup );
  extern void Trame_del_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
- extern void Trame_del_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
+ extern void Trame_del_passerelle ( struct TRAME *trame, struct TRAME_ITEM_PASS *trame_pass );
  extern void Trame_del_commentaire ( struct TRAME_ITEM_COMMENT *trame_comm );
  extern void Trame_del_item ( struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Trame_del_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );

@@ -424,44 +424,44 @@ printf(" On veut les horloges du syn %d\n", infos->syn_id );
   { printf("Changer_etat_passerelle syn %d!\n", vars->syn_id );
 
     if (vars->bit_comm_out == TRUE)  /****************************  Vignette Activite *****************************************/
-     { Trame_peindre_pass_1 ( trame_pass, "kaki", TRUE ); }
+     { Trame_set_svg ( trame_pass->item_1, "kaki", 0, TRUE ); }
     else if (vars->bit_alarme == TRUE)
-     { Trame_peindre_pass_1 ( trame_pass, "rouge", TRUE ); }
+     { Trame_set_svg ( trame_pass->item_1, "rouge", 0, TRUE ); }
     else if (vars->bit_alarme_fixe == TRUE)
-     { Trame_peindre_pass_1 ( trame_pass, "rouge", FALSE ); }
+     { Trame_set_svg ( trame_pass->item_1, "rouge", 0, FALSE ); }
     else if (vars->bit_defaut == TRUE)
-     { Trame_peindre_pass_1 ( trame_pass, "jaune", TRUE );  }
+     { Trame_set_svg ( trame_pass->item_1, "jaune", 0, TRUE ); }
     else if (vars->bit_defaut_fixe == TRUE)
-     { Trame_peindre_pass_1 ( trame_pass, "jaune", FALSE ); }
+     { Trame_set_svg ( trame_pass->item_1, "jaune", 0, FALSE ); }
     else
-     { Trame_peindre_pass_1 ( trame_pass, "vert", FALSE ); }
+     { Trame_set_svg ( trame_pass->item_1, "vert", 0, FALSE ); }
     
 
     if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Personnes **************************/
-     { Trame_peindre_pass_2 ( trame_pass, "kaki", TRUE ); }
+     { Trame_set_svg ( trame_pass->item_2, "kaki", 0, TRUE ); }
     else if (vars->bit_alerte == TRUE)
-     { Trame_peindre_pass_2 ( trame_pass, "rouge", TRUE ); }
+     { Trame_set_svg ( trame_pass->item_2, "rouge", 0, TRUE ); }
     else if (vars->bit_alerte_fixe == TRUE)
-     { Trame_peindre_pass_2 ( trame_pass, "rouge", FALSE ); }
+     { Trame_set_svg ( trame_pass->item_2, "rouge", 0, FALSE ); }
     else if (vars->bit_veille_totale == TRUE)
-     { Trame_peindre_pass_2 ( trame_pass, "vert", FALSE ); }
+     { Trame_set_svg ( trame_pass->item_2, "vert", 0, FALSE ); }
     else if (vars->bit_veille_partielle == TRUE)
-     { Trame_peindre_pass_2 ( trame_pass, "orange", FALSE ); }
+     { Trame_set_svg ( trame_pass->item_2, "orange", 0, FALSE ); }
     else
-     { Trame_peindre_pass_2 ( trame_pass, "blanc", FALSE ); }
+     { Trame_set_svg ( trame_pass->item_2, "blanc", 0, FALSE ); }
 
     if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Biens ******************************/
-     { Trame_peindre_pass_3 ( trame_pass, "kaki", TRUE ); }
+     { Trame_set_svg ( trame_pass->item_3, "kaki", 0, TRUE ); }
     else if (vars->bit_danger == TRUE)
-     { Trame_peindre_pass_3 ( trame_pass, "rouge", TRUE ); }
+     { Trame_set_svg ( trame_pass->item_3, "rouge", 0, TRUE ); }
     else if (vars->bit_danger_fixe == TRUE)
-     { Trame_peindre_pass_3 ( trame_pass, "rouge", FALSE ); }
+     { Trame_set_svg ( trame_pass->item_3, "rouge", 0, FALSE ); }
     else if (vars->bit_derangement == TRUE)
-     { Trame_peindre_pass_3 ( trame_pass, "jaune", TRUE );  }
+     { Trame_set_svg ( trame_pass->item_3, "jaune", 0, TRUE ); }
     else if (vars->bit_derangement_fixe == TRUE)
-     { Trame_peindre_pass_3 ( trame_pass, "jaune", FALSE );  }
+     { Trame_set_svg ( trame_pass->item_3, "jaune", 0, FALSE ); }
     else
-     { Trame_peindre_pass_3 ( trame_pass, "vert", FALSE ); }
+     { Trame_set_svg ( trame_pass->item_3, "vert", 0, FALSE ); }
  }
 /******************************************************************************************************************************/
 /* Changer_etat_passerelle: Changement d'etat d'une passerelle (toutes les vignettes)                                         */
@@ -636,10 +636,9 @@ printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, eta
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  void Proto_set_syn_vars( struct CMD_TYPE_SYN_VARS *syn_vars )
-  { struct TRAME_ITEM_PASS *trame_pass;
-    struct TYPE_INFO_SUPERVISION *infos;
+  { struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
-    GList *liste_motifs;
+    GSList *liste_pass;
     GdkColor color;
     GList *liste;
     gint cpt;
@@ -668,18 +667,14 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
            Changer_etat_etiquette( infos, syn_vars );
         }
 
-       liste_motifs = infos->Trame->trame_items;                                /* On parcours tous les motifs de chaque page */
-       while (liste_motifs)
-        { switch( *((gint *)liste_motifs->data) )
-           { case TYPE_PASSERELLE : trame_pass = (struct TRAME_ITEM_PASS *)liste_motifs->data;
-                                    if (trame_pass->pass->syn_cible_id == syn_vars->syn_id)
-                                     { Changer_etat_passerelle( trame_pass, syn_vars );
-                                       cpt++;                                             /* Nous updatons un motif de plus ! */ 
-                                     }
-                                    break;
-             default: break;
+       liste_pass = infos->Trame->Liste_passerelles;                            /* On parcours tous les motifs de chaque page */
+       while (liste_pass)
+        { struct TRAME_ITEM_PASS *trame_pass = liste_pass->data;
+          if (trame_pass->pass->syn_cible_id == syn_vars->syn_id)
+           { Changer_etat_passerelle( trame_pass, syn_vars );
+             cpt++;                                                                       /* Nous updatons un motif de plus ! */ 
            }
-          liste_motifs=liste_motifs->next;
+          liste_pass=liste_pass->next;
         }
        liste = liste->next;
      }
