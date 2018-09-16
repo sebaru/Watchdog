@@ -473,118 +473,43 @@ printf(" On veut les horloges du syn %d\n", infos->syn_id );
     printf("Changer_etat_etiquette syn %d!\n", vars->syn_id );
     etat_motif.etat = 0;
     if (vars->bit_comm_out == TRUE)  /****************************  Vignette Activite *****************************************/
-     { etat_motif.rouge  = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.vert   = 100;                                                                    /* Sauvegarde etat motif */
-       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_set_svg ( infos->Trame->Vignette_activite, "kaki", 0, TRUE ); }
     else if (vars->bit_alarme == TRUE)
-     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.vert   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.cligno = 1;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_set_svg ( infos->Trame->Vignette_activite, "rouge", 0, TRUE ); }
     else if (vars->bit_alarme_fixe == TRUE)
-     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.vert   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_set_svg ( infos->Trame->Vignette_activite, "rouge", 0, FALSE ); }
     else if (vars->bit_defaut == TRUE)
-     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.vert   = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.cligno = 1;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_set_svg ( infos->Trame->Vignette_activite, "jaune", 0, TRUE ); }
     else if (vars->bit_defaut_fixe == TRUE)
-     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.vert   = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_set_svg ( infos->Trame->Vignette_activite, "jaune", 0, FALSE ); }
     else
-     { etat_motif.rouge  = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.vert   = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
-     }
-    Changer_etat_motif( infos->Trame->Vignette_activite, &etat_motif );
-
-    if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Personnes **************************/
-     { etat_motif.rouge  = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.vert   = 100;                                                                    /* Sauvegarde etat motif */
-       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
-     }
-    else if (vars->bit_alerte == TRUE)
-     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.vert   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.cligno = 1;                                                                      /* Sauvegarde etat motif */
-     }
-    else if (vars->bit_alerte_fixe == TRUE)
-     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.vert   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
-     }
-    else if (vars->bit_veille_totale == TRUE)
-     { etat_motif.rouge  = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.vert   = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
-     }
-    else if (vars->bit_veille_partielle == TRUE)
-     { etat_motif.rouge  = 127;                                                                    /* Sauvegarde etat motif */
-       etat_motif.vert   = 127;                                                                    /* Sauvegarde etat motif */
-       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
-     }
-    else
-     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.vert   = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.bleu   = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
-     }
-    Changer_etat_motif( infos->Trame->Vignette_secu_personne, &etat_motif );
+     { Trame_set_svg ( infos->Trame->Vignette_activite, "vert", 0, FALSE ); }
 
     if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Biens ******************************/
-     { etat_motif.rouge  = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.vert   = 100;                                                                    /* Sauvegarde etat motif */
-       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
-     }
-    else if (vars->bit_danger == TRUE)
-     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.vert   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.cligno = 1;                                                                      /* Sauvegarde etat motif */
-     }
-    else if (vars->bit_danger_fixe == TRUE)
-     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.vert   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
-     }
-    else if (vars->bit_derangement == TRUE)
-     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.vert   = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.cligno = 1;                                                                      /* Sauvegarde etat motif */
-     }
-    else if (vars->bit_derangement == TRUE)
-     { etat_motif.rouge  = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.vert   = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
-     }
+     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "kaki", 0, TRUE ); }
+    else if (vars->bit_alerte == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "rouge", 0, TRUE ); }
+    else if (vars->bit_alerte_fixe == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "rouge", 0, FALSE ); }
+    else if (vars->bit_veille_totale == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "vert", 0, FALSE ); }
+    else if (vars->bit_veille_partielle == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "orange", 0, FALSE ); }
     else
-     { etat_motif.rouge  = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.vert   = 255;                                                                    /* Sauvegarde etat motif */
-       etat_motif.bleu   = 0;                                                                      /* Sauvegarde etat motif */
-       etat_motif.cligno = 0;                                                                      /* Sauvegarde etat motif */
-     }
-    Changer_etat_motif( infos->Trame->Vignette_secu_bien, &etat_motif );
+     { Trame_set_svg ( infos->Trame->Vignette_secu_bien, "blanc", 0, FALSE ); }
+
+    if (vars->bit_comm_out == TRUE) /******************************* Vignette Securite des Personnes **************************/
+     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "kaki", 0, TRUE ); }
+    else if (vars->bit_danger == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "rouge", 0, TRUE ); }
+    else if (vars->bit_danger_fixe == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "rouge", 0, FALSE ); }
+    else if (vars->bit_derangement == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "jaune", 0, TRUE ); }
+    else if (vars->bit_derangement_fixe == TRUE)
+     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "jaune", 0, FALSE ); }
+    else
+     { Trame_set_svg ( infos->Trame->Vignette_secu_personne, "vert", 0, FALSE ); }
  }
 /******************************************************************************************************************************/
 /* Proto_rafrachir_un_message: Rafraichissement du message en parametre                                                       */

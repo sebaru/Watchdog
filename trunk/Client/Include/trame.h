@@ -120,7 +120,8 @@
   };
 
  struct TRAME_ITEM_PASS
-  { GooCanvasItem *item_groupe;
+  { struct TRAME *trame;
+    GooCanvasItem *item_groupe;
     GooCanvasItem *item_texte;
     struct TRAME_ITEM_SVG *item_1;
     struct TRAME_ITEM_SVG *item_2;
@@ -185,9 +186,10 @@
     GList *trame_items;
     GSList *Liste_passerelles;
     GSList *Liste_timer;
-    struct TRAME_ITEM_MOTIF *Vignette_activite;
-    struct TRAME_ITEM_MOTIF *Vignette_secu_bien;
-    struct TRAME_ITEM_MOTIF *Vignette_secu_personne;
+    struct TRAME_ITEM_SVG *Logo;
+    struct TRAME_ITEM_SVG *Vignette_activite;
+    struct TRAME_ITEM_SVG *Vignette_secu_bien;
+    struct TRAME_ITEM_SVG *Vignette_secu_personne;
   };
 
 /*********************************************** Déclaration des prototypes****************************************************/
@@ -216,7 +218,7 @@
  extern struct TRAME_ITEM_CAMERA_SUP *Trame_ajout_camera_sup ( gint flag, struct TRAME *trame,
                                                                struct CMD_TYPE_CAMERASUP *camera_sup );
  extern void Trame_del_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran );
- extern void Trame_del_passerelle ( struct TRAME *trame, struct TRAME_ITEM_PASS *trame_pass );
+ extern void Trame_del_passerelle ( struct TRAME_ITEM_PASS *trame_pass );
  extern void Trame_del_commentaire ( struct TRAME_ITEM_COMMENT *trame_comm );
  extern void Trame_del_item ( struct TRAME_ITEM_MOTIF *trame_motif );
  extern void Trame_del_camera_sup ( struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup );

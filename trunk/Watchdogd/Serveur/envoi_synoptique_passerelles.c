@@ -138,6 +138,8 @@
      }
 
     client->Liste_pass = g_slist_prepend( client->Liste_pass, GINT_TO_POINTER(client->syn_to_send->id) );/* Pour update de la page source */
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
+              "%s: add syn_cible_id '%d'", __func__, client->syn_to_send->id );
 
     while ( (pass = Recuperer_passerelleDB_suite( &db )) )                                      /* Et toutes les pages filles */
      { if (tag == TAG_SUPERVISION)
