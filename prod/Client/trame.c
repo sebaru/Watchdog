@@ -120,13 +120,27 @@
  void Trame_del_cadran ( struct TRAME_ITEM_CADRAN *trame_cadran )
   { if (trame_cadran->item_groupe) goo_canvas_item_remove( trame_cadran->item_groupe );
   }
-/**********************************************************************************************************/
-/* Trame_del_item: Renvoi un nouveau item, completement vierge                                            */
-/* Entrée: un item                                                                                        */
-/* Sortie: rieng                                                                                          */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Trame_del_svg: Libere la mémoire liée à un objet de type SVG                                                               */
+/* Entrée: le SVG                                                                                                             */
+/* Sortie: rieng                                                                                                              */
+/******************************************************************************************************************************/
+ void Trame_del_SVG ( struct TRAME_ITEM_SVG *trame_svg )
+  { trame_svg->trame->Liste_timer = g_slist_remove ( trame_svg->trame->Liste_timer, trame_svg );/* Désactive la gestion clignotement */
+    g_free(trame_svg);
+  }    
+/******************************************************************************************************************************/
+/* Trame_del_item: Renvoi un nouveau item, completement vierge                                                                */
+/* Entrée: un item                                                                                                            */
+/* Sortie: rieng                                                                                                              */
+/******************************************************************************************************************************/
  void Trame_del_passerelle ( struct TRAME_ITEM_PASS *trame_pass )
-  { if (trame_pass->item_groupe) goo_canvas_item_remove( trame_pass->item_groupe );
+  { goo_canvas_item_remove( trame_pass->item_groupe );
+    Trame_del_SVG (trame_pass->item_1);                                                  /* Désactive la gestion clignotement */
+    Trame_del_SVG (trame_pass->item_2);                                                  /* Désactive la gestion clignotement */
+    Trame_del_SVG (trame_pass->item_3);                                                  /* Désactive la gestion clignotement */
+    trame_pass->trame->Liste_passerelles = g_slist_remove ( trame_pass->trame->Liste_passerelles, trame_pass );
+    g_free(trame_pass);
   }
 /**********************************************************************************************************/
 /* Trame_del_item: Renvoi un nouveau item, completement vierge                                            */
@@ -851,6 +865,43 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     return(trame_comm);
   }
 /******************************************************************************************************************************/
+/* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                                             */
+/* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                                            */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ void Trame_set_svg ( struct TRAME_ITEM_SVG *trame_svg, gchar *couleur, gint mode, gboolean cligno )
+  { GdkPixbuf *pixbuf;
+    pixbuf = Charger_svg_pixbuf ( trame_svg->svg_name, couleur, mode, trame_svg->taillex, trame_svg->tailley );
+    g_object_set( G_OBJECT(trame_svg->item), "pixbuf", pixbuf, NULL );
+    if (cligno && !trame_svg->cligno)                                                    /* Active la gestion du clignotement */
+     { trame_svg->trame->Liste_timer = g_slist_prepend ( trame_svg->trame->Liste_timer, trame_svg );
+       trame_svg->cligno = TRUE;
+     }
+    else if (!cligno)                                                                            /* Desactive le clignotement */
+     { trame_svg->trame->Liste_timer = g_slist_remove ( trame_svg->trame->Liste_timer, trame_svg );
+       trame_svg->cligno = FALSE;
+     }
+  }
+/******************************************************************************************************************************/
+/* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                                             */
+/* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                                            */
+/* Sortie: rien                                                                                                               */
+/******************************************************************************************************************************/
+ static struct TRAME_ITEM_SVG *Trame_new_SVG ( struct TRAME *trame, GooCanvasItem *item_groupe, gchar *nom, gchar *couleur,
+                                               gint mode, gint taillex, gint tailley, gint posx, gint posy )
+  { struct TRAME_ITEM_SVG *trame_svg;
+    GdkPixbuf *pixbuf;
+    trame_svg = (struct TRAME_ITEM_SVG *)g_try_malloc0( sizeof(struct TRAME_ITEM_SVG) );
+    if (!trame_svg) return(NULL);
+    g_snprintf( trame_svg->svg_name, sizeof(trame_svg->svg_name), "%s", nom );
+    trame_svg->trame   = trame;
+    trame_svg->taillex = taillex;
+    trame_svg->tailley = tailley;
+    trame_svg->item    = goo_canvas_image_new ( item_groupe, NULL, 1.0*posx, 1.0*posy, NULL );
+    Trame_set_svg ( trame_svg, couleur, mode, FALSE );
+    return(trame_svg);
+  }
+/******************************************************************************************************************************/
 /* Trame_ajout_passerelle: Ajoute une passerelle sur le visuel                                                                */
 /* Entrée: une structure passerelle, la trame de reference                                                                    */
 /* Sortie: reussite                                                                                                           */
@@ -860,12 +911,13 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     struct TRAME_ITEM_MOTIF *trame_motif;
     struct CMD_TYPE_MOTIF *motif;
     gint taillex, tailley;
-       
+
     if (!(trame && pass)) return(NULL);
     trame_pass = g_try_malloc0( sizeof(struct TRAME_ITEM_PASS) );
     if (!trame_pass) return(NULL);
 
-    trame_pass->pass = pass;
+    trame_pass->trame = trame;
+    trame_pass->pass  = pass;
 
     trame_pass->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );     /* Groupe PASSERELLE */
 
@@ -887,14 +939,10 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                                                   "fill-color", "white",
                                                   NULL);
 
-    trame_pass->item_1 = goo_canvas_image_new ( trame_pass->item_groupe, NULL, -58.0, -15.0, NULL );
-    Trame_peindre_pass_1 ( trame_pass, "vert", FALSE );
-
-    trame_pass->item_2 = goo_canvas_image_new ( trame_pass->item_groupe, NULL, -32.0, -13.0, NULL );
-    Trame_peindre_pass_2 ( trame_pass, "vert", FALSE );
-
-    trame_pass->item_3 = goo_canvas_image_new ( trame_pass->item_groupe, NULL, -10.0, -10.0, NULL );
-    Trame_peindre_pass_3 ( trame_pass, "vert", FALSE );
+    trame_pass->item_1 = Trame_new_SVG ( trame, trame_pass->item_groupe, "Pignon", "vert", 0, 25, 25, -58, -15 );
+    trame_pass->item_2 = Trame_new_SVG ( trame, trame_pass->item_groupe, "Bouclier2", "vert", 0, 20, 20, -32, -13 );
+    trame_pass->item_3 = Trame_new_SVG ( trame, trame_pass->item_groupe, "Croix_rouge", "vert", 0, 15, 15, -10, -10 );
+    printf("Nouvelle passerelle: %d, %p, %p, %p\n", pass->syn_id, trame_pass->item_1, trame_pass->item_2, trame_pass->item_3 );
 
     if ( flag )
      { trame_pass->select_mi = goo_canvas_rect_new (trame_pass->item_groupe,
@@ -907,46 +955,9 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 
     Trame_rafraichir_passerelle ( trame_pass );
 
-    trame_pass->type = TYPE_PASSERELLE;
-    trame->trame_items = g_list_append( trame->trame_items, trame_pass );
+    trame->Liste_passerelles = g_slist_prepend( trame->Liste_passerelles, trame_pass );
 
     return(trame_pass);
-  }
-/******************************************************************************************************************************/
-/* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                                             */
-/* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                                            */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- void Trame_peindre_pass_1 ( struct TRAME_ITEM_PASS *trame_pass, gchar *couleur, gboolean cligno )
-  { GdkPixbuf *pixbuf;
-    if (!(trame_pass && trame_pass->pass)) return;
-    pixbuf = Charger_svg_pixbuf ( "Pignon", couleur, 0, 25, 25 );
-    g_object_set( G_OBJECT(trame_pass->item_1), "pixbuf", pixbuf, NULL );
-    trame_pass->cligno1 = cligno;
-  }
-/******************************************************************************************************************************/
-/* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                                             */
-/* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                                            */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- void Trame_peindre_pass_2 ( struct TRAME_ITEM_PASS *trame_pass, gchar *couleur, gboolean cligno )
-  { GdkPixbuf *pixbuf;
-    if (!(trame_pass && trame_pass->pass)) return;
-    pixbuf = Charger_svg_pixbuf ( "Bouclier2", couleur, 0, 20, 20 );
-    g_object_set( G_OBJECT(trame_pass->item_2), "pixbuf", pixbuf, NULL );
-    trame_pass->cligno2 = cligno;
-  }
-/******************************************************************************************************************************/
-/* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                                             */
-/* Entrée: une structure TRAME_ITEM_MOTIF, la couleur de reference                                                            */
-/* Sortie: rien                                                                                                               */
-/******************************************************************************************************************************/
- void Trame_peindre_pass_3 ( struct TRAME_ITEM_PASS *trame_pass, gchar *couleur, gboolean cligno )
-  { GdkPixbuf *pixbuf;
-    if (!(trame_pass && trame_pass->pass)) return;
-    pixbuf = Charger_svg_pixbuf ( "Croix_rouge", couleur, 0, 15, 15 );
-    g_object_set( G_OBJECT(trame_pass->item_3), "pixbuf", pixbuf, NULL );
-    trame_pass->cligno3 = cligno;
   }
 /******************************************************************************************************************************/
 /* Trame_ajout_cadran: Ajoute un cadran sur le visuel                                                                         */
@@ -1008,8 +1019,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 /* Sortie: un widget GTK                                                                                                      */
 /******************************************************************************************************************************/
  struct TRAME *Trame_creer_trame ( guint taille_x, guint taille_y, char *coul, guint grille )
-  { struct CMD_TYPE_MOTIF *motif;
-    struct TRAME *trame;
+  { struct TRAME *trame;
     gdouble x, y;
 
     trame = g_try_malloc0( sizeof(struct TRAME) );
@@ -1019,75 +1029,33 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     g_object_set( trame->trame_widget, "background-color", coul, "anchor", GTK_ANCHOR_CENTER, NULL );
     goo_canvas_set_bounds (GOO_CANVAS (trame->trame_widget), 0, 0, taille_x+80, taille_y);
     trame->canvas_root = goo_canvas_get_root_item (GOO_CANVAS (trame->trame_widget));
-    trame->fond = goo_canvas_rect_new (trame->canvas_root,
-                                       0.0, 0.0, (double) taille_x, (double) taille_y,
-                                         "stroke_color", "yellow", NULL);
+    trame->fond = goo_canvas_rect_new ( trame->canvas_root, 0.0, 0.0, (double) taille_x, (double) taille_y,
+                                       "stroke_color", "yellow", NULL);
     goo_canvas_item_lower( GOO_CANVAS_ITEM(trame->fond), NULL );
-
-    motif = g_try_malloc0 ( sizeof( struct TRAME_ITEM_MOTIF ) );
-    if (motif)
-     { motif->position_x = TAILLE_SYNOPTIQUE_X+30;
-       motif->position_y = TAILLE_SYNOPTIQUE_Y/2-100;
-       motif->largeur = 40;
-       motif->hauteur = 40;
-       motif->icone_id = 535;
-       motif->type_gestion = TYPE_FOND;
-       Trame_ajout_motif ( FALSE, trame, motif );
-     }
                                                                                          /* Creation de la vignette activités */
-    motif = g_try_malloc0 ( sizeof( struct TRAME_ITEM_MOTIF ) );
-    if (motif)
-     { motif->position_x = TAILLE_SYNOPTIQUE_X+30;
-       motif->position_y = TAILLE_SYNOPTIQUE_Y/2-50;
-       motif->largeur = 40;
-       motif->hauteur = 40;
-       motif->icone_id = 3;
-       motif->type_gestion = TYPE_DYNAMIQUE;
-       trame->Vignette_activite = Trame_ajout_motif ( FALSE, trame, motif );
-       Trame_choisir_frame ( trame->Vignette_activite, 0, 0, 255, 0 );
-     }
-     
+    trame->Logo = Trame_new_SVG ( trame, trame->canvas_root, "logo", "neutre", 0,
+                                  60, 60, TAILLE_SYNOPTIQUE_X, 10 );
+                                                                                         /* Creation de la vignette activités */
+    trame->Vignette_activite = Trame_new_SVG ( trame, trame->canvas_root, "Pignon", "vert", 0,
+                                               40, 40, TAILLE_SYNOPTIQUE_X+10,  60 );
                                                                                          /* Creation de la vignette secu bien */
-    motif = g_try_malloc0 ( sizeof( struct TRAME_ITEM_MOTIF ) );
-    if (motif)
-     { motif->position_x = TAILLE_SYNOPTIQUE_X+30;
-       motif->position_y = TAILLE_SYNOPTIQUE_Y/2+0;
-       motif->largeur = 40;
-       motif->hauteur = 40;
-       motif->icone_id = 431;
-       motif->type_gestion = TYPE_DYNAMIQUE;
-       trame->Vignette_secu_bien = Trame_ajout_motif ( FALSE, trame, motif );
-       Trame_choisir_frame ( trame->Vignette_secu_bien, 0, 0, 255, 0 );
-     }
-
+    trame->Vignette_secu_bien = Trame_new_SVG ( trame, trame->canvas_root, "Bouclier2", "vert", 0,
+                                               40, 40, TAILLE_SYNOPTIQUE_X+10, 110 );
                                                                                      /* Creation de la vignette secu personne */
-    motif = g_try_malloc0 ( sizeof( struct TRAME_ITEM_MOTIF ) );
-    if (motif)
-     { motif->position_x = TAILLE_SYNOPTIQUE_X+30;
-       motif->position_y = TAILLE_SYNOPTIQUE_Y/2+50;
-       motif->largeur = 40;
-       motif->hauteur = 40;
-       motif->icone_id = 536;
-       motif->type_gestion = TYPE_DYNAMIQUE;
-       trame->Vignette_secu_personne = Trame_ajout_motif ( FALSE, trame, motif );
-       Trame_choisir_frame ( trame->Vignette_secu_personne, 0, 0, 255, 0 );
-     }
+    trame->Vignette_secu_personne = Trame_new_SVG ( trame, trame->canvas_root, "Croix_rouge", "vert", 0,
+                                                    40, 40, TAILLE_SYNOPTIQUE_X+10, 160 );
 
     if (grille)
      { for ( x=grille; x<taille_x; x+=grille )
         { for ( y=grille; y<taille_y; y+=grille )
-           { goo_canvas_polyline_new_line (trame->canvas_root, x, y-1.0, x, y+1.0, 
-                                           "stroke_color", "blue", NULL );
-
-             goo_canvas_polyline_new_line (trame->canvas_root, x-1.0, y, x+1.0, y, 
-                                           "stroke_color", "blue", NULL );
+           { goo_canvas_polyline_new_line (trame->canvas_root, x, y-1.0, x, y+1.0, "stroke_color", "blue", NULL );
+             goo_canvas_polyline_new_line (trame->canvas_root, x-1.0, y, x+1.0, y, "stroke_color", "blue", NULL );
            }
         }
      }
 
     return(trame);
   }
-
 /******************************************************************************************************************************/
 /* Trame_effacer_trame: Efface la trame en parametre                                                                          */
 /* Entrée: la trame voulue                                                                                                    */
@@ -1100,16 +1068,12 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     struct TRAME_ITEM_CADRAN *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GList *objet;
+    GSList *liste;
 
     objet = trame->trame_items;                                              /* Destruction des items du synoptique precedent */
     while(objet)
      { switch ( *((gint *)objet->data) )
-        { case TYPE_PASSERELLE:
-                            trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
-                            Trame_del_passerelle( trame_pass );
-                            g_free(trame_pass);
-                            break;
-          case TYPE_CADRAN:  trame_cadran = (struct TRAME_ITEM_CADRAN *)objet->data;
+        { case TYPE_CADRAN:  trame_cadran = (struct TRAME_ITEM_CADRAN *)objet->data;
                             Trame_del_cadran( trame_cadran );
                             g_free(trame_cadran);
                             break;
@@ -1132,8 +1096,17 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
        objet = objet->next;
      }
     g_list_free( trame->trame_items );                                                    /* Raz de la g_list correspondantes */
-    /*Trame_del_item ( trame->Vignette_activite );*/
     trame->trame_items = NULL;
+
+    while(trame->Liste_passerelles)
+     { struct TRAME_ITEM_PASS *trame_pass = trame->Liste_passerelles->data;
+       Trame_del_passerelle( trame_pass );
+     }
+
+    Trame_del_SVG ( trame->Logo );
+    Trame_del_SVG ( trame->Vignette_activite );
+    Trame_del_SVG ( trame->Vignette_secu_bien );
+    Trame_del_SVG ( trame->Vignette_secu_personne );
   }
 
 /******************************************************************************************************************************/

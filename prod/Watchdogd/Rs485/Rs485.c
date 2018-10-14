@@ -365,10 +365,10 @@
      }
     return( (int)CRC16 );
   }
-/**********************************************************************************************************/
-/* Envoyer_trame: envoie d'une trame RS485 sur la ligne                                                   */
-/* Entrée: L'id de la transmission, et la trame a transmettre                                             */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* Envoyer_trame: envoie d'une trame RS485 sur la ligne                                                                       */
+/* Entrée: L'id de la transmission, et la trame a transmettre                                                                 */
+/******************************************************************************************************************************/
  static void Envoyer_trame( int fd, struct TRAME_RS485 *trame )
   { int crc16;
 
@@ -379,15 +379,17 @@
                                                                   trame->taille );*/
 
     if (write( fd, trame, TAILLE_ENTETE - 2 ) == -1)                                        /* Ecriture de l'entete */
-     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "Envoyer_trame: Write Error" ); }
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "%s: Write Entete Error '%s'", __func__, strerror(errno) ); }
     if (trame->taille)                                                           /* On envoie les données */
      { if (write( fd, &trame->donnees, trame->taille )==-1)
-        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "Envoyer_trame: Write Error" ); }
+        { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "%s: Write %d bytes Error '%s'", __func__,
+                    trame->taille, strerror(errno) );
+        }
      }
     if (write( fd, &trame->crc16_h, sizeof(unsigned char) )==-1)
-     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "Envoyer_trame: Write Error" ); }
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "%s: Write CRC16H Error '%s'", __func__, strerror(errno) ); }
     if (write( fd, &trame->crc16_l, sizeof(unsigned char) )==-1)
-     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "Envoyer_trame: Write Error" ); }
+     { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "%s: Write CRC16L Error '%s'", __func__, strerror(errno) ); }
   }
 /**********************************************************************************************************/
 /* Envoyer_trame: envoie d'une trame RS485 sur la ligne                                                   */
@@ -395,9 +397,7 @@
 /**********************************************************************************************************/
  static void Envoyer_trame_want_inputANA( struct MODULE_RS485 *module, int fd )
   { static struct TRAME_RS485 Trame_want_entre_ana=
-     { 0x00, 0xFF, RS485_FCT_ENTRE_ANA, 0x00,
-   	  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-       0xFF, 0xFF
+     { 0x00, 0xFF, RS485_FCT_ENTRE_ANA, 0x00, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0xFF, 0xFF
      };
     Trame_want_entre_ana.dest = module->rs485.id;
     Envoyer_trame( fd, &Trame_want_entre_ana );
@@ -408,9 +408,7 @@
 /**********************************************************************************************************/
  static void Envoyer_trame_want_inputTOR( struct MODULE_RS485 *module, int fd )
   { static struct TRAME_RS485 Trame_want_entre_tor=
-     { 0x00, 0xFF, RS485_FCT_ENTRE_TOR, 0x00,
-   	  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-       0xFF, 0xFF
+     { 0x00, 0xFF, RS485_FCT_ENTRE_TOR, 0x00, { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0xFF, 0xFF
      };
     Trame_want_entre_tor.dest = module->rs485.id;
     if (module->rs485.s_min != -1 )
