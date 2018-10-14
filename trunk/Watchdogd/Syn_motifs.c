@@ -86,7 +86,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s SET icone='%d',syn_id='%d',libelle='%s',access_level='%d',bitctrl='%d',bitclic='%d',"
                 "posx='%d',posy='%d',larg='%f',haut='%f',angle='%f',"
-                "dialog='%d',gestion='%d',rouge='%d',vert='%d',bleu='%d',bitclic2='%d',rafraich='%d',layer='%d' ",
+                "dialog='%d',gestion='%d',rouge='%d',vert='%d',bleu='%d',bitclic2='%d',rafraich='%d',layer='%d'",
                 NOM_TABLE_MOTIF,
                 motif->icone_id, motif->syn_id, libelle, motif->access_level,
                 motif->bit_controle, motif->bit_clic,
@@ -96,7 +96,7 @@
                 motif->layer );
     g_free(libelle);
     if (motif->mnemo_id>0)
-     { gchar chaine[20];
+     { gchar chaine[32];
        g_snprintf( chaine, sizeof(chaine), ",mnemo_id='%d'", motif->mnemo_id );
        g_strlcat ( requete, chaine, sizeof(requete) );
      }

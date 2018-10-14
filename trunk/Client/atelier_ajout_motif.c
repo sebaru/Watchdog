@@ -190,6 +190,7 @@
 
     switch(reponse)
      { case GTK_RESPONSE_OK:     if (!Trame_motif_p0) return(TRUE);
+                                 memset ( &add_motif, 0, sizeof(add_motif) );
                                  add_motif.icone_id = Trame_motif_p0->motif->icone_id;/* Correspond au .gif*/
                                  g_snprintf( add_motif.libelle, sizeof(add_motif.libelle),
                                              "%s" , Motif_preview0.libelle );
@@ -201,6 +202,7 @@
                                  add_motif.angle = 0.0; /*infos->Adj_angle->value;*/
                                  add_motif.type_dialog = 0;               /* Type de la boite de dialogue */
                                  add_motif.type_gestion = 0;
+                                 add_motif.mnemo_id = 0;
                                  /*add_motif.position_x et posy positionné par le serveur */
                                  add_motif.largeur = Trame_motif_p0->gif_largeur;
                                  add_motif.hauteur = Trame_motif_p0->gif_hauteur;
