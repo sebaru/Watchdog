@@ -878,9 +878,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
        trame_svg->cligno = TRUE;
      }
     else if (!cligno)                                                                            /* Desactive le clignotement */
-     { trame_svg->trame->Liste_timer = g_slist_remove ( trame_svg->trame->Liste_timer, trame_svg );
-       trame_svg->cligno = FALSE;
-     }
+     { trame_svg->cligno = FALSE; }                       /* Arret cligno. Il sera sorti de la liste par l'interruption timer */
   }
 /******************************************************************************************************************************/
 /* Trame_peindre_motif: Peint un motif de la couleur selectionnée                                                             */
