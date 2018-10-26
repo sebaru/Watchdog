@@ -588,8 +588,7 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
            } else
            { gtk_widget_modify_bg ( infos->bouton_acq, GTK_STATE_NORMAL, NULL ); }
 
-                                                                               /* Positionnement des vignettes du synoptiques */
-           Changer_etat_etiquette( infos, syn_vars );
+           Changer_etat_etiquette( infos, syn_vars );                          /* Positionnement des vignettes du synoptiques */
         }
 
        liste_pass = infos->Trame->Liste_passerelles;                            /* On parcours tous les motifs de chaque page */

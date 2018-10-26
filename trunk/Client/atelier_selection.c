@@ -137,12 +137,12 @@
 /**********************************************************************************************************/
  void Selectionner ( struct TYPE_INFO_ATELIER *infos, gint groupe, gboolean deselect )
   { struct TRAME_ITEM_MOTIF      *trame_motif;
-    struct TRAME_ITEM_PASS       *trame_pass;
     struct TRAME_ITEM_COMMENT    *trame_comm;
     struct TRAME_ITEM_CADRAN     *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
+    GSList *liste;
     GList *objet;
- printf("Selectionner groupe %d\n", groupe );   
+ printf("Selectionner : Selectionner groupe %d\n", groupe );   
     objet = infos->Trame_atelier->trame_items;
     while (objet)
      { switch ( *((gint *)objet->data) )                             /* Test du type de données dans data */
@@ -182,21 +182,6 @@
                   }
                 }
                break;
-          case TYPE_PASSERELLE:
-               trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
-               if (trame_pass->groupe_dpl == groupe)
-                { if (!trame_pass->selection)
-                   { g_object_set( trame_pass->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-                     trame_pass->selection = TRUE;
-                     infos->Selection.items = g_list_append( infos->Selection.items, objet->data );
-                   }
-                  else if (deselect)
-                   { g_object_set( trame_pass->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                     trame_pass->selection = FALSE;
-                     infos->Selection.items = g_list_remove( infos->Selection.items, objet->data );
-                   }
-                }
-               break;
           case TYPE_CADRAN:
                trame_cadran = (struct TRAME_ITEM_CADRAN *)objet->data;
                if (trame_cadran->groupe_dpl == groupe)
@@ -231,6 +216,23 @@
         }
        objet=objet->next;
      }
+    liste = infos->Trame_atelier->Liste_passerelles;
+    while (liste)
+     { struct TRAME_ITEM_PASS *trame_pass = liste->data;
+       if (trame_pass->groupe_dpl == groupe)
+        { if (!trame_pass->selection)
+           { g_object_set( trame_pass->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+             trame_pass->selection = TRUE;
+             infos->Selection.items = g_list_append( infos->Selection.items, trame_pass );
+           }
+          else if (deselect)
+           { g_object_set( trame_pass->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+             trame_pass->selection = FALSE;
+             infos->Selection.items = g_list_remove( infos->Selection.items, trame_pass );
+           }
+        }
+       liste = g_slist_next( liste );
+     }
     printf("Fin selectionner\n");
   } 
 /**********************************************************************************************************/
@@ -263,10 +265,8 @@
                   new_y = new_y/largeur_grille * largeur_grille;
                 }
 
-               if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X )
-                { trame_pass->pass->position_x = new_x; }
-               if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y )
-                { trame_pass->pass->position_y = new_y; }
+               if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X ) { trame_pass->pass->position_x = new_x; }
+               if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y ) { trame_pass->pass->position_y = new_y; }
                Trame_rafraichir_passerelle(trame_pass);                                 /* Refresh visuel */
                break;
 

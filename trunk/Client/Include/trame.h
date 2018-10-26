@@ -120,7 +120,8 @@
   };
 
  struct TRAME_ITEM_PASS
-  { struct TRAME *trame;
+  { gint type;                                                                                              /* Type de l'item */
+    struct TRAME *trame;
     GooCanvasItem *item_groupe;
     GooCanvasItem *item_texte;
     struct TRAME_ITEM_SVG *item_1;
@@ -172,7 +173,6 @@
 
  struct TRAME_ITEM
   { union { struct TRAME_ITEM_MOTIF motif;
-            struct TRAME_ITEM_PASS pass;
             struct TRAME_ITEM_COMMENT comment;
             struct TRAME_ITEM_CADRAN cadran;
             struct TRAME_ITEM_CAMERA_SUP camera_sup;

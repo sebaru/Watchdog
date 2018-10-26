@@ -221,7 +221,7 @@ printf("Afficher_propriete: debut\n");
                                 break;
        case GDK_BUTTON_PRESS:   Clic_x = event->button.x_root;
                                 Clic_y = event->button.y_root;
-                                printf(" Appui: ClicXY=%f %f  rootx=%f, rooty=%f\n",
+                                printf("Clic_general:  Appui: ClicXY=%f %f  rootx=%f, rooty=%f\n",
                                        event->button.x, event->button.y,
                                        event->button.x_root, event->button.y_root );
                                 Appui = 1;
@@ -241,11 +241,11 @@ printf("Afficher_propriete: debut\n");
                                    { gdouble posx, posy;
                                      posx = event->motion.x_root-Clic_x;
                                      posy = event->motion.y_root-Clic_y;
-                                     printf("posx=%f, posy=%f\n", posx, posy );
+                                     printf("Clic_general: Appel a Deplacer_selection posx=%f, posy=%f\n", posx, posy );
                                      Deplacer_selection( infos, (gint)posx, (gint)posy);
                                    }
                                   else if (event->motion.state & 0x200)      /* Motion + Bouton gauche ?? */
-                                   { printf("bouh\n");
+                                   { printf("Clic_general: bouh\n");
                                    }
                                 }
                                switch (infos->Selection.type)        /* Mise a jour des entrys positions */

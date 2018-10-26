@@ -156,8 +156,8 @@
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
  void Trame_rafraichir_motif ( struct TRAME_ITEM_MOTIF *trame_motif )
-  { if (!(trame_motif && trame_motif->motif && trame_motif->image)) return;
-
+  { if (!(trame_motif && trame_motif->motif)) return;
+printf("Trame_rafraichir_motif : posx=%d, posy=%d\n", trame_motif->motif->position_x, trame_motif->motif->position_y );
     cairo_matrix_init_identity ( &trame_motif->transform );
     cairo_matrix_translate ( &trame_motif->transform,
                              (gdouble)trame_motif->motif->position_x,
@@ -633,7 +633,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     pixbuf = gdk_pixbuf_new_from_file_at_size( file, taille_x, taille_y, NULL );
 
     if (pixbuf) return(pixbuf);                                                       /* Si trouvé en local, on charge direct */
-
+                                                                          /* Sinon on telecharge depuis le repository d'icone */
     if (Download_icon ( file )) { pixbuf = gdk_pixbuf_new_from_file_at_size( file, taille_x, taille_y, NULL ); }
     return(pixbuf);
   }
@@ -646,17 +646,14 @@ printf("Charger_pixbuf_file: %s\n", fichier );
   { gdouble haut = 0.0, larg = 0.0;
 
     switch (trame_motif->motif->mnemo_type)
-     { case MNEMO_HORLOGE: Charger_pixbuf_file ( trame_motif, "Horloge.svg" );
+     { case MNEMO_HORLOGE: trame_motif->pixbuf = Charger_svg_pixbuf ( "Horloge", "neutre", 0, 40, 40 );
                            haut = larg = 40.0;
                            break;
      }
 
-    Trame_peindre_motif( trame_motif, trame_motif->motif->rouge0, trame_motif->motif->vert0, trame_motif->motif->bleu0 );
-
     trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
     trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe, trame_motif->pixbuf, 
-                                                  (-(gdouble)(larg/2)),
-                                                  (-(gdouble)(haut/2)),
+                                                  (-(gdouble)(larg/2)), (-(gdouble)(haut/2)),
                                                   "scale-to-fit", TRUE, "height", haut, "width", larg,
                                                   NULL );
     switch (trame_motif->motif->mnemo_type)
@@ -668,12 +665,9 @@ printf("Charger_pixbuf_file: %s\n", fichier );
            break;
         }
      }
-
+printf("New motif special : posx=%d posy=%d\n", trame_motif->motif->position_x, trame_motif->motif->position_y );
     trame_motif->motif->largeur = larg;
     trame_motif->motif->hauteur = haut;
-
-    Trame_rafraichir_motif ( trame_motif );
-    trame->trame_items = g_list_append( trame->trame_items, trame_motif );
     return(trame_motif);
   }
 /******************************************************************************************************************************/
@@ -693,25 +687,26 @@ printf("Charger_pixbuf_file: %s\n", fichier );
     trame_motif->type = TYPE_MOTIF;
 
     if (motif->mnemo_id!=0)                                                               /* Chargement de l'icone id associé */
-     { return ( Trame_ajout_motif_special ( trame, trame_motif ) ); }
+     { Trame_ajout_motif_special ( trame, trame_motif ); }
+    else
+     { Charger_pixbuf_id( trame_motif, motif->icone_id );
+       if (!trame_motif->images)                                                               /* En cas de probleme, on sort */
+        { Trame_del_item(trame_motif);
+          g_free(trame_motif);
+          return(NULL);
+        }
+       Trame_peindre_motif( trame_motif, motif->rouge0, motif->vert0, motif->bleu0 );
 
-    Charger_pixbuf_id( trame_motif, motif->icone_id );
-    if (!trame_motif->images)                                                                  /* En cas de probleme, on sort */
-     { Trame_del_item(trame_motif);
-       g_free(trame_motif);
-       return(NULL);
+       trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
+       trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
+                                                  trame_motif->pixbuf,
+                                                  (-(gdouble)(trame_motif->gif_largeur/2)),
+                                                  (-(gdouble)(trame_motif->gif_hauteur/2)),
+                                                  NULL );
+
+       if (!motif->largeur) motif->largeur = trame_motif->gif_largeur;
+       if (!motif->hauteur) motif->hauteur = trame_motif->gif_hauteur;
      }
-    Trame_peindre_motif( trame_motif, motif->rouge0, motif->vert0, motif->bleu0 );
-
-    trame_motif->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );         /* Groupe MOTIF */
-    trame_motif->item = goo_canvas_image_new ( trame_motif->item_groupe,
-                                               trame_motif->pixbuf,
-                                               (-(gdouble)(trame_motif->gif_largeur/2)),
-                                               (-(gdouble)(trame_motif->gif_hauteur/2)),
-                                               NULL );
-
-    if (!motif->largeur) motif->largeur = trame_motif->gif_largeur;
-    if (!motif->hauteur) motif->hauteur = trame_motif->gif_hauteur;
 
     if ( flag )
      { GdkPixbuf *pixbuf;
@@ -916,7 +911,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 
     trame_pass->trame = trame;
     trame_pass->pass  = pass;
-
+    trame_pass->type  = TYPE_PASSERELLE;
     trame_pass->item_groupe = goo_canvas_group_new ( trame->canvas_root, NULL );     /* Groupe PASSERELLE */
 
     tailley = 15;
