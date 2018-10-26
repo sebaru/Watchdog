@@ -139,8 +139,6 @@
     Trame_del_SVG (trame_pass->item_1);                                                  /* Désactive la gestion clignotement */
     Trame_del_SVG (trame_pass->item_2);                                                  /* Désactive la gestion clignotement */
     Trame_del_SVG (trame_pass->item_3);                                                  /* Désactive la gestion clignotement */
-    trame_pass->trame->Liste_passerelles = g_slist_remove ( trame_pass->trame->Liste_passerelles, trame_pass );
-    g_free(trame_pass);
   }
 /**********************************************************************************************************/
 /* Trame_del_item: Renvoi un nouveau item, completement vierge                                            */
@@ -948,7 +946,7 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 
     Trame_rafraichir_passerelle ( trame_pass );
 
-    trame->Liste_passerelles = g_slist_prepend( trame->Liste_passerelles, trame_pass );
+    trame->trame_items = g_list_append( trame->trame_items, trame_pass );
 
     return(trame_pass);
   }
@@ -1070,6 +1068,11 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
                             Trame_del_cadran( trame_cadran );
                             g_free(trame_cadran);
                             break;
+          case TYPE_PASSERELLE:
+                            trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
+                            Trame_del_passerelle( trame_pass );
+                            g_free(trame_pass);
+                            break;
           case TYPE_COMMENTAIRE:
                             trame_comm = (struct TRAME_ITEM_COMMENT *)objet->data;
                             Trame_del_commentaire( trame_comm );
@@ -1090,11 +1093,6 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
      }
     g_list_free( trame->trame_items );                                                    /* Raz de la g_list correspondantes */
     trame->trame_items = NULL;
-
-    while(trame->Liste_passerelles)
-     { struct TRAME_ITEM_PASS *trame_pass = trame->Liste_passerelles->data;
-       Trame_del_passerelle( trame_pass );
-     }
 
     Trame_del_SVG ( trame->Logo );
     Trame_del_SVG ( trame->Vignette_activite );

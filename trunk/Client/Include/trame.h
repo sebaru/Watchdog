@@ -184,7 +184,6 @@
     GtkWidget *trame_widget;
     GooCanvasItem *fond;
     GList *trame_items;
-    GSList *Liste_passerelles;
     GSList *Liste_timer;
     struct TRAME_ITEM_SVG *Logo;
     struct TRAME_ITEM_SVG *Vignette_activite;

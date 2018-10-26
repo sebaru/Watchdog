@@ -565,6 +565,7 @@ printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, eta
     struct PAGE_NOTEBOOK *page;
     GSList *liste_pass;
     GdkColor color;
+    GList *objet;
     GList *liste;
     gint cpt;
 
@@ -591,14 +592,20 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
            Changer_etat_etiquette( infos, syn_vars );                          /* Positionnement des vignettes du synoptiques */
         }
 
-       liste_pass = infos->Trame->Liste_passerelles;                            /* On parcours tous les motifs de chaque page */
-       while (liste_pass)
-        { struct TRAME_ITEM_PASS *trame_pass = liste_pass->data;
-          if (trame_pass->pass->syn_cible_id == syn_vars->syn_id)
-           { Changer_etat_passerelle( trame_pass, syn_vars );
-             cpt++;                                                                       /* Nous updatons un motif de plus ! */ 
+       objet = infos->Trame->trame_items;
+       while (objet)
+        { switch ( *((gint *)objet->data) )                             /* Test du type de données dans data */
+           { case TYPE_PASSERELLE:
+                   { struct TRAME_ITEM_PASS *trame_pass = objet->data;
+                     if (trame_pass->pass->syn_cible_id == syn_vars->syn_id)
+                      { Changer_etat_passerelle( trame_pass, syn_vars );
+                        cpt++;                                                            /* Nous updatons un motif de plus ! */ 
+                      }
+                   }
+                  break;
+             default: printf("Selectionner: type inconnu\n" );
            }
-          liste_pass=liste_pass->next;
+          objet=objet->next;
         }
        liste = liste->next;
      }
