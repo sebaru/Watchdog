@@ -763,7 +763,7 @@
      }
 
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    g_snprintf( critere, sizeof(critere),"%s:AI%%", module->modbus.libelle ); 
+    g_snprintf( critere, sizeof(critere),"%s:AI%%", module->modbus.hostname ); 
     if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
     else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)

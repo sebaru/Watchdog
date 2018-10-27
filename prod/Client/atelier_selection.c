@@ -141,8 +141,9 @@
     struct TRAME_ITEM_COMMENT    *trame_comm;
     struct TRAME_ITEM_CADRAN     *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
+    GSList *liste;
     GList *objet;
- printf("Selectionner groupe %d\n", groupe );   
+ printf("Selectionner : Selectionner groupe %d\n", groupe );   
     objet = infos->Trame_atelier->trame_items;
     while (objet)
      { switch ( *((gint *)objet->data) )                             /* Test du type de données dans data */
@@ -166,21 +167,6 @@
                      infos->Selection.items = g_list_remove( infos->Selection.items, objet->data );
                    }
                 }
-              break;
-         case TYPE_COMMENTAIRE:
-              trame_comm = (struct TRAME_ITEM_COMMENT *)objet->data;
-              if (trame_comm->groupe_dpl == groupe)
-               { if (!trame_comm->selection)
-                  { g_object_set( trame_comm->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-                    trame_comm->selection = TRUE;
-                    infos->Selection.items = g_list_append( infos->Selection.items, objet->data );
-                  }
-                 else if (deselect)
-                  { g_object_set( trame_comm->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                    trame_comm->selection = FALSE;
-                    infos->Selection.items = g_list_remove( infos->Selection.items, objet->data );
-                  }
-                }
                break;
           case TYPE_PASSERELLE:
                trame_pass = (struct TRAME_ITEM_PASS *)objet->data;
@@ -188,45 +174,60 @@
                 { if (!trame_pass->selection)
                    { g_object_set( trame_pass->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
                      trame_pass->selection = TRUE;
-                     infos->Selection.items = g_list_append( infos->Selection.items, objet->data );
+                     infos->Selection.items = g_list_append( infos->Selection.items, trame_pass );
                    }
                   else if (deselect)
                    { g_object_set( trame_pass->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
                      trame_pass->selection = FALSE;
-                     infos->Selection.items = g_list_remove( infos->Selection.items, objet->data );
+                     infos->Selection.items = g_list_remove( infos->Selection.items, trame_pass );
                    }
                 }
                break;
-          case TYPE_CADRAN:
-               trame_cadran = (struct TRAME_ITEM_CADRAN *)objet->data;
-               if (trame_cadran->groupe_dpl == groupe)
-                { if (!trame_cadran->selection)
-                   { g_object_set( trame_cadran->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-                     trame_cadran->selection = TRUE;
+          case TYPE_COMMENTAIRE:
+               trame_comm = (struct TRAME_ITEM_COMMENT *)objet->data;
+               if (trame_comm->groupe_dpl == groupe)
+                { if (!trame_comm->selection)
+                   { g_object_set( trame_comm->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                     trame_comm->selection = TRUE;
                      infos->Selection.items = g_list_append( infos->Selection.items, objet->data );
                    }
                   else if (deselect)
-                   { g_object_set( trame_cadran->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                     trame_cadran->selection = FALSE;
+                   { g_object_set( trame_comm->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                     trame_comm->selection = FALSE;
                      infos->Selection.items = g_list_remove( infos->Selection.items, objet->data );
                    }
-                }
+                 }
+                break;
+           case TYPE_CADRAN:
+                trame_cadran = (struct TRAME_ITEM_CADRAN *)objet->data;
+                if (trame_cadran->groupe_dpl == groupe)
+                 { if (!trame_cadran->selection)
+                    { g_object_set( trame_cadran->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                      trame_cadran->selection = TRUE;
+                      infos->Selection.items = g_list_append( infos->Selection.items, objet->data );
+                    }
+                   else if (deselect)
+                    { g_object_set( trame_cadran->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                      trame_cadran->selection = FALSE;
+                      infos->Selection.items = g_list_remove( infos->Selection.items, objet->data );
+                    }
+                 }
+                break;
+           case TYPE_CAMERA_SUP:
+                trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
+                if (trame_camera_sup->groupe_dpl == groupe)
+                 { if (!trame_camera_sup->selection)
+                    { g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
+                      trame_camera_sup->selection = TRUE;
+                      infos->Selection.items = g_list_append( infos->Selection.items, objet->data );
+                    }
+                   else if (deselect)
+                    { g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+                      trame_camera_sup->selection = FALSE;
+                      infos->Selection.items = g_list_remove( infos->Selection.items, objet->data );
+                    }
+                 }
                break;
-          case TYPE_CAMERA_SUP:
-               trame_camera_sup = (struct TRAME_ITEM_CAMERA_SUP *)objet->data;
-               if (trame_camera_sup->groupe_dpl == groupe)
-                { if (!trame_camera_sup->selection)
-                   { g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
-                     trame_camera_sup->selection = TRUE;
-                     infos->Selection.items = g_list_append( infos->Selection.items, objet->data );
-                   }
-                  else if (deselect)
-                   { g_object_set( trame_camera_sup->select_mi, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
-                     trame_camera_sup->selection = FALSE;
-                     infos->Selection.items = g_list_remove( infos->Selection.items, objet->data );
-                   }
-                }
-              break;
           default: printf("Selectionner: type inconnu\n" );
         }
        objet=objet->next;
@@ -263,10 +264,8 @@
                   new_y = new_y/largeur_grille * largeur_grille;
                 }
 
-               if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X )
-                { trame_pass->pass->position_x = new_x; }
-               if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y )
-                { trame_pass->pass->position_y = new_y; }
+               if ( 0<new_x && new_x < TAILLE_SYNOPTIQUE_X ) { trame_pass->pass->position_x = new_x; }
+               if ( 0<new_y && new_y < TAILLE_SYNOPTIQUE_Y ) { trame_pass->pass->position_y = new_y; }
                Trame_rafraichir_passerelle(trame_pass);                                 /* Refresh visuel */
                break;
 

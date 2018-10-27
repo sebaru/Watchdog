@@ -40,8 +40,8 @@
 /* Entree: trame_motif                                                                                                        */
 /* Sortie: TRUE                                                                                                               */
 /******************************************************************************************************************************/
- static void Timer_svg( struct TRAME_ITEM_SVG *trame_svg, gboolean cligno )
-  { if (cligno) g_object_set ( trame_svg->item, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
+ static void Timer_svg( struct TRAME_ITEM_SVG *trame_svg, gboolean hidden )
+  { if (hidden) g_object_set ( trame_svg->item, "visibility", GOO_CANVAS_ITEM_INVISIBLE, NULL );
            else g_object_set ( trame_svg->item, "visibility", GOO_CANVAS_ITEM_VISIBLE, NULL );
   }
 /**********************************************************************************************************/
@@ -194,8 +194,13 @@
     liste_timer = infos->Trame->Liste_timer;
     while (liste_timer)
      { struct TRAME_ITEM_SVG *trame_svg = liste_timer->data;
-       Timer_svg( trame_svg, hidden );
-       liste_timer = g_slist_next ( liste_timer );
+       liste_timer = g_slist_next ( liste_timer );                                             /* On prepare le prochain coup */
+       if (trame_svg->cligno)
+         { Timer_svg( trame_svg, hidden ); }                                              /* Si cligno, on le fait clignotter */
+        else                                                                                  /* Sinon on le vire de la liste */
+         { infos->Trame->Liste_timer = g_slist_remove ( infos->Trame->Liste_timer, trame_svg );
+           Timer_svg( trame_svg, FALSE );                                                 /* Si cligno, on le fait clignotter */
+         }
      }
 
     if (hidden) hidden=FALSE; else hidden=TRUE;

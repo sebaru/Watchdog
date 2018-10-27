@@ -120,7 +120,8 @@
   };
 
  struct TRAME_ITEM_PASS
-  { struct TRAME *trame;
+  { gint type;                                                                                              /* Type de l'item */
+    struct TRAME *trame;
     GooCanvasItem *item_groupe;
     GooCanvasItem *item_texte;
     struct TRAME_ITEM_SVG *item_1;
@@ -184,7 +185,6 @@
     GtkWidget *trame_widget;
     GooCanvasItem *fond;
     GList *trame_items;
-    GSList *Liste_passerelles;
     GSList *Liste_timer;
     struct TRAME_ITEM_SVG *Logo;
     struct TRAME_ITEM_SVG *Vignette_activite;
