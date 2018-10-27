@@ -173,6 +173,7 @@
 
  struct TRAME_ITEM
   { union { struct TRAME_ITEM_MOTIF motif;
+            struct TRAME_ITEM_PASS pass;
             struct TRAME_ITEM_COMMENT comment;
             struct TRAME_ITEM_CADRAN cadran;
             struct TRAME_ITEM_CAMERA_SUP camera_sup;
