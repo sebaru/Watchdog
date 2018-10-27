@@ -59,7 +59,7 @@
     guint syn_id;                                           /* Numéro du fichier syn correspondant(pas l'index dans la table) */
     guint id;
     guint on;
-    guint compil_date;                                                                        /* Date de derniere compilation */
+    gchar compil_date[32];                                                                    /* Date de derniere compilation */
     guint compil_status;                                                                    /* Statut de derniere compilation */
     guint nbr_compil;                                                                         /* Nombre de compilation totale */
     guint nbr_ligne;                                                                               /* Nombre de ligne de code */

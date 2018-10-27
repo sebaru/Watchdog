@@ -921,10 +921,21 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 3747)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE dls ADD `compil_date_temp` DATETIME NOT NULL DEFAULT NOW();");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "UPDATE dls SET compil_date_temp=FROM_UNIXTIME(compil_date);");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE dls DROP `compil_date`;");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE dls CHANGE `compil_date_temp` `compil_date` DATETIME NOT NULL DEFAULT NOW();");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 
 fin:
-    database_version=3728;
+    database_version=3747;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }

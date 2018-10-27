@@ -659,7 +659,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Rafraichir_visu_plugin_dls( GtkTreeIter *iter, struct CMD_TYPE_PLUGIN_DLS *plugin_dls )
-  { gchar chaine[128], groupe_page[512], *date_compil;
+  { gchar chaine[128], groupe_page[512];
     GtkTreeModel *store;
     struct tm *temps;
     time_t time;
@@ -667,11 +667,6 @@
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_plugin_dls) );                              /* Acquisition du modele */
 
     g_snprintf( groupe_page, sizeof(groupe_page), "%s/%s", plugin_dls->syn_parent_page, plugin_dls->syn_page );
-    time = plugin_dls->compil_date;
-    temps = localtime( (time_t *)&time );
-    if (temps) { strftime( chaine, sizeof(chaine), "%F %T", temps ); }
-    else       { g_snprintf( chaine, sizeof(chaine), _("Erreur") ); }
-    date_compil = g_locale_to_utf8( chaine, -1, NULL, NULL, NULL );
 
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, plugin_dls->id,
@@ -681,7 +676,7 @@
                          COLONNE_NOM, plugin_dls->nom,
                          COLONNE_SHORTNAME, plugin_dls->shortname,
                          COLONNE_TECH_ID, plugin_dls->tech_id,
-                         COLONNE_COMPIL_DATE, date_compil,
+                         COLONNE_COMPIL_DATE, plugin_dls->compil_date,
                          COLONNE_COMPIL_STATUS, Dls_compil_status(plugin_dls->compil_status),
                          COLONNE_COMPIL_NBR, plugin_dls->nbr_compil,
                          COLONNE_NBR_LIGNE, plugin_dls->nbr_ligne,
@@ -689,7 +684,6 @@
                          COLONNE_COLOR_TEXTE, &COULEUR_PLUGIN_TEXTE[plugin_dls->type],*/
                           -1
                        );
-    g_free( date_compil );
   }
 /******************************************************************************************************************************/
 /* Afficher_un_plugin_dls: Ajoute un plugin_dls dans la liste des plugin_dls                                                  */

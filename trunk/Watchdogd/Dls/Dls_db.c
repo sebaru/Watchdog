@@ -110,7 +110,7 @@
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "INSERT INTO %s"             
                    "(name,shortname,package,tech_id,actif,syn_id,compil_date,compil_status,nbr_compil,sourcecode) "
-                   "VALUES ('%s','%s','%s','%s','%d',%d,0,0,0,'/* Source Code */');",
+                   "VALUES ('%s','%s','%s','%s','%d','%d',NOW(),0,0,'/* Source Code */');",
                    NOM_TABLE_DLS, nom, shortname, package, tech_id, dls->on, dls->syn_id );
      }
     else
@@ -235,10 +235,10 @@
        g_snprintf( dls->shortname, sizeof(dls->shortname), "%s", db->row[2] );
        g_snprintf( dls->syn_parent_page, sizeof(dls->syn_parent_page), "%s", db->row[6] );
        g_snprintf( dls->syn_page, sizeof(dls->syn_page), "%s", db->row[7] );
+       g_snprintf( dls->compil_date, sizeof(dls->compil_date), "%s", db->row[8] );
        dls->id            = atoi(db->row[0]);
        dls->on            = atoi(db->row[3]);
        dls->syn_id        = atoi(db->row[5]);
-       dls->compil_date   = atoi(db->row[8]);
        dls->compil_status = atoi(db->row[9]);
        dls->nbr_compil    = atoi(db->row[10]);
        dls->nbr_ligne     = atoi(db->row[12]);
@@ -292,9 +292,9 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "
-                "compil_date='%d', compil_status='%d', nbr_compil=nbr_compil+1, "
+                "compil_date=NOW(), compil_status='%d', nbr_compil=nbr_compil+1, "
                 "nbr_ligne = LENGTH(`sourcecode`)-LENGTH(REPLACE(`sourcecode`,'\n',''))+1 WHERE id=%d",
-                NOM_TABLE_DLS, (gint)time(NULL), status, id );
+                NOM_TABLE_DLS, status, id );
 
     db = Init_DB_SQL();       
     if (!db)
