@@ -607,11 +607,12 @@
      { Info_new( Config.log, Config.log_dls, LOG_INFO, "SCH : num %d out of range", num );
        return;
      }
-    if (etat)
-     { if (reset)                                                   /* Le compteur doit-il etre resetté ? */
-        { Partage->ch[num].confDB.valeur = 0; }
 
-       if ( ! Partage->ch[ num ].actif )
+    if (reset)
+     { if (etat) { Partage->ch[num].confDB.valeur = 0; }
+     }
+    else if (etat)
+     { if ( ! Partage->ch[ num ].actif )
         { Partage->ch[num].actif = TRUE;
           Partage->ch[num].old_top = Partage->top;
         }
