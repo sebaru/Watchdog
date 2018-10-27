@@ -609,7 +609,10 @@
      }
 
     if (reset)
-     { if (etat) { Partage->ch[num].confDB.valeur = 0; }
+     { if (etat)
+        { Partage->ch[num].confDB.valeur = 0;
+          Partage->ch[num].actif = FALSE;
+        }
      }
     else if (etat)
      { if ( ! Partage->ch[ num ].actif )
