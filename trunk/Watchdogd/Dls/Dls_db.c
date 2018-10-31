@@ -300,7 +300,7 @@
                 "UPDATE %s SET "
                 "compil_date=NOW(), compil_status='%d', nbr_compil=nbr_compil+1, "
                 "nbr_ligne = LENGTH(`sourcecode`)-LENGTH(REPLACE(`sourcecode`,'\n',''))+1, "
-                "errorlog='%s', "
+                "errorlog='%s' "
                 "WHERE id=%d",
                 NOM_TABLE_DLS, status, log, id );
     g_free(log);

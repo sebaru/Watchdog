@@ -322,26 +322,21 @@
  /*   Http_Log_request(connection, url, method, version, upload_data_size, con_cls);*/
     switch (tag)
      { case LWS_CALLBACK_ESTABLISHED:
-            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                      "CB_http: connexion established" );
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: connexion established" );
 		          break;
        case LWS_CALLBACK_CLOSED_HTTP:
-            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                      "CB_http: connexion closed" );
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: connexion closed" );
             break;
        case LWS_CALLBACK_PROTOCOL_INIT:
             break;
        case LWS_CALLBACK_PROTOCOL_DESTROY:
-            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                      "CB_http: Destroy protocol" );
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: Destroy protocol" );
 		          break;
        case LWS_CALLBACK_OPENSSL_CONTEXT_REQUIRES_PRIVATE_KEY:
-            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                      "CB_http: Need SSL Private key" );
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: Need SSL Private key" );
 		          break;
        case LWS_CALLBACK_RECEIVE:
-            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                      "CB_http: data received" );
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: data received" );
 		          break;
        case LWS_CALLBACK_HTTP_BODY:
              { if ( ! strcasecmp ( pss->url, "/postfile" ) )
@@ -380,20 +375,11 @@
                   if (retour != 0) return(1);                             /* Si erreur (<0) ou si ok (>0), on ferme la socket */
                   return(0);                    /* si besoin de plus de temps, on laisse la ws http ouverte pour libwebsocket */
                 }
-               else if ( ! strcasecmp ( url, "/ws/logoff" ) )
-                { if (session) Http_Close_session ( wsi, session ); }
-               else if ( ! strcasecmp ( url, "/status" ) )
-                { Http_Traiter_request_getstatus ( wsi ); }
-               else if ( ! strncasecmp ( url, "/ws/getsyn", 11 ) )
-                { return( Http_Traiter_request_getsyn ( wsi, session ) ); }
-               else if ( ! strcasecmp ( url, "/ws/getsvg" ) )
-                { return( Http_Traiter_request_getsvg ( wsi, session ) ); }
-               else if ( ! strncasecmp ( url, "/ws/gif/", 8 ) )
-                { return( Http_Traiter_request_getgif ( wsi, remote_name, remote_ip, url+8 ) ); }
-               else if ( ! strncasecmp ( url, "/ws/audio/", 10 ) )
-                { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
-               else if ( ! strncasecmp ( url, "/setm", 5 ) )
-                { return( Http_Traiter_request_setm ( wsi ) ); }
+               else if ( ! strcasecmp ( url, "/status" ) )         { Http_Traiter_request_getstatus ( wsi ); }
+               else if ( ! strncasecmp ( url, "/ws/getsyn", 11 ) ) { return( Http_Traiter_request_getsyn ( wsi, session ) ); }
+               else if ( ! strncasecmp ( url, "/ws/audio/", 10 ) ) { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
+               else if ( ! strncasecmp ( url, "/compil", 7 ) ) { return( Http_Traiter_request_compil ( wsi ) ); }
+               else if ( ! strncasecmp ( url, "/setm", 5 ) )   { return( Http_Traiter_request_setm ( wsi ) ); }
                else if ( ! strcasecmp ( url, "/cli" ) )
                 { g_snprintf( pss->url, sizeof(pss->url), "/cli" );
                   return(0);

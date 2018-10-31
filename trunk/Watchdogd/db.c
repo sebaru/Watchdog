@@ -932,7 +932,7 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 3750)
+    if (database_version < 3751)
      { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `audit_log` ("
                                              "`id` int(11) NOT NULL AUTO_INCREMENT,"
                                              "`username` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
@@ -955,7 +955,7 @@
     Libere_DB_SQL(&db);
 
 fin:
-    database_version=3750;
+    database_version=3751;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
