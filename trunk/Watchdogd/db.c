@@ -932,10 +932,30 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 3750)
+     { g_snprintf( requete, sizeof(requete), "CREATE TABLE IF NOT EXISTS `audit_log` ("
+                                             "`id` int(11) NOT NULL AUTO_INCREMENT,"
+                                             "`username` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,"
+                                             "`access_level` int(11) NOT NULL DEFAULT '0',"
+                                             "`message` varchar(256) COLLATE utf8_unicode_ci NOT NULL,"
+                                             "`date` DATETIME NOT NULL DEFAULT NOW(),"
+                                             "PRIMARY KEY (`id`)"
+                                             ") ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
+                                             " AUTO_INCREMENT=10000;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` DROP FOREIGN KEY `fk_msgs_dls_id`");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `msgs` ADD CONSTRAINT `fk_msgs_dls_id` FOREIGN KEY (`dls_id`)"
+                                             " REFERENCES `dls` (`id`) ON DELETE CASCADE");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE `dls` ADD `errorlog` TEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT 'No Error'");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 
 fin:
-    database_version=3747;
+    database_version=3750;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }

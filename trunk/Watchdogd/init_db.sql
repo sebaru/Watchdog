@@ -228,6 +228,7 @@ CREATE TABLE IF NOT EXISTS `dls` (
   `compil_status` int(11) NOT NULL DEFAULT '0',
   `nbr_compil` int(11) NOT NULL DEFAULT '0',
   `sourcecode` MEDIUMTEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT "/* Default ! */",
+  `errorlog` TEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT "No Error",
   `nbr_ligne` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
@@ -996,3 +997,11 @@ CREATE TABLE `users_sessions` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `audit_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
+  `access_level` int(11) NOT NULL DEFAULT '0',
+  `message` varchar(256) COLLATE utf8_unicode_ci NOT NULL,
+  `date` DATETIME NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (`id`)
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;

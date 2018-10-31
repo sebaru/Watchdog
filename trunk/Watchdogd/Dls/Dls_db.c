@@ -285,16 +285,25 @@
 /* Entrées: l'id du plugin DLS                                                                                                */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Set_compil_status_plugin_dlsDB( gint id, gint status )
-  { gchar requete[1024];
+ gboolean Set_compil_status_plugin_dlsDB( gint id, gint status, gchar *log_buffer )
+  { gchar requete[2048], *log;
     gboolean retour;
     struct DB *db;
+
+    log = Normaliser_chaine ( log_buffer );                                                  /* Formatage correct des chaines */
+    if (!log)
+     { Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: Normalisation shortname impossible", __func__ );
+       return(FALSE);
+     }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "
                 "compil_date=NOW(), compil_status='%d', nbr_compil=nbr_compil+1, "
-                "nbr_ligne = LENGTH(`sourcecode`)-LENGTH(REPLACE(`sourcecode`,'\n',''))+1 WHERE id=%d",
-                NOM_TABLE_DLS, status, id );
+                "nbr_ligne = LENGTH(`sourcecode`)-LENGTH(REPLACE(`sourcecode`,'\n',''))+1, "
+                "errorlog='%s', "
+                "WHERE id=%d",
+                NOM_TABLE_DLS, status, log, id );
+    g_free(log);
 
     db = Init_DB_SQL();       
     if (!db)
