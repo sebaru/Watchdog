@@ -1234,6 +1234,11 @@
           Partage->com_dls.admin_stop = 0;
         }
 
+       if (Partage->com_dls.Retirer_plugin)                                                   /* A-t-on un plugin a retirer ? */
+        { Decharger_plugin_by_id ( Partage->com_dls.Retirer_plugin );
+          Partage->com_dls.Retirer_plugin = 0;
+        }
+
        Set_cde_exterieure();                                            /* Mise à un des bit de commande exterieure (furtifs) */
 
        SB_SYS(0, !B(0));                                                            /* Change d'etat tous les tours programme */
