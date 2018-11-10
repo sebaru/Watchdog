@@ -152,7 +152,6 @@
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
     guint admin_start;                                                                              /* Demande de deconnexion */
     guint admin_stop;                                                                               /* Demande de deconnexion */
-    guint Retirer_plugin;                                   /* Numero du plugin a retirer si ddemande de suppression d'un DLS */
     guint temps_sched;
   };
 
