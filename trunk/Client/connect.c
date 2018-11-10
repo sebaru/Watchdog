@@ -386,7 +386,6 @@ encore:
     texte = gtk_label_new( _("Name") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 1, 2 );
     Entry_nom = gtk_entry_new();
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_nom), NBR_CARAC_LOGIN );
     gtk_entry_set_text( GTK_ENTRY(Entry_nom), Config_cli.user );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_nom, 1, 3, 1, 2 );
 
@@ -394,7 +393,6 @@ encore:
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 2, 3 );
     Entry_code = gtk_entry_new();
     gtk_entry_set_visibility( GTK_ENTRY(Entry_code), FALSE );
-    gtk_entry_set_max_length( GTK_ENTRY(Entry_code), NBR_CARAC_LOGIN );
     gtk_entry_set_text( GTK_ENTRY(Entry_code), Config_cli.passwd );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_code, 1, 3, 2, 3 );
 
