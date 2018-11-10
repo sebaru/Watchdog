@@ -117,7 +117,6 @@
  extern gint Http_Traiter_request_body_postfile ( struct lws *wsi, void *data, size_t taille );
  extern gint Http_Traiter_request_body_completion_postfile ( struct lws *wsi );
  extern gint Http_Traiter_request_setm ( struct lws *wsi );
- extern gint Http_Traiter_request_compil ( struct lws *wsi );
  extern gboolean Get_phpsessionid_cookie ( struct lws *wsi );
   
  extern gchar *Http_get_session_id ( struct HTTP_SESSION *session );

@@ -46,8 +46,7 @@
            return(1);
          }
 
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-             "%s: Compiling DLS %d", __func__, id );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Compiling DLS %d", __func__, id );
     Compiler_source_dls( TRUE, id, NULL, 0 );
 
     Http_Send_response_code ( wsi, HTTP_200_OK );

@@ -378,7 +378,6 @@
                else if ( ! strcasecmp ( url, "/status" ) )         { Http_Traiter_request_getstatus ( wsi ); }
                else if ( ! strncasecmp ( url, "/ws/getsyn", 11 ) ) { return( Http_Traiter_request_getsyn ( wsi, session ) ); }
                else if ( ! strncasecmp ( url, "/ws/audio/", 10 ) ) { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
-               else if ( ! strncasecmp ( url, "/compil", 7 ) ) { return( Http_Traiter_request_compil ( wsi ) ); }
                else if ( ! strncasecmp ( url, "/setm", 5 ) )   { return( Http_Traiter_request_setm ( wsi ) ); }
                else if ( ! strcasecmp ( url, "/cli" ) )
                 { g_snprintf( pss->url, sizeof(pss->url), "/cli" );
@@ -389,7 +388,31 @@
                   return(0);
                 }
                else                                                                                             /* Par défaut */
-                { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Unknown Request from %s/%s (sid %s): %s",
+                { gchar token_id[12];
+                  const gchar *id_s;
+                  gint id;
+    
+                  id_s = lws_get_urlarg_by_name	( wsi, "id=", token_id, sizeof(token_id) );        /* Recup du param get 'ID' */
+                  if (id_s)
+                   { id = atoi (id_s);
+                     if ( ! strcasecmp( url, "/compil" ) )
+                      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Compiling DLS %d", __func__, id );
+                        Compiler_source_dls( TRUE, id, NULL, 0 );
+                        Http_Send_response_code ( wsi, HTTP_200_OK );
+                        return(1);
+                      }
+                     else if ( ! strcasecmp( url, "/dlsdelete" ) )
+                      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Delete DLS %d", __func__, id );
+                        Decharger_plugin_by_id( id );
+                        Http_Send_response_code ( wsi, HTTP_200_OK );
+                        return(1);
+                      }
+                     Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ); /* Bad Request */
+                     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Bad Request from %s/%s (sid %s): %s",
+                               __func__, remote_name, remote_ip, Http_get_session_id(session), url );
+                     return(1);
+                   }
+                  Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Unknown Request from %s/%s (sid %s): %s",
                             __func__, remote_name, remote_ip, Http_get_session_id(session), url );
                   Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ); /* Bad Request */
                   return(1);
