@@ -976,19 +976,21 @@
 /******************************************************************************************************************************/
  gfloat Dls_data_get_AI ( gchar *acronyme, gchar *dls_tech_id, gpointer **ai_p )
   { struct ANALOG_INPUT *ai;
-    if (!ai_p || !*ai_p)                                                           /* Si pointeur d'acceleration indisponible */
-     { GSList *liste;
-       liste = Partage->Dls_data_AI;
-       while (liste)
-        { ai = (struct ANALOG_INPUT *)liste->data;
-          if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->dls_tech_id, dls_tech_id ) ) break;
-          liste = g_slist_next(liste);
-        }
+    GSList *liste;
+    if (ai_p && *ai_p)                                                               /* Si pointeur d'acceleration disponible */
+     { ai = (struct ANALOG_INPUT *)*ai_p;
+       return( ai->val_ech );
+     }
+
+    liste = Partage->Dls_data_AI;
+    while (liste)
+     { ai = (struct ANALOG_INPUT *)liste->data;
+       if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->dls_tech_id, dls_tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
        
-       if (!liste) return(0.0);
-       if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */
-      }
-    else ai = (struct ANALOG_INPUT *)*ai_p;
+    if (!liste) return(0.0);
+    if (ai_p) *ai_p = (gpointer)ai;                                                 /* Sauvegarde pour acceleration si besoin */
     return( ai->val_ech );    
   }
 /******************************************************************************************************************************/
@@ -996,11 +998,11 @@
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
  void Dls_data_set_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p, gboolean etat,
-                            gint delai_on, gint min_on, gint max_on, gint delai_off, gint random)
+                           gint delai_on, gint min_on, gint max_on, gint delai_off, gint random)
   { if (!tempo_p || !*tempo_p)
      { gchar chaine[80];
        struct TEMPO *tempo;
-       g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
+       g_snprintf(chaine, sizeof(chaine), "%s:%s", owner, nom );
        tempo = g_tree_lookup ( Partage->com_dls.Dls_data_tempo, chaine );
        if (!tempo)
         { tempo = g_malloc0 ( sizeof(struct TEMPO) );
@@ -1024,7 +1026,7 @@
      { tempo = (struct TEMPO *)*tempo_p;
        return (tempo->state);
      }
-    g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
+    g_snprintf(chaine, sizeof(chaine), "%s:%s", owner, nom );
     tempo = g_tree_lookup ( Partage->com_dls.Dls_data_tempo, chaine );
     if (tempo)
      { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : key %s found val %p", __func__, chaine, tempo );
