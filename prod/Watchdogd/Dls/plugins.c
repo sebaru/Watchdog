@@ -73,21 +73,21 @@
           if (!dls->Get_Tableau_bit)
            { Info_new( Config.log, Config.log_dls, LOG_WARNING,
                       "%s: Candidat %06d does not provide Get_Tableau_bit function", __func__, dls->plugindb.id ); 
-             Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING );
+             Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
            }
 
           dls->Get_Tableau_num = dlsym( dls->handle, "Get_Tableau_num" );                         /* Recherche de la fonction */
           if (!dls->Get_Tableau_num)
            { Info_new( Config.log, Config.log_dls, LOG_WARNING,
                       "%s: Candidat %06d does not provide Get_Tableau_num function", __func__, dls->plugindb.id ); 
-             Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING );
+             Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
            }
 
           dls->Get_Tableau_msg = dlsym( dls->handle, "Get_Tableau_msg" );                         /* Recherche de la fonction */
           if (!dls->Get_Tableau_msg)
            { Info_new( Config.log, Config.log_dls, LOG_WARNING,
                       "%s: Candidat %06d does not provide Get_Tableau_msg function", __func__, dls->plugindb.id ); 
-             Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING );
+             Set_compil_status_plugin_dlsDB( dls->plugindb.id, DLS_COMPIL_WARNING_FUNCTION_MISSING, "Function Missing" );
            }
          }
      }
@@ -150,7 +150,7 @@
     while(liste)                                                                            /* Liberation mémoire des modules */
      { struct PLUGIN_DLS *plugin = liste->data;
        if (plugin->plugindb.id == id)
-        { dlclose( plugin->handle );
+        { if (plugin->handle) dlclose( plugin->handle );
           dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
                                                                              /* Destruction de l'entete associé dans la GList */
           Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d unloaded (%s)", __func__,
@@ -328,10 +328,11 @@
 /******************************************************************************************************************************/
  gint Compiler_source_dls( gboolean reset, gint id, gchar *buffer, gint taille_buffer )
   { gint retour, pidgcc, id_fichier;
+    gchar log_buffer[1024], log_file[20];
     gchar chaine[128];
     gint taille_source;
     gchar *Source;
-  
+
     Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Compilation module DLS %06d", __func__, id );
     if (buffer) memset (buffer, 0, taille_buffer);                                                 /* RAZ du buffer de sortie */
 
@@ -368,51 +369,47 @@
 
     if (retour == TRAD_DLS_ERROR_FILE)                                                /* Retour de la traduction D.L.S vers C */
      { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: envoi erreur file Traduction D.L.S %06d", id );
-      Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_LOAD_SOURCE );
-      return( DLS_COMPIL_ERROR_LOAD_SOURCE );
+       Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_LOAD_SOURCE, "Erreur chargement source" );
+       return( DLS_COMPIL_ERROR_LOAD_SOURCE );
      }
 
-    if ( buffer )                             /* Chargement de fichier de log dans le buffer mis à disposition par l'appelant */
-     { gint id_fichier;
-       gchar log[20];
+    memset ( log_buffer, 0, sizeof(log_buffer) );                            /* Chargement de fichier de log dans la database */
 
-       Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-                "%s: Chargement du fichier de log D.L.S %d", __func__, id );
-       g_snprintf( log, sizeof(log), "Dls/%06d.log", id );
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: Chargement du fichier de log D.L.S %d", __func__, id );
+    g_snprintf( log_file, sizeof(log_file), "Dls/%06d.log", id );
 
-       id_fichier = open( log, O_RDONLY, 0 );                /* Ouverture du fichier log et chargement du contenu dans buffer */
-       if (id_fichier<0)
-        { Info_new( Config.log, Config.log_dls, LOG_ERR,
-                "%s: Impossible de charger le fichier de log '%s' : %s", __func__, log, strerror(errno) );
-          Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_LOAD_LOG );
-          return(DLS_COMPIL_ERROR_LOAD_LOG);
-        }
-       else { int nbr_car, index_buffer_erreur;
-              nbr_car = index_buffer_erreur = 0; 
-              while ( (nbr_car = read (id_fichier, buffer + index_buffer_erreur,
-                                       taille_buffer-1-index_buffer_erreur )) > 0 )
-               { index_buffer_erreur+=nbr_car; }
-              close(id_fichier);
-            }
+    id_fichier = open( log_file, O_RDONLY, 0 );              /* Ouverture du fichier log et chargement du contenu dans buffer */
+    if (id_fichier<0)
+     { Info_new( Config.log, Config.log_dls, LOG_ERR,
+                "%s: Impossible de charger le fichier de log '%s' : %s", __func__, log_file, strerror(errno) );
+       Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_LOAD_LOG, "Erreur chargement log" );
+       return(DLS_COMPIL_ERROR_LOAD_LOG);
+     }
+    else
+     { int nbr_car, index_buffer_erreur;
+       nbr_car = index_buffer_erreur = 0; 
+       while ( (nbr_car = read (id_fichier, log_buffer + index_buffer_erreur, sizeof(log_buffer)-1-index_buffer_erreur )) > 0 )
+        { index_buffer_erreur+=nbr_car; }
+       close(id_fichier);
+       if (buffer) memcpy ( buffer, log_buffer, nbr_car );
      }
 
     if ( retour == TRAD_DLS_ERROR )
-     { Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_TRAD );
+     { Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_TRAD, log_buffer );
        return ( DLS_COMPIL_ERROR_TRAD );
      }
 
     pidgcc = fork();
     if (pidgcc<0)
      { Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s_Fils: envoi erreur Fork GCC %06d", __func__, id );
-       Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_FORK_GCC );
+       Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_ERROR_FORK_GCC, "Erreur Fork GCC" );
        return(DLS_COMPIL_ERROR_FORK_GCC);
      }
     else if (!pidgcc)
      { gchar source[80], cible[80];
        g_snprintf( source, sizeof(source), "Dls/%06d.c", id );
        g_snprintf( cible,  sizeof(cible),  "Dls/libdls%06d.so", id );
-       Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-                "%s: GCC start (pid %d) source %s cible %s!",
+       Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: GCC start (pid %d) source %s cible %s!",
                  __func__, pidgcc, source, cible );
        execlp( "gcc", "gcc", "-I/usr/include/glib-2.0", "-I/usr/lib/glib-2.0/include", "-I/usr/lib64/glib-2.0/include",
                "-shared", "-o3", "-Wall", "-lwatchdog-dls", source, "-fPIC", "-o", cible, NULL );
@@ -429,11 +426,11 @@
 
     Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: end of %06d", __func__, id );
     if (retour == TRAD_DLS_WARNING)
-     { Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_OK_WITH_WARNINGS );
+     { Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_OK_WITH_WARNINGS, log_buffer );
        return( DLS_COMPIL_OK_WITH_WARNINGS );
      }
 
-    Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_OK );
+    Set_compil_status_plugin_dlsDB( id, DLS_COMPIL_OK, "Pas d'erreur !" );
     return( DLS_COMPIL_OK );
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

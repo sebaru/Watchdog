@@ -111,8 +111,6 @@
  extern gint Http_CB_file_upload( struct lws *wsi, char *buffer, int taille );
  extern gboolean Http_Traiter_request_getsyn ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gboolean Http_Traiter_request_getstatus ( struct lws *wsi );
- extern gint Http_Traiter_request_getgif ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
- extern gint Http_Traiter_request_getsvg ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gint Http_Traiter_request_getaudio ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
  extern gint Http_Traiter_request_body_cli ( struct lws *wsi, void *data, size_t taille );
  extern gint Http_Traiter_request_body_completion_cli ( struct lws *wsi );

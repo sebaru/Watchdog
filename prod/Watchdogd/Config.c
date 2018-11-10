@@ -41,8 +41,8 @@
 /******************************************************************************************************************************/
  void Lire_config ( char *fichier_config )
   { gchar *chaine, *fichier;
-	   gint num;
     GError *error = NULL;
+	gint num;
     GKeyFile *gkf;
 
     g_snprintf( Config.home,          sizeof(Config.home),          "%s", g_get_home_dir() );

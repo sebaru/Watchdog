@@ -308,7 +308,7 @@
      }
 
     message = Recuperer_messageDB_suite( &db );
-    Libere_DB_SQL ( &db );
+    if (message) Libere_DB_SQL ( &db );
     return(message);
   }
 /******************************************************************************************************************************/

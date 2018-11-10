@@ -163,7 +163,7 @@
  extern struct CMD_TYPE_PLUGIN_DLS *Recuperer_plugins_dlsDB_suite( struct DB **db );
  extern struct CMD_TYPE_PLUGIN_DLS *Rechercher_plugin_dlsDB( gint id );
  extern gboolean Modifier_plugin_dlsDB( struct CMD_TYPE_PLUGIN_DLS *dls );
- extern gboolean Set_compil_status_plugin_dlsDB( gint id, gint status );
+ extern gboolean Set_compil_status_plugin_dlsDB( gint id, gint status, gchar *log_buffer );
  extern gboolean Get_source_dls_from_DB ( gint id, gchar **result_buffer, gint *result_taille );
  extern gboolean Save_source_dls_to_DB( gint id, gchar *buffer, gint taille );
 
