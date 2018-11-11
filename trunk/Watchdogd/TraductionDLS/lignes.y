@@ -89,7 +89,7 @@ listeAlias:     un_alias listeAlias
                 
 un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                 {{ int taille;
-                   if ( New_alias(ALIAS_TYPE_DYNAMIC, $2, $4, -1, 0, $5) == FALSE )                         /* Deja defini ? */
+                   if ( New_alias(ALIAS_TYPE_DYNAMIC, NULL, $2, $4, -1, 0, $5) == FALSE )                    /* Deja defini ? */
                     { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
                 }}
                 | T_STATIC ID EQUIV barre alias_bit ENTIER PVIRGULE
@@ -97,7 +97,7 @@ un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                    switch($5)
                     { case ENTREE:
                       case SORTIE:
-                      case T_BI  : if ( New_alias(ALIAS_TYPE_STATIC, $2, $5, $6, $4, NULL) == FALSE )       /* Deja defini ? */
+                      case T_BI  : if ( New_alias(ALIAS_TYPE_STATIC, NULL, $2, $5, $6, $4, NULL) == FALSE )  /* Deja defini ? */
                                     { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
                                    break;
                       case EANA  :
@@ -110,7 +110,7 @@ un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                       case ICONE : if ($4==1)                                             /* Barre = 1 ?? */
                                     { Emettre_erreur_new( "Ligne %d: Use of '/%s' is forbidden", DlsScanner_get_lineno(), $2 ); }
                                    else
-                                    { if (New_alias(ALIAS_TYPE_STATIC, $2, $5, $6, 0, NULL) == FALSE)
+                                    { if (New_alias(ALIAS_TYPE_STATIC, NULL, $2, $5, $6, 0, NULL) == FALSE)
                                        { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
                                     }
                                    break;
@@ -225,7 +225,7 @@ calcul_expr3:   VALF
                 {{ struct ALIAS *alias;
                    char *chaine;
                    int taille;
-                   alias = Get_alias_par_nom($1);                                  /* On recupere l'alias */
+                   alias = Get_alias_par_acronyme(NULL,$1);                                  /* On recupere l'alias */
                    if (alias)
                     { switch(alias->bit)               /* On traite que ce qui peut passer en "condition" */
                        { case EANA  :
@@ -269,7 +269,7 @@ calcul_ea_result: T_REGISTRE ENTIER
                 {{ struct ALIAS *alias;
                    char *chaine;
                    int taille;
-                   alias = Get_alias_par_nom($1);                                  /* On recupere l'alias */
+                   alias = Get_alias_par_acronyme(NULL,$1);                                  /* On recupere l'alias */
                    if (alias)
                     { switch(alias->bit)               /* On traite que ce qui peut passer en "condition" */
                        { case T_REGISTRE:
@@ -451,7 +451,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                 {{ struct ALIAS *alias;
                    char *chaine;
                    int taille;
-                   alias = Get_alias_par_nom($2);                                                      /* On recupere l'alias */
+                   alias = Get_alias_par_acronyme(NULL,$2);                                                      /* On recupere l'alias */
                    if (alias)
                     { if ($4 && (alias->bit==T_TEMPO ||                              /* Vérification des bits non comparables */
                                  alias->bit==ENTREE ||
@@ -631,7 +631,7 @@ une_action:     barre SORTIE ENTIER
                 | barre ID liste_options
                 {{ struct ALIAS *alias;                                                   /* Definition des actions via alias */
                    int taille;
-                   alias = Get_alias_par_nom( $2 );
+                   alias = Get_alias_par_acronyme(NULL, $2 );
                    if (!alias)
                     { char *chaine;
                       Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $2 );
@@ -651,7 +651,7 @@ une_action:     barre SORTIE ENTIER
                                  alias->bit==T_MSG ||
                                  alias->bit==T_MONO)
                          )
-                       { Emettre_erreur_new( "Ligne %d: '/%s' ne peut s'utiliser", DlsScanner_get_lineno(), alias->nom );
+                       { Emettre_erreur_new( "Ligne %d: '/%s' ne peut s'utiliser", DlsScanner_get_lineno(), alias->acronyme );
                          $$=New_action();
                          taille = 2;
                          $$->alors = New_chaine( taille );
@@ -677,7 +677,7 @@ une_action:     barre SORTIE ENTIER
                          case CPT_H  : $$=New_action_cpt_h( alias->num, options );   break;
                          case T_CPT_IMP: $$=New_action_cpt_imp( alias->num, options ); break;
                          case ICONE  : $$=New_action_icone( alias->num, options );   break;
-                         default: { Emettre_erreur_new( "Ligne %d: '%s' syntax error", DlsScanner_get_lineno(), alias->nom );
+                         default: { Emettre_erreur_new( "Ligne %d: '%s' syntax error", DlsScanner_get_lineno(), alias->acronyme );
                                     $$=New_action();
                                     taille = 2;
                                     $$->alors = New_chaine( taille );

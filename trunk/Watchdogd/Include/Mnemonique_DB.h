@@ -48,11 +48,10 @@
  extern struct CMD_TYPE_MNEMO_BASE *Recuperer_mnemo_baseDB_suite( struct DB **db );
  extern gint Ajouter_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo );
  extern gboolean Retirer_mnemo_baseDB ( struct CMD_TYPE_MNEMO_BASE *mnemo );
- extern gboolean Retirer_auto_mnemo_baseDB_for_dls ( gint dls_id );
  extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB_type_num ( struct CMD_TYPE_NUM_MNEMONIQUE *critere );
  extern struct CMD_TYPE_MNEMO_FULL *Rechercher_mnemo_fullDB ( guint id );
  extern gboolean Modifier_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
- extern gboolean Mnemo_auto_create_for_dls ( struct CMD_TYPE_MNEMO_BASE *mnemo );
+ extern gboolean Mnemo_auto_create_for_dls ( struct CMD_TYPE_MNEMO_FULL *mnemo );
 
  extern void Charger_analogInput ( void );                                                                 /* Dans Mnemo_AI.c */
  extern struct CMD_TYPE_MNEMO_AI *Rechercher_mnemo_aiDB ( guint id );
@@ -66,7 +65,6 @@
  extern struct CMD_TYPE_MNEMO_FULL *Rechercher_horloge_by_id ( gint id );
  extern struct CMD_TYPE_MNEMO_FULL *Recuperer_horlogeDB_suite( struct DB **db_orig );
  extern void Activer_horlogeDB ( void );
-
 
  extern void Updater_cpt_impDB ( void );                                                              /* Dans Mnemo_CPT_IMP.c */
  extern void Charger_cpt_imp ( void );
