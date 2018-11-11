@@ -386,12 +386,12 @@
        return(DLS_COMPIL_ERROR_LOAD_LOG);
      }
     else
-     { int nbr_car, index_buffer_erreur;
-       nbr_car = index_buffer_erreur = 0; 
-       while ( (nbr_car = read (id_fichier, log_buffer + index_buffer_erreur, sizeof(log_buffer)-1-index_buffer_erreur )) > 0 )
-        { index_buffer_erreur+=nbr_car; }
+     { int nbr_car, nbr_car_lu;
+       nbr_car = nbr_car_lu = 0; 
+       while ( (nbr_car = read (id_fichier, log_buffer + nbr_car_lu, sizeof(log_buffer)-1-nbr_car_lu )) > 0 )
+        { nbr_car_lu+=nbr_car; }
        close(id_fichier);
-       if (buffer) memcpy ( buffer, log_buffer, nbr_car );
+       if (buffer) memcpy ( buffer, log_buffer, nbr_car_lu );
      }
 
     if ( retour == TRAD_DLS_ERROR )
