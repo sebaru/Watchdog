@@ -447,7 +447,8 @@ printf("Charger_pixbuf_file: %s\n", fichier );
        return(FALSE);
      }
 
-    g_snprintf( url, sizeof(url), "http://%s:5560/ws/gif/%d/%d", Client.host, id, mode );
+    if (mode) g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/%d.gif.%d", id, mode );
+         else g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/%d.gif", id );
     Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Trying to get %s", __func__, url );
     curl_easy_setopt(curl, CURLOPT_URL, url );
        /*curl_easy_setopt(curl, CURLOPT_POST, 1 );
