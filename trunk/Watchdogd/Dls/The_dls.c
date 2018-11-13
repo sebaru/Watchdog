@@ -772,17 +772,17 @@
 /* Envoyer_commande_dls_data: Gestion des envois de commande DLS via dls_data                                                 */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- void Envoyer_commande_dls_data ( gchar *nom, gchar *owner )
+ void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme )
   { gboolean *data_p=NULL;
-    Dls_data_set_bool ( nom, owner, &data_p, FALSE );
+    Dls_data_set_bool ( tech_id, acronyme, &data_p, FALSE );
     if (!data_p)
-     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: bit '%s:%s' not found", __func__, owner, nom );
+     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: bit '%s:%s' not found", __func__, tech_id, acronyme );
        return;
      }
     pthread_mutex_lock( &Partage->com_dls.synchro );
     Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, data_p );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
-    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit '%s:%s' demandée", __func__, owner, nom );
+    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit '%s:%s' demandée", __func__, tech_id, acronyme );
   }
 /******************************************************************************************************************************/
 /* Set_cde_exterieure: Mise à un des bits de commande exterieure                                                              */
@@ -851,12 +851,12 @@
      { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : searching for key %s : %p failed.", __func__, key, data ); }*/
     return(data);
   }
- void Dls_data_set_bool ( gchar *nom, gchar *owner, gboolean **data_p, gboolean valeur )
+ void Dls_data_set_bool ( gchar *tech_id, gchar *acronyme, gboolean **data_p, gboolean valeur )
   { if (!data_p || !*data_p)
      { gchar chaine[80];
        gboolean *data;
-       if ( !(nom && owner) ) return;
-       g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
+       if ( !(tech_id && acronyme) ) return;
+       g_snprintf(chaine, sizeof(chaine), "%s:%s", tech_id, acronyme );
        data = Dls_data_get( chaine );
        if (!data)
         { data = g_malloc ( sizeof(gboolean) );
@@ -869,11 +869,11 @@
     else
      { **data_p = valeur; }                                                   /* Récopie directement via le pointeur acceléré */
   }
- gboolean Dls_data_get_bool ( gchar *nom, gchar *owner, gboolean **data_p )
+ gboolean Dls_data_get_bool ( gchar *tech_id, gchar *acronyme, gboolean **data_p )
   { gchar chaine[80];
     gboolean *data;
     if (data_p && *data_p) return (**data_p);                                        /* Si pointeur d'acceleration disponible */
-    g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
+    g_snprintf(chaine, sizeof(chaine), "%s:%s", tech_id, acronyme );
     data = Dls_data_get( chaine );
     if (data) { return(*data); }
     return(FALSE);    
@@ -882,32 +882,32 @@
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_AI ( gchar *dls_tech_id, gchar *acronyme, gpointer **ai_p, float val_avant_ech )
+ void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer **ai_p, float val_avant_ech )
   { struct ANALOG_INPUT *ai;
     gboolean need_arch;
 
     if (!ai_p || !*ai_p)
      { GSList *liste;
-       if ( !(acronyme && dls_tech_id) ) return;
+       if ( !(acronyme && tech_id) ) return;
        liste = Partage->Dls_data_AI;
        while (liste)
         { ai = (struct ANALOG_INPUT *)liste->data;
-          if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->dls_tech_id, dls_tech_id ) ) break;
+          if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
        
        if (!liste)
         { ai = g_try_malloc0 ( sizeof(struct ANALOG_INPUT) );
           if (!ai)
-           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, dls_tech_id );
+           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( ai->acronyme,    sizeof(ai->acronyme),    "%s", acronyme );
-          g_snprintf( ai->dls_tech_id, sizeof(ai->dls_tech_id), "%s", dls_tech_id );
+          g_snprintf( ai->tech_id, sizeof(ai->tech_id), "%s", tech_id );
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding AI '%s:%s'", __func__, dls_tech_id, acronyme );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding AI '%s:%s'", __func__, tech_id, acronyme );
           Charger_conf_AI ( ai );                                                     /* Chargment de la conf AI depuis la DB */
         }
        if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */
@@ -966,7 +966,7 @@
      { need_arch = TRUE; }                                                               /* Archive au pire toutes les 10 min */
 
     if (need_arch)
-     { Ajouter_arch_by_nom( ai->acronyme, ai->dls_tech_id, ai->val_ech );                              /* Archivage si besoin */
+     { Ajouter_arch_by_nom( ai->acronyme, ai->tech_id, ai->val_ech );                              /* Archivage si besoin */
        ai->last_arch = Partage->top;
      }
   }
@@ -974,7 +974,7 @@
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gfloat Dls_data_get_AI ( gchar *acronyme, gchar *dls_tech_id, gpointer **ai_p )
+ gfloat Dls_data_get_AI ( gchar *tech_id, gchar *acronyme, gpointer **ai_p )
   { struct ANALOG_INPUT *ai;
     GSList *liste;
     if (ai_p && *ai_p)                                                               /* Si pointeur d'acceleration disponible */
@@ -985,7 +985,7 @@
     liste = Partage->Dls_data_AI;
     while (liste)
      { ai = (struct ANALOG_INPUT *)liste->data;
-       if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->dls_tech_id, dls_tech_id ) ) break;
+       if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
        
@@ -997,12 +997,12 @@
 /* Dls_data_set_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
- void Dls_data_set_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p, gboolean etat,
+ void Dls_data_set_tempo ( gchar *tech_id, gchar *acronyme, gpointer **tempo_p, gboolean etat,
                            gint delai_on, gint min_on, gint max_on, gint delai_off, gint random)
   { if (!tempo_p || !*tempo_p)
      { gchar chaine[80];
        struct TEMPO *tempo;
-       g_snprintf(chaine, sizeof(chaine), "%s:%s", owner, nom );
+       g_snprintf(chaine, sizeof(chaine), "%s:%s", tech_id, acronyme );
        tempo = g_tree_lookup ( Partage->com_dls.Dls_data_tempo, chaine );
        if (!tempo)
         { tempo = g_malloc0 ( sizeof(struct TEMPO) );
@@ -1019,14 +1019,14 @@
       }
      ST_local ( (struct TEMPO *)*tempo_p, etat );                                                 /* Recopie dans la variable */
   }
- gboolean Dls_data_get_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p )
+ gboolean Dls_data_get_tempo ( gchar *tech_id, gchar *acronyme, gpointer **tempo_p )
   { gchar chaine[80];
     struct TEMPO *tempo;
     if (tempo_p && *tempo_p)                                                         /* Si pointeur d'acceleration disponible */
      { tempo = (struct TEMPO *)*tempo_p;
        return (tempo->state);
      }
-    g_snprintf(chaine, sizeof(chaine), "%s:%s", owner, nom );
+    g_snprintf(chaine, sizeof(chaine), "%s:%s", tech_id, acronyme );
     tempo = g_tree_lookup ( Partage->com_dls.Dls_data_tempo, chaine );
     if (tempo)
      { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : key %s found val %p", __func__, chaine, tempo );

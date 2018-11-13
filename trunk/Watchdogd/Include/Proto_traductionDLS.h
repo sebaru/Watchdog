@@ -98,6 +98,7 @@
  extern struct ACTION *New_action_cpt_h( int num, GList *options );
  extern struct ACTION *New_action_cpt_imp( int num, GList *options );
  extern gboolean New_alias( gint type, gchar *tech_id, gchar *acronyme, gint bit, gint num, gint barre, GList *options );
+ extern struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme );
  extern struct ALIAS *Get_alias_par_acronyme( gchar *tech_id, gchar *acronyme );
  extern struct OPTION *New_option( void );
  /*extern int Get_option_entier( GList *liste_options, gint type );*/

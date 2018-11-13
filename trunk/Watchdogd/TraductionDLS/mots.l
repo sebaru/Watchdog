@@ -135,6 +135,7 @@ blanc         [\t ]+
 "-"                        { DlsScanner_lval.val = MOINS;       return MOINS;       }
 ";"                        { DlsScanner_lval.val = PVIRGULE;    return PVIRGULE;    }
 ","                        { DlsScanner_lval.val = VIRGULE;     return VIRGULE;     }
+":"                        { DlsScanner_lval.val = T_DPOINTS;   return T_DPOINTS;   }
 "("                        { DlsScanner_lval.val = T_POUV;      return T_POUV;      }
 ")"                        { DlsScanner_lval.val = T_PFERM;     return T_PFERM;     }
 "="                        { DlsScanner_lval.val = T_EGAL;      return T_EGAL;      }

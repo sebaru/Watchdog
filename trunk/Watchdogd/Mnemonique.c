@@ -375,6 +375,49 @@
     return(mnemo);
   }
 /******************************************************************************************************************************/
+/* Rechercher_mnemo_baseDB: Recupération du mnemo dont l'id est en parametre                                                  */
+/* Entrée: l'id du mnemonique a récupérer                                                                                     */
+/* Sortie: la structure representant le mnemonique de base                                                                    */
+/******************************************************************************************************************************/
+ struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB_by_acronyme ( gchar *tech_id, gchar *acronyme )
+  { struct CMD_TYPE_MNEMO_BASE *mnemo;
+    gchar requete[1024], *tech_id_s, *acronyme_s;
+    struct DB *db;
+
+    tech_id_s = Normaliser_chaine ( tech_id );
+    if (!tech_id_s)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible tech_id_s", __func__ );
+       return(NULL);
+     }
+     
+    acronyme_s = Normaliser_chaine ( acronyme );
+    if (!acronyme_s)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible acronyme_s", __func__ );
+       g_free(tech_id_s);
+       return(NULL);
+     }
+
+    g_snprintf( requete, sizeof(requete), MNEMO_SQL_SELECT                                                     /* Requete SQL */
+                " WHERE tech_id='%s' AND acronyme='%s'", tech_id_s, acronyme_s );
+    g_free(tech_id_s);
+    g_free(acronyme_s);
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(NULL);
+     }
+
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
+
+    mnemo = Recuperer_mnemo_baseDB_suite( &db );
+    if (mnemo) Libere_DB_SQL ( &db );
+    return(mnemo);
+  }
+/******************************************************************************************************************************/
 /* Rechercher_mnemo_baseDB_type_num: Recupération du mnemo par critere type/numéro                                            */
 /* Entrée: une structure de critere                                                                                           */
 /* Sortie: le mnemonique de base                                                                                              */

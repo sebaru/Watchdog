@@ -73,7 +73,7 @@
  struct ANALOG_INPUT
   { struct CMD_TYPE_MNEMO_AI confDB;
     gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gchar   dls_tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gfloat  val_ech;
     gfloat  val_avant_ech;
     guint   last_arch;                                                                         /* Date de la derniere archive */
@@ -179,7 +179,7 @@
  extern int EA_inrange( int num );
  extern void SB_SYS( int num, int etat );
  extern void SE( int num, int etat );
- extern void Dls_data_set_AI ( gchar *dls_tech_id, gchar *acronyme, gpointer **ai_p, float val_avant_ech );
+ extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer **ai_p, float val_avant_ech );
  extern void SEA( int num, float val_avant_ech );
  extern void SEA_range( int num, int range );
  extern void SEA_ech( int num, float val_ech );

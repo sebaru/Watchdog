@@ -51,12 +51,12 @@
 
  extern void     Dls_print_debug ( gint id, gint *Tableau_bit, gint *Tableau_num, gfloat *Tableau_val );
  extern gboolean Dls_get_top_alerte ( void );
- extern gboolean Dls_data_get_bool ( gchar *nom, gchar *owner, gboolean **data_p );
- extern void     Dls_data_set_bool ( gchar *nom, gchar *owner, gboolean **data_p, gboolean valeur );
- extern void     Dls_data_set_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p, gboolean etat,
+ extern gboolean Dls_data_get_bool ( gchar *tech_id, gchar *acronyme, gboolean **data_p );
+ extern void     Dls_data_set_bool ( gchar *tech_id, gchar *acronyme, gboolean **data_p, gboolean valeur );
+ extern void     Dls_data_set_tempo ( gchar *tech_id, gchar *acronyme, gpointer **tempo_p, gboolean etat,
                                       gint delai_on, gint min_on, gint max_on, gint delai_off, gint random);
- extern gboolean Dls_data_get_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p );
- extern gfloat   Dls_data_get_AI ( gchar *acronyme, gchar *dls_tech_id, gpointer **ai_p );
+ extern gboolean Dls_data_get_tempo ( gchar *tech_id, gchar *acronyme, gpointer **tempo_p );
+ extern gfloat   Dls_data_get_AI ( gchar *tech_id, gchar *acronyme, gpointer **ai_p );
  extern int E( int num );
  extern int B( int num );
  extern int M( int num );

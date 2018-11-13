@@ -795,7 +795,7 @@
           gint num;
           if ( sscanf ( mnemo->ev_text, "%[^:]:DI%d", debut, &num ) == 2 )                       /* Découpage de la ligne ev_text */
            { if (num<module->nbr_entree_tor)
-              { Dls_data_set_bool ( mnemo->acronyme, mnemo->dls_tech_id, (gboolean **)&module->DI[cpt], FALSE ); }
+              { Dls_data_set_bool ( mnemo->dls_tech_id, mnemo->acronyme, (gboolean **)&module->DI[cpt], FALSE ); }
              else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
                             mnemo->ev_text, num, module->nbr_entree_tor );
            }

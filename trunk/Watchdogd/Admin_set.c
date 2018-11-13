@@ -137,21 +137,21 @@
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "new_b" ) )
-     { gchar nom[80], owner[80];
+     { gchar tech_id[80], acronyme[80];
        int val;
-       if (sscanf ( ligne, "%s %s %s %d", commande, nom, owner, &val ) == 4)             /* Découpage de la ligne de commande */
-        { Dls_data_set_bool ( nom, owner, NULL, val );
-          g_snprintf( chaine, sizeof(chaine), " | - %s_%s set to %d", nom, owner, val );
+       if (sscanf ( ligne, "%s %s %s %d", commande, tech_id, acronyme, &val ) == 4)      /* Découpage de la ligne de commande */
+        { Dls_data_set_bool ( tech_id, acronyme, NULL, val );
+          g_snprintf( chaine, sizeof(chaine), " | - %s:%s set to %d", tech_id, acronyme, val );
         }
        else { g_snprintf( chaine, sizeof(chaine), " | - Wrong number of parameters" ); }
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "new_m" ) )
-     { gchar nom[80], owner[80];
+     { gchar tech_id[80], acronyme[80];
        int val;
-       if (sscanf ( ligne, "%s %s %s", commande, nom, owner ) == 3)                      /* Découpage de la ligne de commande */
-        { Envoyer_commande_dls_data ( nom, owner );
-          g_snprintf( chaine, sizeof(chaine), " | - %s_%s set to 1", nom, owner, val );
+       if (sscanf ( ligne, "%s %s %s", commande, tech_id, acronyme ) == 3)               /* Découpage de la ligne de commande */
+        { Envoyer_commande_dls_data ( tech_id, acronyme );
+          g_snprintf( chaine, sizeof(chaine), " | - %s:%s set to 1", tech_id, acronyme, val );
         }
        else { g_snprintf( chaine, sizeof(chaine), " | - Wrong number of parameters" ); }
        response = Admin_write ( response, chaine );
