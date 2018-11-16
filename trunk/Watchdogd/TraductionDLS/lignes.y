@@ -652,13 +652,19 @@ une_action:     barre SORTIE ENTIER
                   {{ $$=New_action_vars_mono("vars->bit_danger"); }}
                 | T_SPERS_DANF
                   {{ $$=New_action_vars_mono("vars->bit_danger_fixe"); }}
-                | barre ID liste_options
+                | barre ID suffixe liste_options
                 {{ struct ALIAS *alias;                                                   /* Definition des actions via alias */
+                   gchar *tech_id, *acro;
                    int taille;
-                   alias = Get_alias_par_acronyme(NULL, $2 );
+                   if ($3) { tech_id = $2; acro = $3; }
+                      else { tech_id = NULL; acro = $2; }
+                   alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
+                   if (!alias && $3) { alias = Set_new_external_alias(tech_id,acro); }/* Si dependance externe, on va chercher */
+                   alias = Get_alias_par_acronyme(tech_id, acro);
                    if (!alias)
                     { char *chaine;
-                      Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $2 );
+                      if ($3) Emettre_erreur_new( "Ligne %d: '%s:%s' is not defined", DlsScanner_get_lineno(), $2, $3 );
+                         else Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $2 );
 
                       $$=New_action();
                       taille = 2;
@@ -668,7 +674,7 @@ une_action:     barre SORTIE ENTIER
                     }
                    else                                                           /* L'alias existe, vérifions ses parametres */
                     { GList *options, *options_g, *options_d;
-                      options_g = g_list_copy( $3 );
+                      options_g = g_list_copy( $4 );
                       options_d = g_list_copy( alias->options );
                       options = g_list_concat( options_g, options_d );                  /* Concaténation des listes d'options */
                       if ($1 && (alias->bit==MNEMO_TEMPO ||
@@ -702,7 +708,8 @@ une_action:     barre SORTIE ENTIER
                          case MNEMO_CPTH      : $$=New_action_cpt_h( alias->num, options );   break;
                          case MNEMO_CPT_IMP   : $$=New_action_cpt_imp( alias->num, options ); break;
                          case MNEMO_MOTIF     : $$=New_action_icone( alias->num, options );   break;
-                         default: { Emettre_erreur_new( "Ligne %d: '%s' syntax error", DlsScanner_get_lineno(), alias->acronyme );
+                         default: { Emettre_erreur_new( "Ligne %d: '%s:%s' syntax error", DlsScanner_get_lineno(),
+                                                        alias->tech_id, alias->acronyme );
                                     $$=New_action();
                                     taille = 2;
                                     $$->alors = New_chaine( taille );
@@ -712,7 +719,8 @@ une_action:     barre SORTIE ENTIER
                        }
                       g_list_free(options);
                     }
-                   Liberer_options($3);                                                    /* On libére les options "locales" */
+                   Liberer_options($4);                                                    /* On libére les options "locales" */
+                   if ($3) g_free($3);
                    g_free($2);
                 }}
                 ;
