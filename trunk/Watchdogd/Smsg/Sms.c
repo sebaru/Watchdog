@@ -553,7 +553,6 @@
 /******************************************************************************************************************************/
  static gboolean Smsg_connect ( void )
   { GSM_Error error;
-    GSM_Debug_Info *debug_info;
 
     GSM_InitLocales(NULL);
     if ( (s = GSM_AllocStateMachine()) == NULL )                                                   /* Allocates state machine */
@@ -561,11 +560,13 @@
        return(FALSE);
      }
        
-	debug_info = GSM_GetDebug(s);
-	GSM_SetDebugGlobal(FALSE, debug_info);
-	GSM_SetDebugFile("gammurc.log", debug_info);
-	GSM_SetDebugLevel("textall", debug_info);
-
+	   if (Cfg_smsg.lib->Thread_debug)
+     { GSM_Debug_Info *debug_info;
+       debug_info = GSM_GetDebug(s);
+	      GSM_SetDebugGlobal(TRUE, debug_info);
+	      GSM_SetDebugFile("gammurc.log", debug_info);
+	      GSM_SetDebugLevel("textall", debug_info);
+     }
 	   error = GSM_FindGammuRC(&cfg, NULL);
 	   if (error != ERR_NONE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
