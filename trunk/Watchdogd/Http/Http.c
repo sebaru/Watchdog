@@ -407,6 +407,12 @@
                         Http_Send_response_code ( wsi, HTTP_200_OK );
                         return(1);
                       }
+                     else if ( ! strcasecmp( url, "/dls_reload" ) )
+                      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading DLS %d", __func__ );
+                        Partage->com_dls.Thread_reload = TRUE;
+                        Http_Send_response_code ( wsi, HTTP_200_OK );
+                        return(1);
+                      }
                      Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ); /* Bad Request */
                      Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Bad Request from %s/%s (sid %s): %s",
                                __func__, remote_name, remote_ip, Http_get_session_id(session), url );
