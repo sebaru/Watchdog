@@ -236,7 +236,7 @@
    	INI_Free(cfg);
    	GSM_SetConfigNum(s, 1);
 
-   	error = GSM_InitConnection(s, 1);
+   	error = GSM_InitConnection(s, 3);
 	   if (error != ERR_NONE)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
                 "%s: InitConnection Failed (%s)", __func__, GSM_ErrorString(error) );
@@ -553,15 +553,18 @@
 /******************************************************************************************************************************/
  static gboolean Smsg_connect ( void )
   { GSM_Error error;
+    GSM_Debug_Info *debug_info;
+
+    GSM_InitLocales(NULL);
     if ( (s = GSM_AllocStateMachine()) == NULL )                                                   /* Allocates state machine */
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: AllocStateMachine Error", __func__ );
        return(FALSE);
      }
        
-	/*debug_info = GSM_GetDebug(s);
+	debug_info = GSM_GetDebug(s);
 	GSM_SetDebugGlobal(FALSE, debug_info);
-	GSM_SetDebugFileDescriptor(stderr, TRUE, debug_info);
-	GSM_SetDebugLevel("textall", debug_info);*/
+	GSM_SetDebugFile("gammurc.log", debug_info);
+	GSM_SetDebugLevel("textall", debug_info);
 
 	   error = GSM_FindGammuRC(&cfg, NULL);
 	   if (error != ERR_NONE)
