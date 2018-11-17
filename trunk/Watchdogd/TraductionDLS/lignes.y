@@ -43,10 +43,16 @@
        };
 
 %token <val>    PVIRGULE VIRGULE T_DPOINTS DONNE EQUIV MOINS T_POUV T_PFERM T_EGAL OU ET BARRE T_FOIS T_DEFINE T_STATIC
-%token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_TOP_ALERTE T_HORLOGE
+
+%token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_TOP_ALERTE
 %token <val>    T_SPERS_DER T_SPERS_DERF T_SPERS_DAN T_SPERS_DANF T_OSYN_ACQ
 %token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_DOWN
-%token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM
+
+%token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE
+%token <val>    T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM
+
+%token <val>    T_TYPE T_ETAT T_ATTENTE T_DEFAUT T_ALARME T_VEILLE T_ALERTE T_DERANGEMENT T_DANGER
+%type  <val>    type_msg
 
 %token <val>    INF SUP INF_OU_EGAL SUP_OU_EGAL T_TRUE T_FALSE
 %type  <val>    ordre
@@ -54,7 +60,7 @@
 %token <val>    HEURE APRES AVANT LUNDI MARDI MERCREDI JEUDI VENDREDI SAMEDI DIMANCHE
 %type  <val>    modulateur jour_semaine
 
-%token <val>    T_BI T_MONO ENTREE SORTIE T_TEMPO T_TYPE T_RETARD
+%token <val>    T_BI T_MONO ENTREE SORTIE T_TEMPO T_HORLOGE
 %token <val>    T_MSG ICONE CPT_H T_CPT_IMP EANA T_START T_REGISTRE
 %type  <val>    alias_bit
 
@@ -689,9 +695,9 @@ une_action:     barre SORTIE ENTIER
                          $$->sinon = NULL;
                        }
                       else switch(alias->bit)
-                       { case MNEMO_TEMPO : $$=New_action_tempo( alias, options );        break;
-                         case MNEMO_MSG   : $$=New_action_msg( alias->num );              break;
-                         case MNEMO_SORTIE: $$=New_action_sortie( alias->num, $1 );       break;
+                       { case MNEMO_TEMPO : $$=New_action_tempo( alias, options ); break;
+                         case MNEMO_MSG   : $$=New_action_msg_by_alias( alias );   break;
+                         case MNEMO_SORTIE: $$=New_action_sortie( alias->num, $1 );  break;
                          case MNEMO_BISTABLE:
                                     if (alias->num >= NBR_BIT_BISTABLE_RESERVED || alias->type==ALIAS_TYPE_DYNAMIC)
                                      { $$=New_action_bi_by_alias( alias, $1 ); }
@@ -841,11 +847,26 @@ une_option:     MODE T_EGAL ENTIER
                    $$->type = T_RANDOM;
                    $$->entier = $3;
                 }}
+                | T_TYPE T_EGAL type_msg
+                {{ $$=New_option();
+                   $$->type = T_TYPE;
+                   $$->entier = $3;
+                }}
                 ;
 
 
 couleur:        ROUGE | VERT | BLEU | JAUNE | NOIR | BLANC | GRIS | ORANGE | KAKI
                 ;
+type_msg:         T_ETAT    {{ $$=MSG_ETAT; }}
+                | T_ATTENTE {{ $$=MSG_ATTENTE; }}
+                | T_DEFAUT  {{ $$=MSG_DEFAUT; }}
+                | T_ALARME  {{ $$=MSG_ALARME; }}
+                | T_VEILLE  {{ $$=MSG_VEILLE; }}
+                | T_ALERTE  {{ $$=MSG_ALERTE; }}
+                | T_DANGER  {{ $$=MSG_DANGER; }}
+                | T_DERANGEMENT {{ $$=MSG_DERANGEMENT; }}
+                ;
+
 %%
 
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -385,6 +385,29 @@
     return(action);
   }
 /******************************************************************************************************************************/
+/* New_action_msg_by_alias: Prepare une struct action avec une commande de type MSG                                           */
+/* Entrées: L'alias decouvert                                                                                                 */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
+ struct ACTION *New_action_msg_by_alias( struct ALIAS *alias )
+  { struct ACTION *action;
+    int taille;
+
+    if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par numéro ? */
+     { return(New_action_msg ( alias->num )); }
+
+    taille = 100;
+    action = New_action();
+    action->alors = New_chaine( taille );
+    action->sinon = New_chaine( taille );
+
+    g_snprintf( action->alors, taille, "Dls_data_set_msg ( \"%s\", \"%s\", &_MSG_%s_%s, TRUE );",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+    g_snprintf( action->sinon, taille, "Dls_data_set_msg ( \"%s\", \"%s\", &_MSG_%s_%s, FALSE );",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+    return(action);
+  }
+/******************************************************************************************************************************/
 /* Add_bit_to_list: Ajoute un bit dans la liste des bits utilisé                                                              */
 /* Entrées: le type de bit et son numéro                                                                                      */
 /* Sortie: FALSE si le bit est deja dans la liste                                                                             */
@@ -956,6 +979,8 @@
              g_snprintf( mnemo.mnemo_base.acro_syn, sizeof(mnemo.mnemo_base.acro_syn), "%s", Get_option_chaine( alias->options, T_ETIQUETTE ) );
              mnemo.mnemo_base.dls_id = Dls_plugin.id;
              mnemo.mnemo_base.type = alias->bit;
+             if (alias->bit == MNEMO_MSG)
+              { mnemo.mnemo_msg.type = Get_option_entier ( alias->options, T_TYPE ); }
              Mnemo_auto_create_for_dls ( &mnemo );
            }
           liste = liste->next;

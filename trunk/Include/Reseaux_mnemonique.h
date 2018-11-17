@@ -127,6 +127,11 @@
   { guint  valeur;                                                                                      /* Valeur du compteur */
   };
 
+/************************************************ Pour les messages ***********************************************************/
+ struct CMD_TYPE_MNEMO_MESSAGE
+  { guint type;                                                                                            /* Type du message */
+  };
+
 /******************************************************* Pour les temporisations **********************************************/
  struct CMD_TYPE_MNEMO_TEMPO
   { guint delai_on;                                                     /* delai avant mise à un (fixé par option mnémonique) */
@@ -154,6 +159,7 @@
             struct CMD_TYPE_MNEMO_TEMPO mnemo_tempo;
             struct CMD_TYPE_MNEMO_REGISTRE mnemo_r;
             struct CMD_TYPE_MNEMO_HORLOGE mnemo_horloge;
+            struct CMD_TYPE_MNEMO_MESSAGE mnemo_msg;
           };
   };
 
