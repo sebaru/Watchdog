@@ -135,8 +135,7 @@
     liste = Partage->Dls_data_AI;
     while (liste)
      { struct ANALOG_INPUT *ai = liste->data;
-       if( !strcmp( ai->tech_id, tech_id ) && !strcmp( ai->acronyme, acronyme ) )
-        { Charger_conf_AI ( ai ); }
+       if( !strcmp( ai->tech_id, tech_id ) && !strcmp( ai->acronyme, acronyme ) ) { Charger_conf_AI ( ai ); }
        liste = g_slist_next(liste);
      }
   }

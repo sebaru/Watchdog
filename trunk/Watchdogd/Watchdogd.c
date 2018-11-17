@@ -319,7 +319,9 @@
        Connect_zmq ( zmq_from_master, "tcp", Config.master_host, 5555 );
      }
 /************************************* Création des zones de bits internes dynamiques *****************************************/
-    Partage->Dls_data_AI = NULL;
+    Partage->Dls_data_AI  = NULL;
+    Partage->Dls_data_DI  = NULL;
+    Partage->Dls_data_MSG = NULL;
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single == FALSE)                                                                    /* Si demarrage des thread */

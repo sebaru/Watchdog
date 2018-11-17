@@ -93,6 +93,7 @@
     GSList *liste_msg_repeat;                                                          /* liste de struct MSGDB msg a envoyer */
                                                                        /* Distribution aux threads (par systeme d'abonnement) */
     GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
+    GSList *liste_event_msg;                                                        /* liste de struct MESSAGES msg a envoyer */
     GSList *liste_i;                                                             /* liste de I a traiter dans la distribution */
     GSList *liste_a;                                                             /* liste de A a traiter dans la distribution */
     struct ZMQUEUE *zmq_msg;                                                           /* Message Queue des messages Watchdog */
@@ -137,7 +138,7 @@
     struct REGISTRE registre[NBR_REGISTRE];
     GSList *Dls_data_DI;                                                                   /* Arbre des entrees dynamique TOR */
     GSList *Dls_data_AI;                                                                   /* Arbre des entrees dynamique ANA */
-
+    GSList *Dls_data_MSG;                                                                  /* Arbre des entrees dynamique TOR */
   };
 
 /************************************************ Définitions des prototypes **************************************************/

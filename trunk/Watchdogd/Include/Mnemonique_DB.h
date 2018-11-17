@@ -51,6 +51,7 @@
  extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB_by_acronyme ( gchar *tech_id, gchar *acronyme );
  extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB_type_num ( struct CMD_TYPE_NUM_MNEMONIQUE *critere );
  extern struct CMD_TYPE_MNEMO_FULL *Rechercher_mnemo_fullDB ( guint id );
+ extern struct CMD_TYPE_MNEMO_FULL *Rechercher_mnemo_fullDB_by_acronyme ( gchar*tech_id, gchar *acronyme );
  extern gboolean Modifier_mnemo_fullDB ( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
  extern gboolean Mnemo_auto_create_for_dls ( struct CMD_TYPE_MNEMO_FULL *mnemo );
 

@@ -103,7 +103,10 @@
   };
 
  struct MESSAGES
-  { gchar etat;
+  { struct CMD_TYPE_MESSAGE confDB;
+    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gchar etat;
     gint last_change;
     gint changes;
     gint next_repeat;
@@ -148,6 +151,7 @@
     GSList *Reset_M;                                                      /* liste des Mxxx a désactiver à la fin du tour prg */
     GSList *Set_Dls_Data;                                                       /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_Dls_Data;                                               /* liste des Mxxx a désactiver à la fin du tour prg */
+
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
     guint admin_start;                                                                              /* Demande de deconnexion */

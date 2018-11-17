@@ -53,7 +53,7 @@
  extern gboolean Dls_get_top_alerte ( void );
  extern gboolean Dls_data_get_bool ( gchar *tech_id, gchar *acronyme, gboolean **data_p );
  extern void     Dls_data_set_bool ( gchar *tech_id, gchar *acronyme, gboolean **data_p, gboolean valeur );
- extern void     Dls_data_set_msg ( gchar *tech_id, gchar *acronyme, gboolean **data_p, gboolean valeur );
+ extern void     Dls_data_set_msg ( gchar *tech_id, gchar *acronyme, gpointer **msg_p, gboolean etat );
  extern void     Dls_data_set_tempo ( gchar *tech_id, gchar *acronyme, gpointer **tempo_p, gboolean etat,
                                       gint delai_on, gint min_on, gint max_on, gint delai_off, gint random);
  extern gboolean Dls_data_get_tempo ( gchar *tech_id, gchar *acronyme, gpointer **tempo_p );

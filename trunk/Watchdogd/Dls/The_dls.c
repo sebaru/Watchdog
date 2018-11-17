@@ -859,7 +859,7 @@
        g_snprintf(chaine, sizeof(chaine), "%s:%s", tech_id, acronyme );
        data = Dls_data_get( chaine );
        if (!data)
-        { data = g_malloc ( sizeof(gboolean) );
+        { data = g_try_malloc ( sizeof(gboolean) );
           if (!data) { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for %s", __func__, chaine ); return; }
           Dls_data_add ( g_strdup(chaine), data );
         }
@@ -902,8 +902,8 @@
            { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
-          g_snprintf( ai->acronyme,    sizeof(ai->acronyme),    "%s", acronyme );
-          g_snprintf( ai->tech_id, sizeof(ai->tech_id), "%s", tech_id );
+          g_snprintf( ai->acronyme, sizeof(ai->acronyme), "%s", acronyme );
+          g_snprintf( ai->tech_id,  sizeof(ai->tech_id),  "%s", tech_id );
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
@@ -1034,6 +1034,59 @@
        return(tempo->state);
      }
     return(FALSE);    
+  }
+/******************************************************************************************************************************/
+/* Met à jour le message en parametre                                                                                         */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_msg ( gchar *tech_id, gchar *acronyme, gpointer **msg_p, gboolean etat )
+  { struct MESSAGES *msg;
+
+    if (!msg_p || !*msg_p)
+     { GSList *liste;
+       if ( !(acronyme && tech_id) ) return;
+       liste = Partage->Dls_data_MSG;
+       while (liste)
+        { msg = (struct MESSAGES *)liste->data;
+          if ( !strcmp ( msg->acronyme, acronyme ) && !strcmp( msg->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+       
+       if (!liste)
+        { msg = g_try_malloc0 ( sizeof(struct MESSAGES) );
+          if (!msg)
+           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+             return;
+           }
+          g_snprintf( msg->acronyme, sizeof(msg->acronyme), "%s", acronyme );
+          g_snprintf( msg->tech_id,  sizeof(msg->tech_id),  "%s", tech_id );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_MSG = g_slist_prepend ( Partage->Dls_data_MSG, msg );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding MSG '%s:%s'", __func__, tech_id, acronyme );
+        }
+       if (msg_p) *msg_p = (gpointer)msg;                                           /* Sauvegarde pour acceleration si besoin */
+      }
+    else msg = (struct MESSAGES *)*msg_p;
+
+    if ( msg->etat != etat )
+     { msg->etat = etat;
+
+       if ( msg->last_change + 10 <= Partage->top ) { msg->changes = 0; }            /* Si pas de change depuis plus de 1 sec */
+
+       if ( msg->changes > 5 && !(Partage->top % 50) )              /* Si persistence d'anomalie on prévient toutes les 5 sec */
+        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: last_change trop tot for MSG %s:%s !", __func__,
+                    msg->tech_id, msg->acronyme );
+        }
+       else                                                                                 /* On envoi l'envenementau master */
+        { pthread_mutex_lock( &Partage->com_msrv.synchro );                           /* Ajout dans la liste de msg a traiter */
+          Partage->com_msrv.liste_event_msg = g_slist_append( Partage->com_msrv.liste_event_msg, msg );
+          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+          msg->changes++;
+          msg->last_change = Partage->top;
+          Partage->audit_bit_interne_per_sec++;
+        }
+     }
   }
 /******************************************************************************************************************************/
 /* Dls_data_free_data: Libere la memoire pour les clefs et data contenu dans l'arbre Dls_data. Appellé par g_tree_foreach     */
