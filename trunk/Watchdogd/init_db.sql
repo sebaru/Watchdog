@@ -824,6 +824,7 @@ CREATE TABLE IF NOT EXISTS `config` (
 
 CREATE TABLE IF NOT EXISTS `msgs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_mnemo` int(11) NULL DEFAULT NULL,
   `num` int(11) NOT NULL DEFAULT '0',
   `dls_id` int(11) NOT NULL DEFAULT '1',
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,

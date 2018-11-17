@@ -952,10 +952,15 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 3779)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs ADD `id_mnemo` int(11) NULL DEFAULT NULL AFTER `id`" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 
 fin:
-    database_version=3751;
+    database_version=3779;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
