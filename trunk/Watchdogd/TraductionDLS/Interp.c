@@ -851,7 +851,7 @@
                         write (fd, chaine, nb_car);
                         break;
                    case MNEMO_MSG:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_MSG_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_MSG_%s_%s;\n", alias->tech_id, alias->acronyme );
                         write (fd, chaine, nb_car);
                         break;
                  }

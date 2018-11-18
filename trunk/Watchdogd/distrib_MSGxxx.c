@@ -256,7 +256,6 @@
 
             if (msg->etat == 0) Gerer_arrive_MSG_event_dls_off( msg );
        else if (msg->etat == 1) Gerer_arrive_MSG_event_dls_on ( msg );
-       g_free(event);
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
