@@ -139,7 +139,7 @@
         { g_snprintf( chaine, sizeof(chaine), " | - MSG -> num '%d' out of range", num ); }
        response = Admin_write ( response, chaine );
      } else
-    if ( ! strcmp ( commande, "msg" ) )
+    if ( ! strcmp ( commande, "new_msg" ) )
      { int num;
        gchar tech_id[80], acronyme[80];
        if (sscanf ( ligne, "%s %s %s", commande, tech_id, acronyme ) == 3)               /* Découpage de la ligne de commande */
