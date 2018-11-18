@@ -976,7 +976,7 @@
                                              " COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT'" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE modbus_modules ADD `tech_id` VARCHAR(32)"
-                                             " COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT ''");
+                                             " COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT hostname");
        Lancer_requete_SQL ( db, requete );
      }
   
