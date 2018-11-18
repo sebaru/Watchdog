@@ -319,9 +319,9 @@
        Connect_zmq ( zmq_from_master, "tcp", Config.master_host, 5555 );
      }
 /************************************* Création des zones de bits internes dynamiques *****************************************/
-    Partage->Dls_data_AI  = NULL;
-    Partage->Dls_data_DI  = NULL;
-    Partage->Dls_data_MSG = NULL;
+    Partage->Dls_data_AI   = NULL;
+    Partage->Dls_data_BOOL = NULL;
+    Partage->Dls_data_MSG  = NULL;
 
 /***************************************** Demarrage des threads builtin et librairies ****************************************/
     if (Config.single == FALSE)                                                                    /* Si demarrage des thread */
@@ -475,10 +475,12 @@
        Close_zmq( zmq_from_master );
      }
 /********************************* Dechargement des zones de bits internes dynamiques *****************************************/
-    g_slist_foreach (Partage->Dls_data_DI, (GFunc) g_free, NULL );
-    g_slist_free (Partage->Dls_data_DI);
+    g_slist_foreach (Partage->Dls_data_BOOL, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_BOOL);
     g_slist_foreach (Partage->Dls_data_AI, (GFunc) g_free, NULL );
     g_slist_free (Partage->Dls_data_AI);
+    g_slist_foreach (Partage->Dls_data_MSG, (GFunc) g_free, NULL );
+    g_slist_free (Partage->Dls_data_MSG);
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: fin boucle sans fin", __func__ );
     pthread_exit( NULL );

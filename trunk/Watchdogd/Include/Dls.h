@@ -102,11 +102,19 @@
     gint changes;                               /* Compte le nombre de changes afin de ne pas depasser une limite par seconde */
   };
 
+ struct DLS_BOOL
+  { gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gboolean etat;
+    gboolean edge_up;
+    gboolean edge_down;
+  };
+
  struct MESSAGES
   { struct CMD_TYPE_MESSAGE confDB;
     gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
-    gchar etat;
+    gboolean etat;
     gint last_change;
     gint changes;
     gint next_repeat;
@@ -145,7 +153,6 @@
     pthread_mutex_t synchro_traduction;                  /* Mutex pour interdire les traductions simultanées de plugins D.L.S */
     struct DLS_TREE *Dls_tree;                                                                       /* Arbre d'execution DLS */
     pthread_mutex_t synchro_data;                                      /* Mutex pour les acces concurrents à l'arbre des data */
-    GTree *Dls_data;
     GTree *Dls_data_tempo;                                                                   /* Arbres des temporisations DLS */
     GSList *Set_M;                                                              /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_M;                                                      /* liste des Mxxx a désactiver à la fin du tour prg */

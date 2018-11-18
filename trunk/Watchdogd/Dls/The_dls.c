@@ -773,14 +773,14 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme )
-  { gboolean *data_p=NULL;
-    Dls_data_set_bool ( tech_id, acronyme, &data_p, FALSE );
-    if (!data_p)
+  { gpointer *bool_p=NULL;
+    Dls_data_get_bool ( tech_id, acronyme, &bool_p );
+    if (!bool_p)
      { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: bit '%s:%s' not found", __func__, tech_id, acronyme );
        return;
      }
     pthread_mutex_lock( &Partage->com_dls.synchro );
-    Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, data_p );
+    Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, bool_p );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
     Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit '%s:%s' demandée", __func__, tech_id, acronyme );
   }
@@ -832,51 +832,112 @@
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
 /******************************************************************************************************************************/
-/* Dls_data_set: Ajoute une données à l'arbre des data dls                                                                    */
-/* Entrée : le propriétaire de la données, son nom, sa valeur                                                                 */
-/* Sortie : rien                                                                                                              */
+/* Dls_data_set_bool: Positionne un boolean                                                                                   */
+/* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
- static void Dls_data_add ( gchar *key, void *data )
-  { pthread_mutex_lock( &Partage->com_dls.synchro_data );
-    g_tree_insert ( Partage->com_dls.Dls_data, key, data );
-    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding key %s : %p", __func__, key, data );
-    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-  }
- static void *Dls_data_get ( gchar *key )
-  { void *data;
-    pthread_mutex_lock( &Partage->com_dls.synchro_data );
-    data = g_tree_lookup ( Partage->com_dls.Dls_data, key );
-    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-/*    if (!data)
-     { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : searching for key %s : %p failed.", __func__, key, data ); }*/
-    return(data);
-  }
- void Dls_data_set_bool ( gchar *tech_id, gchar *acronyme, gboolean **data_p, gboolean valeur )
-  { if (!data_p || !*data_p)
-     { gchar chaine[80];
-       gboolean *data;
-       if ( !(tech_id && acronyme) ) return;
-       g_snprintf(chaine, sizeof(chaine), "%s:%s", tech_id, acronyme );
-       data = Dls_data_get( chaine );
-       if (!data)
-        { data = g_try_malloc ( sizeof(gboolean) );
-          if (!data) { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for %s", __func__, chaine ); return; }
-          Dls_data_add ( g_strdup(chaine), data );
+ void Dls_data_set_bool ( gchar *tech_id, gchar *acronyme, gpointer **bool_p, gboolean valeur )
+  { struct DLS_BOOL *bool;
+
+    if (!bool_p || !*bool_p)
+     { GSList *liste;
+       if ( !(acronyme && tech_id) ) return;
+       liste = Partage->Dls_data_BOOL;
+       while (liste)
+        { bool = (struct DLS_BOOL *)liste->data;
+          if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
         }
-       *data = valeur;                                                                            /* Recopie dans la variable */
-       if (data_p) *data_p = data;                                                  /* Sauvegarde pour acceleration si besoin */
+       
+       if (!liste)
+        { bool = g_try_malloc0 ( sizeof(struct DLS_BOOL) );
+          if (!bool)
+           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+             return;
+           }
+          g_snprintf( bool->acronyme, sizeof(bool->acronyme), "%s", acronyme );
+          g_snprintf( bool->tech_id,  sizeof(bool->tech_id),  "%s", tech_id );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_BOOL = g_slist_prepend ( Partage->Dls_data_BOOL, bool );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding DLS_BOOL '%s:%s'", __func__, tech_id, acronyme );
+        }
+       if (bool_p) *bool_p = (gpointer)bool;                                        /* Sauvegarde pour acceleration si besoin */
       }
-    else
-     { **data_p = valeur; }                                                   /* Récopie directement via le pointeur acceléré */
+    else bool = (struct DLS_BOOL *)*bool_p;
+
+    if (valeur == TRUE && bool->etat==FALSE) { bool->edge_up = TRUE; }
+    else if (valeur == FALSE && bool->etat==TRUE) { bool->edge_down = TRUE; }
+    else { bool->edge_up = bool->edge_down = FALSE; }
+    bool->etat = valeur;
   }
- gboolean Dls_data_get_bool ( gchar *tech_id, gchar *acronyme, gboolean **data_p )
-  { gchar chaine[80];
-    gboolean *data;
-    if (data_p && *data_p) return (**data_p);                                        /* Si pointeur d'acceleration disponible */
-    g_snprintf(chaine, sizeof(chaine), "%s:%s", tech_id, acronyme );
-    data = Dls_data_get( chaine );
-    if (data) { return(*data); }
-    return(FALSE);    
+/******************************************************************************************************************************/
+/* Dls_data_get_bool: Remonte l'etat d'un boolean                                                                             */
+/* Sortie : TRUE sur le boolean est UP                                                                                        */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_bool ( gchar *tech_id, gchar *acronyme, gpointer **bool_p )
+  { struct DLS_BOOL *bool;
+    GSList *liste;
+    if (bool_p && *bool_p)                                                           /* Si pointeur d'acceleration disponible */
+     { bool = (struct DLS_BOOL *)*bool_p;
+       return( bool->etat );
+     }
+
+    liste = Partage->Dls_data_BOOL;
+    while (liste)
+     { bool = (struct DLS_BOOL *)liste->data;
+       if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+       
+    if (!liste) return(FALSE);
+    if (bool_p) *bool_p = (gpointer)bool;                                           /* Sauvegarde pour acceleration si besoin */
+    return( bool->etat );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_bool_up: Remonte le front montant d'un boolean                                                                */
+/* Sortie : TRUE sur le boolean vient de passer à UP                                                                          */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_bool_up ( gchar *tech_id, gchar *acronyme, gpointer **bool_p )
+  { struct DLS_BOOL *bool;
+    GSList *liste;
+    if (bool_p && *bool_p)                                                           /* Si pointeur d'acceleration disponible */
+     { bool = (struct DLS_BOOL *)*bool_p;
+       return( bool->edge_up );
+     }
+
+    liste = Partage->Dls_data_BOOL;
+    while (liste)
+     { bool = (struct DLS_BOOL *)liste->data;
+       if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+       
+    if (!liste) return(FALSE);
+    if (bool_p) *bool_p = (gpointer)bool;                                           /* Sauvegarde pour acceleration si besoin */
+    return( bool->edge_up );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_bool_down: Remonte le front descendant d'un boolean                                                           */
+/* Sortie : TRUE sur le boolean vient de passer à DOWN                                                                        */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_bool_down ( gchar *tech_id, gchar *acronyme, gpointer **bool_p )
+  { struct DLS_BOOL *bool;
+    GSList *liste;
+    if (bool_p && *bool_p)                                                           /* Si pointeur d'acceleration disponible */
+     { bool = (struct DLS_BOOL *)*bool_p;
+       return( bool->edge_down );
+     }
+
+    liste = Partage->Dls_data_BOOL;
+    while (liste)
+     { bool = (struct DLS_BOOL *)liste->data;
+       if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+       
+    if (!liste) return(FALSE);
+    if (bool_p) *bool_p = (gpointer)bool;                                           /* Sauvegarde pour acceleration si besoin */
+    return( bool->edge_down );
   }
 /******************************************************************************************************************************/
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
@@ -1279,7 +1340,6 @@
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
     Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
     Partage->com_dls.Thread_run         = TRUE;                                                         /* Le thread tourne ! */
-    Partage->com_dls.Dls_data = g_tree_new ( (GCompareFunc) strcmp ); 
     Partage->com_dls.Dls_data_tempo = g_tree_new ( (GCompareFunc) strcmp ); 
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                                          /* Chargement des modules dls */
@@ -1329,8 +1389,6 @@
        sched_yield();
      }
     Decharger_plugins();                                                                      /* Dechargement des modules DLS */
-    g_tree_foreach (Partage->com_dls.Dls_data, Dls_data_free_data, NULL );
-    g_tree_destroy (Partage->com_dls.Dls_data);
     g_tree_foreach (Partage->com_dls.Dls_data_tempo, Dls_data_free_all_data, NULL );
     g_tree_destroy (Partage->com_dls.Dls_data_tempo);
     Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: DLS Down (%p)", __func__, pthread_self() );

@@ -758,7 +758,7 @@
      }
     module->DI = g_try_malloc0( sizeof(gpointer) * module->nbr_entree_tor );
     if (!module->DI)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Memory Error DI", __func__ );
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Memory Error for DI", __func__ );
        return;
      }
 
@@ -772,7 +772,7 @@
        if ( mnemo->type == MNEMO_ENTREE_ANA )
         { gchar debut[80];
           gint num;
-          if ( sscanf ( mnemo->ev_text, "%[^:]:AI%d", debut, &num ) == 2 )                       /* Découpage de la ligne ev_text */
+          if ( sscanf ( mnemo->ev_text, "%[^:]:AI%d", debut, &num ) == 2 )                   /* Découpage de la ligne ev_text */
            { if (num<module->nbr_entree_ana)
               { Dls_data_set_AI ( mnemo->dls_tech_id, mnemo->acronyme, &module->AI[num], 0.0 ); }
              else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
@@ -784,7 +784,7 @@
        g_free(mnemo);
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    g_snprintf( critere, sizeof(critere),"%s:DI%%", module->modbus.libelle ); 
+    g_snprintf( critere, sizeof(critere),"%s:DI%%", module->modbus.hostname ); 
     if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
     else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
@@ -793,7 +793,7 @@
        if ( mnemo->type == MNEMO_ENTREE )
         { gchar debut[80];
           gint num;
-          if ( sscanf ( mnemo->ev_text, "%[^:]:DI%d", debut, &num ) == 2 )                       /* Découpage de la ligne ev_text */
+          if ( sscanf ( mnemo->ev_text, "%[^:]:DI%d", debut, &num ) == 2 )                   /* Découpage de la ligne ev_text */
            { if (num<module->nbr_entree_tor)
               { Dls_data_set_bool ( mnemo->dls_tech_id, mnemo->acronyme, (gboolean **)&module->DI[cpt], FALSE ); }
              else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
@@ -804,6 +804,8 @@
         }
        g_free(mnemo);
      }
+/******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
+    Dls_data_set_bool ( module->modbus.hostname, "COMM", &module->bit_comm, FALSE );
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: Module '%s' : mapping done", __func__,
               module->modbus.libelle );
   }

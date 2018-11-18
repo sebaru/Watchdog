@@ -30,19 +30,6 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Admin_get_list: Affiche la liste des data dans l'arbre dls_data                                                            */
-/* Entrée: la clef, la value et le data qui est la 'response'                                                                 */
-/* Sortie: FALSE                                                                                                              */
-/******************************************************************************************************************************/
- static gboolean Admin_get_bool_list ( gpointer key, gpointer value, gpointer data )
-  { gchar chaine[256];
-    gchar *response = *(gchar **)data;
-    g_snprintf( chaine, sizeof(chaine), " | - %s -> %d", key, (*(gboolean *)value ? 1 : 0) );
-    response = Admin_write ( response, chaine );
-    *(gchar **)data = response;
-    return(FALSE);
-  }    
-/******************************************************************************************************************************/
 /* Admin_get: Gere une commande 'admin get' depuis une response admin                                                         */
 /* Entrée: le response et la ligne de commande                                                                                */
 /* Sortie: Néant                                                                                                              */
@@ -59,7 +46,6 @@
        response = Admin_write ( response, " | - new_ea $tech_id $acronyme  - Get Analog Input $tech_id $acronyme" );
        response = Admin_write ( response, " | - new_msg $tech_id $acronyme - Get Message $tech_id $acronyme" );
        response = Admin_write ( response, " | - list_ea                   - List all dynamic Digital Input" );
-       response = Admin_write ( response, " | - list                      - List all running bits" );
        response = Admin_write ( response, " | - e $num                    - Get E[$num]" );
        response = Admin_write ( response, " | - ea $num                   - Get EA[$num]" );
        response = Admin_write ( response, " | - m $num                    - Get M[$num]" );
@@ -160,9 +146,6 @@
        sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " | - M%03d = %d", num, M(num) );
        response = Admin_write ( response, chaine );
-     } else
-    if ( ! strcmp ( commande, "list" ) )
-     { g_tree_foreach ( Partage->com_dls.Dls_data, (GTraverseFunc)Admin_get_bool_list, &response );
      } else
     if ( ! strcmp ( commande, "e" ) )
      { int num;

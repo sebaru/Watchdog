@@ -125,6 +125,7 @@
     struct TRAME_MODBUS_REPONSE response;
     gpointer **DI;                                                             /* Tableau dynamique d'accès aux bits internes */
     gpointer **AI;                                                             /* Tableau dynamique d'accès aux bits internes */
+    gpointer *bit_comm;                                                                      /* Bit interne d'etat de la comm */
   };
 
 /****************************************************** Déclaration des prototypes ********************************************/

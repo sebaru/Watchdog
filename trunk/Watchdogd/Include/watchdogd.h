@@ -136,7 +136,7 @@
     struct I_MOTIF i[ NBR_BIT_CONTROLE ];                                                               /* DLS=rw, Sserveur=r */
     struct TEMPO Tempo_R[NBR_TEMPO];
     struct REGISTRE registre[NBR_REGISTRE];
-    GSList *Dls_data_DI;                                                                   /* Arbre des entrees dynamique TOR */
+    GSList *Dls_data_BOOL;                                                              /* Arbre des bistables et monostables */
     GSList *Dls_data_AI;                                                                   /* Arbre des entrees dynamique ANA */
     GSList *Dls_data_MSG;                                                                  /* Arbre des entrees dynamique TOR */
   };
