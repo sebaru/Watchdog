@@ -482,7 +482,7 @@
     switch( mnemo_full->mnemo_base.type )
      { case MNEMO_MSG:
         { struct CMD_TYPE_MESSAGE *mnemo_msg;
-          mnemo_msg = Rechercher_messageDB_par_id ( mnemo_full->mnemo_base.id );
+          mnemo_msg = Rechercher_messageDB_par_mnemo_id ( mnemo_full->mnemo_base.id );
           if (mnemo_msg) 
            { memcpy ( &mnemo_full->mnemo_msg, mnemo_msg, sizeof(struct CMD_TYPE_MESSAGE) );
              g_free(mnemo_msg);
