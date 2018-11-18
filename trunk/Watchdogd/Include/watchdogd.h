@@ -134,11 +134,12 @@
     guchar b [ (NBR_BIT_BISTABLE>>3) + 1 ];                                                                      /* Bistables */
     struct MESSAGES g [ NBR_MESSAGE_ECRITS ];                                                   /* Message vers veille et syn */
     struct I_MOTIF i[ NBR_BIT_CONTROLE ];                                                               /* DLS=rw, Sserveur=r */
-    struct TEMPO Tempo_R[NBR_TEMPO];
+    struct DLS_TEMPO Tempo_R[NBR_TEMPO];
     struct REGISTRE registre[NBR_REGISTRE];
-    GSList *Dls_data_BOOL;                                                              /* Arbre des bistables et monostables */
-    GSList *Dls_data_AI;                                                                   /* Arbre des entrees dynamique ANA */
-    GSList *Dls_data_MSG;                                                                  /* Arbre des entrees dynamique TOR */
+    GSList *Dls_data_TEMPO;                                                                               /* Liste des tempos */
+    GSList *Dls_data_BOOL;                                                              /* Liste des bistables et monostables */
+    GSList *Dls_data_AI;                                                                   /* Liste des entrees dynamique ANA */
+    GSList *Dls_data_MSG;                                                                  /* Liste des entrees dynamique TOR */
   };
 
 /************************************************ Définitions des prototypes **************************************************/

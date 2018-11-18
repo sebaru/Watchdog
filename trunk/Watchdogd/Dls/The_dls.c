@@ -482,10 +482,10 @@
 /* Entrée: la structure tempo et son etat                                                                                     */
 /* Sortie: Neant                                                                                                              */
 /******************************************************************************************************************************/
- static void ST_local( struct TEMPO *tempo, int etat )
+ static void ST_local( struct DLS_TEMPO *tempo, int etat )
   { static guint seed;
-    if (tempo->status == TEMPO_NOT_COUNTING && etat == 1)
-     { tempo->status = TEMPO_WAIT_FOR_DELAI_ON;
+    if (tempo->status == DLS_TEMPO_NOT_COUNTING && etat == 1)
+     { tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_ON;
        if (tempo->confDB.random)
         { gfloat ratio;
           ratio = (gfloat)rand_r(&seed)/RAND_MAX;
@@ -497,57 +497,57 @@
        tempo->date_on = Partage->top + tempo->confDB.delai_on;
      }
 
-    if (tempo->status == TEMPO_WAIT_FOR_DELAI_ON && etat == 0)
-     { tempo->status = TEMPO_NOT_COUNTING; }
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON && etat == 0)
+     { tempo->status = DLS_TEMPO_NOT_COUNTING; }
 
-    if (tempo->status == TEMPO_WAIT_FOR_DELAI_ON && tempo->date_on <= Partage->top)
-     { tempo->status = TEMPO_WAIT_FOR_MIN_ON;
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON && tempo->date_on <= Partage->top)
+     { tempo->status = DLS_TEMPO_WAIT_FOR_MIN_ON;
        tempo->state = TRUE;
      }
 
-    if (tempo->status == TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
         Partage->top < tempo->date_on + tempo->confDB.min_on )
      { if (Partage->top+tempo->confDB.delai_off <= tempo->date_on + tempo->confDB.min_on)
             { tempo->date_off = tempo->date_on+tempo->confDB.min_on; }
        else { tempo->date_off = Partage->top+tempo->confDB.delai_off; }
-       tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
+       tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
      }
     
-    if (tempo->status == TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
         tempo->date_on + tempo->confDB.min_on <= Partage->top )
      { tempo->date_off = Partage->top+tempo->confDB.delai_off;
-       tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
+       tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
      }
 
-    if (tempo->status == TEMPO_WAIT_FOR_MIN_ON && etat == 1 &&
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_MIN_ON && etat == 1 &&
         tempo->date_on + tempo->confDB.min_on <= Partage->top )
-     { tempo->status = TEMPO_WAIT_FOR_MAX_ON;
+     { tempo->status = DLS_TEMPO_WAIT_FOR_MAX_ON;
      }
 
-    if (tempo->status == TEMPO_WAIT_FOR_MAX_ON && etat == 0 )
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_MAX_ON && etat == 0 )
      { if (tempo->confDB.max_on)
             { if (Partage->top+tempo->confDB.delai_off < tempo->date_on+tempo->confDB.max_on)
                    { tempo->date_off = Partage->top + tempo->confDB.delai_off; }
               else { tempo->date_off = tempo->date_on+tempo->confDB.max_on; }
             }
        else { tempo->date_off = Partage->top+tempo->confDB.delai_off; }
-       tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
+       tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
      }
 
-    if (tempo->status == TEMPO_WAIT_FOR_MAX_ON && etat == 1 && tempo->confDB.max_on &&
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_MAX_ON && etat == 1 && tempo->confDB.max_on &&
         tempo->date_on + tempo->confDB.max_on <= Partage->top )
      { tempo->date_off = tempo->date_on+tempo->confDB.max_on;
-       tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
+       tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
      }
 
-    if (tempo->status == TEMPO_WAIT_FOR_DELAI_OFF && tempo->date_off <= Partage->top )
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_OFF && tempo->date_off <= Partage->top )
      { tempo->date_on = tempo->date_off = 0;
-       tempo->status = TEMPO_WAIT_FOR_COND_OFF;
+       tempo->status = DLS_TEMPO_WAIT_FOR_COND_OFF;
        tempo->state = FALSE;
      }
 
-    if (tempo->status == TEMPO_WAIT_FOR_COND_OFF && etat == 0 )
-     { tempo->status = TEMPO_NOT_COUNTING; }
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_COND_OFF && etat == 0 )
+     { tempo->status = DLS_TEMPO_NOT_COUNTING; }
   }
 /******************************************************************************************************************************/
 /* STR: Positionnement d'une Tempo retard DLS                                                                                 */
@@ -555,7 +555,7 @@
 /* Sortie: Neant                                                                                                              */
 /******************************************************************************************************************************/
  void ST( int num, int etat )
-  { struct TEMPO *tempo;
+  { struct DLS_TEMPO *tempo;
 
     if (num<0 || num>=NBR_TEMPO)
      { if (!(Partage->top % 600))
@@ -1060,41 +1060,64 @@
 /******************************************************************************************************************************/
  void Dls_data_set_tempo ( gchar *tech_id, gchar *acronyme, gpointer **tempo_p, gboolean etat,
                            gint delai_on, gint min_on, gint max_on, gint delai_off, gint random)
-  { if (!tempo_p || !*tempo_p)
-     { gchar chaine[80];
-       struct TEMPO *tempo;
-       g_snprintf(chaine, sizeof(chaine), "%s:%s", tech_id, acronyme );
-       tempo = g_tree_lookup ( Partage->com_dls.Dls_data_tempo, chaine );
-       if (!tempo)
-        { tempo = g_malloc0 ( sizeof(struct TEMPO) );
-          if (!tempo) { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for %s", __func__, chaine ); return; }
+  { struct DLS_TEMPO *tempo;
+
+    if (!tempo_p || !*tempo_p)
+     { GSList *liste;
+       if ( !(acronyme && tech_id) ) return;
+       liste = Partage->Dls_data_TEMPO;
+       while (liste)
+        { tempo = (struct DLS_TEMPO *)liste->data;
+          if ( !strcmp ( tempo->acronyme, acronyme ) && !strcmp( tempo->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+       
+       if (!liste)
+        { tempo = g_try_malloc0 ( sizeof(struct DLS_TEMPO) );
+          if (!tempo)
+           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+             return;
+           }
+          g_snprintf( tempo->acronyme, sizeof(tempo->acronyme), "%s", acronyme );
+          g_snprintf( tempo->tech_id,  sizeof(tempo->tech_id),  "%s", tech_id );
           tempo->confDB.delai_on  = delai_on;
           tempo->confDB.min_on    = min_on;
           tempo->confDB.max_on    = max_on;
           tempo->confDB.delai_off = delai_off;
           tempo->confDB.random    = random;
-          g_tree_insert ( Partage->com_dls.Dls_data_tempo, g_strdup(chaine), tempo );
-          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding key %s : %p", __func__, chaine, tempo );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_TEMPO = g_slist_prepend ( Partage->Dls_data_TEMPO, tempo );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding TEMPO '%s:%s'", __func__, tech_id, acronyme );
         }
        if (tempo_p) *tempo_p = (gpointer)tempo;                                     /* Sauvegarde pour acceleration si besoin */
       }
-     ST_local ( (struct TEMPO *)*tempo_p, etat );                                                 /* Recopie dans la variable */
+    else tempo = (struct DLS_TEMPO *)*tempo_p;
+
+    ST_local ( tempo, etat );                                                                     /* Recopie dans la variable */
   }
+/******************************************************************************************************************************/
+/* Dls_data_get_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
+/* Entrée : l'acronyme, le owner dls, un pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
  gboolean Dls_data_get_tempo ( gchar *tech_id, gchar *acronyme, gpointer **tempo_p )
-  { gchar chaine[80];
-    struct TEMPO *tempo;
+  { struct DLS_TEMPO *tempo;
+    GSList *liste;
     if (tempo_p && *tempo_p)                                                         /* Si pointeur d'acceleration disponible */
-     { tempo = (struct TEMPO *)*tempo_p;
-       return (tempo->state);
+     { tempo = (struct DLS_TEMPO *)*tempo_p;
+       return( tempo->state );
      }
-    g_snprintf(chaine, sizeof(chaine), "%s:%s", tech_id, acronyme );
-    tempo = g_tree_lookup ( Partage->com_dls.Dls_data_tempo, chaine );
-    if (tempo)
-     { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : key %s found val %p", __func__, chaine, tempo );
-       if (tempo_p) *tempo_p = (gpointer)tempo;                                     /* Sauvegarde pour acceleration si besoin */
-       return(tempo->state);
+
+    liste = Partage->Dls_data_TEMPO;
+    while (liste)
+     { tempo = (struct DLS_TEMPO *)liste->data;
+       if ( !strcmp ( tempo->acronyme, acronyme ) && !strcmp( tempo->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
      }
-    return(FALSE);    
+       
+    if (!liste) return(FALSE);
+    if (tempo_p) *tempo_p = (gpointer)tempo;                                        /* Sauvegarde pour acceleration si besoin */
+    return( tempo->state );    
   }
 /******************************************************************************************************************************/
 /* Met à jour le message en parametre                                                                                         */
@@ -1340,7 +1363,6 @@
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
     Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
     Partage->com_dls.Thread_run         = TRUE;                                                         /* Le thread tourne ! */
-    Partage->com_dls.Dls_data_tempo = g_tree_new ( (GCompareFunc) strcmp ); 
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                                          /* Chargement des modules dls */
     SB_SYS(1, 0);                                                                                      /* B1 est toujours à 0 */
@@ -1389,8 +1411,6 @@
        sched_yield();
      }
     Decharger_plugins();                                                                      /* Dechargement des modules DLS */
-    g_tree_foreach (Partage->com_dls.Dls_data_tempo, Dls_data_free_all_data, NULL );
-    g_tree_destroy (Partage->com_dls.Dls_data_tempo);
     Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: DLS Down (%p)", __func__, pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
