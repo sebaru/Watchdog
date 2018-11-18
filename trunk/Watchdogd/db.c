@@ -953,7 +953,7 @@
      }
 
     if (database_version < 3779)
-     { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs ADD `id_mnemo` int(11) NULL DEFAULT NULL AFTER `id`" );
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs ADD `mnemo_id` int(11) NULL DEFAULT NULL AFTER `id`" );
        Lancer_requete_SQL ( db, requete );
      }
 
