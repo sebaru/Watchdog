@@ -107,46 +107,55 @@
 /******************************************************************************************************************************/
  static gint Ajouter_modifier_modbusDB ( struct MODBUSDB *modbus, gboolean ajout )
   { gchar requete[2048];
-    gchar *libelle, *hostname;
+    gchar *description, *hostname, *tech_id;
     gboolean retour_sql;
     struct DB *db;
     gint retour;
 
-    libelle = Normaliser_chaine ( modbus->libelle );                                         /* Formatage correct des chaines */
-    if (!libelle)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: Normalisation libelle impossible", __func__ );
+    description = Normaliser_chaine ( modbus->description );                                         /* Formatage correct des chaines */
+    if (!description)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: Normalisation description impossible", __func__ );
+       return(-1);
+     }
+
+    tech_id = Normaliser_chaine ( modbus->tech_id );                                         /* Formatage correct des chaines */
+    if (!tech_id)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: Normalisation tech_id impossible", __func__ );
+       g_free(description);
        return(-1);
      }
 
     hostname = Normaliser_chaine ( modbus->hostname );                                                   /* Formatage correct des chaines */
     if (!hostname)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: Normalisation hostname impossible", __func__ );
-       Libere_DB_SQL( &db );
-       g_free(libelle);
+       g_free(tech_id);
+       g_free(description);
        return(-1);
      }
 
     if ( ajout == TRUE )
      { g_snprintf( requete, sizeof(requete),
-                  "INSERT INTO %s(instance_id,date_create,enable,hostname,bit,watchdog,libelle,map_E,map_EA,map_A,map_AA,max_nbr_E) "
-                  "VALUES ('%s',NOW(),'%d','%s',%d,%d,'%s','%d','%d','%d','%d','%d')",
-                   NOM_TABLE_MODULE_MODBUS, g_get_host_name(), modbus->enable, hostname, modbus->bit, modbus->watchdog, libelle,
+                  "INSERT INTO %s(instance_id,date_create,enable,hostname,tech_id,bit,watchdog,description,"
+                  "map_E,map_EA,map_A,map_AA,max_nbr_E) "
+                  "VALUES ('%s',NOW(),'%d','%s',%d,%d,'%s','%s','%d','%d','%d','%d','%d')",
+                   NOM_TABLE_MODULE_MODBUS, g_get_host_name(), modbus->enable, hostname, tech_id, modbus->bit, modbus->watchdog, description,
                    modbus->map_E, modbus->map_EA, modbus->map_A, modbus->map_AA, modbus->max_nbr_E
                  );
      }
     else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                   "UPDATE %s SET "             
-                  "enable='%d',hostname='%s',bit='%d',watchdog='%d',libelle='%s',"
+                  "enable='%d',hostname='%s',tech_id='%s',bit='%d',watchdog='%d',description='%s',"
                   "map_E='%d',map_EA='%d',map_A='%d',map_AA='%d',max_nbr_E='%d'"
                   " WHERE id=%d",
                    NOM_TABLE_MODULE_MODBUS,
-                   modbus->enable, hostname, modbus->bit, modbus->watchdog, libelle,
+                   modbus->enable, hostname, tech_id, modbus->bit, modbus->watchdog, description,
                    modbus->map_E, modbus->map_EA, modbus->map_A, modbus->map_AA, modbus->max_nbr_E,
                    modbus->id );
       }
     g_free(hostname);
-    g_free(libelle);
+    g_free(tech_id);
+    g_free(description);
 
     db = Init_DB_SQL();       
     if (!db)
@@ -187,8 +196,8 @@
   { gchar requete[256];
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT id,date_create,enable,hostname,bit,watchdog,libelle,map_E,map_EA,map_A,map_AA,max_nbr_E "
-                " FROM %s ORDER BY libelle",
+                "SELECT id,date_create,enable,hostname,tech_id,bit,watchdog,description,map_E,map_EA,map_A,map_AA,max_nbr_E "
+                " FROM %s ORDER BY description",
                 NOM_TABLE_MODULE_MODBUS );
 
     return ( Lancer_requete_SQL ( db, requete ) );                                             /* Execution de la requete SQL */
@@ -211,18 +220,19 @@
     if (!modbus) Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR,
                           "%s: Erreur allocation mémoire", __func__ );
     else
-     { g_snprintf( modbus->libelle, sizeof(modbus->libelle), "%s", db->row[6] );
+     { g_snprintf( modbus->description, sizeof(modbus->description), "%s", db->row[7] );
+       g_snprintf( modbus->tech_id, sizeof(modbus->tech_id), "%s", db->row[4] );
        g_snprintf( modbus->hostname, sizeof(modbus->hostname), "%s", db->row[3] );
        g_snprintf( modbus->date_create, sizeof(modbus->date_create), "%s", db->row[1] );
        modbus->id       = atoi(db->row[0]);
        modbus->enable   = atoi(db->row[2]);
-       modbus->bit      = atoi(db->row[4]);
-       modbus->watchdog = atoi(db->row[5]);
-       modbus->map_E    = atoi(db->row[7]);
-       modbus->map_EA   = atoi(db->row[8]);
-       modbus->map_A    = atoi(db->row[9]);
-       modbus->map_AA   = atoi(db->row[10]);
-       modbus->max_nbr_E= atoi(db->row[11]);
+       modbus->bit      = atoi(db->row[5]);
+       modbus->watchdog = atoi(db->row[6]);
+       modbus->map_E    = atoi(db->row[8]);
+       modbus->map_EA   = atoi(db->row[9]);
+       modbus->map_A    = atoi(db->row[10]);
+       modbus->map_AA   = atoi(db->row[11]);
+       modbus->max_nbr_E= atoi(db->row[12]);
      }
     return(modbus);
   }
@@ -763,7 +773,7 @@
      }
 
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    g_snprintf( critere, sizeof(critere),"%s:AI%%", module->modbus.hostname ); 
+    g_snprintf( critere, sizeof(critere),"%s:AI%%", module->modbus.tech_id ); 
     if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
     else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
@@ -784,7 +794,7 @@
        g_free(mnemo);
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    g_snprintf( critere, sizeof(critere),"%s:DI%%", module->modbus.hostname ); 
+    g_snprintf( critere, sizeof(critere),"%s:DI%%", module->modbus.tech_id ); 
     if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
     else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
@@ -795,7 +805,7 @@
           gint num;
           if ( sscanf ( mnemo->ev_text, "%[^:]:DI%d", debut, &num ) == 2 )                   /* Découpage de la ligne ev_text */
            { if (num<module->nbr_entree_tor)
-              { Dls_data_set_bool ( mnemo->dls_tech_id, mnemo->acronyme, (gboolean **)&module->DI[cpt], FALSE ); }
+              { Dls_data_set_bool ( mnemo->dls_tech_id, mnemo->acronyme, &module->DI[cpt], FALSE ); }
              else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
                             mnemo->ev_text, num, module->nbr_entree_tor );
            }
@@ -805,9 +815,9 @@
        g_free(mnemo);
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    Dls_data_set_bool ( module->modbus.hostname, "COMM", &module->bit_comm, FALSE );
+    Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: Module '%s' : mapping done", __func__,
-              module->modbus.libelle );
+              module->modbus.description );
   }
 /******************************************************************************************************************************/
 /* Recuperer_borne: Recupere les informations d'une borne MODBUS                                                              */
