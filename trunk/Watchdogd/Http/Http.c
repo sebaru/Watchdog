@@ -408,8 +408,32 @@
                         return(1);
                       }
                      else if ( ! strcasecmp( url, "/dls_reload" ) )
-                      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading DLS %d", __func__ );
+                      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading DLS", __func__ );
                         Partage->com_dls.Thread_reload = TRUE;
+                        Http_Send_response_code ( wsi, HTTP_200_OK );
+                        return(1);
+                      }
+                     else if ( ! strncasecmp( url, "/reload/", 8 ) )
+                      { gchar *target = url+8;
+                        GSList *liste;
+                        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                                  "%s: Reloading start for %s", __func__, target );
+                        liste = Partage->com_msrv.Librairies;                            /* Parcours de toutes les librairies */
+                        while(liste)
+                         { struct LIBRAIRIE *lib = liste->data;
+                           if ( ! strcmp( target, lib->admin_prompt ) )
+                            { if (lib->Thread_run == FALSE)
+                               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                                          "%s: reloading %s -> Library found but not started.", __func__, target );
+                               }    
+                              else
+                               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                                          "%s: reloading %s -> Library found. Sending Reload.", __func__, target );
+                                 lib->Thread_reload = TRUE;
+                               }    
+                            }
+                           liste = g_slist_next(liste);
+                         }
                         Http_Send_response_code ( wsi, HTTP_200_OK );
                         return(1);
                       }
