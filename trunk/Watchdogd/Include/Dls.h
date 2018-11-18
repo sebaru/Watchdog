@@ -184,6 +184,7 @@
  extern void SB_SYS( int num, int etat );
  extern void SE( int num, int etat );
  extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer **ai_p, float val_avant_ech );
+ extern gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer **msg_p );
  extern void SEA( int num, float val_avant_ech );
  extern void SEA_range( int num, int range );
  extern void SEA_ech( int num, float val_ech );

@@ -54,9 +54,10 @@
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'GET'" );
 
-       response = Admin_write ( response, " | - new_b $tech_id $acronyme  - Get bistable $tech_id $acronyme" );
-       response = Admin_write ( response, " | - new_t $tech_id $acronyme  - Get Tempo $tech_id $acronyme" );
-       response = Admin_write ( response, " | - new_ea $tech_id $acronyme - Get Analog Input $tech_id $acronyme" );
+       response = Admin_write ( response, " | - new_b $tech_id $acronyme   - Get bistable $tech_id $acronyme" );
+       response = Admin_write ( response, " | - new_t $tech_id $acronyme   - Get Tempo $tech_id $acronyme" );
+       response = Admin_write ( response, " | - new_ea $tech_id $acronyme  - Get Analog Input $tech_id $acronyme" );
+       response = Admin_write ( response, " | - new_msg $tech_id $acronyme - Get Message $tech_id $acronyme" );
        response = Admin_write ( response, " | - list_ea                   - List all dynamic Digital Input" );
        response = Admin_write ( response, " | - list                      - List all running bits" );
        response = Admin_write ( response, " | - e $num                    - Get E[$num]" );
@@ -137,6 +138,22 @@
         } else
         { g_snprintf( chaine, sizeof(chaine), " | - MSG -> num '%d' out of range", num ); }
        response = Admin_write ( response, chaine );
+     } else
+    if ( ! strcmp ( commande, "msg" ) )
+     { int num;
+       gchar tech_id[80], acronyme[80];
+       if (sscanf ( ligne, "%s %s %s", commande, tech_id, acronyme ) == 3)               /* Découpage de la ligne de commande */
+        { struct MESSAGES *msg = NULL;
+          Dls_data_get_MSG ( tech_id, acronyme, (gpointer)&msg );
+          if (msg)
+           { g_snprintf( chaine, sizeof(chaine), " | - MSG %s:%s = %d, persist = %d, changes = %d, last_change = %d top=%d",
+                      tech_id,acronyme, msg->etat, msg->persist, msg->changes, msg->last_change, Partage->top );
+             response = Admin_write ( response, chaine );
+           } else
+           { g_snprintf( chaine, sizeof(chaine), " | - MSG: %s:%s not found", tech_id, acronyme );
+             response = Admin_write ( response, chaine );
+	          }
+        }
      } else
     if ( ! strcmp ( commande, "m" ) )
      { int num;

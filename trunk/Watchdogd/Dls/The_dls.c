@@ -1089,6 +1089,29 @@
      }
   }
 /******************************************************************************************************************************/
+/* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
+/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer **msg_p )
+  { struct MESSAGES *msg;
+    GSList *liste;
+    if (msg_p && *msg_p)                                                             /* Si pointeur d'acceleration disponible */
+     { msg = (struct MESSAGES *)*msg_p;
+       return( msg->etat );
+     }
+
+    liste = Partage->Dls_data_MSG;
+    while (liste)
+     { msg = (struct MESSAGES *)liste->data;
+       if ( !strcmp ( msg->acronyme, acronyme ) && !strcmp( msg->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+       
+    if (!liste) return(FALSE);
+    if (msg_p) *msg_p = (gpointer)msg;                                              /* Sauvegarde pour acceleration si besoin */
+    return( msg->etat );    
+  }
+/******************************************************************************************************************************/
 /* Dls_data_free_data: Libere la memoire pour les clefs et data contenu dans l'arbre Dls_data. Appellé par g_tree_foreach     */
 /* Entrée : la clef a libérer, la value qui va avec et un pointer non utilisé                                                 */
 /* Sortie : FALSE pour poursuivre le cheminement de l'arbre                                                                   */
