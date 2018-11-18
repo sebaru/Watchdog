@@ -132,9 +132,9 @@
     else if (mnemo->mnemo_base.type == MNEMO_MSG)                                                      /* Ajout d'une horloge */
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "INSERT INTO msgs "
-                   "SET id_mnemo=LAST_INSERT_ID(),type='%d',num=0,enable=1"
+                   "SET id_mnemo=LAST_INSERT_ID(),type='%d',num=0,enable=1,dls_id='%d'"
                    " ON DUPLICATE KEY UPDATE type=VALUES(type)",
-                   mnemo->mnemo_msg.type );
+                   mnemo->mnemo_msg.type, mnemo->mnemo_base.dls_id );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
     retour = Lancer_requete_SQL ( db, "COMMIT;" );                                             /* Execution de la requete SQL */

@@ -957,10 +957,24 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 3781)
+     { g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs CHANGE `libelle` `libelle` VARCHAR(256)"
+                                             " COLLATE utf8_unicode_ci NOT NULL DEFAULT 'No libelle'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs CHANGE `libelle_audio` `libelle_audio` VARCHAR(256)"
+                                             " COLLATE utf8_unicode_ci NOT NULL DEFAULT 'No audio'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs CHANGE `libelle_sms` `libelle_sms` VARCHAR(256)"
+                                             " COLLATE utf8_unicode_ci NOT NULL DEFAULT 'No sms'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs CHANGE `time_repeat` `time_repeat` int(11) NOT NULL DEFAULT '0'");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 
 fin:
-    database_version=3779;
+    database_version=3781;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
