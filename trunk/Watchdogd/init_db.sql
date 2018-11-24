@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS `cameras` (
 
 CREATE TABLE IF NOT EXISTS `class` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `date_create` datetime NOT NULL DEFAULT NOW(),
   `libelle` varchar(241) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
@@ -337,6 +338,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_DigitalInput` (
 
 CREATE TABLE IF NOT EXISTS `icons` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `date_create` datetime NOT NULL DEFAULT NOW(),
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `id_classe` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
@@ -778,7 +780,7 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `ev_
 
 CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `date_create` datetime NOT NULL,
+  `date_create` datetime NOT NULL DEFAULT NOW(),
   `enable` tinyint(1) NOT NULL,
   `hostname` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',
   `tech_id` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT hostname,
