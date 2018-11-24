@@ -387,7 +387,7 @@
                 { g_snprintf( pss->url, sizeof(pss->url), "/postfile" );
                   return(0);
                 }
-               else if ( ! strcasecmp( url, "/dls_reload" ) )
+               else if ( ! strcasecmp( url, "/dls/reload" ) )
                 { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading DLS", __func__ );
                   Partage->com_dls.Thread_reload = TRUE;
                   Http_Send_response_code ( wsi, HTTP_200_OK );
@@ -431,9 +431,23 @@
                         Http_Send_response_code ( wsi, HTTP_200_OK );
                         return(1);
                       }
-                     else if ( ! strcasecmp( url, "/dlsdelete" ) )
+                     else if ( ! strcasecmp( url, "/dls/delete" ) )
                       { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Delete DLS %d", __func__, id );
                         Decharger_plugin_by_id( id );
+                        Http_Send_response_code ( wsi, HTTP_200_OK );
+                        return(1);
+                      }
+                     else if ( ! strcasecmp( url, "/dls/activate" ) )
+                      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Activating DLS %d", __func__, id );
+                        while (Partage->com_dls.admin_start) sched_yield();
+                        Partage->com_dls.admin_start = id;
+                        Http_Send_response_code ( wsi, HTTP_200_OK );
+                        return(1);
+                      }
+                     else if ( ! strcasecmp( url, "/dls/deactivate" ) )
+                      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: DesActivating DLS %d", __func__, id );
+                        while (Partage->com_dls.admin_stop) sched_yield();
+                        Partage->com_dls.admin_stop = id;
                         Http_Send_response_code ( wsi, HTTP_200_OK );
                         return(1);
                       }
