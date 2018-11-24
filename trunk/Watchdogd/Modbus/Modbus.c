@@ -258,6 +258,7 @@
     g_free(module->AI);
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
              "%s : Module %d disconnected", __func__, module->modbus.id );
+    Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
     SB( module->modbus.bit, 0 );                                                  /* Mise a zero du bit interne lié au module */
   }
 /******************************************************************************************************************************/
@@ -835,6 +836,7 @@
     else
      { int cpt_e, cpt_byte, cpt_poid, cpt;
        module->date_last_reponse = Partage->top;                                                   /* Estampillage de la date */
+       Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, TRUE );
        SB( module->modbus.bit, 1 );                                                  /* Mise a 1 du bit interne lié au module */
        if (ntohs(module->response.transaction_id) != module->transaction_id)                              /* Mauvaise reponse */
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,

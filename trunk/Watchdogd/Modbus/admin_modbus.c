@@ -89,8 +89,9 @@
                 Modbus_mode_to_string(module), module->modbus.date_create );
     response = Admin_write ( response, chaine );
 
-    g_snprintf( chaine, sizeof(chaine), " | - enable = %d, started = %d (bit B%04d=%d), watchdog = %03d",
+    g_snprintf( chaine, sizeof(chaine), " | - enable = %d, started = %d (bit B%04d=%d, '%s:COMM'=%d), watchdog = %03d",
                 module->modbus.enable, module->started, module->modbus.bit, B(module->modbus.bit),
+                module->modbus.tech_id, Dls_data_get_bool( module->modbus.tech_id, "COMM", NULL ),
                 module->modbus.watchdog );
     response = Admin_write ( response, chaine );
 
