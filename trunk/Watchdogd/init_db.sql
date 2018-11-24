@@ -172,9 +172,10 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `layer` int(11) NOT NULL DEFAULT '0',
   `mnemo_id` int(11) NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-  FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`icone`) REFERENCES `icons` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -331,18 +332,6 @@ CREATE TABLE IF NOT EXISTS `mnemos_DigitalInput` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `gids`
---
-
-CREATE TABLE IF NOT EXISTS `gids` (
-  `id_util` int(11) NOT NULL DEFAULT '0',
-  `gids` int(11) NOT NULL DEFAULT '0',
-  FOREIGN KEY (`id_util`) REFERENCES `util` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `icons`
 --
 
@@ -350,7 +339,8 @@ CREATE TABLE IF NOT EXISTS `icons` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `id_classe` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`id_classe`) REFERENCES `class` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
 
 --

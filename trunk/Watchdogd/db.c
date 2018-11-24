@@ -980,10 +980,20 @@
        Lancer_requete_SQL ( db, requete );
      }
   
+    if (database_version < 3796)
+     { g_snprintf( requete, sizeof(requete), "DROP TABLE gids" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE icons ENGINE=INNODB");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE icons ADD FOREIGN KEY (`id_classe`)"
+                                             " REFERENCES `class` (`id`) ON DELETE CASCADE;");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 
 fin:
-    database_version=3792;
+    database_version=3796;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
