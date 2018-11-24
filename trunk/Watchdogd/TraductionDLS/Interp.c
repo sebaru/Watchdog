@@ -665,8 +665,14 @@
     alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
     if (!alias) { return(NULL); }
 
+    if (!strcmp(tech_id,"THIS")) tech_id=Dls_plugin.tech_id;
+
     mnemo = Rechercher_mnemo_baseDB_by_acronyme ( tech_id, acronyme );
-    if (!mnemo) { g_free(alias); return(NULL); }
+    if (!mnemo)
+     { g_free(alias);
+       Emettre_erreur_new( "Bit %s:%s not found", tech_id, acronyme );
+       return(NULL);
+     }
     alias->type     = ALIAS_TYPE_DYNAMIC;
     alias->tech_id  = g_strdup(mnemo->dls_tech_id);
     alias->acronyme = g_strdup(mnemo->acronyme);
