@@ -988,6 +988,9 @@
        g_snprintf( requete, sizeof(requete), "ALTER TABLE icons ADD FOREIGN KEY (`id_classe`)"
                                              " REFERENCES `class` (`id`) ON DELETE CASCADE;");
        Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "ALTER TABLE syns_motifs ADD FOREIGN KEY (`icone`)"
+                                             " REFERENCES `icons` (`id`) ON DELETE CASCADE");
+       Lancer_requete_SQL ( db, requete );
      }
 
     Libere_DB_SQL(&db);
