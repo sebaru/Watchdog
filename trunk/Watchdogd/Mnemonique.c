@@ -34,12 +34,12 @@
  #include <string.h>
 
  #define MNEMO_SQL_SELECT "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.ev_text,parent_syn.page,syn.page," \
-                          "dls.name, mnemo.tableau, mnemo.acro_syn, mnemo.ev_host, mnemo.ev_thread, syn.id, dls.tech_id" \
+                          "dls.shortname, mnemo.tableau, mnemo.acro_syn, mnemo.ev_host, mnemo.ev_thread, syn.id, dls.tech_id" \
                           " FROM mnemos as mnemo" \
                           " INNER JOIN dls as dls ON mnemo.dls_id=dls.id" \
                           " INNER JOIN syns as syn ON dls.syn_id = syn.id" \
                           " INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id"
-
+       
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
