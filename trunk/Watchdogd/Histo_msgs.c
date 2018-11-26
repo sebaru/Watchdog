@@ -103,11 +103,19 @@
           g_free(nom_ack);
         }
        else
-        { g_snprintf( requete, sizeof(requete),                                                                /* Requete SQL */
-                      "UPDATE %s as histo, %s as msg SET histo.alive=0,histo.date_fin='%d'"
-                      " WHERE histo.alive=1 AND histo.id_msg = msg.id AND msg.num='%d'",
-                      NOM_TABLE_HISTO_MSGS, NOM_TABLE_MSG,
-                      (int)histo->date_fin, histo->msg.num );
+        { if (histo->msg.num!=0)
+           { g_snprintf( requete, sizeof(requete),                                                                /* Requete SQL */
+                         "UPDATE %s as histo, %s as msg SET histo.alive=0,histo.date_fin='%d'"
+                         " WHERE histo.alive=1 AND histo.id_msg = msg.id AND msg.num='%d'",
+                         NOM_TABLE_HISTO_MSGS, NOM_TABLE_MSG,
+                         (int)histo->date_fin, histo->msg.num );
+           }
+          else
+           { g_snprintf( requete, sizeof(requete),                                                                /* Requete SQL */
+                         "UPDATE %s as histo SET histo.alive=0,histo.date_fin='%d'"
+                         " WHERE histo.id_msg='%d'",
+                         NOM_TABLE_HISTO_MSGS, (int)histo->date_fin, histo->msg.id );
+           }
         }
      }
 
