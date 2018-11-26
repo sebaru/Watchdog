@@ -160,7 +160,7 @@
                 g_free(tempo);
               }
            }
-          pthread_mutex_unlock( &Partage->com_dls.synchro );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
           if (plugin->handle) dlclose( plugin->handle );
           dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
                                                                              /* Destruction de l'entete associé dans la GList */
