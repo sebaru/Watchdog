@@ -144,13 +144,24 @@
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Decharger_plugin_by_id_dls_tree ( gint id, struct DLS_TREE *dls_tree )
-  { GSList *liste;
+  { GSList *liste, *liste_bit;
 
     liste = dls_tree->Liste_plugin_dls;
     while(liste)                                                                            /* Liberation mémoire des modules */
      { struct PLUGIN_DLS *plugin = liste->data;
        if (plugin->plugindb.id == id)
-        { if (plugin->handle) dlclose( plugin->handle );
+        { pthread_mutex_lock( &Partage->com_dls.synchro_data );                           /* Décharge tous les bits du module */
+          liste_bit = Partage->Dls_data_TEMPO;
+          while(liste_bit)
+           { struct DLS_TEMPO *tempo = liste_bit->data;
+             liste_bit = g_slist_next(liste_bit);
+             if (!strcmp(tempo->tech_id, plugin->plugindb.tech_id))
+              { Partage->Dls_data_TEMPO = g_slist_remove( Partage->Dls_data_TEMPO, tempo );
+                g_free(tempo);
+              }
+           }
+          pthread_mutex_unlock( &Partage->com_dls.synchro );
+          if (plugin->handle) dlclose( plugin->handle );
           dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
                                                                              /* Destruction de l'entete associé dans la GList */
           Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d unloaded (%s)", __func__,
