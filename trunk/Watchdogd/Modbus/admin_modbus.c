@@ -84,9 +84,9 @@
 
     response = Admin_write ( response, " |---------------------------" );
 
-    g_snprintf( chaine, sizeof(chaine), " | MODBUS[%02d] - '%s' - '%s' -----> '%s' - %s (added '%s')",
-                module->modbus.id, module->modbus.tech_id, module->modbus.description,
-                Modbus_mode_to_string(module), module->modbus.date_create );
+    g_snprintf( chaine, sizeof(chaine), " | MODBUS[%02d] - '%s' - Mode:'%s' -----> '%s' (added '%s')",
+                module->modbus.id, module->modbus.tech_id, Modbus_mode_to_string(module),
+                module->modbus.description, module->modbus.date_create );
     response = Admin_write ( response, chaine );
 
     g_snprintf( chaine, sizeof(chaine), " | - enable = %d, started = %d (bit B%04d=%d, '%s:COMM'=%d), watchdog = %03d",
