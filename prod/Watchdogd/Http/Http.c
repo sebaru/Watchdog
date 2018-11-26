@@ -387,6 +387,36 @@
                 { g_snprintf( pss->url, sizeof(pss->url), "/postfile" );
                   return(0);
                 }
+               else if ( ! strcasecmp( url, "/dls/reload" ) )
+                { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading DLS", __func__ );
+                  Partage->com_dls.Thread_reload = TRUE;
+                  Http_Send_response_code ( wsi, HTTP_200_OK );
+                  return(1);
+                }
+               else if ( ! strncasecmp( url, "/reload/", 8 ) )
+                { gchar *target = url+8;
+                  GSList *liste;
+                  Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                            "%s: Reloading start for %s", __func__, target );
+                  liste = Partage->com_msrv.Librairies;                            /* Parcours de toutes les librairies */
+                  while(liste)
+                   { struct LIBRAIRIE *lib = liste->data;
+                     if ( ! strcmp( target, lib->admin_prompt ) )
+                      { if (lib->Thread_run == FALSE)
+                         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                                    "%s: reloading %s -> Library found but not started.", __func__, target );
+                         }    
+                        else
+                         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                                    "%s: reloading %s -> Library found. Sending Reload.", __func__, target );
+                           lib->Thread_reload = TRUE;
+                         }    
+                      }
+                     liste = g_slist_next(liste);
+                   }
+                  Http_Send_response_code ( wsi, HTTP_200_OK );
+                  return(1);
+                }
                else                                                                                             /* Par défaut */
                 { gchar token_id[12];
                   const gchar *id_s;
@@ -401,9 +431,23 @@
                         Http_Send_response_code ( wsi, HTTP_200_OK );
                         return(1);
                       }
-                     else if ( ! strcasecmp( url, "/dlsdelete" ) )
+                     else if ( ! strcasecmp( url, "/dls/delete" ) )
                       { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Delete DLS %d", __func__, id );
                         Decharger_plugin_by_id( id );
+                        Http_Send_response_code ( wsi, HTTP_200_OK );
+                        return(1);
+                      }
+                     else if ( ! strcasecmp( url, "/dls/activate" ) )
+                      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Activating DLS %d", __func__, id );
+                        while (Partage->com_dls.admin_start) sched_yield();
+                        Partage->com_dls.admin_start = id;
+                        Http_Send_response_code ( wsi, HTTP_200_OK );
+                        return(1);
+                      }
+                     else if ( ! strcasecmp( url, "/dls/deactivate" ) )
+                      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: DesActivating DLS %d", __func__, id );
+                        while (Partage->com_dls.admin_stop) sched_yield();
+                        Partage->com_dls.admin_stop = id;
                         Http_Send_response_code ( wsi, HTTP_200_OK );
                         return(1);
                       }

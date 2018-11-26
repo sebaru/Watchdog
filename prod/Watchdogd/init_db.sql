@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS `cameras` (
 
 CREATE TABLE IF NOT EXISTS `class` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `date_create` datetime NOT NULL DEFAULT NOW(),
   `libelle` varchar(241) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
@@ -172,9 +173,10 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `layer` int(11) NOT NULL DEFAULT '0',
   `mnemo_id` int(11) NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-  FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`icone`) REFERENCES `icons` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -331,26 +333,16 @@ CREATE TABLE IF NOT EXISTS `mnemos_DigitalInput` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `gids`
---
-
-CREATE TABLE IF NOT EXISTS `gids` (
-  `id_util` int(11) NOT NULL DEFAULT '0',
-  `gids` int(11) NOT NULL DEFAULT '0',
-  FOREIGN KEY (`id_util`) REFERENCES `util` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `icons`
 --
 
 CREATE TABLE IF NOT EXISTS `icons` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `date_create` datetime NOT NULL DEFAULT NOW(),
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `id_classe` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`id_classe`) REFERENCES `class` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
 
 --
@@ -788,12 +780,13 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `ev_
 
 CREATE TABLE IF NOT EXISTS `modbus_modules` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `date_create` datetime NOT NULL,
+  `date_create` datetime NOT NULL DEFAULT NOW(),
   `enable` tinyint(1) NOT NULL,
   `hostname` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT '',
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT hostname,
+  `description` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'DEFAULT',
   `watchdog` int(11) NOT NULL,
   `bit` int(11) NOT NULL,
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `map_E` int(11) NOT NULL,
   `max_nbr_E` int(11) NOT NULL,
   `map_EA` int(11) NOT NULL,
@@ -824,19 +817,20 @@ CREATE TABLE IF NOT EXISTS `config` (
 
 CREATE TABLE IF NOT EXISTS `msgs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `mnemo_id` int(11) NULL DEFAULT NULL,
   `num` int(11) NOT NULL DEFAULT '0',
   `dls_id` int(11) NOT NULL DEFAULT '1',
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `libelle_audio` text COLLATE utf8_unicode_ci NOT NULL,
-  `libelle_sms` text COLLATE utf8_unicode_ci NOT NULL,
+  `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No libelle",
+  `libelle_audio` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No audio",
+  `libelle_sms` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL "No sms",
   `type` int(11) NOT NULL DEFAULT '0',
   `audio` tinyint(1) NOT NULL DEFAULT '0',
-  `bit_audio` int(11) DEFAULT NULL,
+  `bit_audio` int(11) DEFAULT NULL DEFAULT '0',
   `enable` tinyint(1) NOT NULL DEFAULT '0',
   `persist` tinyint(1) NOT NULL DEFAULT '0',
   `sms` int(11) NOT NULL DEFAULT '0',
   `time_repeat` int(11) NOT NULL DEFAULT '0',
-  `is_mp3` tinyint(1) NOT NULL,
+  `is_mp3` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;

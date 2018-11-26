@@ -340,6 +340,34 @@
     return(message);
   }
 /******************************************************************************************************************************/
+/* Rechercher_messageDB_par_id: Recupération du message dont l'id est en parametre                                            */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: une GList                                                                                                          */
+/******************************************************************************************************************************/
+ struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_mnemo_id ( guint mnemo_id )
+  { struct CMD_TYPE_MESSAGE *message;
+    gchar requete[512];
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(NULL);
+     }
+   
+    g_snprintf( requete, sizeof(requete), MSGS_SQL_SELECT                                                      /* Requete SQL */
+                " WHERE msg.mnemo_id=%d LIMIT 1", mnemo_id                                                                       /* Where */
+              );
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
+
+    message = Recuperer_messageDB_suite( &db );
+    if (message) Libere_DB_SQL ( &db );
+    return(message);
+  }
+/******************************************************************************************************************************/
 /* Modifier_messageDB: Modification d'un message Watchdog                                                                     */
 /* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                                                */
 /* Sortie: -1 si pb, id sinon                                                                                                 */

@@ -482,10 +482,10 @@
 /* Entrée: la structure tempo et son etat                                                                                     */
 /* Sortie: Neant                                                                                                              */
 /******************************************************************************************************************************/
- static void ST_local( struct TEMPO *tempo, int etat )
+ static void ST_local( struct DLS_TEMPO *tempo, int etat )
   { static guint seed;
-    if (tempo->status == TEMPO_NOT_COUNTING && etat == 1)
-     { tempo->status = TEMPO_WAIT_FOR_DELAI_ON;
+    if (tempo->status == DLS_TEMPO_NOT_COUNTING && etat == 1)
+     { tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_ON;
        if (tempo->confDB.random)
         { gfloat ratio;
           ratio = (gfloat)rand_r(&seed)/RAND_MAX;
@@ -497,57 +497,57 @@
        tempo->date_on = Partage->top + tempo->confDB.delai_on;
      }
 
-    if (tempo->status == TEMPO_WAIT_FOR_DELAI_ON && etat == 0)
-     { tempo->status = TEMPO_NOT_COUNTING; }
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON && etat == 0)
+     { tempo->status = DLS_TEMPO_NOT_COUNTING; }
 
-    if (tempo->status == TEMPO_WAIT_FOR_DELAI_ON && tempo->date_on <= Partage->top)
-     { tempo->status = TEMPO_WAIT_FOR_MIN_ON;
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_ON && tempo->date_on <= Partage->top)
+     { tempo->status = DLS_TEMPO_WAIT_FOR_MIN_ON;
        tempo->state = TRUE;
      }
 
-    if (tempo->status == TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
         Partage->top < tempo->date_on + tempo->confDB.min_on )
      { if (Partage->top+tempo->confDB.delai_off <= tempo->date_on + tempo->confDB.min_on)
             { tempo->date_off = tempo->date_on+tempo->confDB.min_on; }
        else { tempo->date_off = Partage->top+tempo->confDB.delai_off; }
-       tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
+       tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
      }
     
-    if (tempo->status == TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
         tempo->date_on + tempo->confDB.min_on <= Partage->top )
      { tempo->date_off = Partage->top+tempo->confDB.delai_off;
-       tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
+       tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
      }
 
-    if (tempo->status == TEMPO_WAIT_FOR_MIN_ON && etat == 1 &&
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_MIN_ON && etat == 1 &&
         tempo->date_on + tempo->confDB.min_on <= Partage->top )
-     { tempo->status = TEMPO_WAIT_FOR_MAX_ON;
+     { tempo->status = DLS_TEMPO_WAIT_FOR_MAX_ON;
      }
 
-    if (tempo->status == TEMPO_WAIT_FOR_MAX_ON && etat == 0 )
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_MAX_ON && etat == 0 )
      { if (tempo->confDB.max_on)
             { if (Partage->top+tempo->confDB.delai_off < tempo->date_on+tempo->confDB.max_on)
                    { tempo->date_off = Partage->top + tempo->confDB.delai_off; }
               else { tempo->date_off = tempo->date_on+tempo->confDB.max_on; }
             }
        else { tempo->date_off = Partage->top+tempo->confDB.delai_off; }
-       tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
+       tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
      }
 
-    if (tempo->status == TEMPO_WAIT_FOR_MAX_ON && etat == 1 && tempo->confDB.max_on &&
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_MAX_ON && etat == 1 && tempo->confDB.max_on &&
         tempo->date_on + tempo->confDB.max_on <= Partage->top )
      { tempo->date_off = tempo->date_on+tempo->confDB.max_on;
-       tempo->status = TEMPO_WAIT_FOR_DELAI_OFF;
+       tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
      }
 
-    if (tempo->status == TEMPO_WAIT_FOR_DELAI_OFF && tempo->date_off <= Partage->top )
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_DELAI_OFF && tempo->date_off <= Partage->top )
      { tempo->date_on = tempo->date_off = 0;
-       tempo->status = TEMPO_WAIT_FOR_COND_OFF;
+       tempo->status = DLS_TEMPO_WAIT_FOR_COND_OFF;
        tempo->state = FALSE;
      }
 
-    if (tempo->status == TEMPO_WAIT_FOR_COND_OFF && etat == 0 )
-     { tempo->status = TEMPO_NOT_COUNTING; }
+    if (tempo->status == DLS_TEMPO_WAIT_FOR_COND_OFF && etat == 0 )
+     { tempo->status = DLS_TEMPO_NOT_COUNTING; }
   }
 /******************************************************************************************************************************/
 /* STR: Positionnement d'une Tempo retard DLS                                                                                 */
@@ -555,7 +555,7 @@
 /* Sortie: Neant                                                                                                              */
 /******************************************************************************************************************************/
  void ST( int num, int etat )
-  { struct TEMPO *tempo;
+  { struct DLS_TEMPO *tempo;
 
     if (num<0 || num>=NBR_TEMPO)
      { if (!(Partage->top % 600))
@@ -772,17 +772,17 @@
 /* Envoyer_commande_dls_data: Gestion des envois de commande DLS via dls_data                                                 */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- void Envoyer_commande_dls_data ( gchar *nom, gchar *owner )
-  { gboolean *data_p=NULL;
-    Dls_data_set_bool ( nom, owner, &data_p, FALSE );
-    if (!data_p)
-     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: bit '%s:%s' not found", __func__, owner, nom );
+ void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme )
+  { gpointer *bool_p=NULL;
+    Dls_data_get_bool ( tech_id, acronyme, &bool_p );
+    if (!bool_p)
+     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: bit '%s:%s' not found", __func__, tech_id, acronyme );
        return;
      }
     pthread_mutex_lock( &Partage->com_dls.synchro );
-    Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, data_p );
+    Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, bool_p );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
-    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit '%s:%s' demandée", __func__, owner, nom );
+    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit '%s:%s' demandée", __func__, tech_id, acronyme );
   }
 /******************************************************************************************************************************/
 /* Set_cde_exterieure: Mise à un des bits de commande exterieure                                                              */
@@ -832,82 +832,143 @@
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
 /******************************************************************************************************************************/
-/* Dls_data_set: Ajoute une données à l'arbre des data dls                                                                    */
-/* Entrée : le propriétaire de la données, son nom, sa valeur                                                                 */
-/* Sortie : rien                                                                                                              */
+/* Dls_data_set_bool: Positionne un boolean                                                                                   */
+/* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
- static void Dls_data_add ( gchar *key, void *data )
-  { pthread_mutex_lock( &Partage->com_dls.synchro_data );
-    g_tree_insert ( Partage->com_dls.Dls_data, key, data );
-    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding key %s : %p", __func__, key, data );
-    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-  }
- static void *Dls_data_get ( gchar *key )
-  { void *data;
-    pthread_mutex_lock( &Partage->com_dls.synchro_data );
-    data = g_tree_lookup ( Partage->com_dls.Dls_data, key );
-    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-/*    if (!data)
-     { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : searching for key %s : %p failed.", __func__, key, data ); }*/
-    return(data);
-  }
- void Dls_data_set_bool ( gchar *nom, gchar *owner, gboolean **data_p, gboolean valeur )
-  { if (!data_p || !*data_p)
-     { gchar chaine[80];
-       gboolean *data;
-       if ( !(nom && owner) ) return;
-       g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
-       data = Dls_data_get( chaine );
-       if (!data)
-        { data = g_malloc ( sizeof(gboolean) );
-          if (!data) { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for %s", __func__, chaine ); return; }
-          Dls_data_add ( g_strdup(chaine), data );
+ void Dls_data_set_bool ( gchar *tech_id, gchar *acronyme, gpointer **bool_p, gboolean valeur )
+  { struct DLS_BOOL *bool;
+
+    if (!bool_p || !*bool_p)
+     { GSList *liste;
+       if ( !(acronyme && tech_id) ) return;
+       liste = Partage->Dls_data_BOOL;
+       while (liste)
+        { bool = (struct DLS_BOOL *)liste->data;
+          if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
         }
-       *data = valeur;                                                                            /* Recopie dans la variable */
-       if (data_p) *data_p = data;                                                  /* Sauvegarde pour acceleration si besoin */
+       
+       if (!liste)
+        { bool = g_try_malloc0 ( sizeof(struct DLS_BOOL) );
+          if (!bool)
+           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+             return;
+           }
+          g_snprintf( bool->acronyme, sizeof(bool->acronyme), "%s", acronyme );
+          g_snprintf( bool->tech_id,  sizeof(bool->tech_id),  "%s", tech_id );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_BOOL = g_slist_prepend ( Partage->Dls_data_BOOL, bool );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding DLS_BOOL '%s:%s'", __func__, tech_id, acronyme );
+        }
+       if (bool_p) *bool_p = (gpointer)bool;                                        /* Sauvegarde pour acceleration si besoin */
       }
-    else
-     { **data_p = valeur; }                                                   /* Récopie directement via le pointeur acceléré */
+    else bool = (struct DLS_BOOL *)*bool_p;
+
+    if (valeur == TRUE && bool->etat==FALSE) { bool->edge_up = TRUE; }
+    else if (valeur == FALSE && bool->etat==TRUE) { bool->edge_down = TRUE; }
+    else { bool->edge_up = bool->edge_down = FALSE; }
+    bool->etat = valeur;
   }
- gboolean Dls_data_get_bool ( gchar *nom, gchar *owner, gboolean **data_p )
-  { gchar chaine[80];
-    gboolean *data;
-    if (data_p && *data_p) return (**data_p);                                        /* Si pointeur d'acceleration disponible */
-    g_snprintf(chaine, sizeof(chaine), "%s_%s", nom, owner );
-    data = Dls_data_get( chaine );
-    if (data) { return(*data); }
-    return(FALSE);    
+/******************************************************************************************************************************/
+/* Dls_data_get_bool: Remonte l'etat d'un boolean                                                                             */
+/* Sortie : TRUE sur le boolean est UP                                                                                        */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_bool ( gchar *tech_id, gchar *acronyme, gpointer **bool_p )
+  { struct DLS_BOOL *bool;
+    GSList *liste;
+    if (bool_p && *bool_p)                                                           /* Si pointeur d'acceleration disponible */
+     { bool = (struct DLS_BOOL *)*bool_p;
+       return( bool->etat );
+     }
+
+    liste = Partage->Dls_data_BOOL;
+    while (liste)
+     { bool = (struct DLS_BOOL *)liste->data;
+       if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+       
+    if (!liste) return(FALSE);
+    if (bool_p) *bool_p = (gpointer)bool;                                           /* Sauvegarde pour acceleration si besoin */
+    return( bool->etat );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_bool_up: Remonte le front montant d'un boolean                                                                */
+/* Sortie : TRUE sur le boolean vient de passer à UP                                                                          */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_bool_up ( gchar *tech_id, gchar *acronyme, gpointer **bool_p )
+  { struct DLS_BOOL *bool;
+    GSList *liste;
+    if (bool_p && *bool_p)                                                           /* Si pointeur d'acceleration disponible */
+     { bool = (struct DLS_BOOL *)*bool_p;
+       return( bool->edge_up );
+     }
+
+    liste = Partage->Dls_data_BOOL;
+    while (liste)
+     { bool = (struct DLS_BOOL *)liste->data;
+       if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+       
+    if (!liste) return(FALSE);
+    if (bool_p) *bool_p = (gpointer)bool;                                           /* Sauvegarde pour acceleration si besoin */
+    return( bool->edge_up );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_bool_down: Remonte le front descendant d'un boolean                                                           */
+/* Sortie : TRUE sur le boolean vient de passer à DOWN                                                                        */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_bool_down ( gchar *tech_id, gchar *acronyme, gpointer **bool_p )
+  { struct DLS_BOOL *bool;
+    GSList *liste;
+    if (bool_p && *bool_p)                                                           /* Si pointeur d'acceleration disponible */
+     { bool = (struct DLS_BOOL *)*bool_p;
+       return( bool->edge_down );
+     }
+
+    liste = Partage->Dls_data_BOOL;
+    while (liste)
+     { bool = (struct DLS_BOOL *)liste->data;
+       if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+       
+    if (!liste) return(FALSE);
+    if (bool_p) *bool_p = (gpointer)bool;                                           /* Sauvegarde pour acceleration si besoin */
+    return( bool->edge_down );
   }
 /******************************************************************************************************************************/
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_AI ( gchar *dls_tech_id, gchar *acronyme, gpointer **ai_p, float val_avant_ech )
+ void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer **ai_p, float val_avant_ech )
   { struct ANALOG_INPUT *ai;
     gboolean need_arch;
 
     if (!ai_p || !*ai_p)
      { GSList *liste;
-       if ( !(acronyme && dls_tech_id) ) return;
+       if ( !(acronyme && tech_id) ) return;
        liste = Partage->Dls_data_AI;
        while (liste)
         { ai = (struct ANALOG_INPUT *)liste->data;
-          if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->dls_tech_id, dls_tech_id ) ) break;
+          if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
        
        if (!liste)
         { ai = g_try_malloc0 ( sizeof(struct ANALOG_INPUT) );
           if (!ai)
-           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, dls_tech_id );
+           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
-          g_snprintf( ai->acronyme,    sizeof(ai->acronyme),    "%s", acronyme );
-          g_snprintf( ai->dls_tech_id, sizeof(ai->dls_tech_id), "%s", dls_tech_id );
+          g_snprintf( ai->acronyme, sizeof(ai->acronyme), "%s", acronyme );
+          g_snprintf( ai->tech_id,  sizeof(ai->tech_id),  "%s", tech_id );
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding AI '%s:%s'", __func__, dls_tech_id, acronyme );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding AI '%s:%s'", __func__, tech_id, acronyme );
           Charger_conf_AI ( ai );                                                     /* Chargment de la conf AI depuis la DB */
         }
        if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */
@@ -966,7 +1027,7 @@
      { need_arch = TRUE; }                                                               /* Archive au pire toutes les 10 min */
 
     if (need_arch)
-     { Ajouter_arch_by_nom( ai->acronyme, ai->dls_tech_id, ai->val_ech );                              /* Archivage si besoin */
+     { Ajouter_arch_by_nom( ai->acronyme, ai->tech_id, ai->val_ech );                              /* Archivage si besoin */
        ai->last_arch = Partage->top;
      }
   }
@@ -974,7 +1035,7 @@
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gfloat Dls_data_get_AI ( gchar *acronyme, gchar *dls_tech_id, gpointer **ai_p )
+ gfloat Dls_data_get_AI ( gchar *tech_id, gchar *acronyme, gpointer **ai_p )
   { struct ANALOG_INPUT *ai;
     GSList *liste;
     if (ai_p && *ai_p)                                                               /* Si pointeur d'acceleration disponible */
@@ -985,7 +1046,7 @@
     liste = Partage->Dls_data_AI;
     while (liste)
      { ai = (struct ANALOG_INPUT *)liste->data;
-       if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->dls_tech_id, dls_tech_id ) ) break;
+       if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
        
@@ -997,43 +1058,142 @@
 /* Dls_data_set_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
- void Dls_data_set_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p, gboolean etat,
+ void Dls_data_set_tempo ( gchar *tech_id, gchar *acronyme, gpointer **tempo_p, gboolean etat,
                            gint delai_on, gint min_on, gint max_on, gint delai_off, gint random)
-  { if (!tempo_p || !*tempo_p)
-     { gchar chaine[80];
-       struct TEMPO *tempo;
-       g_snprintf(chaine, sizeof(chaine), "%s:%s", owner, nom );
-       tempo = g_tree_lookup ( Partage->com_dls.Dls_data_tempo, chaine );
-       if (!tempo)
-        { tempo = g_malloc0 ( sizeof(struct TEMPO) );
-          if (!tempo) { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for %s", __func__, chaine ); return; }
+  { struct DLS_TEMPO *tempo;
+
+    if (!tempo_p || !*tempo_p)
+     { GSList *liste;
+       if ( !(acronyme && tech_id) ) return;
+       liste = Partage->Dls_data_TEMPO;
+       while (liste)
+        { tempo = (struct DLS_TEMPO *)liste->data;
+          if ( !strcmp ( tempo->acronyme, acronyme ) && !strcmp( tempo->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+       
+       if (!liste)
+        { tempo = g_try_malloc0 ( sizeof(struct DLS_TEMPO) );
+          if (!tempo)
+           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+             return;
+           }
+          g_snprintf( tempo->acronyme, sizeof(tempo->acronyme), "%s", acronyme );
+          g_snprintf( tempo->tech_id,  sizeof(tempo->tech_id),  "%s", tech_id );
           tempo->confDB.delai_on  = delai_on;
           tempo->confDB.min_on    = min_on;
           tempo->confDB.max_on    = max_on;
           tempo->confDB.delai_off = delai_off;
           tempo->confDB.random    = random;
-          g_tree_insert ( Partage->com_dls.Dls_data_tempo, g_strdup(chaine), tempo );
-          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding key %s : %p", __func__, chaine, tempo );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_TEMPO = g_slist_prepend ( Partage->Dls_data_TEMPO, tempo );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding TEMPO '%s:%s'", __func__, tech_id, acronyme );
         }
        if (tempo_p) *tempo_p = (gpointer)tempo;                                     /* Sauvegarde pour acceleration si besoin */
       }
-     ST_local ( (struct TEMPO *)*tempo_p, etat );                                                 /* Recopie dans la variable */
+    else tempo = (struct DLS_TEMPO *)*tempo_p;
+
+    ST_local ( tempo, etat );                                                                     /* Recopie dans la variable */
   }
- gboolean Dls_data_get_tempo ( gchar *nom, gchar *owner, gpointer **tempo_p )
-  { gchar chaine[80];
-    struct TEMPO *tempo;
+/******************************************************************************************************************************/
+/* Dls_data_get_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
+/* Entrée : l'acronyme, le owner dls, un pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_tempo ( gchar *tech_id, gchar *acronyme, gpointer **tempo_p )
+  { struct DLS_TEMPO *tempo;
+    GSList *liste;
     if (tempo_p && *tempo_p)                                                         /* Si pointeur d'acceleration disponible */
-     { tempo = (struct TEMPO *)*tempo_p;
-       return (tempo->state);
+     { tempo = (struct DLS_TEMPO *)*tempo_p;
+       return( tempo->state );
      }
-    g_snprintf(chaine, sizeof(chaine), "%s:%s", owner, nom );
-    tempo = g_tree_lookup ( Partage->com_dls.Dls_data_tempo, chaine );
-    if (tempo)
-     { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : key %s found val %p", __func__, chaine, tempo );
-       if (tempo_p) *tempo_p = (gpointer)tempo;                                     /* Sauvegarde pour acceleration si besoin */
-       return(tempo->state);
+
+    liste = Partage->Dls_data_TEMPO;
+    while (liste)
+     { tempo = (struct DLS_TEMPO *)liste->data;
+       if ( !strcmp ( tempo->acronyme, acronyme ) && !strcmp( tempo->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
      }
-    return(FALSE);    
+       
+    if (!liste) return(FALSE);
+    if (tempo_p) *tempo_p = (gpointer)tempo;                                        /* Sauvegarde pour acceleration si besoin */
+    return( tempo->state );    
+  }
+/******************************************************************************************************************************/
+/* Met à jour le message en parametre                                                                                         */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_msg ( gchar *tech_id, gchar *acronyme, gpointer **msg_p, gboolean etat )
+  { struct MESSAGES *msg;
+
+    if (!msg_p || !*msg_p)
+     { GSList *liste;
+       if ( !(acronyme && tech_id) ) return;
+       liste = Partage->Dls_data_MSG;
+       while (liste)
+        { msg = (struct MESSAGES *)liste->data;
+          if ( !strcmp ( msg->acronyme, acronyme ) && !strcmp( msg->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+       
+       if (!liste)
+        { msg = g_try_malloc0 ( sizeof(struct MESSAGES) );
+          if (!msg)
+           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+             return;
+           }
+          g_snprintf( msg->acronyme, sizeof(msg->acronyme), "%s", acronyme );
+          g_snprintf( msg->tech_id,  sizeof(msg->tech_id),  "%s", tech_id );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_MSG = g_slist_prepend ( Partage->Dls_data_MSG, msg );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding MSG '%s:%s'", __func__, tech_id, acronyme );
+        }
+       if (msg_p) *msg_p = (gpointer)msg;                                           /* Sauvegarde pour acceleration si besoin */
+      }
+    else msg = (struct MESSAGES *)*msg_p;
+
+    if ( msg->etat != etat )
+     { msg->etat = etat;
+
+       if ( msg->last_change + 10 <= Partage->top ) { msg->changes = 0; }            /* Si pas de change depuis plus de 1 sec */
+
+       if ( msg->changes > 5 && !(Partage->top % 50) )              /* Si persistence d'anomalie on prévient toutes les 5 sec */
+        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: last_change trop tot for MSG %s:%s !", __func__,
+                    msg->tech_id, msg->acronyme );
+        }
+       else                                                                                 /* On envoi l'envenementau master */
+        { pthread_mutex_lock( &Partage->com_msrv.synchro );                           /* Ajout dans la liste de msg a traiter */
+          Partage->com_msrv.liste_event_msg = g_slist_append( Partage->com_msrv.liste_event_msg, msg );
+          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+          msg->changes++;
+          msg->last_change = Partage->top;
+          Partage->audit_bit_interne_per_sec++;
+        }
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
+/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer **msg_p )
+  { struct MESSAGES *msg;
+    GSList *liste;
+    if (msg_p && *msg_p)                                                             /* Si pointeur d'acceleration disponible */
+     { msg = (struct MESSAGES *)*msg_p;
+       return( msg->etat );
+     }
+
+    liste = Partage->Dls_data_MSG;
+    while (liste)
+     { msg = (struct MESSAGES *)liste->data;
+       if ( !strcmp ( msg->acronyme, acronyme ) && !strcmp( msg->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+       
+    if (!liste) return(FALSE);
+    if (msg_p) *msg_p = (gpointer)msg;                                              /* Sauvegarde pour acceleration si besoin */
+    return( msg->etat );    
   }
 /******************************************************************************************************************************/
 /* Dls_data_free_data: Libere la memoire pour les clefs et data contenu dans l'arbre Dls_data. Appellé par g_tree_foreach     */
@@ -1203,8 +1363,6 @@
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
     Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
     Partage->com_dls.Thread_run         = TRUE;                                                         /* Le thread tourne ! */
-    Partage->com_dls.Dls_data = g_tree_new ( (GCompareFunc) strcmp ); 
-    Partage->com_dls.Dls_data_tempo = g_tree_new ( (GCompareFunc) strcmp ); 
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                                          /* Chargement des modules dls */
     SB_SYS(1, 0);                                                                                      /* B1 est toujours à 0 */
@@ -1253,10 +1411,6 @@
        sched_yield();
      }
     Decharger_plugins();                                                                      /* Dechargement des modules DLS */
-    g_tree_foreach (Partage->com_dls.Dls_data, Dls_data_free_data, NULL );
-    g_tree_destroy (Partage->com_dls.Dls_data);
-    g_tree_foreach (Partage->com_dls.Dls_data_tempo, Dls_data_free_all_data, NULL );
-    g_tree_destroy (Partage->com_dls.Dls_data_tempo);
     Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: DLS Down (%p)", __func__, pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

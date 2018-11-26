@@ -88,6 +88,7 @@
  extern gchar *New_condition_vars( int barre, gchar *nom );
  extern struct ACTION *New_action( void );
  extern struct ACTION *New_action_msg( int num );
+ extern struct ACTION *New_action_msg_by_alias( struct ALIAS *alias );
  extern struct ACTION *New_action_sortie( int num, int barre );
  extern struct ACTION *New_action_vars_mono( gchar *nom );
  extern struct ACTION *New_action_activite_fixe( void );
@@ -98,6 +99,7 @@
  extern struct ACTION *New_action_cpt_h( int num, GList *options );
  extern struct ACTION *New_action_cpt_imp( int num, GList *options );
  extern gboolean New_alias( gint type, gchar *tech_id, gchar *acronyme, gint bit, gint num, gint barre, GList *options );
+ extern struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme );
  extern struct ALIAS *Get_alias_par_acronyme( gchar *tech_id, gchar *acronyme );
  extern struct OPTION *New_option( void );
  /*extern int Get_option_entier( GList *liste_options, gint type );*/

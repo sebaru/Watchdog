@@ -41,6 +41,7 @@
  enum
   { COLONNE_ID,
     COLONNE_NUM,
+    COLONNE_MSG_ID,
     COLONNE_GROUPE_PAGE,
     COLONNE_TYPE,
     COLONNE_SYN_ID,
@@ -248,6 +249,7 @@
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
                          COLONNE_ID, histo->id,
                          COLONNE_NUM, histo->msg.num,
+                         COLONNE_MSG_ID, histo->msg.id,
                          COLONNE_SYN_ID, histo->msg.syn_id,
                          COLONNE_GROUPE_PAGE, groupe_page,
                          COLONNE_TYPE, Type_vers_string(histo->msg.type),
@@ -315,15 +317,16 @@
   { GtkTreeModel *store;
     GtkTreeIter iter;
     gboolean valide;
-    guint num;
+    guint num, id;
 
     store  = gtk_tree_view_get_model ( GTK_TREE_VIEW(Liste_histo) );
     valide = gtk_tree_model_get_iter_first( store, &iter );
 
     while ( valide )
-     { gtk_tree_model_get( store, &iter, COLONNE_NUM, &num, -1 );
+     { gtk_tree_model_get( store, &iter, COLONNE_MSG_ID, &id, COLONNE_NUM, &num, -1 );
 /* printf("Del_histo: id = %d, cible = %d\n", id, histo->id); */
-       if ( num == histo->msg.num ) 
+       if ( (histo->msg.num != 0 && num == histo->msg.num) ||
+            (histo->msg.num == 0 && id == histo->msg.id) ) 
         { if (gtk_list_store_remove( GTK_LIST_STORE(store), &iter )) continue; }
        valide = gtk_tree_model_iter_next( store, &iter );
      }
@@ -368,6 +371,7 @@
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                          /* ID */
                                               G_TYPE_UINT,                                         /* NUM */
+                                              G_TYPE_UINT,                                         /* MSG_ID */
                                               G_TYPE_STRING,
                                               G_TYPE_STRING,                               /* Groupe page */
                                               G_TYPE_UINT,                                     /* Num_syn */

@@ -232,8 +232,12 @@
      { taille = 100;
        result = New_chaine( taille ); /* 10 caractères max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
-            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_B_%s )", alias->acronyme, Dls_plugin.tech_id, alias->acronyme ); }
-       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_B_%s )", alias->acronyme, Dls_plugin.tech_id, alias->acronyme ); }
+            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_B_%s_%s )",
+                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+            }
+       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_B_%s_%s )",
+                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+            }
      }
     return(result);
   }
@@ -277,8 +281,12 @@
      { taille = 100;
        result = New_chaine( taille ); /* 10 caractères max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
-            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_M_%s )", alias->acronyme, Dls_plugin.tech_id, alias->acronyme ); }
-       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_M_%s )", alias->acronyme, Dls_plugin.tech_id, alias->acronyme ); }
+            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_M_%s_%s )",
+                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+            }
+       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_M_%s_%s )",
+                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+            }
      }
    return(result);
  }
@@ -293,8 +301,8 @@
     taille = 128;
     result = New_chaine( taille );
     if ( alias->type == ALIAS_TYPE_DYNAMIC)
-     { g_snprintf( result, taille, "%sDls_data_get_tempo ( \"%s\", \"%s\", &_T_%s )",
-                   (barre==1 ? "!" : ""), alias->acronyme, Dls_plugin.tech_id, alias->acronyme );
+     { g_snprintf( result, taille, "%sDls_data_get_tempo ( \"%s\", \"%s\", &_T_%s_%s )",
+                   (barre==1 ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else
      { g_snprintf( result, taille, "%sT(%d)",
@@ -313,8 +321,12 @@
     taille = 100;                                                                               /* Alias par nom uniquement ! */
     result = New_chaine( taille ); /* 10 caractères max */
     if ( !barre )
-         { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_HOR_%s )", alias->acronyme, Dls_plugin.tech_id, alias->acronyme ); }
-    else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_HOR_%s )", alias->acronyme, Dls_plugin.tech_id, alias->acronyme ); }
+         { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_HOR_%s_%s )",
+                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+         }
+    else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_HOR_%s_%s )",
+                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+         }
    return(result);
  }
 /******************************************************************************************************************************/
@@ -370,6 +382,29 @@
     g_snprintf( action->alors, taille, "MSG(%d,1);", num );
     action->sinon = New_chaine( taille );
     g_snprintf( action->sinon, taille, "MSG(%d,0);", num );
+    return(action);
+  }
+/******************************************************************************************************************************/
+/* New_action_msg_by_alias: Prepare une struct action avec une commande de type MSG                                           */
+/* Entrées: L'alias decouvert                                                                                                 */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
+ struct ACTION *New_action_msg_by_alias( struct ALIAS *alias )
+  { struct ACTION *action;
+    int taille;
+
+    if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par numéro ? */
+     { return(New_action_msg ( alias->num )); }
+
+    taille = 100;
+    action = New_action();
+    action->alors = New_chaine( taille );
+    action->sinon = New_chaine( taille );
+
+    g_snprintf( action->alors, taille, "Dls_data_set_msg ( \"%s\", \"%s\", &_MSG_%s_%s, TRUE );",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+    g_snprintf( action->sinon, taille, "Dls_data_set_msg ( \"%s\", \"%s\", &_MSG_%s_%s, FALSE );",
+                alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
     return(action);
   }
 /******************************************************************************************************************************/
@@ -452,8 +487,10 @@
        action->alors = New_chaine( taille );
        action->sinon = New_chaine( taille );
 
-       g_snprintf( action->alors, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_M_%s, TRUE );", alias->acronyme, Dls_plugin.tech_id, alias->acronyme );
-       g_snprintf( action->sinon, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_M_%s, FALSE );", alias->acronyme, Dls_plugin.tech_id, alias->acronyme );
+       g_snprintf( action->alors, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_M_%s_%s, TRUE );",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+       g_snprintf( action->sinon, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_M_%s_%s, FALSE );",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
        return(action);
      }
   }
@@ -550,12 +587,12 @@
     taille = 128;
     if (alias->type == ALIAS_TYPE_DYNAMIC)
      { action->alors = New_chaine( taille );
-       g_snprintf( action->alors, taille, "Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s, 1, %d, %d, %d, %d, %d );",
-                                           alias->acronyme, Dls_plugin.tech_id, alias->acronyme,
+       g_snprintf( action->alors, taille, "Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s_%s, 1, %d, %d, %d, %d, %d );",
+                                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
                                            daa, dma, dMa, dad, random );
        action->sinon = New_chaine( taille );
-       g_snprintf( action->sinon, taille, "Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s, 0, %d, %d, %d, %d, %d );",
-                                           alias->acronyme, Dls_plugin.tech_id, alias->acronyme,
+       g_snprintf( action->sinon, taille, "Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s_%s, 0, %d, %d, %d, %d, %d );",
+                                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
                                            daa, dma, dMa, dad, random );
      }
     else
@@ -587,7 +624,8 @@
      { taille = 100;
        action = New_action();
        action->alors = New_chaine( taille );
-       g_snprintf( action->alors, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_B_%s, %d );", alias->acronyme, Dls_plugin.tech_id, alias->acronyme, !barre );
+       g_snprintf( action->alors, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_B_%s_%s, %d );",
+                                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, !barre );
      }
     return(action);
   }
@@ -604,9 +642,9 @@
     alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
     if (!alias) { return(FALSE); }
     alias->type = type;
-    if (!tech_id) alias->tech_id = Dls_plugin.tech_id;
-             else alias->tech_id = tech_id;
-    alias->acronyme = acronyme;
+    if (!tech_id) alias->tech_id = g_strdup(Dls_plugin.tech_id);
+             else alias->tech_id = g_strdup(tech_id);
+    alias->acronyme = g_strdup(acronyme);
     alias->bit      = bit;
     alias->num      = num;
     alias->barre    = barre;
@@ -614,6 +652,38 @@
     alias->used     = 0;
     Alias = g_slist_prepend( Alias, alias );
     return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* New_alias: Alloue une certaine quantité de mémoire pour utiliser des alias                                                 */
+/* Entrées: le nom de l'alias, le tableau et le numero du bit                                                                 */
+/* Sortie: False si il existe deja, true sinon                                                                                */
+/******************************************************************************************************************************/
+ struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme )
+  { struct CMD_TYPE_MNEMO_BASE *mnemo;
+    struct ALIAS *alias;
+
+    alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
+    if (!alias) { return(NULL); }
+
+    if (!strcmp(tech_id,"THIS")) tech_id=Dls_plugin.tech_id;
+
+    mnemo = Rechercher_mnemo_baseDB_by_acronyme ( tech_id, acronyme );
+    if (!mnemo)
+     { g_free(alias);
+       Emettre_erreur_new( "Bit %s:%s not found", tech_id, acronyme );
+       return(NULL);
+     }
+    alias->type     = ALIAS_TYPE_DYNAMIC;
+    alias->tech_id  = g_strdup(mnemo->dls_tech_id);
+    alias->acronyme = g_strdup(mnemo->acronyme);
+    alias->bit      = mnemo->type;
+    alias->num      = -1;
+    alias->barre    = 0;
+    alias->options  = NULL;
+    alias->used     = 1;
+    Alias = g_slist_prepend( Alias, alias );
+    g_free(mnemo);
+    return(alias);
   }
 /******************************************************************************************************************************/
 /* Get_alias: Recherche un alias donné en paramètre                                                                           */
@@ -642,7 +712,9 @@
      { struct OPTION *option = (struct OPTION *)options->data;
        options = g_list_remove (options, option);
        switch (option->type)
-        { case T_LIBELLE: g_free(option->chaine); break; }
+        { case T_LIBELLE: g_free(option->chaine); break;
+          case T_ETIQUETTE: g_free(option->chaine); break;
+        }
        g_free(option);
      }
   }
@@ -654,6 +726,7 @@
  static void Liberer_alias ( struct ALIAS *alias )
   { GList *liste;
     Liberer_options(alias->options);
+    g_free(alias->tech_id);
     g_free(alias->acronyme);
     g_free(alias);
   }
@@ -721,7 +794,7 @@
     rc = fopen( source, "r" );
     if (!rc) retour = TRAD_DLS_ERROR;
     else
-     { DlsScanner_debug = 0;                                                                     /* Debug de la traduction ?? */
+     { DlsScanner_debug = 1;                                                                     /* Debug de la traduction ?? */
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
        fclose(rc);
@@ -767,20 +840,26 @@
            { alias = (struct ALIAS *)liste->data;
              if (alias->type == ALIAS_TYPE_DYNAMIC)                      /* alias par nom ? creation du pointeur de raccourci */
               { switch (alias->bit)
-                 { case T_MONO: nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_M_%s;\n", alias->acronyme );
-                                write (fd, chaine, nb_car);
-                                break;
-                   case T_BI:   nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_B_%s;\n", alias->acronyme );
-                                write (fd, chaine, nb_car);
-                                break;
-                   case T_TEMPO:
-                                nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_T_%s;\n", alias->acronyme );
-                                write (fd, chaine, nb_car);
-                                break;
-                   case T_HORLOGE:
-                                nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_HOR_%s;\n", alias->acronyme );
-                                write (fd, chaine, nb_car);
-                                break;
+                 { case MNEMO_MONOSTABLE:
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_M_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        write (fd, chaine, nb_car);
+                        break;
+                   case MNEMO_BISTABLE:
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_B_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        write (fd, chaine, nb_car);
+                        break;
+                   case MNEMO_TEMPO:
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_T_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        write (fd, chaine, nb_car);
+                        break;
+                   case MNEMO_HORLOGE:
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_HOR_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        write (fd, chaine, nb_car);
+                        break;
+                   case MNEMO_MSG:
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_MSG_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        write (fd, chaine, nb_car);
+                        break;
                  }
               }
              liste = liste->next;
@@ -904,34 +983,15 @@
            { Emettre_erreur_new( "Warning: %s not used", alias->acronyme );
              retour = TRAD_DLS_WARNING;
            }
-          mnemo.mnemo_base.dls_id = Dls_plugin.id;
-          mnemo.mnemo_base.syn_id = Dls_plugin.syn_id;
-          if (alias->type == ALIAS_TYPE_DYNAMIC)                                      /* Pour les alias Dynamiques uniquement */
+          if (alias->type == ALIAS_TYPE_DYNAMIC && !strcmp(alias->tech_id, Dls_plugin.tech_id))/* Alias Dynamiques uniquement */
            { g_snprintf( mnemo.mnemo_base.acronyme, sizeof(mnemo.mnemo_base.acronyme), "%s", alias->acronyme );
              g_snprintf( mnemo.mnemo_base.libelle,  sizeof(mnemo.mnemo_base.libelle),  "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
              g_snprintf( mnemo.mnemo_base.acro_syn, sizeof(mnemo.mnemo_base.acro_syn), "%s", Get_option_chaine( alias->options, T_ETIQUETTE ) );
-             switch ( alias->bit )
-              { case T_MONO:
-                 { mnemo.mnemo_base.type = MNEMO_MONOSTABLE;
-                   Mnemo_auto_create_for_dls ( &mnemo );
-                   break;
-                 }
-                case T_BI:
-                 { mnemo.mnemo_base.type = MNEMO_BISTABLE;
-                   Mnemo_auto_create_for_dls ( &mnemo );
-                   break;
-                 }
-                case T_TEMPO:
-                 { mnemo.mnemo_base.type = MNEMO_TEMPO;
-                   Mnemo_auto_create_for_dls ( &mnemo );
-                   break;
-                 }
-                case T_HORLOGE:
-                 { mnemo.mnemo_base.type = MNEMO_HORLOGE;
-                   Mnemo_auto_create_for_dls ( &mnemo );
-                   break;
-                 }
-              }
+             mnemo.mnemo_base.dls_id = Dls_plugin.id;
+             mnemo.mnemo_base.type = alias->bit;
+             if (alias->bit == MNEMO_MSG)
+              { mnemo.mnemo_msg.type = Get_option_entier ( alias->options, T_TYPE ); }
+             Mnemo_auto_create_for_dls ( &mnemo );
            }
           liste = liste->next;
         }

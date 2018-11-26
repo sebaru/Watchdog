@@ -53,6 +53,7 @@
     MNEMO_CPT_IMP,
     MNEMO_REGISTRE,
     MNEMO_HORLOGE,
+    MNEMO_MSG,
     NBR_TYPE_MNEMO
   };
 
@@ -60,7 +61,7 @@
  struct CMD_TYPE_MNEMO_BASE                                                     /* Informations partagées par tous les mnémos */
   { guint id;                                                                    /* ID unique du mnemonique dans la structure */
     guint type;                                                                                    /* Type du bit interne lié */
-    guint num;                                                                             /* Numéro du bit lié au mnemonique */
+    gint  num;                                                                             /* Numéro du bit lié au mnemonique */
     guint dls_id;                                                                             /* Numéro du plugin DLS associé */
     guint syn_id;                                                                             /* Numéro du synoptique associé */
     gchar  syn_parent_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
@@ -153,6 +154,7 @@
             struct CMD_TYPE_MNEMO_TEMPO mnemo_tempo;
             struct CMD_TYPE_MNEMO_REGISTRE mnemo_r;
             struct CMD_TYPE_MNEMO_HORLOGE mnemo_horloge;
+            struct CMD_TYPE_MESSAGE mnemo_msg;
           };
   };
 

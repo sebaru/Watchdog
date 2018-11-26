@@ -125,6 +125,15 @@ blanc         [\t ]+
 "dma"                      { DlsScanner_lval.val = T_DMINA;     return T_DMINA;     }
 "dMa"                      { DlsScanner_lval.val = T_DMAXA;     return T_DMAXA;     }
 "dad"                      { DlsScanner_lval.val = T_DAD;       return T_DAD;       }
+"type"                     { DlsScanner_lval.val = T_TYPE;      return T_TYPE;      }
+"etat"                     { DlsScanner_lval.val = T_ETAT;      return T_ETAT;      }
+"attente"                  { DlsScanner_lval.val = T_ATTENTE;   return T_ATTENTE;   }
+"defaut"                   { DlsScanner_lval.val = T_DEFAUT;    return T_DEFAUT;    }
+"alarme"                   { DlsScanner_lval.val = T_ALARME;    return T_ALARME;    }
+"veille"                   { DlsScanner_lval.val = T_VEILLE;    return T_VEILLE;    }
+"alerte"                   { DlsScanner_lval.val = T_ALERTE;    return T_ALERTE;    }
+"derangement"              { DlsScanner_lval.val = T_DERANGEMENT;return T_DERANGEMENT;}
+"danger"                   { DlsScanner_lval.val = T_DANGER;    return T_DANGER;    }
  /*********************************************** Le reste ************************************************/
 "#define"                  { DlsScanner_lval.val = T_DEFINE;    return T_DEFINE;    }
 "#static"                  { DlsScanner_lval.val = T_STATIC;    return T_STATIC;    }
@@ -135,6 +144,7 @@ blanc         [\t ]+
 "-"                        { DlsScanner_lval.val = MOINS;       return MOINS;       }
 ";"                        { DlsScanner_lval.val = PVIRGULE;    return PVIRGULE;    }
 ","                        { DlsScanner_lval.val = VIRGULE;     return VIRGULE;     }
+":"                        { DlsScanner_lval.val = T_DPOINTS;   return T_DPOINTS;   }
 "("                        { DlsScanner_lval.val = T_POUV;      return T_POUV;      }
 ")"                        { DlsScanner_lval.val = T_PFERM;     return T_PFERM;     }
 "="                        { DlsScanner_lval.val = T_EGAL;      return T_EGAL;      }

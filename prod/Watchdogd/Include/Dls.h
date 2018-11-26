@@ -49,17 +49,18 @@
   };
 
  enum                                                                                  /* différent statut des temporisations */
-  { TEMPO_NOT_COUNTING,                                                                     /* La tempo ne compte pas du tout */
-    TEMPO_WAIT_FOR_DELAI_ON,                                           /* La tempo compte, en attendant le delai de mise à un */
-    TEMPO_WAIT_FOR_MIN_ON,                                             /* Delai de MAU dépassé, en attente du creneau minimum */
-    TEMPO_WAIT_FOR_MAX_ON,                                          /* Creneau minimum atteint, en attente du creneau maximum */
-    TEMPO_WAIT_FOR_DELAI_OFF,                                    /* Creneau max atteint, en attente du delai de remise a zero */
-    TEMPO_WAIT_FOR_COND_OFF                                                /* Attend que la condition soit tombée avant reset */
+  { DLS_TEMPO_NOT_COUNTING,                                                                 /* La tempo ne compte pas du tout */
+    DLS_TEMPO_WAIT_FOR_DELAI_ON,                                       /* La tempo compte, en attendant le delai de mise à un */
+    DLS_TEMPO_WAIT_FOR_MIN_ON,                                         /* Delai de MAU dépassé, en attente du creneau minimum */
+    DLS_TEMPO_WAIT_FOR_MAX_ON,                                      /* Creneau minimum atteint, en attente du creneau maximum */
+    DLS_TEMPO_WAIT_FOR_DELAI_OFF,                                /* Creneau max atteint, en attente du delai de remise a zero */
+    DLS_TEMPO_WAIT_FOR_COND_OFF                                            /* Attend que la condition soit tombée avant reset */
   };
 
- struct TEMPO                                                                               /* Définition d'une temporisation */
+ struct DLS_TEMPO                                                                           /* Définition d'une temporisation */
   { struct CMD_TYPE_MNEMO_TEMPO confDB;
-                                                                                                /* Variables de travail (run) */
+    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     guint status;                                                                               /* Statut de la temporisation */
     guint date_on;                                                              /* date a partir de laquelle la tempo sera ON */
     guint date_off;                                                            /* date a partir de laquelle la tempo sera OFF */
@@ -73,7 +74,7 @@
  struct ANALOG_INPUT
   { struct CMD_TYPE_MNEMO_AI confDB;
     gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gchar   dls_tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gfloat  val_ech;
     gfloat  val_avant_ech;
     guint   last_arch;                                                                         /* Date de la derniere archive */
@@ -102,8 +103,19 @@
     gint changes;                               /* Compte le nombre de changes afin de ne pas depasser une limite par seconde */
   };
 
+ struct DLS_BOOL
+  { gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gboolean etat;
+    gboolean edge_up;
+    gboolean edge_down;
+  };
+
  struct MESSAGES
-  { gchar etat;
+  { struct CMD_TYPE_MESSAGE confDB;
+    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gboolean etat;
     gint last_change;
     gint changes;
     gint next_repeat;
@@ -142,12 +154,11 @@
     pthread_mutex_t synchro_traduction;                  /* Mutex pour interdire les traductions simultanées de plugins D.L.S */
     struct DLS_TREE *Dls_tree;                                                                       /* Arbre d'execution DLS */
     pthread_mutex_t synchro_data;                                      /* Mutex pour les acces concurrents à l'arbre des data */
-    GTree *Dls_data;
-    GTree *Dls_data_tempo;                                                                   /* Arbres des temporisations DLS */
     GSList *Set_M;                                                              /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_M;                                                      /* liste des Mxxx a désactiver à la fin du tour prg */
     GSList *Set_Dls_Data;                                                       /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_Dls_Data;                                               /* liste des Mxxx a désactiver à la fin du tour prg */
+
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
     guint admin_start;                                                                              /* Demande de deconnexion */
@@ -179,7 +190,8 @@
  extern int EA_inrange( int num );
  extern void SB_SYS( int num, int etat );
  extern void SE( int num, int etat );
- extern void Dls_data_set_AI ( gchar *dls_tech_id, gchar *acronyme, gpointer **ai_p, float val_avant_ech );
+ extern void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer **ai_p, float val_avant_ech );
+ extern gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer **msg_p );
  extern void SEA( int num, float val_avant_ech );
  extern void SEA_range( int num, int range );
  extern void SEA_ech( int num, float val_ech );

@@ -30,19 +30,6 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
-/* Admin_get_list: Affiche la liste des data dans l'arbre dls_data                                                            */
-/* Entrée: la clef, la value et le data qui est la 'response'                                                                 */
-/* Sortie: FALSE                                                                                                              */
-/******************************************************************************************************************************/
- static gboolean Admin_get_bool_list ( gpointer key, gpointer value, gpointer data )
-  { gchar chaine[256];
-    gchar *response = *(gchar **)data;
-    g_snprintf( chaine, sizeof(chaine), " | - %s -> %d", key, (*(gboolean *)value ? 1 : 0) );
-    response = Admin_write ( response, chaine );
-    *(gchar **)data = response;
-    return(FALSE);
-  }    
-/******************************************************************************************************************************/
 /* Admin_get: Gere une commande 'admin get' depuis une response admin                                                         */
 /* Entrée: le response et la ligne de commande                                                                                */
 /* Sortie: Néant                                                                                                              */
@@ -54,23 +41,23 @@
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'GET'" );
 
-       response = Admin_write ( response, " | - new_b $name $owner    - Get bistable $name_$owner" );
-       response = Admin_write ( response, " | - new_t $name $owner    - Get Tempo $name_$owner" );
-       response = Admin_write ( response, " | - new_ea $name $owner   - Get Analog Input $name_$owner" );
-       response = Admin_write ( response, " | - list_ea               - List all dynamic Digital Input" );
-       response = Admin_write ( response, " | - list                  - List all running bits" );
-       response = Admin_write ( response, " | - e $num                - Get E[$num]" );
-       response = Admin_write ( response, " | - ea $num               - Get EA[$num]" );
-       response = Admin_write ( response, " | - m $num                - Get M[$num]" );
-       response = Admin_write ( response, " | - b $num                - Get B[$num]" );
-       response = Admin_write ( response, " | - a $num                - Get A[$num]" );
-       response = Admin_write ( response, " | - msg $num              - Get MSG[$num]" );
-       response = Admin_write ( response, " | - tr $num               - Get TR[$num]" );
-       response = Admin_write ( response, " | - i $num                - Get I[$num]" );
-       response = Admin_write ( response, " | - ci $num               - Get CI[$num]" );
-       response = Admin_write ( response, " | - ch $num               - Get CH[$num]" );
-       response = Admin_write ( response, " | - r $num                - Get Registre $num _R[$num]" );
-       response = Admin_write ( response, " | - help                  - This help" );
+       response = Admin_write ( response, " | - new_b $tech_id $acronyme   - Get bistable $tech_id $acronyme" );
+       response = Admin_write ( response, " | - new_t $tech_id $acronyme   - Get Tempo $tech_id $acronyme" );
+       response = Admin_write ( response, " | - new_ea $tech_id $acronyme  - Get Analog Input $tech_id $acronyme" );
+       response = Admin_write ( response, " | - new_msg $tech_id $acronyme - Get Message $tech_id $acronyme" );
+       response = Admin_write ( response, " | - list_ea                   - List all dynamic Digital Input" );
+       response = Admin_write ( response, " | - e $num                    - Get E[$num]" );
+       response = Admin_write ( response, " | - ea $num                   - Get EA[$num]" );
+       response = Admin_write ( response, " | - m $num                    - Get M[$num]" );
+       response = Admin_write ( response, " | - b $num                    - Get B[$num]" );
+       response = Admin_write ( response, " | - a $num                    - Get A[$num]" );
+       response = Admin_write ( response, " | - msg $num                  - Get MSG[$num]" );
+       response = Admin_write ( response, " | - tr $num                   - Get TR[$num]" );
+       response = Admin_write ( response, " | - i $num                    - Get I[$num]" );
+       response = Admin_write ( response, " | - ci $num                   - Get CI[$num]" );
+       response = Admin_write ( response, " | - ch $num                   - Get CH[$num]" );
+       response = Admin_write ( response, " | - r $num                    - Get Registre $num _R[$num]" );
+       response = Admin_write ( response, " | - help                      - This help" );
      } else
     if ( ! strcmp ( commande, "t" ) )
      { int num;
@@ -93,22 +80,22 @@
 	       }
      } else
     if ( ! strcmp ( commande, "new_t" ) )
-     { gchar nom[80], owner[80];
-       if (sscanf ( ligne, "%s %s %s", commande, nom, owner ) == 3)                      /* Découpage de la ligne de commande */
-        { struct TEMPO *tempo = NULL;
-          Dls_data_get_tempo ( nom, owner, (gpointer)&tempo );
+     { gchar tech_id[80], acronyme[80];
+       if (sscanf ( ligne, "%s %s %s", commande, tech_id, acronyme ) == 3)               /* Découpage de la ligne de commande */
+        { struct DLS_TEMPO *tempo = NULL;
+          Dls_data_get_tempo ( tech_id, acronyme, (gpointer)&tempo );
           if (tempo)
-           { g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s -> delai_on=%d min_on=%d max_on=%d delai_off=%d", nom, owner,
+           { g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s -> delai_on=%d min_on=%d max_on=%d delai_off=%d", tech_id, acronyme,
 			                   tempo->confDB.delai_on, tempo->confDB.min_on, tempo->confDB.max_on, tempo->confDB.delai_off );
              response = Admin_write ( response, chaine );
-             g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", nom, owner,
+             g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", tech_id, acronyme,
                       tempo->state, tempo->status, tempo->date_on,
                       (tempo->date_on > Partage->top ? (tempo->date_on - Partage->top)/10.0 : 0.0),
                       tempo->date_off,
                      (tempo->date_off > Partage->top ? (tempo->date_off - Partage->top)/10.0 : 0.0) );
              response = Admin_write ( response, chaine );
            } else
-           { g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s not found", nom, owner );
+           { g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s not found", tech_id, acronyme );
              response = Admin_write ( response, chaine );
 	          }
         }
@@ -138,14 +125,27 @@
         { g_snprintf( chaine, sizeof(chaine), " | - MSG -> num '%d' out of range", num ); }
        response = Admin_write ( response, chaine );
      } else
+    if ( ! strcmp ( commande, "new_msg" ) )
+     { int num;
+       gchar tech_id[80], acronyme[80];
+       if (sscanf ( ligne, "%s %s %s", commande, tech_id, acronyme ) == 3)               /* Découpage de la ligne de commande */
+        { struct MESSAGES *msg = NULL;
+          Dls_data_get_MSG ( tech_id, acronyme, (gpointer)&msg );
+          if (msg)
+           { g_snprintf( chaine, sizeof(chaine), " | - MSG %s:%s = %d, persist = %d, changes = %d, last_change = %d top=%d",
+                      tech_id,acronyme, msg->etat, msg->persist, msg->changes, msg->last_change, Partage->top );
+             response = Admin_write ( response, chaine );
+           } else
+           { g_snprintf( chaine, sizeof(chaine), " | - MSG: %s:%s not found", tech_id, acronyme );
+             response = Admin_write ( response, chaine );
+	          }
+        }
+     } else
     if ( ! strcmp ( commande, "m" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
        g_snprintf( chaine, sizeof(chaine), " | - M%03d = %d", num, M(num) );
        response = Admin_write ( response, chaine );
-     } else
-    if ( ! strcmp ( commande, "list" ) )
-     { g_tree_foreach ( Partage->com_dls.Dls_data, (GTraverseFunc)Admin_get_bool_list, &response );
      } else
     if ( ! strcmp ( commande, "e" ) )
      { int num;
@@ -177,7 +177,7 @@
           g_snprintf( chaine, sizeof(chaine),
                       " | - EA '%s:%s' = %8.2f %s, val_avant_ech=%8.2f, inrange=%d\n"
                       "                  type=%d, last_arch=%d (%ds ago), min=%8.2f, max=%8.2f",
-                      ai->dls_tech_id, ai->acronyme, ai->val_ech, ai->confDB.unite, ai->val_avant_ech, ai->inrange,
+                      ai->tech_id, ai->acronyme, ai->val_ech, ai->confDB.unite, ai->val_avant_ech, ai->inrange,
                       ai->confDB.type, ai->last_arch, (Partage->top - ai->last_arch)/10,
                       ai->confDB.min, ai->confDB.max 
                     );
@@ -203,9 +203,9 @@
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "new_b" ) )
-     { gchar nom[80], owner[80];
-       if (sscanf ( ligne, "%s %s %s", commande, nom, owner ) == 3)                      /* Découpage de la ligne de commande */
-        { g_snprintf( chaine, sizeof(chaine), " | - %s_%s = %d", nom, owner, Dls_data_get_bool ( nom, owner, NULL ) ); }
+     { gchar tech_id[80], acronyme[80];
+       if (sscanf ( ligne, "%s %s %s", commande, tech_id, acronyme ) == 3)               /* Découpage de la ligne de commande */
+        { g_snprintf( chaine, sizeof(chaine), " | - %s:%s = %d", tech_id, acronyme, Dls_data_get_bool ( tech_id, acronyme, NULL ) ); }
        else { g_snprintf( chaine, sizeof(chaine), " | - Wrong number of parameters" ); }
        response = Admin_write ( response, chaine );
      } else

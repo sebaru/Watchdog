@@ -96,7 +96,8 @@
     guint watchdog;                                           /* Le module doit-il etre auto-supervisé ? en dixeme de seconde */
     guint bit;                                                           /* Bit interne B d'etat communication avec le module */
     gchar hostname[32];                                                                       /* Adresses IP du module MODBUS */
-    gchar libelle[NBR_CARAC_LIBELLE_MNEMONIQUE_UTF8];                                                    /* Libelle du modbus */
+    gchar tech_id[32];                                                                            /* Tech_id du module MODBUS */
+    gchar description[128];                                                                              /* Libelle du modbus */
     guint map_E;
     guint max_nbr_E;
     guint map_EA;
@@ -125,6 +126,7 @@
     struct TRAME_MODBUS_REPONSE response;
     gpointer **DI;                                                             /* Tableau dynamique d'accès aux bits internes */
     gpointer **AI;                                                             /* Tableau dynamique d'accès aux bits internes */
+    gpointer *bit_comm;                                                                      /* Bit interne d'etat de la comm */
   };
 
 /****************************************************** Déclaration des prototypes ********************************************/

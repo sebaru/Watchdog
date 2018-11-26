@@ -36,6 +36,7 @@
 /******************************************** Définitions des prototypes ******************************************************/
  extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB ( guint num );
  extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_id ( guint id );
+ extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_mnemo_id ( guint mnemo_id );
  extern gboolean Recuperer_messageDB ( struct DB **db );
  extern gboolean Recuperer_messageDB_with_conditions ( struct DB **db_retour, gchar *conditions, gint start, gint length );
  extern struct CMD_TYPE_MESSAGE *Recuperer_messageDB_suite( struct DB **db );

@@ -34,12 +34,12 @@
  #include <string.h>
 
  #define MNEMO_SQL_SELECT "SELECT mnemo.id,mnemo.type,num,dls_id,acronyme,mnemo.libelle,mnemo.ev_text,parent_syn.page,syn.page," \
-                          "dls.name, mnemo.tableau, mnemo.acro_syn, mnemo.ev_host, mnemo.ev_thread, syn.id, dls.tech_id" \
+                          "dls.shortname, mnemo.tableau, mnemo.acro_syn, mnemo.ev_host, mnemo.ev_thread, syn.id, dls.tech_id" \
                           " FROM mnemos as mnemo" \
                           " INNER JOIN dls as dls ON mnemo.dls_id=dls.id" \
                           " INNER JOIN syns as syn ON dls.syn_id = syn.id" \
                           " INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id"
-
+       
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
@@ -127,6 +127,14 @@
                    "SET mnemo_id=LAST_INSERT_ID(),libelle='Horloge',syn_id='%d',"
                    "posx = '150.0', posy = '150.0', larg = '50.0', haut = '50.0'",
                    mnemo->mnemo_base.syn_id );
+       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
+     }
+    else if (mnemo->mnemo_base.type == MNEMO_MSG)                                                      /* Ajout d'une horloge */
+     { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
+                   "INSERT INTO msgs "
+                   "SET mnemo_id=LAST_INSERT_ID(),type='%d',num=0,enable=1,dls_id='%d'"
+                   " ON DUPLICATE KEY UPDATE type=VALUES(type)",
+                   mnemo->mnemo_msg.type, mnemo->mnemo_base.dls_id );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
     retour = Lancer_requete_SQL ( db, "COMMIT;" );                                             /* Execution de la requete SQL */
@@ -375,6 +383,49 @@
     return(mnemo);
   }
 /******************************************************************************************************************************/
+/* Rechercher_mnemo_baseDB: Recupération du mnemo dont l'id est en parametre                                                  */
+/* Entrée: l'id du mnemonique a récupérer                                                                                     */
+/* Sortie: la structure representant le mnemonique de base                                                                    */
+/******************************************************************************************************************************/
+ struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB_by_acronyme ( gchar *tech_id, gchar *acronyme )
+  { struct CMD_TYPE_MNEMO_BASE *mnemo;
+    gchar requete[1024], *tech_id_s, *acronyme_s;
+    struct DB *db;
+
+    tech_id_s = Normaliser_chaine ( tech_id );
+    if (!tech_id_s)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible tech_id_s", __func__ );
+       return(NULL);
+     }
+     
+    acronyme_s = Normaliser_chaine ( acronyme );
+    if (!acronyme_s)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible acronyme_s", __func__ );
+       g_free(tech_id_s);
+       return(NULL);
+     }
+
+    g_snprintf( requete, sizeof(requete), MNEMO_SQL_SELECT                                                     /* Requete SQL */
+                " WHERE tech_id='%s' AND acronyme='%s'", tech_id_s, acronyme_s );
+    g_free(tech_id_s);
+    g_free(acronyme_s);
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(NULL);
+     }
+
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
+
+    mnemo = Recuperer_mnemo_baseDB_suite( &db );
+    if (mnemo) Libere_DB_SQL ( &db );
+    return(mnemo);
+  }
+/******************************************************************************************************************************/
 /* Rechercher_mnemo_baseDB_type_num: Recupération du mnemo par critere type/numéro                                            */
 /* Entrée: une structure de critere                                                                                           */
 /* Sortie: le mnemonique de base                                                                                              */
@@ -402,6 +453,44 @@
     mnemo = Recuperer_mnemo_baseDB_suite ( &db );
     if (mnemo) Libere_DB_SQL( &db );
     return( mnemo );
+  }
+/******************************************************************************************************************************/
+/* Rechercher_mnemo_fullDB: Recupération de l'ensemble du mnemo et de sa conf spécifique                                      */
+/* Entrée: l'id du mnemonique a récupérer                                                                                     */
+/* Sortie: la structure representant le mnemonique de base                                                                    */
+/******************************************************************************************************************************/
+ struct CMD_TYPE_MNEMO_FULL *Rechercher_mnemo_fullDB_by_acronyme ( gchar*tech_id, gchar *acronyme )
+  { struct CMD_TYPE_MNEMO_BASE *mnemo_base;
+    struct CMD_TYPE_MNEMO_FULL *mnemo_full;
+
+    mnemo_base = Rechercher_mnemo_baseDB_by_acronyme( tech_id, acronyme );
+    if (!mnemo_base)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Mnemo %s:%s not found", __func__, tech_id, acronyme );
+       return(NULL);
+     }
+
+    mnemo_full = (struct CMD_TYPE_MNEMO_FULL *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_FULL) );
+    if (!mnemo_full)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
+       g_free(mnemo_base);
+       return(NULL);
+     }
+
+    memcpy ( &mnemo_full->mnemo_base, mnemo_base, sizeof( struct CMD_TYPE_MNEMO_BASE ) );
+    g_free(mnemo_base);
+
+    switch( mnemo_full->mnemo_base.type )
+     { case MNEMO_MSG:
+        { struct CMD_TYPE_MESSAGE *mnemo_msg;
+          mnemo_msg = Rechercher_messageDB_par_mnemo_id ( mnemo_full->mnemo_base.id );
+          if (mnemo_msg) 
+           { memcpy ( &mnemo_full->mnemo_msg, mnemo_msg, sizeof(struct CMD_TYPE_MESSAGE) );
+             g_free(mnemo_msg);
+           }
+          break;
+        }
+     }
+    return(mnemo_full);
   }
 /******************************************************************************************************************************/
 /* Rechercher_mnemo_fullDB: Recupération de l'ensemble du mnemo et de sa conf spécifique                                      */

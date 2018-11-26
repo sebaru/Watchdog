@@ -84,13 +84,15 @@
 
     response = Admin_write ( response, " |---------------------------" );
 
-    g_snprintf( chaine, sizeof(chaine), " | MODBUS[%02d] ------> '%s' - %s (added '%s')",
-                module->modbus.id, module->modbus.libelle,  Modbus_mode_to_string(module), module->modbus.date_create );
+    g_snprintf( chaine, sizeof(chaine), " | MODBUS[%02d] - '%s' - '%s' -----> '%s' - %s (added '%s')",
+                module->modbus.id, module->modbus.tech_id, module->modbus.description,
+                Modbus_mode_to_string(module), module->modbus.date_create );
     response = Admin_write ( response, chaine );
 
-    g_snprintf( chaine, sizeof(chaine), " | - enable = %d, started = %d (bit B%04d=%d), watchdog = %03d, Hostname = %s",
+    g_snprintf( chaine, sizeof(chaine), " | - enable = %d, started = %d (bit B%04d=%d, '%s:COMM'=%d), watchdog = %03d",
                 module->modbus.enable, module->started, module->modbus.bit, B(module->modbus.bit),
-                module->modbus.watchdog, module->modbus.hostname );
+                module->modbus.tech_id, Dls_data_get_bool( module->modbus.tech_id, "COMM", NULL ),
+                module->modbus.watchdog );
     response = Admin_write ( response, chaine );
 
     if (module->modbus.max_nbr_E>0)
@@ -190,7 +192,7 @@
 
     if ( ! strcmp ( ligne, "list" ) )
      { response = Admin_write ( response, " | Parameter can be:" );
-       response = Admin_write ( response, " | - enable, bit, watchdog, libelle," );
+       response = Admin_write ( response, " | - enable, bit, watchdog, hostname, tech_id, description," );
        response = Admin_write ( response, " | - map_E, map_EA, map_A, map_AA, max_nbr_E" );
        return(response);
      }
@@ -228,7 +230,9 @@
     else if ( ! strcmp( param, "map_AA" ) )    { module->modbus.map_AA = valeur;    }
     else if ( ! strcmp( param, "max_nbr_E" ) ) { module->modbus.max_nbr_E = valeur; }
     else if ( ! strcmp( param, "libelle" ) )
-     { g_snprintf( module->modbus.libelle, sizeof(module->modbus.libelle), "%s", valeur_char ); }
+     { g_snprintf( module->modbus.description, sizeof(module->modbus.description), "%s", valeur_char ); }
+    else if ( ! strcmp( param, "tech_id" ) )
+     { g_snprintf( module->modbus.tech_id, sizeof(module->modbus.tech_id), "%s", valeur_char ); }
     else if ( ! strcmp( param, "hostname" ) )
      { g_snprintf( module->modbus.hostname, sizeof(module->modbus.hostname), "%s", valeur_char ); }
     else
@@ -283,8 +287,8 @@
        gint retour;
 
        memset( &modbus, 0, sizeof(struct MODBUSDB) );
-       if (sscanf ( ligne, "%s %s %s", commande,                                         /* Découpage de la ligne de commande */
-                    modbus.hostname, modbus.libelle
+       if (sscanf ( ligne, "%s %s %s %s", commande,                                      /* Découpage de la ligne de commande */
+                    modbus.hostname, modbus.tech_id, modbus.description
                   ) != 3) return(response);
        modbus.watchdog = 600;
        retour = Ajouter_modbusDB ( &modbus );
@@ -314,7 +318,7 @@
      }
     else if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'MODBUS'" );
-       response = Admin_write ( response, " | - add $hostname $libelle - Ajoute un module modbus" );
+       response = Admin_write ( response, " | - add $hostname $tech_id $description - Ajoute un module modbus" );
        response = Admin_write ( response, " | - set $id $champ $val    - Set $val to $champ for module $id" );
        response = Admin_write ( response, " | - set list               - List parameter that can be set" );
        response = Admin_write ( response, " | - del $id                - Erase module $id" );
