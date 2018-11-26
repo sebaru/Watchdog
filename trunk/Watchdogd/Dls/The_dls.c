@@ -490,6 +490,7 @@
         { gfloat ratio;
           ratio = (gfloat)rand_r(&seed)/RAND_MAX;
           tempo->confDB.delai_on  = (gint)(tempo->confDB.random * ratio);
+          if (tempo->confDB.delai_on<10) tempo->confDB.delai_on = 10;
           tempo->confDB.min_on    = 0;
           tempo->confDB.max_on    = 0;
           tempo->confDB.delai_off = 0;
