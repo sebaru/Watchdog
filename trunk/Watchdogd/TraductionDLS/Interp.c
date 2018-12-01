@@ -794,7 +794,7 @@
     rc = fopen( source, "r" );
     if (!rc) retour = TRAD_DLS_ERROR;
     else
-     { DlsScanner_debug = 1;                                                                     /* Debug de la traduction ?? */
+     { DlsScanner_debug = 0;                                                                     /* Debug de la traduction ?? */
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
        fclose(rc);
@@ -966,15 +966,27 @@
              liste = liste->next;
            }
           g_snprintf(chaine, sizeof(chaine), "  }\n" );
-          write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+          write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
 
-          write( fd, Start_Go, strlen(Start_Go) );
+          write( fd, Start_Go, strlen(Start_Go) );                                                 /* Ecriture de de l'entete */
+
+          g_snprintf(chaine, sizeof(chaine), "    if (vars->starting)\n     {\n" );
+          write( fd, chaine, strlen(chaine) );                                                     /* Ecriture de de l'entete */
+          liste = Liste_Actions_msg;                               /* Initialise les fonctions de gestion des fronts montants */
+          while(liste)
+           { gchar chaine[128];
+             g_snprintf(chaine, sizeof(chaine), "       MSG(%d,0);\n", GPOINTER_TO_INT(liste->data) );
+             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+             liste = liste->next;
+           }
+          g_snprintf(chaine, sizeof(chaine), "     }\n" );
+          write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
+
           write(fd, Buffer, Buffer_used );                                                     /* Ecriture du buffer resultat */
           write( fd, End_Go, strlen(End_Go) );
           close(fd);
         }
 
-       /*Retirer_auto_mnemo_baseDB_for_dls ( id );             /* Suppression des mnemos automatique du DLS fraichement traduit */
        liste = Alias;                                           /* Libération des alias, et remonté d'un Warning si il y en a */
        while(liste)
         { struct CMD_TYPE_MNEMO_FULL mnemo;

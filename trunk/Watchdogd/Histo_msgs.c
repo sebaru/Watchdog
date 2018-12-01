@@ -143,7 +143,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
                 "parent_syn.page, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
-                "histo.date_fixe,histo.date_fin,dls.shortname"
+                "histo.date_fixe,histo.date_fin,dls.shortname,msg.id"
                 " FROM %s as histo"
                 " INNER JOIN %s as msg ON msg.id = histo.id_msg"
                 " INNER JOIN %s as dls ON dls.id = msg.dls_id"
@@ -226,7 +226,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
                 "parent_syn.page, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
-                "histo.date_fixe,histo.date_fin,dls.shortname"
+                "histo.date_fixe,histo.date_fin,dls.shortname,msg.id"
                 " FROM %s as histo"
                 " INNER JOIN %s as msg ON msg.id = histo.id_msg"
                 " INNER JOIN %s as dls ON dls.id = msg.dls_id"
@@ -260,7 +260,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
-                "histo.date_fixe,histo.date_fin,dls.shortname"
+                "histo.date_fixe,histo.date_fin,dls.shortname,msg.id"
                 " FROM %s as histo"
                 " INNER JOIN %s as msg ON msg.id = histo.id_msg"
                 " INNER JOIN %s as dls ON dls.id = msg.dls_id"
@@ -320,6 +320,7 @@
        histo_msgs->date_create_usec = atoi(db->row[10]);
        histo_msgs->date_fixe        = atoi(db->row[11]);
        histo_msgs->date_fin         = atoi(db->row[12]);
+       histo_msgs->msg.id           = atoi(db->row[14]);
      }
     return(histo_msgs);
   }

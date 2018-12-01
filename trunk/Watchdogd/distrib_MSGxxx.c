@@ -164,11 +164,17 @@
 /******************************************************************************************************************************/
  static void Gerer_arrive_MSGxxx_dls_off ( gint num )
   { struct CMD_TYPE_HISTO histo;
+    struct CMD_TYPE_MESSAGE *msg;
     GSList *liste;
 
-    memset ( &histo, 0, sizeof(struct CMD_TYPE_HISTO) );
+    msg = Rechercher_messageDB( num );
+    if (!msg) return;
+
+    memset( &histo, 0, sizeof(histo) );
+    memcpy( &histo.msg, msg, sizeof(struct CMD_TYPE_MESSAGE) );                                           /* Ajout dans la DB */
+    g_free( msg );                                                                     /* On a plus besoin de cette reference */
+
     histo.alive   = FALSE;
-    histo.msg.num = num;
     time ( (time_t *)&histo.date_fin );
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );                           /* Retrait de la liste des messages en REPEAT */

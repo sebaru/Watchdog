@@ -164,6 +164,7 @@
     source_dls->id = rezo_dls->id;
     buffer_write = buffer_all + sizeof(struct CMD_TYPE_SOURCE_DLS);                          /* Index data dans le buffer_all */
     taille_max_write = Cfg_ssrv.taille_bloc_reseau - sizeof(struct CMD_TYPE_SOURCE_DLS);
+    taille_sent = 0;
 
     while ( taille_sent < taille_source )                                                   /* On envoie le fichier au client */
      { gint taille;
@@ -179,7 +180,7 @@
        taille_sent+=taille;
      }
     Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_SOURCE_DLS_END, buffer_all, sizeof(struct CMD_TYPE_SOURCE_DLS) );
-    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG, "%s: Source DLS %05d sent", __func__, rezo_dls->id );
+    Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Source DLS %05d sent", __func__, rezo_dls->id );
     g_free(buffer_all);
     g_free(Source);
   }

@@ -96,6 +96,32 @@
     return(retour);
   }
 /******************************************************************************************************************************/
+/* Reseter_all_bit_interne: Met a 0 et decharge tous les bits interne d'un plugin                                             */
+/* Entrée: le plugin                                                                                                          */
+/* Sortie: Rien                                                                                                               */
+/******************************************************************************************************************************/
+ static void Reseter_all_bit_interne ( struct PLUGIN_DLS *plugin )
+  { GSList *liste_bit; 
+    pthread_mutex_lock( &Partage->com_dls.synchro_data );                           /* Décharge tous les bits du module */
+    liste_bit = Partage->Dls_data_TEMPO;
+    while(liste_bit)
+     { struct DLS_TEMPO *tempo = liste_bit->data;
+       liste_bit = g_slist_next(liste_bit);
+       if (!strcmp(tempo->tech_id, plugin->plugindb.tech_id))
+        { Partage->Dls_data_TEMPO = g_slist_remove( Partage->Dls_data_TEMPO, tempo );
+          g_free(tempo);
+        }
+     }
+    liste_bit = Partage->Dls_data_MSG;                                         /* Decharge tous les messages du modules */
+    while(liste_bit)
+     { struct DLS_MESSAGES *msg = liste_bit->data;
+       liste_bit = g_slist_next(liste_bit);
+       if (!strcmp(msg->tech_id, plugin->plugindb.tech_id))
+        { Dls_data_set_MSG ( msg->tech_id, msg->acronyme, (gpointer **)&msg, 0 ); }
+     }
+    pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+  }          
+/******************************************************************************************************************************/
 /* Decharger_plugins: Decharge tous les plugins DLS                                                                           */
 /* Entrée: Rien                                                                                                               */
 /* Sortie: Rien                                                                                                               */
@@ -107,10 +133,10 @@
     while(liste)                                                                            /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)liste->data;
        if ( plugin->plugindb.id == dls_id )
-        {
-          if (plugin->handle)
+        { if (plugin->handle)
            { dlclose( plugin->handle );
              plugin->plugindb.on = TRUE;                                                           /* On tente de l'allumer ! */
+             Reseter_all_bit_interne ( plugin );
              Charger_un_plugin ( plugin );
              Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d reloaded (%s)", __func__,
                        plugin->plugindb.id, plugin->plugindb.shortname );
@@ -144,23 +170,13 @@
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Decharger_plugin_by_id_dls_tree ( gint id, struct DLS_TREE *dls_tree )
-  { GSList *liste, *liste_bit;
+  { GSList *liste;
 
     liste = dls_tree->Liste_plugin_dls;
     while(liste)                                                                            /* Liberation mémoire des modules */
      { struct PLUGIN_DLS *plugin = liste->data;
        if (plugin->plugindb.id == id)
-        { pthread_mutex_lock( &Partage->com_dls.synchro_data );                           /* Décharge tous les bits du module */
-          liste_bit = Partage->Dls_data_TEMPO;
-          while(liste_bit)
-           { struct DLS_TEMPO *tempo = liste_bit->data;
-             liste_bit = g_slist_next(liste_bit);
-             if (!strcmp(tempo->tech_id, plugin->plugindb.tech_id))
-              { Partage->Dls_data_TEMPO = g_slist_remove( Partage->Dls_data_TEMPO, tempo );
-                g_free(tempo);
-              }
-           }
-          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+        { Reseter_all_bit_interne (plugin);
           if (plugin->handle) dlclose( plugin->handle );
           dls_tree->Liste_plugin_dls = g_slist_remove( dls_tree->Liste_plugin_dls, plugin );
                                                                              /* Destruction de l'entete associé dans la GList */
