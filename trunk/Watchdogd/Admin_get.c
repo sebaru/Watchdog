@@ -129,7 +129,7 @@
      { int num;
        gchar tech_id[80], acronyme[80];
        if (sscanf ( ligne, "%s %s %s", commande, tech_id, acronyme ) == 3)               /* Découpage de la ligne de commande */
-        { struct MESSAGES *msg = NULL;
+        { struct DLS_MESSAGES *msg = NULL;
           Dls_data_get_MSG ( tech_id, acronyme, (gpointer)&msg );
           if (msg)
            { g_snprintf( chaine, sizeof(chaine), " | - MSG %s:%s = %d, persist = %d, changes = %d, last_change = %d top=%d",

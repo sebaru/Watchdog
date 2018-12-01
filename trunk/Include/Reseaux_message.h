@@ -55,6 +55,7 @@
   { guint  id;
     guint  num;                                                                        /* Numero du message dans la structure */
     guint  dls_id;                                                           /* Numéro ID du plugin D.L.S rattaché au message */
+    gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gchar  dls_shortname[NBR_CARAC_PLUGIN_DLS_UTF8+1];
     gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
     gchar  libelle_sms[NBR_CARAC_LIBELLE_MSG_UTF8+1];

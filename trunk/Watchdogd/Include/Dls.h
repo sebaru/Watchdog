@@ -111,9 +111,8 @@
     gboolean edge_down;
   };
 
- struct MESSAGES
-  { struct CMD_TYPE_MESSAGE confDB;
-    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+ struct DLS_MESSAGES
+  { gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gboolean etat;
     gint last_change;
@@ -123,8 +122,9 @@
   };
 
  struct MESSAGES_EVENT
-  { guint num;
+  { gint num;
     gchar etat;
+    struct DLS_MESSAGES *msg;
   };
 
  struct REGISTRE

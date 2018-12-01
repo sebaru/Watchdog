@@ -817,7 +817,7 @@ CREATE TABLE IF NOT EXISTS `config` (
 
 CREATE TABLE IF NOT EXISTS `msgs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `mnemo_id` int(11) NULL DEFAULT NULL,
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `num` int(11) NOT NULL DEFAULT '0',
   `dls_id` int(11) NOT NULL DEFAULT '1',
   `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No libelle",
@@ -832,6 +832,7 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `time_repeat` int(11) NOT NULL DEFAULT '0',
   `is_mp3` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
+  UNIQUE(`dls_id`,`acronyme`),
   FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 

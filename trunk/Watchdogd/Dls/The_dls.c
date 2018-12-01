@@ -696,10 +696,10 @@
 /******************************************************************************************************************************/
  void MSG( int num, int etat )
   { if ( num<0 || num>=NBR_MESSAGE_ECRITS )
-     { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: num %03d out of range", __func__, num ); }
-       return;
-     }
+      { if (!(Partage->top % 600))
+         { Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: num %03d out of range", __func__, num ); }
+        return;
+      }
 
     if ( Partage->g[num].etat != etat )
      { Partage->g[num].etat = etat;
@@ -748,7 +748,7 @@
                       "%s: malloc Event failed. Memory error for MSG%d", __func__, num );
            }
           else
-           { event->num  = num;
+          { event->num  = num;
              event->etat = 1;
              pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
              Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
@@ -1124,21 +1124,21 @@
 /* Met à jour le message en parametre                                                                                         */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_msg ( gchar *tech_id, gchar *acronyme, gpointer **msg_p, gboolean etat )
-  { struct MESSAGES *msg;
+ void Dls_data_set_MSG ( gchar *tech_id, gchar *acronyme, gpointer **msg_p, gboolean etat )
+  { struct DLS_MESSAGES *msg;
 
     if (!msg_p || !*msg_p)
      { GSList *liste;
        if ( !(acronyme && tech_id) ) return;
        liste = Partage->Dls_data_MSG;
        while (liste)
-        { msg = (struct MESSAGES *)liste->data;
+        { msg = (struct DLS_MESSAGES *)liste->data;
           if ( !strcmp ( msg->acronyme, acronyme ) && !strcmp( msg->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
        
        if (!liste)
-        { msg = g_try_malloc0 ( sizeof(struct MESSAGES) );
+        { msg = g_try_malloc0 ( sizeof(struct DLS_MESSAGES) );
           if (!msg)
            { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
@@ -1152,7 +1152,7 @@
         }
        if (msg_p) *msg_p = (gpointer)msg;                                           /* Sauvegarde pour acceleration si besoin */
       }
-    else msg = (struct MESSAGES *)*msg_p;
+    else msg = (struct DLS_MESSAGES *)*msg_p;
 
     if ( msg->etat != etat )
      { msg->etat = etat;
@@ -1160,13 +1160,24 @@
        if ( msg->last_change + 10 <= Partage->top ) { msg->changes = 0; }            /* Si pas de change depuis plus de 1 sec */
 
        if ( msg->changes > 5 && !(Partage->top % 50) )              /* Si persistence d'anomalie on prévient toutes les 5 sec */
-        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: last_change trop tot for MSG %s:%s !", __func__,
+        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: last_change trop tot for MSG '%s':'%s' !", __func__,
                     msg->tech_id, msg->acronyme );
         }
-       else                                                                                 /* On envoi l'envenementau master */
-        { pthread_mutex_lock( &Partage->com_msrv.synchro );                           /* Ajout dans la liste de msg a traiter */
-          Partage->com_msrv.liste_event_msg = g_slist_append( Partage->com_msrv.liste_event_msg, msg );
-          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+       else
+        { struct MESSAGES_EVENT *event;
+          event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
+          if (!event)
+           { Info_new( Config.log, Config.log_dls, LOG_ERR,
+                      "%s: malloc Event failed. Memory error for MSG'%s:%s'", __func__, msg->tech_id, msg->acronyme );
+           }
+          else
+           { event->num  = -1;
+             event->etat = etat;                                                        /* Recopie de l'état dans l'evenement */
+             event->msg  = msg;
+             pthread_mutex_lock( &Partage->com_msrv.synchro );                        /* Ajout dans la liste de msg a traiter */
+             Partage->com_msrv.liste_msg  = g_slist_append( Partage->com_msrv.liste_msg, event );
+             pthread_mutex_unlock( &Partage->com_msrv.synchro );
+           }
           msg->changes++;
           msg->last_change = Partage->top;
           Partage->audit_bit_interne_per_sec++;
@@ -1178,16 +1189,16 @@
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
  gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer **msg_p )
-  { struct MESSAGES *msg;
+  { struct DLS_MESSAGES *msg;
     GSList *liste;
     if (msg_p && *msg_p)                                                             /* Si pointeur d'acceleration disponible */
-     { msg = (struct MESSAGES *)*msg_p;
+     { msg = (struct DLS_MESSAGES *)*msg_p;
        return( msg->etat );
      }
 
     liste = Partage->Dls_data_MSG;
     while (liste)
-     { msg = (struct MESSAGES *)liste->data;
+     { msg = (struct DLS_MESSAGES *)liste->data;
        if ( !strcmp ( msg->acronyme, acronyme ) && !strcmp( msg->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }

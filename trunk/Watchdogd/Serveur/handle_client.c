@@ -66,8 +66,8 @@
 /******************************************************************************************************************************/
  static void Envoyer_histo_au_client ( struct CLIENT *client, struct CMD_TYPE_HISTO *histo )
   { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-             "%s: Histo traite : id = %08d, alive = %d, msg=%04d, libelle=%s", __func__,
-              histo->id, histo->alive, histo->msg.num, histo->msg.libelle );
+             "%s: Histo traite : id = %08d, msg_id=%d, alive = %d, msg=%04d, libelle=%s", __func__,
+              histo->id, histo->msg.id, histo->alive, histo->msg.num, histo->msg.libelle );
 
     Envoi_client( client, TAG_HISTO, (histo->alive ? SSTAG_SERVEUR_SHOW_HISTO : SSTAG_SERVEUR_DEL_HISTO),
                   (gchar *)histo, sizeof(struct CMD_TYPE_HISTO) );
