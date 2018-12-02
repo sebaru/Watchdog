@@ -133,14 +133,12 @@
     while(liste)                                                                            /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)liste->data;
        if ( plugin->plugindb.id == dls_id )
-        { if (plugin->handle)
-           { dlclose( plugin->handle );
-             plugin->plugindb.on = TRUE;                                                           /* On tente de l'allumer ! */
-             Reseter_all_bit_interne ( plugin );
-             Charger_un_plugin ( plugin );
-             Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d reloaded (%s)", __func__,
-                       plugin->plugindb.id, plugin->plugindb.shortname );
-           }
+        { if (plugin->handle) { dlclose( plugin->handle ); }    /* Peut etre à 0 si changement de librairie et erreur de link */
+          plugin->plugindb.on = TRUE;                                                              /* On tente de l'allumer ! */
+          Reseter_all_bit_interne ( plugin );
+          Charger_un_plugin ( plugin );
+          Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: plugin %06d reloaded (%s)", __func__,
+                    plugin->plugindb.id, plugin->plugindb.shortname );
           return;
         }
        liste=liste->next;
