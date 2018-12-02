@@ -102,7 +102,7 @@
 /******************************************************************************************************************************/
  static void Reseter_all_bit_interne ( struct PLUGIN_DLS *plugin )
   { GSList *liste_bit; 
-    pthread_mutex_lock( &Partage->com_dls.synchro_data );                           /* Décharge tous les bits du module */
+    pthread_mutex_lock( &Partage->com_dls.synchro_data );                                 /* Décharge tous les bits du module */
     liste_bit = Partage->Dls_data_TEMPO;
     while(liste_bit)
      { struct DLS_TEMPO *tempo = liste_bit->data;
@@ -112,12 +112,19 @@
           g_free(tempo);
         }
      }
-    liste_bit = Partage->Dls_data_MSG;                                         /* Decharge tous les messages du modules */
+    liste_bit = Partage->Dls_data_MSG;                                               /* Decharge tous les messages du modules */
     while(liste_bit)
      { struct DLS_MESSAGES *msg = liste_bit->data;
        liste_bit = g_slist_next(liste_bit);
        if (!strcmp(msg->tech_id, plugin->plugindb.tech_id))
         { Dls_data_set_MSG ( msg->tech_id, msg->acronyme, (gpointer **)&msg, 0 ); }
+     }
+    liste_bit = Partage->Dls_data_BOOL;                                              /* Decharge tous les messages du modules */
+    while(liste_bit)
+     { struct DLS_BOOL *bool = liste_bit->data;
+       liste_bit = g_slist_next(liste_bit);
+       if (!strcmp(bool->tech_id, plugin->plugindb.tech_id))
+        { Dls_data_set_bool ( bool->tech_id, bool->acronyme, (gpointer **)&bool, 0 ); }
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro_data );
   }          
