@@ -24,6 +24,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
+
+ #include <json-glib/json-glib.h>
  
  #include "watchdogd.h"
  #include "Modbus.h"
@@ -334,5 +336,101 @@
        response = Admin_write ( response, chaine );
      }
     return(response);
+  }
+/******************************************************************************************************************************/
+/* Admin_json_list : fonction appelée pour lister les modules modbus                                                          */
+/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/******************************************************************************************************************************/
+ static void Admin_json_list ( gchar **buffer_p, gint *taille_p )
+  { GSList *liste_modules;
+    JsonBuilder *builder;
+    JsonGenerator *gen;
+    gsize taille_buf;
+    gint retour, num;
+    gchar *buf;
+
+    builder = json_builder_new ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       return;
+     }
+
+  /*  json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+  /*  json_builder_set_member_name  ( builder, "list" );*/
+    json_builder_begin_object (builder);                                                                 /* Contenu du Status */
+
+    pthread_mutex_lock( &Cfg_modbus.lib->synchro );
+    liste_modules = Cfg_modbus.Modules_MODBUS;
+    while ( liste_modules )
+     { struct MODULE_MODBUS *module = liste_modules->data;
+
+       json_builder_set_member_name  ( builder, module->modbus.tech_id );
+/*       json_builder_begin_array (builder);                                                   /* Création du noeud Passerelles */
+
+       json_builder_begin_object (builder);                                                 /* Contenu du Noeud Passerelle */
+
+       json_builder_set_member_name  ( builder, "mode" );
+       json_builder_add_string_value ( builder, Modbus_mode_to_string(module) );
+
+       json_builder_set_member_name  ( builder, "started" );
+       json_builder_add_int_value ( builder, module->started );
+
+       json_builder_set_member_name  ( builder, "comm" );
+       json_builder_add_int_value ( builder, Dls_data_get_bool( NULL, NULL, &module->bit_comm) );
+
+       json_builder_set_member_name  ( builder, "transaction_id" );
+       json_builder_add_int_value ( builder, module->transaction_id );
+
+       json_builder_set_member_name  ( builder, "nbr_deconnect" );
+       json_builder_add_int_value ( builder, module->nbr_deconnect );
+
+       json_builder_set_member_name  ( builder, "last_reponse (in s)" );
+       json_builder_add_int_value ( builder, (Partage->top - module->date_last_reponse)/10 );
+
+       json_builder_set_member_name  ( builder, "date_next_eana" );
+       json_builder_add_int_value ( builder, (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1) );
+
+       json_builder_set_member_name  ( builder, "date_retente" );
+       json_builder_add_int_value ( builder, (module->date_retente > Partage->top   ? (module->date_retente   - Partage->top)/10 : -1) );
+
+       json_builder_end_object (builder);                                                                       /* End Module */
+
+/*       json_builder_end_array (builder);                                                                  /* End Module Array */
+
+       liste_modules = liste_modules->next;                                                      /* Passage au module suivant */
+     }
+    pthread_mutex_unlock( &Cfg_modbus.lib->synchro );
+
+/*  json_builder_end_object (builder);                                                                  /* Fin dump du status */
+
+    json_builder_end_object (builder);                                                                        /* End Document */
+
+    gen = json_generator_new ();
+    json_generator_set_root ( gen, json_builder_get_root(builder) );
+    json_generator_set_pretty ( gen, TRUE );
+    buf = json_generator_to_data (gen, &taille_buf);
+    g_object_unref(builder);
+    g_object_unref(gen);
+
+    *buffer_p = buf;
+    *taille_p = taille_buf;
+  }
+/******************************************************************************************************************************/
+/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
+/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/******************************************************************************************************************************/
+ void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
+  { 
+    *buffer_p = NULL;
+    *taille_p = 0;
+
+/************************************************ Préparation du buffer JSON **************************************************/
+                                                                      /* Lancement de la requete de recuperation des messages */
+    if (!strcmp(commande, "/list"))
+     { Admin_json_list ( buffer_p, taille_p ); }
+    
+    return;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

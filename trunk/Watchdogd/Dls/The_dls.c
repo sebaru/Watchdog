@@ -882,6 +882,7 @@
      { bool = (struct DLS_BOOL *)*bool_p;
        return( bool->etat );
      }
+    if (!tech_id || !acronyme) return(FALSE);
 
     liste = Partage->Dls_data_BOOL;
     while (liste)
@@ -905,6 +906,7 @@
      { bool = (struct DLS_BOOL *)*bool_p;
        return( bool->edge_up );
      }
+    if (!tech_id || !acronyme) return(FALSE);
 
     liste = Partage->Dls_data_BOOL;
     while (liste)
@@ -928,6 +930,7 @@
      { bool = (struct DLS_BOOL *)*bool_p;
        return( bool->edge_down );
      }
+    if (!tech_id || !acronyme) return(FALSE);
 
     liste = Partage->Dls_data_BOOL;
     while (liste)
@@ -1043,6 +1046,7 @@
      { ai = (struct ANALOG_INPUT *)*ai_p;
        return( ai->val_ech );
      }
+    if (!tech_id || !acronyme) return(0.0);
 
     liste = Partage->Dls_data_AI;
     while (liste)
@@ -1108,6 +1112,7 @@
      { tempo = (struct DLS_TEMPO *)*tempo_p;
        return( tempo->state );
      }
+    if (!tech_id || !acronyme) return(FALSE);
 
     liste = Partage->Dls_data_TEMPO;
     while (liste)
@@ -1195,6 +1200,7 @@
      { msg = (struct DLS_MESSAGES *)*msg_p;
        return( msg->etat );
      }
+    if (!tech_id || !acronyme) return(FALSE);
 
     liste = Partage->Dls_data_MSG;
     while (liste)
