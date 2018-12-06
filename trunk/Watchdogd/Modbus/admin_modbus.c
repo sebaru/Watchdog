@@ -368,7 +368,7 @@
        json_builder_set_member_name  ( builder, module->modbus.tech_id );
 /*       json_builder_begin_array (builder);                                                   /* Création du noeud Passerelles */
 
-       json_builder_begin_object (builder);                                                 /* Contenu du Noeud Passerelle */
+       json_builder_begin_object (builder);                                                    /* Contenu du Noeud Passerelle */
 
        json_builder_set_member_name  ( builder, "mode" );
        json_builder_add_string_value ( builder, Modbus_mode_to_string(module) );
@@ -385,7 +385,7 @@
        json_builder_set_member_name  ( builder, "nbr_deconnect" );
        json_builder_add_int_value ( builder, module->nbr_deconnect );
 
-       json_builder_set_member_name  ( builder, "last_reponse (in s)" );
+       json_builder_set_member_name  ( builder, "last_reponse" );
        json_builder_add_int_value ( builder, (Partage->top - module->date_last_reponse)/10 );
 
        json_builder_set_member_name  ( builder, "date_next_eana" );
