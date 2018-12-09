@@ -112,7 +112,7 @@
        g_snprintf( log, sizeof(log), "%s\n", chaine );
        write( Id_log, log, strlen(log) );
 
-       Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: %s", __func__, chaine );
+       Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: Ligne %d : %s", __func__, DlsScanner_get_lineno(), chaine );
      }
     else if (nbr_erreur==15)
      { write( Id_log, too_many, strlen(too_many)+1 ); }
@@ -794,7 +794,7 @@
     rc = fopen( source, "r" );
     if (!rc) retour = TRAD_DLS_ERROR;
     else
-     { DlsScanner_debug = 0;                                                                     /* Debug de la traduction ?? */
+     { DlsScanner_debug = 1;                                                                     /* Debug de la traduction ?? */
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
        fclose(rc);
