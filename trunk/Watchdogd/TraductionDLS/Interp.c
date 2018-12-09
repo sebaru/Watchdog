@@ -746,6 +746,12 @@
     g_slist_free(Liste_edge_up_entree); Liste_edge_up_entree = NULL;
   }
 /******************************************************************************************************************************/
+/* Trad_dls_set_debug: Positionne le flag de debug Bison/Flex                                                                 */
+/* Entrée : TRUE ou FALSE                                                                                                     */
+/******************************************************************************************************************************/
+ void Trad_dls_set_debug ( gboolean actif )
+  { DlsScanner_debug = actif; }                                                                   /* Debug de la traduction ?? */
+/******************************************************************************************************************************/
 /* Traduire: Traduction du fichier en paramètre du langage DLS vers le langage C                                              */
 /* Entrée: l'id du modul                                                                                                      */
 /* Sortie: TRAD_DLS_OK, _WARNING ou _ERROR                                                                                    */

@@ -393,6 +393,18 @@
                   Http_Send_response_code ( wsi, HTTP_200_OK );
                   return(1);
                 }
+               else if ( ! strcasecmp( url, "/dls/debug_trad_on" ) )
+                { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug ON", __func__ );
+                  Trad_dls_set_debug ( TRUE );
+                  Http_Send_response_code ( wsi, HTTP_200_OK );
+                  return(1);
+                }
+               else if ( ! strcasecmp( url, "/dls/debug_trad_off" ) )
+                { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug OFF", __func__ );
+                  Trad_dls_set_debug ( FALSE );
+                  Http_Send_response_code ( wsi, HTTP_200_OK );
+                  return(1);
+                }
                else if ( ! strncasecmp( url, "/reload/", 8 ) )
                 { gchar *target = url+8;
                   GSList *liste;
