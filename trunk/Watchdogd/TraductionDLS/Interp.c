@@ -83,7 +83,7 @@
        Info_new( Config.log, Config.log_dls, LOG_INFO,
                 "%s: Buffer expanded to %d bytes", __func__, Buffer_taille );
      }
-    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "Emettre %s", chaine );
+    Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: ligne %d : %s", __func__, DlsScanner_get_lineno(), chaine );
     memcpy ( Buffer + Buffer_used, chaine, taille );                                          /* Recopie du bout de buffer */
     Buffer_used += taille;
   }

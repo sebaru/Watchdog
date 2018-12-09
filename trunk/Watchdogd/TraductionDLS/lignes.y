@@ -150,6 +150,10 @@ listeInstr:     une_instr listeInstr
 une_instr:      MOINS expr DONNE action PVIRGULE
                 {{ int taille;
                    char *instr;
+                   Emettre_erreur_new( "%s ligne %d: $2=%p", __func__, DlsScanner_get_lineno(), $2 );
+                   Emettre_erreur_new( "%s ligne %d: $2=%s", __func__, DlsScanner_get_lineno(), $2 );
+                   Emettre_erreur_new( "%s ligne %d: $4=%p", __func__, DlsScanner_get_lineno(), $4 );
+                   Emettre_erreur_new( "%s ligne %d: $4=%s", __func__, DlsScanner_get_lineno(), $4 );
                    taille = strlen($2)+strlen($4->alors)+15;
                    if ($4->sinon)
                     { taille += (strlen($4->sinon) + 10);
