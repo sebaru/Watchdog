@@ -491,8 +491,8 @@
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
        g_snprintf( action->sinon, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_M_%s_%s, FALSE );",
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-       return(action);
      }
+    return(action);
   }
 /******************************************************************************************************************************/
 /* New_action_mono: Prepare une struct action avec une commande SM                                                            */
