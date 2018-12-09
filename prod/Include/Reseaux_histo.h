@@ -29,8 +29,8 @@
  #define _RESEAUX_HISTO_H_
 
  struct CMD_TYPE_HISTO
-  { guint id;                                                        /* id unique dans la base de données */
-    gboolean alive;                                             /* Le message est-il encore d'actualité ? */
+  { gint id;                                                                             /* id unique dans la base de données */
+    gboolean alive;                                                                 /* Le message est-il encore d'actualité ? */
     struct CMD_TYPE_MESSAGE msg;
     gchar nom_ack [ NBR_CARAC_LOGIN_UTF8 + 1 ];
     guint date_create_sec;

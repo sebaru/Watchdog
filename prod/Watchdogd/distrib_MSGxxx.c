@@ -46,7 +46,6 @@
     while (liste)
      { struct MESSAGES_EVENT *event;
        histo = (struct CMD_TYPE_HISTO *)liste->data;                                         /* Recuperation du numero de msg */
-
        if (Partage->g[histo->msg.num].next_repeat <= Partage->top)
         { event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
           if (event)
@@ -130,25 +129,16 @@
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- static void Gerer_arrive_MSG_event_dls_on ( struct MESSAGES *msg )
-  { struct CMD_TYPE_MNEMO_FULL *message;
+ static void Gerer_arrive_MSG_event_dls_on ( struct DLS_MESSAGES *msg )
+  { struct CMD_TYPE_MESSAGE *message;
     struct CMD_TYPE_HISTO histo;
     struct timeval tv;
 
-    message = Rechercher_mnemo_fullDB_by_acronyme ( msg->tech_id, msg->acronyme );
+    message = Rechercher_messageDB_par_acronyme ( msg->tech_id, msg->acronyme );
     if (!message) return;
 
     memset ( &histo, 0, sizeof(struct CMD_TYPE_HISTO) );
-    g_snprintf( histo.msg.libelle, sizeof(histo.msg.libelle),"%s", message->mnemo_base.libelle );
-    g_snprintf( histo.msg.syn_page, sizeof(histo.msg.syn_page), "%s", message->mnemo_base.syn_page );
-    g_snprintf( histo.msg.syn_parent_page, sizeof(histo.msg.syn_parent_page), "%s", message->mnemo_base.syn_parent_page );
-    g_snprintf( histo.msg.dls_shortname, sizeof(histo.msg.dls_shortname), "%s", message->mnemo_base.dls_shortname );
-    histo.msg.id = message->mnemo_msg.id;
-    histo.msg.num = 0;
-    histo.msg.enable = message->mnemo_msg.enable;
-    histo.msg.type = message->mnemo_msg.type;
-    histo.msg.syn_id = message->mnemo_msg.syn_id;
-
+    memcpy( &histo.msg, message, sizeof(struct CMD_TYPE_MESSAGE) );                                       /* Ajout dans la DB */
     g_free( message );                                                                 /* On a plus besoin de cette reference */
 
     if (!histo.msg.enable)                                                       /* Distribution du message aux sous serveurs */
@@ -174,11 +164,17 @@
 /******************************************************************************************************************************/
  static void Gerer_arrive_MSGxxx_dls_off ( gint num )
   { struct CMD_TYPE_HISTO histo;
+    struct CMD_TYPE_MESSAGE *msg;
     GSList *liste;
 
-    memset ( &histo, 0, sizeof(struct CMD_TYPE_HISTO) );
+    msg = Rechercher_messageDB( num );
+    if (!msg) return;
+
+    memset( &histo, 0, sizeof(histo) );
+    memcpy( &histo.msg, msg, sizeof(struct CMD_TYPE_MESSAGE) );                                           /* Ajout dans la DB */
+    g_free( msg );                                                                     /* On a plus besoin de cette reference */
+
     histo.alive   = FALSE;
-    histo.msg.num = num;
     time ( (time_t *)&histo.date_fin );
 
     pthread_mutex_lock( &Partage->com_msrv.synchro );                           /* Retrait de la liste des messages en REPEAT */
@@ -204,24 +200,23 @@
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
- static void Gerer_arrive_MSG_event_dls_off ( struct MESSAGES *msg )
-  { struct CMD_TYPE_MNEMO_FULL *message;
+ static void Gerer_arrive_MSG_event_dls_off ( struct DLS_MESSAGES *msg )
+  { struct CMD_TYPE_MESSAGE *message;
     struct CMD_TYPE_HISTO histo;
-    GSList *liste;
 
-    message = Rechercher_mnemo_fullDB_by_acronyme ( msg->tech_id, msg->acronyme );
+    message = Rechercher_messageDB_par_acronyme ( msg->tech_id, msg->acronyme );
     if (!message) return;
 
     memset ( &histo, 0, sizeof(struct CMD_TYPE_HISTO) );
+    memcpy( &histo.msg, message, sizeof(struct CMD_TYPE_MESSAGE) );                                       /* Ajout dans la DB */
+    g_free( message );                                                                 /* On a plus besoin de cette reference */
+
     histo.alive  = FALSE;
-    histo.msg.num = 0;
-    histo.msg.id = message->mnemo_msg.id;
     time ( (time_t *)&histo.date_fin );
 
     Modifier_histo_msgsDB ( &histo );
     Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
     Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, TAG_ZMQ_TO_HISTO, NULL, NULL, &histo, sizeof(struct CMD_TYPE_HISTO) );
-    g_free(message);
   }
 /******************************************************************************************************************************/
 /* Gerer_arrive_message_dls: Gestion de l'arrive des messages depuis DLS                                                      */
@@ -234,28 +229,27 @@
      { pthread_mutex_lock( &Partage->com_msrv.synchro );          /* Ajout dans la liste de msg a traiter */
        event = Partage->com_msrv.liste_msg->data;                        /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg, event );
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "%s: Handle MSG%03d=%d, Reste a %d a traiter", __func__,
-                 event->num, event->etat, g_slist_length(Partage->com_msrv.liste_msg) );
+       if (event->msg)
+        { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+                   "%s: Handle MSG'%s:%s'=%d, Reste a %d a traiter", __func__,
+                    event->msg->tech_id, event->msg->acronyme, event->etat, g_slist_length(Partage->com_msrv.liste_msg) );
+        }
+       else
+        { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+                   "%s: Handle MSG%03d=%d, Reste a %d a traiter", __func__,
+                    event->num, event->etat, g_slist_length(Partage->com_msrv.liste_msg) );
+        }
        pthread_mutex_unlock( &Partage->com_msrv.synchro );
 
-            if (event->etat == 0) Gerer_arrive_MSGxxx_dls_off( event->num );
-       else if (event->etat == 1) Gerer_arrive_MSGxxx_dls_on ( event->num );
+       if (event->msg)
+        {      if (event->etat == 0) Gerer_arrive_MSG_event_dls_off( event->msg );
+          else if (event->etat == 1) Gerer_arrive_MSG_event_dls_on ( event->msg );
+        }
+       else
+        {      if (event->etat == 0) Gerer_arrive_MSGxxx_dls_off( event->num );
+          else if (event->etat == 1) Gerer_arrive_MSGxxx_dls_on ( event->num );
+        }
        g_free(event);
-     }
-
-    while (Partage->com_msrv.liste_event_msg)
-     { struct MESSAGES *msg;
-       pthread_mutex_lock( &Partage->com_msrv.synchro );                              /* Ajout dans la liste de msg a traiter */
-       msg = Partage->com_msrv.liste_event_msg->data;                                        /* Recuperation du numero de msg */
-       Partage->com_msrv.liste_event_msg = g_slist_remove ( Partage->com_msrv.liste_event_msg, msg );
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "%s: Handle MSG %s:%s=%d, Reste a %d a traiter", __func__,
-                 msg->tech_id, msg->acronyme, msg->etat, g_slist_length(Partage->com_msrv.liste_event_msg) );
-       pthread_mutex_unlock( &Partage->com_msrv.synchro );
-
-            if (msg->etat == 0) Gerer_arrive_MSG_event_dls_off( msg );
-       else if (msg->etat == 1) Gerer_arrive_MSG_event_dls_on ( msg );
      }
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

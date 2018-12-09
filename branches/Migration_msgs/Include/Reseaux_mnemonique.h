@@ -136,57 +136,6 @@
     guint random;                                         /* Est-ce une tempo random ? si oui, est la dynamique max du random */
   };
 
-/******************************************************** Les messages ********************************************************/
- #define NBR_CARAC_LIBELLE_MSG       100                                                                  /* Attention au SMS */
- #define NBR_CARAC_LIBELLE_MSG_UTF8  (2*NBR_CARAC_LIBELLE_MSG)
-
- enum
-  { MSG_ETAT,                                                        /* Definitions des types de messages */
-    MSG_ALERTE,
-    MSG_DEFAUT,
-    MSG_ALARME,
-    MSG_VEILLE,
-    MSG_ATTENTE,
-    MSG_DANGER,
-    MSG_DERANGEMENT,
-    NBR_TYPE_MSG
-  };
-
- enum
-  { MSG_SMS_NONE,
-    MSG_SMS_YES,
-    MSG_SMS_GSM_ONLY,
-    MSG_SMS_SMSBOX_ONLY,
-    NBR_TYPE_MSG_SMS
-  };
-
- struct CMD_TYPE_MNEMO_MESSAGE
-  { guint  id;
-    guint  dls_id;                                                           /* Numéro ID du plugin D.L.S rattaché au message */
-    gchar  dls_shortname[NBR_CARAC_PLUGIN_DLS_UTF8+1];
-    gchar  acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
-    gchar  libelle_sms[NBR_CARAC_LIBELLE_MSG_UTF8+1];
-    guint  syn_id;                                                             /* Numéro ID du synoptique rattaché au message */
-    gchar  syn_parent_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
-    gchar  syn_page[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];
-    gchar  syn_libelle[NBR_CARAC_LIBELLE_SYNOPTIQUE_UTF8+1];
-    guchar type;                                                                           /* Etat, prealarme, defaut, alarme */
-    gboolean enable;                                                  /* Flag pour la gestion par exemple de l'inhibition ... */
-    guint  sms;                                                                                             /* Envoi de sms ? */
-    gboolean audio;                                                                             /* Activation message audio ? */
-    guint  bit_audio;                                                         /* Numéro du Monostable associé au profil vocal */
-    gchar  libelle_audio[NBR_CARAC_LIBELLE_MSG_UTF8+1];
-    guint  time_repeat;                                               /* Temps entre deux répétitions (si non nul) en minutes */
-    gboolean persist;                                                                               /* Persistence du message */
-    gboolean is_mp3;                                                            /* Un mp3 a-t'il été chargé pour ce message ? */
-  };
-
- struct CMD_TYPE_MNEMO_MESSAGES
-  { guint nbr_messages;                                                     /* Nombre de structure CMD_TYPE_MESSAGE suivantes */
-    struct CMD_TYPE_MNEMO_MESSAGE msg[];
-  };
-  
 /******************************************************* Suite des structures *************************************************/
  struct CMD_TYPE_MNEMONIQUES
   { guint nbr_mnemos;                                                    /* Nombre de structure CMD_TYPE_MNEMONIQUE suivantes */
@@ -205,7 +154,6 @@
             struct CMD_TYPE_MNEMO_TEMPO mnemo_tempo;
             struct CMD_TYPE_MNEMO_REGISTRE mnemo_r;
             struct CMD_TYPE_MNEMO_HORLOGE mnemo_horloge;
-            struct CMD_TYPE_MNEMO_MESSAGE mnemo_msg;
           };
   };
 

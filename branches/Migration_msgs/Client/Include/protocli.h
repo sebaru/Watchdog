@@ -51,7 +51,6 @@
  enum
   { TYPE_PAGE_PLUGIN_DLS,                                                                         /* Listes des plugins D.L.S */
     TYPE_PAGE_HISTO,                                                               /* Page de garde: messages au fil de l'eau */
-    TYPE_PAGE_MESSAGE,                                                                       /* Edition des messages Watchdog */
     TYPE_PAGE_SYNOPTIQUE,                                                     /* Edition des noms/mnémoniques des synoptiques */
     TYPE_PAGE_ALL_MNEMONIQUE,                                                /* Page de visualisation de tous les mnemoniques */
     TYPE_PAGE_MNEMONIQUE,                                                            /* Page de visualisation des mnemoniques */
@@ -231,17 +230,6 @@
  extern void Creer_page_histo( void );                               
  extern void Jouer_remote_mp3 ( gchar *file, gint id );
  
- extern void Proto_afficher_un_message( struct CMD_TYPE_MESSAGE *message );                           /* Dans liste_message.c */
- extern void Proto_cacher_un_message( struct CMD_TYPE_MESSAGE *message );
- extern void Proto_rafraichir_un_message( struct CMD_TYPE_MESSAGE *message );
- extern void Creer_page_message( void );
- extern gchar *Type_vers_string ( guint type );
- extern gchar *Type_sms_vers_string ( guint type );
-
- extern void Menu_ajouter_editer_message ( struct CMD_TYPE_MESSAGE *edit_msg );                       /* Dans ajout_message.c */
- extern void Proto_afficher_mnemo_voc_message ( struct CMD_TYPE_MNEMO_BASE *mnemo );
- extern void Proto_afficher_un_dls_for_message ( struct CMD_TYPE_PLUGIN_DLS *dls );
-
  extern void Proto_cacher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );                  /* Dans liste_synoptique.c*/
  extern void Proto_afficher_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );
  extern void Proto_rafraichir_un_synoptique( struct CMD_TYPE_SYNOPTIQUE *synoptique );

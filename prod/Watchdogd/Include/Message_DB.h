@@ -37,10 +37,12 @@
  extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB ( guint num );
  extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_id ( guint id );
  extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_mnemo_id ( guint mnemo_id );
+ extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_acronyme ( gchar *tech_id, gchar *acronyme );
  extern gboolean Recuperer_messageDB ( struct DB **db );
  extern gboolean Recuperer_messageDB_with_conditions ( struct DB **db_retour, gchar *conditions, gint start, gint length );
  extern struct CMD_TYPE_MESSAGE *Recuperer_messageDB_suite( struct DB **db );
  extern gint Ajouter_messageDB ( struct CMD_TYPE_MESSAGE *msg );
+ extern gint Ajouter_messageDB_for_dls ( struct CMD_TYPE_MESSAGE *msg );
  extern gboolean Retirer_messageDB ( struct CMD_TYPE_MESSAGE *msg );
  extern gboolean Modifier_messageDB( struct CMD_TYPE_MESSAGE *msg );
  extern gboolean Modifier_messageDB_set_mp3 ( gint id, gboolean valeur );

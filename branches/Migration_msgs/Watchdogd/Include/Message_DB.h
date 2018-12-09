@@ -28,23 +28,49 @@
 #ifndef _MESSAGE_DB_H_
  #define _MESSAGE_DB_H_
 
- #include "Reseaux.h"
  #include "Db.h"
 
- #define NOM_TABLE_MSG       "msgs"
+/******************************************************** Les messages ********************************************************/
+ #define NBR_CARAC_LIBELLE_MSG       100                                                                  /* Attention au SMS */
+ #define NBR_CARAC_LIBELLE_MSG_UTF8  (2*NBR_CARAC_LIBELLE_MSG)
+
+ enum
+  { MSG_ETAT,                                                        /* Definitions des types de messages */
+    MSG_ALERTE,
+    MSG_DEFAUT,
+    MSG_ALARME,
+    MSG_VEILLE,
+    MSG_ATTENTE,
+    MSG_DANGER,
+    MSG_DERANGEMENT,
+    NBR_TYPE_MSG
+  };
+
+ enum
+  { MSG_SMS_NONE,
+    MSG_SMS_YES,
+    MSG_SMS_GSM_ONLY,
+    MSG_SMS_SMSBOX_ONLY,
+    NBR_TYPE_MSG_SMS
+  };
+
+ struct DB_MESSAGE
+  { gint   mnemo_id;
+    gboolean enable;                                                  /* Flag pour la gestion par exemple de l'inhibition ... */
+    guchar type;                                                                           /* Etat, prealarme, defaut, alarme */
+    gchar  libelle[NBR_CARAC_LIBELLE_MSG_UTF8+1];
+    guint  sms;                                                                                             /* Envoi de sms ? */
+    gchar  libelle_sms[NBR_CARAC_LIBELLE_MSG_UTF8+1];
+    gboolean audio;                                                                             /* Activation message audio ? */
+    gchar  libelle_audio[NBR_CARAC_LIBELLE_MSG_UTF8+1];
+    guint  bit_audio;                                                         /* Numéro du Monostable associé au profil vocal */
+    guint  time_repeat;                                               /* Temps entre deux répétitions (si non nul) en minutes */
+    gboolean persist;                                                                               /* Persistence du message */
+    gboolean is_mp3;                                                            /* Un mp3 a-t'il été chargé pour ce message ? */
+  };
 
 /******************************************** Définitions des prototypes ******************************************************/
- extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB ( guint num );
- extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_id ( guint id );
- extern struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_mnemo_id ( guint mnemo_id );
- extern gboolean Recuperer_messageDB ( struct DB **db );
- extern gboolean Recuperer_messageDB_with_conditions ( struct DB **db_retour, gchar *conditions, gint start, gint length );
- extern struct CMD_TYPE_MESSAGE *Recuperer_messageDB_suite( struct DB **db );
- extern gint Ajouter_messageDB ( struct CMD_TYPE_MESSAGE *msg );
- extern gboolean Retirer_messageDB ( struct CMD_TYPE_MESSAGE *msg );
- extern gboolean Modifier_messageDB( struct CMD_TYPE_MESSAGE *msg );
- extern gboolean Modifier_messageDB_set_mp3 ( gint id, gboolean valeur );
- extern void Charger_messages ( void );
+ extern struct DB_MESSAGE *Rechercher_messageDB ( gchar *tech_id, gchar *acro );
 
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

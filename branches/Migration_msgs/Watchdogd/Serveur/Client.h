@@ -84,7 +84,7 @@
     gint id_creation_message_mp3;                                              /* ID fichier message mp3 en cours de creation */
     gint classe_icone;                                                            /* Classe d'icone en cours de visualisation */
     gint date_next_send_cadran;                                             /* Date du prochain envoi des cadrans au client */
-    struct CMD_CRITERE_HISTO_MSGS requete;                                       /* Pour la sauvegarde de la requete en cours */
+/*    struct CMD_CRITERE_HISTO_MSGS requete;                                       /* Pour la sauvegarde de la requete en cours */
     struct CMD_TYPE_SOURCE_DLS dls;                                         /* Pour la sauvegarde et compilation dls en cours */
 
     struct CMD_TYPE_SYNOPTIQUE *syn_to_send;             /* Structure du synoptique en cours d'envoi (atelier ou supervision) */

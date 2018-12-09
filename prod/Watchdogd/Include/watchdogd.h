@@ -76,6 +76,7 @@
     void (*Run_thread)( struct LIBRAIRIE *lib );                                  /* Fonction principale de gestion du thread */
                                                                                  /* Fonction de gestion des commandes d'admin */
     gchar *(*Admin_command)( gchar *response, gchar *ligne );
+    void *(*Admin_json)( gchar *commande, gchar **buffer, gint *taille_buf );
   };
 
  struct COM_DB                                                                 /* Interfaçage avec le code de gestion des BDD */
@@ -93,7 +94,6 @@
     GSList *liste_msg_repeat;                                                          /* liste de struct MSGDB msg a envoyer */
                                                                        /* Distribution aux threads (par systeme d'abonnement) */
     GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
-    GSList *liste_event_msg;                                                        /* liste de struct MESSAGES msg a envoyer */
     GSList *liste_i;                                                             /* liste de I a traiter dans la distribution */
     GSList *liste_a;                                                             /* liste de A a traiter dans la distribution */
     struct ZMQUEUE *zmq_msg;                                                           /* Message Queue des messages Watchdog */
@@ -132,7 +132,7 @@
     struct DIGITAL_INPUT e [ NBR_ENTRE_TOR ];
     struct SORTIE_TOR a [ NBR_SORTIE_TOR ];
     guchar b [ (NBR_BIT_BISTABLE>>3) + 1 ];                                                                      /* Bistables */
-    struct MESSAGES g [ NBR_MESSAGE_ECRITS ];                                                   /* Message vers veille et syn */
+    struct DLS_MESSAGES g [ NBR_MESSAGE_ECRITS ];                                               /* Message vers veille et syn */
     struct I_MOTIF i[ NBR_BIT_CONTROLE ];                                                               /* DLS=rw, Sserveur=r */
     struct DLS_TEMPO Tempo_R[NBR_TEMPO];
     struct REGISTRE registre[NBR_REGISTRE];

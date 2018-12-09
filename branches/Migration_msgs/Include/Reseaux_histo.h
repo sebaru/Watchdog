@@ -39,6 +39,7 @@
     guint date_fin;
   };
 
+#ifdef bouh
  struct CMD_RESPONSE_HISTO_MSGS
   { struct CMD_TYPE_HISTO histo;
     gint32 page_id;                    /* Numéro de la page du client sur laquelle afficher les résultats */
@@ -55,6 +56,7 @@
     gint32 page_id;
   };
 
+#endif
  enum 
   { SSTAG_SERVEUR_ADDPROGRESS_HISTO,
     SSTAG_SERVEUR_ADDPROGRESS_HISTO_FIN,

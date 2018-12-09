@@ -9,14 +9,12 @@ bin_PROGRAMS = Watchdog-client
 Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
                           protocole.c protocole_gtk_message.c protocole_icone.c \
                           protocole_dls.c protocole_mnemonique.c \
-                          protocole_message.c protocole_connexion.c \
-                          protocole_supervision.c protocole_histo.c \
+                          protocole_connexion.c \
+                          protocole_supervision.c \
                           protocole_atelier.c horloge.c ajout_horloge.c \
 			  protocole_synoptique.c protocole_admin.c \
                           menu.c timer.c admin.c \
 			  liste_plugin_dls.c ajout_plugin_dls.c edit_source_dls.c \
-			  liste_histo.c liste_histo_msgs.c \
-			  liste_message.c ajout_message.c \
 			  liste_synoptique.c ajout_synoptique.c \
 			  liste_mnemonique.c ajout_mnemonique.c option_entreeana.c option_cpt_imp.c \
 			  liste_icone.c ajout_icone.c liste_icone.h option_tempo.c option_registre.c \

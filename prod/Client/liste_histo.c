@@ -324,10 +324,9 @@
 
     while ( valide )
      { gtk_tree_model_get( store, &iter, COLONNE_MSG_ID, &id, COLONNE_NUM, &num, -1 );
-/* printf("Del_histo: id = %d, cible = %d\n", id, histo->id); */
-       if ( (histo->msg.num != 0 && num == histo->msg.num) ||
-            (histo->msg.num == 0 && id == histo->msg.id) ) 
-        { if (gtk_list_store_remove( GTK_LIST_STORE(store), &iter )) continue; }
+       if ( (histo->msg.num != -1 && num == histo->msg.num) ||
+            (histo->msg.num == -1 && id == histo->msg.id) ) 
+        { gtk_list_store_remove( GTK_LIST_STORE(store), &iter ); }
        valide = gtk_tree_model_iter_next( store, &iter );
      }
   }
@@ -370,7 +369,7 @@
     gtk_box_pack_start( GTK_BOX(hboite), scroll, TRUE, TRUE, 0 );
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                          /* ID */
-                                              G_TYPE_UINT,                                         /* NUM */
+                                              G_TYPE_INT,                                          /* NUM */
                                               G_TYPE_UINT,                                         /* MSG_ID */
                                               G_TYPE_STRING,
                                               G_TYPE_STRING,                               /* Groupe page */

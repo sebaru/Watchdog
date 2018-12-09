@@ -74,14 +74,6 @@
 /* Menu_want_message: l'utilisateur desire editer la base msgs                                            */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/
- void Menu_want_message ( void )
-  { if (Chercher_page_notebook( TYPE_PAGE_MESSAGE, 0, TRUE )) return;
-    Envoi_serveur( TAG_MESSAGE, SSTAG_CLIENT_WANT_PAGE_MESSAGE, NULL, 0 );
-  }
-/**********************************************************************************************************/
-/* Menu_want_message: l'utilisateur desire editer la base msgs                                            */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
  void Menu_want_camera ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_CAMERA, 0, TRUE )) return;
     Envoi_serveur( TAG_LOWLEVEL, SSTAG_CLIENT_WANT_PAGE_CAMERA, NULL, 0 );
@@ -101,13 +93,6 @@
  void Menu_want_synoptique ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_SYNOPTIQUE, 0, TRUE )) return;
     Envoi_serveur( TAG_SYNOPTIQUE, SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE, NULL, 0 );
-  }
-/**********************************************************************************************************/
-/* Menu_want_histo_msgs: l'utilisateur desire voir l'historique                                           */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
- void Menu_want_histo_msgs ( void )
-  { Creer_page_liste_histo_msgs();
   }
 /**********************************************************************************************************/
 /* Menu_want_supervision: l'utilisateur desire voir le synoptique supervision                             */

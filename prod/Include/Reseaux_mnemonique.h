@@ -154,7 +154,6 @@
             struct CMD_TYPE_MNEMO_TEMPO mnemo_tempo;
             struct CMD_TYPE_MNEMO_REGISTRE mnemo_r;
             struct CMD_TYPE_MNEMO_HORLOGE mnemo_horloge;
-            struct CMD_TYPE_MESSAGE mnemo_msg;
           };
   };
 

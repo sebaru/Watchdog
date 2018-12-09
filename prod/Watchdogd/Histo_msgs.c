@@ -62,22 +62,15 @@
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  static gboolean Modifier_Ajouter_histo_msgsDB ( gboolean ajout, struct CMD_TYPE_HISTO *histo )
-  { gchar *libelle, *nom_ack;
+  { gchar *nom_ack;
     gchar requete[1024];
     gboolean retour;
     struct DB *db;
 
     if (ajout == TRUE)
-     { libelle = Normaliser_chaine ( histo->msg.libelle );                                   /* Formatage correct des chaines */
-       if (!libelle)
-        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_histo_msgsDB: Normalisation impossible" );
-          return(FALSE);
-        }
-
-       nom_ack = Normaliser_chaine ( histo->nom_ack );                                       /* Formatage correct des chaines */
+     { nom_ack = Normaliser_chaine ( histo->nom_ack );                                       /* Formatage correct des chaines */
        if (!nom_ack)
-        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_histo_msgsDB: Normalisation impossible" );
-          g_free(libelle);
+        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
           return(FALSE);
         }
           
@@ -87,14 +80,13 @@
                    "('%d','%d','%s','%d','%d')", NOM_TABLE_HISTO_MSGS, TRUE,
                    histo->msg.id, 
                    nom_ack, (int)histo->date_create_sec, (int)histo->date_create_usec );
-       g_free(libelle);
      }
     else
      { 
        if (histo->alive == TRUE)
         { nom_ack = Normaliser_chaine ( histo->nom_ack );                                    /* Formatage correct des chaines */
           if (!nom_ack)
-           { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Ajouter_histo_msgsDB: Normalisation impossible" );
+           { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
              return(FALSE);
            }
           g_snprintf( requete, sizeof(requete),                                                                /* Requete SQL */
@@ -104,16 +96,16 @@
         }
        else
         { g_snprintf( requete, sizeof(requete),                                                                /* Requete SQL */
-                      "UPDATE %s as histo, %s as msg SET histo.alive=0,histo.date_fin='%d'"
-                      " WHERE histo.alive=1 AND histo.id_msg = msg.id AND msg.num='%d'",
-                      NOM_TABLE_HISTO_MSGS, NOM_TABLE_MSG,
-                      (int)histo->date_fin, histo->msg.num );
+                      "UPDATE %s as histo SET histo.alive=0,histo.date_fin='%d'"
+                      " WHERE histo.alive=1 AND histo.id_msg = '%d' ",
+                      NOM_TABLE_HISTO_MSGS,
+                      (int)histo->date_fin, histo->msg.id );
         }
      }
 
     db = Init_DB_SQL();       
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_histoDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
@@ -151,7 +143,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
                 "parent_syn.page, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
-                "histo.date_fixe,histo.date_fin,dls.shortname"
+                "histo.date_fixe,histo.date_fin,dls.shortname,msg.id"
                 " FROM %s as histo"
                 " INNER JOIN %s as msg ON msg.id = histo.id_msg"
                 " INNER JOIN %s as dls ON dls.id = msg.dls_id"
@@ -234,7 +226,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
                 "parent_syn.page, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
-                "histo.date_fixe,histo.date_fin,dls.shortname"
+                "histo.date_fixe,histo.date_fin,dls.shortname,msg.id"
                 " FROM %s as histo"
                 " INNER JOIN %s as msg ON msg.id = histo.id_msg"
                 " INNER JOIN %s as dls ON dls.id = msg.dls_id"
@@ -268,7 +260,7 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT histo.id, histo.alive, msg.num, msg.libelle, msg.type, dls.syn_id,"
                 "syn.groupe, syn.page, histo.nom_ack, histo.date_create_sec, histo.date_create_usec,"
-                "histo.date_fixe,histo.date_fin,dls.shortname"
+                "histo.date_fixe,histo.date_fin,dls.shortname,msg.id"
                 " FROM %s as histo"
                 " INNER JOIN %s as msg ON msg.id = histo.id_msg"
                 " INNER JOIN %s as dls ON dls.id = msg.dls_id"
@@ -328,6 +320,7 @@
        histo_msgs->date_create_usec = atoi(db->row[10]);
        histo_msgs->date_fixe        = atoi(db->row[11]);
        histo_msgs->date_fin         = atoi(db->row[12]);
+       histo_msgs->msg.id           = atoi(db->row[14]);
      }
     return(histo_msgs);
   }

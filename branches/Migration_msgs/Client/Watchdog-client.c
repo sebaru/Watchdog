@@ -75,8 +75,6 @@
  GnomeUIInfo Menu_admin[]=                                                           /*!< Définition du menu d'administration */
   { GNOMEUIINFO_ITEM_STOCK( N_("_Administration"), N_("Administration"),
                             Menu_want_page_admin, GNOME_STOCK_PIXMAP_PROPERTIES ),
-    GNOMEUIINFO_ITEM_STOCK( N_("Edit _Messages"), N_("Edit messages"),
-                            Menu_want_message, GNOME_STOCK_PIXMAP_MAIL ),
     GNOMEUIINFO_ITEM_STOCK( N_("_D.L.S"), N_("Edit DLS plugins"),
                             Menu_want_plugin_dls, GNOME_STOCK_PIXMAP_EXEC ),
     GNOMEUIINFO_SUBTREE(N_("_Synoptiques"), Menu_synoptique),
@@ -86,18 +84,12 @@
     GNOMEUIINFO_SUBTREE(N_("_Client leger"), Menu_client_leger),
     GNOMEUIINFO_END
   };
- GnomeUIInfo Menu_view[]=                                                                        /*!< Définition du menu view */
-  { GNOMEUIINFO_ITEM_STOCK( N_("_Historique MSGS"), N_("Show Historique"),
-                            Menu_want_histo_msgs, GNOME_STOCK_PIXMAP_BOOK_BLUE ),
-    GNOMEUIINFO_END
-  };
  GnomeUIInfo Menu_serveur[]=                                                  /*!< Définition du menu de connexion au serveur */
   { GNOMEUIINFO_ITEM_STOCK( N_("Connect"), N_("Connect to server"),
                             Connecter, GNOME_STOCK_PIXMAP_EXEC ),
     GNOMEUIINFO_ITEM_STOCK( N_("Stop"), N_("Stop the connexion"),
                             Deconnecter, GNOME_STOCK_PIXMAP_CLOSE ),
     GNOMEUIINFO_SEPARATOR,
-    GNOMEUIINFO_SUBTREE(N_("_View"), Menu_view),
     GNOMEUIINFO_ITEM_STOCK( N_("_Quit"), N_("Disconnect and quit"), Fermer_client, GNOME_STOCK_PIXMAP_EXIT ),
     GNOMEUIINFO_END
   };

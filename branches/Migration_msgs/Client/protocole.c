@@ -78,11 +78,9 @@
                               return;
       case TAG_ICONE       : Gerer_protocole_icone        ( connexion ); break;
       case TAG_DLS         : Gerer_protocole_dls          ( connexion ); break;
-      case TAG_MESSAGE     : Gerer_protocole_message      ( connexion ); break;
       case TAG_MNEMONIQUE  : Gerer_protocole_mnemonique   ( connexion ); break;
       case TAG_SYNOPTIQUE  : Gerer_protocole_synoptique   ( connexion ); break;
       case TAG_SUPERVISION : Gerer_protocole_supervision  ( connexion ); break;
-      case TAG_HISTO       : Gerer_protocole_histo        ( connexion ); break;
       case TAG_ATELIER     : Gerer_protocole_atelier      ( connexion ); break;
       case TAG_LOWLEVEL      : Gerer_protocole_lowlevel     ( connexion ); break;
       case TAG_ADMIN       : Gerer_protocole_admin        ( connexion ); break;

@@ -180,11 +180,11 @@
      } else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
                    "UPDATE %s SET "             
-                   "type=%d,libelle='%s',acronyme='%s',ev_host='%s',ev_thread='%s',ev_text='%s',dls_id=%d,"
+                   "type=%d,libelle='%s',acronyme='%s',ev_host='%s',ev_thread='%s',ev_text='%s',"
                    "num=IF(num='-1', '-1','%d'),tableau='%s',acro_syn='%s' "
                    "WHERE id=%d",
                    NOM_TABLE_MNEMO, mnemo->type, libelle, acro, ev_host, ev_thread, ev_text, 
-                   mnemo->dls_id, mnemo->num, tableau, acro_syn, mnemo->id );
+                   mnemo->num, tableau, acro_syn, mnemo->id );
      }
     g_free(libelle);
     g_free(acro);

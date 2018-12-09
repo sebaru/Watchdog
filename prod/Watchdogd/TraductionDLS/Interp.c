@@ -401,9 +401,9 @@
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
 
-    g_snprintf( action->alors, taille, "Dls_data_set_msg ( \"%s\", \"%s\", &_MSG_%s_%s, TRUE );",
+    g_snprintf( action->alors, taille, "Dls_data_set_MSG ( \"%s\", \"%s\", &_MSG_%s_%s, TRUE );",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-    g_snprintf( action->sinon, taille, "Dls_data_set_msg ( \"%s\", \"%s\", &_MSG_%s_%s, FALSE );",
+    g_snprintf( action->sinon, taille, "Dls_data_set_MSG ( \"%s\", \"%s\", &_MSG_%s_%s, FALSE );",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
     return(action);
   }
@@ -794,7 +794,7 @@
     rc = fopen( source, "r" );
     if (!rc) retour = TRAD_DLS_ERROR;
     else
-     { DlsScanner_debug = 1;                                                                     /* Debug de la traduction ?? */
+     { DlsScanner_debug = 0;                                                                     /* Debug de la traduction ?? */
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
        fclose(rc);
@@ -841,11 +841,11 @@
              if (alias->type == ALIAS_TYPE_DYNAMIC)                      /* alias par nom ? creation du pointeur de raccourci */
               { switch (alias->bit)
                  { case MNEMO_MONOSTABLE:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_M_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_M_%s_%s;\n", alias->tech_id, alias->acronyme );
                         write (fd, chaine, nb_car);
                         break;
                    case MNEMO_BISTABLE:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_B_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_B_%s_%s;\n", alias->tech_id, alias->acronyme );
                         write (fd, chaine, nb_car);
                         break;
                    case MNEMO_TEMPO:
@@ -853,7 +853,7 @@
                         write (fd, chaine, nb_car);
                         break;
                    case MNEMO_HORLOGE:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gboolean *_HOR_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_HOR_%s_%s;\n", alias->tech_id, alias->acronyme );
                         write (fd, chaine, nb_car);
                         break;
                    case MNEMO_MSG:
@@ -966,15 +966,27 @@
              liste = liste->next;
            }
           g_snprintf(chaine, sizeof(chaine), "  }\n" );
-          write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+          write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
 
-          write( fd, Start_Go, strlen(Start_Go) );
+          write( fd, Start_Go, strlen(Start_Go) );                                                 /* Ecriture de de l'entete */
+
+          g_snprintf(chaine, sizeof(chaine), "    if (vars->starting)\n     {\n" );
+          write( fd, chaine, strlen(chaine) );                                                     /* Ecriture de de l'entete */
+          liste = Liste_Actions_msg;                               /* Initialise les fonctions de gestion des fronts montants */
+          while(liste)
+           { gchar chaine[128];
+             g_snprintf(chaine, sizeof(chaine), "       MSG(%d,0);\n", GPOINTER_TO_INT(liste->data) );
+             write(fd, chaine, strlen(chaine) );                                                      /* Ecriture du prologue */
+             liste = liste->next;
+           }
+          g_snprintf(chaine, sizeof(chaine), "     }\n" );
+          write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
+
           write(fd, Buffer, Buffer_used );                                                     /* Ecriture du buffer resultat */
           write( fd, End_Go, strlen(End_Go) );
           close(fd);
         }
 
-       /*Retirer_auto_mnemo_baseDB_for_dls ( id );             /* Suppression des mnemos automatique du DLS fraichement traduit */
        liste = Alias;                                           /* Libération des alias, et remonté d'un Warning si il y en a */
        while(liste)
         { struct CMD_TYPE_MNEMO_FULL mnemo;
@@ -984,14 +996,26 @@
              retour = TRAD_DLS_WARNING;
            }
           if (alias->type == ALIAS_TYPE_DYNAMIC && !strcmp(alias->tech_id, Dls_plugin.tech_id))/* Alias Dynamiques uniquement */
-           { g_snprintf( mnemo.mnemo_base.acronyme, sizeof(mnemo.mnemo_base.acronyme), "%s", alias->acronyme );
-             g_snprintf( mnemo.mnemo_base.libelle,  sizeof(mnemo.mnemo_base.libelle),  "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
-             g_snprintf( mnemo.mnemo_base.acro_syn, sizeof(mnemo.mnemo_base.acro_syn), "%s", Get_option_chaine( alias->options, T_ETIQUETTE ) );
-             mnemo.mnemo_base.dls_id = Dls_plugin.id;
-             mnemo.mnemo_base.type = alias->bit;
-             if (alias->bit == MNEMO_MSG)
-              { mnemo.mnemo_msg.type = Get_option_entier ( alias->options, T_TYPE ); }
-             Mnemo_auto_create_for_dls ( &mnemo );
+           { switch(alias->bit)
+              { case MNEMO_MSG:
+                 { struct CMD_TYPE_MESSAGE msg;
+                   g_snprintf( msg.acronyme, sizeof(msg.acronyme), "%s", alias->acronyme );
+                   g_snprintf( msg.libelle,  sizeof(msg.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
+                   msg.dls_id = Dls_plugin.id;
+                   msg.type = Get_option_entier ( alias->options, T_TYPE );
+                   Ajouter_messageDB_for_dls ( &msg );
+                   break;
+                 }
+                default: g_snprintf( mnemo.mnemo_base.acronyme, sizeof(mnemo.mnemo_base.acronyme), "%s", alias->acronyme );
+                         g_snprintf( mnemo.mnemo_base.libelle,  sizeof(mnemo.mnemo_base.libelle),
+                                     "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
+                         g_snprintf( mnemo.mnemo_base.acro_syn, sizeof(mnemo.mnemo_base.acro_syn),
+                                     "%s", Get_option_chaine( alias->options, T_ETIQUETTE ) );
+                         mnemo.mnemo_base.dls_id = Dls_plugin.id;
+                         mnemo.mnemo_base.type = alias->bit;
+                         Mnemo_auto_create_for_dls ( &mnemo );
+                         break;
+              }
            }
           liste = liste->next;
         }

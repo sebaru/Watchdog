@@ -256,8 +256,7 @@
      { SEA_range( cpt, 0 ); }
     g_free(module->DI);
     g_free(module->AI);
-    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
-             "%s : Module %d disconnected", __func__, module->modbus.id );
+    Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s : Module %d disconnected", __func__, module->modbus.id );
     Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
     SB( module->modbus.bit, 0 );                                                  /* Mise a zero du bit interne lié au module */
   }
@@ -1077,7 +1076,7 @@
 
        if ( module->modbus.enable == FALSE ||                          /* Si module DOWN ou si UP mais dans le delai de retry */
             Partage->top < module->date_retente )                                  /* Si attente retente, on change de module */
-        { continue; }
+        { sleep(1); continue; }
 
 /********************************************* Début de l'interrogation du module *********************************************/
        if ( ! module->started )                                                                  /* Communication OK ou non ? */

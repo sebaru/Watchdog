@@ -200,6 +200,63 @@
     return(id);
   }
 /******************************************************************************************************************************/
+/* Ajouter_messageDB: Ajout ou edition d'un message                                                                           */
+/* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                                               */
+/* Sortie: false si probleme                                                                                                  */
+/******************************************************************************************************************************/
+ gint Ajouter_messageDB_for_dls ( struct CMD_TYPE_MESSAGE *msg )
+  { gchar *libelle, *libelle_audio, *libelle_sms;
+    gchar requete[2048];
+    gboolean retour;
+    struct DB *db;
+    gint id;
+
+    libelle = Normaliser_chaine ( msg->libelle );                                            /* Formatage correct des chaines */
+    if (!libelle)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle impossible", __func__ );
+       return(-1);
+     }
+    libelle_audio = Normaliser_chaine ( msg->libelle_audio );                                /* Formatage correct des chaines */
+    if (!libelle_audio)
+     { g_free(libelle);
+       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle_audio impossible", __func__ );
+       return(-1);
+     }
+    libelle_sms = Normaliser_chaine ( msg->libelle_sms );                                    /* Formatage correct des chaines */
+    if (!libelle_sms)
+     { g_free(libelle);
+       g_free(libelle_audio);
+       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle_sms impossible", __func__ );
+       return(-1);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "INSERT INTO %s SET num='-1',acronyme='%s',libelle='%s',libelle_audio='%s',libelle_sms='%s',"
+                "type='%d',audio='0',bit_audio='0',enable='1',sms='0',time_repeat='0',dls_id='%d',persist='0' "
+                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)", NOM_TABLE_MSG, msg->acronyme,
+                libelle, libelle, libelle, msg->type, msg->dls_id
+              );
+    g_free(libelle);
+    g_free(libelle_audio);
+    g_free(libelle_sms);
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(-1);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if ( retour == FALSE )
+     { Libere_DB_SQL(&db); 
+       return(-1);
+     }
+    id = Recuperer_last_ID_SQL ( db );
+    Libere_DB_SQL(&db);
+    Updater_msg_run ( msg );
+    return(id);
+  }
+/******************************************************************************************************************************/
 /* Recuperer_messageDB_with_conditions: Recupération de la liste des ids des messages avec conditions en paramètre            */
 /* Entrée: une database et des conditions                                                                                     */
 /* Sortie: FALSE si probleme                                                                                                  */
@@ -357,6 +414,34 @@
    
     g_snprintf( requete, sizeof(requete), MSGS_SQL_SELECT                                                      /* Requete SQL */
                 " WHERE msg.mnemo_id=%d LIMIT 1", mnemo_id                                                                       /* Where */
+              );
+    if ( Lancer_requete_SQL ( db, requete ) == FALSE )
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
+
+    message = Recuperer_messageDB_suite( &db );
+    if (message) Libere_DB_SQL ( &db );
+    return(message);
+  }
+/******************************************************************************************************************************/
+/* Rechercher_messageDB_par_id: Recupération du message dont l'id est en parametre                                            */
+/* Entrée: un log et une database                                                                                             */
+/* Sortie: une GList                                                                                                          */
+/******************************************************************************************************************************/
+ struct CMD_TYPE_MESSAGE *Rechercher_messageDB_par_acronyme ( gchar *tech_id, gchar *acronyme )
+  { struct CMD_TYPE_MESSAGE *message;
+    gchar requete[512];
+    struct DB *db;
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(NULL);
+     }
+   
+    g_snprintf( requete, sizeof(requete), MSGS_SQL_SELECT                                                      /* Requete SQL */
+                " WHERE dls.tech_id='%s' AND msg.acronyme='%s' LIMIT 1", tech_id, acronyme                           /* Where */
               );
     if ( Lancer_requete_SQL ( db, requete ) == FALSE )
      { Libere_DB_SQL( &db );

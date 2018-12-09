@@ -677,7 +677,7 @@ CREATE TABLE IF NOT EXISTS `icons_new` (
 CREATE TABLE IF NOT EXISTS `mnemos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type` int(11) NOT NULL DEFAULT '0',
-  `num` int(11) NOT NULL DEFAULT '0',
+  `num` int(11) NOT NULL DEFAULT '-1',
   `dls_id` int(11) NOT NULL DEFAULT '0',
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
   `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
@@ -812,11 +812,10 @@ CREATE TABLE IF NOT EXISTS `config` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `msgs`
+-- Structure de la table `mnemos_Msgs`
 --
 
-CREATE TABLE IF NOT EXISTS `msgs` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `mnemos_Msgs` (
   `mnemo_id` int(11) NULL DEFAULT NULL,
   `libelle_audio` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No audio",
   `libelle_sms` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL "No sms",
@@ -828,7 +827,6 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `sms` int(11) NOT NULL DEFAULT '0',
   `time_repeat` int(11) NOT NULL DEFAULT '0',
   `is_mp3` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
   FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 

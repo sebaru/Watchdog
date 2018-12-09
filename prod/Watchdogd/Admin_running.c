@@ -49,7 +49,6 @@
        response = Admin_write ( response, "  clear_histo           - Clear Histo DB" );
        response = Admin_write ( response, "  get                   - Sous-menu de lecture des bits internes" );
        response = Admin_write ( response, "  set                   - Sous-menu d'affectation des bits internes" );
-       response = Admin_write ( response, "  modbus                - Sous-menu de gestion des equipements MODBUS" );
        response = Admin_write ( response, "  dls                   - D.L.S. Status" );
        response = Admin_write ( response, "  user                  - Manage Watchdog Users" );
        response = Admin_write ( response, "  update_schemaDB       - Update Database Schema" );

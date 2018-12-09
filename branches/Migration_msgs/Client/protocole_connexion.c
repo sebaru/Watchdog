@@ -112,7 +112,7 @@
                Client.mode = CONNECTE;
                Info_new( Config_cli.log, Config_cli.log_override, LOG_INFO,
                          "Gerer_protocole_connexion : Client en mode CONNECTE" );
-               Jouer_remote_mp3( "connected", 0 );
+               /*Jouer_remote_mp3( "connected", 0 );*/
              }
             break;
      }
