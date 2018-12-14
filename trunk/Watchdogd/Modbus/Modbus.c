@@ -815,7 +815,16 @@
        g_free(mnemo);
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
+    g_snprintf( critere, sizeof(critere),"%s:COMM", module->modbus.tech_id ); 
+    if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
+    else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: Match found '%s' Type %d Num %d '%s:%s' - %s", __func__,
+                 mnemo->ev_text, mnemo->type, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme, mnemo->libelle );
+       if ( mnemo->type == MNEMO_BISTABLE && !module->bit_comm )
+        { Dls_data_set_bool ( mnemo->dls_tech_id, "COMM", &module->bit_comm, FALSE ); }
+       g_free(mnemo);
+     }
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: Module '%s' : mapping done", __func__,
               module->modbus.description );
   }
