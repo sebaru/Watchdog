@@ -869,7 +869,7 @@
     if (valeur == TRUE && bool->etat==FALSE) { bool->edge_up = TRUE; }
     else if (valeur == FALSE && bool->etat==TRUE) { bool->edge_down = TRUE; }
     else { bool->edge_up = bool->edge_down = FALSE; }
-    bool->etat = valeur;
+    bool->etat = (valeur ? TRUE : FALSE);
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_bool: Remonte l'etat d'un boolean                                                                             */

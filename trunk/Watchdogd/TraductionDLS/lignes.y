@@ -391,7 +391,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                    else    { g_snprintf( $$, taille, "B(%d)", $3 ); }
                 }}
                 | barre ENTREE ENTIER liste_options
-                {{ $$ = New_condition_entree ( $1, $3, $4 );
+                {{ $$ = New_condition_entree_old ( $1, $3, $4 );
                    Liberer_options($4);
                 }}
                | EANA ENTIER ordre VALF
@@ -502,10 +502,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                             break;
                           }
                          case MNEMO_ENTREE:
-                          { if ( (alias->barre && $1) || (!alias->barre && !$1))
-                             { $$ = New_condition_entree( 0, alias->num, $4 ); }
-                            else
-                             { $$ = New_condition_entree( 1, alias->num, $4 ); }
+                          { $$ = New_condition_entree( $1, alias, $4 );
                             break;
                           }
                          case MNEMO_BISTABLE:

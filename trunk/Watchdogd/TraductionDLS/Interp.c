@@ -246,7 +246,7 @@
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_entree( int barre, int num, GList *options )
+ gchar *New_condition_entree_old( int barre, int num, GList *options )
   { gchar *result;
     gint taille;
     taille = 24;
@@ -260,6 +260,29 @@
     else { if (barre) g_snprintf( result, taille, "!E(%d)", num );
                  else g_snprintf( result, taille, "E(%d)", num );
          }
+    return(result);
+  }
+/******************************************************************************************************************************/
+/* New_condition_bi: Prepare la chaine de caractere associée à la condition, en respectant les options                        */
+/* Entrées: numero du bit bistable et sa liste d'options                                                                      */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_entree( int barre, struct ALIAS *alias, GList *options )
+  { gchar *result;
+    gint taille;
+    if (alias->num != -1) /* Alias par numéro ? */
+     { return(New_condition_entree_old( barre, alias->num, options)); }
+    else /* Alias par nom */
+     { taille = 100;
+       result = New_chaine( taille ); /* 10 caractères max */
+       if ( (!barre && !alias->barre) || (barre && alias->barre) )
+            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_B_%s_%s )",
+                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+            }
+       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_B_%s_%s )",
+                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+            }
+     }
     return(result);
   }
 /******************************************************************************************************************************/
