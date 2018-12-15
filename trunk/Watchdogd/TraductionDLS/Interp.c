@@ -276,10 +276,10 @@
      { taille = 100;
        result = New_chaine( taille ); /* 10 caractères max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
-            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_B_%s_%s )",
+            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_E_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
             }
-       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_B_%s_%s )",
+       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_E_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
             }
      }
@@ -875,6 +875,10 @@
                         break;
                    case MNEMO_BISTABLE:
                         nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_B_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        write (fd, chaine, nb_car);
+                        break;
+                   case MNEMO_ENTREE:
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_E_%s_%s;\n", alias->tech_id, alias->acronyme );
                         write (fd, chaine, nb_car);
                         break;
                    case MNEMO_TEMPO:
