@@ -156,7 +156,5 @@
      }
     Envoi_client ( client, tag, sstag_fin, NULL, 0 );
     Dls_foreach ( client, NULL, Envoyer_bit_init_pass );
-    g_slist_free(client->Liste_pass);
-    client->Liste_pass = NULL;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
