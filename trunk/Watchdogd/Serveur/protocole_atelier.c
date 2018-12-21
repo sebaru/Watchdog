@@ -38,7 +38,7 @@
  static void *Proto_Envoyer_atelier_thread ( struct CLIENT *client )
   { gchar titre[20];
 
-    g_snprintf( titre, sizeof(titre), "W-ATLR-%06d", client->ssrv_id );
+    g_snprintf( titre, sizeof(titre), "W-ATLR-%03d", client->ssrv_id );
     prctl(PR_SET_NAME, titre, 0, 0, 0 );
 
     Envoyer_motif_tag ( client, TAG_ATELIER, SSTAG_SERVEUR_ADDPROGRESS_ATELIER_MOTIF,
