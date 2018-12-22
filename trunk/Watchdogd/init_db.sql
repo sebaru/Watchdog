@@ -341,6 +341,7 @@ CREATE TABLE IF NOT EXISTS `icons` (
   `date_create` datetime NOT NULL DEFAULT NOW(),
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `id_classe` int(11) NOT NULL DEFAULT '0',
+  `nbr_matrice` INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`id_classe`) REFERENCES `class` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;

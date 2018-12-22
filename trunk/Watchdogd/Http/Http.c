@@ -393,6 +393,7 @@
                   Http_Send_response_code ( wsi, HTTP_200_OK );
                   return(1);
                 }
+/*************************************************** WS DLS debug traduction **************************************************/
                else if ( ! strcasecmp( url, "/dls/debug_trad_on" ) )
                 { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug ON", __func__ );
                   Trad_dls_set_debug ( TRUE );
@@ -405,12 +406,13 @@
                   Http_Send_response_code ( wsi, HTTP_200_OK );
                   return(1);
                 }
+/*************************************************** WS Reload library ********************************************************/
                else if ( ! strncasecmp( url, "/reload/", 8 ) )
                 { gchar *target = url+8;
                   GSList *liste;
                   Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
                             "%s: Reloading start for %s", __func__, target );
-                  liste = Partage->com_msrv.Librairies;                            /* Parcours de toutes les librairies */
+                  liste = Partage->com_msrv.Librairies;                                  /* Parcours de toutes les librairies */
                   while(liste)
                    { struct LIBRAIRIE *lib = liste->data;
                      if ( ! strcmp( target, lib->admin_prompt ) )
@@ -429,12 +431,13 @@
                   Http_Send_response_code ( wsi, HTTP_200_OK );
                   return(1);
                 }
+/****************************************** WS get Running config library *****************************************************/
                else if ( ! strncasecmp( url, "/run/", 5 ) )
                 { gchar *target = url+5;
                   GSList *liste;
                   Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
                             "%s: Searching for CLI commande %s", __func__, target );
-                  liste = Partage->com_msrv.Librairies;                            /* Parcours de toutes les librairies */
+                  liste = Partage->com_msrv.Librairies;                                  /* Parcours de toutes les librairies */
                   while(liste)
                    { struct LIBRAIRIE *lib = liste->data;
                      if ( ! strncmp( target, lib->admin_prompt, strlen(lib->admin_prompt) ) )

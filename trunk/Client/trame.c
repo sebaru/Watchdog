@@ -447,8 +447,8 @@ printf("Charger_pixbuf_file: %s\n", fichier );
        return(FALSE);
      }
 
-    if (mode) g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/%d.gif.%02d", id, mode );
-         else g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/%d.gif", id );
+    if (mode) g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/assets/gif/%d.gif.%02d", id, mode );
+         else g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/assets/gif/%d.gif", id );
     Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Trying to get %s", __func__, url );
     curl_easy_setopt(curl, CURLOPT_URL, url );
        /*curl_easy_setopt(curl, CURLOPT_POST, 1 );
@@ -532,7 +532,7 @@ printf("Charger_pixbuf_file: %s\n", fichier );
      }
     Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Trying to download %s", __func__, file );
 
-    g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/%s", file );
+    g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/assets/gif/%s", file );
     Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Trying to get %s", __func__, url );
     curl_easy_setopt(curl, CURLOPT_URL, url );
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
