@@ -36,7 +36,7 @@
 %option noyywrap nounput noinput
 /* On garde le numéro de ligne lors du scan des tokens */
 %option yylineno
-
+ /*%option debug*/
 
 /* Expressions rationnelles de detection */
 digit         [0-9]+
@@ -44,15 +44,16 @@ digitf        [-]?[0-9]+[.[0-9]+]?
 id            [a-zA-Z][a-zA-Z_0-9-]+[a-zA-Z0-9]
 chaine        [^"]*
 blanc         [\t ]+
+newline       [\n\r]+
 
  /* Noms des environnements */
 %x code_en_c
 %x chaine_directe
 %x comment
-%%
-{blanc}                    ;
 
-"\n"                       { }
+%%                         
+{blanc}                    
+{newline}
 
  /******************************************** Methodes ***************************************************/
 "_EA"                      { DlsScanner_lval.val = EANA;        return EANA;        }
@@ -167,10 +168,10 @@ blanc         [\t ]+
 "\""                       { BEGIN(chaine_directe); }
 <chaine_directe>{chaine}   { DlsScanner_lval.chaine = (char *)strdup(DlsScanner_text); return T_CHAINE; }
 <chaine_directe>"\""       { BEGIN(INITIAL); }
-<chaine_directe>.          { BEGIN(INITIAL); }
 
 {id}                       { DlsScanner_lval.chaine = (char *)strdup(DlsScanner_text); return ID;       }
 {digit}                    { DlsScanner_lval.val    = atoi(DlsScanner_text);           return ENTIER;   }
 {digitf}                   { DlsScanner_lval.valf   = atof(DlsScanner_text);           return VALF;     }
- /*** Pourquoi cette ligne ??  .                          {  }   */
-%%
+
+.                          { DlsScanner_lval.val = T_ERROR; return T_ERROR; }
+ /*------------------------------------------------------------------------------------------------------*/

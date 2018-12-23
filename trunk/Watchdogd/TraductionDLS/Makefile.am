@@ -9,7 +9,7 @@ libtradDLS_la_SOURCES = lignes.y mots.l Interp.c
 
 .NOTPARALLEL:
 
-AM_LFLAGS = -PDlsScanner_ --outfile=mots.c
+AM_LFLAGS = -PDlsScanner_ -Cf --outfile=mots.c
 AM_YFLAGS = -p DlsScanner_ -d -t -v
 
 #Pour LEX et YACC
