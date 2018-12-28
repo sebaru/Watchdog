@@ -759,7 +759,6 @@
   { struct CMD_TYPE_MNEMO_BASE *mnemo;
     gchar critere[80];
     struct DB *db;
-    gint cpt;
 
     module->AI = g_try_malloc0( sizeof(gpointer) * module->nbr_entree_ana );
     if (!module->AI)
@@ -777,7 +776,7 @@
     if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
     else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: Match found '%s' Type %d Num %d '%s:%s' - %s", __func__,
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' Type %d Num %d '%s:%s' - %s", __func__,
                  mnemo->ev_text, mnemo->type, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme, mnemo->libelle );
        if ( mnemo->type == MNEMO_ENTREE_ANA )
         { gchar debut[80];
@@ -798,14 +797,14 @@
     if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
     else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_DEBUG, "%s: Match found '%s' Type %d Num %d '%s:%s' - %s", __func__,
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' Type %d Num %d '%s:%s' - %s", __func__,
                  mnemo->ev_text, mnemo->type, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme, mnemo->libelle );
        if ( mnemo->type == MNEMO_ENTREE )
         { gchar debut[80];
           gint num;
           if ( sscanf ( mnemo->ev_text, "%[^:]:DI%d", debut, &num ) == 2 )                   /* Découpage de la ligne ev_text */
            { if (num<module->nbr_entree_tor)
-              { Dls_data_set_bool ( mnemo->dls_tech_id, mnemo->acronyme, &module->DI[cpt], FALSE ); }
+              { Dls_data_set_bool ( mnemo->dls_tech_id, mnemo->acronyme, &module->DI[num], FALSE ); }
              else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
                             mnemo->ev_text, num, module->nbr_entree_tor );
            }
@@ -815,7 +814,16 @@
        g_free(mnemo);
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
+    g_snprintf( critere, sizeof(critere),"%s:COMM", module->modbus.tech_id ); 
+    if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
+    else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' Type %d Num %d '%s:%s' - %s", __func__,
+                 mnemo->ev_text, mnemo->type, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme, mnemo->libelle );
+       if ( mnemo->type == MNEMO_BISTABLE && !module->bit_comm )
+        { Dls_data_set_bool ( mnemo->dls_tech_id, "COMM", &module->bit_comm, FALSE ); }
+       g_free(mnemo);
+     }
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: Module '%s' : mapping done", __func__,
               module->modbus.description );
   }

@@ -42,7 +42,7 @@
          struct COMPARATEUR *comparateur;
        };
 
-%token <val>    PVIRGULE VIRGULE T_DPOINTS DONNE EQUIV MOINS T_POUV T_PFERM T_EGAL OU ET BARRE T_FOIS T_DEFINE T_STATIC
+%token <val>    T_ERROR PVIRGULE VIRGULE T_DPOINTS DONNE EQUIV MOINS T_POUV T_PFERM T_EGAL OU ET BARRE T_FOIS T_DEFINE T_STATIC
 
 %token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_TOP_ALERTE
 %token <val>    T_SPERS_DER T_SPERS_DERF T_SPERS_DAN T_SPERS_DANF T_OSYN_ACQ
@@ -150,10 +150,6 @@ listeInstr:     une_instr listeInstr
 une_instr:      MOINS expr DONNE action PVIRGULE
                 {{ int taille;
                    char *instr;
-                   Emettre_erreur_new( "%s ligne %d: $2=%p", __func__, DlsScanner_get_lineno(), $2 );
-                   Emettre_erreur_new( "%s ligne %d: $2=%s", __func__, DlsScanner_get_lineno(), $2 );
-                   Emettre_erreur_new( "%s ligne %d: $4=%p", __func__, DlsScanner_get_lineno(), $4 );
-                   Emettre_erreur_new( "%s ligne %d: $4=%s", __func__, DlsScanner_get_lineno(), $4 );
                    taille = strlen($2)+strlen($4->alors)+15;
                    if ($4->sinon)
                     { taille += (strlen($4->sinon) + 10);
@@ -395,7 +391,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                    else    { g_snprintf( $$, taille, "B(%d)", $3 ); }
                 }}
                 | barre ENTREE ENTIER liste_options
-                {{ $$ = New_condition_entree ( $1, $3, $4 );
+                {{ $$ = New_condition_entree_old ( $1, $3, $4 );
                    Liberer_options($4);
                 }}
                | EANA ENTIER ordre VALF
@@ -506,10 +502,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                             break;
                           }
                          case MNEMO_ENTREE:
-                          { if ( (alias->barre && $1) || (!alias->barre && !$1))
-                             { $$ = New_condition_entree( 0, alias->num, $4 ); }
-                            else
-                             { $$ = New_condition_entree( 1, alias->num, $4 ); }
+                          { $$ = New_condition_entree( $1, alias, $4 );
                             break;
                           }
                          case MNEMO_BISTABLE:

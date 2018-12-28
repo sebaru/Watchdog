@@ -111,8 +111,8 @@
     struct DB *db;
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT username,id,comment,enable,access_level,UNIX_TIMESTAMP(date_create),"
-                "UNIX_TIMESTAMP(date_modif),hash,sms_enable,sms_phone,sms_allow_cde,"
+                "SELECT username,id,comment,enable,access_level,date_create,"
+                "date_modif,hash,sms_enable,sms_phone,sms_allow_cde,"
                 "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence "
                 "FROM %s", NOM_TABLE_UTIL );
 
@@ -152,11 +152,11 @@
        g_snprintf( util->hash,           sizeof(util->hash),          "%s", db->row[7]);
        g_snprintf( util->sms_phone,      sizeof(util->sms_phone),     "%s", db->row[9]);
        g_snprintf( util->imsg_jabberid,  sizeof(util->imsg_jabberid), "%s", db->row[12]);
+       g_snprintf( util->date_create,    sizeof(util->date_create),   "%s", db->row[5]);
+       g_snprintf( util->date_modif,     sizeof(util->date_modif),    "%s", db->row[6]);
        util->id                = atoi(db->row[1]);
        util->enable            = atoi(db->row[3]);
        util->access_level      = atoi(db->row[4]);
-       util->date_create       = atoi(db->row[5]);
-       util->date_modif        = atoi(db->row[6]);
        util->sms_enable        = atoi(db->row[8]);
        util->sms_allow_cde     = atoi(db->row[10]);
        util->imsg_enable       = atoi(db->row[11]);
@@ -183,8 +183,8 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT username,id,comment,enable,access_level,UNIX_TIMESTAMP(date_create),"
-                "UNIX_TIMESTAMP(date_modif),hash,sms_enable,sms_phone,sms_allow_cde,"
+                "SELECT username,id,comment,enable,access_level,date_create,"
+                "date_modif,hash,sms_enable,sms_phone,sms_allow_cde,"
                 "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence "
                 "FROM %s WHERE username='%s' LIMIT 1", NOM_TABLE_UTIL, name );
     g_free(name);

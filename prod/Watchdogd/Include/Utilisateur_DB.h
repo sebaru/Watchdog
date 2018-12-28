@@ -50,6 +50,7 @@
  #define ACCESS_LEVEL_ICONE     6
  #define ACCESS_LEVEL_ALL       0
 
+
 /************************************************ Prototypes de fonctions *****************************************************/
  extern gboolean Recuperer_utilisateurDB( struct DB **db );                                             /* Dans Utilisateur.c */
  extern gboolean Tester_level_util( struct CMD_TYPE_UTILISATEUR *util, guint id_groupe );

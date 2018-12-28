@@ -246,7 +246,7 @@
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_entree( int barre, int num, GList *options )
+ gchar *New_condition_entree_old( int barre, int num, GList *options )
   { gchar *result;
     gint taille;
     taille = 24;
@@ -260,6 +260,29 @@
     else { if (barre) g_snprintf( result, taille, "!E(%d)", num );
                  else g_snprintf( result, taille, "E(%d)", num );
          }
+    return(result);
+  }
+/******************************************************************************************************************************/
+/* New_condition_bi: Prepare la chaine de caractere associée à la condition, en respectant les options                        */
+/* Entrées: numero du bit bistable et sa liste d'options                                                                      */
+/* Sortie: la chaine de caractere en C                                                                                        */
+/******************************************************************************************************************************/
+ gchar *New_condition_entree( int barre, struct ALIAS *alias, GList *options )
+  { gchar *result;
+    gint taille;
+    if (alias->num != -1) /* Alias par numéro ? */
+     { return(New_condition_entree_old( barre, alias->num, options)); }
+    else /* Alias par nom */
+     { taille = 100;
+       result = New_chaine( taille ); /* 10 caractères max */
+       if ( (!barre && !alias->barre) || (barre && alias->barre) )
+            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_E_%s_%s )",
+                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+            }
+       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_E_%s_%s )",
+                          alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+            }
+     }
     return(result);
   }
 /******************************************************************************************************************************/
@@ -491,8 +514,8 @@
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
        g_snprintf( action->sinon, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_M_%s_%s, FALSE );",
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-       return(action);
      }
+    return(action);
   }
 /******************************************************************************************************************************/
 /* New_action_mono: Prepare une struct action avec une commande SM                                                            */
@@ -746,6 +769,12 @@
     g_slist_free(Liste_edge_up_entree); Liste_edge_up_entree = NULL;
   }
 /******************************************************************************************************************************/
+/* Trad_dls_set_debug: Positionne le flag de debug Bison/Flex                                                                 */
+/* Entrée : TRUE ou FALSE                                                                                                     */
+/******************************************************************************************************************************/
+ void Trad_dls_set_debug ( gboolean actif )
+  { DlsScanner_debug = actif; }                                                                   /* Debug de la traduction ?? */
+/******************************************************************************************************************************/
 /* Traduire: Traduction du fichier en paramètre du langage DLS vers le langage C                                              */
 /* Entrée: l'id du modul                                                                                                      */
 /* Sortie: TRAD_DLS_OK, _WARNING ou _ERROR                                                                                    */
@@ -846,6 +875,10 @@
                         break;
                    case MNEMO_BISTABLE:
                         nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_B_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        write (fd, chaine, nb_car);
+                        break;
+                   case MNEMO_ENTREE:
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_E_%s_%s;\n", alias->tech_id, alias->acronyme );
                         write (fd, chaine, nb_car);
                         break;
                    case MNEMO_TEMPO:

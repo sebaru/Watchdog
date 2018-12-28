@@ -36,7 +36,7 @@
 %option noyywrap nounput noinput
 /* On garde le numéro de ligne lors du scan des tokens */
 %option yylineno
-
+ /*%option debug*/
 
 /* Expressions rationnelles de detection */
 digit         [0-9]+
@@ -44,19 +44,20 @@ digitf        [-]?[0-9]+[.[0-9]+]?
 id            [a-zA-Z][a-zA-Z_0-9-]+[a-zA-Z0-9]
 chaine        [^"]*
 blanc         [\t ]+
+newline       [\n\r]+
 
  /* Noms des environnements */
 %x code_en_c
 %x chaine_directe
 %x comment
-%%
-{blanc}                    ;
 
-"\n"                       { }
+%%                         
+{blanc}                    
+{newline}
 
  /******************************************** Methodes ***************************************************/
-"_E"                       { DlsScanner_lval.val = ENTREE;      return ENTREE;      }
 "_EA"                      { DlsScanner_lval.val = EANA;        return EANA;        }
+"_E"                       { DlsScanner_lval.val = ENTREE;      return ENTREE;      }
 "_A"                       { DlsScanner_lval.val = SORTIE;      return SORTIE;      }
 "_I"                       { DlsScanner_lval.val = ICONE;       return ICONE;       }
 "_B"                       { DlsScanner_lval.val = T_BI;        return T_BI;        }
@@ -87,18 +88,18 @@ blanc         [\t ]+
 
  /**************************************************** Status des vignette ****************************************************/
 "_MEMSA_COMOUT"            { DlsScanner_lval.val = T_ACT_COMOUT; return T_ACT_COMOUT; }
-"_MEMSA_DEFAUT"            { DlsScanner_lval.val = T_ACT_DEF;    return T_ACT_DEF;    }
 "_MEMSA_DEFAUT_FIXE"       { DlsScanner_lval.val = T_ACT_DEFF;   return T_ACT_DEFF;   }
-"_MEMSA_ALARME"            { DlsScanner_lval.val = T_ACT_ALA;    return T_ACT_ALA;    }
+"_MEMSA_DEFAUT"            { DlsScanner_lval.val = T_ACT_DEF;    return T_ACT_DEF;    }
 "_MEMSA_ALARME_FIXE"       { DlsScanner_lval.val = T_ACT_ALAF;   return T_ACT_ALAF;   }
+"_MEMSA_ALARME"            { DlsScanner_lval.val = T_ACT_ALA;    return T_ACT_ALA;    }
 "_MEMSA_DOWN"              { DlsScanner_lval.val = T_ACT_DOWN;   return T_ACT_DOWN;   }
 "_MEMSSB_VEILLE"           { DlsScanner_lval.val = T_SBIEN_VEILLE;return T_SBIEN_VEILLE; }
-"_MEMSSB_ALERTE"           { DlsScanner_lval.val = T_SBIEN_ALE;  return T_SBIEN_ALE;  }
 "_MEMSSB_ALERTE_FIXE"      { DlsScanner_lval.val = T_SBIEN_ALEF; return T_SBIEN_ALEF; }
-"_MEMSSP_DERANGEMENT"      { DlsScanner_lval.val = T_SPERS_DER;  return T_SPERS_DER;  }
+"_MEMSSB_ALERTE"           { DlsScanner_lval.val = T_SBIEN_ALE;  return T_SBIEN_ALE;  }
 "_MEMSSP_DERANGEMENT_FIXE" { DlsScanner_lval.val = T_SPERS_DERF; return T_SPERS_DERF; }
-"_MEMSSP_DANGER"           { DlsScanner_lval.val = T_SPERS_DAN;  return T_SPERS_DAN;  }
+"_MEMSSP_DERANGEMENT"      { DlsScanner_lval.val = T_SPERS_DER;  return T_SPERS_DER;  }
 "_MEMSSP_DANGER_FIXE"      { DlsScanner_lval.val = T_SPERS_DANF; return T_SPERS_DANF; }
+"_MEMSSP_DANGER"           { DlsScanner_lval.val = T_SPERS_DAN;  return T_SPERS_DAN;  }
 "_OSYN_ACQUIT"             { DlsScanner_lval.val = T_OSYN_ACQ;   return T_OSYN_ACQ;   }
 
  /************************************************ Couleurs ***********************************************/
@@ -167,10 +168,10 @@ blanc         [\t ]+
 "\""                       { BEGIN(chaine_directe); }
 <chaine_directe>{chaine}   { DlsScanner_lval.chaine = (char *)strdup(DlsScanner_text); return T_CHAINE; }
 <chaine_directe>"\""       { BEGIN(INITIAL); }
-<chaine_directe>.          { BEGIN(INITIAL); }
 
 {id}                       { DlsScanner_lval.chaine = (char *)strdup(DlsScanner_text); return ID;       }
 {digit}                    { DlsScanner_lval.val    = atoi(DlsScanner_text);           return ENTIER;   }
 {digitf}                   { DlsScanner_lval.valf   = atof(DlsScanner_text);           return VALF;     }
- /*** Pourquoi cette ligne ??  .                          {  }   */
-%%
+
+.                          { DlsScanner_lval.val = T_ERROR; return T_ERROR; }
+ /*------------------------------------------------------------------------------------------------------*/
