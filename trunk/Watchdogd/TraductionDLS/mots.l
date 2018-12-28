@@ -36,7 +36,7 @@
 %option noyywrap nounput noinput
 /* On garde le numéro de ligne lors du scan des tokens */
 %option yylineno
- %option debug
+%option debug
 
 /* Expressions rationnelles de detection */
 digit         [0-9]+
