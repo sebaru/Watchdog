@@ -54,7 +54,7 @@
  extern gboolean Dls_data_get_bool      ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern gboolean Dls_data_get_bool_up   ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
  extern gboolean Dls_data_get_bool_down ( gchar *tech_id, gchar *acronyme, gpointer *bool_p );
- extern void     Dls_data_set_bool      ( gchar *tech_id, gchar *acronyme, gpointer *data_p, gboolean valeur );
+ extern void     Dls_data_set_bool      ( gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur );
  extern void     Dls_data_set_MSG       ( gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean etat );
  extern void     Dls_data_set_tempo     ( gchar *tech_id, gchar *acronyme, gpointer *tempo_p, gboolean etat,
                                           gint delai_on, gint min_on, gint max_on, gint delai_off, gint random);
