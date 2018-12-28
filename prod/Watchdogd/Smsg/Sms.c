@@ -506,7 +506,7 @@
                      Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: From %s -> Mise à un du bit M%03d %s:%s", __func__,
                                from, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme );
                      if (mnemo->num != -1) Envoyer_commande_dls ( mnemo->num );
-                                      else Envoyer_commande_dls_data ( mnemo->acronyme, mnemo->dls_tech_id );
+                                      else Envoyer_commande_dls_data ( mnemo->dls_tech_id, mnemo->acronyme );
                      break;
                 default:
                      Info_new( Config.log, Config.log_msrv, LOG_ERR,
