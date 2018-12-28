@@ -187,7 +187,7 @@
 /* Main: Fonction principale du thread                                                                                        */
 /******************************************************************************************************************************/
  void Run_arch ( void )
-  { static gpointer *arch_request_number;
+  { static gpointer arch_request_number;
 	   struct DB *db;
     gint top, last_update, nb_enreg;
     prctl(PR_SET_NAME, "W-Arch", 0, 0, 0 );

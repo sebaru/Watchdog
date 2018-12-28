@@ -774,7 +774,7 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme )
-  { gpointer *bool_p=NULL;
+  { gpointer bool_p=NULL;
     Dls_data_get_bool ( tech_id, acronyme, &bool_p );
     if (!bool_p) { Dls_data_set_bool ( tech_id, acronyme, &bool_p, TRUE ); }
 
@@ -799,11 +799,11 @@
        SM( num, 1 );                                                                           /* Mise a un du bit monostable */
      }
     while( Partage->com_dls.Set_Dls_Data )                                               /* A-t-on un monostable a allumer ?? */
-     { gpointer *data_p = Partage->com_dls.Set_Dls_Data->data;
+     { gpointer data_p = Partage->com_dls.Set_Dls_Data->data;
        Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit %p", __func__, data_p );
        Partage->com_dls.Set_Dls_Data = g_slist_remove ( Partage->com_dls.Set_Dls_Data, data_p );
        Partage->com_dls.Reset_Dls_Data = g_slist_append ( Partage->com_dls.Reset_Dls_Data, data_p ); 
-       Dls_data_set_bool ( NULL, NULL, *data_p, TRUE );                                        /* Mise a un du bit monostable */
+       Dls_data_set_bool ( NULL, NULL, &data_p, TRUE );                                        /* Mise a un du bit monostable */
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro ); 
   }
@@ -834,7 +834,7 @@
 /* Dls_data_set_bool: Positionne un boolean                                                                                   */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
- void Dls_data_set_bool ( gchar *tech_id, gchar *acronyme, gpointer **bool_p, gboolean valeur )
+ void Dls_data_set_bool ( gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur )
   { struct DLS_BOOL *bool;
 
     if (!bool_p || !*bool_p)
@@ -873,7 +873,7 @@
 /* Dls_data_get_bool: Remonte l'etat d'un boolean                                                                             */
 /* Sortie : TRUE sur le boolean est UP                                                                                        */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_bool ( gchar *tech_id, gchar *acronyme, gpointer **bool_p )
+ gboolean Dls_data_get_bool ( gchar *tech_id, gchar *acronyme, gpointer *bool_p )
   { struct DLS_BOOL *bool;
     GSList *liste;
     if (bool_p && *bool_p)                                                           /* Si pointeur d'acceleration disponible */
@@ -897,7 +897,7 @@
 /* Dls_data_get_bool_up: Remonte le front montant d'un boolean                                                                */
 /* Sortie : TRUE sur le boolean vient de passer à UP                                                                          */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_bool_up ( gchar *tech_id, gchar *acronyme, gpointer **bool_p )
+ gboolean Dls_data_get_bool_up ( gchar *tech_id, gchar *acronyme, gpointer *bool_p )
   { struct DLS_BOOL *bool;
     GSList *liste;
     if (bool_p && *bool_p)                                                           /* Si pointeur d'acceleration disponible */
@@ -921,7 +921,7 @@
 /* Dls_data_get_bool_down: Remonte le front descendant d'un boolean                                                           */
 /* Sortie : TRUE sur le boolean vient de passer à DOWN                                                                        */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_bool_down ( gchar *tech_id, gchar *acronyme, gpointer **bool_p )
+ gboolean Dls_data_get_bool_down ( gchar *tech_id, gchar *acronyme, gpointer *bool_p )
   { struct DLS_BOOL *bool;
     GSList *liste;
     if (bool_p && *bool_p)                                                           /* Si pointeur d'acceleration disponible */
@@ -945,7 +945,7 @@
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer **ai_p, float val_avant_ech )
+ void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech )
   { struct ANALOG_INPUT *ai;
     gboolean need_arch;
 
@@ -1037,7 +1037,7 @@
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gfloat Dls_data_get_AI ( gchar *tech_id, gchar *acronyme, gpointer **ai_p )
+ gfloat Dls_data_get_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p )
   { struct ANALOG_INPUT *ai;
     GSList *liste;
     if (ai_p && *ai_p)                                                               /* Si pointeur d'acceleration disponible */
@@ -1061,7 +1061,7 @@
 /* Dls_data_set_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
 /******************************************************************************************************************************/
- void Dls_data_set_tempo ( gchar *tech_id, gchar *acronyme, gpointer **tempo_p, gboolean etat,
+ void Dls_data_set_tempo ( gchar *tech_id, gchar *acronyme, gpointer *tempo_p, gboolean etat,
                            gint delai_on, gint min_on, gint max_on, gint delai_off, gint random)
   { struct DLS_TEMPO *tempo;
 
@@ -1103,7 +1103,7 @@
 /* Dls_data_get_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_tempo ( gchar *tech_id, gchar *acronyme, gpointer **tempo_p )
+ gboolean Dls_data_get_tempo ( gchar *tech_id, gchar *acronyme, gpointer *tempo_p )
   { struct DLS_TEMPO *tempo;
     GSList *liste;
     if (tempo_p && *tempo_p)                                                         /* Si pointeur d'acceleration disponible */
@@ -1127,7 +1127,7 @@
 /* Met à jour le message en parametre                                                                                         */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_MSG ( gchar *tech_id, gchar *acronyme, gpointer **msg_p, gboolean etat )
+ void Dls_data_set_MSG ( gchar *tech_id, gchar *acronyme, gpointer *msg_p, gboolean etat )
   { struct DLS_MESSAGES *msg;
 
     if (!msg_p || !*msg_p)
@@ -1191,7 +1191,7 @@
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer **msg_p )
+ gboolean Dls_data_get_MSG ( gchar *tech_id, gchar *acronyme, gpointer *msg_p )
   { struct DLS_MESSAGES *msg;
     GSList *liste;
     if (msg_p && *msg_p)                                                             /* Si pointeur d'acceleration disponible */

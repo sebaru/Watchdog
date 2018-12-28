@@ -182,7 +182,7 @@
 /* Entrée: numero du signal à gerer                                                                                           */
 /******************************************************************************************************************************/
  static void Traitement_signaux( int num )
-  { static gpointer *dls_wait, *dls_tour_per_sec, *dls_bit_per_sec;
+  { static gpointer dls_wait, dls_tour_per_sec, dls_bit_per_sec;
     char chaine[50];
     if (num == SIGALRM)
      { Partage->top++;
