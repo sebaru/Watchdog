@@ -870,27 +870,27 @@
              if (alias->type == ALIAS_TYPE_DYNAMIC)                      /* alias par nom ? creation du pointeur de raccourci */
               { switch (alias->bit)
                  { case MNEMO_MONOSTABLE:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_M_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _M_%s_%s;\n", alias->tech_id, alias->acronyme );
                         write (fd, chaine, nb_car);
                         break;
                    case MNEMO_BISTABLE:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_B_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _B_%s_%s;\n", alias->tech_id, alias->acronyme );
                         write (fd, chaine, nb_car);
                         break;
                    case MNEMO_ENTREE:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_E_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _E_%s_%s;\n", alias->tech_id, alias->acronyme );
                         write (fd, chaine, nb_car);
                         break;
                    case MNEMO_TEMPO:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_T_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _T_%s_%s;\n", alias->tech_id, alias->acronyme );
                         write (fd, chaine, nb_car);
                         break;
                    case MNEMO_HORLOGE:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_HOR_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _HOR_%s_%s;\n", alias->tech_id, alias->acronyme );
                         write (fd, chaine, nb_car);
                         break;
                    case MNEMO_MSG:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer *_MSG_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _MSG_%s_%s;\n", alias->tech_id, alias->acronyme );
                         write (fd, chaine, nb_car);
                         break;
                  }
