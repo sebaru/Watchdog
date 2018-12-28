@@ -774,12 +774,12 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme )
-  { gpointer bool_p=NULL;
-    Dls_data_get_bool ( tech_id, acronyme, &bool_p );
-    if (!bool_p) { Dls_data_set_bool ( tech_id, acronyme, &bool_p, TRUE ); }
+  { gpointer bool=NULL;
+    Dls_data_get_bool ( tech_id, acronyme, &bool );
+    if (!bool) { Dls_data_set_bool ( tech_id, acronyme, &bool, TRUE ); }
 
     pthread_mutex_lock( &Partage->com_dls.synchro );
-    Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, *(struct DLS_BOOL **)bool_p );
+    Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, bool );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
     Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit '%s:%s' demandée", __func__, tech_id, acronyme );
   }
