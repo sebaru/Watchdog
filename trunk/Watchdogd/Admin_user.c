@@ -36,21 +36,8 @@
 /* Sortie: Le buffer de reponse complété                                                                                      */
 /******************************************************************************************************************************/
  static gchar *Admin_print_user ( gchar *response, struct CMD_TYPE_UTILISATEUR *util )
-  { gchar date_create[20], date_modif[20];
-    gchar chaine[1024];
-    struct tm *temps;
-    time_t time;
-
-    time = util->date_modif;
-    temps = localtime( (time_t *)&time );
-    if (temps) { strftime  ( date_modif, sizeof(date_modif), "%F %T", temps ); }
-    else       { g_snprintf( date_modif, sizeof(date_modif), "Erreur" );    }
-
-    time = util->date_create;
-    temps = localtime( (time_t *)&time );
-    if (temps) { strftime  ( date_create, sizeof(date_create), "%F %T", temps ); }
-    else       { g_snprintf( date_create, sizeof(date_create), "Erreur" );    }
-
+  { gchar chaine[1024];
+    
     g_snprintf( chaine, sizeof(chaine),
               " |---------------------------------------------------------------------------------------\n"
               " [%03d]%12s -> enable=%d, date_create = %s, date_modif = %s\n"
@@ -60,7 +47,7 @@
               " |                 -> ssrv_bit_presence = B%04d (=%d)\n"
               " |                 -> hash=%s\n"
               " |                 -> %s\n",
-                util->id, util->username, util->enable, date_create, date_modif,
+                util->id, util->username, util->enable, util->date_create, util->date_modif,
                 util->sms_enable, util->sms_allow_cde, util->sms_phone,
                 util->imsg_enable, util->imsg_allow_cde, util->imsg_jabberid,
                 util->imsg_available,

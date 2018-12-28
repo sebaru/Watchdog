@@ -41,8 +41,8 @@
     gchar    commentaire[ NBR_CARAC_COMMENTAIRE_UTF8+1 ];
     guint    access_level;
     gboolean enable;
-    guint    date_create;
-    guint    date_modif;
+    gchar    date_create[32];
+    gchar    date_modif[32];
     gboolean sms_enable;
     gchar    sms_phone[80];
     gboolean sms_allow_cde;
