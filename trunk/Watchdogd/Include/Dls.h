@@ -196,7 +196,7 @@
  extern void SEA_range( int num, int range );
  extern void SEA_ech( int num, float val_ech );
  extern void Envoyer_commande_dls ( int num );
- extern void Envoyer_commande_dls_data ( gchar *nom, gchar *owner );
+ extern void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme );
  extern void Dls_foreach ( void *user_data, 
                            void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
                            void (*do_tree)   (void *user_data, struct DLS_TREE *) );

@@ -366,7 +366,7 @@
                    bit = (struct ZMQ_SET_BIT *)payload;
                    if (bit->type == MNEMO_MONOSTABLE)
                     { if (bit->num != -1) Envoyer_commande_dls ( bit->num );
-                                     else Envoyer_commande_dls_data ( bit->acronyme, bit->dls_tech_id );
+                                     else Envoyer_commande_dls_data ( bit->dls_tech_id, bit->acronyme );
                     }
                    break;
                  }

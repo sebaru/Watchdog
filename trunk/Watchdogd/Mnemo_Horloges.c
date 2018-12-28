@@ -51,7 +51,7 @@
      }
  
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT m.acronyme, d.tech_id"
+                "SELECT d.tech_id, m.acronyme"
                 " FROM %s as m INNER JOIN %s as d ON m.dls_id = d.id"
                 " INNER JOIN %s as h ON h.id_mnemo = m.id"
                 " WHERE CURTIME() LIKE CONCAT(LPAD(h.heure,2,'0'),':',LPAD(h.minute,2,'0'),':%')",
@@ -64,8 +64,8 @@
      }
 
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Mise à un de l'horloge %s 1/2", __func__, db->row[0] );
-       Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Mise à un de l'horloge %s 2/2", __func__, db->row[1] );
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Mise à un de l'horloge %s:%s 1/2",
+                 __func__, db->row[0], db->row[1] );
        Envoyer_commande_dls_data ( db->row[0], db->row[1] );
      }
     Libere_DB_SQL( &db );
