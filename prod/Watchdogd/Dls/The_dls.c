@@ -774,12 +774,12 @@
 /* Entrée/Sortie: rien                                                                                                        */
 /******************************************************************************************************************************/
  void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme )
-  { gpointer bool_p=NULL;
-    Dls_data_get_bool ( tech_id, acronyme, &bool_p );
-    if (!bool_p) { Dls_data_set_bool ( tech_id, acronyme, &bool_p, TRUE ); }
+  { gpointer bool=NULL;
+    Dls_data_get_bool ( tech_id, acronyme, &bool );
+    if (!bool) { Dls_data_set_bool ( tech_id, acronyme, &bool, TRUE ); }
 
     pthread_mutex_lock( &Partage->com_dls.synchro );
-    Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, bool_p );
+    Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, bool );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
     Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit '%s:%s' demandée", __func__, tech_id, acronyme );
   }
@@ -799,11 +799,11 @@
        SM( num, 1 );                                                                           /* Mise a un du bit monostable */
      }
     while( Partage->com_dls.Set_Dls_Data )                                               /* A-t-on un monostable a allumer ?? */
-     { gpointer data_p = Partage->com_dls.Set_Dls_Data->data;
-       Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit %p", __func__, data_p );
-       Partage->com_dls.Set_Dls_Data = g_slist_remove ( Partage->com_dls.Set_Dls_Data, data_p );
-       Partage->com_dls.Reset_Dls_Data = g_slist_append ( Partage->com_dls.Reset_Dls_Data, data_p ); 
-       Dls_data_set_bool ( NULL, NULL, &data_p, TRUE );                                        /* Mise a un du bit monostable */
+     { struct DLS_BOOL *bool = Partage->com_dls.Set_Dls_Data->data;
+       Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a 1 du bit %s:%s", __func__, bool->tech_id, bool->acronyme );
+       Partage->com_dls.Set_Dls_Data = g_slist_remove ( Partage->com_dls.Set_Dls_Data, bool );
+       Partage->com_dls.Reset_Dls_Data = g_slist_append ( Partage->com_dls.Reset_Dls_Data, bool ); 
+       Dls_data_set_bool ( NULL, NULL, (gpointer *)&bool, TRUE );                              /* Mise a un du bit monostable */
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro ); 
   }
@@ -822,10 +822,10 @@
        SM( num, 0 );
      }
     while( Partage->com_dls.Reset_Dls_Data )                                            /* A-t-on un monostable a éteindre ?? */
-     { gboolean *data_p = Partage->com_dls.Reset_Dls_Data->data;
-       Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: Mise a 0 du bit %p", __func__, data_p );
-       Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, data_p ); 
-       *data_p = FALSE;                                                                         /* Mise a 0 du bit monostable */
+     { struct DLS_BOOL *bool = Partage->com_dls.Reset_Dls_Data->data;
+       Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: Mise a 0 du bit %s:%s", __func__, bool->tech_id, bool->acronyme );
+       Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, bool ); 
+       Dls_data_set_bool ( NULL, NULL, (gpointer *)&bool, FALSE );                             /* Mise a un du bit monostable */
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
   }

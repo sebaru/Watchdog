@@ -454,12 +454,6 @@
        return;
      }
      
-    Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s : Received %s from %s(%s). Processing...", __func__,
-              texte, sms->user_name, sms->user_phone );
-    g_free(sms);
-    g_snprintf(chaine, sizeof(chaine), "Processing: %s", texte );                           /* Envoi de l'acquit de reception */
-    Envoyer_smsg_gsm_text ( chaine );
-
     if ( ! strcasecmp( texte, "ping" ) )                                                               /* Interfacage de test */
      { Envoyer_smsg_gsm_text ( "Pong !" );
        return;
