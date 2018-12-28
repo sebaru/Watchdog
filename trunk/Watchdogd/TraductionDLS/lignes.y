@@ -575,7 +575,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                           }
                        }
                     }
-                   else { Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), $3 );/* si l'alias n'existe pas */
+                   else { Emettre_erreur_new( "Ligne %d: '%s' is not defined", DlsScanner_get_lineno(), acro );/* si l'alias n'existe pas */
                           $$=New_chaine(2);
                           g_snprintf( $$, 2, "0" );
                         }

@@ -36,7 +36,7 @@
 %option noyywrap nounput noinput
 /* On garde le numéro de ligne lors du scan des tokens */
 %option yylineno
-%option debug
+ /*%option debug*/
 
 /* Expressions rationnelles de detection */
 digit         [0-9]+
@@ -166,8 +166,8 @@ newline       [\n\r]+
 <comment>.                 ;
 
 "\""                       { BEGIN(chaine_directe); }
-<chaine_directe>{chaine}   { DlsScanner_lval.chaine = (char *)strdup(DlsScanner_text); return T_CHAINE; }
-<chaine_directe>"\""       { BEGIN(INITIAL); }
+<chaine_directe>"\""       { DlsScanner_lval.chaine = (char *)strdup(DlsScanner_text); BEGIN(INITIAL); return T_CHAINE; }
+<chaine_directe>.          { yymore(); }
 
 {id}                       { DlsScanner_lval.chaine = (char *)strdup(DlsScanner_text); return ID;       }
 {digit}                    { DlsScanner_lval.val    = atoi(DlsScanner_text);           return ENTIER;   }

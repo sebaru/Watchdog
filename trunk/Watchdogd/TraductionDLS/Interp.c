@@ -823,7 +823,7 @@
     rc = fopen( source, "r" );
     if (!rc) retour = TRAD_DLS_ERROR;
     else
-     { DlsScanner_debug = 1;                                                                     /* Debug de la traduction ?? */
+     { DlsScanner_debug = 0;                                                                     /* Debug de la traduction ?? */
        DlsScanner_restart(rc);
        DlsScanner_parse();                                                                       /* Parsing du fichier source */
        fclose(rc);
