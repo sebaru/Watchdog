@@ -105,4 +105,5 @@ Watchdogd/Serveur/Makefile \
 Watchdogd/TraductionDLS/Makefile \
 Watchdogd/Dls/Makefile \
 WatchdogdAdmin/Makefile \
+Watchdogd/Voice/Makefile \
 )

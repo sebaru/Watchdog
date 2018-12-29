@@ -682,8 +682,11 @@
     zmq_admin = New_zmq ( ZMQ_REP, "listen-to-admin" );
     Bind_zmq (zmq_admin, "inproc", NOM_THREAD "-admin", 0 );
 
-    Cfg_smsg.zmq_to_master = New_zmq ( ZMQ_PUB, "pub-to-master" );
-    Connect_zmq ( Cfg_smsg.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
+    if (Config.instance_is_master==FALSE)                                                          /* si l'instance est Slave */
+     { Cfg_smsg.zmq_to_master = New_zmq ( ZMQ_PUB, "pub-to-master" );
+       Connect_zmq ( Cfg_smsg.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
+     }
+
     Envoyer_smsg_gsm_text ( "SMS System is running" );
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
     while(Cfg_smsg.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */

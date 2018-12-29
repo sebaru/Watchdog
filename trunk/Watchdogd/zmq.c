@@ -106,8 +106,8 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Close_zmq ( struct ZMQUEUE *zmq )
-  { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-              "%s: ZMQ closing '%s'", __func__, zmq->name );
+  { if (!zmq) return;
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: ZMQ closing '%s'", __func__, zmq->name );
     zmq_close ( zmq->socket );
     g_free(zmq);
   }
