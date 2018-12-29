@@ -475,6 +475,7 @@
        Close_zmq( zmq_from_master );
      }
 /********************************* Dechargement des zones de bits internes dynamiques *****************************************/
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Début libération mémoire dynamique", __func__ );
     g_slist_foreach (Partage->Dls_data_BOOL, (GFunc) g_free, NULL );
     g_slist_free (Partage->Dls_data_BOOL);
     g_slist_foreach (Partage->Dls_data_AI, (GFunc) g_free, NULL );
