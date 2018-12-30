@@ -378,6 +378,7 @@
                else if ( ! strcasecmp ( url, "/status" ) )         { Http_Traiter_request_getstatus ( wsi ); }
                else if ( ! strncasecmp ( url, "/ws/getsyn", 11 ) ) { return( Http_Traiter_request_getsyn ( wsi, session ) ); }
                else if ( ! strncasecmp ( url, "/ws/audio/", 10 ) ) { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
+               else if ( ! strncasecmp ( url, "/process/", 9 ) ) { return( Http_Traiter_request_getprocess ( wsi, url+9 ) ); }
                else if ( ! strncasecmp ( url, "/setm", 5 ) )   { return( Http_Traiter_request_setm ( wsi ) ); }
                else if ( ! strcasecmp ( url, "/cli" ) )
                 { g_snprintf( pss->url, sizeof(pss->url), "/cli" );
