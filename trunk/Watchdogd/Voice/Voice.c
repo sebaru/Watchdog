@@ -110,8 +110,8 @@
      { close(pipefd[0]);    /* this descriptor is no longer needed */
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_DEBUG, "%s: Starting PocketSphinx (pid %d) !", __func__, getpid() );
        dup2(pipefd[1], 1);  /* Send stdout to the pipe (back to father !) */
-       dup2(pipefd[1], 2);  /* Send stdout to the pipe (back to father !) */
-       execlp( "pocketsphinx_continuous", "pocketsphinx_continuous", "-adcdev", "alsa_input.usb-0b0e_Jabra_SPEAK_510_USB_745C4B657953021800-00.analog-mono",
+       dup2(pipefd[1], 2);  /* Send stderr to the pipe (back to father !) */
+       execlp( "pocketsphinx_continuous", "pocketsphinx_continuous", "-adcdev", Cfg_voice.audio_device,
                "-inmic", "yes", "-agc", "noise", "-logfn", "pocket.log",
                "-dict", "wtd.dic", "-jsgf", "wtd.gram", "-hmm", "cmusphinx-fr-5.2", NULL );
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s_Fils: lancement PocketSphinx failed", __func__ );
@@ -132,8 +132,8 @@ sleep(4);
        sched_yield();
        memset(commande_vocale, sizeof(commande_vocale), 0);
        retour = read(pipefd[0], commande_vocale, sizeof(commande_vocale));
-       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: retour = %d", __func__, retour );
        if (retour<=0) continue;
+       commande_vocale[retour-1]=0;                                                                  /*Caractere NULL d'arret */
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: recu = %s", __func__, commande_vocale );
 
        if (Cfg_voice.lib->Thread_reload)                                                      /* A-t'on recu un signal USR1 ? */
