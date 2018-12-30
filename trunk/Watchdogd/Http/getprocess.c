@@ -81,6 +81,35 @@
     return(lws_http_transaction_completed(wsi));
   }
 /******************************************************************************************************************************/
+/* Http_Traiter_request_getprocess_start_stop: Traite une requete sur l'URI process/stop|start                                */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : FALSE si pb                                                                                                       */
+/******************************************************************************************************************************/
+ static gint Http_Traiter_request_getprocess_start_stop ( struct lws *wsi, gchar *thread, gboolean status )
+  { if ( ! strcmp ( thread, "arch" ) )
+     { if (status==FALSE) { Partage->com_arch.Thread_run = FALSE; }
+       else Demarrer_arch();                                                                   /* Demarrage gestion Archivage */
+     } else
+    if ( ! strcmp ( thread, "dls"  ) )
+     { if (status==FALSE) { Partage->com_dls.Thread_run  = FALSE; }
+       else Demarrer_dls();                                                                               /* Démarrage D.L.S. */
+     }
+    else
+     { GSList *liste;
+       gint found;
+       liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
+       found = 0;
+       while(liste)
+        { struct LIBRAIRIE *lib;
+          lib = (struct LIBRAIRIE *)liste->data;
+          if ( ! strcmp( lib->admin_prompt, thread ) )
+           { if (status) Start_librairie(lib); else Stop_librairie(lib); }
+          liste = liste->next;
+        }
+     }
+    return(lws_http_transaction_completed(wsi));
+  }
+/******************************************************************************************************************************/
 /* Http_Traiter_request_getprocess: Traite une requete sur l'URI process                                                        */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
@@ -90,6 +119,10 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     if (!strcmp(url, "list"))
      { return(Http_Traiter_request_getprocess_list(wsi));}
+    else if (!strncmp(url, "stop/", 5))
+     { return(Http_Traiter_request_getprocess_start_stop(wsi,url+5,FALSE));}
+    else if (!strncmp(url, "start/", 6))
+     { return(Http_Traiter_request_getprocess_start_stop(wsi,url+6,TRUE));}
     Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );
     return(1);
   }
