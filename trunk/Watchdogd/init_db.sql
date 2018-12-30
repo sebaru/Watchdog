@@ -23,6 +23,20 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `config`
+--
+
+CREATE TABLE IF NOT EXISTS `config` (
+  `instance_id` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
+  `nom_thread` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
+  `nom` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
+  `valeur` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
+  UNIQUE KEY `instance_id` (`instance_id`,`nom_thread`,`nom`)
+) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `cameras`
 --
 
@@ -46,28 +60,21 @@ CREATE TABLE IF NOT EXISTS `class` (
   PRIMARY KEY (`id`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
-INSERT INTO `class` (`id`, `libelle`) VALUES
-(1, 'Divers'),
-(4, 'Etats_des_Commandes'),
-(5, 'Plans du Site'),
-(6, 'Commandes_Manu'),
-(7, 'Indicateurs'),
-(16, 'Capteurs_Statiques'),
-(9, 'Actionneurs'),
-(10, 'Ouvrants_Habitat'),
-(11, 'Alerter'),
-(18, 'Outillage'),
-(14, 'Composants_Hydrauliques'),
-(21, 'Composants_Infrastructures'),
-(17, 'Composants_Electrique'),
-(19, 'Fond_d''Ã©cran'),
-(20, 'DÃ©tecter'),
-(22, 'Fils_Electriques'),
-(23, 'Tuyaux_Plomberie'),
-(24, 'Capteurs Dynamiques'),
-(25, 'Electro_MÃ©nager'),
-(26, 'Meubles'),
-(27, 'Traitement de l''Air');
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `icons`
+--
+
+CREATE TABLE IF NOT EXISTS `icons` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `date_create` datetime NOT NULL DEFAULT NOW(),
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
+  `id_classe` int(11) NOT NULL DEFAULT '0',
+  `nbr_matrice` INT(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`id_classe`) REFERENCES `class` (`id`) ON DELETE CASCADE
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
 
 -- --------------------------------------------------------
 
@@ -86,131 +93,6 @@ CREATE TABLE IF NOT EXISTS `syns` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 INSERT INTO `syns` (`id`, `parent_id`, `libelle`, `page`, `access_level` ) VALUES
 (1, 1, 'Accueil', 'Defaut Page', 0);
-
--- --------------------------------------------------------
-
---
--- Structure de la table `syns_camerasup`
---
-
-CREATE TABLE IF NOT EXISTS `syns_camerasup` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `syn_id` int(11) NOT NULL,
-  `camera_src_id` int(11) NOT NULL,
-  `posx` int(11) NOT NULL,
-  `posy` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`camera_src_id`) REFERENCES `cameras` (`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `syns_cadrans`
---
-
-CREATE TABLE IF NOT EXISTS `syns_cadrans` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `syn_id` int(11) NOT NULL DEFAULT '0',
-  `bitctrl` int(11) NOT NULL DEFAULT '0',
-  `posx` int(11) NOT NULL DEFAULT '0',
-  `posy` int(11) NOT NULL DEFAULT '0',
-  `type` int(11) NOT NULL DEFAULT '0',
-  `angle` float NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
-
---
--- Structure de la table `syns_comments`
---
-
-CREATE TABLE IF NOT EXISTS `syns_comments` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `syn_id` int(11) NOT NULL DEFAULT '0',
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `font` text COLLATE utf8_unicode_ci NOT NULL,
-  `rouge` int(11) NOT NULL DEFAULT '0',
-  `vert` int(11) NOT NULL DEFAULT '0',
-  `bleu` int(11) NOT NULL DEFAULT '0',
-  `posx` int(11) NOT NULL DEFAULT '0',
-  `posy` int(11) NOT NULL DEFAULT '0',
-  `angle` float NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `syns_motifs`
---
-
-CREATE TABLE IF NOT EXISTS `syns_motifs` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `icone` int(11) NOT NULL DEFAULT '0',
-  `syn_id` int(11) NOT NULL DEFAULT '0',
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `access_level` int(11) NOT NULL DEFAULT '0',
-  `bitctrl` int(11) NOT NULL DEFAULT '0',
-  `bitclic` int(11) NOT NULL DEFAULT '0',
-  `bitclic2` int(11) NOT NULL DEFAULT '0',
-  `rafraich` int(11) NOT NULL DEFAULT '0',
-  `posx` int(11) NOT NULL DEFAULT '0',
-  `posy` int(11) NOT NULL DEFAULT '0',
-  `larg` float NOT NULL DEFAULT '0',
-  `haut` float NOT NULL DEFAULT '0',
-  `angle` float NOT NULL DEFAULT '0',
-  `dialog` int(11) NOT NULL DEFAULT '0',
-  `gestion` int(11) NOT NULL DEFAULT '0',
-  `rouge` int(11) NOT NULL DEFAULT '0',
-  `vert` int(11) NOT NULL DEFAULT '0',
-  `bleu` int(11) NOT NULL DEFAULT '0',
-  `layer` int(11) NOT NULL DEFAULT '0',
-  `mnemo_id` int(11) NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`icone`) REFERENCES `icons` (`id`) ON DELETE CASCADE
-) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `syns_palettes`
---
-
-CREATE TABLE IF NOT EXISTS `syns_palettes` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `syn_id` int(11) NOT NULL DEFAULT '0',
-  `syn_cible_id` int(11) NOT NULL DEFAULT '0',
-  `pos` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `syns_pass`
---
-
-CREATE TABLE IF NOT EXISTS `syns_pass` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `syn_id` int(11) NOT NULL DEFAULT '0',
-  `syn_cible_id` int(11) NOT NULL DEFAULT '0',
-  `posx` int(11) NOT NULL DEFAULT '0',
-  `posy` int(11) NOT NULL DEFAULT '0',
-  `angle` float NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -239,437 +121,6 @@ INSERT INTO `dls` (`id`, `syn_id`, `name`, `shortname`, `tech_id`, `actif`, `com
 (1, 1, 'Système', 'Système', 'SYS', FALSE, 0, 0);
 
 -- --------------------------------------------------------
-
---
--- Structure de la table `mnemos_CptHoraire`
---
-
-CREATE TABLE IF NOT EXISTS `mnemos_CptHoraire` (
-  `id_mnemo` int(11) NOT NULL DEFAULT '0',
-  `valeur` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id_mnemo`),
-  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `dls_cpt_imp`
---
-
-CREATE TABLE IF NOT EXISTS `mnemos_CptImp` (
-  `id_mnemo` int(11) NOT NULL,
-  `valeur` float NOT NULL DEFAULT '0',
-  `type_ci` int(11) NOT NULL DEFAULT '0',
-  `multi` float NOT NULL DEFAULT '1',
-  `unite_string` text COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id_mnemo`),
-  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `mnemos_AnalogInput`
---
-
-CREATE TABLE IF NOT EXISTS `mnemos_AnalogInput` (
-  `id_mnemo` int(11) NOT NULL,
-  `type` int(11) NOT NULL,
-  `min` float NOT NULL DEFAULT '0',
-  `max` float NOT NULL DEFAULT '0',
-  `unite` text COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id_mnemo`),
-  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-INSERT INTO `mnemos_AnalogInput` (`id_mnemo`, `type`, `min`, `max`, `unite`) VALUES
-(10, 0, 0, 100, 'ms'),
-(11, 0, 0, 100, 't/s'),
-(12, 0, 0, 100, 'bit/s'),
-(13, 0, 0, 100, 'arch'),
-(14, 0, 0, 100, 'dbs');
-
--- --------------------------------------------------------
-
---
--- Structure de la table `mnemos_Horloge`
---
-
-CREATE TABLE IF NOT EXISTS `mnemos_Horloge` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_mnemo` int(11) NOT NULL,
-  `heure` int(11) NOT NULL,
-  `minute` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `mnemos_Registre`
---
-
-CREATE TABLE IF NOT EXISTS `mnemos_Registre` (
-  `id_mnemo` int(11) NOT NULL,
-  `unite` text COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id_mnemo`),
-  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `mnemos_DigitalInput`
---
-
-CREATE TABLE IF NOT EXISTS `mnemos_DigitalInput` (
-  `id_mnemo` int(11) NOT NULL,
-  PRIMARY KEY (`id_mnemo`),
-  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `icons`
---
-
-CREATE TABLE IF NOT EXISTS `icons` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `date_create` datetime NOT NULL DEFAULT NOW(),
-  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
-  `id_classe` int(11) NOT NULL DEFAULT '0',
-  `nbr_matrice` INT(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`id_classe`) REFERENCES `class` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
-
---
--- Contenu de la table `icons`
---
-
-INSERT INTO `icons` (`id`, `libelle`, `id_classe`) VALUES
-(1, 'Camera', 0),
-(7, 'Tournevis', 18),
-(8, 'Poterie', 0),
-(12, 'Boule_rouge', 7),
-(13, 'Boule_verte', 7),
-(15, 'Local_Marche', 4),
-(14, 'Local_Arret', 4),
-(16, 'Local_SystÃ¨me', 4),
-(11, 'CÃ©dÃ©S', 0),
-(17, 'Poussoir_Rond_Marche', 6),
-(19, 'Nuit_EtoilÃ©', 19),
-(20, 'H_noir', 7),
-(31, 'Paturage', 19),
-(35, 'Poussoir_Ovale_Marche.', 6),
-(36, 'Poussoir_Ovale_ ArrÃªt.', 6),
-(37, 'Poussoir_Ovale_Acquit_DÃ©faut.', 6),
-(38, 'RÃ©veil_Commande_Horaire_ProgrammÃ©e.', 6),
-(39, 'Auto_/Manu_/Manu+horloge_/Down', 4),
-(40, 'Vue_AÃ©rienne_Soisy', 5),
-(25, 'Fil_CourbÃ©_Bas_Droite', 22),
-(226, 'Tuyau_Syphon_Grand_ModÃ¨le_Gauche', 23),
-(107, 'Sablier_V2', 7),
-(211, 'AmpÃ¨remÃ¨tre', 16),
-(30, 'PrÃ©sence_U_Eclair', 24),
-(33, 'TÃ©lÃ©rupteur_Bipolaire', 9),
-(34, 'TÃ©lÃ©rupteur_Bobine', 17),
-(23, 'Contacteur_Bipolaire ', 9),
-(24, 'Contacteur_Bobine', 17),
-(22, 'Batterie', 17),
-(41, 'En construction', 0),
-(42, 'FenÃªtre un battant', 10),
-(44, 'Haut Parleur', 11),
-(45, 'Moteur', 9),
-(46, 'CarrÃ©', 7),
-(32, 'Moteur_Rideaux', 9),
-(47, 'CarrÃ©_Noir', 7),
-(48, 'Rectangle', 7),
-(49, 'Rectangle_Noir', 7),
-(182, 'Poussoir_CarrÃ©_ArrÃªt', 6),
-(51, 'Voyant', 9),
-(186, 'Fil_DÃ©rivation_Ã _Gauche', 22),
-(53, 'Bouteille', 16),
-(54, 'Girouette_2', 16),
-(56, 'Niveau Site GÃ©nÃ©ral de Soisy.', 5),
-(57, 'Niveau -1', 5),
-(59, 'Chauffe Eau', 14),
-(60, 'RÃ©sistance Chauffage', 9),
-(63, 'FlÃ¨che_Haut_Gauche', 7),
-(70, 'Gyrophare rouge', 11),
-(72, 'Bonhomme en marche', 0),
-(76, '3xPignons_3D', 0),
-(77, 'Disquette', 0),
-(78, 'Girouette', 16),
-(79, 'Gyrophare_Gros', 11),
-(80, 'Tarif Jour ou nuit', 16),
-(189, 'Fil_Horizontal', 22),
-(82, 'Bonhomme marcheur_2', 0),
-(83, 'Bonhomme marcheur_3', 0),
-(84, 'Habitat_RdChaussÃ©e', 5),
-(297, 'Mur_7Px_Vertical_Court', 21),
-(86, 'Pointer_du_doigt', 7),
-(87, 'Pressostat', 16),
-(88, 'Radar', 20),
-(89, 'Sablier', 7),
-(92, 'FlÃ¨che_Tendance_Basse ', 7),
-(93, 'FlÃ¨che_Tendance_Hausse', 7),
-(285, 'ThermomÃ¨tre', 16),
-(203, 'Tuyau_TÃ©_Bas', 23),
-(190, 'Fil_Horizontal_Long', 22),
-(108, 'Sablier_V2_Mini', 7),
-(204, 'Tuyau_TÃ©_Haut', 23),
-(207, 'Tuyau_TÃ©_Droite', 23),
-(206, 'Tuyau_TÃ©_Gauche', 23),
-(208, 'Tuyau_DÃ©rivation_Croix', 23),
-(209, 'Tuyau_Vertical', 23),
-(119, 'Vanne_de_RÃ©gulation', 9),
-(121, 'Petit_Cadenas_Statique', 7),
-(122, 'Photo_Garage', 5),
-(123, 'Lapin', 0),
-(142, 'Visu_Mode_Manuel', 7),
-(125, 'Horloge_2', 7),
-(296, 'Porte_Poussant_Droite', 10),
-(127, 'Moteur_2', 9),
-(291, 'Mur_7Px_Angle_FermÃ©', 21),
-(290, 'Mur_7Px_Angle_Court_FermÃ©', 21),
-(131, 'Naviguer_Droite', 7),
-(132, 'Naviguer_Gauche', 7),
-(133, 'Ventilateur', 9),
-(134, 'Habitat_Niveau-1', 5),
-(135, 'Site_de_Soisy_2', 5),
-(136, 'Site Ã  voir', 5),
-(137, 'Interrupteur_Unipolaire', 17),
-(153, 'Disjoncteur_Bipolaire', 17),
-(139, 'Poussoir_Rectangulaire_Auto', 6),
-(140, 'Poussoir_Rectangulaire_Manu', 6),
-(141, 'Visu_Mode_Horloge', 7),
-(187, 'Fil_DÃ©rivation_en_Bas', 22),
-(185, 'Fil_DÃ©rivation_Ã _Droite', 22),
-(149, 'Poussoir_Rectangulaire_Semi Auto', 6),
-(150, 'Poussoir_CarrÃ©_Marche', 6),
-(192, 'Fil_Vertical_Long', 22),
-(159, 'Fil_Angle_Bas_Droite', 22),
-(160, 'Fil_Angle_Bas_Gauche', 22),
-(161, 'Fil_Angle_Haut_Droite', 22),
-(162, 'Fil_Angle_Haut_Gauche', 22),
-(191, 'Fil_Vertical', 22),
-(193, 'Fil_DÃ©rivation_en_Croix ', 22),
-(184, 'Visu_Mode_SemiAuto', 7),
-(166, 'Disjoncteur_Unipolaire_V3', 17),
-(167, 'Interrupteur_Unipolaire', 17),
-(183, 'Poussoir_CarrÃ©_Acquit_DÃ©faut', 6),
-(169, 'Interrupteur_Unipolaire', 17),
-(177, 'Contacteur_Bipolaire_Dynamique', 17),
-(172, 'AnÃ©momÃ¨tre', 16),
-(188, 'Fil_DÃ©rivation_en_Haut', 22),
-(210, 'Horloge_EDF', 7),
-(229, 'Tuyau_Vertical_CoudÃ©_Droite', 23),
-(231, 'Tuyau_CoudÃ©_Bas_Droite_Mini', 23),
-(215, 'Tuyau_CoudÃ©_Haut_Droite', 23),
-(216, 'Tuyau_CoudÃ©_Haut_Gauche', 23),
-(217, 'Tuyau_CoudÃ©_Bas_Gauche', 23),
-(218, 'Tuyau_CoudÃ©_Bas_Droite', 23),
-(219, 'Tuyau_Vertical_Court', 23),
-(220, 'Tuyau_Vertical_Long', 23),
-(221, 'Tuyau_Horizontal_Long', 23),
-(222, 'Tuyau_Horizontal_Court', 23),
-(223, 'Tuyau_Syphon_Gauche', 23),
-(224, 'Tuyau-Syphon_Droite', 23),
-(225, 'Vanne_Tor_Horizontale', 14),
-(227, 'Tuyau_Syphon_Grand_ModÃ¨le_Droite', 23),
-(230, 'Tuyau_CoudÃ©_Bas_Gauche_Mini', 23),
-(232, 'Tuyau_CoudÃ©_Haut_Droite_Mini', 23),
-(233, 'Tuyau_CoudÃ©_Haut_Gauche_Mini', 23),
-(234, 'Vanne_Verticale_Droite_Mini', 14),
-(235, 'Vanne_Verticale_Gauche_Mini', 14),
-(236, 'Vase_Expansion', 14),
-(240, 'FlÃ¨che_Horizontale_Gauche', 7),
-(238, 'FlÃ¨che_Verticale_Bas', 7),
-(239, 'FlÃ¨che_Horizontale_Droite', 7),
-(241, 'FlÃ¨che_Verticale_Haut', 7),
-(242, 'FlÃ¨che_Verticale_Haut_Maxi', 7),
-(243, 'FlÃ¨che_Horizontale_Droite_Maxi', 7),
-(244, 'FlÃ¨che_Verticale_Bas_Maxi', 7),
-(245, 'FlÃ¨che_Horizontale_Gauche_Maxi', 7),
-(246, 'Vanne_Horizontale_Bas_Mini', 14),
-(247, 'Vanne_Horizontale_Haut_Mini', 14),
-(248, 'Soupape_Verticale_Gauche_Mini', 14),
-(249, 'Soupape_Verticale_Droite_Mini', 14),
-(250, 'Soupape_Horizontale_Haut_Mini', 14),
-(251, 'Soupape_Horizontale_Bas_Mini', 14),
-(252, 'Soupape_Horizontale_Bas', 14),
-(253, 'Soupape_Horizontale_Haut', 14),
-(254, 'Soupape_Verticale_Droite', 14),
-(255, 'Soupape_Verticale_Gauche', 14),
-(256, 'Sigle_Abls_Mini', 0),
-(257, 'Voyant_12X12', 7),
-(258, 'Voyant_16X16', 7),
-(259, 'DÃ©tendeur_Horizontal', 14),
-(260, 'DÃ©tendeur_Vertical', 14),
-(264, 'DÃ©tendeur_Vertical_Mini', 14),
-(263, 'DÃ©tendeur_Horizontal_Mini', 14),
-(265, 'Clapet-Horizontal_Droite_Mini', 14),
-(266, 'Clapet_Horizontal_Gauche_Mini', 14),
-(267, 'Clapet_Vertical_Haut_Mini', 14),
-(268, 'Clapet_Vertical_Bas_Mini', 14),
-(269, 'Clapet_Vertical_Bas', 14),
-(270, 'Clapet_Vertical_Haut', 14),
-(271, 'Clapet_Horizontal_Droite', 14),
-(272, 'Clapet_Horizontal_Gauche', 14),
-(273, 'Pressostat', 24),
-(274, 'Pressostat', 0),
-(275, 'Pressostat_Mini', 0),
-(276, 'Compteur_Mini', 24),
-(277, 'Compteur', 24),
-(278, 'AmpÃ¨remÃ¨tre_Bas_Mini', 24),
-(279, 'AmpÃ¨remÃ¨tre_Droite_Mini', 24),
-(280, 'Poussoir_CarrÃ©_FlÃ¨che_Haut', 6),
-(281, 'Poussoir_CarrÃ©_FlÃ¨che_Bas', 6),
-(282, 'Volet_Roulant_Toit', 10),
-(283, 'Lucarne_Outeau', 10),
-(284, 'FenÃªtre_Toit', 10),
-(286, 'Mur_10Px_Angle_Bas_Droite', 21),
-(287, 'Mur_7Px_Angle_Bas_Droite', 21),
-(288, 'Mur_7px_Horizontal_FermÃ©_Droite', 21),
-(292, 'Mur_Long_Horizontal', 21),
-(295, 'Mur_Grand_Angle_FermÃ©', 21),
-(294, 'Mur_7Px_Vertical_Long', 21),
-(298, 'Gyrophare_Statique', 11),
-(304, 'Porte IntÃ©rieure', 10),
-(303, 'CongÃ©lateur', 25),
-(305, 'Porte IntÃ©rieure miroir', 10),
-(306, 'Cloison IntÃ©rieure_4Px', 21),
-(307, 'Cloison IntÃ©rieure croix', 21),
-(308, 'Cloison IntÃ©rieure TÃ©', 21),
-(309, 'Cloison intÃ©rieure angle', 21),
-(315, 'Mur extÃ©rieur 7Px croix', 21),
-(313, 'Porte intÃ©rieure grande', 10),
-(314, 'Porte intÃ©rieure grande miroir', 10),
-(319, 'Porte extÃ©rieure tirant Ã  gauche', 10),
-(320, 'Mur_7Px_Angle_Bas_Droite_V2', 21),
-(323, 'Mur_7Px_Angle_bas_gauche', 21),
-(325, 'FenÃªtre_un_battant_tirant_gauche_7px ', 10),
-(326, 'fenÃªtre_un_battant_tirant_droite_7Px', 10),
-(327, 'FenÃªtre_un_battant_poussant_droite_7Px', 10),
-(328, 'FenÃªtre_2_battants_poussant_7px', 10),
-(329, 'Mur_7Px_Angle _Bas_Gauche_Court', 21),
-(330, 'Mur_7Px_Angle_Bas_Droite_Court', 21),
-(331, 'Porte_roulante ', 10),
-(332, 'Porte_DÃ©roulante-Haut ', 10),
-(333, 'Mur_7Px_Horizontal_Court', 21),
-(334, 'Cloison_intÃ©rieure_longue', 21),
-(335, 'Porte intÃ©rieure grande', 10),
-(336, 'Porte intÃ©rieure miroir grande', 10),
-(337, 'Porte intÃ©rieure grande V2', 10),
-(338, 'Mur_7Px_angle_bas_gauche_court_V3', 21),
-(339, 'Mur_7Px_angle_bas_gauche_court_V4', 21),
-(340, 'Porte_extÃ©rieure_poussant_droite_7Px', 10),
-(341, 'Placard 30X60', 26),
-(342, 'Placard 30X30', 26),
-(343, 'Placard 15X30', 26),
-(344, 'Placard horizontal 30X50', 26),
-(345, 'Cloison intÃ©rieure courte fermÃ©e', 21),
-(346, 'Cloison intÃ©rieure trÃ¨s courte fermÃ©e', 21),
-(347, 'CheminÃ©e d''angle 65X65', 27),
-(348, 'Escalier tournant Ã  droite 65X65', 21),
-(349, 'Escalier tournant Ã  droite 70X220', 21),
-(351, 'Escalier Droit Court 45X60', 21),
-(352, 'Escalier Droit Court 45X120', 21),
-(355, 'Escalier Droit Court 45X100', 21),
-(354, 'Auvent 30X60', 21),
-(356, 'Escalier droit court et plateau 45X95', 21),
-(357, 'Volet un battant', 10),
-(371, 'Pressostat', 16),
-(375, 'Pompe Arrosage', 17),
-(370, 'Pressostat', 16),
-(369, 'Bache Eaux Naturelles', 14),
-(386, 'Pompe Puit', 17),
-(364, 'Puit', 14),
-(365, 'Puit', 21),
-(367, '', 9),
-(368, 'Bache Eau Naturelle', 14),
-(372, 'Puit !', 21),
-(373, 'ElectroVanne', 9),
-(376, 'Pressostat Carre', 16),
-(377, 'NTH a droite', 16),
-(378, 'NTB a droite', 16),
-(379, 'NTH a gauche', 16),
-(380, 'NB a droite', 16),
-(381, 'NH a droite', 16),
-(382, 'Pressostat Carre 3 Px', 16),
-(383, 'Pressostat carre base', 16),
-(384, 'Tuyau Horizontal AnimÃ© ', 23),
-(385, 'Tuyau horizontal Ã©pais AnimÃ©', 23),
-(387, 'Tuyau_CoudÃ©_AnimÃ©_Epais ', 23),
-(388, 'Tuyau_CoudÃ©_AnimÃ©', 23),
-(389, 'Tuyau_TÃ©_AnimÃ©', 23),
-(390, 'Pompe_Arrosage-AnimÃ©', 14),
-(391, 'Bouton_Marche_AnimÃ© ', 6),
-(392, 'Bouton_ArrÃªt_AnimÃ©', 6),
-(393, 'Pompe_Puit_AnimÃ© ', 17),
-(394, 'Filtre_Eau', 14),
-(395, 'Filtre_Eau_Long', 14),
-(396, 'GouttiÃ¨re', 23),
-(398, 'Ampoule a vis', 17),
-(399, 'Applique demi ronde', 17),
-(400, 'Applique demi ronde petite', 17),
-(401, 'Volet 1 Battant', 10),
-(402, 'Volet 1 Battant DÃ©portÃ©', 10),
-(403, 'Volets 2 battants', 10),
-(405, 'Digicode ExtÃ©rieur', 4),
-(406, 'Digicode ExtÃ©rieur Petit', 4),
-(407, 'Bouton_Inhibition_AnimÃ©', 6),
-(408, 'Bouton_DÃ©sinhibition_AnimÃ©', 6),
-(409, 'wago', 1),
-(410, 'Niveau TrÃ¨s Bas Ã  Droite', 16),
-(423, '', 9),
-(412, 'Niveau Bas Ã  Droite', 16),
-(414, 'Bouton Maintenance AnimÃ©', 0),
-(415, 'ccc', 0),
-(416, 'Bouton Maintenance AnimÃ©', 0),
-(417, 'Bouton Maintenance Anime', 0),
-(418, 'Bouton Silence Anime', 0),
-(419, 'Bouton Silence Anime', 6),
-(420, 'Bouton Essai AnimÃ©', 6),
-(421, 'Bouton Maintenance AnimÃ©', 6),
-(422, 'Bouton En Service AnimÃ©', 6),
-(424, 'Bouton Stop Klaxon', 6),
-(426, 'Volet EntrÃ©e un Battant', 10),
-(428, 'Ampoule Vis', 17),
-(430, 'Applique', 17),
-(431, 'Oeuil Veille', 4),
-(432, 'Bouton Veille animÃ©', 6),
-(433, 'Bouton Manu AnimÃ©', 6),
-(434, 'Bouton In AnimÃ©', 6),
-(435, 'Bouton Out AnimÃ©', 6),
-(436, 'Vigie Ã©tiquette', 4),
-(440, 'Abls mini', 1),
-(441, 'ABLS', 1),
-(444, 'Compteur prise en bas', 24),
-(443, 'Fuite liquide', 16),
-(445, 'Compteur en ligne', 24),
-(450, 'Vignette Activites', 7),
-(449, 'Bouton Acquit', 6),
-(453, 'Infra Rouge_V3', 24);
-
--- --------------------------------------------------------
-
---
--- Structure de la table `icons_new`
---
-
-CREATE TABLE IF NOT EXISTS `icons_new` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `description` VARCHAR(160) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
-  `classe` VARCHAR(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT '0',
-  KEY (`classe`),
-  PRIMARY KEY (`id`)
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000;
-
 
 --
 -- Structure de la table `mnemos`
@@ -776,6 +227,221 @@ INSERT INTO `mnemos` (`id`, `type`, `num`, `dls_id`, `acronyme`, `libelle`, `ev_
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `mnemos_CptHoraire`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_CptHoraire` (
+  `id_mnemo` int(11) NOT NULL DEFAULT '0',
+  `valeur` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id_mnemo`),
+  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `dls_cpt_imp`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_CptImp` (
+  `id_mnemo` int(11) NOT NULL,
+  `valeur` float NOT NULL DEFAULT '0',
+  `type_ci` int(11) NOT NULL DEFAULT '0',
+  `multi` float NOT NULL DEFAULT '1',
+  `unite_string` text COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id_mnemo`),
+  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `mnemos_AnalogInput`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_AnalogInput` (
+  `id_mnemo` int(11) NOT NULL,
+  `type` int(11) NOT NULL,
+  `min` float NOT NULL DEFAULT '0',
+  `max` float NOT NULL DEFAULT '0',
+  `unite` text COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id_mnemo`),
+  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+INSERT INTO `mnemos_AnalogInput` (`id_mnemo`, `type`, `min`, `max`, `unite`) VALUES
+(10, 0, 0, 100, 'ms'),
+(11, 0, 0, 100, 't/s'),
+(12, 0, 0, 100, 'bit/s'),
+(13, 0, 0, 100, 'arch'),
+(14, 0, 0, 100, 'dbs');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `mnemos_Horloge`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_Horloge` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_mnemo` int(11) NOT NULL,
+  `heure` int(11) NOT NULL,
+  `minute` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `mnemos_Registre`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_Registre` (
+  `id_mnemo` int(11) NOT NULL,
+  `unite` text COLLATE utf8_unicode_ci NOT NULL,
+  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `mnemos_DigitalInput`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_DigitalInput` (
+  `id_mnemo` int(11) NOT NULL,
+  PRIMARY KEY (`id_mnemo`),
+  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `syns_camerasup`
+--
+
+CREATE TABLE IF NOT EXISTS `syns_camerasup` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `syn_id` int(11) NOT NULL,
+  `camera_src_id` int(11) NOT NULL,
+  `posx` int(11) NOT NULL,
+  `posy` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`camera_src_id`) REFERENCES `cameras` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `syns_cadrans`
+--
+
+CREATE TABLE IF NOT EXISTS `syns_cadrans` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `syn_id` int(11) NOT NULL DEFAULT '0',
+  `bitctrl` int(11) NOT NULL DEFAULT '0',
+  `posx` int(11) NOT NULL DEFAULT '0',
+  `posy` int(11) NOT NULL DEFAULT '0',
+  `type` int(11) NOT NULL DEFAULT '0',
+  `angle` float NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+
+--
+-- Structure de la table `syns_comments`
+--
+
+CREATE TABLE IF NOT EXISTS `syns_comments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `syn_id` int(11) NOT NULL DEFAULT '0',
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
+  `font` text COLLATE utf8_unicode_ci NOT NULL,
+  `rouge` int(11) NOT NULL DEFAULT '0',
+  `vert` int(11) NOT NULL DEFAULT '0',
+  `bleu` int(11) NOT NULL DEFAULT '0',
+  `posx` int(11) NOT NULL DEFAULT '0',
+  `posy` int(11) NOT NULL DEFAULT '0',
+  `angle` float NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `syns_motifs`
+--
+
+CREATE TABLE IF NOT EXISTS `syns_motifs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `icone` int(11) NOT NULL DEFAULT '0',
+  `syn_id` int(11) NOT NULL DEFAULT '0',
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL,
+  `access_level` int(11) NOT NULL DEFAULT '0',
+  `bitctrl` int(11) NOT NULL DEFAULT '0',
+  `bitclic` int(11) NOT NULL DEFAULT '0',
+  `bitclic2` int(11) NOT NULL DEFAULT '0',
+  `rafraich` int(11) NOT NULL DEFAULT '0',
+  `posx` int(11) NOT NULL DEFAULT '0',
+  `posy` int(11) NOT NULL DEFAULT '0',
+  `larg` float NOT NULL DEFAULT '0',
+  `haut` float NOT NULL DEFAULT '0',
+  `angle` float NOT NULL DEFAULT '0',
+  `dialog` int(11) NOT NULL DEFAULT '0',
+  `gestion` int(11) NOT NULL DEFAULT '0',
+  `rouge` int(11) NOT NULL DEFAULT '0',
+  `vert` int(11) NOT NULL DEFAULT '0',
+  `bleu` int(11) NOT NULL DEFAULT '0',
+  `layer` int(11) NOT NULL DEFAULT '0',
+  `mnemo_id` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `syns_palettes`
+--
+
+CREATE TABLE IF NOT EXISTS `syns_palettes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `syn_id` int(11) NOT NULL DEFAULT '0',
+  `syn_cible_id` int(11) NOT NULL DEFAULT '0',
+  `pos` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `syns_pass`
+--
+
+CREATE TABLE IF NOT EXISTS `syns_pass` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `syn_id` int(11) NOT NULL DEFAULT '0',
+  `syn_cible_id` int(11) NOT NULL DEFAULT '0',
+  `posx` int(11) NOT NULL DEFAULT '0',
+  `posy` int(11) NOT NULL DEFAULT '0',
+  `angle` float NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`syn_cible_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
+) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `modbus_modules`
 --
 
@@ -796,19 +462,6 @@ CREATE TABLE IF NOT EXISTS `modbus_modules` (
   PRIMARY KEY (`id`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
--- --------------------------------------------------------
-
---
--- Structure de la table `config`
---
-
-CREATE TABLE IF NOT EXISTS `config` (
-  `instance_id` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
-  `nom_thread` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
-  `nom` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
-  `valeur` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
-  UNIQUE KEY `instance_id` (`instance_id`,`nom_thread`,`nom`)
-) ENGINE=ARIA DEFAULT CHARSET=utf8 COLLATE utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -823,7 +476,7 @@ CREATE TABLE IF NOT EXISTS `msgs` (
   `dls_id` int(11) NOT NULL DEFAULT '1',
   `libelle` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No libelle",
   `libelle_audio` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No audio",
-  `libelle_sms` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL "No sms",
+  `libelle_sms` VARCHAR(256) COLLATE utf8_unicode_ci NOT NULL DEFAULT "No sms",
   `type` int(11) NOT NULL DEFAULT '0',
   `audio` tinyint(1) NOT NULL DEFAULT '0',
   `bit_audio` int(11) DEFAULT NULL DEFAULT '0',
@@ -976,7 +629,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `imsg_available` tinyint(1) NOT NULL DEFAULT '0',
   `ssrv_bit_presence` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  PRIMARY KEY(`username`)
+  KEY(`username`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 INSERT INTO `users` (`id`, `enable`, `access_level`, `username`, `hash`, `comment`, `date_create`, `date_modif`) VALUES

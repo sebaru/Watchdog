@@ -18,7 +18,6 @@ sudo -u watchdog mkdir ~watchdog/Gif
 sudo -u watchdog mkdir ~watchdog/Son
 sudo -u watchdog mkdir ~watchdog/Dls
 
-sudo -u watchdog cp -r Gif/* ~watchdog/Gif
 sudo -u watchdog cp -r Son/* ~watchdog/Son
 
 echo "done."
