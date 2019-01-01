@@ -2,9 +2,11 @@
 
 grammar watchdog.fr;
 
-<verbe> = ouvre | ferme | allume | éteint;
-<lela> = le | la | les | l;
-<items> = volets | lumières;
-public <demande> = capitaine <verbe> <lela> <items>;
+<verbe> = ouvre | ferme | allume | éteint | passe | annule | quel est;
+<lela> = le | la | les | l | ton | ta ;
+<items> = volets | lumières | version;
+<demande> = <verbe> <lela> <items> |
+            <verbe> en mode nuit;
+public <phrase> = annule | disciple | disciple <demande> svp;
 
 
