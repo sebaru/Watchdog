@@ -1,0 +1,10 @@
+#JSGF V1.0 UTF-8;
+
+grammar watchdog.fr;
+
+<verbe> = ouvre | ferme | allume | éteint;
+<lela> = le | la | les | l;
+<items> = volets | lumières;
+public <demande> = capitaine <verbe> <lela> <items>;
+
+

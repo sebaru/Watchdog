@@ -113,7 +113,7 @@
        dup2(pipefd[1], 2);  /* Send stderr to the pipe (back to father !) */
        execlp( "pocketsphinx_continuous", "pocketsphinx_continuous", "-adcdev", Cfg_voice.audio_device,
                "-inmic", "yes", "-agc", "noise", "-logfn", "pocket.log",
-               "-dict", "wtd.dic", "-jsgf", "wtd.gram", "-hmm", "cmusphinx-fr-5.2", NULL );
+               "-dict", "WTD_PKGDATADIR/fr.dict", "-jsgf", "WTD_PKGDATADIR/wtd.gram", "-hmm", "WTD_PKGDATADIR/cmusphinx-fr-5.2", NULL );
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s_Fils: lancement PocketSphinx failed", __func__ );
        _exit(0);
      }

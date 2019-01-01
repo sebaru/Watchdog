@@ -14,7 +14,12 @@ libwatchdog_server_voice_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0` \
                                       -version-info $(LIBDLS_MAJOR_VERSION):$(LIBDLS_MINOR_VERSION):$(LIBDLS_MICRO_VERSION)
 
 libwatchdog_server_voice_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0` \
-                                     `mysql_config --cflags`
+                                     `mysql_config --cflags` \
+                                     -DWTD_PKGDATADIR=$(pkgdatadir)
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/Watchdogd/Include
+
+pkgdata_DATA = cmusphinx-fr-5.2 fr.dict wtd.gram
+EXTRA_DIST = cmusphinx-fr-5.2 fr.dict wtd.gram
+
