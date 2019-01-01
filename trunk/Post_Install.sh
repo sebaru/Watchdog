@@ -13,6 +13,13 @@ systemctl daemon-reload
 echo "done."
 sleep 2
 
+echo "Enabling pulseaudio systemd service"
+sudo -u watchdog systemctl enable --user pulseaudio
+sudo -u watchdog systemctl start --user pulseaudio
+systemctl daemon-reload
+echo "done."
+sleep 2
+
 echo "Copying data files"
 sudo -u watchdog mkdir ~watchdog/Gif
 sudo -u watchdog mkdir ~watchdog/Son
