@@ -40,9 +40,8 @@
   };
 
  enum
-  {  COLONNE_ID,
-     COLONNE_LIBELLE,
-     COLONNE_CLASSE_ID_ICONE,
+  {  COLONNE_ICONE_ID,
+     COLONNE_ICONE_LIBELLE,
      NBR_COLONNE
   };
 
@@ -72,35 +71,36 @@
 /**********************************************************************************************************/
  static void Clic_icone_atelier ( void )
   { GtkTreeSelection *selection;
+    gchar *icone_id,*libelle;
     GtkTreeModel *store;
     GtkTreeIter iter;
     GList *lignes;
-    gchar *libelle;
-    guint nbr, icone_id;
+    guint nbr;
 
     selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(Liste_icone) );
     store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_icone) );
 
     nbr = gtk_tree_selection_count_selected_rows( selection );
-    if (!nbr) return;                                                        /* Si rien n'est selectionné */
+    if (!nbr) return;                                                                            /* Si rien n'est selectionné */
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
-    gtk_tree_model_get( store, &iter, COLONNE_ID, &icone_id, -1 );                         /* Recup du id */
-    gtk_tree_model_get( store, &iter, COLONNE_LIBELLE, &libelle, -1 );
+    gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
+    gtk_tree_model_get( store, &iter, COLONNE_ICONE_ID, &icone_id,
+                                      COLONNE_ICONE_LIBELLE, &libelle, -1 );                                   /* Recup du id */
 
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-    g_list_free (lignes);                                                           /* Liberation mémoire */
+    g_list_free (lignes);                                                                               /* Liberation mémoire */
 
     memset( &Motif_preview0, 0, sizeof(struct CMD_TYPE_MOTIF) );
     memcpy( &Motif_preview0.libelle, libelle, sizeof( Motif_preview0.libelle ) );
-    g_free(libelle);
-    Motif_preview0.icone_id = icone_id;
+    Motif_preview0.icone_id = atoi(icone_id);
     Motif_preview0.position_x = TAILLE_ICONE_X/2;
     Motif_preview0.position_y = TAILLE_ICONE_Y/2;
     Motif_preview0.rouge0 = 0;
     Motif_preview0.vert0  = 255;
     Motif_preview0.bleu0  = 0;
+    g_free(icone_id);
+    g_free(libelle);
 
     if (Trame_motif_p0)
      { goo_canvas_item_remove( Trame_motif_p0->item_groupe );
@@ -114,16 +114,105 @@
     Reduire_en_vignette( &Motif_preview0 );
     Trame_rafraichir_motif ( Trame_motif_p0 );
   }
-/**********************************************************************************************************/
-/* Clic_classe_atelier: fonction appelée quand l'utilisateur appuie sur une des classes                   */
-/* Entrée: rien                                                                                           */
-/* Sortie: Niet                                                                                           */
-/**********************************************************************************************************/
+/******************************************************************************************************************************/
+/* CB_Receive_package_data : Recoit une partie du fichier package                                                             */
+/* Entrée : Les informations à sauvegarder                                                                                    */
+/******************************************************************************************************************************/
+ static size_t CB_Receive_package_data( char *ptr, size_t size, size_t nmemb, void *userdata )
+  { gchar *new_buffer;
+    Info_new( Config_cli.log, FALSE, LOG_DEBUG,
+              "%s: Récupération de %d*%d octets depuis le cloud", __func__, size, nmemb );
+    new_buffer = g_try_realloc ( Package_received_buffer,
+                                 Package_received_size +  size*nmemb );
+    if (!new_buffer)                                                                     /* Si erreur, on arrete le transfert */
+     { Info_new( Config_cli.log, FALSE, LOG_ERR,
+                "%s: Memory Error realloc (%s).", __func__, strerror(errno) );
+       g_free(Package_received_buffer);
+       Package_received_buffer = NULL;
+       return(-1);
+     } else Package_received_buffer = new_buffer;
+    memcpy( Package_received_buffer + Package_received_size, ptr, size*nmemb );
+    Package_received_size += size*nmemb;
+    return(size*nmemb);
+  }
+/******************************************************************************************************************************/
+/* Remplir_liste_icone: envoie une requete dans le cloud pour récupérer la liste des icones de classe en parametre            */
+/* Entrée / Sortie : Rien                                                                                                     */
+/******************************************************************************************************************************/
+ static void Remplir_liste_icone ( gchar *classe_id )
+  { gchar erreur[CURL_ERROR_SIZE+1], url[256];
+    gint http_response, res;
+    GtkTreeModel *store;
+    CURL *curl;
+
+    Package_received_buffer = NULL;                                                     /* Init du tampon de reception à NULL */
+    Package_received_size = 0;                                                          /* Init du tampon de reception à NULL */
+    http_response = 0;
+
+    curl = curl_easy_init();
+    if (!curl)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "%s: cURL init failed", __func__ );
+       return;
+     }
+
+    g_snprintf( url, sizeof(url), "https://icons.abls-habitat.fr/icons/icon_list/%s", classe_id );
+    Info_new( Config_cli.log, Config_cli.log_override, LOG_DEBUG, "%s: Trying to get %s", __func__, url );
+
+    curl_easy_setopt(curl, CURLOPT_URL, url );
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, erreur );
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1 );
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CB_Receive_package_data );
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, Config_cli.log_override );
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, WATCHDOG_USER_AGENT );
+    res = curl_easy_perform(curl);
+    if (res)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING,
+                "%s: Could not connect to %s (%s)", __func__, url, erreur);
+     }
+    else if (curl_easy_getinfo( curl, CURLINFO_RESPONSE_CODE, &http_response ) != CURLE_OK)
+     { Info_new( Config_cli.log, Config_cli.log_override, LOG_WARNING, "%s: Wrong Response code for %s", __func__, url );
+     }
+    else                                                                 
+     { JsonNode *Response;
+       JsonArray *Icones;
+       gint cpt;
+       Response = json_from_string ( Package_received_buffer, NULL );
+       if(!Response)
+        { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR, "%s: Wrong Response JSON for %s", __func__, url );
+          return;
+        }
+
+       store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_icone) );
+       Icones = json_node_get_array (Response);
+       for (cpt=0; cpt < json_array_get_length ( Icones ); cpt++ )
+        { GtkTreeIter iter;
+          JsonNode *icone_node = json_array_get_element ( Icones, cpt );
+          JsonArray *icone     = json_node_get_array(icone_node);
+          const gchar *icone_id      = json_node_get_string ( json_array_get_element(icone, 0) );
+          const gchar *icone_libelle = json_node_get_string ( json_array_get_element(icone, 1) );
+          gtk_list_store_append ( GTK_LIST_STORE(store), &iter );                                    /* Acquisition iterateur */
+          gtk_list_store_set ( GTK_LIST_STORE(store), &iter,
+                               COLONNE_ICONE_ID, icone_id,
+                               COLONNE_ICONE_LIBELLE, icone_libelle,
+                               -1
+                             );
+        }
+       json_node_unref(Response);      
+       g_free(Package_received_buffer);                                                           /* On libere le tampon reçu */
+       Package_received_buffer = NULL;
+     }
+    curl_easy_cleanup(curl);
+  }
+/******************************************************************************************************************************/
+/* Clic_classe_atelier: fonction appelée quand l'utilisateur appuie sur une des classes                                       */
+/* Entrée: rien                                                                                                               */
+/* Sortie: Niet                                                                                                               */
+/******************************************************************************************************************************/
  static void Clic_classe_atelier ( void )
   { GtkTreeSelection *selection;
-    struct CMD_TYPE_CLASSE rezo_classe;
     GtkTreeModel *store;
     GtkTreeIter iter;
+    gchar *classe_id;
     GList *lignes;
     guint nbr;
 
@@ -134,17 +223,17 @@
     store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_classe) );
 
     nbr = gtk_tree_selection_count_selected_rows( selection );
-    if (!nbr) return;                                                        /* Si rien n'est selectionné */
+    if (!nbr) return;                                                                            /* Si rien n'est selectionné */
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    gtk_tree_model_get_iter( store, &iter, lignes->data );             /* Recuperation ligne selectionnée */
-    gtk_tree_model_get( store, &iter, COLONNE_CLASSE_ID, &rezo_classe.id, -1 );            /* Recup du id */
-    Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_WANT_PAGE_ICONE_FOR_ATELIER,
-                   (gchar *)&rezo_classe, sizeof(struct CMD_TYPE_CLASSE) );
+    gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
+    gtk_tree_model_get( store, &iter, COLONNE_CLASSE_ID, &classe_id, -1 );                                     /* Recup du id */
+    Remplir_liste_icone ( classe_id );
+    g_free(classe_id);
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-    g_list_free (lignes);                                                           /* Liberation mémoire */
+    g_list_free (lignes);                                                                               /* Liberation mémoire */
 
-    if (Trame_motif_p0)                                         /* On efface la previsu de l'icone */
+    if (Trame_motif_p0)                                                                    /* On efface la previsu de l'icone */
      { goo_canvas_item_remove( Trame_motif_p0->item_groupe );
        Trame_preview0->trame_items = g_list_remove( Trame_preview0->trame_items,
                                                            Trame_motif_p0 );
@@ -220,27 +309,6 @@
      }
     gtk_widget_hide( F_ajout_motif );
     return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* CB_Receive_package_data : Recoit une partie du fichier package                                                             */
-/* Entrée : Les informations à sauvegarder                                                                                    */
-/******************************************************************************************************************************/
- static size_t CB_Receive_package_data( char *ptr, size_t size, size_t nmemb, void *userdata )
-  { gchar *new_buffer;
-    Info_new( Config_cli.log, FALSE, LOG_DEBUG,
-              "%s: Récupération de %d*%d octets depuis le cloud", __func__, size, nmemb );
-    new_buffer = g_try_realloc ( Package_received_buffer,
-                                 Package_received_size +  size*nmemb );
-    if (!new_buffer)                                                                     /* Si erreur, on arrete le transfert */
-     { Info_new( Config_cli.log, FALSE, LOG_ERR,
-                "%s: Memory Error realloc (%s).", __func__, strerror(errno) );
-       g_free(Package_received_buffer);
-       Package_received_buffer = NULL;
-       return(-1);
-     } else Package_received_buffer = new_buffer;
-    memcpy( Package_received_buffer + Package_received_size, ptr, size*nmemb );
-    Package_received_size += size*nmemb;
-    return(size*nmemb);
   }
 /******************************************************************************************************************************/
 /* Remplir_liste_classe: envoie une requete dans le cloud pour récupérer la liste des classes                                 */
@@ -372,9 +440,8 @@
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
     gtk_box_pack_start( GTK_BOX(vboite), scroll, TRUE, TRUE, 0 );
 
-    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_UINT,                                          /* Id */
-                                              G_TYPE_STRING,                                   /* libellé */
-                                              G_TYPE_UINT                              /* Classe id icone */
+    store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_STRING,                                                            /* Id */
+                                              G_TYPE_STRING                                                        /* libellé */
                                );
 
     Liste_icone = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );    /* Creation de la vue */
@@ -382,23 +449,23 @@
     gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );
     gtk_container_add( GTK_CONTAINER(scroll), Liste_icone );
 
-    renderer = gtk_cell_renderer_text_new();                                  /* Colonne de l'id du icone */
+    renderer = gtk_cell_renderer_text_new();                                                      /* Colonne de l'id du icone */
     g_object_set( renderer, "xalign", 0.5, NULL );
     colonne = gtk_tree_view_column_new_with_attributes ( _("IconeId"), renderer,
-                                                         "text", COLONNE_ID,
+                                                         "text", COLONNE_ICONE_ID,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_ID);                     /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_ICONE_ID);                                   /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_icone), colonne );
 
-    renderer = gtk_cell_renderer_text_new();                               /* Colonne du libelle de icone */
+    renderer = gtk_cell_renderer_text_new();                                                   /* Colonne du libelle de icone */
     colonne = gtk_tree_view_column_new_with_attributes ( _("IconName"), renderer,
-                                                         "text", COLONNE_LIBELLE,
+                                                         "text", COLONNE_ICONE_LIBELLE,
                                                          NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_LIBELLE);                /* On peut la trier */
+    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_ICONE_LIBELLE);                              /* On peut la trier */
     gtk_tree_view_append_column ( GTK_TREE_VIEW (Liste_icone), colonne );
 
     /*gtk_tree_view_set_reorderable( GTK_TREE_VIEW(Liste_icone), TRUE );*/
-    gtk_tree_view_set_rules_hint( GTK_TREE_VIEW(Liste_icone), TRUE );           /* Pour faire beau */
+    gtk_tree_view_set_rules_hint( GTK_TREE_VIEW(Liste_icone), TRUE );                                      /* Pour faire beau */
 
     g_signal_connect_swapped( G_OBJECT(selection), "changed",                    /* Gestion du menu popup */
                               G_CALLBACK(Clic_icone_atelier), NULL );
@@ -452,9 +519,8 @@
   { GtkTreeModel *store;
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_icone) );          /* Acquisition du modele */
     gtk_list_store_set ( GTK_LIST_STORE(store), iter,
-                         COLONNE_ID, icone->id,
-                         COLONNE_LIBELLE, icone->libelle,
-                         COLONNE_CLASSE_ID_ICONE, icone->id_classe,
+                         COLONNE_ICONE_ID, icone->id,
+                         COLONNE_ICONE_LIBELLE, icone->libelle,
                          -1
                        );
   }
