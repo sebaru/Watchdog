@@ -124,18 +124,6 @@
           case ATTENTE_CONNEXION_SSL:
                Connecter_ssl ( client );                                                  /* Tentative de connexion securisée */
                break;
-          case ENVOI_ICONE_FOR_ATELIER:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send icone atelier" );
-               pthread_create( &tid, NULL, (void *)Envoyer_icones_pour_atelier_thread, client );
-               pthread_detach( tid );
-               break;
-          case ENVOI_CLASSE_FOR_ATELIER:
-               Client_mode( client, VALIDE );
-               Ref_client( client, "Send classes atelier" );
-               pthread_create( &tid, NULL, (void *)Envoyer_classes_pour_atelier_thread, client );
-               pthread_detach( tid );
-               break;
         }
 /************************************************* Envoi des chaines cadrans *************************************************/
        if (client->mode == VALIDE && client->Liste_bit_cadrans && client->date_next_send_cadran < Partage->top)

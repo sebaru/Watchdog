@@ -57,8 +57,7 @@
           { 
 /********************************* Client en VALIDE, gestion des groupes **********************************/
             switch ( Reseau_tag(connexion) )
-             { case TAG_ICONE       : Gerer_protocole_icone        ( client ); break;
-               case TAG_DLS         : Gerer_protocole_dls          ( client ); break;
+             { case TAG_DLS         : Gerer_protocole_dls          ( client ); break;
                case TAG_MESSAGE     : Gerer_protocole_message      ( client ); break;
                case TAG_MNEMONIQUE  : Gerer_protocole_mnemonique   ( client ); break;
                case TAG_SYNOPTIQUE  : Gerer_protocole_synoptique   ( client ); break;

@@ -163,9 +163,6 @@
        case WAIT_FOR_IDENT              : return("WAIT_FOR_IDENT");
        case WAIT_FOR_NEWPWD             : return("WAIT_FOR_NEWPWD");
 
-       case ENVOI_CLASSE_FOR_ATELIER    : return("ENVOI_CLASSE_FOR_ATELIER");
-       case ENVOI_ICONE_FOR_ATELIER     : return("ENVOI_ICONE_FOR_ATELIER");
-
        case VALIDE                      : return("VALIDE");
        case DECONNECTE                  : return("DECONNECTE");
      }

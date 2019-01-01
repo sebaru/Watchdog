@@ -10,7 +10,7 @@ bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
                     zmq.c shm.c Config.c Mnemo_Registre.c \
                     db.c Mnemonique.c Mnemo_AI.c Mnemo_CPT_IMP.c Mnemo_CPT_H.c Message.c \
-		    Icones.c classe.c Mnemo_Horloges.c \
+		    Mnemo_Horloges.c \
 		    Mnemo_Tempo.c Histo_msgs.c Camera.c distrib_Events.c \
                     distrib_MSGxxx.c distrib_Ixxx.c \
                     Admin.c Admin_running.c Admin_process.c Admin_dls.c Admin_set.c Admin_get.c Admin_dbcfg.c Admin_user.c \

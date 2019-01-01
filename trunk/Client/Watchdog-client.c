@@ -58,13 +58,6 @@
                             Menu_want_camera, GNOME_STOCK_PIXMAP_MIC ),
     GNOMEUIINFO_END
   };
- GnomeUIInfo Menu_synoptique[]=                                                            /*!< Définition du menu synoptique */
-  { GNOMEUIINFO_ITEM_STOCK( N_("Caisse a outils"), N_("Edit icons"),
-                            Menu_want_icone, GNOME_STOCK_PIXMAP_COLORSELECTOR ),
-    GNOMEUIINFO_ITEM_STOCK( N_("Atelier"), N_("Edit syns"),
-                            Menu_want_synoptique, GNOME_STOCK_PIXMAP_INDEX ),
-    GNOMEUIINFO_END
-  };
 
  GnomeUIInfo Menu_client_leger[]=                                    /*!< Définition du menu d'administration du client leger */
   { GNOMEUIINFO_ITEM_STOCK( N_("Edit _Messages"), N_("Edit messages"),
@@ -73,13 +66,14 @@
   };
 
  GnomeUIInfo Menu_admin[]=                                                           /*!< Définition du menu d'administration */
-  { GNOMEUIINFO_ITEM_STOCK( N_("_Administration"), N_("Administration"),
+  { GNOMEUIINFO_ITEM_STOCK( N_("Adminis_tration"), N_("Administration"),
                             Menu_want_page_admin, GNOME_STOCK_PIXMAP_PROPERTIES ),
     GNOMEUIINFO_ITEM_STOCK( N_("Edit _Messages"), N_("Edit messages"),
                             Menu_want_message, GNOME_STOCK_PIXMAP_MAIL ),
     GNOMEUIINFO_ITEM_STOCK( N_("_D.L.S"), N_("Edit DLS plugins"),
                             Menu_want_plugin_dls, GNOME_STOCK_PIXMAP_EXEC ),
-    GNOMEUIINFO_SUBTREE(N_("_Synoptiques"), Menu_synoptique),
+    GNOMEUIINFO_ITEM_STOCK( N_("_Atelier"), N_("Edit synoptiques"),
+                            Menu_want_synoptique, GNOME_STOCK_PIXMAP_INDEX ),
     GNOMEUIINFO_SEPARATOR,
     GNOMEUIINFO_SUBTREE(N_("_Low level"), Menu_lowlevel),
     GNOMEUIINFO_SEPARATOR,

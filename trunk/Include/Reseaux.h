@@ -34,7 +34,6 @@
  #include "Erreur.h"
  #include "Reseaux_gtk_message.h"
  #include "Reseaux_connexion.h"
- #include "Reseaux_icone.h"
  #include "Reseaux_synoptique.h"
  #include "Reseaux_dls.h"
  #include "Reseaux_mnemonique.h"
@@ -80,7 +79,6 @@
   { TAG_INTERNAL,                                                                         /* Gestion interne librairie Reseau */
     TAG_GTK_MESSAGE,                                                                                  /* Envoi de message GTK */
     TAG_CONNEXION,                                                                                  /* Gestion des connexions */
-    TAG_ICONE,                                                                                          /* Gestion des icones */
     TAG_DLS,                                                                        /* Gestion des plugins et des sources DLS */
     TAG_SYNOPTIQUE,                                                                                /* Gestion des synoptiques */
     TAG_MNEMONIQUE,                                                                                /* Gestion des mnemoniques */

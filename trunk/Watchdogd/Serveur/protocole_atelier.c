@@ -137,17 +137,6 @@
                Proto_valider_editer_motif_atelier( client, motif );
              }
             break;
-       case SSTAG_CLIENT_WANT_PAGE_CLASSE_FOR_ATELIER:
-             { Client_mode( client, ENVOI_CLASSE_FOR_ATELIER );
-               Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                         "Le client desire les classes icones par atelier\n" );
-             }
-            break;
-       case SSTAG_CLIENT_WANT_PAGE_ICONE_FOR_ATELIER:
-             { Client_mode( client, ENVOI_ICONE_FOR_ATELIER );
-               client->classe_icone = ((struct CMD_TYPE_CLASSE *)connexion->donnees)->id;
-             }
-            break;
        case SSTAG_CLIENT_TYPE_NUM_MNEMO_CLIC:
              { struct CMD_TYPE_NUM_MNEMONIQUE *mnemo;
                mnemo = (struct CMD_TYPE_NUM_MNEMONIQUE *)connexion->donnees;

@@ -189,24 +189,6 @@
  extern void *Envoyer_histo_thread ( struct CLIENT *client );                                           /* Dans envoi_histo.c */
  extern void Proto_acquitter_histo ( struct CLIENT *client, struct CMD_TYPE_HISTO *rezo_histo );
 
- extern void *Envoyer_classes_thread ( struct CLIENT *client );                                        /* Dans envoi_classe.c */
- extern void *Envoyer_classes_pour_atelier_thread ( struct CLIENT *client );
- extern void Proto_editer_classe ( struct CLIENT *client, struct CMD_TYPE_CLASSE *rezo_classe );
- extern void Proto_valider_editer_classe ( struct CLIENT *client, struct CMD_TYPE_CLASSE *rezo_classe );
- extern void Proto_effacer_classe ( struct CLIENT *client, struct CMD_TYPE_CLASSE *rezo_classe );
- extern void Proto_ajouter_classe ( struct CLIENT *client, struct CMD_TYPE_CLASSE *rezo_classe );
-
- extern void *Envoyer_icones_thread ( struct CLIENT *client );                                          /* Dans envoi_icone.c */
- extern void *Envoyer_icones_pour_atelier_thread ( struct CLIENT *client );
- extern void Proto_editer_icone ( struct CLIENT *client, struct CMD_TYPE_ICONE *rezo_icone );
- extern void Proto_valider_editer_icone ( struct CLIENT *client, struct CMD_TYPE_ICONE *rezo_icone );
- extern void Proto_effacer_icone ( struct CLIENT *client, struct CMD_TYPE_ICONE *rezo_icone );
- extern void Proto_ajouter_icone ( struct CLIENT *client, struct CMD_TYPE_ICONE *rezo_icone );
- extern void Proto_ajouter_icone_deb_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone );
- extern void Proto_ajouter_icone_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone,
-                                       gint taille, gchar *buffer );
- extern void Proto_ajouter_icone_fin_file( struct CLIENT *client, struct CMD_TYPE_ICONE *icone );
- 
  extern void *Proto_envoyer_histo_msgs_thread ( struct CLIENT *client );                           /* Dans envoi_histo_hard.c */
 
                                                                                                        /* Dans envoi_camera.c */

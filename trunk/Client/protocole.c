@@ -76,7 +76,6 @@
                                  Envoyer_authentification();         /* Envoi l'identification au serveur */
                                }
                               return;
-      case TAG_ICONE       : Gerer_protocole_icone        ( connexion ); break;
       case TAG_DLS         : Gerer_protocole_dls          ( connexion ); break;
       case TAG_MESSAGE     : Gerer_protocole_message      ( connexion ); break;
       case TAG_MNEMONIQUE  : Gerer_protocole_mnemonique   ( connexion ); break;

@@ -87,14 +87,6 @@
     Envoi_serveur( TAG_LOWLEVEL, SSTAG_CLIENT_WANT_PAGE_CAMERA, NULL, 0 );
   }
 /**********************************************************************************************************/
-/* Menu_want_icone: l'utilisateur desire editer la base icons                                             */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
- void Menu_want_icone ( void )
-  { if (Chercher_page_notebook( TYPE_PAGE_ICONE, 0, TRUE )) return;
-    Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_WANT_PAGE_CLASSE, NULL, 0 );
-  }
-/**********************************************************************************************************/
 /* Menu_want_synoptique: l'utilisateur desire editer la base syns                                         */
 /* Entrée/Sortie: rien                                                                                    */
 /**********************************************************************************************************/

@@ -7,7 +7,7 @@ SUBDIRS = Include Config_cli
 
 bin_PROGRAMS = Watchdog-client
 Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
-                          protocole.c protocole_gtk_message.c protocole_icone.c \
+                          protocole.c protocole_gtk_message.c \
                           protocole_dls.c protocole_mnemonique.c \
                           protocole_message.c protocole_connexion.c \
                           protocole_supervision.c protocole_histo.c \
@@ -19,7 +19,7 @@ Watchdog_client_SOURCES = Watchdog-client.c connect.c ihm.c \
 			  liste_message.c ajout_message.c \
 			  liste_synoptique.c ajout_synoptique.c \
 			  liste_mnemonique.c ajout_mnemonique.c option_entreeana.c option_cpt_imp.c \
-			  liste_icone.c ajout_icone.c liste_icone.h option_tempo.c option_registre.c \
+			  option_tempo.c option_registre.c \
                           liste_camera.c ajout_camera.c protocole_lowlevel.c \
 			  atelier.c atelier_clic_trame.c atelier_selection.c \
 			  atelier_agrandir.c atelier_propriete_motif.c atelier_ajout_motif.c \

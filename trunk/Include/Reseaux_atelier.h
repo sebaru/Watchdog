@@ -178,13 +178,6 @@
     SSTAG_CLIENT_TYPE_NUM_MNEMONIQUE_EA,                          /* Le client desire un mnémonique EAxxx */
     SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE_EA,
     
-    SSTAG_CLIENT_WANT_PAGE_CLASSE_FOR_ATELIER,        /* Le client veut les données classe pour l'atelier */
-    SSTAG_SERVEUR_ADDPROGRESS_CLASSE_FOR_ATELIER, /* Le serveur envoie les données classes pour l'atelier */
-    SSTAG_SERVEUR_ADDPROGRESS_CLASSE_FOR_ATELIER_FIN,
-    SSTAG_CLIENT_WANT_PAGE_ICONE_FOR_ATELIER,          /* Le client veut les données icone pour l'atelier */
-    SSTAG_SERVEUR_ADDPROGRESS_ICONE_FOR_ATELIER,   /* Le serveur envoie les données icones pour l'atelier */
-    SSTAG_SERVEUR_ADDPROGRESS_ICONE_FOR_ATELIER_FIN,
-
     SSTAG_CLIENT_ATELIER_ADD_COMMENT,  /* Le client veut ajouter un commentaire au syn en cours d'edition */
     SSTAG_SERVEUR_ATELIER_ADD_COMMENT_OK,                   /* Le serveur valide l'ajout d'un commentaire */
     SSTAG_CLIENT_ATELIER_DEL_COMMENT,                           /* Le client veut detruire un commentaire */
