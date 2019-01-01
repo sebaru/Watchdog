@@ -115,7 +115,8 @@
     if(json_node_get_node_type (node) != JSON_NODE_VALUE) return(-1);
     json_node_get_value (node, &valeur);
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: Parsing value type %d ('%s') for attribut '%s'", __func__, G_VALUE_TYPE(&valeur), G_VALUE_TYPE_NAME(&valeur), name );
+             "%s: Parsing value type %d ('%s') for attribut '%s'", __func__,
+              G_VALUE_TYPE(&valeur), G_VALUE_TYPE_NAME(&valeur), name );
     switch( G_VALUE_TYPE(&valeur) )             
      { case G_TYPE_BOOLEAN:
             return( json_node_get_boolean(node) );

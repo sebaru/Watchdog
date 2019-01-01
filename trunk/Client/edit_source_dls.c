@@ -155,7 +155,7 @@
  static size_t CB_Receive_package_data( char *ptr, size_t size, size_t nmemb, void *userdata )
   { gchar *new_buffer;
     Info_new( Config_cli.log, FALSE, LOG_DEBUG,
-              "%s: Récupération de %d*%d octets depuis le master", __func__, size, nmemb );
+              "%s: Récupération de %d*%d octets depuis le cloud", __func__, size, nmemb );
     new_buffer = g_try_realloc ( Package_received_buffer,
                                  Package_received_size +  size*nmemb );
     if (!new_buffer)                                                                     /* Si erreur, on arrete le transfert */
