@@ -21,10 +21,11 @@ echo "done."
 sleep 2
 
 echo "Copying data files"
-sudo -u watchdog mkdir ~watchdog/Gif
 sudo -u watchdog mkdir ~watchdog/Son
 sudo -u watchdog mkdir ~watchdog/Dls
-
+sudo -u watchdog cp Watchdogd/Voice/fr.dict ~watchdog/
+sudo -u watchdog cp Watchdogd/Voice/wtd.gram ~watchdog/
+sudo -u watchdog cp -r Watchdogd/Voice/cmusphinx-fr-5.2 ~watchdog/
 sudo -u watchdog cp -r Son/* ~watchdog/Son
 
 echo "done."
