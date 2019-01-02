@@ -30,6 +30,7 @@
  #include <string.h>
  #include <unistd.h>
  #include <sys/types.h>
+ #include <sys/wait.h>
  #include <signal.h>
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
@@ -78,7 +79,8 @@
   { struct CMD_TYPE_HISTO *histo, histo_buf;
     gchar commande_vocale[256];
     gint pipefd[2], pidpocket;
-    
+    struct timeval tv;
+
     prctl(PR_SET_NAME, "W-VOICE", 0, 0, 0 );
     memset( &Cfg_voice, 0, sizeof(Cfg_voice) );                                     /* Mise a zero de la structure de travail */
     Cfg_voice.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
@@ -112,7 +114,7 @@
        dup2(pipefd[1], 1);  /* Send stdout to the pipe (back to father !) */
        dup2(pipefd[1], 2);  /* Send stderr to the pipe (back to father !) */
        execlp( "pocketsphinx_continuous", "pocketsphinx_continuous", "-adcdev", Cfg_voice.audio_device,
-               "-inmic", "yes", "-agc", "noise", "-logfn", "pocket.log", "-bestpathlw", "9.8",
+               "-inmic", "yes", "-agc", "noise", "-logfn", "pocket.log", "-bestpathlw", "9.9",
                "-dict", "fr.dict", "-jsgf", "wtd.gram", "-hmm", "cmusphinx-fr-5.2", NULL );
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s_Fils: lancement PocketSphinx failed", __func__ );
        _exit(0);
@@ -124,15 +126,23 @@
      { Cfg_voice.zmq_to_master = New_zmq ( ZMQ_PUB, "pub-to-master" );
        Connect_zmq ( Cfg_voice.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
      }
-sleep(4);
+
     while ( Cfg_voice.lib->Thread_run == TRUE )
      { struct DB *db;
        gint retour;
-       sleep(2);
-       sched_yield();
-       memset(commande_vocale, sizeof(commande_vocale), 0);
+       fd_set fd;
+       tv.tv_sec=1;
+       tv.tv_usec=0;
+       FD_ZERO(&fd);
+       FD_SET( pipefd[0], &fd );
+       retour = select( pipefd[0]+1, &fd, NULL, NULL, &tv );
+       if (retour==-1) break;
+       if (retour==0) { sched_yield(); usleep(1000); continue; }
        retour = read(pipefd[0], commande_vocale, sizeof(commande_vocale));
-       if (retour<=0) continue;
+       if (retour<=0)
+        { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING, "%s: recu error (ret=%d)", __func__, retour );
+          continue;
+        }
        commande_vocale[retour-1]=0;                                                                  /*Caractere NULL d'arret */
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: recu = %s", __func__, commande_vocale );
 
@@ -194,7 +204,10 @@ sleep(4);
            }
         }
      }
-    kill(pidpocket,SIGTERM);
+    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: Sending kill to pocketsphinx", __func__ );
+    kill(pidpocket, SIGKILL);
+    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: Waiting for termination", __func__ );
+    waitpid(pidpocket, NULL, 0);
     close(pipefd[0]);                                                                       /* Fermeture du pipe en reception */
 end:
     Close_zmq ( Cfg_voice.zmq_to_master );
