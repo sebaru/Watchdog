@@ -29,11 +29,13 @@
  #define _VOICE_H_
 
  #define NOM_THREAD                    "voice"
+ #define QUELLE_VERSION                "quel est ta version"
 
  struct VOICE_CONFIG
   { struct LIBRAIRIE *lib;
     gboolean enable;                                                                    /* Is this tread is enabled at boot ? */
     gchar audio_device[80]; /* Nom du device audio: alsa_input.usb-0b0e_Jabra_SPEAK_510_USB_745C4B657953021800-00.analog-mono */
+    gchar key_words[80];                                                         /* Mot magic pour debuter la detection audio */
     void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
   } Cfg_voice;
 

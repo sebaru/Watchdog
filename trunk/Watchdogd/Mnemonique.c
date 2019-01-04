@@ -272,6 +272,31 @@
     return ( retour );
   }
 /******************************************************************************************************************************/
+/* Recuperer_mnemo_baseDB_by_command_text: Recupération de la liste des mnemo par command_text                                */
+/* Entrée: un pointeur vers une nouvelle connexion de base de données, le critere de recherche                                */
+/* Sortie: FALSE si erreur                                                      ********************                          */
+/******************************************************************************************************************************/
+ gboolean Recuperer_mnemo_baseDB_by_thread ( struct DB **db_retour, gchar *thread )
+  { gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
+
+    g_snprintf( requete, sizeof(requete), MNEMO_SQL_SELECT                                                     /* Requete SQL */
+               " WHERE (mnemo.ev_host='*' OR mnemo.ev_host='%s') AND mnemo.ev_thread='%s'",
+               g_get_host_name(), thread );
+
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
+  }
+/******************************************************************************************************************************/
 /* Recuperer_mnemo_base_db: Récupération de la liste des mnemos de base                                                       */
 /* Entrée: un pointeur vers la nouvelle connexion base de données                                                             */
 /* Sortie: FALSE si erreur                                                                                                    */

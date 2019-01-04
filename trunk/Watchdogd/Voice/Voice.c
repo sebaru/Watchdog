@@ -30,8 +30,11 @@
  #include <string.h>
  #include <unistd.h>
  #include <sys/types.h>
+ #include <sys/stat.h>
  #include <sys/wait.h>
  #include <signal.h>
+ #include <fcntl.h>
+
 /**************************************************** Prototypes de fonctions *************************************************/
  #include "watchdogd.h"
  #include "Voice.h"
@@ -61,6 +64,8 @@
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_voice.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "audio_device" ) )
         { g_snprintf( Cfg_voice.audio_device, sizeof(Cfg_voice.audio_device), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "key_words" ) )
+        { g_snprintf( Cfg_voice.key_words, sizeof(Cfg_voice.key_words), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_voice.lib->Thread_debug = TRUE;  }
        else
@@ -68,6 +73,84 @@
                    "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
         }
      }
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Voice_Make_jsgf_grammaire : Lit tous les mnemos du thread et les places dans la grammaire                                  */
+/* Entrée: Néant                                                                                                              */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Voice_Make_jsgf_grammaire ( void )
+  { gchar *debut="#JSGF V1.0 UTF-8;\n\ngrammar watchdog.fr;\n\npublic <phrase> = ";
+    struct CMD_TYPE_MNEMO_BASE *mnemo;
+    gchar *file="wtd.gram";
+    gint id_fichier;
+    struct DB *db;
+
+    if ( ! Recuperer_mnemo_baseDB_by_thread ( &db, NOM_THREAD ) )
+     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
+                 "%s: Error searching Database for '%s'", __func__, NOM_THREAD );
+       return;
+     }
+
+    unlink(file);
+    id_fichier = open( file, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+    if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
+     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING, "%s: Open file '%s' for write failed for %06d (%s)", __func__,
+                 file, id_fichier, strerror(errno) );
+       Libere_DB_SQL ( &db );
+       close(id_fichier);
+       return;
+     }
+
+    if (write( id_fichier, debut, strlen(debut) )<0)
+     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: Write Début to file '%s' failed (%s)", __func__, 
+                 file, strerror(errno) );
+       Libere_DB_SQL ( &db );
+       close(id_fichier);
+       return;
+     }
+
+    write( id_fichier, Cfg_voice.key_words, strlen(Cfg_voice.key_words) );
+    write( id_fichier, "\n |", 3 );
+    write( id_fichier, QUELLE_VERSION, strlen(QUELLE_VERSION) );
+
+    while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
+     { write( id_fichier, "\n |", 3 );
+       write( id_fichier, mnemo->ev_text, strlen(mnemo->ev_text) );
+       g_free(mnemo);
+     }
+    write( id_fichier, ";", 1 );
+    close(id_fichier);
+  }
+/******************************************************************************************************************************/
+/* Jouer_google_speech : Joue un texte avec google_speech et attend la fin de la diffusion                                    */
+/* Entrée : le message à jouer                                                                                                */
+/* Sortie : True si OK, False sinon                                                                                           */
+/******************************************************************************************************************************/
+ static gboolean Jouer_google_speech ( gchar *libelle_audio )
+  { gint pid;
+
+    pid = fork();
+    if (pid<0)
+     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
+                 "%s: '%s' fork failed pid=%d (%s)", __func__, libelle_audio, pid, strerror(errno) );
+       return(FALSE);
+     }
+    else if (!pid)
+     { execlp( "google_speech", "google_speech", "-v", "debug", "-l", "fr", libelle_audio, NULL );
+       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
+                "%s: '%s' exec failed pid=%d (%s)", __func__, libelle_audio, pid, strerror( errno ) );
+       _exit(0);
+     }
+    else
+     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_DEBUG,
+                "%s: '%s' waiting to finish pid=%d", __func__, libelle_audio, pid );
+       waitpid(pid, NULL, 0 );
+     }
+    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_DEBUG,
+             "%s: google_speech '%s' finished pid=%d", __func__, libelle_audio, pid );
+
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -79,6 +162,7 @@
   { struct CMD_TYPE_HISTO *histo, histo_buf;
     gchar commande_vocale[256];
     gint pipefd[2], pidpocket;
+    gboolean wait_for_keywords;
     struct timeval tv;
 
     prctl(PR_SET_NAME, "W-VOICE", 0, 0, 0 );
@@ -99,7 +183,7 @@
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
        goto end;
      }
-
+    Voice_Make_jsgf_grammaire();
 /********************************************* Création du process de reconnaissance vocale ***********************************/
     pipe(pipefd);                                                           /* Création de 2 File Descriptor : 0=Read 1=Write */
 
@@ -127,29 +211,52 @@
        Connect_zmq ( Cfg_voice.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
      }
 
+    wait_for_keywords=TRUE;
     while ( Cfg_voice.lib->Thread_run == TRUE )
      { struct DB *db;
        gint retour;
        fd_set fd;
-       tv.tv_sec=1;
+
+       if (Cfg_voice.lib->Thread_reload)                                                      /* A-t'on recu un signal USR1 ? */
+        { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: SIGUSR1", __func__ );
+          Voice_Lire_config();
+          Cfg_voice.lib->Thread_reload = FALSE;
+        }
+
+       tv.tv_sec=5;
        tv.tv_usec=0;
        FD_ZERO(&fd);
        FD_SET( pipefd[0], &fd );
        retour = select( pipefd[0]+1, &fd, NULL, NULL, &tv );
        if (retour==-1) break;
-       if (retour==0) { sched_yield(); usleep(1000); continue; }
+       if (retour==0)
+        { sched_yield();
+          usleep(1000);
+          wait_for_keywords = TRUE;
+          continue;
+        }
        retour = read(pipefd[0], commande_vocale, sizeof(commande_vocale));
        if (retour<=0)
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING, "%s: recu error (ret=%d)", __func__, retour );
           continue;
         }
        commande_vocale[retour-1]=0;                                                                  /*Caractere NULL d'arret */
-       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: recu = %s", __func__, commande_vocale );
 
-       if (Cfg_voice.lib->Thread_reload)                                                      /* A-t'on recu un signal USR1 ? */
-        { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: SIGUSR1", __func__ );
-          Voice_Lire_config();
-          Cfg_voice.lib->Thread_reload = FALSE;
+       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: recu = %s", __func__, commande_vocale );
+       if (wait_for_keywords==TRUE)
+        { if (!strcmp(Cfg_voice.key_words, commande_vocale))
+           { Jouer_google_speech ( "Oui ?" );
+             wait_for_keywords = FALSE;
+           }
+          continue;
+        }
+       wait_for_keywords = TRUE;
+
+       if (!strcmp( QUELLE_VERSION, commande_vocale))
+        { gchar chaine[80];
+          g_snprintf( chaine, sizeof(chaine), "Ma version est la %s", PACKAGE_VERSION );
+          Jouer_google_speech ( chaine );
+          continue;
         }
 
        if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, commande_vocale ) )

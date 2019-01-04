@@ -80,7 +80,7 @@
     if ( ! strcmp ( commande, "set" ) )
      { gchar param[80],valeur[80];
        gboolean retour;
-       if (sscanf ( ligne, "%s %s %s %s", thread, commande, param, valeur )!=4) return(response);
+       if (sscanf ( ligne, "%s %s %s %[^\n]", thread, commande, param, valeur )!=4) return(response);
        retour = Modifier_configDB( thread, param, valeur );
        g_snprintf( chaine, sizeof(chaine), " | - Instance_id '%s', Thread '%s' -> Setting %s = %s -> %s",
                    g_get_host_name(), thread, param, valeur, (retour ? "Success" : "Failed") );
