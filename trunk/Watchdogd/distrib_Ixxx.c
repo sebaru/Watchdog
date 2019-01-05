@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/distrib_Ixxx.c        Distribution des changements d'etats motif                                                 */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                          lun 10 mai 2004 11:31:17 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                          lun 10 mai 2004 11:31:17 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * distrib_Ixxx.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2019 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

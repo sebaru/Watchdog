@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Client/Makefile.am                                     Profil de compilation du client Watchdog        */
-#* Projet WatchDog version 2.0       Gestion d'habitat                       sam 13 mar 2004 17:53:37 CET */
+#* Projet WatchDog version 3.0       Gestion d'habitat                       sam 13 mar 2004 17:53:37 CET */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS = Include Config_cli

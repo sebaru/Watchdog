@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Client/Config_cli/Makefile.am          Profil de compilation du l'outil de configuration du client      */
-#* Projet WatchDog version 2.0       Gestion d'habitat                      lun 02 jun 2003 14:41:53 CEST */
+#* Projet WatchDog version 3.0       Gestion d'habitat                      lun 02 jun 2003 14:41:53 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 

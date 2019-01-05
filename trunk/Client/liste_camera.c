@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Client/liste_camera.c        Configuration des cameras de Watchdog v2.0                                                    */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                       dim. 13 sept. 2009 13:03:00 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                       dim. 13 sept. 2009 13:03:00 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Voice/admin_voice.c        Gestion de l'administration du thread Voice                                           */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                                     29.12.2018 23:00:22*/
+/* Projet WatchDog version 3.0       Gestion d'habitat                                                     29.12.2018 23:00:22*/
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * admin_voice.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

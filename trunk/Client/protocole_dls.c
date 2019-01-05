@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
 /* Client/protocole_dls.c    Gestion du protocole_dls pour la connexion au serveur Watchdog               */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam. 31 déc. 2011 17:34:09 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                      sam. 31 déc. 2011 17:34:09 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * protocole_dls.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

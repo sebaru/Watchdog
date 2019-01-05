@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Client/liste_message.c        Configuration des messages de Watchdog v2.0                                                  */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                           sam 23 fév 2008 11:25:00 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                           sam 23 fév 2008 11:25:00 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

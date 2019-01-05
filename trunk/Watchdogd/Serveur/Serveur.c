@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Serveur/serveur.c                Comportement d'un sous-serveur Watchdog                                         */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                           jeu 02 fév 2006 13:01:57 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                           jeu 02 fév 2006 13:01:57 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Serveur.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

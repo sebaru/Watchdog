@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Client/ajout_synoptique.c        Addition/Edition d'un synoptique Watchdog2.0                                              */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                          sam 04 avr 2009 13:54:48 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                          sam 04 avr 2009 13:54:48 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * ajout_synoptique.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

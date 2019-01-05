@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
 /* Watchdogd/Icones/Icones.c        Déclaration des fonctions pour la gestion des icones                  */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      mar 30 sep 2003 10:38:04 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                      mar 30 sep 2003 10:38:04 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * Icones.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

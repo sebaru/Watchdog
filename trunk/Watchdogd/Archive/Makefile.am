@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Rs485/Makefile.am          Profil de compilation de l'interface Rs485 Watchdog               */
-#* Projet WatchDog version 2.0       Gestion d'habitat                      mar 22 jun 2004 15:48:08 CEST */
+#* Projet WatchDog version 3.0       Gestion d'habitat                      mar 22 jun 2004 15:48:08 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS= 

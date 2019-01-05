@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/envoi.c        Procedures d'envoi de données au(x) client(s) connecté(s)                                         */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                           ven 04 mar 2005 10:16:04 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                           ven 04 mar 2005 10:16:04 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * envoi.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Serveur/envoi_synoptique_cadran.c     Envoi des cadrans aux clients                                              */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                          dim 22 mai 2005 17:35:28 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                          dim 22 mai 2005 17:35:28 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * envoi_synoptique_cadran.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

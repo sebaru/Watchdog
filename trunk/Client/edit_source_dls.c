@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Client/edit_source_dls.c        Edition des modules D.L.S de watchdog v2.0                                                 */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 30 oct 2004 14:26:13 CEST                     */
+/* Projet WatchDog version 3.0       Gestion d'habitat                      sam 30 oct 2004 14:26:13 CEST                     */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * edit_source_dls.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

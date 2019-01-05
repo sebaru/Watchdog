@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
 /* Watchdogd/Serveur/accept.c        Gestion des connexions securisées                                    */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      mar 24 jun 2003 12:58:56 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                      mar 24 jun 2003 12:58:56 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * accept.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

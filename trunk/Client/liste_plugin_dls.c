@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
 /* Client/liste_plugin_dls.c        Configuration des plugin_dlss de Watchdog v2.0                                            */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                           ven 23 nov 2007 20:33:45 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                           ven 23 nov 2007 20:33:45 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*

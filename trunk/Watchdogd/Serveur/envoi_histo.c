@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Serveur/envoi_histo.c        Envoi de l'ihstorique à la connexion client                                         */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                           sam 13 mar 2004 18:41:14 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                           sam 13 mar 2004 18:41:14 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * envoi_histo.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

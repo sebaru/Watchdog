@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
 /* Commun/Reseaux/Ssl.c          Gestion des connexions securisées                                        */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      lun 23 jun 2003 11:30:45 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                      lun 23 jun 2003 11:30:45 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * Ssl.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2019 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

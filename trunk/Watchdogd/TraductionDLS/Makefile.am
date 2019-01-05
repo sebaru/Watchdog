@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/TraductionDLS/Makefile.am          Profil de compilation de l'outil de traduction DLS        */
-#* Projet WatchDog version 2.0       Gestion d'habitat                      mer 06 aoû 2003 15:33:14 CEST */
+#* Projet WatchDog version 3.0       Gestion d'habitat                      mer 06 aoû 2003 15:33:14 CEST */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 

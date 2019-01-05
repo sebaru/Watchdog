@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
 /* Watchdogd/lirc.c        Connexion à LIRC et gestion des commandes associées                            */
-/* Projet WatchDog version 2.0       Gestion d'habitat                    dim. 22 août 2010 21:38:27 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                    dim. 22 août 2010 21:38:27 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * lirc.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2019 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

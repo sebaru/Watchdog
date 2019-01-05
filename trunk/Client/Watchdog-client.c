@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Client/Watchdog-client.c        Le client Watchdog v2.0                                                                    */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                           ven 15 fév 2008 18:05:42 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                           ven 15 fév 2008 18:05:42 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Watchdog-client.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - sebastien
+ * Copyright (C) 2010-2019 - sebastien
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

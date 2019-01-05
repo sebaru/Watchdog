@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Serveur/ident.c        Gestion du logon user sur module Client Watchdog                                          */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                          ven 03 avr 2009 19:46:29 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                          ven 03 avr 2009 19:46:29 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * ident.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

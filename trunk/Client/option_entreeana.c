@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Client/option_entreeANA.c        Addition/Edition d'un entreeANA Watchdog2.0                                               */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                         mer. 15 déc. 2010 11:37:22 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                         mer. 15 déc. 2010 11:37:22 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * option_entreeana.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

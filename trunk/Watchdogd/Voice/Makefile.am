@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Voice/Makefile.am          Profil de compilation de l'interface SMS Watchdog                 */
-#* Projet WatchDog version 2.0       Gestion d'habitat                                29/12/2018 22:04:04 */
+#* Projet WatchDog version 3.0       Gestion d'habitat                                29/12/2018 22:04:04 */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS= 

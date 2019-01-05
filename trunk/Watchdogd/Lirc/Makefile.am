@@ -1,6 +1,6 @@
 #**********************************************************************************************************/
 #* Watchdogd/Lirc/Makefile.am          Profil de compilation de l'interface Lirc pour Watchdog            */
-#* Projet WatchDog version 2.0       Gestion d'habitat                           mar 01 mar 2011 20:00:00 */
+#* Projet WatchDog version 3.0       Gestion d'habitat                           mar 01 mar 2011 20:00:00 */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS= 

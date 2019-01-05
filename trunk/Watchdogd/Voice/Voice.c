@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Voice/Voice.c        Gestion des ordres vocaux de Watchdog v2.0                                                  */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                                    29.12.2018 22:06:26 */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                                    29.12.2018 22:06:26 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Voice.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Http/postfile.c       Gestion des request postfile pour le thread HTTP de watchdog                               */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                                    25.03.2017 18:27:20 */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                                    25.03.2017 18:27:20 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * postfile.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

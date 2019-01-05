@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Client/protocole_mnemonique.c    Gestion du protocole_mnemonique pour la connexion au serveur Watchdog                     */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     mer. 15 déc. 2010 11:32:01 CET                     */
+/* Projet WatchDog version 3.0       Gestion d'habitat                     mer. 15 déc. 2010 11:32:01 CET                     */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * protocole_mnemonique.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
