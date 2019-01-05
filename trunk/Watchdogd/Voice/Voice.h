@@ -29,7 +29,7 @@
  #define _VOICE_H_
 
  #define NOM_THREAD                    "voice"
- #define QUELLE_VERSION                "quel est ta version"
+ #define QUELLE_VERSION                "quelle est ta version"
 
  struct VOICE_CONFIG
   { struct LIBRAIRIE *lib;

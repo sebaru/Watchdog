@@ -111,6 +111,8 @@
        return;
      }
 
+    write( id_fichier, "annule", strlen("annule") );
+    write( id_fichier, "\n |", 3 );
     write( id_fichier, Cfg_voice.key_words, strlen(Cfg_voice.key_words) );
     write( id_fichier, "\n |", 3 );
     write( id_fichier, QUELLE_VERSION, strlen(QUELLE_VERSION) );
@@ -238,6 +240,7 @@
        retour = read(pipefd[0], commande_vocale, sizeof(commande_vocale));
        if (retour<=0)
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING, "%s: recu error (ret=%d)", __func__, retour );
+          sleep(5);
           continue;
         }
        commande_vocale[retour-1]=0;                                                                  /*Caractere NULL d'arret */
@@ -269,18 +272,20 @@
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
                     "%s: No match found for '%s'", __func__, commande_vocale );
           Libere_DB_SQL ( &db );
+          Jouer_google_speech ( "Je ne sais pas faire" );
         }
        else if (db->nbr_result > 1)
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
                     "%s: Too many event for '%s'", __func__, commande_vocale );
           Libere_DB_SQL ( &db );
+          Jouer_google_speech ( "C'est ambigu" );
         }
        else
         { struct CMD_TYPE_MNEMO_BASE *mnemo;
           while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
            { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Match found for '%s' Type %d Num %d - %s", __func__,
                        commande_vocale, mnemo->type, mnemo->num, mnemo->libelle );
-
+             Jouer_google_speech ( "C'est parti !" );
              if (Config.instance_is_master==TRUE)                                                 /* si l'instance est Maitre */
               { switch( mnemo->type )
                  { case MNEMO_MONOSTABLE:
