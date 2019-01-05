@@ -42,10 +42,12 @@
      { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'GET'" );
 
        response = Admin_write ( response, " | - new_b $tech_id $acronyme   - Get bistable $tech_id $acronyme" );
+       response = Admin_write ( response, " | - new_m $tech_id $acronyme   - Get monostable $tech_id $acronyme" );
        response = Admin_write ( response, " | - new_t $tech_id $acronyme   - Get Tempo $tech_id $acronyme" );
        response = Admin_write ( response, " | - new_ea $tech_id $acronyme  - Get Analog Input $tech_id $acronyme" );
        response = Admin_write ( response, " | - new_msg $tech_id $acronyme - Get Message $tech_id $acronyme" );
-       response = Admin_write ( response, " | - list_ea                   - List all dynamic Digital Input" );
+       response = Admin_write ( response, " | - list_ea                   - List all dynamic Digital Inputs" );
+       response = Admin_write ( response, " | - list_bool                 - List all dynamic Booleans" );
        response = Admin_write ( response, " | - e $num                    - Get E[$num]" );
        response = Admin_write ( response, " | - ea $num                   - Get EA[$num]" );
        response = Admin_write ( response, " | - m $num                    - Get M[$num]" );
@@ -185,6 +187,19 @@
           liste = g_slist_next(liste);
         }
      } else
+    if ( ! strcmp ( commande, "list_bool" ) )
+     { GSList *liste;
+       liste = Partage->Dls_data_BOOL;
+       while (liste)
+        { struct DLS_BOOL *bool = liste->data;
+          g_snprintf( chaine, sizeof(chaine),
+                      " | - Bool '%s:%s' = %d",
+                      bool->tech_id, bool->acronyme, bool->etat
+                    );
+          response = Admin_write ( response, chaine );
+          liste = g_slist_next(liste);
+        }
+     } else
     if ( ! strcmp ( commande, "r" ) )
      { int num;
        sscanf ( ligne, "%s %d", commande, &num );                                        /* Découpage de la ligne de commande */
@@ -202,7 +217,7 @@
        g_snprintf( chaine, sizeof(chaine), " | - B%03d = %d", num, B(num) );
        response = Admin_write ( response, chaine );
      } else
-    if ( ! strcmp ( commande, "new_b" ) )
+    if ( ! strcmp ( commande, "new_b" ) || ! strcmp ( commande, "new_m" ))
      { gchar tech_id[80], acronyme[80];
        if (sscanf ( ligne, "%s %s %s", commande, tech_id, acronyme ) == 3)               /* Découpage de la ligne de commande */
         { g_snprintf( chaine, sizeof(chaine), " | - %s:%s = %d", tech_id, acronyme, Dls_data_get_bool ( tech_id, acronyme, NULL ) ); }
