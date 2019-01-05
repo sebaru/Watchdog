@@ -214,7 +214,6 @@ reload:
        Connect_zmq ( Cfg_voice.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
      }
 
-    Jouer_google_speech ( "Bonjour !" );
     wait_for_keywords=TRUE;
     while ( Cfg_voice.lib->Thread_run == TRUE )
      { struct DB *db;
@@ -328,7 +327,7 @@ end:
     Close_zmq ( Cfg_voice.zmq_to_master );
 
     Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
-    if (Cfg_voice.lib->Thread_reload)
+    if (Cfg_voice.lib->Thread_run && Cfg_voice.lib->Thread_reload)
      { Cfg_voice.lib->Thread_reload = FALSE;
        goto reload;
      }
