@@ -213,6 +213,7 @@
        Connect_zmq ( Cfg_voice.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
      }
 
+    Jouer_google_speech ( "Bonjour !" );
     wait_for_keywords=TRUE;
     while ( Cfg_voice.lib->Thread_run == TRUE )
      { struct DB *db;

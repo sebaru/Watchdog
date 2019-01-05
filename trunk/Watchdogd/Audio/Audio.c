@@ -81,21 +81,21 @@
     pid = fork();
     if (pid<0)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "%s: APLAY '%s' fork failed pid=%d", __func__, fichier, pid );
+                "%s: PAPLAY '%s' fork failed pid=%d", __func__, fichier, pid );
      }
     else if (!pid)
-     { execlp( "aplay", "aplay", "-R", "1", fichier, NULL );
+     { execlp( "paplay", "paplay", fichier, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "%s: APLAY '%s' exec failed pid=%d", __func__, fichier, pid );
+                "%s: PAPLAY '%s' exec failed pid=%d", __func__, fichier, pid );
        _exit(0);
      }
     else
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                "%s: APLAY '%s' waiting to finish pid=%d", __func__, fichier, pid );
+                "%s: PAPLAY '%s' waiting to finish pid=%d", __func__, fichier, pid );
        waitpid(pid, NULL, 0 );
      }
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-             "%s: APLAY '%s' finished pid=%d", __func__, fichier, pid );
+             "%s: PAPLAY '%s' finished pid=%d", __func__, fichier, pid );
   }
 /******************************************************************************************************************************/
 /* Jouer_mp3 : Joue un fichier mp3 et attend la fin de la diffusion                                                           */

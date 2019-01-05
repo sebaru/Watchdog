@@ -230,12 +230,12 @@
        event = Partage->com_msrv.liste_msg->data;                        /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg, event );
        if (event->msg)
-        { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO,
                    "%s: Handle MSG'%s:%s'=%d, Reste a %d a traiter", __func__,
                     event->msg->tech_id, event->msg->acronyme, event->etat, g_slist_length(Partage->com_msrv.liste_msg) );
         }
        else
-        { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO,
                    "%s: Handle MSG%03d=%d, Reste a %d a traiter", __func__,
                     event->num, event->etat, g_slist_length(Partage->com_msrv.liste_msg) );
         }
