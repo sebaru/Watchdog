@@ -126,6 +126,45 @@
     close(id_fichier);
   }
 /******************************************************************************************************************************/
+/* Jouer_mp3 : Joue un fichier mp3 et attend la fin de la diffusion                                                           */
+/* Entrée : le message à jouer                                                                                                */
+/* Sortie : True si OK, False sinon                                                                                           */
+/******************************************************************************************************************************/
+ gboolean Jouer_mp3 ( gchar *texte )
+  { gchar nom_fichier[128];
+    gint fd_cible, pid;
+
+    g_snprintf( nom_fichier, sizeof(nom_fichier), "Son/%s.mp3", texte );
+    fd_cible = open ( nom_fichier, O_RDONLY, 0 );
+    if (fd_cible < 0) { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
+                                  "%s: '%s' not found", __func__, nom_fichier );
+                        return(FALSE);
+                      }
+    else close (fd_cible);
+
+    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "Jouer_mp3: Send '%s'", nom_fichier );
+    pid = fork();
+    if (pid<0)
+     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
+                 "%s: '%s' fork failed pid=%d (%s)", __func__, nom_fichier, pid, strerror(errno) );
+       return(FALSE);
+     }
+    else if (!pid)
+     { execlp( "mpg123", "mpg123", "-q", nom_fichier, NULL );
+       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
+                "%s: '%s' exec failed pid=%d (%s)", __func__, nom_fichier, pid, strerror( errno ) );
+       _exit(0);
+     }
+    else
+     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_DEBUG,
+                "%s: '%s' waiting to finish pid=%d", __func__, nom_fichier, pid );
+       waitpid(pid, NULL, 0 );
+     }
+    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_DEBUG, "%s: MPG123 '%s' finished pid=%d", __func__, nom_fichier, pid );
+
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
 /* Jouer_google_speech : Joue un texte avec google_speech et attend la fin de la diffusion                                    */
 /* Entrée : le message à jouer                                                                                                */
 /* Sortie : True si OK, False sinon                                                                                           */
@@ -250,7 +289,7 @@ reload:
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: recu = %s", __func__, commande_vocale );
        if (wait_for_keywords==TRUE)
         { if (!strcmp(Cfg_voice.key_words, commande_vocale))
-           { Jouer_google_speech ( "Oui ?" );
+           { Jouer_mp3 ( "Oui_question" );
              wait_for_keywords = FALSE;
            }
           continue;
@@ -274,13 +313,13 @@ reload:
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
                     "%s: No match found for '%s'", __func__, commande_vocale );
           Libere_DB_SQL ( &db );
-          Jouer_google_speech ( "Je ne sais pas faire" );
+          Jouer_mp3 ( "Je_ne_sais_pas_faire" );
         }
        else if (db->nbr_result > 1)
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
                     "%s: Too many event for '%s'", __func__, commande_vocale );
           Libere_DB_SQL ( &db );
-          Jouer_google_speech ( "C'est ambigu" );
+          Jouer_mp3 ( "C_est_ambigue" );
         }
        else
         { struct CMD_TYPE_MNEMO_BASE *mnemo;
