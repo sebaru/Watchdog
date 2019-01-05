@@ -69,7 +69,7 @@
  extern gboolean Connect_zmq ( struct ZMQUEUE *zmq, gchar *type, gchar *nom, gint port );
  extern void Close_zmq ( struct ZMQUEUE *zmq );
  extern gboolean Send_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille );
- extern gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag, gchar *target_instance, gchar *target_thread, void *source, gint taille );
+ extern gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag, const gchar *target_instance, gchar *target_thread, void *source, gint taille );
  extern gint Recv_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille_buf );
  extern gint Recv_zmq_block ( struct ZMQUEUE *zmq, void *buf, gint taille_buf );
  extern gint Recv_zmq_with_tag ( struct ZMQUEUE *zmq, void *buf, gint taille_buf, struct MSRV_EVENT **event, void **payload );

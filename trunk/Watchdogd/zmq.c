@@ -133,7 +133,8 @@
 /* Entrée: la socket, le tag, le message, sa longueur                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag, gchar *target_instance, gchar *target_thread, void *source, gint taille )
+ gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag, const gchar *target_instance, gchar *target_thread,
+                              void *source, gint taille )
   { struct MSRV_EVENT event;
     void *buffer;
     gboolean retour;

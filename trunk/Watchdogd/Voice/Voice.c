@@ -304,13 +304,13 @@ reload:
               }
              else /* Envoi au master via thread HTTP */
               { if (mnemo->type == MNEMO_MONOSTABLE)
-                 { /*struct ZMQ_SET_BIT bit;
+                 { struct ZMQ_SET_BIT bit;
                    bit.type = mnemo->type;
                    bit.num = mnemo->num;
                    g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", mnemo->dls_tech_id );
                    g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", mnemo->acronyme );
-                   Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, TAG_ZMQ_SET_BIT, g_get_host_name(), NOM_THREAD,
-                                       &bit, sizeof(struct ZMQ_SET_BIT) );*/
+                   Send_zmq_with_tag ( Cfg_voice.zmq_to_master, TAG_ZMQ_SET_BIT, g_get_host_name(), NOM_THREAD,
+                                       &bit, sizeof(struct ZMQ_SET_BIT) );
                  }
                 else Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
                               "%s: '%s' -> Error, type of mnemo not handled", __func__, commande_vocale );
