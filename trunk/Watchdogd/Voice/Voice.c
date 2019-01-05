@@ -167,6 +167,7 @@
     gboolean wait_for_keywords;
     struct timeval tv;
 
+reload:
     prctl(PR_SET_NAME, "W-VOICE", 0, 0, 0 );
     memset( &Cfg_voice, 0, sizeof(Cfg_voice) );                                     /* Mise a zero de la structure de travail */
     Cfg_voice.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
@@ -221,9 +222,8 @@
        fd_set fd;
 
        if (Cfg_voice.lib->Thread_reload)                                                      /* A-t'on recu un signal USR1 ? */
-        { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: SIGUSR1", __func__ );
-          Voice_Lire_config();
-          Cfg_voice.lib->Thread_reload = FALSE;
+        { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: RELOADING", __func__ );
+          break;
         }
 
        tv.tv_sec=5;
@@ -240,8 +240,10 @@
         }
        retour = read(pipefd[0], commande_vocale, sizeof(commande_vocale));
        if (retour<=0)
-        { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING, "%s: recu error (ret=%d)", __func__, retour );
+        { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
+                    "%s: recu error (ret=%d) restarting in 5s", __func__, retour );
           sleep(5);
+          Cfg_voice.lib->Thread_reload = TRUE;
           continue;
         }
        commande_vocale[retour-1]=0;                                                                  /*Caractere NULL d'arret */
@@ -324,7 +326,13 @@
     close(pipefd[0]);                                                                       /* Fermeture du pipe en reception */
 end:
     Close_zmq ( Cfg_voice.zmq_to_master );
+
     Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
+    if (Cfg_voice.lib->Thread_reload)
+     { Cfg_voice.lib->Thread_reload = FALSE;
+       goto reload;
+     }
+
     Cfg_voice.lib->Thread_run = FALSE;
     Cfg_voice.lib->TID = 0;                                                     /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
