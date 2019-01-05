@@ -126,11 +126,11 @@
     close(id_fichier);
   }
 /******************************************************************************************************************************/
-/* Jouer_mp3 : Joue un fichier mp3 et attend la fin de la diffusion                                                           */
+/* Voice_Jouer_mp3 : Joue un fichier mp3 et attend la fin de la diffusion                                                           */
 /* Entrée : le message à jouer                                                                                                */
 /* Sortie : True si OK, False sinon                                                                                           */
 /******************************************************************************************************************************/
- gboolean Jouer_mp3 ( gchar *texte )
+ static gboolean Voice_Jouer_mp3 ( gchar *texte )
   { gchar nom_fichier[128];
     gint fd_cible, pid;
 
@@ -142,7 +142,7 @@
                       }
     else close (fd_cible);
 
-    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "Jouer_mp3: Send '%s'", nom_fichier );
+    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "Voice_Jouer_mp3: Send '%s'", nom_fichier );
     pid = fork();
     if (pid<0)
      { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
@@ -165,11 +165,11 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Jouer_google_speech : Joue un texte avec google_speech et attend la fin de la diffusion                                    */
+/* Voice_Jouer_google_speech : Joue un texte avec google_speech et attend la fin de la diffusion                                    */
 /* Entrée : le message à jouer                                                                                                */
 /* Sortie : True si OK, False sinon                                                                                           */
 /******************************************************************************************************************************/
- static gboolean Jouer_google_speech ( gchar *libelle_audio )
+ static gboolean Voice_Jouer_google_speech ( gchar *libelle_audio )
   { gint pid;
 
     pid = fork();
@@ -289,7 +289,7 @@ reload:
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: recu = %s", __func__, commande_vocale );
        if (wait_for_keywords==TRUE)
         { if (!strcmp(Cfg_voice.key_words, commande_vocale))
-           { Jouer_mp3 ( "Oui_question" );
+           { Voice_Jouer_mp3 ( "Oui_question" );
              wait_for_keywords = FALSE;
            }
           continue;
@@ -299,7 +299,7 @@ reload:
        if (!strcmp( QUELLE_VERSION, commande_vocale))
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), "Ma version est la %s", PACKAGE_VERSION );
-          Jouer_google_speech ( chaine );
+          Voice_Jouer_google_speech ( chaine );
           continue;
         }
 
@@ -313,20 +313,20 @@ reload:
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
                     "%s: No match found for '%s'", __func__, commande_vocale );
           Libere_DB_SQL ( &db );
-          Jouer_mp3 ( "Je_ne_sais_pas_faire" );
+          Voice_Jouer_mp3 ( "Je_ne_sais_pas_faire" );
         }
        else if (db->nbr_result > 1)
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
                     "%s: Too many event for '%s'", __func__, commande_vocale );
           Libere_DB_SQL ( &db );
-          Jouer_mp3 ( "C_est_ambigue" );
+          Voice_Jouer_mp3 ( "C_est_ambigue" );
         }
        else
         { struct CMD_TYPE_MNEMO_BASE *mnemo;
           while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
            { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Match found for '%s' Type %d Num %d - %s", __func__,
                        commande_vocale, mnemo->type, mnemo->num, mnemo->libelle );
-             Jouer_google_speech ( "C'est parti !" );
+             Voice_Jouer_google_speech ( "C'est parti !" );
              if (Config.instance_is_master==TRUE)                                                 /* si l'instance est Maitre */
               { switch( mnemo->type )
                  { case MNEMO_MONOSTABLE:
