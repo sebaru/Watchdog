@@ -61,7 +61,7 @@
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_audio.lib->Thread_debug = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "language" ) )
-        { g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", __func__, valeur ); }
+        { g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", valeur ); }
        else
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,
                    "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
