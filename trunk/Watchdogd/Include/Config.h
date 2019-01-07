@@ -31,7 +31,6 @@
  #define NOM_TABLE_CONFIG         "config"                          /* Nom de la table en base de données */
 
  #define TAILLE_HOME              80                                           /* Chemin HOME de watchdog */
- #define TAILLE_INSTANCE_ID       24                                           /* Chemin HOME de watchdog */
 
  extern struct CONFIG Config;            /* Parametre de configuration du serveur via /etc/watchdogd.conf */
 
