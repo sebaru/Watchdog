@@ -41,13 +41,14 @@
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'GET'" );
 
+       response = Admin_write ( response, " | - new_e $tech_id $acronyme   - Get digitalinput $tech_id $acronyme" );
        response = Admin_write ( response, " | - new_b $tech_id $acronyme   - Get bistable $tech_id $acronyme" );
        response = Admin_write ( response, " | - new_m $tech_id $acronyme   - Get monostable $tech_id $acronyme" );
        response = Admin_write ( response, " | - new_t $tech_id $acronyme   - Get Tempo $tech_id $acronyme" );
        response = Admin_write ( response, " | - new_ea $tech_id $acronyme  - Get Analog Input $tech_id $acronyme" );
        response = Admin_write ( response, " | - new_msg $tech_id $acronyme - Get Message $tech_id $acronyme" );
        response = Admin_write ( response, " | - list_ea                   - List all dynamic Digital Inputs" );
-       response = Admin_write ( response, " | - list_bool                 - List all dynamic Booleans" );
+       response = Admin_write ( response, " | - list $tech_id             - Get all bits of DLS $tech_id" );
        response = Admin_write ( response, " | - e $num                    - Get E[$num]" );
        response = Admin_write ( response, " | - ea $num                   - Get EA[$num]" );
        response = Admin_write ( response, " | - m $num                    - Get M[$num]" );
@@ -87,10 +88,10 @@
         { struct DLS_TEMPO *tempo = NULL;
           Dls_data_get_tempo ( tech_id, acronyme, (gpointer)&tempo );
           if (tempo)
-           { g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s -> delai_on=%d min_on=%d max_on=%d delai_off=%d", tech_id, acronyme,
+           { g_snprintf( chaine, sizeof(chaine), " | - T: %s:%s -> delai_on=%d min_on=%d max_on=%d delai_off=%d", tech_id, acronyme,
 			                   tempo->confDB.delai_on, tempo->confDB.min_on, tempo->confDB.max_on, tempo->confDB.delai_off );
              response = Admin_write ( response, chaine );
-             g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", tech_id, acronyme,
+             g_snprintf( chaine, sizeof(chaine), " | - T: %s:%s = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)", tech_id, acronyme,
                       tempo->state, tempo->status, tempo->date_on,
                       (tempo->date_on > Partage->top ? (tempo->date_on - Partage->top)/10.0 : 0.0),
                       tempo->date_off,
@@ -171,34 +172,54 @@
         { g_snprintf( chaine, sizeof(chaine), " | - EA -> num '%d' out of range (max=%d)", num, NBR_ENTRE_ANA ); }
        response = Admin_write ( response, chaine );
      } else
-    if ( ! strcmp ( commande, "list_ea" ) )
-     { GSList *liste;
-       liste = Partage->Dls_data_AI;
-       while (liste)
-        { struct ANALOG_INPUT *ai = liste->data;
-          g_snprintf( chaine, sizeof(chaine),
-                      " | - EA '%s:%s' = %8.2f %s, val_avant_ech=%8.2f, inrange=%d\n"
-                      "                  type=%d, last_arch=%d (%ds ago), min=%8.2f, max=%8.2f",
-                      ai->tech_id, ai->acronyme, ai->val_ech, ai->confDB.unite, ai->val_avant_ech, ai->inrange,
-                      ai->confDB.type, ai->last_arch, (Partage->top - ai->last_arch)/10,
-                      ai->confDB.min, ai->confDB.max 
-                    );
-          response = Admin_write ( response, chaine );
-          liste = g_slist_next(liste);
+    if ( ! strcmp ( commande, "list" ) )
+     { gchar tech_id[80];
+       GSList *liste;
+       if (sscanf ( ligne, "%s %s", commande, tech_id ) == 2)                            /* Découpage de la ligne de commande */
+        { liste = Partage->Dls_data_BOOL;
+          while (liste)
+           { struct DLS_BOOL *bool = liste->data;
+             liste = g_slist_next(liste);
+             if (strcmp(bool->tech_id, tech_id)) continue;
+             g_snprintf( chaine, sizeof(chaine), " | - Bool '%s:%s' = %d", bool->tech_id, bool->acronyme, bool->etat );
+             response = Admin_write ( response, chaine );
+           }
+          liste = Partage->Dls_data_BOOL;
+          while (liste)
+           { struct DLS_TEMPO *tempo = liste->data;
+             liste = g_slist_next(liste);
+             if (strcmp(tempo->tech_id, tech_id)) continue;
+             g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s -> delai_on=%d min_on=%d max_on=%d delai_off=%d",
+                        tempo->tech_id, tempo->acronyme,
+			                     tempo->confDB.delai_on, tempo->confDB.min_on, tempo->confDB.max_on, tempo->confDB.delai_off );
+             response = Admin_write ( response, chaine );
+             g_snprintf( chaine, sizeof(chaine), " | - T: %s_%s = %d : status = %d, date_on=%d(%08.1fs) date_off=%d(%08.1fs)",
+                      tempo->tech_id, tempo->acronyme,
+                      tempo->state, tempo->status, tempo->date_on,
+                      (tempo->date_on > Partage->top ? (tempo->date_on - Partage->top)/10.0 : 0.0),
+                      tempo->date_off,
+                     (tempo->date_off > Partage->top ? (tempo->date_off - Partage->top)/10.0 : 0.0) );
+             response = Admin_write ( response, chaine );
+           }
+          liste = Partage->Dls_data_AI;
+          while (liste)
+           { struct ANALOG_INPUT *ai = liste->data;
+             liste = g_slist_next(liste);
+             if (strcmp(ai->tech_id, tech_id)) continue;
+             g_snprintf( chaine, sizeof(chaine),
+                         " | - EA '%s:%s' = %8.2f %s, val_avant_ech=%8.2f, inrange=%d\n"
+                         "                  type=%d, last_arch=%d (%ds ago), min=%8.2f, max=%8.2f",
+                         ai->tech_id, ai->acronyme, ai->val_ech, ai->confDB.unite, ai->val_avant_ech, ai->inrange,
+                         ai->confDB.type, ai->last_arch, (Partage->top - ai->last_arch)/10,
+                         ai->confDB.min, ai->confDB.max 
+                       );
+             response = Admin_write ( response, chaine );
+           }
         }
-     } else
-    if ( ! strcmp ( commande, "list_bool" ) )
-     { GSList *liste;
-       liste = Partage->Dls_data_BOOL;
-       while (liste)
-        { struct DLS_BOOL *bool = liste->data;
-          g_snprintf( chaine, sizeof(chaine),
-                      " | - Bool '%s:%s' = %d",
-                      bool->tech_id, bool->acronyme, bool->etat
-                    );
+       else
+        { g_snprintf( chaine, sizeof(chaine), " | - Usage: get list $tech_id" );
           response = Admin_write ( response, chaine );
-          liste = g_slist_next(liste);
-        }
+	       }
      } else
     if ( ! strcmp ( commande, "r" ) )
      { int num;
@@ -217,7 +238,7 @@
        g_snprintf( chaine, sizeof(chaine), " | - B%03d = %d", num, B(num) );
        response = Admin_write ( response, chaine );
      } else
-    if ( ! strcmp ( commande, "new_b" ) || ! strcmp ( commande, "new_m" ))
+    if ( ! strcmp ( commande, "new_b" ) || ! strcmp ( commande, "new_m" ) || ! strcmp ( commande, "new_e" ))
      { gchar tech_id[80], acronyme[80];
        if (sscanf ( ligne, "%s %s %s", commande, tech_id, acronyme ) == 3)               /* Découpage de la ligne de commande */
         { g_snprintf( chaine, sizeof(chaine), " | - %s:%s = %d", tech_id, acronyme, Dls_data_get_bool ( tech_id, acronyme, NULL ) ); }
