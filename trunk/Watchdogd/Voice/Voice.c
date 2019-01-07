@@ -50,6 +50,9 @@
 
     Cfg_voice.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
     Cfg_voice.enable            = FALSE; 
+    g_snprintf( Cfg_voice.audio_device,  sizeof(Cfg_voice.audio_device),  "default" );
+    g_snprintf( Cfg_voice.key_words,     sizeof(Cfg_voice.key_words),     "dis moi jolie maison" );
+    g_snprintf( Cfg_voice.vad_threshold, sizeof(Cfg_voice.vad_threshold), "4.0" );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
@@ -66,6 +69,8 @@
         { g_snprintf( Cfg_voice.audio_device, sizeof(Cfg_voice.audio_device), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "key_words" ) )
         { g_snprintf( Cfg_voice.key_words, sizeof(Cfg_voice.key_words), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "vad_threshold" ) )
+        { g_snprintf( Cfg_voice.vad_threshold, sizeof(Cfg_voice.vad_threshold), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_voice.lib->Thread_debug = TRUE;  }
        else
@@ -240,7 +245,8 @@ reload:
        dup2(pipefd[1], 1);  /* Send stdout to the pipe (back to father !) */
        dup2(pipefd[1], 2);  /* Send stderr to the pipe (back to father !) */
        execlp( "pocketsphinx_continuous", "pocketsphinx_continuous", "-adcdev", Cfg_voice.audio_device,
-               "-inmic", "yes", "-agc", "noise", "-logfn", "pocket.log", "-bestpathlw", "9.9",
+               "-inmic", "yes", "-agc", "none", "-logfn", "pocket.log",
+               "-vad_threshold", Cfg_voice.vad_threshold, "-bestpathlw", "9.9",
                "-dict", "fr.dict", "-jsgf", "wtd.gram", "-hmm", "cmusphinx-fr-5.2", NULL );
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s_Fils: lancement PocketSphinx failed", __func__ );
        _exit(0);
