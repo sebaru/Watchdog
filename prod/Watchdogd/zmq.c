@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/zmq.c        Gestion des echanges ZMQ                                                                            */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                                    06.01.2018 11:42:29 */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                                    06.01.2018 11:42:29 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * zmq.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2019 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,8 +106,8 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Close_zmq ( struct ZMQUEUE *zmq )
-  { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-              "%s: ZMQ closing '%s'", __func__, zmq->name );
+  { if (!zmq) return;
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: ZMQ closing '%s'", __func__, zmq->name );
     zmq_close ( zmq->socket );
     g_free(zmq);
   }
@@ -133,7 +133,8 @@
 /* Entrée: la socket, le tag, le message, sa longueur                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag, gchar *target_instance, gchar *target_thread, void *source, gint taille )
+ gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag, const gchar *target_instance, gchar *target_thread,
+                              void *source, gint taille )
   { struct MSRV_EVENT event;
     void *buffer;
     gboolean retour;

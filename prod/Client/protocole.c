@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
 /* Client/protocole.c    Gestion du protocole pour la connexion au serveur Watchdog                       */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       sam 16 fév 2008 19:19:36 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                       sam 16 fév 2008 19:19:36 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * protocole.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,7 +76,6 @@
                                  Envoyer_authentification();         /* Envoi l'identification au serveur */
                                }
                               return;
-      case TAG_ICONE       : Gerer_protocole_icone        ( connexion ); break;
       case TAG_DLS         : Gerer_protocole_dls          ( connexion ); break;
       case TAG_MESSAGE     : Gerer_protocole_message      ( connexion ); break;
       case TAG_MNEMONIQUE  : Gerer_protocole_mnemonique   ( connexion ); break;

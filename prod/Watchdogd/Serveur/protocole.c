@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
 /* Watchdogd/Serveur/protocole.c    Gestion du protocole pour la connexion au client Watchdog             */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       dim 25 jan 2004 17:35:52 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                       dim 25 jan 2004 17:35:52 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * protocole.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,8 +57,7 @@
           { 
 /********************************* Client en VALIDE, gestion des groupes **********************************/
             switch ( Reseau_tag(connexion) )
-             { case TAG_ICONE       : Gerer_protocole_icone        ( client ); break;
-               case TAG_DLS         : Gerer_protocole_dls          ( client ); break;
+             { case TAG_DLS         : Gerer_protocole_dls          ( client ); break;
                case TAG_MESSAGE     : Gerer_protocole_message      ( client ); break;
                case TAG_MNEMONIQUE  : Gerer_protocole_mnemonique   ( client ); break;
                case TAG_SYNOPTIQUE  : Gerer_protocole_synoptique   ( client ); break;

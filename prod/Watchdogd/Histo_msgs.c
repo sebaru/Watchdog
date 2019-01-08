@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Histo/Histo_msgs.c        Déclaration des fonctions pour la gestion des message                                  */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                          ven 15 aoû 2003 13:02:48 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                          ven 15 aoû 2003 13:02:48 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Histo_msgs.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

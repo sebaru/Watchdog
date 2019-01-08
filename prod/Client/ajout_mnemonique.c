@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Client/ajout_mnemonique.c        Addition/Edition d'un mnemonique Watchdog2.0                                              */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                           dim 05 déc 2004 14:21:22 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                           dim 05 déc 2004 14:21:22 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * ajout_mnemonique.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
 /* Client/admin.c        Administration du serveur Watchdog v2.0                                          */
-/* Projet WatchDog version 2.0       Gestion d'habitat                     lun. 24 déc. 2012 13:08:00 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                     lun. 24 déc. 2012 13:08:00 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * admin.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

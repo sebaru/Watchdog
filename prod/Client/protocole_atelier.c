@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
 /* Client/protocole_atelier.c    Gestion du protocole_atelier pour la connexion au serveur Watchdog       */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       mar 21 fév 2006 14:07:22 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                       mar 21 fév 2006 14:07:22 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * protocole_atelier.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,10 +42,8 @@
  void Gerer_protocole_atelier ( struct CONNEXION *connexion )
   { static GList *Arrivee_groupe = NULL;
     static GList *Arrivee_synoptique_for_atelier = NULL;
-    static GList *Arrivee_classe = NULL;
     static GList *Arrivee_synoptique_for_atelier_palette = NULL;
     static GList *Arrivee_motif = NULL;
-    static GList *Arrivee_icone = NULL;
     static GList *Arrivee_pass = NULL;
     static GList *Arrivee_cadran = NULL;
     static GList *Arrivee_comment = NULL;
@@ -316,40 +314,6 @@
                g_list_foreach( Arrivee_palette, (GFunc)g_free, NULL );
                g_list_free( Arrivee_palette );
                Arrivee_palette = NULL;
-             }
-            break;
-
-       case SSTAG_SERVEUR_ADDPROGRESS_CLASSE_FOR_ATELIER:
-             { struct CMD_TYPE_CLASSE *classe;
-               Set_progress_plus(1);
-               classe = (struct CMD_TYPE_CLASSE *)g_try_malloc0( sizeof( struct CMD_TYPE_CLASSE ) );
-               if (!classe) return; 
-               memcpy( classe, connexion->donnees, sizeof(struct CMD_TYPE_CLASSE ) );
-               Arrivee_classe = g_list_append( Arrivee_classe, classe );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_CLASSE_FOR_ATELIER_FIN:
-             { g_list_foreach( Arrivee_classe, (GFunc)Proto_afficher_une_classe_atelier, NULL );
-               g_list_foreach( Arrivee_classe, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_classe );
-               Arrivee_classe = NULL;
-             }
-            break;
-
-       case SSTAG_SERVEUR_ADDPROGRESS_ICONE_FOR_ATELIER:
-             { struct CMD_TYPE_ICONE *ico;
-
-               ico = (struct CMD_TYPE_ICONE *)g_try_malloc0( sizeof( struct CMD_TYPE_ICONE ) );
-               if (!ico) return; 
-               memcpy( ico, connexion->donnees, sizeof(struct CMD_TYPE_ICONE ) );
-               Arrivee_icone = g_list_append( Arrivee_icone, ico );
-             }
-            break;
-       case SSTAG_SERVEUR_ADDPROGRESS_ICONE_FOR_ATELIER_FIN:
-             { g_list_foreach( Arrivee_icone, (GFunc)Proto_afficher_un_icone_atelier, NULL );
-               g_list_foreach( Arrivee_icone, (GFunc)g_free, NULL );
-               g_list_free( Arrivee_icone );
-               Arrivee_icone = NULL;
              }
             break;
      }

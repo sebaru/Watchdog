@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Http/Http.c        Gestion des connexions HTTP WebService de watchdog                                            */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                       mer. 24 avril 2013 18:48:19 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                       mer. 24 avril 2013 18:48:19 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Http.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -115,7 +115,8 @@
     if(json_node_get_node_type (node) != JSON_NODE_VALUE) return(-1);
     json_node_get_value (node, &valeur);
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: Parsing value type %d ('%s') for attribut '%s'", __func__, G_VALUE_TYPE(&valeur), G_VALUE_TYPE_NAME(&valeur), name );
+             "%s: Parsing value type %d ('%s') for attribut '%s'", __func__,
+              G_VALUE_TYPE(&valeur), G_VALUE_TYPE_NAME(&valeur), name );
     switch( G_VALUE_TYPE(&valeur) )             
      { case G_TYPE_BOOLEAN:
             return( json_node_get_boolean(node) );
@@ -378,6 +379,7 @@
                else if ( ! strcasecmp ( url, "/status" ) )         { Http_Traiter_request_getstatus ( wsi ); }
                else if ( ! strncasecmp ( url, "/ws/getsyn", 11 ) ) { return( Http_Traiter_request_getsyn ( wsi, session ) ); }
                else if ( ! strncasecmp ( url, "/ws/audio/", 10 ) ) { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
+               else if ( ! strncasecmp ( url, "/process/", 9 ) ) { return( Http_Traiter_request_getprocess ( wsi, url+9 ) ); }
                else if ( ! strncasecmp ( url, "/setm", 5 ) )   { return( Http_Traiter_request_setm ( wsi ) ); }
                else if ( ! strcasecmp ( url, "/cli" ) )
                 { g_snprintf( pss->url, sizeof(pss->url), "/cli" );

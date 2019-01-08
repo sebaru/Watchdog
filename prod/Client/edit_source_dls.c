@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Client/edit_source_dls.c        Edition des modules D.L.S de watchdog v2.0                                                 */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 30 oct 2004 14:26:13 CEST                     */
+/* Projet WatchDog version 3.0       Gestion d'habitat                      sam 30 oct 2004 14:26:13 CEST                     */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * edit_source_dls.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -155,7 +155,7 @@
  static size_t CB_Receive_package_data( char *ptr, size_t size, size_t nmemb, void *userdata )
   { gchar *new_buffer;
     Info_new( Config_cli.log, FALSE, LOG_DEBUG,
-              "%s: Récupération de %d*%d octets depuis le master", __func__, size, nmemb );
+              "%s: Récupération de %d*%d octets depuis le cloud", __func__, size, nmemb );
     new_buffer = g_try_realloc ( Package_received_buffer,
                                  Package_received_size +  size*nmemb );
     if (!new_buffer)                                                                     /* Si erreur, on arrete le transfert */

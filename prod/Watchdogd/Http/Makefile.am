@@ -1,13 +1,13 @@
 #**********************************************************************************************************/
 #* Watchdogd/Http/Makefile.am          Profil de compilation de l'interface Mobile HTTP Watchdog          */
-#* Projet WatchDog version 2.0       Gestion d'habitat                           mer 24 avr 2013 13:46:15 */
+#* Projet WatchDog version 3.0       Gestion d'habitat                           mer 24 avr 2013 13:46:15 */
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS= 
 
 lib_LTLIBRARIES                      = libwatchdog-server-http.la
 libwatchdog_server_http_la_SOURCES    = Http.c Http.h admin_http.c getsyn.c getstatus.c cli.c \
-                                        setm.c getaudio.c login.c postfile.c
+                                        setm.c getprocess.c getaudio.c login.c postfile.c
 
 libwatchdog_server_http_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 libwebsockets libxml-2.0 json-glib-1.0` \
                                        `mysql_config --libs` \

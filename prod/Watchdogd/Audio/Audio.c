@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Audio/Audio.c  Gestion des messages audio de Watchdog 2.0                                                        */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                         sam. 09 nov. 2013 13:49:53 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                         sam. 09 nov. 2013 13:49:53 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Archive.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_audio.lib->Thread_debug = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "language" ) )
-        { g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", __func__, valeur ); }
+        { g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", valeur ); }
        else
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,
                    "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
@@ -81,21 +81,21 @@
     pid = fork();
     if (pid<0)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "%s: APLAY '%s' fork failed pid=%d", __func__, fichier, pid );
+                "%s: PAPLAY '%s' fork failed pid=%d", __func__, fichier, pid );
      }
     else if (!pid)
-     { execlp( "aplay", "aplay", "-R", "1", fichier, NULL );
+     { execlp( "paplay", "paplay", fichier, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "%s: APLAY '%s' exec failed pid=%d", __func__, fichier, pid );
+                "%s: PAPLAY '%s' exec failed pid=%d", __func__, fichier, pid );
        _exit(0);
      }
     else
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                "%s: APLAY '%s' waiting to finish pid=%d", __func__, fichier, pid );
+                "%s: PAPLAY '%s' waiting to finish pid=%d", __func__, fichier, pid );
        waitpid(pid, NULL, 0 );
      }
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-             "%s: APLAY '%s' finished pid=%d", __func__, fichier, pid );
+             "%s: PAPLAY '%s' finished pid=%d", __func__, fichier, pid );
   }
 /******************************************************************************************************************************/
 /* Jouer_mp3 : Joue un fichier mp3 et attend la fin de la diffusion                                                           */

@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Client/atelier.c        Edition d'un synoptique de Watchdog v2.0                                                           */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                          dim 29 mar 2009 09:54:12 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                          dim 29 mar 2009 09:54:12 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * atelier.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

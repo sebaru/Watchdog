@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Serveur/protocole_atelier.c    Gestion du protocole_atelier pour Watchdog                                        */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                         mar. 17 nov. 2009 13:47:17 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                         mar. 17 nov. 2009 13:47:17 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * protocole_atelier.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -135,17 +135,6 @@
                Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
                          "Le client desire modifier le motif numéro %d: %d", motif->id, motif->libelle );
                Proto_valider_editer_motif_atelier( client, motif );
-             }
-            break;
-       case SSTAG_CLIENT_WANT_PAGE_CLASSE_FOR_ATELIER:
-             { Client_mode( client, ENVOI_CLASSE_FOR_ATELIER );
-               Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
-                         "Le client desire les classes icones par atelier\n" );
-             }
-            break;
-       case SSTAG_CLIENT_WANT_PAGE_ICONE_FOR_ATELIER:
-             { Client_mode( client, ENVOI_ICONE_FOR_ATELIER );
-               client->classe_icone = ((struct CMD_TYPE_CLASSE *)connexion->donnees)->id;
              }
             break;
        case SSTAG_CLIENT_TYPE_NUM_MNEMO_CLIC:

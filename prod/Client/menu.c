@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
 /* Client/menu.c          Gestion des callbacks des menus Watchdog v2.0                                   */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 30 oct 2004 14:34:53 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                      sam 30 oct 2004 14:34:53 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * menu.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,14 +85,6 @@
  void Menu_want_camera ( void )
   { if (Chercher_page_notebook( TYPE_PAGE_CAMERA, 0, TRUE )) return;
     Envoi_serveur( TAG_LOWLEVEL, SSTAG_CLIENT_WANT_PAGE_CAMERA, NULL, 0 );
-  }
-/**********************************************************************************************************/
-/* Menu_want_icone: l'utilisateur desire editer la base icons                                             */
-/* Entrée/Sortie: rien                                                                                    */
-/**********************************************************************************************************/
- void Menu_want_icone ( void )
-  { if (Chercher_page_notebook( TYPE_PAGE_ICONE, 0, TRUE )) return;
-    Envoi_serveur( TAG_ICONE, SSTAG_CLIENT_WANT_PAGE_CLASSE, NULL, 0 );
   }
 /**********************************************************************************************************/
 /* Menu_want_synoptique: l'utilisateur desire editer la base syns                                         */

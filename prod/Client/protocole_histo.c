@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
 /* Client/protocole_histo.c    Gestion du protocole_histo pour Watchdog                                   */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       sam 16 fév 2008 19:19:20 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                       sam 16 fév 2008 19:19:20 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * protocole_histo.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/plugins.c  -> Gestion des plugins pour DLS                                                                   */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                        dim. 02 janv. 2011 19:04:47 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                        dim. 02 janv. 2011 19:04:47 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
  /*****************************************************************************************************************************/
 /*
  * plugins.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -441,11 +441,11 @@
      { gchar source[80], cible[80];
        g_snprintf( source, sizeof(source), "Dls/%06d.c", id );
        g_snprintf( cible,  sizeof(cible),  "Dls/libdls%06d.so", id );
-       Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: GCC start (pid %d) source %s cible %s!",
+       Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: GCC start (pid %d) source %s cible %s!",
                  __func__, pidgcc, source, cible );
        execlp( "gcc", "gcc", "-I/usr/include/glib-2.0", "-I/usr/lib/glib-2.0/include", "-I/usr/lib64/glib-2.0/include",
                "-shared", "-o3", "-Wall", "-lwatchdog-dls", source, "-fPIC", "-o", cible, NULL );
-       Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s_Fils: lancement GCC failed", __func__ );
+       Info_new( Config.log, Config.log_dls, LOG_ERR, "%s_Fils: lancement GCC failed", __func__ );
        _exit(0);
      }
 

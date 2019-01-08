@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Onduleur/Onduleur.c  Gestion des modules UPS Watchdgo 2.0                                                        */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                         mar. 10 nov. 2009 15:56:10 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                         mar. 10 nov. 2009 15:56:10 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Onduleur.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

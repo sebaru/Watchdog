@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Imsg/Imsg.c  Gestion des Instant Messaging IMSG Watchdog 2.0                                                     */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                                    20.02.2018 17:58:31 */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                                    20.02.2018 17:58:31 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Imsg.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

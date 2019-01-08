@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Modbus/Modbus.c  Gestion des modules MODBUS Watchdgo 2.0                                                         */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                         jeu. 24 déc. 2009 12:59:27 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                         jeu. 24 déc. 2009 12:59:27 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Modbus.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -252,10 +252,10 @@
     module->request = FALSE;
     module->nbr_deconnect++;
     module->date_retente = Partage->top + MODBUS_RETRY;
-    for ( cpt = module->modbus.map_EA; cpt<module->nbr_entree_ana; cpt++)
-     { SEA_range( cpt, 0 ); }
-    g_free(module->DI);
-    g_free(module->AI);
+    for ( cpt = module->modbus.map_EA; cpt<module->nbr_entree_ana; cpt++) { SEA_range( cpt, 0 ); }
+    if (module->DI) g_free(module->DI);
+    if (module->AI) g_free(module->AI);
+    if (module->DO) g_free(module->DO);
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s : Module %d disconnected", __func__, module->modbus.id );
     Dls_data_set_bool ( module->modbus.tech_id, "COMM", &module->bit_comm, FALSE );
     SB( module->modbus.bit, 0 );                                                  /* Mise a zero du bit interne lié au module */
@@ -338,6 +338,7 @@
     module->mode = MODBUS_GET_DESCRIPTION;
     module->DI = NULL;
     module->AI = NULL;
+    module->DO = NULL;
 
     return(TRUE);
   }
@@ -707,10 +708,13 @@
     requete.nbr            = htons( module->nbr_sortie_tor );                                /* bit count */
     requete.data[2]        = nbr_data;                                                      /* Byte count */
     cpt_a = module->modbus.map_A;
-    for ( cpt_poid = 1, cpt_byte = 3, cpt = 0; cpt<module->nbr_sortie_tor; cpt++)
+    for ( cpt_poid = 1, cpt_byte = 3, cpt = 0; cpt<module->nbr_sortie_tor; cpt++, cpt_a++)
       { if (cpt_poid == 256) { cpt_byte++; cpt_poid = 1; }
-        if ( A(cpt_a) ) requete.data[cpt_byte] |= cpt_poid;
-        cpt_a++;
+        if ( module->DO && module->DO[cpt] )
+         { if (Dls_data_get_bool( NULL, NULL, &module->DO[cpt] ) )
+            { requete.data[cpt_byte] |= cpt_poid; }
+         }
+        else if (A(cpt_a)) requete.data[cpt_byte] |= cpt_poid;
         cpt_poid = cpt_poid << 1;
       }
                
@@ -771,6 +775,12 @@
        return;
      }
 
+    module->DO = g_try_malloc0( sizeof(gpointer) * module->nbr_sortie_tor );
+    if (!module->DO)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Memory Error for DO", __func__ );
+       return;
+     }
+
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     g_snprintf( critere, sizeof(critere),"%s:AI%%", module->modbus.tech_id ); 
     if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
@@ -813,6 +823,27 @@
         }
        g_free(mnemo);
      }
+/*********************************** Recherche des events DO a raccrocher aux bits internes ***********************************/
+    g_snprintf( critere, sizeof(critere),"%s:DO%%", module->modbus.tech_id ); 
+    if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
+    else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' Type %d Num %d '%s:%s' - %s", __func__,
+                 mnemo->ev_text, mnemo->type, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme, mnemo->libelle );
+       if ( mnemo->type == MNEMO_SORTIE )
+        { gchar debut[80];
+          gint num;
+          if ( sscanf ( mnemo->ev_text, "%[^:]:DO%d", debut, &num ) == 2 )                   /* Découpage de la ligne ev_text */
+           { if (num<module->nbr_sortie_tor)
+              { Dls_data_set_bool ( mnemo->dls_tech_id, mnemo->acronyme, &module->DO[num], FALSE ); }
+             else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
+                            mnemo->ev_text, num, module->nbr_entree_tor );
+           }
+          else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__,
+                         mnemo->ev_text );
+        }
+       g_free(mnemo);
+     }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     g_snprintf( critere, sizeof(critere),"%s:COMM", module->modbus.tech_id ); 
     if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
@@ -821,7 +852,7 @@
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' Type %d Num %d '%s:%s' - %s", __func__,
                  mnemo->ev_text, mnemo->type, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme, mnemo->libelle );
        if ( mnemo->type == MNEMO_BISTABLE && !module->bit_comm )
-        { Dls_data_set_bool ( mnemo->dls_tech_id, "COMM", &module->bit_comm, FALSE ); }
+        { Dls_data_set_bool ( mnemo->dls_tech_id, mnemo->acronyme, &module->bit_comm, FALSE ); }
        g_free(mnemo);
      }
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: Module '%s' : mapping done", __func__,

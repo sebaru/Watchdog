@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Serveur/protocole_supervision.c    Gestion du protocole_supervision pour Watchdog                                */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                          sam 04 avr 2009 11:17:04 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                          sam 04 avr 2009 11:17:04 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * protocole_supervision.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

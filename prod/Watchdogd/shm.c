@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
 /* Watchdogd/shm.c        Gestion de la mémoire partagée                                                  */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      dim 05 avr 2009 12:32:40 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                      dim 05 avr 2009 12:32:40 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * shm.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2019 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

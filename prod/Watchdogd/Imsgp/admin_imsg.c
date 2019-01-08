@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Imsgp/admin_imsg.c        Gestion des responses Admin IMSG au serveur watchdog                                   */
-/* Projet WatchDog version 2.0        Gestion d'habitat                                                   25.02.2018 17:36:21 */
+/* Projet WatchDog version 3.0        Gestion d'habitat                                                   25.02.2018 17:36:21 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * admin_imsg.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

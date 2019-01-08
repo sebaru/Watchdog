@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Watchdogd.c        Démarrage/Arret du systeme Watchdog, gestion des connexions clientes                          */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                           mar 14 fév 2006 15:56:40 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                           mar 14 fév 2006 15:56:40 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Watchdogd.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2019 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -475,6 +475,7 @@
        Close_zmq( zmq_from_master );
      }
 /********************************* Dechargement des zones de bits internes dynamiques *****************************************/
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Début libération mémoire dynamique", __func__ );
     g_slist_foreach (Partage->Dls_data_BOOL, (GFunc) g_free, NULL );
     g_slist_free (Partage->Dls_data_BOOL);
     g_slist_foreach (Partage->Dls_data_AI, (GFunc) g_free, NULL );

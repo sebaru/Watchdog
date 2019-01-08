@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Dls/The_dls.c  Gestion et execution des plugins DLS Watchdgo 2.0                                                 */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                       mar. 06 juil. 2010 18:31:32 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                       mar. 06 juil. 2010 18:31:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * The_dls.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1210,26 +1210,6 @@
     if (!liste) return(FALSE);
     if (msg_p) *msg_p = (gpointer)msg;                                              /* Sauvegarde pour acceleration si besoin */
     return( msg->etat );    
-  }
-/******************************************************************************************************************************/
-/* Dls_data_free_data: Libere la memoire pour les clefs et data contenu dans l'arbre Dls_data. Appellé par g_tree_foreach     */
-/* Entrée : la clef a libérer, la value qui va avec et un pointer non utilisé                                                 */
-/* Sortie : FALSE pour poursuivre le cheminement de l'arbre                                                                   */
-/******************************************************************************************************************************/
- static gboolean Dls_data_free_data (gpointer key, gpointer value, gpointer data)
-  { g_free(key);
-    g_free(value);
-    return(FALSE);
-  }
-/******************************************************************************************************************************/
-/* Dls_data_free_data: Libere la memoire pour les clefs et data contenu dans l'arbre Dls_data. Appellé par g_tree_foreach     */
-/* Entrée : la clef a libérer, la value qui va avec et un pointer non utilisé                                                 */
-/* Sortie : FALSE pour poursuivre le cheminement de l'arbre                                                                   */
-/******************************************************************************************************************************/
- static gboolean Dls_data_free_all_data (gpointer key, gpointer value, gpointer data)
-  { g_free(key);
-    g_free(value);
-    return(FALSE);
   }
 /******************************************************************************************************************************/
 /* Dls_foreach_dls_tree: Parcours recursivement l'arbre DLS et execute des commandes en parametres                            */

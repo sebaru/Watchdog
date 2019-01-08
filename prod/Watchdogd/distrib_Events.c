@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/distrib_Events.c        Distribution des changements d'etats motif                                               */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                        sam. 24 janv. 2015 13:53:26 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                        sam. 24 janv. 2015 13:53:26 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * distrib_Events.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2019 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@
     Partage->com_msrv.liste_a = g_slist_remove ( Partage->com_msrv.liste_a, GINT_TO_POINTER(num) );
     reste = g_slist_length(Partage->com_msrv.liste_a);
     pthread_mutex_unlock( &Partage->com_msrv.synchro );
-
+return; /* pour test le 05/01/2019 Seb */
     critere.type = MNEMO_SORTIE;                                                /* Recherche du ev_text associé au mnemonique */
     critere.num  = num;
     mnemo = Rechercher_mnemo_baseDB_type_num ( &critere );
@@ -70,7 +70,7 @@
        Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Recu A(%03d) (%s/%s/%s). Reste a traiter %03d", __func__,
                  num, mnemo->ev_host, mnemo->ev_thread, mnemo->ev_text, reste
                );
-       SA ( num, 0 );                                                   /* L'evenement est traité, on fait retomber la sortie */
+       /*SA ( num, 0 );                                                 /* L'evenement est traité, on fait retomber la sortie */
      }
     g_free(mnemo);
   }

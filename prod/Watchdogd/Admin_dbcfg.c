@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Admin/admin_dbcfg.c        Gestion des connexions Admin GET au serveur watchdog                                  */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                        jeu. 05 janv. 2012 23:24:09 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                        jeu. 05 janv. 2012 23:24:09 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * admin_dbcfg.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@
     if ( ! strcmp ( commande, "set" ) )
      { gchar param[80],valeur[80];
        gboolean retour;
-       if (sscanf ( ligne, "%s %s %s %s", thread, commande, param, valeur )!=4) return(response);
+       if (sscanf ( ligne, "%s %s %s %[^\n]", thread, commande, param, valeur )!=4) return(response);
        retour = Modifier_configDB( thread, param, valeur );
        g_snprintf( chaine, sizeof(chaine), " | - Instance_id '%s', Thread '%s' -> Setting %s = %s -> %s",
                    g_get_host_name(), thread, param, valeur, (retour ? "Success" : "Failed") );

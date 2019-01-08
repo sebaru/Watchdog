@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/distrib.c        Distribution des messages DLS aux clients                                                       */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                        mar. 14 août 2012 19:05:42 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                        mar. 14 août 2012 19:05:42 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * distrib_MSGxxx.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien LEFEVRE
+ * Copyright (C) 2010-2019 - Sebastien LEFEVRE
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -230,12 +230,12 @@
        event = Partage->com_msrv.liste_msg->data;                        /* Recuperation du numero de msg */
        Partage->com_msrv.liste_msg = g_slist_remove ( Partage->com_msrv.liste_msg, event );
        if (event->msg)
-        { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO,
                    "%s: Handle MSG'%s:%s'=%d, Reste a %d a traiter", __func__,
                     event->msg->tech_id, event->msg->acronyme, event->etat, g_slist_length(Partage->com_msrv.liste_msg) );
         }
        else
-        { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+        { Info_new( Config.log, Config.log_msrv, LOG_INFO,
                    "%s: Handle MSG%03d=%d, Reste a %d a traiter", __func__,
                     event->num, event->etat, g_slist_length(Partage->com_msrv.liste_msg) );
         }

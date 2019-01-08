@@ -47,8 +47,6 @@
 
     VALIDE,
 
-    ENVOI_ICONE_FOR_ATELIER,
-    ENVOI_CLASSE_FOR_ATELIER,
     DECONNECTE                                                                                            /* Deconnexion SOFT */
   };
 

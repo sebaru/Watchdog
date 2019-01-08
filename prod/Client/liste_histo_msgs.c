@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
 /* Client/liste_histo_msgs.c        Gestion de la page d'affichage des messages au fil de l'eau           */
-/* Projet WatchDog version 2.0       Gestion d'habitat                       mer 24 mar 2004 10:06:06 CET */
+/* Projet WatchDog version 3.0       Gestion d'habitat                       mer 24 mar 2004 10:06:06 CET */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * liste_histo_msgs.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

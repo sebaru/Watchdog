@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Client/Config_cli/Config_cli.c        Lecture du fichier de configuration cliente Watchdog                                 */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                          ven 03 avr 2009 19:02:43 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                          ven 03 avr 2009 19:02:43 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Config_cli.c
  * This file is part of <Watchdog>
  *
- * Copyright (C) 2010 - sebastien
+ * Copyright (C) 2010-2019 - sebastien
  *
  * <Watchdog> is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

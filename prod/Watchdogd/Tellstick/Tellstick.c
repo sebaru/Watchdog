@@ -1,13 +1,13 @@
 /**********************************************************************************************************/
 /* Watchdogd/Tellstick/Tellstick.c  Gestion des tellivages bit_internes Watchdog 2.0                          */
-/* Projet WatchDog version 2.0       Gestion d'habitat                      sam 08 jui 2006 11:56:48 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                      sam 08 jui 2006 11:56:48 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
 /*
  * Tellstick.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

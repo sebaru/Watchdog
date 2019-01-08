@@ -1,13 +1,13 @@
 /******************************************************************************************************************************/
 /* Watchdogd/Mnemonique/Mnemonique.c        Déclaration des fonctions pour la gestion des mnemoniques                         */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                          dim 19 avr 2009 15:15:28 CEST */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                          dim 19 avr 2009 15:15:28 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
  * Mnemonique.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sebastien Lefevre
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -260,6 +260,31 @@
                " AND mnemo.ev_text LIKE '%s'",
                g_get_host_name(), thread, commande );
     g_free(commande);
+    db = Init_DB_SQL();       
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
+  }
+/******************************************************************************************************************************/
+/* Recuperer_mnemo_baseDB_by_command_text: Recupération de la liste des mnemo par command_text                                */
+/* Entrée: un pointeur vers une nouvelle connexion de base de données, le critere de recherche                                */
+/* Sortie: FALSE si erreur                                                      ********************                          */
+/******************************************************************************************************************************/
+ gboolean Recuperer_mnemo_baseDB_by_thread ( struct DB **db_retour, gchar *thread )
+  { gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
+
+    g_snprintf( requete, sizeof(requete), MNEMO_SQL_SELECT                                                     /* Requete SQL */
+               " WHERE (mnemo.ev_host='*' OR mnemo.ev_host='%s') AND mnemo.ev_thread='%s'",
+               g_get_host_name(), thread );
+
     db = Init_DB_SQL();       
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
