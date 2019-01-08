@@ -27,7 +27,7 @@ sudo -u watchdog cp Watchdogd/Voice/fr.dict ~watchdog/
 sudo -u watchdog cp Watchdogd/Voice/wtd.gram ~watchdog/
 sudo -u watchdog cp -r Watchdogd/Voice/cmusphinx-fr-5.2 ~watchdog/
 sudo -u watchdog cp -r Son/* ~watchdog/Son
-
+sudo -u watchdog echo "default-server=/run/user/"`id -u watchdog`"/pulse/native" > ~watchdog/.pulse/client.conf
 echo "done."
 sleep 2
 
