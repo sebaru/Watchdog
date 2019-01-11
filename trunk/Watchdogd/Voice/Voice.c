@@ -116,8 +116,6 @@
        return;
      }
 
-    write( id_fichier, "annule", strlen("annule") );
-    write( id_fichier, "\n |", 3 );
     write( id_fichier, Cfg_voice.key_words, strlen(Cfg_voice.key_words) );
     write( id_fichier, "\n |", 3 );
     write( id_fichier, QUELLE_VERSION, strlen(QUELLE_VERSION) );
