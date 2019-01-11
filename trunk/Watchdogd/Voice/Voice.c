@@ -243,7 +243,7 @@ reload:
      { gint cpt_fd;
        close(pipefd[0]);                                                               /* this descriptor is no longer needed */
        for (cpt_fd = getdtablesize(); cpt_fd>2; cpt_fd--)                            /* Fermeture de tous les FD avant execve */
-        { close(cpt_fd); }
+        { if (cpt_fd!=pipefd[1]) close(cpt_fd); }
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_DEBUG, "%s: Starting PocketSphinx (pid %d) !", __func__, getpid() );
        dup2(pipefd[1], 1);  /* Send stdout to the pipe (back to father !) */
        dup2(pipefd[1], 2);  /* Send stderr to the pipe (back to father !) */
