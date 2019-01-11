@@ -282,7 +282,10 @@ reload:
        if (retour==0)
         { sched_yield();
           usleep(1000);
-          wait_for_keywords = TRUE;
+          if(wait_for_keywords == FALSE)
+           { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_DEBUG, "%s: waiting for keywords", __func__, retour );
+             wait_for_keywords = TRUE;
+           }
           continue;
         }
        retour = read(pipefd[0], commande_vocale, sizeof(commande_vocale));
