@@ -52,7 +52,7 @@
     Cfg_voice.enable            = FALSE; 
     g_snprintf( Cfg_voice.audio_device,  sizeof(Cfg_voice.audio_device),  "default" );
     g_snprintf( Cfg_voice.key_words,     sizeof(Cfg_voice.key_words),     "dis moi jolie maison" );
-    g_snprintf( Cfg_voice.vad_threshold, sizeof(Cfg_voice.vad_threshold), "4.0" );
+    g_snprintf( Cfg_voice.vad_threshold, sizeof(Cfg_voice.vad_threshold), "5.0" );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
