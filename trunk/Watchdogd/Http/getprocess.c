@@ -62,6 +62,8 @@
        json_builder_add_boolean_value ( builder, lib->Thread_run );
        json_builder_set_member_name  ( builder, "Fichier" );
        json_builder_add_string_value ( builder, lib->nom_fichier );
+       json_builder_set_member_name  ( builder, "Objet" );
+       json_builder_add_string_value ( builder, lib->admin_help );
        json_builder_end_object (builder);                                                                       /* End Module */
 
        liste = liste->next;

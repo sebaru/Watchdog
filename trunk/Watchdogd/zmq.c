@@ -133,9 +133,9 @@
 /* Entrée: la socket, le tag, le message, sa longueur                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag, const gchar *target_instance, gchar *target_thread,
+ gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag, const gchar *target_instance, const gchar *target_thread,
                               void *source, gint taille )
-  { struct MSRV_EVENT event;
+  { struct ZMQ_TARGET event;
     void *buffer;
     gboolean retour;
     buffer = g_try_malloc( taille + sizeof(struct MSRV_EVENT) );
@@ -203,7 +203,7 @@
 /* Entrée: la file, le buffer d'accueil, la taille du buffer                                                                  */
 /* Sortie: Nombre de caractere lu, -1 si erreur                                                                               */
 /******************************************************************************************************************************/
- gint Recv_zmq_with_tag ( struct ZMQUEUE *zmq, void *buf, gint taille_buf, struct MSRV_EVENT **event, void **payload )
+ gint Recv_zmq_with_tag ( struct ZMQUEUE *zmq, void *buf, gint taille_buf, struct ZMQ_TARGET **event, void **payload )
   { gint byte;
     byte = zmq_recv ( zmq->socket, buf, taille_buf, ZMQ_DONTWAIT );
     if (byte>=0)

@@ -35,9 +35,6 @@
  #include <sys/socket.h>
  #include <netinet/in.h>
  #include <netdb.h>
- #include <gnutls/gnutls.h>
- #include <gnutls/x509.h>
- #include <openssl/rand.h>
 
 /************************************************** Prototypes de fonctions ***************************************************/
  #include "watchdogd.h"
@@ -233,7 +230,7 @@
     buf = json_generator_to_data (gen, &taille_buf);
     g_object_unref(builder);
     g_object_unref(gen);
-    buf_to_send = g_malloc0( taille_buf + LWS_PRE );
+    buf_to_send = g_try_malloc0( taille_buf + LWS_PRE );
     if (buf_to_send)
      { memcpy( buf_to_send + LWS_PRE, buf, taille_buf );
        lws_write(wsi, &buf_to_send[LWS_PRE], taille_buf, LWS_WRITE_TEXT );
@@ -341,16 +338,19 @@
 		          break;
        case LWS_CALLBACK_HTTP_BODY:
              { if ( ! strcasecmp ( pss->url, "/postfile" ) )
-                { return( Http_Traiter_request_body_postfile ( wsi, data, taille ) ); }             /* Utilisation ud lws_spa */
+                { return( Http_Traiter_request_body_postfile ( wsi, data, taille ) ); }             /* Utilisation du lws_spa */
                else if ( ! strcasecmp ( pss->url, "/cli" ) )
-                { return( Http_Traiter_request_body_cli ( wsi, data, taille ) ); }                  /* Utilisation ud lws_spa */
-               return( Http_CB_file_upload( wsi, data, taille ) );          /* Sinon, c'est un buffer type json ou un fichier */
+                { return( Http_CB_file_upload( wsi, data, taille ) ); }     /* Sinon, c'est un buffer type json ou un fichier */
+               else
+                { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );
+                  return(1);
+                }
              }
             break;
        case LWS_CALLBACK_HTTP_BODY_COMPLETION:
-             { lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
-                                           (char *)&remote_name, sizeof(remote_name),
-                                           (char *)&remote_ip, sizeof(remote_ip) );
+             { /*lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
+                                       (char *)&remote_name, sizeof(remote_name),
+                                       (char *)&remote_ip, sizeof(remote_ip) );*/
                if ( ! strcasecmp ( pss->url, "/postfile" ) )
                 { return( Http_Traiter_request_body_completion_postfile ( wsi ) ); }
                else if ( ! strcasecmp ( pss->url, "/cli" ) )
@@ -389,12 +389,6 @@
                 { g_snprintf( pss->url, sizeof(pss->url), "/postfile" );
                   return(0);
                 }
-               else if ( ! strcasecmp( url, "/dls/reload" ) )
-                { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading DLS", __func__ );
-                  Partage->com_dls.Thread_reload = TRUE;
-                  Http_Send_response_code ( wsi, HTTP_200_OK );
-                  return(1);
-                }
 /*************************************************** WS DLS debug traduction **************************************************/
                else if ( ! strcasecmp( url, "/dls/debug_trad_on" ) )
                 { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug ON", __func__ );
@@ -414,6 +408,12 @@
                   GSList *liste;
                   Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
                             "%s: Reloading start for %s", __func__, target );
+                  if ( ! strcasecmp( target, "dls" ) )
+                   { Partage->com_dls.Thread_reload = TRUE;
+                     Http_Send_response_code ( wsi, HTTP_200_OK );
+                     return(1);
+                   }
+
                   liste = Partage->com_msrv.Librairies;                                  /* Parcours de toutes les librairies */
                   while(liste)
                    { struct LIBRAIRIE *lib = liste->data;
@@ -544,8 +544,7 @@
     memset( &Cfg_http, 0, sizeof(Cfg_http) );                                       /* Mise a zero de la structure de travail */
     Cfg_http.lib = lib;                                            /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_http.lib->TID = pthread_self();                                                     /* Sauvegarde du TID pour le pere */
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-              "Run_thread: Demarrage . . . TID = %p", pthread_self() );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
     Http_Lire_config ();                                                    /* Lecture de la configuration logiciel du thread */
 
     g_snprintf( Cfg_http.lib->admin_prompt, sizeof(Cfg_http.lib->admin_prompt), NOM_THREAD );

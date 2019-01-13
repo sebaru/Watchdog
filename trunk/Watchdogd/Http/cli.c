@@ -43,78 +43,65 @@
     NBR_PARAM_CLI
   };
 /******************************************************************************************************************************/
-/* Http_Traiter_request_cli: Traite une requete de cli                                                                        */
-/* Entrées: la connexion MHD                                                                                                  */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- gint Http_Traiter_request_body_cli ( struct lws *wsi, void *data, size_t taille )
-  { struct HTTP_PER_SESSION_DATA *pss;
-
-    pss = lws_wsi_user ( wsi );
-    if (lws_hdr_total_length(wsi, WSI_TOKEN_GET_URI))                                 /* Header de type GET ?? Si oui, erreur */
-     { Http_Send_response_code ( wsi, HTTP_BAD_METHOD );
-       return(1);
-     }
-
-    if (!pss->spa)
-     {	pss->spa = lws_spa_create(wsi, PARAM_CLI, NBR_PARAM_CLI, 256, NULL, NULL );
-    			if (!pss->spa)	return(1);
-     }
-    return(lws_spa_process(pss->spa, data, taille));
-  }
-/******************************************************************************************************************************/
 /* Http_Traiter_request_body_completion_cli: le payload est arrivé, il faut traiter le fichier                                */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : 0 ou 1 selon si la transaction est completed                                                                      */
 /******************************************************************************************************************************/
  gint Http_Traiter_request_body_completion_cli ( struct lws *wsi )
-  { unsigned char header[512], *header_cur, *header_end;
-    gchar *user, *commande, *id, *host;
+  { const gchar *ev_host, *ev_thread, *ev_text;
     struct HTTP_PER_SESSION_DATA *pss;
-    gchar *buffer;
+    JsonObject *object;
+    JsonNode *Query;
     gint retour;
 
     pss = lws_wsi_user ( wsi );
-    lws_spa_finalize(pss->spa);
+    pss->post_data [ pss->post_data_length ] = 0;
+    Query = json_from_string ( pss->post_data, NULL );
 
-    if (! (lws_spa_get_length(pss->spa, PARAM_CLI_USER)>0 ) )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "%s: (sid %s) 'USER' parameter is missing", __func__, Http_get_session_id(pss->session) );
+    if (!Query)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: requete non Json", __func__ );
        Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
-       return(1);
-     }
-    if (! (lws_spa_get_length(pss->spa, PARAM_CLI_ID)>0 ) )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "%s: (sid %s) 'ID' parameter is missing", __func__, Http_get_session_id(pss->session) );
-       Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
-       return(1);
-     }
-    if (! (lws_spa_get_length(pss->spa, PARAM_CLI_HOST)>0 ) )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "%s: (sid %s) 'HOST' parameter is missing", __func__, Http_get_session_id(pss->session) );
-       Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
-       return(1);
-     }
-    if (! (lws_spa_get_length(pss->spa, PARAM_CLI_COMMANDE)>0) )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "%s: (sid %s) 'COMMAND' parameter is missing", __func__, Http_get_session_id(pss->session) );
-       Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
-       return(1);
+       goto end;
      }
 
-    user     = lws_spa_get_string ( pss->spa, PARAM_CLI_USER );
-    id       = lws_spa_get_string ( pss->spa, PARAM_CLI_ID );
-    host     = lws_spa_get_string ( pss->spa, PARAM_CLI_HOST );
-    commande = lws_spa_get_string ( pss->spa, PARAM_CLI_COMMANDE );
+    object = json_node_get_object (Query);
+    if (!object)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Object non trouvé", __func__ );
+       Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
+       goto end;
+     }
 
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: HTTP/CLI request for user '%s' ('%s') from '%s' : '%s'", __func__, user, id, host, commande );
+    ev_host = json_object_get_string_member ( object, "ev_host" );
+    if (!ev_host)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: ev_host non trouvé", __func__ );
+       Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
+       goto end;
+     }
+
+    ev_thread = json_object_get_string_member ( object, "ev_thread" );
+    if (!ev_thread)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: ev_thread non trouvé", __func__ );
+       Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
+       goto end;
+     }
+
+    ev_text = json_object_get_string_member ( object, "ev_text" );
+    if (!ev_text)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: ev_text non trouvé", __func__ );
+       Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
+       goto end;
+     }
+
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+             "%s: HTTP/CLI request for %s:%s:%s", __func__, ev_host, ev_thread, ev_text );
              
-    buffer = Processer_commande_admin ( user, host, commande );
-    Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, "text/plain", buffer, strlen(buffer) );
-    g_free(buffer);
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave,   TAG_ZMQ_CLI, ev_host, ev_thread,
+                        (void *)ev_text, pss->post_data_length+1 );
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_CLI, ev_host, ev_thread,
+                        (void *)ev_text, pss->post_data_length+1 );
+    Http_Send_response_code ( wsi, HTTP_200_OK );
 
-    lws_spa_destroy ( pss->spa	);
+end:
     pss->post_data_length = 0;
     g_free(pss->post_data);
     return(1);                                                                                         /* si erreur, on coupe */

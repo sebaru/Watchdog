@@ -149,7 +149,7 @@
 /********************************************** Envoi des histos et des motifs ************************************************/
        if (client->mode == VALIDE)                                                /* Envoi au suppression des histo au client */
         { struct CMD_TYPE_HISTO histo;
-          struct MSRV_EVENT *event;
+          struct ZMQ_TARGET *event;
           gchar buffer[2048];
           void *payload;
           gint num_i;
