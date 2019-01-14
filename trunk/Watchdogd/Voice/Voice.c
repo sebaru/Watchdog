@@ -213,8 +213,9 @@
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct CMD_TYPE_HISTO *histo, histo_buf;
+    gchar commande_vocale[256], *evenement;
     gint pipefd[2], pidpocket;
-    gboolean wait_for_keywords;
+    gint last_evt = 0;
     struct timeval tv;
 
 reload:
@@ -268,10 +269,8 @@ reload:
        Connect_zmq ( Cfg_voice.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
      }
 
-    wait_for_keywords=TRUE;
     while ( Cfg_voice.lib->Thread_run == TRUE )
-     { gchar commande_vocale[256], *evenement;
-       struct DB *db;
+     { struct DB *db;
        gint retour;
        fd_set fd;
 
@@ -301,15 +300,12 @@ reload:
         }
        commande_vocale[retour-1-strlen(" merci")]=0;                                                 /*Caractere NULL d'arret */
        evenement = commande_vocale + strlen(Cfg_voice.key_words) + 1;
-       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: recu = %s", __func__, evenement );
-/*       if (wait_for_keywords==TRUE)
-        { if (!strcmp(Cfg_voice.key_words, commande_vocale))
-           { Voice_Jouer_mp3 ( "Oui_question" );
-             wait_for_keywords = FALSE;
-           }
+       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: recu = %s (last_evt=%d, top=%d)", __func__, evenement, last_evt, Partage->top );
+       if (last_evt + 100 > Partage->top)
+        { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: recu = %s but too fast !", __func__, evenement );
           continue;
         }
-       wait_for_keywords = TRUE;*/
+       last_evt = Partage->top;
 
        if (!strcmp( QUELLE_VERSION, evenement ))
         { gchar chaine[80];
