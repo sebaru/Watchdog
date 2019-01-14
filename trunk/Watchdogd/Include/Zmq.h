@@ -43,7 +43,7 @@
     gchar endpoint[32];
   };
 
- struct MSRV_EVENT
+ struct ZMQ_TARGET
   { guint tag;
     gchar instance[12];
     gchar thread[12];
