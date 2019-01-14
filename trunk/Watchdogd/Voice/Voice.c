@@ -54,7 +54,7 @@
     g_snprintf( Cfg_voice.audio_device,  sizeof(Cfg_voice.audio_device),  "default" );
     g_snprintf( Cfg_voice.key_words,     sizeof(Cfg_voice.key_words),     "dis moi jolie maison" );
     g_snprintf( Cfg_voice.gain_control,  sizeof(Cfg_voice.gain_control),  "noise" );
-    g_snprintf( Cfg_voice.vad_threshold, sizeof(Cfg_voice.vad_threshold), "2.0" );
+    g_snprintf( Cfg_voice.vad_threshold, sizeof(Cfg_voice.vad_threshold), "3.0" );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
@@ -72,7 +72,7 @@
        else if ( ! g_ascii_strcasecmp ( nom, "key_words" ) )
         { g_snprintf( Cfg_voice.key_words, sizeof(Cfg_voice.key_words), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "gain_control" ) )
-        { g_snprintf( Cfg_voice.key_words, sizeof(Cfg_voice.gain_control), "%s", valeur ); }
+        { g_snprintf( Cfg_voice.gain_control, sizeof(Cfg_voice.gain_control), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "vad_threshold" ) )
         { g_snprintf( Cfg_voice.vad_threshold, sizeof(Cfg_voice.vad_threshold), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
