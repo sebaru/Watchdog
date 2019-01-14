@@ -113,7 +113,6 @@
  extern gboolean Http_Traiter_request_getstatus ( struct lws *wsi );
  extern gint Http_Traiter_request_getprocess ( struct lws *wsi, gchar *url );
  extern gint Http_Traiter_request_getaudio ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
- extern gint Http_Traiter_request_body_cli ( struct lws *wsi, void *data, size_t taille );
  extern gint Http_Traiter_request_body_completion_cli ( struct lws *wsi );
  extern gint Http_Traiter_request_body_postfile ( struct lws *wsi, void *data, size_t taille );
  extern gint Http_Traiter_request_body_completion_postfile ( struct lws *wsi );

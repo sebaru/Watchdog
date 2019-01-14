@@ -208,7 +208,7 @@
 
     while(Cfg_audio.lib->Thread_run == TRUE)                                                 /* On tourne tant que necessaire */
      { gchar buffer[256];
-       struct MSRV_EVENT *event;
+       struct ZMQ_TARGET *event;
        void *payload;
 
        if (Cfg_audio.lib->Thread_reload)                                                             /* On a recu reload ?? */

@@ -1,7 +1,7 @@
 ######################################
 # /etc/watchdogd.conf
 # Ficher de configuration de l'instance Watchdog
-# Licence GPL - lefevre.seb@gmail.com
+# Licence GPL - sebastien.lefevre@abls-habitat.fr
 ######################################
 
 ######################################
@@ -21,9 +21,9 @@ debug_arch = false
 [GLOBAL]
 
 # Répertoire home de user "Watchdog" qui fait tourner le serveur. (default : g_get_home_dir)
-home        = /home/watchdog
+home        = hometobechanged
 # Nom du user sous lequel le serveur tourne. (Default : g_get_user_name)
-run_as      = watchdog
+run_as      = usertobechanged
 # true s'il s'agit de l'instance master (Default true)
 instance_is_master = true
 #host de l'instance master le cas échéant
@@ -36,6 +36,6 @@ instance_is_master = true
 
 host     = localhost
 database = WatchdogDB
-password = tobechanged
+password = dbpasstobechanged
 username = watchdog
 

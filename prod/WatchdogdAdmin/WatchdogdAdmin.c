@@ -26,14 +26,6 @@
  */
 
  #include <glib.h>
-#ifdef bouh
- #include <sys/socket.h>
- #include <sys/un.h>                                               /* Description de la structure AF UNIX */
- #include <sys/types.h>
- #include <sys/stat.h>
- #include <fcntl.h>
- #include <unistd.h>
-#endif
  #include <stdlib.h>
  #include <popt.h>
  #include <string.h>
@@ -52,6 +44,36 @@
  static gint Log_level = 0;
  static gchar Socket_file[128];
  static gboolean Arret = FALSE;
+
+/******************************************************************************************************************************/
+/* Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                        */
+/* Entrée: le nom de fichier à lire                                                                                           */
+/* Sortie: La structure mémoire est à jour                                                                                    */
+/******************************************************************************************************************************/
+ void Lire_config ( char *fichier_config )
+  { gchar *chaine, *fichier;
+    GError *error = NULL;
+	   gint num;
+    GKeyFile *gkf;
+
+    if (!fichier_config) fichier = "/etc/watchdogd.conf";                              /* Lecture du fichier de configuration */
+                    else fichier = fichier_config;
+    printf("Using config file %s\n", fichier );
+    gkf = g_key_file_new();
+
+    if (g_key_file_load_from_file(gkf, fichier, G_KEY_FILE_NONE, &error))
+     {
+/******************************************************* Partie GLOBAL ********************************************************/
+       chaine = g_key_file_get_string ( gkf, "GLOBAL", "home", NULL );
+       if (chaine)
+        { g_snprintf( Socket_file, sizeof(Socket_file), "%s/socket.wdg", chaine ); g_free(chaine); }
+     }
+    else 
+     { printf("Unable to parse config file %s, error %s\n", fichier, error->message );
+       g_error_free( error );
+     }
+    g_key_file_free(gkf);
+  }
 /**********************************************************************************************************/
 /* Deconnecter_admin: Ferme la socket admin                                                               */
 /* Entrée: Néant                                                                                          */
@@ -156,7 +178,7 @@
     fd_set fd;
     gint retour;
 
-    g_snprintf( Socket_file, sizeof(Socket_file), "%s/socket.wdg", g_get_home_dir() );                          /* Par défaut */
+    Lire_config(NULL);                                                                                          /* Par défaut */
     Lire_ligne_commande( argc, argv );                                            /* Lecture du fichier conf et des arguments */
 
     read_history ( NULL );                                               /* Lecture de l'historique des commandes précédentes */

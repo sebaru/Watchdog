@@ -43,7 +43,7 @@
     gchar endpoint[32];
   };
 
- struct MSRV_EVENT
+ struct ZMQ_TARGET
   { guint tag;
     gchar instance[12];
     gchar thread[12];
@@ -61,6 +61,7 @@
     TAG_ZMQ_TO_THREADS,
     TAG_ZMQ_SET_BIT,
     TAG_ZMQ_SET_SYN_VARS,
+    TAG_ZMQ_CLI,
     NBR_ZMQ_TAG
   };
 /************************************************ Définitions des prototypes **************************************************/
@@ -69,9 +70,10 @@
  extern gboolean Connect_zmq ( struct ZMQUEUE *zmq, gchar *type, gchar *nom, gint port );
  extern void Close_zmq ( struct ZMQUEUE *zmq );
  extern gboolean Send_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille );
- extern gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag, const gchar *target_instance, gchar *target_thread, void *source, gint taille );
+ extern gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag, const gchar *target_instance, const gchar *target_thread,
+                                     void *source, gint taille );
  extern gint Recv_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille_buf );
  extern gint Recv_zmq_block ( struct ZMQUEUE *zmq, void *buf, gint taille_buf );
- extern gint Recv_zmq_with_tag ( struct ZMQUEUE *zmq, void *buf, gint taille_buf, struct MSRV_EVENT **event, void **payload );
+ extern gint Recv_zmq_with_tag ( struct ZMQUEUE *zmq, void *buf, gint taille_buf, struct ZMQ_TARGET **event, void **payload );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

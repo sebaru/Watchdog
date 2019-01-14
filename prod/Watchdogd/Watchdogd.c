@@ -259,25 +259,6 @@
     Updater_cpt_impDB();                                                              /* Sauvegarde des compteurs d'impulsion */
   }
 /******************************************************************************************************************************/
-/* Tatiter_reload : Print les variable importante dans les lgos                                                              */
-/* Entrée : Néant                                                                                                             */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Traiter_reload ( void )
-  { guint nbr_i, nbr_msg, nbr_msg_repeat;
-    gchar chaine[256];
-
-    pthread_mutex_lock( &Partage->com_msrv.synchro );
-    nbr_i          = g_slist_length( Partage->com_msrv.liste_i );
-    nbr_msg        = g_slist_length( Partage->com_msrv.liste_msg );                            /* Recuperation du numero de i */
-    nbr_msg_repeat = g_slist_length( Partage->com_msrv.liste_msg_repeat );                                /* liste des repeat */
-    pthread_mutex_unlock( &Partage->com_msrv.synchro );
-
-    g_snprintf( chaine, sizeof(chaine), "%s: Reste %d I, %d MSG, %d MSG_REPEAT", __func__, 
-                nbr_i, nbr_msg, nbr_msg_repeat );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, chaine );
-  }
-/******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
 /* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
@@ -355,7 +336,7 @@
        Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
 
        if (Config.instance_is_master == TRUE)                                     /* Instance is master : listening to slaves */
-        { struct MSRV_EVENT *event;
+        { struct ZMQ_TARGET *event;
           gchar buffer[2048];
           void *payload;
           gint byte;
@@ -378,7 +359,7 @@
            }
         }
        else                                                                         /* Instance is slave, listening to master */
-        { struct MSRV_EVENT *event;
+        { struct ZMQ_TARGET *event;
           gchar buffer[2048];
           void *payload;
           gint byte;
@@ -419,26 +400,6 @@
           Info_change_log_level ( Config.log, Config.log_level );
           Charger_config_bit_interne();                                             /* Rechargement des configs bits internes */
           Partage->com_msrv.Thread_reload      = FALSE;                                                 /* signal traité. RAZ */
-        }
-
-       if (Partage->com_msrv.Thread_reload)                                                          /* On a recu reload ?? */
-        { struct LIBRAIRIE *lib;
-          GSList *liste;
-
-          Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: SIGUSR1", __func__ );
-          Partage->com_dls.Thread_reload       = TRUE;
-          Partage->com_arch.Thread_reload      = TRUE;
-          Partage->com_admin.Thread_reload     = TRUE;
-
-          liste = Partage->com_msrv.Librairies;                                          /* Parcours de toutes les librairies */
-          while(liste)
-           { lib = (struct LIBRAIRIE *)liste->data;
-             lib->Thread_reload = TRUE;
-             liste = liste->next;
-           }
-
-          Traiter_reload();                                         /* Appel de la fonction pour traiter le signal pour MSRV */
-          Partage->com_msrv.Thread_reload      = FALSE;
         }
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */

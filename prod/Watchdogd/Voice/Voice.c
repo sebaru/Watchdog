@@ -50,9 +50,11 @@
 
     Cfg_voice.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
     Cfg_voice.enable            = FALSE; 
+    Cfg_voice.delai_inhib       = 300; 
     g_snprintf( Cfg_voice.audio_device,  sizeof(Cfg_voice.audio_device),  "default" );
     g_snprintf( Cfg_voice.key_words,     sizeof(Cfg_voice.key_words),     "dis moi jolie maison" );
-    g_snprintf( Cfg_voice.vad_threshold, sizeof(Cfg_voice.vad_threshold), "4.0" );
+    g_snprintf( Cfg_voice.gain_control,  sizeof(Cfg_voice.gain_control),  "noise" );
+    g_snprintf( Cfg_voice.vad_threshold, sizeof(Cfg_voice.vad_threshold), "2.0" );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
@@ -69,10 +71,14 @@
         { g_snprintf( Cfg_voice.audio_device, sizeof(Cfg_voice.audio_device), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "key_words" ) )
         { g_snprintf( Cfg_voice.key_words, sizeof(Cfg_voice.key_words), "%s", valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "gain_control" ) )
+        { g_snprintf( Cfg_voice.key_words, sizeof(Cfg_voice.gain_control), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "vad_threshold" ) )
         { g_snprintf( Cfg_voice.vad_threshold, sizeof(Cfg_voice.vad_threshold), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_voice.lib->Thread_debug = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "delai_inhib" ) )
+        { Cfg_voice.delai_inhib = atoi(valeur); }
        else
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_NOTICE,
                    "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
@@ -86,7 +92,9 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Voice_Make_jsgf_grammaire ( void )
-  { gchar *debut="#JSGF V1.0 UTF-8;\n\ngrammar watchdog.fr;\n\npublic <phrase> = ";
+  { gchar *debut="#JSGF V1.0 UTF-8;\n\ngrammar watchdog.fr;\n\n<evenement> = ";
+    gchar *fin="\n\npublic <phrase> = debut evenement fin;";
+    gchar chaine[128];
     struct CMD_TYPE_MNEMO_BASE *mnemo;
     gchar *file="wtd.gram";
     gint id_fichier;
@@ -108,26 +116,28 @@
        return;
      }
 
-    if (write( id_fichier, debut, strlen(debut) )<0)
-     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: Write Début to file '%s' failed (%s)", __func__, 
+    g_snprintf(chaine, sizeof(chaine), "#JSGF V1.0 UTF-8;\n\ngrammar watchdog.fr;\n\n" );
+    if (write( id_fichier, chaine, strlen(chaine) )<0)
+     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: Write to file '%s' failed (%s)", __func__, 
                  file, strerror(errno) );
        Libere_DB_SQL ( &db );
        close(id_fichier);
        return;
      }
 
-    write( id_fichier, "annule", strlen("annule") );
-    write( id_fichier, "\n |", 3 );
-    write( id_fichier, Cfg_voice.key_words, strlen(Cfg_voice.key_words) );
-    write( id_fichier, "\n |", 3 );
-    write( id_fichier, QUELLE_VERSION, strlen(QUELLE_VERSION) );
+    g_snprintf(chaine, sizeof(chaine), "<debut> = %s;\n\n", Cfg_voice.key_words );
+    write( id_fichier, chaine, strlen(chaine) );
+
+    g_snprintf(chaine, sizeof(chaine), "<evenement> = %s", QUELLE_VERSION );
+    write( id_fichier, chaine, strlen(chaine) );
 
     while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
      { write( id_fichier, "\n |", 3 );
        write( id_fichier, mnemo->ev_text, strlen(mnemo->ev_text) );
        g_free(mnemo);
      }
-    write( id_fichier, ";", 1 );
+    g_snprintf(chaine, sizeof(chaine), ";\n public <phrase>= <debut> <evenement> merci;\n" );
+    write( id_fichier, chaine, strlen(chaine) );
     close(id_fichier);
   }
 /******************************************************************************************************************************/
@@ -206,9 +216,9 @@
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct CMD_TYPE_HISTO *histo, histo_buf;
-    gchar commande_vocale[256];
+    gchar commande_vocale[256], *evenement;
     gint pipefd[2], pidpocket;
-    gboolean wait_for_keywords;
+    gint last_evt = 0;
     struct timeval tv;
 
 reload:
@@ -240,13 +250,16 @@ reload:
        goto end;
      }
     else if (!pidpocket)
-     { close(pipefd[0]);    /* this descriptor is no longer needed */
+     { gint cpt_fd;
+       close(pipefd[0]);                                                               /* this descriptor is no longer needed */
+       for (cpt_fd = getdtablesize(); cpt_fd>2; cpt_fd--)                            /* Fermeture de tous les FD avant execve */
+        { if (cpt_fd!=pipefd[1]) close(cpt_fd); }
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_DEBUG, "%s: Starting PocketSphinx (pid %d) !", __func__, getpid() );
        dup2(pipefd[1], 1);  /* Send stdout to the pipe (back to father !) */
        dup2(pipefd[1], 2);  /* Send stderr to the pipe (back to father !) */
        execlp( "pocketsphinx_continuous", "pocketsphinx_continuous", "-adcdev", Cfg_voice.audio_device,
-               "-inmic", "yes", "-agc", "none", "-logfn", "pocket.log",
-               "-vad_threshold", Cfg_voice.vad_threshold, "-bestpathlw", "9.9",
+               "-inmic", "yes", "-agc", Cfg_voice.gain_control, "-logfn", "pocket.log",
+               "-vad_threshold", Cfg_voice.vad_threshold,
                "-dict", "fr.dict", "-jsgf", "wtd.gram", "-hmm", "cmusphinx-fr-5.2", NULL );
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s_Fils: lancement PocketSphinx failed", __func__ );
        _exit(0);
@@ -259,7 +272,6 @@ reload:
        Connect_zmq ( Cfg_voice.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
      }
 
-    wait_for_keywords=TRUE;
     while ( Cfg_voice.lib->Thread_run == TRUE )
      { struct DB *db;
        gint retour;
@@ -279,7 +291,6 @@ reload:
        if (retour==0)
         { sched_yield();
           usleep(1000);
-          wait_for_keywords = TRUE;
           continue;
         }
        retour = read(pipefd[0], commande_vocale, sizeof(commande_vocale));
@@ -290,40 +301,39 @@ reload:
           Cfg_voice.lib->Thread_reload = TRUE;
           continue;
         }
-       commande_vocale[retour-1]=0;                                                                  /*Caractere NULL d'arret */
-
-       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: recu = %s", __func__, commande_vocale );
-       if (wait_for_keywords==TRUE)
-        { if (!strcmp(Cfg_voice.key_words, commande_vocale))
-           { Voice_Jouer_mp3 ( "Oui_question" );
-             wait_for_keywords = FALSE;
-           }
+       commande_vocale[retour-1-strlen(" merci")]=0;                                                 /*Caractere NULL d'arret */
+       evenement = commande_vocale + strlen(Cfg_voice.key_words) + 1;
+       if (Partage->top <= last_evt + Cfg_voice.delai_inhib)
+        { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
+                    "%s: recu = '%s' but too fast. Last_evt=%d. Next evt not before %d !", __func__,
+                    evenement, last_evt, last_evt + Cfg_voice.delai_inhib );
           continue;
         }
-       wait_for_keywords = TRUE;
+       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: recu = '%s'. Searching...", __func__, evenement );
+       last_evt = Partage->top;
 
-       if (!strcmp( QUELLE_VERSION, commande_vocale))
+       if (!strcmp( QUELLE_VERSION, evenement ))
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), "Ma version est la %s", PACKAGE_VERSION );
           Voice_Jouer_google_speech ( chaine );
           continue;
         }
 
-       if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, commande_vocale ) )
+       if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, evenement ) )
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
-                    "%s: Error searching Database for '%s'", __func__, commande_vocale );
+                    "%s: Error searching Database for '%s'", __func__, evenement );
           continue;
         }
           
        if ( db->nbr_result == 0 )                                                           /* Si pas d'enregistrement trouvé */
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
-                    "%s: No match found for '%s'", __func__, commande_vocale );
+                    "%s: No match found for '%s'", __func__, evenement );
           Libere_DB_SQL ( &db );
           Voice_Jouer_mp3 ( "Je_ne_sais_pas_faire" );
         }
        else if (db->nbr_result > 1)
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
-                    "%s: Too many event for '%s'", __func__, commande_vocale );
+                    "%s: Too many event for '%s'", __func__, evenement );
           Libere_DB_SQL ( &db );
           Voice_Jouer_mp3 ( "C_est_ambigue" );
         }
@@ -338,12 +348,12 @@ reload:
                  { case MNEMO_MONOSTABLE:
                         Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_NOTICE,
                                   "%s: '%s' -> Mise à un du bit '%s:%s'", __func__,
-                                  commande_vocale, mnemo->dls_tech_id, mnemo->acronyme );
+                                  evenement, mnemo->dls_tech_id, mnemo->acronyme );
                         Envoyer_commande_dls_data ( mnemo->dls_tech_id, mnemo->acronyme );
                         break;
                    default:
                         Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                                  "%s: '%s' -> Error, type of mnemo not handled", __func__, commande_vocale );
+                                  "%s: '%s' -> Error, type of mnemo not handled", __func__, evenement );
                  }
               }
              else /* Envoi au master via thread HTTP */
@@ -357,7 +367,7 @@ reload:
                                        &bit, sizeof(struct ZMQ_SET_BIT) );
                  }
                 else Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
-                              "%s: '%s' -> Error, type of mnemo not handled", __func__, commande_vocale );
+                              "%s: '%s' -> Error, type of mnemo not handled", __func__, evenement );
               }
              g_free(mnemo);
            }
