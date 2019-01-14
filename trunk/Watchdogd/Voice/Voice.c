@@ -301,7 +301,7 @@ reload:
        commande_vocale[retour-1-strlen(" merci")]=0;                                                 /*Caractere NULL d'arret */
        evenement = commande_vocale + strlen(Cfg_voice.key_words) + 1;
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: recu = %s (last_evt=%d, top=%d)", __func__, evenement, last_evt, Partage->top );
-       if (last_evt + 100 > Partage->top)
+       if (last_evt + 300 > Partage->top)
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: recu = %s but too fast !", __func__, evenement );
           continue;
         }
