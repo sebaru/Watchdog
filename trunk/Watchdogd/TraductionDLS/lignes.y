@@ -615,9 +615,7 @@ action:         action VIRGULE une_action
                 | une_action {{ $$=$1; }}
                 ;
 
-une_action:     barre SORTIE ENTIER
-                  {{ $$=New_action_sortie($3, $1);     }}
-                | ICONE ENTIER liste_options
+une_action:     ICONE ENTIER liste_options
                   {{ $$=New_action_icone($2, $3);
                      Liberer_options($3);
                   }}
@@ -694,7 +692,7 @@ une_action:     barre SORTIE ENTIER
                       else switch(alias->bit)
                        { case MNEMO_TEMPO : $$=New_action_tempo( alias, options ); break;
                          case MNEMO_MSG   : $$=New_action_msg_by_alias( alias );   break;
-                         case MNEMO_SORTIE: $$=New_action_sortie( alias->num, $1 );  break;
+                         case MNEMO_SORTIE: $$=New_action_sortie( alias, $1, options );  break;
                          case MNEMO_BISTABLE:
                                     if (alias->num >= NBR_BIT_BISTABLE_RESERVED || alias->type==ALIAS_TYPE_DYNAMIC)
                                      { $$=New_action_bi_by_alias( alias, $1 ); }

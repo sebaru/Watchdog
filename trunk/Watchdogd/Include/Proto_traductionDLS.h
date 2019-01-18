@@ -91,7 +91,7 @@
  extern struct ACTION *New_action( void );
  extern struct ACTION *New_action_msg( int num );
  extern struct ACTION *New_action_msg_by_alias( struct ALIAS *alias );
- extern struct ACTION *New_action_sortie( int num, int barre );
+ extern struct ACTION *New_action_sortie( struct ALIAS *alias, int barre, GList *options );
  extern struct ACTION *New_action_vars_mono( gchar *nom );
  extern struct ACTION *New_action_activite_fixe( void );
  extern struct ACTION *New_action_mono_by_alias( struct ALIAS *alias );
