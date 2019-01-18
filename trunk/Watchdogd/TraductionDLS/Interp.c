@@ -477,7 +477,7 @@
      { return(New_action_sortie_old( alias->num, barre )); }
     /* Alias par nom */
     struct ACTION *action = New_action();
-    gint taille = 64;
+    gint taille = 128;
     action->alors = New_chaine( taille );
     g_snprintf( action->alors, taille, "SA(%d,%d);", alias->num, !barre );
     if ( (!barre && !alias->barre) || (barre && alias->barre) )
