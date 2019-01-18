@@ -484,7 +484,7 @@
          { g_snprintf( action->alors, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_A_%s_%s, 1 ); ",
                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
-    else { g_snprintf( action->alors, taille, "!Dls_data_set_bool ( \"%s\", \"%s\", &_A_%s_%s, 0 ); ",
+    else { g_snprintf( action->alors, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_A_%s_%s, 0 ); ",
                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
     return(action);
