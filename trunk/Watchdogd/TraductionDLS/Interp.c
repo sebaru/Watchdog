@@ -903,6 +903,10 @@
                         nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _E_%s_%s;\n", alias->tech_id, alias->acronyme );
                         write (fd, chaine, nb_car);
                         break;
+                   case MNEMO_SORTIE:
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _A_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        write (fd, chaine, nb_car);
+                        break;
                    case MNEMO_TEMPO:
                         nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _T_%s_%s;\n", alias->tech_id, alias->acronyme );
                         write (fd, chaine, nb_car);
