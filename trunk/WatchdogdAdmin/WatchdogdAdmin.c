@@ -49,7 +49,7 @@
 
  struct ZMQ_TARGET
   { gint8 tag;
-    gchar instance[12];
+    gchar instance[24];
     gchar thread[12];
   } target;
 
@@ -88,7 +88,6 @@
 /******************************************************************************************************************************/
  static void CB_send_to_master ( char *ligne )
   { gchar commande_old[128];
-    struct ZMQ_TARGET target;
     gchar buffer[256];
     gint recu;
 
@@ -102,7 +101,11 @@
           add_history(ligne);                                                            /* Ajoute la commande à l'historique */
         }
        memcpy(buffer, &target, sizeof(target));
-       g_snprintf( buffer+sizeof(target), sizeof(buffer) - sizeof(target),"%s", ligne );
+       g_snprintf( buffer+sizeof(target), sizeof(buffer) - sizeof(target), "%s", ligne );
+       printf("Send %d bytes to master :\n", sizeof(target)+strlen(ligne)+1 );
+       printf("tag    %d\n", target.tag );
+       printf("inst   %s\n", target.instance );
+       printf("thread %s\n", target.thread );
        zmq_send( to_master, buffer, sizeof(target)+strlen(ligne)+1, 0 );
      }
   }
@@ -144,7 +147,7 @@
 
     target.tag = 4;
     g_snprintf(target.instance, sizeof(target.instance), "%s", Socket_file );
-    g_snprintf(target.thread,   sizeof(target.thread),   "process" );
+    g_snprintf(target.thread,   sizeof(target.thread),   "msrv" );
 
     rl_callback_handler_install ( PROMPT, &CB_send_to_master );
 

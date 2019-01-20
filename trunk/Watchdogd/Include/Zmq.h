@@ -45,7 +45,7 @@
 
  struct ZMQ_TARGET
   { gint8 tag;
-    gchar instance[12];
+    gchar instance[24];
     gchar thread[12];
   };
 
