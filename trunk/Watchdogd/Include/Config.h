@@ -59,7 +59,6 @@
     gint compil;                                            /* Compilation des plugins DLS au demarrage ? */
   };
 
- #define DEFAUT_FICHIER_CONFIG_SRV      "/etc/watchdogd.conf"
  #define DEFAUT_DB_HOST                 "localhost"          /* Ne pas depasser TAILLE_DB_HOST caracteres */
  #define DEFAUT_DB_DATABASE             "WatchdogDB"         /* Ne pas depasser TAILLE_DB_NAME caracteres */
  #define DEFAUT_DB_USERNAME             "watchdog"    /* Ne pas depasser TAILLE_ADMIN_USERNAME caracteres */

@@ -40,10 +40,10 @@
 /* Sortie: La structure mémoire est à jour                                                                                    */
 /******************************************************************************************************************************/
  void Lire_config ( char *fichier_config )
-  { gchar *chaine, *fichier;
+  { gchar *chaine, fichier_etc[32], fichier_home[80];
     GError *error = NULL;
-	   gint num;
     GKeyFile *gkf;
+	   gint num;
 
     g_snprintf( Config.home,          sizeof(Config.home),          "%s", g_get_home_dir() );
     g_snprintf( Config.master_host,   sizeof(Config.master_host),   "*" );
@@ -64,76 +64,93 @@
     Config.log_dls   = FALSE;
     Config.log_arch  = FALSE;
 
+    g_snprintf( fichier_etc,  sizeof(fichier_etc),  "/etc/watchdogd.conf" );
+    g_snprintf( fichier_home, sizeof(fichier_home), "%s/.watchdog/watchdogd.conf", g_get_home_dir() );
 
-    if (!fichier_config) fichier = DEFAUT_FICHIER_CONFIG_SRV;                          /* Lecture du fichier de configuration */
-                    else fichier = fichier_config;
-    printf("Using config file %s\n", fichier );
     gkf = g_key_file_new();
 
-    if (g_key_file_load_from_file(gkf, fichier, G_KEY_FILE_NONE, &error))
-     {
-       g_snprintf( Config.config_file, sizeof(Config.config_file), "%s", fichier );
+    if (fichier_config)
+     { if (g_key_file_load_from_file(gkf, fichier_config, G_KEY_FILE_NONE, &error))
+        { g_snprintf( Config.config_file, sizeof(Config.config_file), "%s", fichier_config );
+          goto parse;
+        }
+       printf("Unable to parse config file %s, error %s\n", fichier_config, error->message );
+       g_error_free( error );
+     }
+
+    if (g_key_file_load_from_file(gkf, fichier_etc, G_KEY_FILE_NONE, &error))
+     { g_snprintf( Config.config_file, sizeof(Config.config_file), "%s", fichier_home );
+       goto parse;
+     }
+    printf("Unable to parse config file %s, error %s\n", fichier_home, error->message );
+    g_error_free( error );
+
+    if (g_key_file_load_from_file(gkf, fichier_etc, G_KEY_FILE_NONE, &error))
+     { g_snprintf( Config.config_file, sizeof(Config.config_file), "%s", fichier_etc );
+       goto parse;
+     }
+    printf("Unable to parse config file %s, error %s\n", fichier_etc, error->message );
+    g_error_free( error );
+    printf("Error : Unable to parse any config file\n" );
+    goto end;
 /******************************************************* Partie GLOBAL ********************************************************/
-       chaine = g_key_file_get_string ( gkf, "GLOBAL", "home", NULL );
-       if (chaine)
-        { g_snprintf( Config.home, sizeof(Config.home), "%s", chaine ); g_free(chaine); }
+parse:
+    chaine = g_key_file_get_string ( gkf, "GLOBAL", "home", NULL );
+    if (chaine)
+     { g_snprintf( Config.home, sizeof(Config.home), "%s", chaine ); g_free(chaine); }
 
-       chaine = g_key_file_get_string ( gkf, "GLOBAL", "master_host", NULL );
-       if (chaine)
-        { g_snprintf( Config.master_host, sizeof(Config.master_host), "%s", chaine ); g_free(chaine); }
+    chaine = g_key_file_get_string ( gkf, "GLOBAL", "master_host", NULL );
+    if (chaine)
+     { g_snprintf( Config.master_host, sizeof(Config.master_host), "%s", chaine ); g_free(chaine); }
 
-       chaine = g_key_file_get_string ( gkf, "GLOBAL", "run_as", NULL );
-       if (chaine)
-        { g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", chaine ); g_free(chaine); }
+    chaine = g_key_file_get_string ( gkf, "GLOBAL", "run_as", NULL );
+    if (chaine)
+     { g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", chaine ); g_free(chaine); }
 
-       chaine = g_key_file_get_string ( gkf, "GLOBAL", "library_dir", NULL );
-       if (chaine)
-        { g_snprintf( Config.librairie_dir, sizeof(Config.librairie_dir), "%s", chaine ); g_free(chaine); }
+    chaine = g_key_file_get_string ( gkf, "GLOBAL", "library_dir", NULL );
+    if (chaine)
+     { g_snprintf( Config.librairie_dir, sizeof(Config.librairie_dir), "%s", chaine ); g_free(chaine); }
 
-       Config.instance_is_master = g_key_file_get_boolean ( gkf, "GLOBAL", "instance_is_master", NULL );
+    Config.instance_is_master = g_key_file_get_boolean ( gkf, "GLOBAL", "instance_is_master", NULL );
 
 /******************************************************** Partie DATABASE *****************************************************/
-       Config.log_db = g_key_file_get_boolean ( gkf, "DATABASE", "debug", NULL );
-       num           = g_key_file_get_integer ( gkf, "DATABASE", "port", NULL );
-       if (num) Config.db_port = num;
+    Config.log_db = g_key_file_get_boolean ( gkf, "DATABASE", "debug", NULL );
+    num           = g_key_file_get_integer ( gkf, "DATABASE", "port", NULL );
+    if (num) Config.db_port = num;
 
-       chaine = g_key_file_get_string ( gkf, "DATABASE", "host", NULL );
-       if (chaine)
-        { g_snprintf( Config.db_host, sizeof(Config.db_host), "%s", chaine ); g_free(chaine); }
+    chaine = g_key_file_get_string ( gkf, "DATABASE", "host", NULL );
+    if (chaine)
+     { g_snprintf( Config.db_host, sizeof(Config.db_host), "%s", chaine ); g_free(chaine); }
 
-       chaine = g_key_file_get_string ( gkf, "DATABASE", "database", NULL );
-       if (chaine)
-        { g_snprintf( Config.db_database, sizeof(Config.db_database), "%s", chaine ); g_free(chaine); }
+    chaine = g_key_file_get_string ( gkf, "DATABASE", "database", NULL );
+    if (chaine)
+     { g_snprintf( Config.db_database, sizeof(Config.db_database), "%s", chaine ); g_free(chaine); }
 
-       chaine = g_key_file_get_string ( gkf, "DATABASE", "password", NULL );
-       if (chaine)
-        { g_snprintf( Config.db_password, sizeof(Config.db_password), "%s", chaine ); g_free(chaine); }
+    chaine = g_key_file_get_string ( gkf, "DATABASE", "password", NULL );
+    if (chaine)
+     { g_snprintf( Config.db_password, sizeof(Config.db_password), "%s", chaine ); g_free(chaine); }
 
-       chaine = g_key_file_get_string ( gkf, "DATABASE", "username", NULL );
-       if (chaine)
-        { g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", chaine ); g_free(chaine); }
+    chaine = g_key_file_get_string ( gkf, "DATABASE", "username", NULL );
+    if (chaine)
+     { g_snprintf( Config.db_username, sizeof(Config.db_username), "%s", chaine ); g_free(chaine); }
 
 
 /******************************************************** Partie LOG **********************************************************/
-       chaine = g_key_file_get_string ( gkf, "LOG", "log_level", NULL );
-       if (chaine)
-        {      if ( ! strcmp( chaine, "debug"    ) ) Config.log_level = LOG_DEBUG;
-          else if ( ! strcmp( chaine, "info"     ) ) Config.log_level = LOG_INFO;
-          else if ( ! strcmp( chaine, "notice"   ) ) Config.log_level = LOG_NOTICE;
-          else if ( ! strcmp( chaine, "warning"  ) ) Config.log_level = LOG_WARNING;
-          else if ( ! strcmp( chaine, "error"    ) ) Config.log_level = LOG_ERR;
-          else if ( ! strcmp( chaine, "critical" ) ) Config.log_level = LOG_CRIT;
-          g_free(chaine);
-        }
+    chaine = g_key_file_get_string ( gkf, "LOG", "log_level", NULL );
+    if (chaine)
+     {      if ( ! strcmp( chaine, "debug"    ) ) Config.log_level = LOG_DEBUG;
+       else if ( ! strcmp( chaine, "info"     ) ) Config.log_level = LOG_INFO;
+       else if ( ! strcmp( chaine, "notice"   ) ) Config.log_level = LOG_NOTICE;
+       else if ( ! strcmp( chaine, "warning"  ) ) Config.log_level = LOG_WARNING;
+       else if ( ! strcmp( chaine, "error"    ) ) Config.log_level = LOG_ERR;
+       else if ( ! strcmp( chaine, "critical" ) ) Config.log_level = LOG_CRIT;
+       g_free(chaine);
+     }
 
-       Config.log_msrv = g_key_file_get_boolean ( gkf, "LOG", "debug_msrv", NULL );
-       Config.log_dls  = g_key_file_get_boolean ( gkf, "LOG", "debug_dls", NULL );
-       Config.log_arch = g_key_file_get_boolean ( gkf, "LOG", "debug_arch", NULL );
-     }
-    else 
-     { printf("Unable to parse config file %s, error %s\n", fichier, error->message );
-       g_error_free( error );
-     }
+    Config.log_msrv = g_key_file_get_boolean ( gkf, "LOG", "debug_msrv", NULL );
+    Config.log_dls  = g_key_file_get_boolean ( gkf, "LOG", "debug_dls", NULL );
+    Config.log_arch = g_key_file_get_boolean ( gkf, "LOG", "debug_arch", NULL );
+end:
     g_key_file_free(gkf);
   }
 /******************************************************************************************************************************/
