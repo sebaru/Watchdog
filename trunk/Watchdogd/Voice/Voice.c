@@ -93,10 +93,9 @@
 /******************************************************************************************************************************/
  static void Voice_Make_jsgf_grammaire ( void )
   { gchar *debut="#JSGF V1.0 UTF-8;\n\ngrammar watchdog.fr;\n\n<evenement> = ";
-    gchar *fin="\n\npublic <phrase> = debut evenement fin;";
-    gchar chaine[128];
     struct CMD_TYPE_MNEMO_BASE *mnemo;
     gchar *file="wtd.gram";
+    gchar chaine[128];
     gint id_fichier;
     struct DB *db;
 

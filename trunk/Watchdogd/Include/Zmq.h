@@ -44,14 +44,14 @@
   };
 
  struct ZMQ_TARGET
-  { guint tag;
+  { gint8 tag;
     gchar instance[12];
     gchar thread[12];
   };
 
  struct ZMQ_SET_BIT
-  { gint  type;
-    gint  num;
+  { gint8 type;
+    gint8 num;
     gchar acronyme [ NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1 ];
     gchar dls_tech_id [ NBR_CARAC_PLUGIN_DLS_TECHID ];
   };
