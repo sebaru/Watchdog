@@ -62,6 +62,7 @@
     TAG_ZMQ_SET_BIT,
     TAG_ZMQ_SET_SYN_VARS,
     TAG_ZMQ_CLI,
+    TAG_ZMQ_CLI_RESPONSE,
     NBR_ZMQ_TAG
   };
 /************************************************ Définitions des prototypes **************************************************/
