@@ -352,19 +352,11 @@
                    break;
                  }
                 case TAG_ZMQ_CLI:
-                 { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive AdminCommand %s/%s : %s",
-                             __func__, event->instance, event->thread, payload );
-                   if (!strcmp( event->instance, g_get_host_name() ))
-                    { gchar *response;
-                      if (!strncmp( event->thread, "msrv", 4 ))
-                       { response = Processer_commande_admin( NULL, NULL, payload );
-                         Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_CLI_RESPONSE,
-                                             "*", "*", response,strlen(response)+1 );
-                       }
-                      else { Send_zmq ( Partage->com_msrv.zmq_to_threads, buffer, byte ); }
-                    }
-                   else
-                    { Send_zmq ( Partage->com_msrv.zmq_to_slave, buffer, byte ); }
+                 { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive TAG_ZMQ_CLI from %s/%s to %s/%s : %s",
+                             __func__, event->src_instance, event->src_thread, event->dst_instance,event->dst_thread, payload );
+                   if (!strcasecmp( event->dst_instance, g_get_host_name() ))          /* Sommes nous sur la bonne instance ? */
+                    { New_Processer_commande_admin ( event, payload ); }
+                   else Send_zmq ( Partage->com_msrv.zmq_to_slave, buffer, byte );               /* Sinon on envoi aux slaves */
                    break;
                  }
                 default:

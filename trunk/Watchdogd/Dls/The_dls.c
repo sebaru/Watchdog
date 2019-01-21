@@ -1345,7 +1345,8 @@
        dls_tree->syn_vars.bit_derangement_fixe = bit_derangement_fixe;
        dls_tree->syn_vars.bit_danger           = bit_danger;
        dls_tree->syn_vars.bit_danger_fixe      = bit_danger_fixe;
-       Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_SET_SYN_VARS, "*", "ssrv",
+       Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_SET_SYN_VARS,
+                           NULL, "dls", "*", "ssrv",
                           &dls_tree->syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
      }
  }

@@ -133,7 +133,9 @@
 /* Entrée: la socket, le tag, le message, sa longueur                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag, const gchar *target_instance, const gchar *target_thread,
+ gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag,
+                              const gchar *source_instance, const gchar *source_thread,
+                              const gchar *target_instance, const gchar *target_thread,
                               void *source, gint taille )
   { struct ZMQ_TARGET event;
     void *buffer;
@@ -146,10 +148,15 @@
      }
     
     event.tag = tag;
-    if (target_instance) g_snprintf( event.instance, sizeof(event.instance), target_instance );
-                    else g_snprintf( event.instance, sizeof(event.instance), "*" );
-    if (target_thread) g_snprintf( event.thread, sizeof(event.thread), target_thread);
-                  else g_snprintf( event.thread, sizeof(event.thread), "*" );
+    g_snprintf( event.src_instance, sizeof(event.src_instance), g_get_host_name() );
+    if (source_instance) g_snprintf( event.src_instance, sizeof(event.src_instance), source_instance);
+                    else g_snprintf( event.src_instance, sizeof(event.src_instance), g_get_host_name() );
+    if (source_thread) g_snprintf( event.src_thread, sizeof(event.src_thread), source_thread);
+                  else g_snprintf( event.src_thread, sizeof(event.src_thread), "*" );
+    if (target_instance) g_snprintf( event.dst_instance, sizeof(event.dst_instance), target_instance );
+                    else g_snprintf( event.dst_instance, sizeof(event.dst_instance), "*" );
+    if (target_thread) g_snprintf( event.dst_thread, sizeof(event.dst_thread), target_thread);
+                  else g_snprintf( event.dst_thread, sizeof(event.dst_thread), "*" );
 
     memcpy ( buffer, &event, sizeof(struct ZMQ_TARGET) );                                                   /* Recopie entete */
     memcpy ( buffer + sizeof(struct ZMQ_TARGET), source, taille );                                  /* Recopie buffer payload */

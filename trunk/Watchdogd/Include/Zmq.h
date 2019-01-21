@@ -45,8 +45,10 @@
 
  struct ZMQ_TARGET
   { gint8 tag;
-    gchar instance[24];
-    gchar thread[12];
+    gchar src_instance[24];
+    gchar src_thread[12];
+    gchar dst_instance[24];
+    gchar dst_thread[12];
   };
 
  struct ZMQ_SET_BIT
@@ -71,7 +73,9 @@
  extern gboolean Connect_zmq ( struct ZMQUEUE *zmq, gchar *type, gchar *nom, gint port );
  extern void Close_zmq ( struct ZMQUEUE *zmq );
  extern gboolean Send_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille );
- extern gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag, const gchar *target_instance, const gchar *target_thread,
+ extern gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag,
+                                     const gchar *source_instance, const gchar *source_thread,
+                                     const gchar *target_instance, const gchar *target_thread,
                                      void *source, gint taille );
  extern gint Recv_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille_buf );
  extern gint Recv_zmq_block ( struct ZMQUEUE *zmq, void *buf, gint taille_buf );

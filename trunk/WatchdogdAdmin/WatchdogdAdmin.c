@@ -49,9 +49,11 @@
 
  struct ZMQ_TARGET
   { gint8 tag;
-    gchar instance[24];
-    gchar thread[12];
-  } target;
+    gchar src_instance[24];
+    gchar src_thread[12];
+    gchar dst_instance[24];
+    gchar dst_thread[12];
+  } event;
 
 /******************************************************************************************************************************/
 /* Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                        */
@@ -100,13 +102,11 @@
         { g_snprintf( commande_old, sizeof(commande_old), "%s", ligne );
           add_history(ligne);                                                            /* Ajoute la commande à l'historique */
         }
-       memcpy(buffer, &target, sizeof(target));
-       g_snprintf( buffer+sizeof(target), sizeof(buffer) - sizeof(target), "%s", ligne );
-       printf("Send %d bytes to master :\n", sizeof(target)+strlen(ligne)+1 );
-       printf("tag    %d\n", target.tag );
-       printf("inst   %s\n", target.instance );
-       printf("thread %s\n", target.thread );
-       zmq_send( to_master, buffer, sizeof(target)+strlen(ligne)+1, 0 );
+       memcpy(buffer, &event, sizeof(event));
+       g_snprintf( buffer+sizeof(event), sizeof(buffer) - sizeof(event), "%s", ligne );
+       printf("Send %d bytes to master :\n", sizeof(event)+strlen(ligne)+1 );
+       printf("Event %s/%s -> %d/%s/%s\n", event.src_instance, event.src_thread, event.dst_instance,event.dst_thread, event.tag );
+       zmq_send( to_master, buffer, sizeof(event)+strlen(ligne)+1, 0 );
      }
   }
 /******************************************************************************************************************************/
@@ -145,9 +145,11 @@
        return;
      }
 
-    target.tag = 4;
-    g_snprintf(target.instance, sizeof(target.instance), "%s", Socket_file );
-    g_snprintf(target.thread,   sizeof(target.thread),   "msrv" );
+    event.tag = 4;
+    g_snprintf(event.src_instance, sizeof(event.src_instance), "%s", g_get_host_name() );
+    g_snprintf(event.src_thread,   sizeof(event.src_thread),   "admin" );
+    g_snprintf(event.dst_instance, sizeof(event.dst_instance), "%s", Socket_file );
+    g_snprintf(event.dst_thread,   sizeof(event.dst_thread),   "msrv" );
 
     rl_callback_handler_install ( PROMPT, &CB_send_to_master );
 

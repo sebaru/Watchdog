@@ -132,6 +132,37 @@
     return(response);                                                                                    /* Fin de la reponse */
   }
 /******************************************************************************************************************************/
+/* Ecouter_admin: Ecoute ce que dis le CLIENT                                                                                 */
+/* Entrée: la connexion, le user host d'origine et commande a parser                                                          */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ void New_Processer_commande_admin ( struct ZMQ_TARGET *event, gchar *ligne )
+  { gchar commande[128], chaine[256];
+    gchar *response=NULL;
+
+    Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Received CLI from %s/%s to %s/%s: '%s'", __func__,
+              event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, ligne );
+
+    if (sscanf ( ligne, "%s", commande )!=1) return;                                     /* Découpage de la ligne de commande */
+
+    g_snprintf( chaine, sizeof(chaine), "At %010.1f, processing '%s' on instance '%s'",
+                (gdouble)Partage->top/10.0, ligne, g_get_host_name() );
+    response = Admin_write ( NULL, chaine );
+         if ( ! strcmp ( commande, "process"   ) ) { response = Admin_process  ( response, ligne + 8 ); }
+    else if ( ! strcmp ( commande, "dls"       ) ) { response = Admin_dls      ( response, ligne + 4 ); }
+    else if ( ! strcmp ( commande, "set"       ) ) { response = Admin_set      ( response, ligne + 4);  }
+    else if ( ! strcmp ( commande, "get"       ) ) { response = Admin_get      ( response, ligne + 4);  }
+    else if ( ! strcmp ( commande, "user"      ) ) { response = Admin_user     ( response, ligne + 5);  }
+    else if ( ! strcmp ( commande, "dbcfg"     ) ) { response = Admin_dbcfg    ( response, ligne + 6);  }
+    else if ( ! strcmp ( commande, "arch"      ) ) { response = Admin_arch     ( response, ligne + 5);  }
+    else Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_CLI,
+                             event->src_instance, event->src_thread, event->dst_instance, commande,
+                             ligne, strlen(ligne)+1 );
+
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, TAG_ZMQ_CLI_RESPONSE,
+                        NULL, "msrv", event->src_instance, event->src_thread, response, strlen(response)+1 );
+  }
+/******************************************************************************************************************************/
 /* Run_admin: Ecoute les commandes d'admin locale et les traite                                                               */
 /* Entrée: Néant                                                                                                              */
 /* Sortie: Néant                                                                                                              */
