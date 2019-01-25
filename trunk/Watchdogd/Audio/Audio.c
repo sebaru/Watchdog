@@ -122,7 +122,7 @@
        return(FALSE);
      }
     else if (!pid)
-     { execlp( "mpg123", "mpg123", "-q", nom_fichier, NULL );
+     { execlp( "mpg123", "mpg123", "-o", "pulse", "-q", nom_fichier, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
                 "%s: '%s' exec failed pid=%d (%s)", __func__, nom_fichier, pid, strerror( errno ) );
        _exit(0);

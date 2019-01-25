@@ -52,7 +52,7 @@
     Cfg_voice.enable            = FALSE; 
     g_snprintf( Cfg_voice.audio_device,  sizeof(Cfg_voice.audio_device),  "default" );
     g_snprintf( Cfg_voice.key_words,     sizeof(Cfg_voice.key_words),     "dis moi jolie maison" );
-    g_snprintf( Cfg_voice.gain_control,  sizeof(Cfg_voice.gain_control),  "noise" );
+    g_snprintf( Cfg_voice.gain_control,  sizeof(Cfg_voice.gain_control),  "none" );
     g_snprintf( Cfg_voice.vad_threshold, sizeof(Cfg_voice.vad_threshold), "3.0" );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
@@ -97,8 +97,8 @@
     unlink(file);
     id_fichier = open( file, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
-     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING, "%s: Open file '%s' for write failed for %06d (%s)", __func__,
-                 file, id_fichier, strerror(errno) );
+     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING, "%s: Open file '%s' for write failed (%s)", __func__,
+                 file, strerror(errno) );
        close(id_fichier);
        return;
      }
@@ -134,8 +134,8 @@
     unlink(file);
     id_fichier = open( file, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
-     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING, "%s: Open file '%s' for write failed for %06d (%s)", __func__,
-                 file, id_fichier, strerror(errno) );
+     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING, "%s: Open file '%s' for write failed (%s)", __func__,
+                 file, strerror(errno) );
        Libere_DB_SQL ( &db );
        close(id_fichier);
        return;
@@ -190,7 +190,7 @@
        return(FALSE);
      }
     else if (!pid)
-     { execlp( "mpg123", "mpg123", "-q", nom_fichier, NULL );
+     { execlp( "mpg123", "mpg123", "-o", "pulse", "-q", nom_fichier, NULL );
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
                 "%s: '%s' exec failed pid=%d (%s)", __func__, nom_fichier, pid, strerror( errno ) );
        _exit(0);
@@ -330,7 +330,7 @@ reload:
        commande_vocale[retour-1]=0;                                                                 /* Caractere NULL d'arret */
        evenement = commande_vocale + strlen(Cfg_voice.key_words) + 1;
 
-       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: recu = '%s'. Searching...", __func__, evenement );
+       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_NOTICE, "%s: recu = '%s'. Searching...", __func__, evenement );
 
        /*g_snprintf( mute, sizeof(mute), "pactl set-source-mute %s 1", Cfg_voice.audio_device );
        system(mute);*/
