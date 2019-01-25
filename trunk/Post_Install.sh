@@ -33,12 +33,6 @@ cp Watchdogd/Voice/wtd.gram $wtd_home/
 cp -r Watchdogd/Voice/cmusphinx-fr-5.2 $wtd_home/
 cp -r Son/* $wtd_home/Son
 mkdir -p $wtd_home/.pulse/
-if [ "$1" = "server" ]
-	then
-		echo "default-server=/run/user/"`id -u watchdog`"/pulse/native" > $wtd_home/.pulse/client.conf
-	else
-		echo "default-server=/run/user/"`id -u`"/pulse/native" > $wtd_home/.pulse/client.conf
-fi
 echo "done."
 sleep 2
 
