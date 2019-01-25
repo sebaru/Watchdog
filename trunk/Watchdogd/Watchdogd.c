@@ -352,14 +352,19 @@
                    break;
                  }
                 case TAG_ZMQ_CLI:
-                 { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive TAG_ZMQ_CLI from %s/%s to %s/%s : %s",
+                 { gboolean instance_is_target;
+                   gboolean send_to_other;
+                   Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive TAG_ZMQ_CLI from %s/%s to %s/%s : %s",
                              __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
-                   if (!strcasecmp( event->dst_instance, g_get_host_name() ))          /* Sommes nous sur la bonne instance ? */
+                   instance_is_target = !strcasecmp( event->dst_instance, g_get_host_name() ) ||/* Sommes nous sur la bonne instance ? */
+                                        !strcmp( event->dst_instance, "*" );
+                   send_to_other = !instance_is_target || !strcmp( event->dst_instance, "*" );
+                   if (instance_is_target)
                     { if (!strcasecmp(event->dst_thread,"msrv"))                                             /* Thread MSRV ? */          
                        { New_Processer_commande_admin ( event, payload ); }
                       else Send_zmq ( Partage->com_msrv.zmq_to_threads, buffer, byte );  /* Sinon on envoi aux threads locaux */
                     }
-                   else Send_zmq ( Partage->com_msrv.zmq_to_slave, buffer, byte );               /* Sinon on envoi aux slaves */
+                   if (send_to_other) Send_zmq ( Partage->com_msrv.zmq_to_slave, buffer, byte ); /* Sinon on envoi aux slaves */
                    break;
                  }
                 case TAG_ZMQ_CLI_RESPONSE:

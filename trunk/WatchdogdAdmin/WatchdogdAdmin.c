@@ -44,6 +44,7 @@
  static struct LOG *Log = NULL;
  static gint Log_level = 0;
  static gchar Socket_file[128];
+ static gchar Master_host[128];
  static gboolean Connect_like_slave;
  static gboolean Arret = FALSE;
 
@@ -66,6 +67,7 @@
 	   gint num;
     GKeyFile *gkf;
 
+    g_snprintf( Master_host, sizeof(Master_host), "%s", g_get_host_name() );                             /* Valeur par défaut */
     if (!fichier_config) fichier = "/etc/watchdogd.conf";                              /* Lecture du fichier de configuration */
                     else fichier = fichier_config;
     printf("Using config file %s\n", fichier );
@@ -95,23 +97,32 @@
     gchar ligne[256];
     gint recu;
 
-    if (strlen(ligne) == 0) return;
+    if (strlen(ligne_ref) == 0) return;
 
-    if ( ! strcmp( "quit", ligne ) || ! strcmp( "exit", ligne ) )
-    { Arret = TRUE; return; }
+    if ( ! strcmp( "quit", ligne_ref ) || ! strcmp( "exit", ligne_ref ) )
+     { Arret = TRUE; return; }
 
-    if ( ! strcmp ( commande, "process"   ) || ! strcmp ( commande, "dls"       ) ||
-         ! strcmp ( commande, "set"       ) || ! strcmp ( commande, "get"       ) ||
-         ! strcmp ( commande, "user"      ) || ! strcmp ( commande, "dbcfg"     ) ||
-         ! strcmp ( commande, "ping"      ) || ! strcmp ( commande, "nocde"     ) ||
-         ! strcmp ( commande, "log_level" ) || ! strcmp ( commande, "debug"     ) ||
-         ! strcmp ( commande, "clear_histo" )     || ! strcmp ( commande, "reload_confDB" ) ||
-         ! strcmp ( commande, "update_schemaDB" ) ||
-         ! strcmp ( commande, "ident"     ) || ! strcmp ( commande, "audit"     ) ||
-         ! strcmp ( commande, "arch"      ) || ! strcmp ( commande, "help"      ) )
+    if ( g_str_has_prefix ( ligne_ref, "instance" ) &&
+         sscanf ( ligne_ref, "%s %[^\n]", thread, commande )==2)                         /* Découpage de la ligne de commande */
+     { g_snprintf( event.dst_instance, sizeof(event.dst_instance), "%s", commande );
+       printf("Target Instance set to '%s'\n", event.dst_instance );
+       return;
+     }
+
+    if ( g_str_has_prefix ( ligne_ref, "process"   ) || g_str_has_prefix ( ligne_ref, "dls"       ) ||
+         g_str_has_prefix ( ligne_ref, "set"       ) || g_str_has_prefix ( ligne_ref, "get"       ) ||
+         g_str_has_prefix ( ligne_ref, "user"      ) || g_str_has_prefix ( ligne_ref, "dbcfg"     ) ||
+         g_str_has_prefix ( ligne_ref, "ping"      ) || g_str_has_prefix ( ligne_ref, "nocde"     ) ||
+         g_str_has_prefix ( ligne_ref, "log_level" ) || g_str_has_prefix ( ligne_ref, "debug"     ) ||
+         g_str_has_prefix ( ligne_ref, "clear_histo" )     || g_str_has_prefix ( ligne_ref, "reload_confDB" ) ||
+         g_str_has_prefix ( ligne_ref, "update_schemaDB" ) ||
+         g_str_has_prefix ( ligne_ref, "ident"     ) || g_str_has_prefix ( ligne_ref, "audit"     ) ||
+         g_str_has_prefix ( ligne_ref, "arch"      ) || g_str_has_prefix ( ligne_ref, "help"      ) )
      { g_snprintf( ligne, sizeof(ligne), "msrv %s", ligne_ref ); }
+    else
+     { g_snprintf( ligne, sizeof(ligne), "%s", ligne_ref ); }
 
-    if (sscanf ( ligne, "%s", thread, commande )!=2) return;                             /* Découpage de la ligne de commande */
+    if (sscanf ( ligne, "%s %[^\n]", thread, commande )!=2) return;                      /* Découpage de la ligne de commande */
 
     if ( strcmp ( ligne_ref, commande_old ) )
      { g_snprintf( commande_old, sizeof(commande_old), "%s", ligne_ref );
@@ -121,9 +132,6 @@
      g_snprintf( event.dst_thread, sizeof(event.dst_thread), "%s", thread );
      memcpy(buffer, &event, sizeof(event));
      g_snprintf( buffer+sizeof(event), sizeof(buffer) - sizeof(event), "%s", commande );
-     printf("Send %d bytes to master :\n", sizeof(event)+strlen(commande)+1 );
-     printf("Event %s/%s -> %d/%s/%s:%s\n", event.src_instance, event.src_thread,
-             event.tag, event.dst_instance,event.dst_thread, commande );
      zmq_send( to_master, buffer, sizeof(event)+strlen(commande)+1, 0 );
   }
 /******************************************************************************************************************************/
@@ -131,29 +139,31 @@
 /* Entrée: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void New_main ( void )
-  { gchar endpoint[80], buffer[256];
+  { gchar endpoint[80], buffer[2048];
     struct timeval tv;
     fd_set fd;
     gint retour;
     gint recu;
 
+    printf("  --  WatchdogdAdmin  v%s ('quit' to end session) - Slave Mode. Using host '%s'.\n", VERSION, Master_host );
+    printf("  --  use 'instance $dst_instance' to change target instance\n" );
+
     zmq_ctx = zmq_ctx_new ();                                                      /* Initialisation du context d'echange ZMQ */
     if (!zmq_ctx)
      { printf( "%s: Init ZMQ Context Failed (%s)", __func__, zmq_strerror(errno) ); return; }
 
-    printf("  --  WatchdogdAdmin  v%s ('quit' to end session) - Slave Mode. Using host '%s'.\n", VERSION, Socket_file );
 
     if ( (to_master = zmq_socket ( zmq_ctx, ZMQ_PUB )) == NULL)
      { printf( "%s: New ZMQ Socket to_master Failed (%s)", __func__, zmq_strerror(errno) ); return; }
 
-    g_snprintf( endpoint, sizeof(endpoint), "tcp://%s:%d", Socket_file, 5556 );
+    g_snprintf( endpoint, sizeof(endpoint), "tcp://%s:%d", Master_host, 5556 );
     if ( zmq_connect (to_master, endpoint) == -1 ) 
      { printf( "%s: ZMQ Connect to '%s' Failed (%s)", __func__, endpoint, zmq_strerror(errno) ); return; }
 
     if ( (from_master = zmq_socket ( zmq_ctx, ZMQ_SUB )) == NULL)
      { printf( "%s: New ZMQ Socket from_master Failed (%s)", __func__, zmq_strerror(errno) ); return; }
 
-    g_snprintf( endpoint, sizeof(endpoint), "tcp://%s:%d", Socket_file, 5555 );
+    g_snprintf( endpoint, sizeof(endpoint), "tcp://%s:%d", Master_host, 5555 );
     if ( zmq_connect (from_master, endpoint) == -1 ) 
      { printf( "%s: ZMQ Connect to '%s' Failed (%s)", __func__, endpoint, zmq_strerror(errno) ); return; }
 
@@ -165,7 +175,7 @@
     event.tag = 4;
     g_snprintf(event.src_instance, sizeof(event.src_instance), "%s", g_get_host_name() );
     g_snprintf(event.src_thread,   sizeof(event.src_thread),   "admin" );
-    g_snprintf(event.dst_instance, sizeof(event.dst_instance), "%s", Socket_file );
+    g_snprintf(event.dst_instance, sizeof(event.dst_instance), "%s", Master_host );
     g_snprintf(event.dst_thread,   sizeof(event.dst_thread),   "msrv" );
 
     rl_callback_handler_install ( PROMPT, &CB_send_to_master );
@@ -187,8 +197,11 @@
         { rl_callback_read_char(); }                                                     /* Lecture du character qui est pret */
        recu = zmq_recv ( from_master, &buffer, sizeof(buffer),  ZMQ_DONTWAIT );            /* Ecoute de ce que dit le serveur */
        if (recu>0)
-        { printf("%s", buffer );
-          fflush(stdout);
+        { struct ZMQ_TARGET *event = (struct ZMQ_TARGET *)buffer;
+          gchar *payload = (gchar *)buffer+sizeof(struct ZMQ_TARGET);
+          switch (event->tag)
+           { case 5: printf("\n%s\n%s", payload, PROMPT ); fflush(stdout); break;
+           }
         }
      }
 
@@ -229,22 +242,24 @@
 /* Sortie: -1 si erreur, 0 si ok                                                                          */
 /**********************************************************************************************************/
  static void Lire_ligne_commande( int argc, char *argv[] )
-  { gchar *file;
-    gint help, new;
+  { gchar *file, *master;
+    gint help, old;
     struct poptOption Options[]= 
      { { "socket",     's', POPT_ARG_STRING,
-         &file,        0, "Admin Socket or Master Hostname", "FILE" },
+         &file,        0, "Admin Socket (old Style Connect)", "FILE" },
        { "help",       'h', POPT_ARG_NONE,
          &help,             0, "Help", NULL },
-       { "new",        'n', POPT_ARG_NONE,
-         &new,              0, "Connect like all slaves", NULL },
+       { "old_connect",'o', POPT_ARG_NONE,
+         &old,              0, "Connect the old way (local ipc socket)", NULL },
+       { "hostname",   'm', POPT_ARG_STRING,
+         &master,       0, "Master Hostname", "HOST" },
        POPT_TABLEEND
      };
     poptContext context;
     int rc;
 
-    file = NULL;
-    new = help = 0;
+    master = file = NULL;
+    old = help = 0;
 
     context = poptGetContext( NULL, argc, (const char **)argv, Options, POPT_CONTEXT_ARG_OPTS );
     while ( (rc = poptGetNextOpt( context )) != -1)                      /* Parse de la ligne de commande */
@@ -255,9 +270,10 @@
         }
      }
 
-    if (file)  g_snprintf( Socket_file, sizeof(Socket_file),  "%s", file );
-    if (new) Connect_like_slave = TRUE;
-        else Connect_like_slave = FALSE;
+    if (file)   g_snprintf( Socket_file, sizeof(Socket_file),  "%s", file );
+    if (master) g_snprintf( Master_host, sizeof(Master_host),  "%s", master );
+    if (old) Connect_like_slave = FALSE;
+        else Connect_like_slave = TRUE;
 
     if (help)                                                             /* Affichage de l'aide en ligne */
      { poptPrintHelp(context, stdout, 0);

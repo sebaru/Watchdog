@@ -89,18 +89,18 @@
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
 
-            if ( ! strcmp ( commande, "process"   ) ) { response = Admin_process  ( response, ligne + 8 ); }
-       else if ( ! strcmp ( commande, "dls"       ) ) { response = Admin_dls      ( response, ligne + 4 ); }
-       else if ( ! strcmp ( commande, "set"       ) ) { response = Admin_set      ( response, ligne + 4);  }
-       else if ( ! strcmp ( commande, "get"       ) ) { response = Admin_get      ( response, ligne + 4);  }
-       else if ( ! strcmp ( commande, "user"      ) ) { response = Admin_user     ( response, ligne + 5);  }
-       else if ( ! strcmp ( commande, "dbcfg"     ) ) { response = Admin_dbcfg    ( response, ligne + 6);  }
-       else if ( ! strcmp ( commande, "arch"      ) ) { response = Admin_arch     ( response, ligne + 5);  }
+            if ( g_str_has_prefix ( commande, "process"   ) ) { response = Admin_process  ( response, ligne + 8 ); }
+       else if ( g_str_has_prefix ( commande, "dls"       ) ) { response = Admin_dls      ( response, ligne + 4 ); }
+       else if ( g_str_has_prefix ( commande, "set"       ) ) { response = Admin_set      ( response, ligne + 4);  }
+       else if ( g_str_has_prefix ( commande, "get"       ) ) { response = Admin_get      ( response, ligne + 4);  }
+       else if ( g_str_has_prefix ( commande, "user"      ) ) { response = Admin_user     ( response, ligne + 5);  }
+       else if ( g_str_has_prefix ( commande, "dbcfg"     ) ) { response = Admin_dbcfg    ( response, ligne + 6);  }
+       else if ( g_str_has_prefix ( commande, "arch"      ) ) { response = Admin_arch     ( response, ligne + 5);  }
        else { gboolean found = FALSE;
               liste = Partage->com_msrv.Librairies;                                      /* Parcours de toutes les librairies */
               while(liste)
                { lib = (struct LIBRAIRIE *)liste->data;
-                 if ( ! strcmp( commande, lib->admin_prompt ) )
+                 if ( g_str_has_prefix( commande, lib->admin_prompt ) )
                   { if (lib->Thread_run == FALSE)
                      { response = Admin_write ( response, " | -- WARNING --" );
                        response = Admin_write ( response, " | -- Thread is not started, Running config is not loaded --");
@@ -137,7 +137,7 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  void New_Processer_commande_admin ( struct ZMQ_TARGET *event, gchar *ligne )
-  { gchar commande[128], chaine[256];
+  { gchar chaine[256];
     gchar *response=NULL;
 
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Received CLI from %s/%s to %s/%s: '%s'", __func__,
@@ -146,22 +146,17 @@
     g_snprintf( chaine, sizeof(chaine), "At %010.1f, processing '%s' on instance '%s'",
                 (gdouble)Partage->top/10.0, ligne, g_get_host_name() );
     response = Admin_write ( NULL, chaine );
-         if ( ! strcmp ( commande, "process"   ) ) { response = Admin_process  ( response, ligne + 8 ); }
-    else if ( ! strcmp ( commande, "dls"       ) ) { response = Admin_dls      ( response, ligne + 4 ); }
-    else if ( ! strcmp ( commande, "set"       ) ) { response = Admin_set      ( response, ligne + 4);  }
-    else if ( ! strcmp ( commande, "get"       ) ) { response = Admin_get      ( response, ligne + 4);  }
-    else if ( ! strcmp ( commande, "user"      ) ) { response = Admin_user     ( response, ligne + 5);  }
-    else if ( ! strcmp ( commande, "dbcfg"     ) ) { response = Admin_dbcfg    ( response, ligne + 6);  }
-    else if ( ! strcmp ( commande, "arch"      ) ) { response = Admin_arch     ( response, ligne + 5);  }
+         if ( g_str_has_prefix ( ligne, "process"   ) ) { response = Admin_process  ( response, ligne + 8 ); }
+    else if ( g_str_has_prefix ( ligne, "dls"       ) ) { response = Admin_dls      ( response, ligne + 4 ); }
+    else if ( g_str_has_prefix ( ligne, "set"       ) ) { response = Admin_set      ( response, ligne + 4);  }
+    else if ( g_str_has_prefix ( ligne, "get"       ) ) { response = Admin_get      ( response, ligne + 4);  }
+    else if ( g_str_has_prefix ( ligne, "user"      ) ) { response = Admin_user     ( response, ligne + 5);  }
+    else if ( g_str_has_prefix ( ligne, "dbcfg"     ) ) { response = Admin_dbcfg    ( response, ligne + 6);  }
+    else if ( g_str_has_prefix ( ligne, "arch"      ) ) { response = Admin_arch     ( response, ligne + 5);  }
     else response = Admin_running (response, ligne);
 
-    if (Config.instance_is_master == TRUE)                                        /* Instance is master : listening to slaves */
-    
-     { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, TAG_ZMQ_CLI_RESPONSE,
-                           NULL, "msrv", event->src_instance, event->src_thread, response, strlen(response)+1 );
-     }
-    else Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, TAG_ZMQ_CLI_RESPONSE,
-                             NULL, "msrv", event->src_instance, event->src_thread, response, strlen(response)+1 );
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, TAG_ZMQ_CLI_RESPONSE,                          /* Send to local msrv */
+                        NULL, "msrv", event->src_instance, event->src_thread, response, strlen(response)+1 );
   }
 /******************************************************************************************************************************/
 /* Run_admin: Ecoute les commandes d'admin locale et les traite                                                               */
