@@ -88,26 +88,43 @@
 /* CB_envoyer_commande_admin: appelé par la librairie readline lorsque une ligne est prete                                    */
 /* Entrée: la ligne a envoyer au serveur                                                                                      */
 /******************************************************************************************************************************/
- static void CB_send_to_master ( char *ligne )
-  { gchar commande_old[128];
+ static void CB_send_to_master ( char *ligne_ref )
+  { static gchar commande_old[256];
+    gchar commande[32], thread[32];
     gchar buffer[256];
+    gchar ligne[256];
     gint recu;
 
     if (strlen(ligne) == 0) return;
 
-    if ( ! strcmp( "quit", ligne ) ) Arret = TRUE;
-    else if ( ! strcmp( "exit", ligne ) ) Arret = TRUE;
-    else
-     { if ( strcmp ( ligne, commande_old ) )
-        { g_snprintf( commande_old, sizeof(commande_old), "%s", ligne );
-          add_history(ligne);                                                            /* Ajoute la commande à l'historique */
-        }
-       memcpy(buffer, &event, sizeof(event));
-       g_snprintf( buffer+sizeof(event), sizeof(buffer) - sizeof(event), "%s", ligne );
-       printf("Send %d bytes to master :\n", sizeof(event)+strlen(ligne)+1 );
-       printf("Event %s/%s -> %d/%s/%s\n", event.src_instance, event.src_thread, event.dst_instance,event.dst_thread, event.tag );
-       zmq_send( to_master, buffer, sizeof(event)+strlen(ligne)+1, 0 );
+    if ( ! strcmp( "quit", ligne ) || ! strcmp( "exit", ligne ) )
+    { Arret = TRUE; return; }
+
+    if ( ! strcmp ( commande, "process"   ) || ! strcmp ( commande, "dls"       ) ||
+         ! strcmp ( commande, "set"       ) || ! strcmp ( commande, "get"       ) ||
+         ! strcmp ( commande, "user"      ) || ! strcmp ( commande, "dbcfg"     ) ||
+         ! strcmp ( commande, "ping"      ) || ! strcmp ( commande, "nocde"     ) ||
+         ! strcmp ( commande, "log_level" ) || ! strcmp ( commande, "debug"     ) ||
+         ! strcmp ( commande, "clear_histo" )     || ! strcmp ( commande, "reload_confDB" ) ||
+         ! strcmp ( commande, "update_schemaDB" ) ||
+         ! strcmp ( commande, "ident"     ) || ! strcmp ( commande, "audit"     ) ||
+         ! strcmp ( commande, "arch"      ) || ! strcmp ( commande, "help"      ) )
+     { g_snprintf( ligne, sizeof(ligne), "msrv %s", ligne_ref ); }
+
+    if (sscanf ( ligne, "%s", thread, commande )!=2) return;                             /* Découpage de la ligne de commande */
+
+    if ( strcmp ( ligne_ref, commande_old ) )
+     { g_snprintf( commande_old, sizeof(commande_old), "%s", ligne_ref );
+       add_history(ligne_ref);                                                           /* Ajoute la commande à l'historique */
      }
+
+     g_snprintf( event.dst_thread, sizeof(event.dst_thread), "%s", thread );
+     memcpy(buffer, &event, sizeof(event));
+     g_snprintf( buffer+sizeof(event), sizeof(buffer) - sizeof(event), "%s", commande );
+     printf("Send %d bytes to master :\n", sizeof(event)+strlen(commande)+1 );
+     printf("Event %s/%s -> %d/%s/%s:%s\n", event.src_instance, event.src_thread,
+             event.tag, event.dst_instance,event.dst_thread, commande );
+     zmq_send( to_master, buffer, sizeof(event)+strlen(commande)+1, 0 );
   }
 /******************************************************************************************************************************/
 /* New_main: Se connecte au serveur via le ZMQ 'classique' entre un slave et son master                                       */

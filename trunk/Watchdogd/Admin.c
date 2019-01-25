@@ -143,8 +143,6 @@
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Received CLI from %s/%s to %s/%s: '%s'", __func__,
               event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, ligne );
 
-    if (sscanf ( ligne, "%s", commande )!=1) return;                                     /* Découpage de la ligne de commande */
-
     g_snprintf( chaine, sizeof(chaine), "At %010.1f, processing '%s' on instance '%s'",
                 (gdouble)Partage->top/10.0, ligne, g_get_host_name() );
     response = Admin_write ( NULL, chaine );
@@ -155,12 +153,15 @@
     else if ( ! strcmp ( commande, "user"      ) ) { response = Admin_user     ( response, ligne + 5);  }
     else if ( ! strcmp ( commande, "dbcfg"     ) ) { response = Admin_dbcfg    ( response, ligne + 6);  }
     else if ( ! strcmp ( commande, "arch"      ) ) { response = Admin_arch     ( response, ligne + 5);  }
-    else Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_CLI,
-                             event->src_instance, event->src_thread, event->dst_instance, commande,
-                             ligne, strlen(ligne)+1 );
+    else response = Admin_running (response, ligne);
 
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, TAG_ZMQ_CLI_RESPONSE,
-                        NULL, "msrv", event->src_instance, event->src_thread, response, strlen(response)+1 );
+    if (Config.instance_is_master == TRUE)                                        /* Instance is master : listening to slaves */
+    
+     { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, TAG_ZMQ_CLI_RESPONSE,
+                           NULL, "msrv", event->src_instance, event->src_thread, response, strlen(response)+1 );
+     }
+    else Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, TAG_ZMQ_CLI_RESPONSE,
+                             NULL, "msrv", event->src_instance, event->src_thread, response, strlen(response)+1 );
   }
 /******************************************************************************************************************************/
 /* Run_admin: Ecoute les commandes d'admin locale et les traite                                                               */
