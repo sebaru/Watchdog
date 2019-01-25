@@ -92,7 +92,7 @@
 /******************************************************************************************************************************/
  static void CB_send_to_master ( char *ligne_ref )
   { static gchar commande_old[256];
-    gchar commande[32], thread[32];
+    gchar commande[256], thread[32];
     gchar buffer[256];
     gchar ligne[256];
     gint recu;
