@@ -80,5 +80,7 @@
  extern gint Recv_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille_buf );
  extern gint Recv_zmq_block ( struct ZMQUEUE *zmq, void *buf, gint taille_buf );
  extern gint Recv_zmq_with_tag ( struct ZMQUEUE *zmq, void *buf, gint taille_buf, struct ZMQ_TARGET **event, void **payload );
+ extern gboolean Zmq_instance_is_target ( struct ZMQ_TARGET *event );
+ extern gboolean Zmq_other_is_target ( struct ZMQ_TARGET *event );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

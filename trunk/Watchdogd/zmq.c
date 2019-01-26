@@ -29,6 +29,33 @@
 
  #include "watchdogd.h"
 /******************************************************************************************************************************/
+/* Zmq_instance_is_target: Renvoie TRUE si l'instance actuelle est visée par l'evenement en parametre                         */
+/* Entrée: l'evenement                                                                                                        */
+/* Sortie: TRUE ou FALSE                                                                                                      */
+/******************************************************************************************************************************/
+ gboolean Zmq_instance_is_target ( struct ZMQ_TARGET *event )
+  { gchar *hostname, *target;
+    gboolean retour;
+
+    if (!strcmp( event->dst_instance, "*" )) return(TRUE);
+
+    hostname = g_ascii_strdown ( g_get_host_name(), -1 );
+    target   = g_ascii_strdown ( event->dst_instance, -1 );
+    retour   = g_str_has_prefix ( hostname, target );
+    g_free(hostname);
+    g_free(target);
+    return(retour);
+  }
+/******************************************************************************************************************************/
+/* Zmq_instance_is_target: Renvoie TRUE si l'instance actuelle est visée par l'evenement en parametre                         */
+/* Entrée: l'evenement                                                                                                        */
+/* Sortie: TRUE ou FALSE                                                                                                      */
+/******************************************************************************************************************************/
+ gboolean Zmq_other_is_target ( struct ZMQ_TARGET *event )
+  { if (!strcmp( event->dst_instance, "*" )) return(TRUE);
+    return(!Zmq_instance_is_target(event));
+  }
+/******************************************************************************************************************************/
 /* New_zmq: Initialise une socket dont le pattern et le nom sont en parametre                                                 */
 /* Entrée: le pattern                                                                                                         */
 /* Sortie: une socket ZMQ ou NUL si erreur                                                                                    */
