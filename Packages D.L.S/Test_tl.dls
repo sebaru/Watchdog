@@ -1,49 +1,47 @@
 /* 000006.dls: Eclairage PCC du Salon */
 
  /* Bits de consommation du module */
- #static POS_TL         <-> _E0002; /* Position du Télérupteur des luminaires centre Salon */
- #define O_TLSALON_ON   <-> _M(libelle="Demande d'allumage TL"); /* Ordre TL Salon ON */
- #define O_TLSALON_OFF  <-> _M(libelle="Demande d'extinction TL"); /* Ordre TL Salon OFF */
+ #define POS_TL         <-> _E(libelle="Position Télérupteur"); /* Position du Télérupteur des luminaires centre Salon */
+ #define OSMS_TLSALON_ON   <-> _M(libelle="Demande d'allumage TL1"); /* Ordre TL Salon ON */
+ #define OSMS_TLSALON_OFF  <-> _M(libelle="Demande d'extinction TL2"); /* Ordre TL Salon OFF */
+ #define ODLS_TLSALON_OFF  <-> _M(libelle="Demande DLS d'extinction des lumières");
+ #define ODLS_TLSALON_ON   <-> _M(libelle="Demande DLS d'allumage des lumières");
 
  /* Bits de production du module */
- #static ACT_TL         <-> _A0002; /* Sortie physique de pilotage du télérupteur, Ex: Legrand 412412 */
- #define MDEF_REPOS     <-> _B(libelle="Defaut Repos TL");       /* Mémorisation du défaut repos non acquitté du TL */
- #define MDEF_REPOS_F   <-> _B(libelle="Defaut Repos Fixe TL");   /* Mémorisation du défaut repos acquitté (Fixe) du TL */
- #define MDEF_TRAVAIL   <-> _B(libelle="Defaut Travail TL");      /* Mémorisation du défaut travail non acquitté du TL */
- #define MDEF_TRAVAIL_F <-> _B(libelle="Defaut Travail Fixe TL"); /* Mémorisation du défaut travail acquitté (Fixe) du TL */
- #static MSG_TELE_ON    <-> _MSG0005; /* Lumière allumée */
- #static MSG_DEF_REPOS  <-> _MSG0006; /* Defaut repos */
- #static MSG_DEF_TRAVAIL<-> _MSG0007; /* Defaut travail */
+ #define ACT_TL         <-> _A(libelle="Sortie physique de pilotage du télérupteur");
+ #define MDEF_REPOS     <-> _B(libelle="Mémorisation du défaut repos non acquitté du TL");
+ #define MDEF_REPOS_F   <-> _B(libelle="Mémorisation du défaut repos acquitté (Fixe) du TL");
+ #define MDEF_TRAVAIL   <-> _B(libelle="Mémorisation du défaut travail non acquitté du TL");
+ #define MDEF_TRAVAIL_F <-> _B(libelle="Mémorisation du défaut travail acquitté (Fixe) du TL");
+ #define MSG_TELE_ON    <-> _MSG(type=etat,libelle="Allumé"); /* Lumière allumée */
+ #define MSG_DEF_REPOS  <-> _MSG(type=defaut,libelle="Défaut repos"); /* Defaut repos */
+ #define MSG_DEF_TRAVAIL<-> _MSG(type=defaut,libelle="Défaut travail"); /* Defaut travail */
 
  /* Bits purement internes au module */
- #define MEWANTTL       <-> _B(libelle="Etat attendu du TL 0=ouvert 1=ferme");
- #define MEACTELE       <-> _B(libelle="Demande de manoeuvre du TL changement d'etat");
- #define TR_DEF         <-> _T(daa=20,dma=0,dMa=0,dad=0,libelle="Temporisation de detection de defaut apres manoeuvre");
- #define TR_IMP         <-> _T(daa=0, dma=0,dMa=3,dad=0,libelle="Temporisation d'impulsion pour manoeuvrer le telerupteur");
+ #define MEWANTTL       <-> _B(libelle="Etat attendu du TL (0=ouvert, 1=fermé)");
+ #define MEACTELE       <-> _B(libelle="Demande de manoeuvre du TL (changement d'état)");
+ #define TR_DEF         <-> _T(daa=20,dma=0,dMa=0,dad=0,libelle="Temporisation de détection de défaut après manoeuvre");
+ #define TR_IMP         <-> _T(daa= 0,dma=0,dMa=3,dad=0,libelle="Temporisation d'impulsion pour manoeuvrer le télérupteur");
 
- #define M_TEST <-> _M;
- #define M_RESULT <-> _M;
- #define T_TEST <-> _T(daa=100);
-
- - M_TEST -> T_TEST;
- - T_TEST -> M_RESULT;
                                     /*******************************************/
  /***********************************                 EVENEMENTS                ***********************************/
                                     /*******************************************/
  /* Start */
 
- - _START -> /ACT_TL, /MDEF_REPOS;
+ - _START -> /ACT_TL, /MEWANTTL, /MEACTELE,
+             /MDEF_REPOS, /MDEF_REPOS_F,
+             /MDEF_TRAVAIL, /MDEF_TRAVAIL_F;
 
  /* DEFAUTS */
   - POS_TL . TR_DEF ./MDEF_REPOS_F
-                               -> MDEF_REPOS;                         /* Détection Discordance Repos du Télérupteur */
-  - _OSYN_ACQUIT . MDEF_REPOS  ->/MDEF_REPOS, MDEF_REPOS_F;                                     /* Acquit du défaut */
-  -/POS_TL . MDEF_REPOS_F      ->/MDEF_REPOS_F;                                            /* Suppression du défaut */
+                             -> MDEF_REPOS;                         /* Détection Discordance Repos du Télérupteur */
+  - _OSYN_ACQUIT . MDEF_REPOS ->/MDEF_REPOS, MDEF_REPOS_F;                                    /* Acquit du défaut */
+  -/POS_TL . MDEF_REPOS_F    ->/MDEF_REPOS_F;                                            /* Suppression du défaut */
  
   -/POS_TL . TR_DEF ./MDEF_TRAVAIL_F
-                                -> MDEF_TRAVAIL;                   /* Détection Discordance Travail du Télérupteur */
-  - _OSYN_ACQUIT . MDEF_TRAVAIL ->/MDEF_TRAVAIL, MDEF_TRAVAIL_F;                               /* Acquit du défaut */
-  - POS_TL . MDEF_TRAVAIL_F     ->/MDEF_TRAVAIL_F;                                        /* Suppression du défaut */
+                               -> MDEF_TRAVAIL;                   /* Détection Discordance Travail du Télérupteur */
+  - _OSYN_ACQUIT . MDEF_TRAVAIL ->/MDEF_TRAVAIL, MDEF_TRAVAIL_F;                              /* Acquit du défaut */
+  - POS_TL . MDEF_TRAVAIL_F    ->/MDEF_TRAVAIL_F;                                        /* Suppression du défaut */
  
                                     /*******************************************/
  /***********************************        SYNTHESES DEFAUTS ET ALARMES       ***********************************/
@@ -62,8 +60,8 @@
  /* ORDRES DU MODULE ----------------------------------------------------------*/
  
  /* CALCUL ETAT ATTENDU TELERUPTEUR */
-  - /_MEMSA_DOWN .  O_TLSALON_ON . /POS_TL -> MEWANTTL, MEACTELE;
-  - /_MEMSA_DOWN .  O_TLSALON_OFF.  POS_TL ->/MEWANTTL, MEACTELE;
+  - /*/_MEMSA_DOWN.*/ (OSMS_TLSALON_ON  + ODLS_TLSALON_ON ). /POS_TL -> MEWANTTL, MEACTELE;
+  - /*/_MEMSA_DOWN.*/ (OSMS_TLSALON_OFF + ODLS_TLSALON_OFF).  POS_TL ->/MEWANTTL, MEACTELE;
  
  /* PILOTAGE TELE SUR COMMANDE DE MANOEUVRE */
   - MEACTELE -> TR_IMP, TR_DEF;
@@ -80,4 +78,4 @@
                                     /*******************************************/
   - POS_TL                        -> MSG_TELE_ON;
   - MDEF_REPOS + MDEF_REPOS_F     -> MSG_DEF_REPOS;
-  - MDEF_TRAVAIL + MDEF_TRAVAIL_F -> MSG_DEF_TRAVAIL;
+  - MDEF_TRAVAIL + MDEF_TRAVAIL_F -> MSG_DEF_TRAVAIL;            
