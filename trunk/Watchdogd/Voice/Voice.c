@@ -401,9 +401,9 @@ reload:
            }
         }
      }
-    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: Sending kill to pocketsphinx", __func__ );
+    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: Sending kill to pocketsphinx pid %d", __func__, pidpocket );
     kill(pidpocket, SIGKILL);
-    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: Waiting for termination", __func__ );
+    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: Waiting for pid %d termination", __func__, pidpocket );
     waitpid(pidpocket, NULL, 0);
     close(pipefd[0]);                                                                       /* Fermeture du pipe en reception */
 end:

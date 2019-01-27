@@ -395,12 +395,9 @@
                    break;
                  }
                 case TAG_ZMQ_CLI:
-                 { gboolean instance_is_target;
-                   Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive TAG_ZMQ_CLI from %s/%s to %s/%s : %s",
+                 { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive TAG_ZMQ_CLI from %s/%s to %s/%s : %s",
                              __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
-                   instance_is_target = g_str_has_prefix( g_get_host_name(), event->dst_instance ) ||/* C la bonne instance ? */
-                                        !strcmp( event->dst_instance, "*" );
-                   if (instance_is_target)
+                   if (Zmq_instance_is_target ( event ))
                     { if (!strcasecmp(event->dst_thread,"msrv"))                                             /* Thread MSRV ? */          
                        { New_Processer_commande_admin ( event, payload ); }
                       else Send_zmq ( Partage->com_msrv.zmq_to_threads, buffer, byte );  /* Sinon on envoi aux threads locaux */

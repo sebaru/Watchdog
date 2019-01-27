@@ -102,6 +102,11 @@
     if ( ! strcmp( "quit", ligne_ref ) || ! strcmp( "exit", ligne_ref ) )
      { Arret = TRUE; return; }
 
+    if ( strcmp ( ligne_ref, commande_old ) )
+     { g_snprintf( commande_old, sizeof(commande_old), "%s", ligne_ref );
+       add_history(ligne_ref);                                                           /* Ajoute la commande à l'historique */
+     }
+
     if ( g_str_has_prefix ( ligne_ref, "instance" ) &&
          sscanf ( ligne_ref, "%s %[^\n]", thread, commande )==2)                         /* Découpage de la ligne de commande */
      { g_snprintf( event.dst_instance, sizeof(event.dst_instance), "%s", commande );
@@ -123,11 +128,6 @@
      { g_snprintf( ligne, sizeof(ligne), "%s", ligne_ref ); }
 
     if (sscanf ( ligne, "%s %[^\n]", thread, commande )!=2) return;                      /* Découpage de la ligne de commande */
-
-    if ( strcmp ( ligne_ref, commande_old ) )
-     { g_snprintf( commande_old, sizeof(commande_old), "%s", ligne_ref );
-       add_history(ligne_ref);                                                           /* Ajoute la commande à l'historique */
-     }
 
      g_snprintf( event.dst_thread, sizeof(event.dst_thread), "%s", thread );
      memcpy(buffer, &event, sizeof(event));
