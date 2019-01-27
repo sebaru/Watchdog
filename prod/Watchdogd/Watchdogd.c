@@ -351,6 +351,21 @@
                     }
                    break;
                  }
+                case TAG_ZMQ_CLI:
+                 { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive TAG_ZMQ_CLI from %s/%s to %s/%s : %s",
+                             __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
+                   if (Zmq_instance_is_target ( event ))
+                    { if (!strcasecmp(event->dst_thread,"msrv"))                                             /* Thread MSRV ? */          
+                       { New_Processer_commande_admin ( event, payload ); }
+                      else Send_zmq ( Partage->com_msrv.zmq_to_threads, buffer, byte );  /* Sinon on envoi aux threads locaux */
+                    }
+                   if (Zmq_other_is_target(event)) Send_zmq ( Partage->com_msrv.zmq_to_slave, buffer, byte ); /* Sinon on envoi aux slaves */
+                   break;
+                 }
+                case TAG_ZMQ_CLI_RESPONSE:
+                 { Send_zmq ( Partage->com_msrv.zmq_to_slave, buffer, byte );                    /* Sinon on envoi aux slaves */
+                   break;
+                 }
                 default:
                  { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: receive wrong tag number '%d' for ZMQ '%s'",
                              __func__, event->tag, zmq_from_slave->name );
@@ -376,6 +391,19 @@
                  { if (Send_zmq( Partage->com_msrv.zmq_to_threads, buffer, byte ) == -1)
                     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ '%s' socket failed (%s)",
                                 __func__, Partage->com_msrv.zmq_to_threads->name, zmq_strerror(errno) );
+                    }
+                   break;
+                 }
+                case TAG_ZMQ_CLI:
+                 { gboolean instance_is_target;
+                   Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive TAG_ZMQ_CLI from %s/%s to %s/%s : %s",
+                             __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
+                   instance_is_target = g_str_has_prefix( g_get_host_name(), event->dst_instance ) ||/* C la bonne instance ? */
+                                        !strcmp( event->dst_instance, "*" );
+                   if (instance_is_target)
+                    { if (!strcasecmp(event->dst_thread,"msrv"))                                             /* Thread MSRV ? */          
+                       { New_Processer_commande_admin ( event, payload ); }
+                      else Send_zmq ( Partage->com_msrv.zmq_to_threads, buffer, byte );  /* Sinon on envoi aux threads locaux */
                     }
                    break;
                  }

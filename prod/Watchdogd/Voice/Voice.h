@@ -38,7 +38,6 @@
     gchar key_words[80];                                                         /* Mot magic pour debuter la detection audio */
     gchar gain_control[12];                                              /* Parametre agc de pocketphinx(noise/max/emax/none) */
     gchar vad_threshold[5];                                                                    /* Seuil de detection des mots */
-    gint  delai_inhib;                                             /* Delai d'inhibition minimum entre deux commandes vocales */
     void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
   } Cfg_voice;
 

@@ -122,7 +122,7 @@
        return(FALSE);
      }
     else if (!pid)
-     { execlp( "mpg123", "mpg123", "-q", nom_fichier, NULL );
+     { execlp( "mpg123", "mpg123", "-o", "pulse", "-q", nom_fichier, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
                 "%s: '%s' exec failed pid=%d (%s)", __func__, nom_fichier, pid, strerror( errno ) );
        _exit(0);
@@ -232,8 +232,8 @@
         }
 
        if (Recv_zmq_with_tag ( zmq_master, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
-        { if ( !strcmp( event->instance, g_get_host_name() ) || !strcmp (event->instance, "*") )
-           { if ( !strcmp( event->thread, NOM_THREAD ) || !strcmp ( event->thread, "*" ) )
+        { if ( !strcasecmp( event->dst_instance, g_get_host_name() ) || !strcmp (event->dst_instance, "*") )
+           { if ( !strcasecmp( event->dst_thread, NOM_THREAD ) || !strcmp ( event->dst_thread, "*" ) )
               { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
                           "%s : Reception d'un message du master : %s", __func__, (gchar *)payload );
               }

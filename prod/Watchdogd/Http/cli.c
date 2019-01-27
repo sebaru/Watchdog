@@ -95,9 +95,9 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
              "%s: HTTP/CLI request for %s:%s:%s", __func__, ev_host, ev_thread, ev_text );
              
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave,   TAG_ZMQ_CLI, ev_host, ev_thread,
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave,   TAG_ZMQ_CLI, NULL, NOM_THREAD, ev_host, ev_thread,
                         (void *)ev_text, pss->post_data_length+1 );
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_CLI, ev_host, ev_thread,
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_CLI, NULL, NOM_THREAD, ev_host, ev_thread,
                         (void *)ev_text, pss->post_data_length+1 );
     Http_Send_response_code ( wsi, HTTP_200_OK );
 

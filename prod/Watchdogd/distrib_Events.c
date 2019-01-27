@@ -56,7 +56,7 @@ return; /* pour test le 05/01/2019 Seb */
      { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Mnemo not found for A%03d", __func__, num );
        return;
      }
-
+#ifdef bouh
     if ( strlen ( mnemo->ev_text ) > 0 )                           /* Existe t'il un evenement associé ? (implique furtivité) */
      { if ( !strcmp(mnemo->ev_host, g_get_host_name()) || !strcmp(mnemo->ev_host, "*"))
         { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_TO_THREADS,
@@ -73,5 +73,6 @@ return; /* pour test le 05/01/2019 Seb */
        /*SA ( num, 0 );                                                 /* L'evenement est traité, on fait retomber la sortie */
      }
     g_free(mnemo);
+#endif
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

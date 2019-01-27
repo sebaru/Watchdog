@@ -29,6 +29,33 @@
 
  #include "watchdogd.h"
 /******************************************************************************************************************************/
+/* Zmq_instance_is_target: Renvoie TRUE si l'instance actuelle est visée par l'evenement en parametre                         */
+/* Entrée: l'evenement                                                                                                        */
+/* Sortie: TRUE ou FALSE                                                                                                      */
+/******************************************************************************************************************************/
+ gboolean Zmq_instance_is_target ( struct ZMQ_TARGET *event )
+  { gchar *hostname, *target;
+    gboolean retour;
+
+    if (!strcmp( event->dst_instance, "*" )) return(TRUE);
+
+    hostname = g_ascii_strdown ( g_get_host_name(), -1 );
+    target   = g_ascii_strdown ( event->dst_instance, -1 );
+    retour   = g_str_has_prefix ( hostname, target );
+    g_free(hostname);
+    g_free(target);
+    return(retour);
+  }
+/******************************************************************************************************************************/
+/* Zmq_instance_is_target: Renvoie TRUE si l'instance actuelle est visée par l'evenement en parametre                         */
+/* Entrée: l'evenement                                                                                                        */
+/* Sortie: TRUE ou FALSE                                                                                                      */
+/******************************************************************************************************************************/
+ gboolean Zmq_other_is_target ( struct ZMQ_TARGET *event )
+  { if (!strcmp( event->dst_instance, "*" )) return(TRUE);
+    return(!Zmq_instance_is_target(event));
+  }
+/******************************************************************************************************************************/
 /* New_zmq: Initialise une socket dont le pattern et le nom sont en parametre                                                 */
 /* Entrée: le pattern                                                                                                         */
 /* Sortie: une socket ZMQ ou NUL si erreur                                                                                    */
@@ -133,7 +160,9 @@
 /* Entrée: la socket, le tag, le message, sa longueur                                                                         */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
- gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag, const gchar *target_instance, const gchar *target_thread,
+ gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag,
+                              const gchar *source_instance, const gchar *source_thread,
+                              const gchar *target_instance, const gchar *target_thread,
                               void *source, gint taille )
   { struct ZMQ_TARGET event;
     void *buffer;
@@ -146,10 +175,15 @@
      }
     
     event.tag = tag;
-    if (target_instance) g_snprintf( event.instance, sizeof(event.instance), target_instance );
-                    else g_snprintf( event.instance, sizeof(event.instance), "*" );
-    if (target_thread) g_snprintf( event.thread, sizeof(event.thread), target_thread);
-                  else g_snprintf( event.thread, sizeof(event.thread), "*" );
+    g_snprintf( event.src_instance, sizeof(event.src_instance), g_get_host_name() );
+    if (source_instance) g_snprintf( event.src_instance, sizeof(event.src_instance), source_instance);
+                    else g_snprintf( event.src_instance, sizeof(event.src_instance), g_get_host_name() );
+    if (source_thread) g_snprintf( event.src_thread, sizeof(event.src_thread), source_thread);
+                  else g_snprintf( event.src_thread, sizeof(event.src_thread), "*" );
+    if (target_instance) g_snprintf( event.dst_instance, sizeof(event.dst_instance), target_instance );
+                    else g_snprintf( event.dst_instance, sizeof(event.dst_instance), "*" );
+    if (target_thread) g_snprintf( event.dst_thread, sizeof(event.dst_thread), target_thread);
+                  else g_snprintf( event.dst_thread, sizeof(event.dst_thread), "*" );
 
     memcpy ( buffer, &event, sizeof(struct ZMQ_TARGET) );                                                   /* Recopie entete */
     memcpy ( buffer + sizeof(struct ZMQ_TARGET), source, taille );                                  /* Recopie buffer payload */

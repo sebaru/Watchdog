@@ -50,11 +50,10 @@
 
     Cfg_voice.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
     Cfg_voice.enable            = FALSE; 
-    Cfg_voice.delai_inhib       = 300; 
     g_snprintf( Cfg_voice.audio_device,  sizeof(Cfg_voice.audio_device),  "default" );
     g_snprintf( Cfg_voice.key_words,     sizeof(Cfg_voice.key_words),     "dis moi jolie maison" );
     g_snprintf( Cfg_voice.gain_control,  sizeof(Cfg_voice.gain_control),  "noise" );
-    g_snprintf( Cfg_voice.vad_threshold, sizeof(Cfg_voice.vad_threshold), "2.0" );
+    g_snprintf( Cfg_voice.vad_threshold, sizeof(Cfg_voice.vad_threshold), "4.2" );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
@@ -72,13 +71,11 @@
        else if ( ! g_ascii_strcasecmp ( nom, "key_words" ) )
         { g_snprintf( Cfg_voice.key_words, sizeof(Cfg_voice.key_words), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "gain_control" ) )
-        { g_snprintf( Cfg_voice.key_words, sizeof(Cfg_voice.gain_control), "%s", valeur ); }
+        { g_snprintf( Cfg_voice.gain_control, sizeof(Cfg_voice.gain_control), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "vad_threshold" ) )
         { g_snprintf( Cfg_voice.vad_threshold, sizeof(Cfg_voice.vad_threshold), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_voice.lib->Thread_debug = TRUE;  }
-       else if ( ! g_ascii_strcasecmp ( nom, "delai_inhib" ) )
-        { Cfg_voice.delai_inhib = atoi(valeur); }
        else
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_NOTICE,
                    "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
@@ -87,16 +84,45 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Voice_Make_pulseaudio_file : Création du fichier de connexion pulseaudio                                                   */
+/* Entrée: Néant                                                                                                              */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Voice_Make_pulseaudio_file ( void )
+  { gchar chaine[128];
+    gchar file[128];
+    gint id_fichier;
+
+    g_snprintf( file, sizeof(file), ".pulse/client.conf" );
+    mkdir(".pulse", 0777);
+    unlink(file);
+    id_fichier = open( file, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
+    if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
+     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING, "%s: Open file '%s' for write failed (%s)", __func__,
+                 file, strerror(errno) );
+       close(id_fichier);
+       return;
+     }
+
+    g_snprintf(chaine, sizeof(chaine), "default-server=/run/user/%d/pulse/native", getuid() );
+    if (write( id_fichier, chaine, strlen(chaine) )<0)
+     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: Write to file '%s' failed (%s)", __func__, 
+                 file, strerror(errno) );
+       close(id_fichier);
+       return;
+     }
+    close(id_fichier);
+  }
+/******************************************************************************************************************************/
 /* Voice_Make_jsgf_grammaire : Lit tous les mnemos du thread et les places dans la grammaire                                  */
 /* Entrée: Néant                                                                                                              */
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Voice_Make_jsgf_grammaire ( void )
   { gchar *debut="#JSGF V1.0 UTF-8;\n\ngrammar watchdog.fr;\n\n<evenement> = ";
-    gchar *fin="\n\npublic <phrase> = debut evenement fin;";
-    gchar chaine[128];
     struct CMD_TYPE_MNEMO_BASE *mnemo;
     gchar *file="wtd.gram";
+    gchar chaine[128];
     gint id_fichier;
     struct DB *db;
 
@@ -109,8 +135,8 @@
     unlink(file);
     id_fichier = open( file, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
     if (id_fichier<0 || lockf( id_fichier, F_TLOCK, 0 ) )
-     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING, "%s: Open file '%s' for write failed for %06d (%s)", __func__,
-                 file, id_fichier, strerror(errno) );
+     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING, "%s: Open file '%s' for write failed (%s)", __func__,
+                 file, strerror(errno) );
        Libere_DB_SQL ( &db );
        close(id_fichier);
        return;
@@ -136,12 +162,12 @@
        write( id_fichier, mnemo->ev_text, strlen(mnemo->ev_text) );
        g_free(mnemo);
      }
-    g_snprintf(chaine, sizeof(chaine), ";\n public <phrase>= <debut> <evenement> merci;\n" );
+    g_snprintf(chaine, sizeof(chaine), ";\n public <phrase>= <debut> <evenement>;\n" );
     write( id_fichier, chaine, strlen(chaine) );
     close(id_fichier);
   }
 /******************************************************************************************************************************/
-/* Voice_Jouer_mp3 : Joue un fichier mp3 et attend la fin de la diffusion                                                           */
+/* Voice_Jouer_mp3 : Joue un fichier mp3 et attend la fin de la diffusion                                                     */
 /* Entrée : le message à jouer                                                                                                */
 /* Sortie : True si OK, False sinon                                                                                           */
 /******************************************************************************************************************************/
@@ -165,7 +191,7 @@
        return(FALSE);
      }
     else if (!pid)
-     { execlp( "mpg123", "mpg123", "-q", nom_fichier, NULL );
+     { execlp( "mpg123", "mpg123", "-o", "pulse", "-q", nom_fichier, NULL );
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
                 "%s: '%s' exec failed pid=%d (%s)", __func__, nom_fichier, pid, strerror( errno ) );
        _exit(0);
@@ -180,7 +206,7 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Voice_Jouer_google_speech : Joue un texte avec google_speech et attend la fin de la diffusion                                    */
+/* Voice_Jouer_google_speech : Joue un texte avec google_speech et attend la fin de la diffusion                              */
 /* Entrée : le message à jouer                                                                                                */
 /* Sortie : True si OK, False sinon                                                                                           */
 /******************************************************************************************************************************/
@@ -218,7 +244,6 @@
   { struct CMD_TYPE_HISTO *histo, histo_buf;
     gchar commande_vocale[256], *evenement;
     gint pipefd[2], pidpocket;
-    gint last_evt = 0;
     struct timeval tv;
 
 reload:
@@ -240,6 +265,7 @@ reload:
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
        goto end;
      }
+    Voice_Make_pulseaudio_file();
     Voice_Make_jsgf_grammaire();
 /********************************************* Création du process de reconnaissance vocale ***********************************/
     pipe(pipefd);                                                           /* Création de 2 File Descriptor : 0=Read 1=Write */
@@ -273,7 +299,8 @@ reload:
      }
 
     while ( Cfg_voice.lib->Thread_run == TRUE )
-     { struct DB *db;
+     { gchar mute[128];
+       struct DB *db;
        gint retour;
        fd_set fd;
 
@@ -301,16 +328,17 @@ reload:
           Cfg_voice.lib->Thread_reload = TRUE;
           continue;
         }
-       commande_vocale[retour-1-strlen(" merci")]=0;                                                 /*Caractere NULL d'arret */
-       evenement = commande_vocale + strlen(Cfg_voice.key_words) + 1;
-       if (Partage->top <= last_evt + Cfg_voice.delai_inhib)
-        { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
-                    "%s: recu = '%s' but too fast. Last_evt=%d. Next evt not before %d !", __func__,
-                    evenement, last_evt, last_evt + Cfg_voice.delai_inhib );
+       commande_vocale[retour-1]=0;                                                                 /* Caractere NULL d'arret */
+       if (g_str_has_prefix( commande_vocale, Cfg_voice.key_words ) == FALSE)
+        { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_NOTICE, "%s: recu Error = '%s'.", __func__, commande_vocale );
           continue;
         }
-       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: recu = '%s'. Searching...", __func__, evenement );
-       last_evt = Partage->top;
+       evenement = commande_vocale + strlen(Cfg_voice.key_words) + 1;
+
+       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_NOTICE, "%s: recu = '%s'. Searching...", __func__, evenement );
+
+       /*g_snprintf( mute, sizeof(mute), "pactl set-source-mute %s 1", Cfg_voice.audio_device );
+       system(mute);*/
 
        if (!strcmp( QUELLE_VERSION, evenement ))
         { gchar chaine[80];
@@ -363,7 +391,7 @@ reload:
                    bit.num = mnemo->num;
                    g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", mnemo->dls_tech_id );
                    g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", mnemo->acronyme );
-                   Send_zmq_with_tag ( Cfg_voice.zmq_to_master, TAG_ZMQ_SET_BIT, g_get_host_name(), NOM_THREAD,
+                   Send_zmq_with_tag ( Cfg_voice.zmq_to_master, TAG_ZMQ_SET_BIT, NULL, NOM_THREAD, "*", "*",
                                        &bit, sizeof(struct ZMQ_SET_BIT) );
                  }
                 else Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,

@@ -456,7 +456,7 @@
 /* Entrées: numero de la sortie, sa logique                                                                                   */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- struct ACTION *New_action_sortie( int num, int barre )
+ static struct ACTION *New_action_sortie_old( int num, int barre )
   { struct ACTION *action;
     int taille;
 
@@ -465,6 +465,28 @@
     action = New_action();
     action->alors = New_chaine( taille );
     g_snprintf( action->alors, taille, "SA(%d,%d);", num, !barre );
+    return(action);
+  }
+/******************************************************************************************************************************/
+/* New_action_sortie: Prepare la structure ACTION associée à l'alias en paremetre                                             */
+/* Entrées: l'alias, le complement si besoin, les options                                                                     */
+/* Sortie: la structure ACTION associée                                                                                       */
+/******************************************************************************************************************************/
+ struct ACTION *New_action_sortie( struct ALIAS *alias, int barre, GList *options )
+  { if (alias->num != -1) /* Alias par numéro ? */
+     { return(New_action_sortie_old( alias->num, barre )); }
+    /* Alias par nom */
+    struct ACTION *action = New_action();
+    gint taille = 128;
+    action->alors = New_chaine( taille );
+    g_snprintf( action->alors, taille, "SA(%d,%d);", alias->num, !barre );
+    if ( (!barre && !alias->barre) || (barre && alias->barre) )
+         { g_snprintf( action->alors, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_A_%s_%s, 1 ); ",
+                       alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+         }
+    else { g_snprintf( action->alors, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_A_%s_%s, 0 ); ",
+                       alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
+         }
     return(action);
   }
 /******************************************************************************************************************************/
@@ -879,6 +901,10 @@
                         break;
                    case MNEMO_ENTREE:
                         nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _E_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        write (fd, chaine, nb_car);
+                        break;
+                   case MNEMO_SORTIE:
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _A_%s_%s;\n", alias->tech_id, alias->acronyme );
                         write (fd, chaine, nb_car);
                         break;
                    case MNEMO_TEMPO:
