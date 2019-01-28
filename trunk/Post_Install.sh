@@ -8,7 +8,7 @@ then
 	echo "Installation in standalone mode in $wtd_home for $wtd_user"
         sudo ln -s /usr/local/etc/Watchdogd.service.system /etc/systemd/system/Watchdogd.service
         sudo systemctl enable Watchdogd.service
-        sudo usermod -a -G audio,dialout,pulse-access
+        sudo usermod -a -G audio,dialout $wtd_user
 else
 	wtd_home=~/.watchdog
         wtd_user=`whoami`
@@ -23,10 +23,10 @@ sleep 2
 echo "Enabling pulseaudio systemd service"
 if [ "$1" = "server" ]
 then
-        systemctl disable pulseaudio
-else
-        systemctl enable pulseaudio
+	sudo loginctl enable-linger $wtd_user
 fi
+systemctl --user enable pulseaudio
+systemctl --user start pulseaudio
 echo "done."
 sleep 2
 
@@ -42,6 +42,8 @@ mkdir -p $wtd_home/.pulse/
 echo "done."
 sleep 2
 
+if [ "$1" = "server" ]
+then
 echo "Create Database and conf file"
 sudo systemctl restart mariadb
 CONFFILE=/etc/watchdogd.conf
@@ -58,6 +60,7 @@ if [ ! -f $CONFFILE ]
    /usr/bin/mysql_secure_installation
 fi
 echo "done."
+fi
 
 echo "Starting Watchdog"
 if [ "$1" = "server" ]
