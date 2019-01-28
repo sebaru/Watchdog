@@ -1,28 +1,34 @@
 #!/bin/sh
 
+echo "Creating systemd service"
 if [ "$1" = "server" ]
 then
-	wtd_home=/home/watchdog
- wtd_user=watchdog
+        wtd_home=/home/watchdog
+        wtd_user=watchdog
 	echo "Installation in standalone mode in $wtd_home for $wtd_user"
+        sudo ln -s /usr/local/etc/Watchdogd.service /etc/systemd/system/Watchdogd.service
+        sudo systemctl enable Watchdogd.service
+        sudo usermod -a -G audio,dialout $wtd_user
 else
 	wtd_home=~/.watchdog
- wtd_user=`whoami`
+        wtd_user=`whoami`
 	echo "Installation in user mode in $wtd_home for $wtd_user"
+        sudo ln -s /usr/local/etc/Watchdogd.service /etc/systemd/user/Watchdogd.service
+        systemctl --user enable Watchdogd.service
 fi
-
-echo "Creating systemd service"
-sudo ln -s /usr/local/etc/Watchdogd.service /etc/systemd/system/Watchdogd.service
-sudo systemctl enable Watchdogd.service
 sudo systemctl daemon-reload
 echo "done."
 sleep 2
 
-#echo "Enabling pulseaudio systemd service"
-#systemctl enable --user pulseaudio
-#systemctl start --user pulseaudio
-#echo "done."
-#sleep 2
+echo "Enabling pulseaudio systemd service"
+if [ "$1" = "server" ]
+then
+	loginctl enable-linger $wtd_user
+fi
+systemctl --user enable pulseaudio
+systemctl --user start pulseaudio
+echo "done."
+sleep 2
 
 echo "Copying data files"
 mkdir -p $wtd_home
@@ -36,6 +42,8 @@ mkdir -p $wtd_home/.pulse/
 echo "done."
 sleep 2
 
+if [ "$1" = "server" ]
+then
 echo "Create Database and conf file"
 sudo systemctl restart mariadb
 CONFFILE=/etc/watchdogd.conf
@@ -52,8 +60,14 @@ if [ ! -f $CONFFILE ]
    /usr/bin/mysql_secure_installation
 fi
 echo "done."
+fi
 
 echo "Starting Watchdog"
-sudo systemctl start Watchdogd.service
+if [ "$1" = "server" ]
+then
+	sudo systemctl start Watchdogd.service
+else
+	systemctl --user start Watchdogd.service
+fi
 echo "done."
 

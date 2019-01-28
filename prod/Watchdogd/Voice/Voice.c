@@ -53,7 +53,7 @@
     g_snprintf( Cfg_voice.audio_device,  sizeof(Cfg_voice.audio_device),  "default" );
     g_snprintf( Cfg_voice.key_words,     sizeof(Cfg_voice.key_words),     "dis moi jolie maison" );
     g_snprintf( Cfg_voice.gain_control,  sizeof(Cfg_voice.gain_control),  "noise" );
-    g_snprintf( Cfg_voice.vad_threshold, sizeof(Cfg_voice.vad_threshold), "4.2" );
+    g_snprintf( Cfg_voice.vad_threshold, sizeof(Cfg_voice.vad_threshold), "3.0" );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
@@ -191,7 +191,7 @@
        return(FALSE);
      }
     else if (!pid)
-     { execlp( "mpg123", "mpg123", "-o", "pulse", "-q", nom_fichier, NULL );
+     { execlp( "mpg123", "mpg123", "-q", nom_fichier, NULL );
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
                 "%s: '%s' exec failed pid=%d (%s)", __func__, nom_fichier, pid, strerror( errno ) );
        _exit(0);
@@ -287,7 +287,8 @@ reload:
                "-inmic", "yes", "-agc", Cfg_voice.gain_control, "-logfn", "pocket.log",
                "-vad_threshold", Cfg_voice.vad_threshold,
                "-dict", "fr.dict", "-jsgf", "wtd.gram", "-hmm", "cmusphinx-fr-5.2", NULL );
-       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s_Fils: lancement PocketSphinx failed", __func__ );
+       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
+                 "%s_Fils: lancement PocketSphinx failed '%s'", __func__, strerror(errno) );
        _exit(0);
      }
 
@@ -335,25 +336,21 @@ reload:
         }
        evenement = commande_vocale + strlen(Cfg_voice.key_words) + 1;
 
-       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_NOTICE, "%s: recu = '%s'. Searching...", __func__, evenement );
+       g_snprintf( mute, sizeof(mute), "pactl set-source-mute %s 1", Cfg_voice.audio_device );
+       system(mute);
 
-       /*g_snprintf( mute, sizeof(mute), "pactl set-source-mute %s 1", Cfg_voice.audio_device );
-       system(mute);*/
+       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_NOTICE, "%s: recu = '%s'. Searching...", __func__, evenement );
 
        if (!strcmp( QUELLE_VERSION, evenement ))
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), "Ma version est la %s", PACKAGE_VERSION );
           Voice_Jouer_google_speech ( chaine );
-          continue;
         }
-
-       if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, evenement ) )
+       else if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, evenement ) )
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
                     "%s: Error searching Database for '%s'", __func__, evenement );
-          continue;
         }
-          
-       if ( db->nbr_result == 0 )                                                           /* Si pas d'enregistrement trouvé */
+       else if ( db->nbr_result == 0 )                                                      /* Si pas d'enregistrement trouvé */
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
                     "%s: No match found for '%s'", __func__, evenement );
           Libere_DB_SQL ( &db );
@@ -400,10 +397,12 @@ reload:
              g_free(mnemo);
            }
         }
+       g_snprintf( mute, sizeof(mute), "pactl set-source-mute %s 0", Cfg_voice.audio_device );
+       system(mute);
      }
-    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: Sending kill to pocketsphinx", __func__ );
+    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: Sending kill to pocketsphinx pid %d", __func__, pidpocket );
     kill(pidpocket, SIGKILL);
-    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: Waiting for termination", __func__ );
+    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: Waiting for pid %d termination", __func__, pidpocket );
     waitpid(pidpocket, NULL, 0);
     close(pipefd[0]);                                                                       /* Fermeture du pipe en reception */
 end:
