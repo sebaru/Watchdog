@@ -23,7 +23,7 @@ sleep 2
 echo "Enabling pulseaudio systemd service"
 if [ "$1" = "server" ]
 then
-	sudo loginctl enable-linger $wtd_user
+	loginctl enable-linger $wtd_user
 fi
 systemctl --user enable pulseaudio
 systemctl --user start pulseaudio

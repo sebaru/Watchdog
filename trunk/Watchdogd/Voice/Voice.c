@@ -336,25 +336,21 @@ reload:
         }
        evenement = commande_vocale + strlen(Cfg_voice.key_words) + 1;
 
-       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_NOTICE, "%s: recu = '%s'. Searching...", __func__, evenement );
+       g_snprintf( mute, sizeof(mute), "pactl set-source-mute %s 1", Cfg_voice.audio_device );
+       system(mute);
 
-       /*g_snprintf( mute, sizeof(mute), "pactl set-source-mute %s 1", Cfg_voice.audio_device );
-       system(mute);*/
+       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_NOTICE, "%s: recu = '%s'. Searching...", __func__, evenement );
 
        if (!strcmp( QUELLE_VERSION, evenement ))
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), "Ma version est la %s", PACKAGE_VERSION );
           Voice_Jouer_google_speech ( chaine );
-          continue;
         }
-
-       if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, evenement ) )
+       else if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, evenement ) )
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
                     "%s: Error searching Database for '%s'", __func__, evenement );
-          continue;
         }
-          
-       if ( db->nbr_result == 0 )                                                           /* Si pas d'enregistrement trouvé */
+       else if ( db->nbr_result == 0 )                                                      /* Si pas d'enregistrement trouvé */
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
                     "%s: No match found for '%s'", __func__, evenement );
           Libere_DB_SQL ( &db );
@@ -401,6 +397,8 @@ reload:
              g_free(mnemo);
            }
         }
+       g_snprintf( mute, sizeof(mute), "pactl set-source-mute %s 0", Cfg_voice.audio_device );
+       system(mute);
      }
     Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: Sending kill to pocketsphinx pid %d", __func__, pidpocket );
     kill(pidpocket, SIGKILL);
