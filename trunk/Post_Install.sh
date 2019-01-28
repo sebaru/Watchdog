@@ -6,7 +6,7 @@ then
         wtd_home=/home/watchdog
         wtd_user=watchdog
 	echo "Installation in standalone mode in $wtd_home for $wtd_user"
-        sudo ln -s /usr/local/etc/Watchdogd.service.server /etc/systemd/system/Watchdogd.service
+        sudo ln -s /usr/local/etc/Watchdogd.service.system /etc/systemd/system/Watchdogd.service
         sudo systemctl enable Watchdogd.service
         sudo usermod -a -G audio,dialout $wtd_user
 else
@@ -15,6 +15,7 @@ else
 	echo "Installation in user mode in $wtd_home for $wtd_user"
         sudo ln -s /usr/local/etc/Watchdogd.service.user /etc/systemd/user/Watchdogd.service
         systemctl --user enable Watchdogd.service
+        sudo usermod -a -G audio,dialout $wtd_user
 fi
 sudo systemctl daemon-reload
 echo "done."
