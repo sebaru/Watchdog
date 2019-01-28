@@ -1,28 +1,34 @@
 #!/bin/sh
 
+echo "Creating systemd service"
 if [ "$1" = "server" ]
 then
-	wtd_home=/home/watchdog
- wtd_user=watchdog
+        wtd_home=/home/watchdog
+        wtd_user=watchdog
 	echo "Installation in standalone mode in $wtd_home for $wtd_user"
+        sudo ln -s /usr/local/etc/Watchdogd.service.system /etc/systemd/system/Watchdogd.service
+        sudo systemctl enable Watchdogd.service
+        sudo usermod -a -G audio,dialout,pulse-access
 else
 	wtd_home=~/.watchdog
- wtd_user=`whoami`
+        wtd_user=`whoami`
 	echo "Installation in user mode in $wtd_home for $wtd_user"
+        sudo ln -s /usr/local/etc/Watchdogd.service.user /etc/systemd/user/Watchdogd.service
+        systemctl --user enable Watchdogd.service
 fi
-
-echo "Creating systemd service"
-sudo ln -s /usr/local/etc/Watchdogd.service /etc/systemd/system/Watchdogd.service
-sudo systemctl enable Watchdogd.service
 sudo systemctl daemon-reload
 echo "done."
 sleep 2
 
-#echo "Enabling pulseaudio systemd service"
-#systemctl enable --user pulseaudio
-#systemctl start --user pulseaudio
-#echo "done."
-#sleep 2
+echo "Enabling pulseaudio systemd service"
+if [ "$1" = "server" ]
+then
+        systemctl disable pulseaudio
+else
+        systemctl enable pulseaudio
+fi
+echo "done."
+sleep 2
 
 echo "Copying data files"
 mkdir -p $wtd_home
@@ -54,6 +60,11 @@ fi
 echo "done."
 
 echo "Starting Watchdog"
-sudo systemctl start Watchdogd.service
+if [ "$1" = "server" ]
+then
+	sudo systemctl start Watchdogd.service
+else
+	systemctl --user start Watchdogd.service
+fi
 echo "done."
 
