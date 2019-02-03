@@ -17,7 +17,7 @@ class Dls extends Admin_Controller{
 			 $this->template->admin_render('admin/dls/index', $this->data);
 		}
 /******************************************************************************************************************************/
-	function get()
+	function get_all()
   {	header("Content-Type: application/json; charset=UTF-8");
 		  $draw   = intval($this->input->get("draw"));
     $start  = intval($this->input->get("start"));

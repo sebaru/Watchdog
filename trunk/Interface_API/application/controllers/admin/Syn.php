@@ -5,25 +5,10 @@ class Syn extends Admin_Controller{
     function __construct()
      { parent::__construct();
        $this->load->model('Syn_model');
-		
-		/* Title Syn :: Common */
-       $this->admin_page_title->push('Synoptiques');
-       $this->data['pagetitle'] = "<h1>Synoptiques</h1>";
-        /* Breadcrumbs :: Common */
-       $this->admin_breadcrumbs->unshift(1, 'Synoptiques', 'admin/syn');
-     } 
-
-/******************************************************************************************************************************/
-    function index()
-     { if ( ! $this->wtd_auth->logged_in() ) {	redirect('auth', 'refresh');	}
-			
-    			$this->data['breadcrumb'] = $this->admin_breadcrumbs->show();
-			    /* Load Template */
-			    $this->template->admin_render('admin/syn/index', $this->data);
-     }
+		     } 
 
 /******************************************************************************************************************************/	
-	function get()
+	function get_all()
   {	header("Content-Type: application/json; charset=UTF-8");
 		  $draw   = intval($this->input->get("draw"));
     $start  = intval($this->input->get("start"));
@@ -31,42 +16,19 @@ class Syn extends Admin_Controller{
 
 		  $data = array();
 		
-		  if ( ! $this->wtd_auth->logged_in() )
+/*		  if ( ! $this->wtd_auth->logged_in() )
      {	echo json_encode(array(	"draw"=>$draw,	"recordsTotal" => 0, "recordsFiltered" => 0,	"data" => $data ));
 			    exit();
-		   }
+		   }*/
 
   		$syns = $this->Syn_model->get_all($start, $length);
 		  foreach($syns->result() as $syn)
-     {	$caret = '<div class="dropdown">'.
-                '<button class="btn btn-xs btn-primary dropdown-toggle" type="button" data-toggle="dropdown">'.
-                '<span class="caret"></span></button>'.
-                '<ul class="dropdown-menu">'.
-                '<li><a href='.site_url('admin/syn/edit/'.$syn->id).'>'.
-                    '<i class="fa fa-pencil" style="color:green"></i>'.
-                    '<i class="fa fa-image" style="color:blue"></i>Configurer</a></li>'.
-                '<li><a href='.site_url('admin/syn/atelier/'.$syn->id).'>'.
-                    '<i class="fa fa-pencil" style="color:green"></i>'.
-                    '<i class="fa fa-image" style="color:blue"></i>Atelier</a></li>'.
-                '<li><a href='.site_url('admin/syn/create/'.$syn->id).'>'.
-                    '<i class="fa fa-plus" style="color:green"></i>'.
-                    '<i class="fa fa-image" style="color:blue"></i>Creer un fils</a></li>'.
-                '<li><a href='.site_url('admin/dls/create/'.$syn->id).'>'.
-                    '<i class="fa fa-plus" style="color:green"></i>'.
-                    '<i class="fa fa-cog" style="color:blue"></i>Creer un DLS</a></li>'.
-                '<li class="divider"></li>'.
-                '<li><a href='.site_url('admin/syn/delete/'.$syn->id).'>'.
-                    '<i class="fa fa-times" style="color:red"></i>Supprimer ce synoptique</a></li>'.
-                '</ul></div>';
-       $data[] = array(	$caret, $syn->id,	$syn->access_level, $syn->ppage, $syn->page,
-                      	'<a href='.site_url('admin/syn/edit/'.$syn->id).' data-toggle="tooltip" style="cursor:pointer" title="Configurer">'.$syn->libelle.'</a>',
+     {	$data[] = array(	"id" => $syn->id,	"access_level" => $syn->access_level,
+                        "parent_page" => $syn->ppage, "page" => $syn->page,
                       );
 		   }
 
-		  $total_syns = $this->Syn_model->get_total();
-		
-		  $output = array( "draw" => $draw,	"recordsTotal" => $total_syns,	"recordsFiltered" => $total_syns,	"data" => $data	);
-		  echo json_encode($output);
+		  echo json_encode($data);
 		  exit();
 	 }
 

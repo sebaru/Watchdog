@@ -13,7 +13,7 @@ class Syn_model extends CI_Model
 	    { $this->db->select("syn.id,syn.libelle,syn.page,syn.access_level,parent.id as pid,parent.page as ppage ");
        $this->db->from("syns as syn");
        $this->db->join("syns as parent", "syn.parent_id=parent.id", "INNER" );
-       $this->db->where("syn.access_level<=", $this->session->user_access_level );
+       /*$this->db->where("syn.access_level<=", $this->session->user_access_level );*/
        $this->db->where("syn.id=", $id );
        return $this->db->get()->row();
      }
@@ -41,7 +41,7 @@ class Syn_model extends CI_Model
      { $this->db->select("syn.id,syn.libelle,syn.page,syn.access_level,parent.id as pid,parent.page as ppage ");
        $this->db->from("syns as syn");
        $this->db->join("syns as parent", "syn.parent_id=parent.id", "INNER" );
-       $this->db->where("syn.access_level<=", $this->session->user_access_level );
+       /*$this->db->where("syn.access_level<=", $this->session->user_access_level );*/
        if ($length != 0) { $this->db->limit($length,$start); }
        $result = $this->db->get();
        error_log ( 'get_all_syns '. $this->db->last_query() );

@@ -4,13 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Auth extends MY_Controller {
 
 	function __construct()
-	{
-		parent::__construct();
-
-		$this->form_validation->set_error_delimiters($this->config->item('error_start_delimiter', 'wtd_auth'), $this->config->item('error_end_delimiter', 'wtd_auth'));
-  log_message('debug', 'test seb 1');
-		$this->lang->load('auth');
-	}
+ 	{	parent::__construct();	}
 
 /******************************************************************************************************************************/
 	function index()
@@ -60,6 +54,24 @@ class Auth extends MY_Controller {
         }
      }
     else { redirect('/', 'refresh'); }
+  }
+/******************************************************************************************************************************/
+ function login_test()
+ 	{ if ($this->wtd_auth->logged_in()) exit();
+
+    log_message('debug', 'input ' . file_get_contents('php://input') );
+
+    try { $input = json_decode(file_get_contents('php://input')); }
+    catch (Exception $e) { echo json_encode( array( "Parsing error" => e.getMessage() ) ); exit(); }
+
+    if ($this->wtd_auth_model->login($input->username, $input->password, "false"))
+     { echo json_encode( array( "login_status" => "OK" ) );
+		     exit();
+     }
+    else
+     { echo json_encode( array( "login_status" => "FAILED" ) );
+		     exit();
+     }
   }
 
 /******************************************************************************************************************************/
