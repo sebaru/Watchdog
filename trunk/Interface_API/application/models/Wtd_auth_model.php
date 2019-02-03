@@ -169,58 +169,10 @@ class Wtd_auth_model extends CI_Model
 		                         'user_access_level'    => $user->access_level,
 		                         'user_id'              => $user->id,
 		                       );
-    error_log ( 'New session for : '.$user->username . '-' . $user->email . '-' . $user->access_level . '-' . $user->id);
+    log_message ( 'debug', 'New session for : '.$user->username . '-' . $user->email . '-' . $user->access_level . '-' . $user->id);
  		 $this->session->set_userdata($session_data);
 	 	 return TRUE;
 	 }
-
-	/**
-	 * remember_user
-	 *
-	 * @param int|string $id
-	 *
-	 * @return bool
-	 * @author Ben Edmunds
-	 */
-	public function remember_user($id)
-	{	if (!$id)	{	return FALSE;	}
-
-		$user = $this->user($id)->row();
-
-		$salt = $this->salt();
-
-		$this->db->update($this->tables['users'], array('remember_code' => $salt), array('id' => $id));
-
-		if ($this->db->affected_rows() > -1)
-		{
-			// if the user_expire is set to zero we'll set the expiration two years from now.
-			if($this->config->item('user_expire', 'ion_auth') === 0)
-			{
-				$expire = (60*60*24*365*2);
-			}
-			// otherwise use what is set
-			else
-			{
-				$expire = $this->config->item('user_expire', 'ion_auth');
-			}
-
-			set_cookie(array(
-			    'name'   => $this->config->item('identity_cookie_name', 'ion_auth'),
-			    'value'  => $user->{$this->identity_column},
-			    'expire' => $expire
-			));
-
-			set_cookie(array(
-			    'name'   => $this->config->item('remember_cookie_name', 'ion_auth'),
-			    'value'  => $salt,
-			    'expire' => $expire
-			));
-
-			return TRUE;
-		}
-
-		return FALSE;
-	}
 
 	/**
 	 * login_remembed_user
