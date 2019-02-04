@@ -37,7 +37,7 @@ class Mnemo_model extends CI_Model
 		     $this->db->join('syns as syn','d.syn_id=syn.id');
 		     $this->db->join('syns as parent_syn','syn.parent_id=parent_syn.id');
    		  $this->db->where('m.dls_id=',$dls_id);
-       $this->db->where("syn.access_level<=", $this->session->user_access_level );
+       /*$this->db->where("syn.access_level<=", $this->session->user_access_level );*/
        return $this->db->get()->result();
     }
 	
