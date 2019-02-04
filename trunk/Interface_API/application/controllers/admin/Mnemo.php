@@ -24,7 +24,7 @@ class Mnemo extends Admin_Controller {
 
 		  $data = array();
  			$mnemos = $this->Mnemo_model->get_all($id);
-    foreach($mnemos->result() as $mnemo)
+    foreach($mnemos as $mnemo)
      { $data[] = array( "id" => $mnemo->id,
                         "tech_id" => $mnemo->tech_id,
                         "acronyme" => $mnemo->acronyme,
