@@ -6,38 +6,38 @@ class Mnemo extends Admin_Controller {
  public function __construct()
   { parent::__construct();
     $this->load->model('Mnemo_model');
-
-        /* Title Page :: Common */
-    $this->admin_page_title->push('Mnémoniques');
- 			$this->admin_breadcrumbs->unshift(1, 'Modules D.L.S', 'admin/dls');
-    $this->data['pagetitle'] = $this->admin_page_title->show();
-
-   /* $this->mnemos_types = array
-     ( '<img style="width: 20px" data-toggle="tooltip" title="Bistable"           src="https://icons.abls-habitat.fr/Info.svg" />',
-       '<img style="width: 20px" data-toggle="tooltip" title="Monostable"         src="https://icons.abls-habitat.fr/Pignon_rouge.svg" />',
-       '<img style="width: 20px" data-toggle="tooltip" title="Temporisation"      src="https://icons.abls-habitat.fr/Pignon_orange.svg" />',
-       '<img style="width: 20px" data-toggle="tooltip" title="Entrée TOR"         src="https://icons.abls-habitat.fr/Pignon_jaune.svg" />',
-       '<img style="width: 20px" data-toggle="tooltip" title="sortie TOR"         src="https://icons.abls-habitat.fr/Bouclier2_vert.svg" />',
-       '<img style="width: 20px" data-toggle="tooltip" title="Entrée ANA"         src="https://icons.abls-habitat.fr/Bouclier2_noir.svg" />',
-       '<img style="width: 20px" data-toggle="tooltip" title="Sortie ANA"         src="https://icons.abls-habitat.fr/Croix_rouge_rouge.svg" />',
-       '<img style="width: 20px" data-toggle="tooltip" title="Visuel"             src="https://icons.abls-habitat.fr/Croix_rouge_jaune.svg" />',
-       '<img style="width: 20px" data-toggle="tooltip" title="Compteur horaire"   src="https://icons.abls-habitat.fr/Croix_rouge_jaune.svg" />',
-       '<img style="width: 20px" data-toggle="tooltip" title="Compteur Impulsion" src="https://icons.abls-habitat.fr/Croix_rouge_jaune.svg" />',
-       '<img style="width: 20px" data-toggle="tooltip" title="Registre"           src="https://icons.abls-habitat.fr/Croix_rouge_jaune.svg" />',
-       '<img style="width: 20px" data-toggle="tooltip" title="Horloge"            src="https://icons.abls-habitat.fr/Horloge_neutre.svg" />',
-     );*/
-        /* Breadcrumbs :: Common */
+    $mnemo_types = array( "Bistable",  "Monostable", "Temporisation", "Entrée TOR", "Sortie TOR",
+                          "Entrée Analogique", "Sortie Analogique", "Visuel",
+                          "Compteur horaire", "Compteur d\'impulsion", "Registre", "Horloge" );
   }
-
 /******************************************************************************************************************************/
-	public function index($dls_id=null)
-	 { if ( ! $this->wtd_auth->logged_in() ) {	redirect('auth', 'refresh');	}
- 			$this->admin_breadcrumbs->unshift(2, 'Liste des mnémoniques', 'admin/mnemo/index/'.$dls_id);
-    $this->data['breadcrumb'] = $this->admin_breadcrumbs->show();                                              /* Breadcrumbs */
-    $this->data['mnemos'] = $this->Mnemo_model->get_all($dls_id);                                            /* Get all users */
+ public function get($id=NULL)
+  {	header("Content-Type: application/json; charset=UTF-8");
+		  $draw   = intval($this->input->get("draw"));
+    $start  = intval($this->input->get("start"));
+		  $length = intval($this->input->get("length"));
 
-    $this->template->admin_render('admin/mnemo/index', $this->data);                                         /* Load Template */
- 	}
+/*    if ( ! $this->wtd_auth->logged_in() )
+     {	echo json_encode(array(	"draw"=>$draw,	"recordsTotal" => 0, "recordsFiltered" => 0,	"data" => $data ));
+			    exit();
+		   }*/
+
+		  $data = array();
+ 			$mnemos = $this->Mnemo_model->get_all($id);
+    foreach($mnemos->result() as $mnemo)
+     { $data[] = array( "id" => $mnemo->id,
+                        "tech_id" => $mnemo->tech_id,
+                        "acronyme" => $mnemo->acronyme,
+                        "type" => $mnemo_types[$mnemo->type],
+                        "libelle" => $mnemo->libelle,
+                        "ev_host" => $mnemo->ev_host,
+                        "ev_thread" => $mnemo->ev_thread,
+                        "ev_text" => $mnemo->ev_text,
+                      );
+		   }
+		  echo json_encode($data);
+		  exit();
+  }
 /******************************************************************************************************************************/
 	public function delete($id)
  	{ $id = (int) $id;
