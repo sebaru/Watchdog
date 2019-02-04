@@ -9,14 +9,6 @@ class Dls extends Admin_Controller{
   } 
 
 /******************************************************************************************************************************/
- function index()
-  { if ( ! $this->wtd_auth->logged_in() ) {	redirect('auth', 'refresh');	}
-		
-			 $this->data['breadcrumb'] = $this->admin_breadcrumbs->show();
-			 /* Load Template */
-			 $this->template->admin_render('admin/dls/index', $this->data);
-		}
-/******************************************************************************************************************************/
 	function get_all()
   {	header("Content-Type: application/json; charset=UTF-8");
 		  $draw   = intval($this->input->get("draw"));
@@ -125,78 +117,54 @@ class Dls extends Admin_Controller{
    	if ( ! $this->wtd_auth->logged_in() ) {	redirect('auth', 'refresh');	}
 
     $target_dls = $this->Dls_model->get($id);
-    if (!isset($target_dls))
-     { $this->session->set_flashdata('flash_error', 'Module D.L.S '.$id.' inconnu' );
-       redirect('admin/dls/index');
-     }
+    if (!isset($target_dls)) { exit(); }
     if ($target_dls->access_level < $this->session->user_access_level)
      { if($this->Dls_model->delete($target_dls->id))
  			    { $flash = 'Module D.L.S ('.$target_dls->tech_id.', '.$target_dls->name.') supprimé';
-          $this->session->set_flashdata('flash_message', $flash );
           $this->wtd_webservice->send('/dls/delete?id='.$target_dls->id);
           $this->wtd_log->add($flash);
         }
-       else
- 			    { $this->session->set_flashdata('flash_error', 'Erreur de suppression du Module D.L.S' ); }
 		   }
     else
-     { $this->session->set_flashdata('flash_error', 'Privilèges insuffisants' );
-       $this->wtd_log->add("Tentative de suppression du module D.L.S ".
+     { $this->wtd_log->add("Tentative de suppression du module D.L.S ".
                            $target_dls->id." (".$target_dls->tech_id.", ".$target_dls->name.")");
      }
-    redirect('admin/dls/index');
 	 }
 /******************************************************************************************************************************/
 	public function activate($id=NULL)
 	 { if ( ! $this->wtd_auth->logged_in() ) {	redirect('auth', 'refresh');		}
 
     $target_dls = $this->Dls_model->get($id);
-    if (!isset($target_dls))
-     { $this->session->set_flashdata('flash_error', 'Module D.L.S '.$id.' inconnu' );
-       redirect('admin/dls/index');
-     }
+    if (!isset($target_dls)) { exit(); }
     if ($target_dls->access_level < $this->session->user_access_level)
      { if($this->Dls_model->activate($target_dls->id))
  			    { $flash = 'Module D.L.S ('.$target_dls->tech_id.', '.$target_dls->name.') activé';
-          $this->session->set_flashdata('flash_message', $flash );
           $this->wtd_webservice->send('/dls/activate?id='.$target_dls->id);
           $this->wtd_log->add($flash);
         }
-       else
- 			    { $this->session->set_flashdata('flash_error', "Erreur d'activation du Module D.L.S" ); }
 		   }
     else
-     { $this->session->set_flashdata('flash_error', 'Privilèges insuffisants' );
-       $this->wtd_log->add("Tentative d'activation du module D.L.S ".
+     { $this->wtd_log->add("Tentative d'activation du module D.L.S ".
                            $target_dls->id." (".$target_dls->tech_id.", ".$target_dls->name.")");
      }
-    redirect('admin/dls/index');
 	 }
 /******************************************************************************************************************************/
 	public function deactivate($id=NULL)
 	 { if ( ! $this->wtd_auth->logged_in() ) {	redirect('auth', 'refresh');		}
 
     $target_dls = $this->Dls_model->get($id);
-    if (!isset($target_dls))
-     { $this->session->set_flashdata('flash_error', 'Module D.L.S '.$id.' inconnu' );
-       redirect('admin/dls/index');
-     }
+    if (!isset($target_dls)) { exit(); }
     if ($target_dls->access_level < $this->session->user_access_level)
      { if($this->Dls_model->deactivate($target_dls->id))
  			    { $flash = 'Module D.L.S ('.$target_dls->tech_id.', '.$target_dls->name.') désactivé';
-          $this->session->set_flashdata('flash_message', $flash );
           $this->wtd_webservice->send('/dls/deactivate?id='.$target_dls->id);
           $this->wtd_log->add($flash);
         }
-       else
- 			    { $this->session->set_flashdata('flash_error', "Erreur de désactivation du Module D.L.S" ); }
 		   }
     else
-     { $this->session->set_flashdata('flash_error', 'Privilèges insuffisants' );
-       $this->wtd_log->add("Tentative désactivation du module D.L.S ".
+     { $this->wtd_log->add("Tentative désactivation du module D.L.S ".
                            $target_dls->id." (".$target_dls->tech_id.", ".$target_dls->name.")");
      }
-    redirect('admin/dls/index');
 	 }
 /******************************************************************************************************************************/
  function edit($id=null)
@@ -280,46 +248,27 @@ class Dls extends Admin_Controller{
  	} 
 /******************************************************************************************************************************/
  function sourceedit($id=null)
-  { if ( ! $this->wtd_auth->logged_in() ) {	redirect('auth', 'refresh');	}
+  { /*if ( ! $this->wtd_auth->logged_in() ) {	redirect('auth', 'refresh');	}
 		
  			if ($this->session->user_access_level<6)
      { $this->session->set_flashdata('flash_error', 'Privilèges insuffisants' );
        redirect('admin/dls/index');
-     }
+     }*/
 		
-    $this->admin_breadcrumbs->unshift(2, 'Editer une source D.L.S', 'admin/dls/sourceedit');
-	   $this->data['breadcrumb'] = $this->admin_breadcrumbs->show();
-								
 			 // check if the dls exists before trying to edit it
-			 $this->data['dls'] = $dls = $this->Dls_model->get($id);
- 			if(!isset($dls))
-     { $this->session->set_flashdata('flash_error', "Ce D.L.S n'existe pas");
-       redirect('admin/dls/index');
-     }
+			 $dls = $this->Dls_model->get($id);
+    if (!isset($dls)) { exit(); }
 
-				$this->form_validation->set_rules('sourcecode','Code Source','required');
-
-   	if($this->form_validation->run() == TRUE)
-	    { $params = array(	'sourcecode' => $this->input->post('sourcecode'),
-                 					);
-
-	  				$this->Dls_model->update($dls->id,$params);            
-  					$this->session->set_flashdata('flash_message','Le dls <strong>'.$dls->tech_id.'</strong>/'.
-                                     $dls->shortname.' a été modifié.');
-       $this->wtd_log->add("Mise à jour et compilation de la source DLS ".$dls->id." (".$dls->tech_id.") ");
-       $this->wtd_webservice->compil($id);
-		 		}
-    else
-     { $this->session->set_flashdata('flash_error', validation_errors() ); }
-
-    $this->data['error_log'] = $this->Dls_model->get_error_log($dls->id);
-    $this->data['sourcecode'] = array(	'name'  => 'sourcecode',
-                                       'id'    => 'sourcecode',
-                                       'type'  => 'textarea',
-                                       'class' => 'form-control',
-                                       'value' => $this->form_validation->set_value('sourcecode', $dls->sourcecode)
-                                     );
-		  $this->template->admin_render('admin/dls/sourceedit', $this->data);
+    $data = array(	"id" => $dls->id,
+                   "sourcecode" => $dls->sourcecode,
+                   "error_log" => $this->Dls_model->get_error_log($dls->id),
+                   "tech_id" => $dls->tech_id,
+                   "package" => $dls->package,
+                   "parent_page" => $dls->ppage, "page" => $dls->page,
+                   "shortname" => $dls->shortname, "name" => $dls->name,
+                 );
+		   }
+		  echo json_encode($data);
  	} 
 /******************************************************************************************************************************/
  function download_package($id=null)

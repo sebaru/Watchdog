@@ -2,10 +2,10 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Syn extends Admin_Controller{
-    function __construct()
-     { parent::__construct();
-       $this->load->model('Syn_model');
-		     } 
+ function __construct()
+  { parent::__construct();
+    $this->load->model('Syn_model');
+  } 
 
 /******************************************************************************************************************************/	
 	function get_all()
