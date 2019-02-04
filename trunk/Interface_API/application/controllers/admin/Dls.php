@@ -267,7 +267,6 @@ class Dls extends Admin_Controller{
                    "parent_page" => $dls->ppage, "page" => $dls->page,
                    "shortname" => $dls->shortname, "name" => $dls->name,
                  );
-		   }
 		  echo json_encode($data);
  	} 
 /******************************************************************************************************************************/
