@@ -6,9 +6,9 @@ class Mnemo extends Admin_Controller {
  public function __construct()
   { parent::__construct();
     $this->load->model('Mnemo_model');
-    $mnemo_types = array( "Bistable",  "Monostable", "Temporisation", "Entrée TOR", "Sortie TOR",
-                          "Entrée Analogique", "Sortie Analogique", "Visuel",
-                          "Compteur horaire", "Compteur d\'impulsion", "Registre", "Horloge" );
+    $this->mnemo_types = array( "Bistable", "Monostable", "Temporisation", "Entrée TOR", "Sortie TOR",
+                                "Entrée Analogique", "Sortie Analogique", "Visuel",
+                                "Compteur horaire", "Compteur d\'impulsion", "Registre", "Horloge", "Messages" );
   }
 /******************************************************************************************************************************/
  public function get($id=NULL)
@@ -28,7 +28,7 @@ class Mnemo extends Admin_Controller {
      { $data[] = array( "id" => $mnemo->id,
                         "tech_id" => $mnemo->tech_id,
                         "acronyme" => $mnemo->acronyme,
-                        "type" => $mnemo_types[$mnemo->type],
+                        "type" => $this->mnemo_types[$mnemo->type],
                         "libelle" => $mnemo->libelle,
                         "ev_host" => $mnemo->ev_host,
                         "ev_thread" => $mnemo->ev_thread,
