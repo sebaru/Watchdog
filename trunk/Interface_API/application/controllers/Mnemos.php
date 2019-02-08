@@ -27,17 +27,21 @@ class Mnemos extends Admin_Controller {
     $data = array();
     $mnemos = $this->Mnemo_model->get_all($id);
     foreach($mnemos as $mnemo)
-     { $data[] = array( "id" => $mnemo->id,
-                        "tech_id" => $mnemo->tech_id,
-                        "acronyme" => $mnemo->acronyme,
-                        "type" => $this->mnemo_types[$mnemo->type],
-                        "libelle" => $mnemo->libelle,
-                        "ev_host" => $mnemo->ev_host,
-                        "ev_thread" => $mnemo->ev_thread,
-                        "ev_text" => $mnemo->ev_text,
-                      );
-     }
+     { $data[] = get_object_vars( $mnemos ); }
     echo json_encode(array( "success" => "true", "Mnemos" => $data));
+    exit();
+  }
+/******************************************************************************************************************************/
+ public function count()
+  { header("Content-Type: application/json; charset=UTF-8");
+
+/*    if ( ! $this->wtd_auth->logged_in() )
+     { echo json_encode( array( "success" => "FALSE", "error" => "need to be authenticated" ) );
+			    exit();
+		   }*/
+
+    $count = $this->Mnemo_model->get_count();
+    echo json_encode(array( "success" => "true", "count" => $count));
     exit();
   }
 }

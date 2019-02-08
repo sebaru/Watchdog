@@ -8,19 +8,19 @@ class Mnemo_model extends CI_Model
 /******************************************************************************************************************************/
    public function get($id)
     { $this->db->select("d.id as dls_id, d.tech_id, syn.access_level, d.shortname, ".
-                        "m.id, m.type, m.libelle, m.acronyme, m.ev_host, m.ev_thread, m.ev_text, m.tableau, ".
+                        "m.*, ".
                         "parent_syn.page as ppage, syn.page as page");
    		  $this->db->from('mnemos as m');
    		  $this->db->join('dls as d','m.dls_id=d.id');
 		     $this->db->join('syns as syn','d.syn_id=syn.id');
 		     $this->db->join('syns as parent_syn','syn.parent_id=parent_syn.id');
    		  $this->db->where('m.id=',$id);
-       $this->db->where("syn.access_level<=", $this->session->user_access_level );
+       /*$this->db->where("syn.access_level<=", $this->session->user_access_level );*/
        return $this->db->get()->row();
     }
     
 /******************************************************************************************************************************/
-	  public function get_total()
+	  public function get_count()
 	   { $response = $this->db->select("COUNT(*) as num")->get("mnemos");
 		    $result = $response->row();
 		    if(isset($result)) return $result->num;
@@ -29,7 +29,7 @@ class Mnemo_model extends CI_Model
         
 /******************************************************************************************************************************/
    public function get_all($dls_id)
-    { $this->db->select("d.id, d.tech_id, syn.access_level, d.shortname, ".
+    { $this->db->select("d.id as dls_id, d.tech_id, syn.access_level, d.shortname, ".
                         "m.*, ".
                         "parent_syn.page as ppage, syn.page as page");
    		  $this->db->from('mnemos as m');

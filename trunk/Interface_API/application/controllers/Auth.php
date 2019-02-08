@@ -60,12 +60,12 @@ class Auth extends MY_Controller {
  	{ if ($this->wtd_auth->logged_in()) exit();
 
     $input = json_decode(file_get_contents('php://input'));
-    if ($input==NULL) { echo json_encode( array( "Parsing" => "Error !" ) ); }
-    else
+    if ($input==NULL) { echo json_encode( array( "Parsing" => "Error !" ) ); exit(); }
+
     if ($this->wtd_auth_model->login($input->username, $input->password, "false"))
-     { echo json_encode( array( "login_status" => "OK" ) ); }
+     { echo json_encode( array( "success" => "true", "login_status" => "OK" ) ); }
     else
-     { echo json_encode( array( "login_status" => "FAILED" ) );
+     { echo json_encode( array( "success" => "false", "login_status" => "FAILED" ) );
      }
     exit();
   }
