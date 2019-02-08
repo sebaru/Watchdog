@@ -20,6 +20,8 @@ class Mnemo extends Admin_Controller {
        case "PUT":    return ($this->update());
 /*       case "POST":   return ($this->insert());*/
      }
+    echo json_encode(array( "success" => "false", "error" => "Method not implemented" ));
+		  exit();
   }
 /******************************************************************************************************************************/
  private function get($id=NULL)
@@ -78,7 +80,7 @@ class Mnemo extends Admin_Controller {
                    'ev_thread' => strtoupper($input->ev_thread),
 				               'ev_text'   => $input->ev_text,
                  );
-    if($this->Mnemo_model->update($mnemo->id, $data))
+    if($this->Mnemo_model->update($input->id, $data))
      { echo json_encode( array( "success" => "true", "Mnemo" => "Updated !" ) );
        if($mnemo->ev_thread=="VOICE"  || $data['ev_thread']=="VOICE")  { $this->wtd_webservice->send('/reload/voice'); }
        if($mnemo->ev_thread=="MODBUS" || $data['ev_thread']=="MODBUS") { $this->wtd_webservice->send('/reload/modbus'); }
