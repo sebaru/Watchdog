@@ -75,11 +75,12 @@ class Mnemo extends Admin_Controller {
     $input = json_decode(file_get_contents('php://input'));
     if ($input==NULL) { echo json_encode( array( "success" => "false", "error" => "Parsing Error !" ) ); exit(); }
 
-    $data = array( 'libelle'   => $input->libelle,
-		                 'ev_host'   => $input->ev_host,
-                   'ev_thread' => strtoupper($input->ev_thread),
-				               'ev_text'   => $input->ev_text,
-                 );
+    $data = array();
+    if ($input->libelle)   $data['libelle']   = $input->libelle;
+    if ($input->ev_host)   $data['ev_host']   = $input->ev_host;
+    if ($input->ev_thread) $data['ev_thread'] = strtoupper($input->ev_thread);
+    if ($input->ev_host)   $data['ev_text']   = $input->ev_text;
+
     if($this->Mnemo_model->update($input->id, $data))
      { echo json_encode( array( "success" => "true", "Mnemo" => "Updated !" ) );
        if($mnemo->ev_thread=="VOICE"  || $data['ev_thread']=="VOICE")  { $this->wtd_webservice->send('/reload/voice'); }
