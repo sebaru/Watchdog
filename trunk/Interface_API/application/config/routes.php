@@ -54,4 +54,6 @@ $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
 $route['admin'] = 'admin/dashboard';
+$route['mnemo/(:num)'] = 'mnemo/index/$1';
+$route['dls/(:num)'] = 'dls/index/$1';
 

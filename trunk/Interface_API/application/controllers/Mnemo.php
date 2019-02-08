@@ -10,10 +10,9 @@ class Mnemo extends Admin_Controller {
                                 "Entrée Analogique", "Sortie Analogique", "Visuel",
                                 "Compteur horaire", "Compteur d\'impulsion", "Registre", "Horloge", "Messages" );
   }
-
 /******************************************************************************************************************************/
  public function index($id=null)
-  {	header("Content-Type: application/json; charset=UTF-8");
+  { header("Content-Type: application/json; charset=UTF-8");
     switch ( $this->input->method(TRUE) )
      { case "GET":    return ($this->get($id));
        case "DELETE": return ($this->delete($id));
@@ -21,28 +20,85 @@ class Mnemo extends Admin_Controller {
 /*       case "POST":   return ($this->insert());*/
      }
     echo json_encode(array( "success" => "false", "error" => "Method not implemented" ));
-		  exit();
+    exit();
+  }
+/******************************************************************************************************************************/
+ public function list($id=NULL)
+  { header("Content-Type: application/json; charset=UTF-8");
+
+/*    if ( ! $this->wtd_auth->logged_in() )
+     { echo json_encode( array( "success" => "FALSE", "error" => "need to be authenticated" ) );
+       exit();
+     }*/
+
+    if (!isset($id))
+     { echo json_encode( array( "success" => "FALSE", "error" => "need DLS id" ) );
+       exit();
+     }
+
+    $data = array();
+    $mnemos = $this->Mnemo_model->get_all($id);
+    if (isset($mnemos))
+     { foreach($mnemos as $mnemo)
+        { $data[] = get_object_vars( $mnemo ); }
+     }
+    echo json_encode(array( "success" => "true", "Mnemos" => $data));
+    exit();
+  }
+/******************************************************************************************************************************/
+ public function voices()
+  { header("Content-Type: application/json; charset=UTF-8");
+
+/*    if ( ! $this->wtd_auth->logged_in() )
+     { echo json_encode( array( "success" => "FALSE", "error" => "need to be authenticated" ) );
+       exit();
+     }*/
+
+    $data = array();
+    $mnemos = $this->Mnemo_model->get_voice();
+    if (isset($mnemos))
+     { foreach($mnemos as $mnemo)
+        { $data[] = get_object_vars( $mnemo ); }
+     }
+    echo json_encode(array( "success" => "true", "Voices" => $data));
+    exit();
+  }
+/******************************************************************************************************************************/
+ public function count()
+  { header("Content-Type: application/json; charset=UTF-8");
+
+/*    if ( ! $this->wtd_auth->logged_in() )
+     { echo json_encode( array( "success" => "FALSE", "error" => "need to be authenticated" ) );
+       exit();
+     }*/
+
+    $count = $this->Mnemo_model->get_count();
+    echo json_encode(array( "success" => "true", "count" => $count));
+    exit();
   }
 /******************************************************************************************************************************/
  private function get($id=NULL)
   {
 /*    if ( ! $this->wtd_auth->logged_in() )
      { echo json_encode( array( "success" => "FALSE", "error" => "need to be authenticated" ) );
-			    exit();
-		   }*/
+       exit();
+     }*/
 
- 			$mnemo = $this->Mnemo_model->get($id);
-    echo json_encode(array( "success" => "true", "Mnemo" => get_object_vars($mnemo) ));
-		  exit();
+    $mnemo = $this->Mnemo_model->get($id);
+    if (!isset($mnemo))
+     { echo json_encode( array( "success" => "FALSE", "error" => "Mnemo unknown" ) ); }
+    else
+     { echo json_encode( array( "success" => "TRUE", "Mnemo" => get_object_vars($mnemo) )); }
+    exit();
   }
 /******************************************************************************************************************************/
-	private function delete($id=null)
- 	{
+ private function delete($id=null)
+  {
 
 /*    if ( ! $this->wtd_auth->logged_in() )
      { echo json_encode( array( "success" => "FALSE", "error" => "need to be authenticated" ) );
-			    exit();
-		   }*/
+       exit();
+     }*/
 
     $mnemo = $this->Mnemo_model->get($id);
     if (!isset($mnemo))
@@ -55,19 +111,20 @@ class Mnemo extends Admin_Controller {
        exit();
      }*/
     $this->Mnemo_model->delete($mnemo->id);
-    echo json_encode(array( "success" => "true", "Mnemo" => "deleted" ));
-		  exit();
-	 }
+    echo json_encode(array( "success" => "FALSE", "Mnemo" => "deleted" ));
+    $this->wtd_log->add('Le mnemo '.$mnemo->id.' a été supprimé.');
+    exit();
+  }
 /******************************************************************************************************************************/
-	private function update()
-	 {
+ private function update()
+  {
 
    /*if ($this->session->user_access_level<6)
      { $this->session->set_flashdata('flash_error', 'Privilèges insuffisants' );
        redirect('admin/dls/index');
      }*/
 
- 			/*if ($this->session->user_access_level<$mnemo->access_level)
+    /*if ($this->session->user_access_level<$mnemo->access_level)
      { $this->session->set_flashdata('flash_error', 'Privilèges insuffisants' );
        redirect('admin/mnemo/index/'.$mnemo->dls_id);
      }*/
@@ -86,12 +143,14 @@ class Mnemo extends Admin_Controller {
     if (isset($input->ev_text))   $data['ev_text']   = $input->ev_text;
 
     if($this->Mnemo_model->update($mnemo->id, $data))
-     { echo json_encode( array( "success" => "true", "Mnemo" => "Updated !" ) );
+     { echo json_encode( array( "success" => "FALSE", "Mnemo" => "Updated !" ) );
        if($mnemo->ev_thread=="VOICE"  || $data['ev_thread']=="VOICE")  { $this->wtd_webservice->send('/reload/voice'); }
        if($mnemo->ev_thread=="MODBUS" || $data['ev_thread']=="MODBUS") { $this->wtd_webservice->send('/reload/modbus'); }
-	    }
+       $flash = 'Le mnémo '.$mnemo->tech_id.':'.$mnemo->acronyme.' a été updaté.';
+       $this->wtd_log->add($flash);
+     }
     else { echo json_encode( array( "success" => "false", "error" => "Update error !" ) ); }
     exit();
-	 }
+  }
 }
 /*----------------------------------------------------------------------------------------------------------------------------*/

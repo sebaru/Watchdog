@@ -39,9 +39,9 @@ class Dls_model extends CI_Model
     
 	
 /******************************************************************************************************************************/
-	public function get_total_dls($access_level)
-	 {	$this->db->where('s.access_level<=', $access_level);
-		  $this->db->join('syns as s','d.syn_id=s.id');
+	public function get_count()
+	 {	/*$this->db->where('s.access_level<=', $access_level);
+		  $this->db->join('syns as s','d.syn_id=s.id');*/
 		  $query = $this->db->select("COUNT(*) as num")->get("dls d");
 		  $result = $query->row();
 		  if(isset($result)) return $result->num;
@@ -49,7 +49,7 @@ class Dls_model extends CI_Model
 	 }
 	
 /******************************************************************************************************************************/
- function get_all_dls($start, $length)
+ function get_all()
   { $this->db->select("d.id, d.tech_id, syn.access_level, d.package, d.name, d.shortname, d.actif, d.compil_date, d.compil_status, d.nbr_compil, d.nbr_ligne, parent_syn.page as ppage, syn.page as page");
 		  $this->db->order_by('ppage', 'desc');
 		  $this->db->order_by('page', 'desc');
@@ -58,8 +58,7 @@ class Dls_model extends CI_Model
 		  $this->db->from('dls as d');
 		  $this->db->join('syns as syn','d.syn_id=syn.id');
 		  $this->db->join('syns as parent_syn','syn.parent_id=parent_syn.id');
-    if ($length != 0) { $this->db->limit($length,$start); }
-    $result = $this->db->get();
+    $result = $this->db->get()->result();
     error_log ( 'get_all_dls '. $this->db->last_query() );
     return $result;
   }
