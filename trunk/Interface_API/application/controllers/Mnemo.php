@@ -19,7 +19,7 @@ class Mnemo extends Admin_Controller {
        case "PUT":    return ($this->update());
 /*       case "POST":   return ($this->insert());*/
      }
-    echo json_encode(array( "success" => "false", "error" => "Method not implemented" ));
+    echo json_encode(array( "success" => "FALSE", "error" => "Method not implemented" ));
     exit();
   }
 /******************************************************************************************************************************/
@@ -111,7 +111,7 @@ class Mnemo extends Admin_Controller {
        exit();
      }*/
     $this->Mnemo_model->delete($mnemo->id);
-    echo json_encode(array( "success" => "FALSE", "Mnemo" => "deleted" ));
+    echo json_encode(array( "success" => "TRUE", "Mnemo" => "deleted" ));
     $this->wtd_log->add('Le mnemo '.$mnemo->id.' a été supprimé.');
     exit();
   }
@@ -130,10 +130,10 @@ class Mnemo extends Admin_Controller {
      }*/
 
     $input = json_decode(file_get_contents('php://input'));
-    if (!isset($input)) { echo json_encode( array( "success" => "false", "error" => "Parsing Error !" ) ); exit(); }
+    if (!isset($input)) { echo json_encode( array( "success" => "FALSE", "error" => "Parsing Error !" ) ); exit(); }
 
     $mnemo = $this->Mnemo_model->get($input->id);
-    if (!isset($mnemo)) { echo json_encode( array( "success" => "false", "error" => "Mnemo unknown !" ) ); exit(); }
+    if (!isset($mnemo)) { echo json_encode( array( "success" => "FALSE", "error" => "Mnemo unknown !" ) ); exit(); }
 
     $data = array();
     if (isset($input->libelle))   $data['libelle']   = $input->libelle;
@@ -143,13 +143,13 @@ class Mnemo extends Admin_Controller {
     if (isset($input->ev_text))   $data['ev_text']   = $input->ev_text;
 
     if($this->Mnemo_model->update($mnemo->id, $data))
-     { echo json_encode( array( "success" => "FALSE", "Mnemo" => "Updated !" ) );
+     { echo json_encode( array( "success" => "TRUE", "Mnemo" => "Updated !" ) );
        if($mnemo->ev_thread=="VOICE"  || $data['ev_thread']=="VOICE")  { $this->wtd_webservice->send('/reload/voice'); }
        if($mnemo->ev_thread=="MODBUS" || $data['ev_thread']=="MODBUS") { $this->wtd_webservice->send('/reload/modbus'); }
        $flash = 'Le mnémo '.$mnemo->tech_id.':'.$mnemo->acronyme.' a été updaté.';
        $this->wtd_log->add($flash);
      }
-    else { echo json_encode( array( "success" => "false", "error" => "Update error !" ) ); }
+    else { echo json_encode( array( "success" => "FALSE", "error" => "Update error !" ) ); }
     exit();
   }
 }

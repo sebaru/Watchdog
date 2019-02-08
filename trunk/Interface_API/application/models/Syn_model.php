@@ -27,8 +27,8 @@ class Syn_model extends CI_Model
      }
 	
 /******************************************************************************************************************************/
-	   public function get_total()
-	    { $this->db->where("syn.access_level<=", $this->session->user_access_level );
+	   public function get_count()
+	    { /*$this->db->where("syn.access_level<=", $this->session->user_access_level );*/
        $this->db->from("syns as syn");
 		     $query = $this->db->select("COUNT(*) as num")->get();
 		     $result = $query->row();
@@ -37,13 +37,12 @@ class Syn_model extends CI_Model
 	    }
         
 /******************************************************************************************************************************/
-    function get_all($start, $length)
+    function get_all()
      { $this->db->select("syn.id,syn.libelle,syn.page,syn.access_level,parent.id as pid,parent.page as ppage ");
        $this->db->from("syns as syn");
        $this->db->join("syns as parent", "syn.parent_id=parent.id", "INNER" );
        /*$this->db->where("syn.access_level<=", $this->session->user_access_level );*/
-       if ($length != 0) { $this->db->limit($length,$start); }
-       $result = $this->db->get();
+       $result = $this->db->get()->result();
        error_log ( 'get_all_syns '. $this->db->last_query() );
        return $result;
      }

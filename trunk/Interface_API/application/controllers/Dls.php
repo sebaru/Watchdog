@@ -25,7 +25,7 @@ class Dls extends Admin_Controller{
        case "PUT":    return ($this->update());
        case "POST":   return ($this->create());
      }
-    echo json_encode(array( "success" => "false", "error" => "Method not implemented" ));
+    echo json_encode(array( "success" => "FALSE", "error" => "Method not implemented" ));
     exit();
   }
 /******************************************************************************************************************************/
@@ -48,7 +48,7 @@ class Dls extends Admin_Controller{
      { foreach($dlss as $dls)
         { $data[] = get_object_vars( $dls ); }
      }
-    echo json_encode(array( "success" => "true", "Dls" => $data));
+    echo json_encode(array( "success" => "TRUE", "Dls" => $data));
     exit();
   }
 /******************************************************************************************************************************/
@@ -61,7 +61,7 @@ class Dls extends Admin_Controller{
      }*/
 
     $count = $this->Dls_model->get_count();
-    echo json_encode(array( "success" => "true", "count" => $count));
+    echo json_encode(array( "success" => "TRUE", "count" => $count));
     exit();
   }
 /******************************************************************************************************************************/
@@ -100,8 +100,8 @@ class Dls extends Admin_Controller{
      }*/
     $this->Dls_model->delete($dls->id);
     $this->wtd_webservice->send('/dls/delete?id='.$dls->id);
-    echo json_encode(array( "success" => "FALSE", "DLS" => "deleted" ));
-    $this->wtd_log->add('Le mnemo '.$dls->id.' a été supprimé.');
+    echo json_encode(array( "success" => "TRUE", "DLS" => "deleted" ));
+    $this->wtd_log->add('Le DLS '.$dls->id.' a été supprimé.');
     exit();
   }
 /******************************************************************************************************************************/
@@ -119,10 +119,10 @@ class Dls extends Admin_Controller{
      }*/
 
     $input = json_decode(file_get_contents('php://input'));
-    if (!isset($input)) { echo json_encode( array( "success" => "false", "error" => "Parsing Error !" ) ); exit(); }
+    if (!isset($input)) { echo json_encode( array( "success" => "FALSE", "error" => "Parsing Error !" ) ); exit(); }
 
     $dls = $this->Dls_model->get($input->id);
-    if (!isset($dls)) { echo json_encode( array( "success" => "false", "error" => "DLS unknown !" ) ); exit(); }
+    if (!isset($dls)) { echo json_encode( array( "success" => "FALSE", "error" => "DLS unknown !" ) ); exit(); }
 
     $data = array();
     if (isset($input->actif))     $data['actif']     = $input->actif;
@@ -133,12 +133,12 @@ class Dls extends Admin_Controller{
     if (isset($input->package))   $data['package']   = $input->package;
 
     if($this->Dls_model->update($dls->id, $data))
-     { echo json_encode( array( "success" => "FALSE", "Mnemo" => "Updated !" ) );
-       $flash = 'Le dls '.$input->tech_id.' ('.$dls->id.') a été updaté.';
+     { echo json_encode( array( "success" => "TRUE", "Dls" => "Updated !" ) );
+       $flash = 'Le dls '.$dls->tech_id.' ('.$dls->id.') a été updaté.';
        $this->wtd_log->add($flash);
        $this->wtd_webservice->send('/reload/dls');
      }
-    else { echo json_encode( array( "success" => "false", "error" => "Update error !" ) ); }
+    else { echo json_encode( array( "success" => "FALSE", "error" => "Update error !" ) ); }
     exit();
   }
 /******************************************************************************************************************************/  
@@ -156,27 +156,28 @@ class Dls extends Admin_Controller{
      }*/
 
     $input = json_decode(file_get_contents('php://input'));
-    if (!isset($input)) { echo json_encode( array( "success" => "false", "error" => "Parsing Error !" ) ); exit(); }
+    if (!isset($input)) { echo json_encode( array( "success" => "FALSE", "error" => "Parsing Error !" ) ); exit(); }
 
     $data = array();
     if (isset($input->syn_id))    $data['syn_id']    = $input->syn_id;
-    else { echo json_encode( array( "success" => "false", "error" => "Parsing Error !" ) ); exit(); }
+    else { echo json_encode( array( "success" => "FALSE", "error" => "Parsing Error !" ) ); exit(); }
 
     $syn = $this->Syn_model->get($input->syn_id);
-    if (!isset($syn)) { echo json_encode( array( "success" => "false", "error" => "Need a SYN !" ) ); exit(); }
+    if (!isset($syn)) { echo json_encode( array( "success" => "FALSE", "error" => "Need a SYN !" ) ); exit(); }
 
     if (isset($input->tech_id))   $data['tech_id']   = strtoupper($input->tech_id);
-    else { echo json_encode( array( "success" => "false", "error" => "Parsing Error !" ) ); exit(); }
+    else { echo json_encode( array( "success" => "FALSE", "error" => "Parsing Error !" ) ); exit(); }
     if (isset($input->name))      $data['name']      = $input->name;
-    else { echo json_encode( array( "success" => "false", "error" => "Parsing Error !" ) ); exit(); }
+    else { echo json_encode( array( "success" => "FALSE", "error" => "Parsing Error !" ) ); exit(); }
     if (isset($input->shortname)) $data['shortname'] = strtoupper($input->shortname);
-    else { echo json_encode( array( "success" => "false", "error" => "Parsing Error !" ) ); exit(); }
+    else { echo json_encode( array( "success" => "FALSE", "error" => "Parsing Error !" ) ); exit(); }
     if (isset($input->package))   $data['package']   = $input->package;
     else $data['package'] = 'custom';
     $data['actif'] = "FALSE";
 
     $dls_id = $this->Dls_model->add($params);
-    $flash = 'Le dls '.$input->tech_id.' ('.$dls_id.') a été ajouté.';
+    echo json_encode( array( "success" => "TRUE", "Dls" => "Added !" ) );
+    $flash = 'Le dls '.$dls->tech_id.' ('.$dls_id.') a été ajouté.';
     $this->wtd_log->add($flash);
   }  
 /******************************************************************************************************************************/
@@ -194,14 +195,14 @@ class Dls extends Admin_Controller{
 
     $target_dls = $this->Dls_model->get($id);
     if (!isset($target_dls))
-     { echo json_encode( array( "success" => "false", "error" => "Dls unknown !" ) ); exit(); }
+     { echo json_encode( array( "success" => "FALSE", "error" => "Dls unknown !" ) ); exit(); }
 
 /*    if ($target_dls->access_level < $this->session->user_access_level)*/
      { if($this->Dls_model->activate($target_dls->id))
         { $flash = 'Module D.L.S ('.$target_dls->tech_id.', '.$target_dls->name.') activé';
           $this->wtd_webservice->send('/dls/activate?id='.$target_dls->id);
           $this->wtd_log->add($flash);
-          echo json_encode( array( "success" => "true", "Dls" => "Dls activé !" ) );
+          echo json_encode( array( "success" => "TRUE", "Dls" => "Dls activé !" ) );
         }
      }
 /*    else
@@ -224,14 +225,14 @@ class Dls extends Admin_Controller{
 
     $target_dls = $this->Dls_model->get($id);
     if (!isset($target_dls))
-     { echo json_encode( array( "success" => "false", "error" => "Dls unknown !" ) ); exit(); }
+     { echo json_encode( array( "success" => "FALSE", "error" => "Dls unknown !" ) ); exit(); }
 
 /*    if ($target_dls->access_level < $this->session->user_access_level)*/
      { if($this->Dls_model->deactivate($target_dls->id))
         { $flash = 'Module D.L.S ('.$target_dls->tech_id.', '.$target_dls->name.') désactivé';
           $this->wtd_webservice->send('/dls/deactivate?id='.$target_dls->id);
           $this->wtd_log->add($flash);
-          echo json_encode( array( "success" => "true", "Dls" => "Dls désactivé !" ) );
+          echo json_encode( array( "success" => "TRUE", "Dls" => "Dls désactivé !" ) );
         }
      }
 /*    else
