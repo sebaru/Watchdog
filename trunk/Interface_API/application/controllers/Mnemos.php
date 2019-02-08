@@ -27,7 +27,7 @@ class Mnemos extends Admin_Controller {
     $data = array();
     $mnemos = $this->Mnemo_model->get_all($id);
     foreach($mnemos as $mnemo)
-     { $data[] = get_object_vars( $mnemos ); }
+     { $data[] = get_object_vars( $mnemo ); }
     echo json_encode(array( "success" => "true", "Mnemos" => $data));
     exit();
   }
