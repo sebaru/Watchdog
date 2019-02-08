@@ -82,7 +82,8 @@ class Mnemo extends Admin_Controller {
     if (isset($input->libelle))   $data['libelle']   = $input->libelle;
     if (isset($input->ev_host))   $data['ev_host']   = $input->ev_host;
     if (isset($input->ev_thread)) $data['ev_thread'] = strtoupper($input->ev_thread);
-    if (isset($input->ev_host))   $data['ev_text']   = $input->ev_text;
+                             else $data['ev_thread'] = $mnemo->ev_thread;
+    if (isset($input->ev_text))   $data['ev_text']   = $input->ev_text;
 
     if($this->Mnemo_model->update($mnemo->id, $data))
      { echo json_encode( array( "success" => "true", "Mnemo" => "Updated !" ) );
