@@ -140,8 +140,7 @@
 
     pss = lws_wsi_user ( wsi );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-             "%s: (sid %s) Sending Response code '%d' for '%s' ", __func__, Http_get_session_id(pss->session), code,
-             (pss->session ? (pss->session->util ? pss->session->util->username : "--no user--") : "--no session--")
+             "%s:  Sending Response code '%d'", __func__, code
             );
 
     header_cur = header;
@@ -164,15 +163,15 @@
 
     pss = lws_wsi_user ( wsi );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-             "%s: (sid %s) Sending Response code '%d' for '%s' (taille_buf=%d)", __func__, Http_get_session_id(pss->session), code,
-             (pss->session ? (pss->session->util ? pss->session->util->username : "--no user--") : "--no session--"), taille_buf
+             "%s: Sending Response code '%d' (taille_buf=%d)", __func__, code, taille_buf
             );
 
     header_cur = header;
     header_end = header + sizeof(header);
 
     retour = lws_add_http_header_status( wsi, code, &header_cur, header_end );
-    retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE, (const unsigned char *)content_type, strlen(content_type),
+    retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE,
+                                           (const unsigned char *)content_type, strlen(content_type),
                                            &header_cur, header_end );
     retour = lws_add_http_header_content_length ( wsi, taille_buf, &header_cur, header_end );
     retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
@@ -294,8 +293,8 @@
    
     if (pss->post_data_length >= Cfg_http.max_upload_bytes)                  /* Si taille de fichier trop importante, on vire */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: (sid %s) file too long (%d/%d), aborting", __func__,
-                 Http_get_session_id(pss->session), pss->post_data_length, Cfg_http.max_upload_bytes );
+                "%s:  file too long (%d/%d), aborting", __func__,
+                 pss->post_data_length, Cfg_http.max_upload_bytes );
        return(1);
      }
 
@@ -304,8 +303,8 @@
     pss->post_data_length += taille;
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %s) received %d bytes (total length=%d, max %d)", __func__,
-              Http_get_session_id(pss->session), taille, pss->post_data_length, Cfg_http.max_upload_bytes );
+             "%s:  received %d bytes (total length=%d, max %d)", __func__,
+              taille, pss->post_data_length, Cfg_http.max_upload_bytes );
     return 0;
   }
 /******************************************************************************************************************************/
@@ -499,12 +498,12 @@
                         return(1);
                       }
                      Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ); /* Bad Request */
-                     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Bad Request from %s/%s (sid %s): %s",
-                               __func__, remote_name, remote_ip, Http_get_session_id(session), url );
+                     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Bad Request from %s/%s : %s",
+                               __func__, remote_name, remote_ip, url );
                      return(1);
                    }
-                  Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Unknown Request from %s/%s (sid %s): %s",
-                            __func__, remote_name, remote_ip, Http_get_session_id(session), url );
+                  Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Unknown Request from %s/%s : %s",
+                            __func__, remote_name, remote_ip, url );
                   Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ); /* Bad Request */
                   return(1);
                 }
@@ -617,8 +616,7 @@
 #endif
     Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
     while(Cfg_http.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */
-     { static gint last_top = 0;
-       usleep(10000);
+     { usleep(10000);
        sched_yield();
 
        if (Cfg_http.lib->Thread_reload)                                                      /* A-t'on recu un signal USR1 ? */
@@ -631,15 +629,8 @@
         }
 
    	   lws_service( Cfg_http.ws_context, 1000);                                 /* On lance l'écoute des connexions websocket */
-
-       if ( last_top + 600 <= Partage->top )                                                            /* Toutes les minutes */
-        { Http_Check_sessions ();
-          last_top = Partage->top;
-        }
      }
 
-    while ( Cfg_http.Liste_sessions ) Http_Liberer_session ( Cfg_http.Liste_sessions->data );     /* Libérations des sessions */
-    
     lws_context_destroy(Cfg_http.ws_context);                                                   /* Arret du serveur WebSocket */
     Cfg_http.ws_context = NULL;
 

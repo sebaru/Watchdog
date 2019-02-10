@@ -74,7 +74,6 @@
     gchar ssl_private_key_filepath[80];
     gchar ssl_ca_filepath[80];
     gboolean authenticate;
-    GSList *Liste_sessions;
  } Cfg_http;
 
  struct HTTP_PER_SESSION_DATA
@@ -119,9 +118,5 @@
  extern gint Http_Traiter_request_setm ( struct lws *wsi );
  extern gboolean Get_phpsessionid_cookie ( struct lws *wsi );
   
- extern gchar *Http_get_session_id ( struct HTTP_SESSION *session );
- extern void Http_Check_sessions ( void );
- extern void Http_Liberer_session ( struct HTTP_SESSION *session );
- extern void Http_Close_session ( struct lws *wsi, struct HTTP_SESSION *session );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
