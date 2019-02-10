@@ -27,7 +27,7 @@
  
 #ifndef _UPS_H_
  #define _UPS_H_
- #include <nutclient.h>
+ #include <upsclient.h>
  #include "Reseaux.h"
 
  #define NOM_THREAD      "ups"

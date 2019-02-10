@@ -39,7 +39,7 @@
 /******************************************************************************************************************************/
  gboolean Http_Traiter_request_getstatus ( struct lws *wsi )
   { unsigned char header[256], *header_cur, *header_end;
-	   gchar host[128], date[64], *buf;
+	   gchar date[64], *buf;
     JsonBuilder *builder;
     JsonGenerator *gen;
     gsize taille_buf;
@@ -49,8 +49,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = json_builder_new ();
     if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "%s : JSon builder creation failed", __func__ );
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
        return(1);
      }
@@ -60,10 +59,10 @@
     json_builder_set_member_name  ( builder, "Status" );
     json_builder_begin_object (builder);                                                                 /* Contenu du Status */
 
-    gethostname( host, sizeof(host) );
-    json_builder_set_member_name  ( builder, "host" );         json_builder_add_string_value ( builder, host );
     json_builder_set_member_name  ( builder, "version" );      json_builder_add_string_value ( builder, VERSION );
     json_builder_set_member_name  ( builder, "instance" );     json_builder_add_string_value ( builder, g_get_host_name() );
+    json_builder_set_member_name  ( builder, "instance_is_master" );
+                                                               json_builder_add_boolean_value ( builder, Config.instance_is_master );
     temps = localtime( (time_t *)&Partage->start_time );
     if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
     else       { g_snprintf( date, sizeof(date), "Erreur" ); }
