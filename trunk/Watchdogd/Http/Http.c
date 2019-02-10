@@ -251,7 +251,7 @@
     pss = lws_wsi_user ( wsi );
     switch (tag)
      { case LWS_CALLBACK_ESTABLISHED: lws_callback_on_writable(wsi);
-            if (Get_phpsessionid_cookie(wsi)==FALSE)                                              /* Recupere le PHPSessionID */
+/*            if (Get_phpsessionid_cookie(wsi)==FALSE)                                              /* Recupere le PHPSessionID */
              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: No PHPSESSID. Killing.", __func__ );
                return(1);
              }
@@ -372,34 +372,34 @@
                pss = lws_wsi_user ( wsi );
                if ( ! strcasecmp ( url, "/favicon.ico" ) )
                 { retour = lws_serve_http_file ( wsi, "WEB/favicon.gif", "image/gif", NULL, 0);
-                  if (retour != 0) return(1);                             /* Si erreur (<0) ou si ok (>0), on ferme la socket */
-                  return(0);                    /* si besoin de plus de temps, on laisse la ws http ouverte pour libwebsocket */
+                  if (retour < 0) return(1);                              /* Si erreur (<0) ou si ok (>0), on ferme la socket */
+                  return(0);
                 }
-               else if ( ! strcasecmp ( url, "/status" ) )         { Http_Traiter_request_getstatus ( wsi ); }
+               else if ( ! strcasecmp ( url, "/status" ) )         { return( Http_Traiter_request_getstatus ( wsi ) ); }
                else if ( ! strncasecmp ( url, "/ws/getsyn", 11 ) ) { return( Http_Traiter_request_getsyn ( wsi, session ) ); }
                else if ( ! strncasecmp ( url, "/ws/audio/", 10 ) ) { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
                else if ( ! strncasecmp ( url, "/process/", 9 ) ) { return( Http_Traiter_request_getprocess ( wsi, url+9 ) ); }
                else if ( ! strncasecmp ( url, "/setm", 5 ) )   { return( Http_Traiter_request_setm ( wsi ) ); }
                else if ( ! strcasecmp ( url, "/cli" ) )
                 { g_snprintf( pss->url, sizeof(pss->url), "/cli" );
-                  return(0);
+                  return(lws_http_transaction_completed(wsi));
                 }
                else if ( ! strcasecmp ( url, "/postfile" ) )
                 { g_snprintf( pss->url, sizeof(pss->url), "/postfile" );
-                  return(0);
+                  return(lws_http_transaction_completed(wsi));
                 }
 /*************************************************** WS DLS debug traduction **************************************************/
                else if ( ! strcasecmp( url, "/dls/debug_trad_on" ) )
                 { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug ON", __func__ );
                   Trad_dls_set_debug ( TRUE );
                   Http_Send_response_code ( wsi, HTTP_200_OK );
-                  return(1);
+                  return(lws_http_transaction_completed(wsi));
                 }
                else if ( ! strcasecmp( url, "/dls/debug_trad_off" ) )
                 { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug OFF", __func__ );
                   Trad_dls_set_debug ( FALSE );
                   Http_Send_response_code ( wsi, HTTP_200_OK );
-                  return(1);
+                  return(lws_http_transaction_completed(wsi));
                 }
 /*************************************************** WS Reload library ********************************************************/
                else if ( ! strncasecmp( url, "/reload/", 8 ) )
@@ -410,7 +410,7 @@
                   if ( ! strcasecmp( target, "dls" ) )
                    { Partage->com_dls.Thread_reload = TRUE;
                      Http_Send_response_code ( wsi, HTTP_200_OK );
-                     return(1);
+                     return(lws_http_transaction_completed(wsi));
                    }
 
                   liste = Partage->com_msrv.Librairies;                                  /* Parcours de toutes les librairies */
@@ -430,7 +430,7 @@
                      liste = g_slist_next(liste);
                    }
                   Http_Send_response_code ( wsi, HTTP_200_OK );
-                  return(1);
+                  return(lws_http_transaction_completed(wsi));
                 }
 /****************************************** WS get Running config library *****************************************************/
                else if ( ! strncasecmp( url, "/run/", 5 ) )
@@ -455,13 +455,13 @@
                            lib->Admin_json ( target+strlen(lib->admin_prompt), &buffer, &taille_buf );
                            Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buffer, taille_buf );
                            g_free(buffer);
-                           return(1);
+                           return(lws_http_transaction_completed(wsi));
                          }    
                       }
                      liste = g_slist_next(liste);
                    }
                   Http_Send_response_code ( wsi, HTTP_200_OK );
-                  return(1);
+                  return(lws_http_transaction_completed(wsi));
                 }
                else                                                                                             /* Par défaut */
                 { gchar token_id[12];
@@ -475,56 +475,52 @@
                       { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Compiling DLS %d", __func__, id );
                         Compiler_source_dls( TRUE, id, NULL, 0 );
                         Http_Send_response_code ( wsi, HTTP_200_OK );
-                        return(1);
+                        return(lws_http_transaction_completed(wsi));
                       }
                      else if ( ! strcasecmp( url, "/dls/delete" ) )
                       { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Delete DLS %d", __func__, id );
                         Decharger_plugin_by_id( id );
                         Http_Send_response_code ( wsi, HTTP_200_OK );
-                        return(1);
+                        return(lws_http_transaction_completed(wsi));
                       }
                      else if ( ! strcasecmp( url, "/dls/activate" ) )
                       { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Activating DLS %d", __func__, id );
                         while (Partage->com_dls.admin_start) sched_yield();
                         Partage->com_dls.admin_start = id;
                         Http_Send_response_code ( wsi, HTTP_200_OK );
-                        return(1);
+                        return(lws_http_transaction_completed(wsi));
                       }
                      else if ( ! strcasecmp( url, "/dls/deactivate" ) )
                       { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: DesActivating DLS %d", __func__, id );
                         while (Partage->com_dls.admin_stop) sched_yield();
                         Partage->com_dls.admin_stop = id;
                         Http_Send_response_code ( wsi, HTTP_200_OK );
-                        return(1);
+                        return(lws_http_transaction_completed(wsi));
                       }
                      Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ); /* Bad Request */
                      Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Bad Request from %s/%s : %s",
                                __func__, remote_name, remote_ip, url );
-                     return(1);
+                     return(lws_http_transaction_completed(wsi));
                    }
-                  Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Unknown Request from %s/%s : %s",
-                            __func__, remote_name, remote_ip, url );
-                  Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ); /* Bad Request */
-                  return(1);
                 }
-               return(1);                                                                    /* Par défaut, on clot la socket */
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Unknown Request from %s/%s : %s",
+                         __func__, remote_name, remote_ip, url );
+               Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ); /* Bad Request */
+               return(1);                                                       /* Si requete non reconnue, on clos la socket */
              }
 		          break;
        case LWS_CALLBACK_HTTP_FILE_COMPLETION:
              { lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
                                         (char *)&remote_name, sizeof(remote_name),
                                         (char *)&remote_ip, sizeof(remote_ip) );
-               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                         "CB_http: file sent for %s(%s)", remote_name, remote_ip );
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: file sent for %s(%s)", remote_name, remote_ip );
              }
             break;
        case LWS_CALLBACK_OPENSSL_PERFORM_CLIENT_CERT_VERIFICATION:
-            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                      "CB_http: need to verify Client SSL Certs" );
+            Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: need to verify Client SSL Certs" );
 		          break;
-	      default: return(0);                                                    /* Par défaut, on laisse la connexion continuer */
      }
-   return(0);                                                                                           /* Continue connexion */
+    return(0);                                                      /* Poursuite du processus de prise en charge des requetes */
   }
 /******************************************************************************************************************************/
 /* Run_thread: Thread principal                                                                                               */

@@ -83,8 +83,7 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = json_builder_new ();
     if (builder == NULL)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                 "%s : JSon builder creation failed", __func__ );
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        g_free(syndb);
        Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
        return(TRUE);

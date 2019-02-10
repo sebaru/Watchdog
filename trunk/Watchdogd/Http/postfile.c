@@ -48,15 +48,15 @@
  static gint Save_file_to_disk ( struct HTTP_SESSION *session, const gchar *filename, const gchar *buffer, const gint taille )
   { gint retour, fd;
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %s) Trying to save new file '%s' (length=%d)",
-              __func__, Http_get_session_id(session), filename, taille );
+             "%s: Trying to save new file '%s' (length=%d)",
+              __func__, filename, taille );
 
     unlink(filename);                                                                      /* Suppression de l'ancien fichier */
     fd = open( filename, O_CREAT | O_WRONLY, S_IWUSR | S_IRUSR );                       /* Enregistrement du nouveau document */
     if (fd < 0)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: (sid %s) Unable to create new file '%s' (%s)",
-                 __func__, Http_get_session_id(session), filename, strerror(errno) );
+                "%s: Unable to create new file '%s' (%s)",
+                 __func__, filename, strerror(errno) );
 	      return(HTTP_SERVER_ERROR);
      }
 
@@ -64,12 +64,12 @@
     close(fd);
     if (retour != taille)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
-                "%s: (sid %s) Writing error for '%s' (%s)",
-                 __func__, Http_get_session_id(session), filename, strerror(errno) );
+                "%s: Writing error for '%s' (%s)",
+                 __func__, filename, strerror(errno) );
        return(HTTP_SERVER_ERROR);
      }
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
-             "%s: (sid %s) New file saved: '%s' length=%d", __func__, Http_get_session_id(session), filename, taille );
+             "%s: New file saved: '%s' length=%d", __func__, filename, taille );
     return(HTTP_200_OK);
   }
 /******************************************************************************************************************************/
@@ -117,14 +117,12 @@
     lws_spa_finalize(pss->spa);
 
     if (! (lws_spa_get_length(pss->spa, PARAM_POSTFILE_ID)>0 ) )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "%s: (sid %s) 'ID' parameter is missing", __func__, Http_get_session_id(pss->session) );
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: 'ID' parameter is missing", __func__ );
        Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
        return(1);
      }
     if (! (lws_spa_get_length(pss->spa, PARAM_POSTFILE_TYPE)>0) )
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-                "%s: (sid %s) 'TYPE' parameter is missing", __func__, Http_get_session_id(pss->session) );
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: 'TYPE' parameter is missing", __func__ );
        Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
        return(1);
      }
@@ -132,9 +130,7 @@
     type = lws_spa_get_string ( pss->spa, PARAM_POSTFILE_TYPE );
     if (sscanf ( lws_spa_get_string ( pss->spa, PARAM_POSTFILE_ID ), "%d", &id ) != 1) id=-1;
 
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
-             "%s: (sid %s) HTTP request for type='%s', id='%d'", __func__, Http_get_session_id(pss->session),
-              type, id );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: HTTP request for type='%s', id='%d'", __func__, type, id );
 
     code = HTTP_BAD_REQUEST;
     if (!strcasecmp(type,"dls"))
