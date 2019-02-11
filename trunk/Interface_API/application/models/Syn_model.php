@@ -17,6 +17,25 @@ class Syn_model extends CI_Model
        $this->db->where("syn.id=", $id );
        return $this->db->get()->row();
      }
+/******************************************************************************************************************************/
+    function motifs($id)
+	    { $this->db->select("sm.* ");
+       $this->db->from("syns_motifs as sm");
+       $this->db->join("syns as syn", "sm.syn_id = syn.id", "INNER" );
+       /*$this->db->where("syn.access_level<=", $this->session->user_access_level );*/
+       $this->db->where("syn.id=", $id );
+       return $this->db->get()->result();
+     }
+/******************************************************************************************************************************/
+    function comments($id)
+	    { $this->db->select("sc.* ");
+       $this->db->from("syns_comments as sc");
+       $this->db->join("syns as syn", "sc.syn_id = syn.id", "INNER" );
+       /*$this->db->where("syn.access_level<=", $this->session->user_access_level );*/
+       $this->db->where("syn.id=", $id );
+       return $this->db->get()->result();
+     }
+/******************************************************************************************************************************/
     
     /*
      * Get all syns count

@@ -54,7 +54,10 @@ $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
 $route['admin'] = 'admin/dashboard';
-$route['mnemo/(:num)'] = 'mnemo/index/$1';
 $route['dls/(:num)'] = 'dls/index/$1';
+$route['dls/(:num)/mnemos'] = 'mnemo/index/$1';
 $route['syn/(:num)'] = 'syn/index/$1';
+$route['syn/(:num)/dlss'] = 'dls/list/$1';
+$route['syn/(:num)/motifs'] = 'syn/motifs/$1';
+$route['syns'] = 'syn/list';
 

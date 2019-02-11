@@ -5,13 +5,14 @@ class Syn extends Admin_Controller{
  function __construct()
   { parent::__construct();
     $this->load->model('Syn_model');
+    $this->load->model('Dls_model');
   } 
 /******************************************************************************************************************************/
- public function index($id=null)
+ public function index($syn_id=NULL)
   { header("Content-Type: application/json; charset=UTF-8");
     switch ( $this->input->method(TRUE) )
-     { case "GET":    return ($this->get($id));
-       case "DELETE": return ($this->delete($id));
+     { case "GET":    return ($this->get($syn_id));
+       case "DELETE": return ($this->delete($syn_id));
        case "PUT":    return ($this->update());
        case "POST":   return ($this->create());
      }
@@ -19,7 +20,7 @@ class Syn extends Admin_Controller{
     exit();
   }
 /******************************************************************************************************************************/
- public function list()
+ public function list ()
   { header("Content-Type: application/json; charset=UTF-8");
 
     $data = array();
@@ -37,16 +38,32 @@ class Syn extends Admin_Controller{
     exit();
   }
 /******************************************************************************************************************************/
- public function count()
+ public function motifs ($id)
   { header("Content-Type: application/json; charset=UTF-8");
 
 /*    if ( ! $this->wtd_auth->logged_in() )
-     { echo json_encode( array( "success" => "FALSE", "error" => "need to be authenticated" ) );
+     { echo json_encode(array( "draw"=>$draw, "recordsTotal" => 0, "recordsFiltered" => 0, "data" => $data ));
        exit();
      }*/
 
-    $count = $this->Syn_model->get_count();
-    echo json_encode(array( "success" => "true", "count" => $count));
+    $data_motifs = array();
+  		$motifs = $this->Syn_model->motifs($id);
+		  if (isset($motifs))
+     { foreach($motifs as $motif)
+        { $data_motifs[] = get_object_vars( $motif ); }
+     }
+
+    $data_comments = array();
+  		$comments = $this->Syn_model->comments($id);
+		  if (isset($comments))
+     { foreach($comments as $comment)
+        { $data_comments[] = get_object_vars( $comment ); }
+     }
+
+    echo json_encode(array( "success" => "true",
+                            "Motifs" => $data_motifs,
+                            "Comments" => $data_comments )
+                    );
     exit();
   }
 /******************************************************************************************************************************/
