@@ -1,11 +1,11 @@
-/* 000006.dls: Eclairage PCC du Salon */
+/* 000006.dls: Eclairage PCC du  */
 
  /* Bits de consommation du module */
- #define POS_TL         <-> _E(libelle="Position Télérupteur"); /* Position du Télérupteur des luminaires centre Salon */
- #define OSMS_TLSALON_ON   <-> _M(libelle="Demande d'allumage TL1"); /* Ordre TL Salon ON */
- #define OSMS_TLSALON_OFF  <-> _M(libelle="Demande d'extinction TL2"); /* Ordre TL Salon OFF */
- #define ODLS_TLSALON_OFF  <-> _M(libelle="Demande DLS d'extinction des lumières");
- #define ODLS_TLSALON_ON   <-> _M(libelle="Demande DLS d'allumage des lumières");
+ #define POS_TL         <-> _E(libelle="Position Télérupteur"); /* Position du Télérupteur des luminaires centre  */
+ #define OSMS_TL_ON     <-> _M(libelle="Demande SMS d'allumage TL"); /* Ordre TL  ON */
+ #define OSMS_TL_OFF    <-> _M(libelle="Demande SMS d'extinction TL"); /* Ordre TL  OFF */
+ #define ODLS_TL_OFF    <-> _M(libelle="Demande DLS d'extinction TL");
+ #define ODLS_TL_ON     <-> _M(libelle="Demande DLS d'allumage TL");
 
  /* Bits de production du module */
  #define ACT_TL         <-> _A(libelle="Sortie physique de pilotage du télérupteur");
@@ -13,7 +13,7 @@
  #define MDEF_REPOS_F   <-> _B(libelle="Mémorisation du défaut repos acquitté (Fixe) du TL");
  #define MDEF_TRAVAIL   <-> _B(libelle="Mémorisation du défaut travail non acquitté du TL");
  #define MDEF_TRAVAIL_F <-> _B(libelle="Mémorisation du défaut travail acquitté (Fixe) du TL");
- #define MSG_TELE_ON    <-> _MSG(type=etat,libelle="Allumé"); /* Lumière allumée */
+ #define MSG_TELE_ON    <-> _MSG(type=etat,libelle="Allumé"); /* TL activé */
  #define MSG_DEF_REPOS  <-> _MSG(type=defaut,libelle="Défaut repos"); /* Defaut repos */
  #define MSG_DEF_TRAVAIL<-> _MSG(type=defaut,libelle="Défaut travail"); /* Defaut travail */
 
@@ -60,8 +60,8 @@
  /* ORDRES DU MODULE ----------------------------------------------------------*/
  
  /* CALCUL ETAT ATTENDU TELERUPTEUR */
-  - /*/_MEMSA_DOWN.*/ (OSMS_TLSALON_ON  + ODLS_TLSALON_ON ). /POS_TL -> MEWANTTL, MEACTELE;
-  - /*/_MEMSA_DOWN.*/ (OSMS_TLSALON_OFF + ODLS_TLSALON_OFF).  POS_TL ->/MEWANTTL, MEACTELE;
+  - /_MEMSA_DOWN. (OSMS_TL_ON  + ODLS_TL_ON ). /POS_TL -> MEWANTTL, MEACTELE;
+  - /_MEMSA_DOWN. (OSMS_TL_OFF + ODLS_TL_OFF).  POS_TL ->/MEWANTTL, MEACTELE;
  
  /* PILOTAGE TELE SUR COMMANDE DE MANOEUVRE */
   - MEACTELE -> TR_IMP, TR_DEF;
