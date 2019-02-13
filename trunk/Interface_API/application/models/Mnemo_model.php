@@ -23,7 +23,7 @@ class Mnemo_model extends CI_Model
     { $this->db->select("m.ev_text");
        $this->db->from('mnemos as m');
        $this->db->where('m.ev_thread=',"VOICE");
-       return $this->db->get()->row();
+       return $this->db->get()->result();
     }
 /******************************************************************************************************************************/
    public function get_count()
