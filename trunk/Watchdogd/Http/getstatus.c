@@ -100,8 +100,6 @@
     g_object_unref(gen);
           
 /*************************************************** Envoi au client **********************************************************/
-    Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf );
-    g_free(buf);                                                      /* Libération du buffer dont nous n'avons plus besoin ! */
-    return(lws_http_transaction_completed(wsi));
+    return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf ));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

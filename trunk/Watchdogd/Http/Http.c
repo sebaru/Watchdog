@@ -133,7 +133,7 @@
 /* Entrée: La structure wsi de reference                                                                                      */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_Send_response_code ( struct lws *wsi, gint code )
+ gint Http_Send_response_code ( struct lws *wsi, gint code )
   { unsigned char header[256], *header_cur, *header_end;
    	struct HTTP_PER_SESSION_DATA *pss;
     gint retour;
@@ -147,16 +147,15 @@
     header_end = header + sizeof(header);
 
     retour = lws_add_http_header_status( wsi, code, &header_cur, header_end );
-    retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
-   *header_cur='\0';                                                                                /* Caractere null d'arret */
-    lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
+    retour = lws_finalize_write_http_header ( wsi, header, &header_cur, header_end );
+    return(1);
   }
 /******************************************************************************************************************************/
 /* Http_Send_response_code: Utiliser pour renvoyer un code reponse                                                            */
 /* Entrée: La structure wsi de reference                                                                                      */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
- void Http_Send_response_code_with_buffer ( struct lws *wsi, gint code, gchar *content_type, gchar *buffer, gint taille_buf )
+ gint Http_Send_response_code_with_buffer ( struct lws *wsi, gint code, gchar *content_type, gchar *buffer, gint taille_buf )
   { unsigned char header[256], *header_cur, *header_end;
    	struct HTTP_PER_SESSION_DATA *pss;
     gint retour;
@@ -174,10 +173,11 @@
                                            (const unsigned char *)content_type, strlen(content_type),
                                            &header_cur, header_end );
     retour = lws_add_http_header_content_length ( wsi, taille_buf, &header_cur, header_end );
-    retour = lws_finalize_http_header ( wsi, &header_cur, header_end );
-    *header_cur='\0';                                                                               /* Caractere null d'arret */
-    lws_write( wsi, header, header_cur - header, LWS_WRITE_HTTP_HEADERS );
-    lws_write ( wsi, buffer, taille_buf, LWS_WRITE_HTTP);                                                   /* Send to client */
+    retour = lws_finalize_write_http_header ( wsi, header, &header_cur, header_end );
+    pss->send_buffer = buffer;
+    pss->size_buffer = taille_buf;
+    lws_callback_on_writable(wsi);
+    return(0);
   }
 /******************************************************************************************************************************/
 /* Http_send_histo : envoie un histo au client                                                                                */
@@ -340,10 +340,7 @@
                 { return( Http_Traiter_request_body_postfile ( wsi, data, taille ) ); }             /* Utilisation du lws_spa */
                else if ( ! strcasecmp ( pss->url, "/cli" ) )
                 { return( Http_CB_file_upload( wsi, data, taille ) ); }     /* Sinon, c'est un buffer type json ou un fichier */
-               else
-                { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );
-                  return(1);
-                }
+               return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));
              }
             break;
        case LWS_CALLBACK_HTTP_BODY_COMPLETION:
@@ -354,10 +351,7 @@
                 { return( Http_Traiter_request_body_completion_postfile ( wsi ) ); }
                else if ( ! strcasecmp ( pss->url, "/cli" ) )
                 { return( Http_Traiter_request_body_completion_cli ( wsi ) ); }
-               else
-                { Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );
-                  return(1);
-                }
+               return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));
               }
             break;
        case LWS_CALLBACK_HTTP:
@@ -392,14 +386,12 @@
                else if ( ! strcasecmp( url, "/dls/debug_trad_on" ) )
                 { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug ON", __func__ );
                   Trad_dls_set_debug ( TRUE );
-                  Http_Send_response_code ( wsi, HTTP_200_OK );
-                  return(lws_http_transaction_completed(wsi));
+                  return(Http_Send_response_code ( wsi, HTTP_200_OK ));
                 }
                else if ( ! strcasecmp( url, "/dls/debug_trad_off" ) )
                 { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug OFF", __func__ );
                   Trad_dls_set_debug ( FALSE );
-                  Http_Send_response_code ( wsi, HTTP_200_OK );
-                  return(lws_http_transaction_completed(wsi));
+                  return(Http_Send_response_code ( wsi, HTTP_200_OK ));
                 }
 /*************************************************** WS Reload library ********************************************************/
                else if ( ! strncasecmp( url, "/reload/", 8 ) )
@@ -409,8 +401,7 @@
                             "%s: Reloading start for %s", __func__, target );
                   if ( ! strcasecmp( target, "dls" ) )
                    { Partage->com_dls.Thread_reload = TRUE;
-                     Http_Send_response_code ( wsi, HTTP_200_OK );
-                     return(lws_http_transaction_completed(wsi));
+                     return(Http_Send_response_code ( wsi, HTTP_200_OK ));
                    }
 
                   liste = Partage->com_msrv.Librairies;                                  /* Parcours de toutes les librairies */
@@ -429,8 +420,7 @@
                       }
                      liste = g_slist_next(liste);
                    }
-                  Http_Send_response_code ( wsi, HTTP_200_OK );
-                  return(lws_http_transaction_completed(wsi));
+                  return(Http_Send_response_code ( wsi, HTTP_200_OK ));
                 }
 /****************************************** WS get Running config library *****************************************************/
                else if ( ! strncasecmp( url, "/run/", 5 ) )
@@ -453,15 +443,12 @@
                                     "%s: library %s has a Admin_json. Calling with %s.", __func__,
                                     lib->admin_prompt, target+strlen(lib->admin_prompt) );
                            lib->Admin_json ( target+strlen(lib->admin_prompt), &buffer, &taille_buf );
-                           Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buffer, taille_buf );
-                           g_free(buffer);
-                           return(lws_http_transaction_completed(wsi));
+                           return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buffer, taille_buf ));
                          }    
                       }
                      liste = g_slist_next(liste);
                    }
-                  Http_Send_response_code ( wsi, HTTP_200_OK );
-                  return(lws_http_transaction_completed(wsi));
+                  return(Http_Send_response_code ( wsi, HTTP_200_OK ));
                 }
                else                                                                                             /* Par défaut */
                 { gchar token_id[12];
@@ -474,41 +461,45 @@
                      if ( ! strcasecmp( url, "/compil" ) )
                       { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Compiling DLS %d", __func__, id );
                         Compiler_source_dls( TRUE, id, NULL, 0 );
-                        Http_Send_response_code ( wsi, HTTP_200_OK );
-                        return(lws_http_transaction_completed(wsi));
+                        return(Http_Send_response_code ( wsi, HTTP_200_OK ));
                       }
                      else if ( ! strcasecmp( url, "/dls/delete" ) )
                       { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Delete DLS %d", __func__, id );
                         Decharger_plugin_by_id( id );
-                        Http_Send_response_code ( wsi, HTTP_200_OK );
-                        return(lws_http_transaction_completed(wsi));
+                        return(Http_Send_response_code ( wsi, HTTP_200_OK ));
                       }
                      else if ( ! strcasecmp( url, "/dls/activate" ) )
                       { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Activating DLS %d", __func__, id );
                         while (Partage->com_dls.admin_start) sched_yield();
                         Partage->com_dls.admin_start = id;
-                        Http_Send_response_code ( wsi, HTTP_200_OK );
-                        return(lws_http_transaction_completed(wsi));
+                        return(Http_Send_response_code ( wsi, HTTP_200_OK ));
                       }
                      else if ( ! strcasecmp( url, "/dls/deactivate" ) )
                       { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: DesActivating DLS %d", __func__, id );
                         while (Partage->com_dls.admin_stop) sched_yield();
                         Partage->com_dls.admin_stop = id;
-                        Http_Send_response_code ( wsi, HTTP_200_OK );
-                        return(lws_http_transaction_completed(wsi));
+                        return(Http_Send_response_code ( wsi, HTTP_200_OK ));
                       }
-                     Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ); /* Bad Request */
                      Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Bad Request from %s/%s : %s",
                                __func__, remote_name, remote_ip, url );
-                     return(lws_http_transaction_completed(wsi));
+                     return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                /* Bad Request */
                    }
                 }
                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Unknown Request from %s/%s : %s",
                          __func__, remote_name, remote_ip, url );
-               Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ); /* Bad Request */
-               return(1);                                                       /* Si requete non reconnue, on clos la socket */
+               return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                      /* Bad Request */
              }
 		          break;
+       case LWS_CALLBACK_HTTP_WRITEABLE:
+             { gint retour;
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Http_Writeable !" );
+               retour = lws_write(wsi, pss->send_buffer, pss->size_buffer, LWS_WRITE_HTTP_FINAL);
+               g_free(pss->send_buffer);
+               if (retour != pss->size_buffer) return(1);
+				           if (lws_http_transaction_completed(wsi))	return -1;
+               else lws_callback_on_writable(wsi);
+               return 0;
+             }
        case LWS_CALLBACK_HTTP_FILE_COMPLETION:
              { lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
                                         (char *)&remote_name, sizeof(remote_name),
