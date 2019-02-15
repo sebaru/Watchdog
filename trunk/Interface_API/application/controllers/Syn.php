@@ -60,9 +60,17 @@ class Syn extends Admin_Controller{
         { $data_comments[] = get_object_vars( $comment ); }
      }
 
+    $data_passerelles = array();
+  		$passerelles = $this->Syn_model->passerelles($id);
+		  if (isset($passerelles))
+     { foreach($passerelles as $passerelle)
+        { $data_passerelles[] = get_object_vars( $passerelle ); }
+     }
+
     echo json_encode(array( "success" => "true",
                             "Motifs" => $data_motifs,
-                            "Comments" => $data_comments )
+                            "Comments" => $data_comments,
+                            "Passerelles" => $data_passerelles )
                     );
     exit();
   }

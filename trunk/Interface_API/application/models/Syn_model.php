@@ -36,6 +36,16 @@ class Syn_model extends CI_Model
        return $this->db->get()->result();
      }
 /******************************************************************************************************************************/
+    function passerelles($id)
+	    { $this->db->select("sp.*, cible.page, cible.libelle ");
+       $this->db->from("syns_pass as sp");
+       $this->db->join("syns as syn", "sp.syn_id = syn.id", "INNER" );
+       $this->db->join("syns as cible", "sp.syn_cible_id = cible.id", "INNER" );
+       /*$this->db->where("syn.access_level<=", $this->session->user_access_level );*/
+       $this->db->where("syn.id=", $id );
+       return $this->db->get()->result();
+     }
+/******************************************************************************************************************************/
     
     /*
      * Get all syns count
