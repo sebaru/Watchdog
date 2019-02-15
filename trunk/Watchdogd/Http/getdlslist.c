@@ -44,6 +44,7 @@
     json_builder_set_member_name  ( builder, "tech_id" );      json_builder_add_string_value ( builder, dls->plugindb.tech_id );
     json_builder_set_member_name  ( builder, "shortname" ); json_builder_add_string_value ( builder, dls->plugindb.shortname );
     json_builder_set_member_name  ( builder, "name" );      json_builder_add_string_value ( builder, dls->plugindb.nom );
+    json_builder_set_member_name  ( builder, "started" ); json_builder_add_boolean_value ( builder, dls->plugindb.on );
 
     json_builder_set_member_name  ( builder, "conso" ); json_builder_add_double_value ( builder, dls->conso );
     json_builder_set_member_name  ( builder, "starting" ); json_builder_add_boolean_value ( builder, dls->vars.starting );
