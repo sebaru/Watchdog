@@ -393,6 +393,10 @@
                   Trad_dls_set_debug ( FALSE );
                   return(Http_Send_response_code ( wsi, HTTP_200_OK ));
                 }
+               else if ( ! strcasecmp( url, "/dls/list" ) )
+                { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: /dls/list received", __func__ );
+                  return(Http_Traiter_request_getdlslist ( wsi ));
+                }
 /*************************************************** WS Reload library ********************************************************/
                else if ( ! strncasecmp( url, "/reload/", 8 ) )
                 { gchar *target = url+8;
