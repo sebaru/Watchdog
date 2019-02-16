@@ -358,17 +358,17 @@
 
   /*  json_builder_begin_object (builder);                                                       /* Création du noeud principal */
   /*  json_builder_set_member_name  ( builder, "list" );*/
-    json_builder_begin_object (builder);                                                                 /* Contenu du Status */
+    json_builder_begin_array (builder);                                                                  /* Contenu du Status */
 
     pthread_mutex_lock( &Cfg_modbus.lib->synchro );
     liste_modules = Cfg_modbus.Modules_MODBUS;
     while ( liste_modules )
      { struct MODULE_MODBUS *module = liste_modules->data;
 
-       json_builder_set_member_name  ( builder, module->modbus.tech_id );
-/*       json_builder_begin_array (builder);                                                   /* Création du noeud Passerelles */
-
        json_builder_begin_object (builder);                                                    /* Contenu du Noeud Passerelle */
+
+       json_builder_set_member_name  ( builder, "tech_id" );
+       json_builder_add_string_value ( builder, module->modbus.tech_id );
 
        json_builder_set_member_name  ( builder, "mode" );
        json_builder_add_string_value ( builder, Modbus_mode_to_string(module) );
@@ -394,17 +394,13 @@
        json_builder_set_member_name  ( builder, "date_retente" );
        json_builder_add_int_value ( builder, (module->date_retente > Partage->top   ? (module->date_retente   - Partage->top)/10 : -1) );
 
-       json_builder_end_object (builder);                                                                       /* End Module */
-
-/*       json_builder_end_array (builder);                                                                  /* End Module Array */
+       json_builder_end_object (builder);                                                                 /* End Module Array */
 
        liste_modules = liste_modules->next;                                                      /* Passage au module suivant */
      }
     pthread_mutex_unlock( &Cfg_modbus.lib->synchro );
 
-/*  json_builder_end_object (builder);                                                                  /* Fin dump du status */
-
-    json_builder_end_object (builder);                                                                        /* End Document */
+    json_builder_end_array (builder);                                                                         /* End Document */
 
     gen = json_generator_new ();
     json_generator_set_root ( gen, json_builder_get_root(builder) );
