@@ -431,7 +431,7 @@
 		          break;
        case LWS_CALLBACK_HTTP_WRITEABLE:
              { gint retour;
-               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Http_Writeable !" );
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Http_Writeable !", __func__ );
                retour = lws_write(wsi, pss->send_buffer, pss->size_buffer, LWS_WRITE_HTTP_FINAL);
                g_free(pss->send_buffer);
                if (retour != pss->size_buffer) return(1);

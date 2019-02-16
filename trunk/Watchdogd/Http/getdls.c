@@ -92,19 +92,15 @@
     builder = json_builder_new ();
     if (builder == NULL)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
-       Http_Send_response_code ( wsi, HTTP_SERVER_ERROR );
-       return(1);
+       return(Http_Send_response_code ( wsi, HTTP_SERVER_ERROR ));
      }
                                                                       /* Lancement de la requete de recuperation des messages */
-/*------------------------------------------------------- Dumping dlslist -----------------------------------------------------*/
-    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-    json_builder_set_member_name  ( builder, "Dls_list" );
-    json_builder_begin_array (builder);                                                                  /* Contenu du Status */
+/*------------------------------------------------------- Dumping dlslist ----------------------------------------------------*/
+    json_builder_begin_array (builder);                                                        /* Création du noeud principal */
 
     Dls_foreach ( builder, Http_dls_do_plugin, NULL );
 
-    json_builder_end_array (builder);                                                                  /* Fin dump du dlslist */
-    json_builder_end_object (builder);                                                                        /* End Document */
+    json_builder_end_array (builder);                                                                         /* End Document */
 
     gen = json_generator_new ();
     json_generator_set_root ( gen, json_builder_get_root(builder) );
@@ -117,6 +113,45 @@
     return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf ));
   }
 /******************************************************************************************************************************/
+/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Http_dls_acquitter_plugin ( void *user_data, struct PLUGIN_DLS *plugin )
+  { gint dls_id = *(gint *)user_data;
+    if (plugin->plugindb.id == dls_id)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Synoptique %d -> plugin %s acquitté", __func__,
+                 plugin->plugindb.id, plugin->plugindb.nom );
+       plugin->vars.bit_acquit = TRUE;
+     }
+  }
+/******************************************************************************************************************************/
+/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Http_dls_debug_plugin ( void *user_data, struct PLUGIN_DLS *plugin )
+  { gint dls_id = *(gint *)user_data;
+    if (plugin->plugindb.id == dls_id)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Synoptique %d -> plugin %s en mode debug", __func__,
+                 plugin->plugindb.id, plugin->plugindb.nom );
+       plugin->vars.debug = TRUE;
+     }
+  }
+/******************************************************************************************************************************/
+/* Proto_Acquitter_synoptique: Acquitte le synoptique si il est en parametre                                                  */
+/* Entrée: Appellé indirectement par les fonctions recursives DLS sur l'arbre en cours                                        */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Http_dls_undebug_plugin ( void *user_data, struct PLUGIN_DLS *plugin )
+  { gint dls_id = *(gint *)user_data;
+    if (plugin->plugindb.id == dls_id)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: Synoptique %d -> plugin %s debug désactivé", __func__,
+                 plugin->plugindb.id, plugin->plugindb.nom );
+       plugin->vars.debug = FALSE;
+     }
+  }
+/******************************************************************************************************************************/
 /* Http_Traiter_request_getprocess: Traite une requete sur l'URI process                                                      */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
@@ -127,12 +162,10 @@
     if ( ! strcasecmp( url, "debug_trad_on" ) )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug ON", __func__ );
        Trad_dls_set_debug ( TRUE );
-       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
      }
     else if ( ! strcasecmp( url, "debug_trad_off" ) )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug OFF", __func__ );
        Trad_dls_set_debug ( FALSE );
-       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
      }
     else if ( ! strcasecmp( url, "list" ) )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: /dls/list received", __func__ );
@@ -142,28 +175,37 @@
      { gint id = Http_get_arg_int ( wsi, "id" );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Compiling DLS %d", __func__, id );
        Compiler_source_dls( TRUE, id, NULL, 0 );
-       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+     }
+    else if ( ! strcasecmp( url, "acquit" ) )
+     { gint id = Http_get_arg_int ( wsi, "id" );
+       Dls_foreach ( &id, Http_dls_acquitter_plugin, NULL );
+     }
+    else if ( ! strcasecmp( url, "debug" ) )
+     { gint id = Http_get_arg_int ( wsi, "id" );
+       Dls_foreach ( &id, Http_dls_debug_plugin, NULL );
+     }
+    else if ( ! strcasecmp( url, "undebug" ) )
+     { gint id = Http_get_arg_int ( wsi, "id" );
+       Dls_foreach ( &id, Http_dls_undebug_plugin, NULL );
      }
     else if ( ! strcasecmp( url, "delete" ) )
      { gint id = Http_get_arg_int ( wsi, "id" );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Delete DLS %d", __func__, id );
        Decharger_plugin_by_id( id );
-       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
      }
     else if ( ! strcasecmp( url, "start" ) )
      { gint id = Http_get_arg_int ( wsi, "id" );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Activating DLS %d", __func__, id );
        while (Partage->com_dls.admin_start) sched_yield();
        Partage->com_dls.admin_start = id;
-       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
      }
     else if ( ! strcasecmp( url, "stop" ) )
      { gint id = Http_get_arg_int ( wsi, "id" );
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: DesActivating DLS %d", __func__, id );
        while (Partage->com_dls.admin_stop) sched_yield();
        Partage->com_dls.admin_stop = id;
-       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
      }
-    return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));
+    else return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));
+    return(Http_Send_response_code ( wsi, HTTP_200_OK ));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
