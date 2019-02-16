@@ -310,7 +310,7 @@
 /******************************************************************************************************************************/
 /* Http_get_arg_int : Recupere l'argument de l'URI en parametre                                                               */
 /* Entrées : le contexte, le message, l'URL                                                                                   */
-/* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
+/* Sortie : la valeur du péramètre                                                                                            */
 /******************************************************************************************************************************/
  gint Http_get_arg_int ( struct lws *wsi, gchar *arg )
   { gchar token_id[12];
