@@ -13,7 +13,7 @@ Watchdogd_SOURCES = Watchdogd.c process.c \
 		    Mnemo_Horloges.c \
 		    Mnemo_Tempo.c Histo_msgs.c Camera.c distrib_Events.c \
                     distrib_MSGxxx.c distrib_Ixxx.c \
-                    Admin.c Admin_running.c Admin_process.c Admin_dls.c Admin_set.c Admin_get.c Admin_dbcfg.c Admin_user.c \
+                    Admin.c Admin_running.c Admin_process.c Admin_set.c Admin_get.c Admin_dbcfg.c Admin_user.c \
                     Utilisateur.c \
                     Synoptiques.c Syn_motifs.c Syn_comment.c Syn_passerelle.c Syn_palette.c Syn_cadran.c Syn_camera_sup.c
 

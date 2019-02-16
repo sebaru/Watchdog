@@ -118,6 +118,7 @@
  extern gint Http_Traiter_request_body_postfile ( struct lws *wsi, void *data, size_t taille );
  extern gint Http_Traiter_request_body_completion_postfile ( struct lws *wsi );
  extern gint Http_Traiter_request_setm ( struct lws *wsi );
- extern gboolean Http_Traiter_request_getdlslist ( struct lws *wsi ) ;
+ extern gboolean Http_Traiter_request_getdls ( struct lws *wsi, gchar *url ) ;
+ extern gint Http_get_arg_int ( struct lws *wsi, gchar *arg );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -113,7 +113,7 @@
     return(lws_http_transaction_completed(wsi));
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_request_getprocess: Traite une requete sur l'URI process                                                        */
+/* Http_Traiter_request_getprocess: Traite une requete sur l'URI process                                                      */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
@@ -126,7 +126,34 @@
      { return(Http_Traiter_request_getprocess_start_stop(wsi,url+5,FALSE));}
     else if (!strncmp(url, "start/", 6))
      { return(Http_Traiter_request_getprocess_start_stop(wsi,url+6,TRUE));}
-    Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );
-    return(1);
+/*************************************************** WS Reload library ********************************************************/
+    else if ( ! strncasecmp( url, "reload/", 7 ) )
+     { gchar *target = url+7;
+       GSList *liste;
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading start for %s", __func__, target );
+       if ( ! strcasecmp( target, "dls" ) )
+        { Partage->com_dls.Thread_reload = TRUE;
+          return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+        }
+
+       liste = Partage->com_msrv.Librairies;                                  /* Parcours de toutes les librairies */
+       while(liste)
+        { struct LIBRAIRIE *lib = liste->data;
+          if ( ! strcmp( target, lib->admin_prompt ) )
+           { if (lib->Thread_run == FALSE)
+              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                         "%s: reloading %s -> Library found but not started.", __func__, target );
+              }    
+             else
+              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                         "%s: reloading %s -> Library found. Sending Reload.", __func__, target );
+                lib->Thread_reload = TRUE;
+              }    
+           }
+          liste = g_slist_next(liste);
+        }
+       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+     }
+    return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

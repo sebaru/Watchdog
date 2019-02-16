@@ -308,6 +308,20 @@
     return 0;
   }
 /******************************************************************************************************************************/
+/* Http_get_arg_int : Recupere l'argument de l'URI en parametre                                                               */
+/* Entrées : le contexte, le message, l'URL                                                                                   */
+/* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
+/******************************************************************************************************************************/
+ gint Http_get_arg_int ( struct lws *wsi, gchar *arg )
+  { gchar token_id[12];
+    const gchar *id_s;
+    gint id;
+    
+    id_s = lws_get_urlarg_by_name	( wsi, "id=", token_id, sizeof(token_id) );                      /* Recup du param get 'ID' */
+    if (id_s) return(atoi(id_s));
+    return(0);
+  }
+/******************************************************************************************************************************/
 /* CB_http : Gere les connexion HTTP pures (appellée par libwebsockets)                                                       */
 /* Entrées : le contexte, le message, l'URL                                                                                   */
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
@@ -370,9 +384,9 @@
                   return(0);
                 }
                else if ( ! strcasecmp ( url, "/status" ) )         { return( Http_Traiter_request_getstatus ( wsi ) ); }
-               else if ( ! strncasecmp ( url, "/ws/getsyn", 11 ) ) { return( Http_Traiter_request_getsyn ( wsi, session ) ); }
                else if ( ! strncasecmp ( url, "/ws/audio/", 10 ) ) { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
                else if ( ! strncasecmp ( url, "/process/", 9 ) ) { return( Http_Traiter_request_getprocess ( wsi, url+9 ) ); }
+               else if ( ! strncasecmp ( url, "/dls/", 5 ) ) { return( Http_Traiter_request_getdls ( wsi, url+5 ) ); }
                else if ( ! strncasecmp ( url, "/setm", 5 ) )   { return( Http_Traiter_request_setm ( wsi ) ); }
                else if ( ! strcasecmp ( url, "/cli" ) )
                 { g_snprintf( pss->url, sizeof(pss->url), "/cli" );
@@ -381,50 +395,6 @@
                else if ( ! strcasecmp ( url, "/postfile" ) )
                 { g_snprintf( pss->url, sizeof(pss->url), "/postfile" );
                   return(lws_http_transaction_completed(wsi));
-                }
-/*************************************************** WS DLS debug traduction **************************************************/
-               else if ( ! strcasecmp( url, "/dls/debug_trad_on" ) )
-                { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug ON", __func__ );
-                  Trad_dls_set_debug ( TRUE );
-                  return(Http_Send_response_code ( wsi, HTTP_200_OK ));
-                }
-               else if ( ! strcasecmp( url, "/dls/debug_trad_off" ) )
-                { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug OFF", __func__ );
-                  Trad_dls_set_debug ( FALSE );
-                  return(Http_Send_response_code ( wsi, HTTP_200_OK ));
-                }
-               else if ( ! strcasecmp( url, "/dls/list" ) )
-                { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: /dls/list received", __func__ );
-                  return(Http_Traiter_request_getdlslist ( wsi ));
-                }
-/*************************************************** WS Reload library ********************************************************/
-               else if ( ! strncasecmp( url, "/reload/", 8 ) )
-                { gchar *target = url+8;
-                  GSList *liste;
-                  Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                            "%s: Reloading start for %s", __func__, target );
-                  if ( ! strcasecmp( target, "dls" ) )
-                   { Partage->com_dls.Thread_reload = TRUE;
-                     return(Http_Send_response_code ( wsi, HTTP_200_OK ));
-                   }
-
-                  liste = Partage->com_msrv.Librairies;                                  /* Parcours de toutes les librairies */
-                  while(liste)
-                   { struct LIBRAIRIE *lib = liste->data;
-                     if ( ! strcmp( target, lib->admin_prompt ) )
-                      { if (lib->Thread_run == FALSE)
-                         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                                    "%s: reloading %s -> Library found but not started.", __func__, target );
-                         }    
-                        else
-                         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-                                    "%s: reloading %s -> Library found. Sending Reload.", __func__, target );
-                           lib->Thread_reload = TRUE;
-                         }    
-                      }
-                     liste = g_slist_next(liste);
-                   }
-                  return(Http_Send_response_code ( wsi, HTTP_200_OK ));
                 }
 /****************************************** WS get Running config library *****************************************************/
                else if ( ! strncasecmp( url, "/run/", 5 ) )
@@ -453,41 +423,6 @@
                      liste = g_slist_next(liste);
                    }
                   return(Http_Send_response_code ( wsi, HTTP_200_OK ));
-                }
-               else                                                                                             /* Par défaut */
-                { gchar token_id[12];
-                  const gchar *id_s;
-                  gint id;
-    
-                  id_s = lws_get_urlarg_by_name	( wsi, "id=", token_id, sizeof(token_id) );        /* Recup du param get 'ID' */
-                  if (id_s)
-                   { id = atoi (id_s);
-                     if ( ! strcasecmp( url, "/compil" ) )
-                      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Compiling DLS %d", __func__, id );
-                        Compiler_source_dls( TRUE, id, NULL, 0 );
-                        return(Http_Send_response_code ( wsi, HTTP_200_OK ));
-                      }
-                     else if ( ! strcasecmp( url, "/dls/delete" ) )
-                      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Delete DLS %d", __func__, id );
-                        Decharger_plugin_by_id( id );
-                        return(Http_Send_response_code ( wsi, HTTP_200_OK ));
-                      }
-                     else if ( ! strcasecmp( url, "/dls/activate" ) )
-                      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Activating DLS %d", __func__, id );
-                        while (Partage->com_dls.admin_start) sched_yield();
-                        Partage->com_dls.admin_start = id;
-                        return(Http_Send_response_code ( wsi, HTTP_200_OK ));
-                      }
-                     else if ( ! strcasecmp( url, "/dls/deactivate" ) )
-                      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: DesActivating DLS %d", __func__, id );
-                        while (Partage->com_dls.admin_stop) sched_yield();
-                        Partage->com_dls.admin_stop = id;
-                        return(Http_Send_response_code ( wsi, HTTP_200_OK ));
-                      }
-                     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Bad Request from %s/%s : %s",
-                               __func__, remote_name, remote_ip, url );
-                     return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                /* Bad Request */
-                   }
                 }
                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Unknown Request from %s/%s : %s",
                          __func__, remote_name, remote_ip, url );

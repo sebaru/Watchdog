@@ -40,15 +40,24 @@
 /******************************************************************************************************************************/
  static void Http_dls_do_plugin ( void *user_data, struct PLUGIN_DLS *dls )
   { JsonBuilder *builder = user_data;
+    struct tm *temps;
+    gchar date[80];
+
+    temps = localtime( (time_t *)&dls->start_date );
+    if (temps) { strftime( date, sizeof(date), "%F %T", temps ); }
+          else { g_snprintf(date, sizeof(date), "Erreur"); }
+
     json_builder_begin_object (builder);
-    json_builder_set_member_name  ( builder, "tech_id" );      json_builder_add_string_value ( builder, dls->plugindb.tech_id );
+    json_builder_set_member_name  ( builder, "id" );        json_builder_add_int_value ( builder, dls->plugindb.id );
+    json_builder_set_member_name  ( builder, "tech_id" );   json_builder_add_string_value ( builder, dls->plugindb.tech_id );
     json_builder_set_member_name  ( builder, "shortname" ); json_builder_add_string_value ( builder, dls->plugindb.shortname );
     json_builder_set_member_name  ( builder, "name" );      json_builder_add_string_value ( builder, dls->plugindb.nom );
-    json_builder_set_member_name  ( builder, "started" ); json_builder_add_boolean_value ( builder, dls->plugindb.on );
+    json_builder_set_member_name  ( builder, "started" );   json_builder_add_boolean_value ( builder, dls->plugindb.on );
+    json_builder_set_member_name  ( builder, "start_date" );json_builder_add_string_value ( builder, date );
 
-    json_builder_set_member_name  ( builder, "conso" ); json_builder_add_double_value ( builder, dls->conso );
-    json_builder_set_member_name  ( builder, "starting" ); json_builder_add_boolean_value ( builder, dls->vars.starting );
-    json_builder_set_member_name  ( builder, "debug" ); json_builder_add_boolean_value ( builder, dls->vars.debug );
+    json_builder_set_member_name  ( builder, "conso" );     json_builder_add_double_value ( builder, dls->conso );
+    json_builder_set_member_name  ( builder, "starting" );  json_builder_add_boolean_value ( builder, dls->vars.starting );
+    json_builder_set_member_name  ( builder, "debug" );     json_builder_add_boolean_value ( builder, dls->vars.debug );
     json_builder_set_member_name  ( builder, "bit_comm_out" ); json_builder_add_boolean_value ( builder, dls->vars.bit_comm_out );
     json_builder_set_member_name  ( builder, "bit_defaut" ); json_builder_add_boolean_value ( builder, dls->vars.bit_defaut );
     json_builder_set_member_name  ( builder, "bit_defaut_fixe" ); json_builder_add_boolean_value ( builder, dls->vars.bit_defaut_fixe );
@@ -70,7 +79,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- gboolean Http_Traiter_request_getdlslist ( struct lws *wsi )
+ static gint Http_dls_getlist ( struct lws *wsi )
   { unsigned char header[256], *header_cur, *header_end;
 	   gchar date[64], *buf;
     JsonBuilder *builder;
@@ -106,5 +115,55 @@
           
 /*************************************************** Envoi au client **********************************************************/
     return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf ));
+  }
+/******************************************************************************************************************************/
+/* Http_Traiter_request_getprocess: Traite une requete sur l'URI process                                                      */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : FALSE si pb                                                                                                       */
+/******************************************************************************************************************************/
+ gint Http_Traiter_request_getdls ( struct lws *wsi, gchar *url )
+  { 
+/************************************************ Préparation du buffer JSON **************************************************/
+    if ( ! strcasecmp( url, "debug_trad_on" ) )
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug ON", __func__ );
+       Trad_dls_set_debug ( TRUE );
+       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+     }
+    else if ( ! strcasecmp( url, "debug_trad_off" ) )
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug OFF", __func__ );
+       Trad_dls_set_debug ( FALSE );
+       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+     }
+    else if ( ! strcasecmp( url, "list" ) )
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: /dls/list received", __func__ );
+       return(Http_dls_getlist ( wsi ));
+     }
+    else if ( ! strcasecmp( url, "compil" ) )
+     { gint id = Http_get_arg_int ( wsi, "id" );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Compiling DLS %d", __func__, id );
+       Compiler_source_dls( TRUE, id, NULL, 0 );
+       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+     }
+    else if ( ! strcasecmp( url, "delete" ) )
+     { gint id = Http_get_arg_int ( wsi, "id" );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Delete DLS %d", __func__, id );
+       Decharger_plugin_by_id( id );
+       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+     }
+    else if ( ! strcasecmp( url, "start" ) )
+     { gint id = Http_get_arg_int ( wsi, "id" );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Activating DLS %d", __func__, id );
+       while (Partage->com_dls.admin_start) sched_yield();
+       Partage->com_dls.admin_start = id;
+       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+     }
+    else if ( ! strcasecmp( url, "stop" ) )
+     { gint id = Http_get_arg_int ( wsi, "id" );
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: DesActivating DLS %d", __func__, id );
+       while (Partage->com_dls.admin_stop) sched_yield();
+       Partage->com_dls.admin_stop = id;
+       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+     }
+    return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
