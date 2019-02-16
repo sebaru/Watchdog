@@ -74,7 +74,6 @@
     gchar ssl_private_key_filepath[80];
     gchar ssl_ca_filepath[80];
     gboolean authenticate;
-    GSList *Liste_sessions;
  } Cfg_http;
 
  struct HTTP_PER_SESSION_DATA
@@ -83,6 +82,8 @@
     struct HTTP_SESSION *session;
     gchar *post_data;
     gint post_data_length;
+    gchar *send_buffer;
+    gint   size_buffer;
   };
 
  struct WS_PER_SESSION_DATA
@@ -106,8 +107,8 @@
 /*************************************************** Définitions des prototypes ***********************************************/
  extern gboolean Http_Lire_config ( void );
  extern gint Http_json_get_int ( JsonObject *object, gchar *name );
- extern void Http_Send_response_code ( struct lws *wsi, gint code );
- extern void Http_Send_response_code_with_buffer ( struct lws *wsi, gint code, gchar *content_type, gchar *buffer, gint taille_buf );
+ extern gint Http_Send_response_code ( struct lws *wsi, gint code );
+ extern gint Http_Send_response_code_with_buffer ( struct lws *wsi, gint code, gchar *content_type, gchar *buffer, gint taille_buf );
  extern gint Http_CB_file_upload( struct lws *wsi, char *buffer, int taille );
  extern gboolean Http_Traiter_request_getsyn ( struct lws *wsi, struct HTTP_SESSION *session );
  extern gboolean Http_Traiter_request_getstatus ( struct lws *wsi );
@@ -117,11 +118,7 @@
  extern gint Http_Traiter_request_body_postfile ( struct lws *wsi, void *data, size_t taille );
  extern gint Http_Traiter_request_body_completion_postfile ( struct lws *wsi );
  extern gint Http_Traiter_request_setm ( struct lws *wsi );
- extern gboolean Get_phpsessionid_cookie ( struct lws *wsi );
-  
- extern gchar *Http_get_session_id ( struct HTTP_SESSION *session );
- extern void Http_Check_sessions ( void );
- extern void Http_Liberer_session ( struct HTTP_SESSION *session );
- extern void Http_Close_session ( struct lws *wsi, struct HTTP_SESSION *session );
+ extern gboolean Http_Traiter_request_getdls ( struct lws *wsi, gchar *url ) ;
+ extern gint Http_get_arg_int ( struct lws *wsi, gchar *arg );
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -50,67 +50,6 @@
     return(response);
   }
 /******************************************************************************************************************************/
-/* Admin_http_list: List les sessions actives du thread HTTP                                                                  */
-/* Entrée: la response pour sortiee client et la ligne de commande                                                           */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static gchar *Admin_http_list ( gchar *response )
-  { struct HTTP_SESSION *session = NULL;
-    gchar chaine[256];
-    GSList *liste;
-
-    pthread_mutex_lock( &Cfg_http.lib->synchro );                                            /* Ajout dans la liste a traiter */
-    liste = Cfg_http.Liste_sessions;
-    while ( liste )
-     { session = (struct HTTP_SESSION *)liste->data;
-       g_snprintf( chaine, sizeof(chaine), " | ------------ ID = %s -------------", (session->util ? session->util->username : "Unknown") );
-       Admin_write( response, chaine );
-       g_snprintf( chaine, sizeof(chaine), " | - session_id    = %s", session->sid );
-       Admin_write( response, chaine );
-       g_snprintf( chaine, sizeof(chaine), " | - remote dns/ip = %s/%s", session->remote_name, session->remote_ip );
-       Admin_write( response, chaine );
-       g_snprintf( chaine, sizeof(chaine), " | - user_agent    = %s", session->user_agent );
-       Admin_write( response, chaine );
-       g_snprintf( chaine, sizeof(chaine), " | - is_ssl        = %s", (session->is_ssl ? "yes" : "NO") );
-       Admin_write( response, chaine );
-       g_snprintf( chaine, sizeof(chaine), " | - last_top      = %.1fs ago", (Partage->top - session->last_top)/10.0 );
-       Admin_write( response, chaine );
-       liste = liste->next;
-     }
-    pthread_mutex_unlock( &Cfg_http.lib->synchro );
-    return(response);
-  }
-/******************************************************************************************************************************/
-/* Admin_http_kill: Kill la session en parametre en se basant sur le username ou l'ID de session                              */
-/* Entrée: la response et l'id (name ou sid)                                                                                 */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static gchar *Admin_http_kill ( gchar *response, gchar *id )
-  { struct HTTP_SESSION *session;
-    gchar chaine[128];
-    GSList *liste;
-
-search_again:
-    session = NULL;
-    pthread_mutex_lock( &Cfg_http.lib->synchro );                                            /* Ajout dans la liste a traiter */
-    liste = Cfg_http.Liste_sessions;
-    while ( liste )
-     { session = (struct HTTP_SESSION *)liste->data;
-       if ( ! strncmp ( session->sid, id, strlen(id) ) ) break;
-       if ( session->util && ( ! strcmp ( session->util->username, id ) ) ) break;
-       liste = liste->next;
-     }
-    pthread_mutex_unlock( &Cfg_http.lib->synchro );
-    if (liste)
-     { g_snprintf( chaine, sizeof(chaine), " | - Session %sl(%s) from %s/%s killed",
-                   session->sid, (session->util ? session->util->username : "nouser"), session->remote_name, session->remote_ip );
-       Admin_write( response, chaine );
-       Http_Liberer_session ( session );
-       goto search_again;
-     }
-    return(response);
-  }
-/******************************************************************************************************************************/
 /* Admin_command: Gere une commande liée au thread HTTP depuis une response admin                                            */
 /* Entrée: le client et la ligne de commande                                                                                  */
 /* Sortie: Néant                                                                                                              */
@@ -119,15 +58,8 @@ search_again:
   { gchar commande[128], chaine[128];
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
-    if ( ! strcmp ( commande, "list" ) )
-     { response = Admin_http_list ( response ); }
-    else if ( ! strcmp ( commande, "status" ) )
+    if ( ! strcmp ( commande, "status" ) )
      { response = Admin_http_status ( response ); }
-    else if ( ! strcmp ( commande, "kill" ) )
-     { gchar name[80];
-       sscanf ( ligne, "%s %s", commande, name );                                        /* Découpage de la ligne de commande */
-       response = Admin_http_kill ( response, name );
-     }
     else if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'UPS'" );
        response = Admin_write ( response, "  status                                 - Get Status of HTTP Thread");

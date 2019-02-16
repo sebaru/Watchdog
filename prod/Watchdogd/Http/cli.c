@@ -33,15 +33,6 @@
  #include "watchdogd.h"
  #include "Http.h"
 
- static const char *PARAM_CLI[] =
-  { "user", "id", "host", "commande" };
- enum
-  { PARAM_CLI_USER,
-    PARAM_CLI_ID,
-    PARAM_CLI_HOST,
-    PARAM_CLI_COMMANDE,
-    NBR_PARAM_CLI
-  };
 /******************************************************************************************************************************/
 /* Http_Traiter_request_body_completion_cli: le payload est arrivé, il faut traiter le fichier                                */
 /* Entrées: la connexion Websocket                                                                                            */
@@ -52,44 +43,41 @@
     struct HTTP_PER_SESSION_DATA *pss;
     JsonObject *object;
     JsonNode *Query;
-    gint retour;
+    gint retour=1;
 
     pss = lws_wsi_user ( wsi );
     pss->post_data [ pss->post_data_length ] = 0;
     Query = json_from_string ( pss->post_data, NULL );
+    pss->post_data_length = 0;
+    g_free(pss->post_data);
 
     if (!Query)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: requete non Json", __func__ );
-       Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
-       goto end;
+       return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
      }
 
     object = json_node_get_object (Query);
     if (!object)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Object non trouvé", __func__ );
-       Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
-       goto end;
+       return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
      }
 
     ev_host = json_object_get_string_member ( object, "ev_host" );
     if (!ev_host)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: ev_host non trouvé", __func__ );
-       Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
-       goto end;
+       return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
      }
 
     ev_thread = json_object_get_string_member ( object, "ev_thread" );
     if (!ev_thread)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: ev_thread non trouvé", __func__ );
-       Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
-       goto end;
+       return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
      }
 
     ev_text = json_object_get_string_member ( object, "ev_text" );
     if (!ev_text)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: ev_text non trouvé", __func__ );
-       Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );                                                      /* Bad Request */
-       goto end;
+       return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
      }
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
@@ -99,11 +87,6 @@
                         (void *)ev_text, pss->post_data_length+1 );
     Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_CLI, NULL, NOM_THREAD, ev_host, ev_thread,
                         (void *)ev_text, pss->post_data_length+1 );
-    Http_Send_response_code ( wsi, HTTP_200_OK );
-
-end:
-    pss->post_data_length = 0;
-    g_free(pss->post_data);
-    return(1);                                                                                         /* si erreur, on coupe */
+    return(Http_Send_response_code ( wsi, HTTP_200_OK ));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -51,24 +51,26 @@
        return(1);
      }
 
-    json_builder_begin_object (builder);                                                                 /* Contenu du Status */
+    json_builder_begin_array (builder);                                                                  /* Contenu du Status */
 
     liste = Partage->com_msrv.Librairies;                                                /* Parcours de toutes les librairies */
     while(liste)
      { struct LIBRAIRIE *lib = liste->data;
-       json_builder_set_member_name  ( builder, lib->admin_prompt );
-       json_builder_begin_object (builder);                                                    /* Contenu du Noeud Passerelle */
-       json_builder_set_member_name  ( builder, "Running" );
+       json_builder_begin_object (builder);                                                                 /* Contenu du Status */
+
+       json_builder_set_member_name  ( builder, "thread" );
+       json_builder_add_string_value ( builder, lib->admin_prompt );
+       json_builder_set_member_name  ( builder, "started" );
        json_builder_add_boolean_value ( builder, lib->Thread_run );
-       json_builder_set_member_name  ( builder, "Fichier" );
-       json_builder_add_string_value ( builder, lib->nom_fichier );
-       json_builder_set_member_name  ( builder, "Objet" );
+       json_builder_set_member_name  ( builder, "objet" );
        json_builder_add_string_value ( builder, lib->admin_help );
-       json_builder_end_object (builder);                                                                       /* End Module */
+       json_builder_set_member_name  ( builder, "fichier" );
+       json_builder_add_string_value ( builder, lib->nom_fichier );
+       json_builder_end_object (builder);                                                                        /* End Document */
 
        liste = liste->next;
      }
-    json_builder_end_object (builder);                                                                        /* End Document */
+    json_builder_end_array (builder);                                                                         /* End Document */
 
     gen = json_generator_new ();
     json_generator_set_root ( gen, json_builder_get_root(builder) );
@@ -78,17 +80,22 @@
     g_object_unref(gen);
 
 /*************************************************** Envoi au client **********************************************************/
-    Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf );
-    g_free(buf);                                                      /* Libération du buffer dont nous n'avons plus besoin ! */
-    return(lws_http_transaction_completed(wsi));
+    return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf ));
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_getprocess_start_stop: Traite une requete sur l'URI process/stop|start                                */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static gint Http_Traiter_request_getprocess_start_stop ( struct lws *wsi, gchar *thread, gboolean status )
-  { if ( ! strcmp ( thread, "arch" ) )
+ static gint Http_Traiter_request_getprocess_start_stop ( struct lws *wsi, gboolean status )
+  { gchar token_thread[80];
+    const gchar *thread;
+    
+    thread = lws_get_urlarg_by_name	( wsi, "thread=", token_thread, sizeof(token_thread) );      /* Recup du param get 'NAME' */
+    if (!thread)
+     { return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST )); }
+
+    if ( ! strcmp ( thread, "arch" ) )
      { if (status==FALSE) { Partage->com_arch.Thread_run = FALSE; }
        else Demarrer_arch();                                                                   /* Demarrage gestion Archivage */
      } else
@@ -98,9 +105,7 @@
      }
     else
      { GSList *liste;
-       gint found;
        liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
-       found = 0;
        while(liste)
         { struct LIBRAIRIE *lib;
           lib = (struct LIBRAIRIE *)liste->data;
@@ -109,24 +114,50 @@
           liste = liste->next;
         }
      }
-    Http_Send_response_code ( wsi, HTTP_200_OK );
-    return(lws_http_transaction_completed(wsi));
+    return(Http_Send_response_code ( wsi, HTTP_200_OK ));
   }
 /******************************************************************************************************************************/
-/* Http_Traiter_request_getprocess: Traite une requete sur l'URI process                                                        */
+/* Http_Traiter_request_getprocess: Traite une requete sur l'URI process                                                      */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
  gint Http_Traiter_request_getprocess ( struct lws *wsi, gchar *url )
-  { 
+  {
 /************************************************ Préparation du buffer JSON **************************************************/
     if (!strcmp(url, "list"))
      { return(Http_Traiter_request_getprocess_list(wsi));}
-    else if (!strncmp(url, "stop/", 5))
-     { return(Http_Traiter_request_getprocess_start_stop(wsi,url+5,FALSE));}
-    else if (!strncmp(url, "start/", 6))
-     { return(Http_Traiter_request_getprocess_start_stop(wsi,url+6,TRUE));}
-    Http_Send_response_code ( wsi, HTTP_BAD_REQUEST );
-    return(1);
+    else if (!strcmp(url, "stop"))
+     { return(Http_Traiter_request_getprocess_start_stop(wsi,FALSE));}
+    else if (!strcmp(url, "start"))
+     { return(Http_Traiter_request_getprocess_start_stop(wsi,TRUE));}
+/*************************************************** WS Reload library ********************************************************/
+    else if ( ! strncasecmp( url, "reload/", 7 ) )
+     { gchar *target = url+7;
+       GSList *liste;
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Reloading start for %s", __func__, target );
+       if ( ! strcasecmp( target, "dls" ) )
+        { Partage->com_dls.Thread_reload = TRUE;
+          return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+        }
+
+       liste = Partage->com_msrv.Librairies;                                  /* Parcours de toutes les librairies */
+       while(liste)
+        { struct LIBRAIRIE *lib = liste->data;
+          if ( ! strcmp( target, lib->admin_prompt ) )
+           { if (lib->Thread_run == FALSE)
+              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                         "%s: reloading %s -> Library found but not started.", __func__, target );
+              }    
+             else
+              { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                         "%s: reloading %s -> Library found. Sending Reload.", __func__, target );
+                lib->Thread_reload = TRUE;
+              }    
+           }
+          liste = g_slist_next(liste);
+        }
+       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+     }
+    return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

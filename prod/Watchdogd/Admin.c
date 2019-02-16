@@ -89,9 +89,7 @@
 
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
 
-            if ( g_str_has_prefix ( commande, "process"   ) ) { response = Admin_process  ( response, ligne + 8 ); }
-       else if ( g_str_has_prefix ( commande, "dls"       ) ) { response = Admin_dls      ( response, ligne + 4 ); }
-       else if ( g_str_has_prefix ( commande, "set"       ) ) { response = Admin_set      ( response, ligne + 4);  }
+            if ( g_str_has_prefix ( commande, "set"       ) ) { response = Admin_set      ( response, ligne + 4);  }
        else if ( g_str_has_prefix ( commande, "get"       ) ) { response = Admin_get      ( response, ligne + 4);  }
        else if ( g_str_has_prefix ( commande, "user"      ) ) { response = Admin_user     ( response, ligne + 5);  }
        else if ( g_str_has_prefix ( commande, "dbcfg"     ) ) { response = Admin_dbcfg    ( response, ligne + 6);  }
@@ -146,9 +144,7 @@
     g_snprintf( chaine, sizeof(chaine), "At %010.1f, processing '%s' on instance '%s'",
                 (gdouble)Partage->top/10.0, ligne, g_get_host_name() );
     response = Admin_write ( NULL, chaine );
-         if ( g_str_has_prefix ( ligne, "process"   ) ) { response = Admin_process  ( response, ligne + 8 ); }
-    else if ( g_str_has_prefix ( ligne, "dls"       ) ) { response = Admin_dls      ( response, ligne + 4 ); }
-    else if ( g_str_has_prefix ( ligne, "set"       ) ) { response = Admin_set      ( response, ligne + 4);  }
+         if ( g_str_has_prefix ( ligne, "set"       ) ) { response = Admin_set      ( response, ligne + 4);  }
     else if ( g_str_has_prefix ( ligne, "get"       ) ) { response = Admin_get      ( response, ligne + 4);  }
     else if ( g_str_has_prefix ( ligne, "user"      ) ) { response = Admin_user     ( response, ligne + 5);  }
     else if ( g_str_has_prefix ( ligne, "dbcfg"     ) ) { response = Admin_dbcfg    ( response, ligne + 6);  }
