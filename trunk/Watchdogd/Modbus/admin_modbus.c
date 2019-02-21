@@ -382,6 +382,9 @@
        json_builder_set_member_name  ( builder, "transaction_id" );
        json_builder_add_int_value ( builder, module->transaction_id );
 
+       json_builder_set_member_name  ( builder, "nbr_request_par_sec" );
+       json_builder_add_int_value ( builder, module->nbr_request_par_sec );
+
        json_builder_set_member_name  ( builder, "nbr_deconnect" );
        json_builder_add_int_value ( builder, module->nbr_deconnect );
 

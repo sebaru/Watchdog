@@ -1100,14 +1100,19 @@
 /* Run_modbus_thread: Fait tourner un module modbus particulier                                                               */
 /******************************************************************************************************************************/
  static void Run_modbus_thread ( struct MODULE_MODBUS *module )
-  { gchar thread_name[30];
+  { static gint old_transaction_id = 0;
+    gchar thread_name[30];
     g_snprintf( thread_name, sizeof(thread_name), "W-MODBUS%02d", module->modbus.id );
     prctl(PR_SET_NAME, thread_name, 0, 0, 0 );
     module->TID = pthread_self();                                                           /* Sauvegarde du TID pour le pere */
-    
+
     while(Cfg_modbus.lib->Thread_run == TRUE && Cfg_modbus.lib->Thread_reload == FALSE)      /* On tourne tant que necessaire */
      { sched_yield();
 
+       if (Partage->top%100 == 0)                                                                   /* Toutes les 10 secondes */
+        { module->nbr_request_par_sec = module->transaction_id-old_transaction_id / 10;
+          old_transaction_id = module->transaction_id;
+        }
        if ( module->modbus.enable == FALSE && module->started )                                     /* Module a deconnecter ! */
         { Deconnecter_module ( module );
           continue;
