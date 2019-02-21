@@ -1105,13 +1105,17 @@
     g_snprintf( thread_name, sizeof(thread_name), "W-MODBUS%02d", module->modbus.id );
     prctl(PR_SET_NAME, thread_name, 0, 0, 0 );
     module->TID = pthread_self();                                                           /* Sauvegarde du TID pour le pere */
+    module->delai = 0;
 
     while(Cfg_modbus.lib->Thread_run == TRUE && Cfg_modbus.lib->Thread_reload == FALSE)      /* On tourne tant que necessaire */
      { sched_yield();
+       usleep(module->delai);
 
-       if (Partage->top%100 == 0)                                                                   /* Toutes les 10 secondes */
-        { module->nbr_request_par_sec = module->transaction_id-old_transaction_id / 10;
+       if (Partage->top%10 == 0)                                                                     /* Toutes les 1 secondes */
+        { module->nbr_request_par_sec = module->transaction_id-old_transaction_id;
           old_transaction_id = module->transaction_id;
+          if(module->nbr_request_par_sec > 1000) module->delai += 1000;
+                        else if(module->delai>0) module->delai -= 1000;
         }
        if ( module->modbus.enable == FALSE && module->started )                                     /* Module a deconnecter ! */
         { Deconnecter_module ( module );

@@ -195,7 +195,7 @@
   {
 /************************************************ Préparation du buffer JSON **************************************************/
     if (!strcmp(url, "list"))
-     { return(Http_Traiter_request_getprocess_list(wsi));}
+     { return(Http_Traiter_request_getprocess_list(wsi)); }
     else if (!strcmp(url, "stop"))
      { return(Http_Traiter_request_getprocess_start_stop(wsi,FALSE));}
     else if (!strcmp(url, "start"))
