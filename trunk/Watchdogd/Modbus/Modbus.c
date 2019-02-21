@@ -1100,11 +1100,12 @@
 /* Run_modbus_thread: Fait tourner un module modbus particulier                                                               */
 /******************************************************************************************************************************/
  static void Run_modbus_thread ( struct MODULE_MODBUS *module )
-  { static gint old_transaction_id = 0;
-    gchar thread_name[30];
+  { gchar thread_name[30];
     g_snprintf( thread_name, sizeof(thread_name), "W-MODBUS%02d", module->modbus.id );
     prctl(PR_SET_NAME, thread_name, 0, 0, 0 );
     module->TID = pthread_self();                                                           /* Sauvegarde du TID pour le pere */
+    module->nbr_request = 0;
+    module->nbr_request_par_sec = 0;
     module->delai = 0;
 
     while(Cfg_modbus.lib->Thread_run == TRUE && Cfg_modbus.lib->Thread_reload == FALSE)      /* On tourne tant que necessaire */
@@ -1112,8 +1113,8 @@
        usleep(module->delai);
 
        if (Partage->top%10 == 0)                                                                     /* Toutes les 1 secondes */
-        { module->nbr_request_par_sec = module->transaction_id-old_transaction_id;
-          old_transaction_id = module->transaction_id;
+        { module->nbr_request_par_sec = module->nbr_request;
+          module->nbr_request = 0;
           if(module->nbr_request_par_sec > 1000) module->delai += 1000;
                         else if(module->delai>0) module->delai -= 1000;
         }
@@ -1168,6 +1169,7 @@
                                               }
                                              else module->mode = MODBUS_GET_DI;
                                              module->do_check_eana = FALSE;                              /* Le check est fait */
+                                             module->nbr_request++;
                                              break;
                 
               }
