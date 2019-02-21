@@ -1116,8 +1116,8 @@
        if (Partage->top>=module->last_top+10)                                                        /* Toutes les 1 secondes */
         { module->nbr_request_par_sec = module->nbr_request;
           module->nbr_request = 0;
-          if(module->nbr_request_par_sec > 1000) module->delai += 1000;
-                        else if(module->delai>0) module->delai -= 1000;
+          if(module->nbr_request_par_sec > 100) module->delai += 1000;
+                       else if(module->delai>0) module->delai -= 1000;
           module->last_top = Partage->top;
         }
        if ( module->modbus.enable == FALSE && module->started )                                     /* Module a deconnecter ! */
