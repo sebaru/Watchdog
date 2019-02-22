@@ -53,13 +53,53 @@
 
     json_builder_begin_array (builder);                                                                  /* Contenu du Status */
 
+    json_builder_begin_object (builder);                                                                 /* Contenu du Status */
+    json_builder_set_member_name  ( builder, "thread" );
+    json_builder_add_string_value ( builder, "msrv" );
+    json_builder_set_member_name  ( builder, "debug" );
+    json_builder_add_boolean_value( builder, Config.log_msrv );
+    json_builder_set_member_name  ( builder, "started" );
+    json_builder_add_boolean_value( builder, Partage->com_msrv.Thread_run );
+    json_builder_set_member_name  ( builder, "objet" );
+    json_builder_add_string_value ( builder, "Local Master Server" );
+    json_builder_set_member_name  ( builder, "fichier" );
+    json_builder_add_string_value ( builder, "built-in" );
+    json_builder_end_object (builder);                                                                        /* End Document */
+
+    json_builder_begin_object (builder);                                                                 /* Contenu du Status */
+    json_builder_set_member_name  ( builder, "thread" );
+    json_builder_add_string_value ( builder, "dls" );
+    json_builder_set_member_name  ( builder, "debug" );
+    json_builder_add_boolean_value( builder, Config.log_dls );
+    json_builder_set_member_name  ( builder, "started" );
+    json_builder_add_boolean_value( builder, Partage->com_dls.Thread_run );
+    json_builder_set_member_name  ( builder, "objet" );
+    json_builder_add_string_value ( builder, "D.L.S" );
+    json_builder_set_member_name  ( builder, "fichier" );
+    json_builder_add_string_value ( builder, "built-in" );
+    json_builder_end_object (builder);                                                                        /* End Document */
+
+    json_builder_begin_object (builder);                                                                 /* Contenu du Status */
+    json_builder_set_member_name  ( builder, "thread" );
+    json_builder_add_string_value ( builder, "arch" );
+    json_builder_set_member_name  ( builder, "debug" );
+    json_builder_add_boolean_value( builder, Config.log_arch );
+    json_builder_set_member_name  ( builder, "started" );
+    json_builder_add_boolean_value( builder, Partage->com_arch.Thread_run );
+    json_builder_set_member_name  ( builder, "objet" );
+    json_builder_add_string_value ( builder, "Archivage" );
+    json_builder_set_member_name  ( builder, "fichier" );
+    json_builder_add_string_value ( builder, "built-in" );
+    json_builder_end_object (builder);                                                                        /* End Document */
+
     liste = Partage->com_msrv.Librairies;                                                /* Parcours de toutes les librairies */
     while(liste)
      { struct LIBRAIRIE *lib = liste->data;
        json_builder_begin_object (builder);                                                                 /* Contenu du Status */
-
        json_builder_set_member_name  ( builder, "thread" );
        json_builder_add_string_value ( builder, lib->admin_prompt );
+       json_builder_set_member_name  ( builder, "debug" );
+       json_builder_add_boolean_value ( builder, lib->Thread_debug );
        json_builder_set_member_name  ( builder, "started" );
        json_builder_add_boolean_value ( builder, lib->Thread_run );
        json_builder_set_member_name  ( builder, "objet" );
@@ -83,9 +123,39 @@
     return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf ));
   }
 /******************************************************************************************************************************/
+/* Http_Traiter_request_getprocess_debug: Active ou non le debug d'un process                                                 */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : HTTP Response code                                                                                                */
+/******************************************************************************************************************************/
+ static gint Http_Traiter_request_getprocess_debug ( struct lws *wsi, gboolean status )
+  { gchar token_thread[80];
+    const gchar *thread;
+    
+    thread = lws_get_urlarg_by_name	( wsi, "thread=", token_thread, sizeof(token_thread) );      /* Recup du param get 'NAME' */
+    if (!thread)
+     { return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST )); }
+
+    if ( ! strcmp ( thread, "arch" ) ) { Config.log_arch = status; }
+    else
+    if ( ! strcmp ( thread, "dls"  ) ) { Config.log_dls  = status; }
+    else
+    if ( ! strcmp ( thread, "msrv" ) ) { Config.log_msrv = status; }
+    else
+     { GSList *liste;
+       liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
+       while(liste)
+        { struct LIBRAIRIE *lib;
+          lib = (struct LIBRAIRIE *)liste->data;
+          if ( ! strcmp( lib->admin_prompt, thread ) ) { lib->Thread_debug = status; }
+          liste = liste->next;
+        }
+     }
+    return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+  }
+/******************************************************************************************************************************/
 /* Http_Traiter_request_getprocess_start_stop: Traite une requete sur l'URI process/stop|start                                */
 /* Entrées: la connexion Websocket                                                                                            */
-/* Sortie : FALSE si pb                                                                                                       */
+/* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
  static gint Http_Traiter_request_getprocess_start_stop ( struct lws *wsi, gboolean status )
   { gchar token_thread[80];
@@ -125,11 +195,15 @@
   {
 /************************************************ Préparation du buffer JSON **************************************************/
     if (!strcmp(url, "list"))
-     { return(Http_Traiter_request_getprocess_list(wsi));}
+     { return(Http_Traiter_request_getprocess_list(wsi)); }
     else if (!strcmp(url, "stop"))
      { return(Http_Traiter_request_getprocess_start_stop(wsi,FALSE));}
     else if (!strcmp(url, "start"))
      { return(Http_Traiter_request_getprocess_start_stop(wsi,TRUE));}
+    else if (!strcmp(url, "undebug"))
+     { return(Http_Traiter_request_getprocess_debug(wsi,FALSE));}
+    else if (!strcmp(url, "debug"))
+     { return(Http_Traiter_request_getprocess_debug(wsi,TRUE));}
 /*************************************************** WS Reload library ********************************************************/
     else if ( ! strncasecmp( url, "reload/", 7 ) )
      { gchar *target = url+7;
