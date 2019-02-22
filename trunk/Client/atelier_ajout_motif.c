@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Client/atelier_ajout_motif.c         gestion des ajouts de motifs à la trame                                               */
+/* Client/atelier_ajout_motif.c         gestion des ajouts de motifs Ã  la trame                                               */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                          sam 08 mai 2004 11:13:34 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -7,7 +7,7 @@
  * atelier_ajout_motif.c
  * This file is part of Watchdog
  *
- * Copyright (C) 2010-2019 - Sébastien Lefevre
+ * Copyright (C) 2010-2019 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@
 
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
-/***************************************** Définitions des prototypes programme ***********************************************/
+/***************************************** DÃ©finitions des prototypes programme ***********************************************/
  #include "protocli.h"
 
  extern GdkBitmap *Rmask, *Bmask, *Vmask, *Omask, *Jmask;                         /* Des pitites boules ! */
@@ -57,7 +57,7 @@
  static GtkWidget *F_ajout_motif;                                    /* Pour acceder la fenetre graphique */
  static GtkWidget *Liste_classe;                      /* GtkTreeView pour la gestion des classes Watchdog */
  static GtkWidget *Liste_icone;                        /* GtkTreeView pour la gestion des icones Watchdog */
- static struct TRAME *Trame_preview0;                             /* Previsualisation du motif par défaut */
+ static struct TRAME *Trame_preview0;                             /* Previsualisation du motif par dÃ©faut */
  static struct TRAME_ITEM_MOTIF *Trame_motif_p0;                           /* Motif en cours de selection */
  static struct CMD_TYPE_MOTIF Motif_preview0;
 
@@ -65,8 +65,8 @@
  static gint   Package_received_size;                                               /* Taille actuelle du buffer de reception */
 
 /**********************************************************************************************************/
-/* Menu_editer_icone: Demande d'edition du icone selectionné                                              */
-/* Entrée: rien                                                                                           */
+/* Menu_editer_icone: Demande d'edition du icone selectionnÃ©                                              */
+/* EntrÃ©e: rien                                                                                           */
 /* Sortie: Niet                                                                                           */
 /**********************************************************************************************************/
  static void Clic_icone_atelier ( void )
@@ -81,15 +81,15 @@
     store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_icone) );
 
     nbr = gtk_tree_selection_count_selected_rows( selection );
-    if (!nbr) return;                                                                            /* Si rien n'est selectionné */
+    if (!nbr) return;                                                                            /* Si rien n'est selectionnÃ© */
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
+    gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnÃ©e */
     gtk_tree_model_get( store, &iter, COLONNE_ICONE_ID, &icone_id,
                                       COLONNE_ICONE_LIBELLE, &libelle, -1 );                                   /* Recup du id */
 
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-    g_list_free (lignes);                                                                               /* Liberation mémoire */
+    g_list_free (lignes);                                                                               /* Liberation mÃ©moire */
 
     memset( &Motif_preview0, 0, sizeof(struct CMD_TYPE_MOTIF) );
     memcpy( &Motif_preview0.libelle, libelle, sizeof( Motif_preview0.libelle ) );
@@ -109,21 +109,20 @@
        g_object_unref( Trame_motif_p0->pixbuf );
        g_free(Trame_motif_p0);
      }    
-                                                                                   /* Affichage à l'ecran */
+                                                                                   /* Affichage Ã  l'ecran */
     Trame_motif_p0 = Trame_ajout_motif( TRUE, Trame_preview0, &Motif_preview0 );
     Reduire_en_vignette( &Motif_preview0 );
     Trame_rafraichir_motif ( Trame_motif_p0 );
   }
 /******************************************************************************************************************************/
 /* CB_Receive_package_data : Recoit une partie du fichier package                                                             */
-/* Entrée : Les informations à sauvegarder                                                                                    */
+/* EntrÃ©e : Les informations Ã  sauvegarder                                                                                    */
 /******************************************************************************************************************************/
  static size_t CB_Receive_package_data( char *ptr, size_t size, size_t nmemb, void *userdata )
   { gchar *new_buffer;
     Info_new( Config_cli.log, FALSE, LOG_DEBUG,
-              "%s: Récupération de %d*%d octets depuis le cloud", __func__, size, nmemb );
-    new_buffer = g_try_realloc ( Package_received_buffer,
-                                 Package_received_size +  size*nmemb );
+              "%s: RÃ©cupÃ©ration de %d*%d octets depuis le cloud (actual size=%d)", __func__, size, nmemb, Package_received_size );
+    new_buffer = g_try_realloc ( Package_received_buffer, Package_received_size + size*nmemb + 1);
     if (!new_buffer)                                                                     /* Si erreur, on arrete le transfert */
      { Info_new( Config_cli.log, FALSE, LOG_ERR,
                 "%s: Memory Error realloc (%s).", __func__, strerror(errno) );
@@ -133,11 +132,12 @@
      } else Package_received_buffer = new_buffer;
     memcpy( Package_received_buffer + Package_received_size, ptr, size*nmemb );
     Package_received_size += size*nmemb;
+    Package_received_buffer[Package_received_size] = 0;                                              /* Caractere nul d'arret */
     return(size*nmemb);
   }
 /******************************************************************************************************************************/
-/* Remplir_liste_icone: envoie une requete dans le cloud pour récupérer la liste des icones de classe en parametre            */
-/* Entrée / Sortie : Rien                                                                                                     */
+/* Remplir_liste_icone: envoie une requete dans le cloud pour rÃ©cupÃ©rer la liste des icones de classe en parametre            */
+/* EntrÃ©e / Sortie : Rien                                                                                                     */
 /******************************************************************************************************************************/
  static void Remplir_liste_icone ( gchar *classe_id )
   { gchar erreur[CURL_ERROR_SIZE+1], url[256];
@@ -145,8 +145,8 @@
     GtkTreeModel *store;
     CURL *curl;
 
-    Package_received_buffer = NULL;                                                     /* Init du tampon de reception à NULL */
-    Package_received_size = 0;                                                          /* Init du tampon de reception à NULL */
+    Package_received_buffer = NULL;                                                     /* Init du tampon de reception Ã  NULL */
+    Package_received_size = 0;                                                          /* Init du tampon de reception Ã  NULL */
     http_response = 0;
 
     curl = curl_easy_init();
@@ -198,14 +198,14 @@
                              );
         }
        json_node_unref(Response);      
-       g_free(Package_received_buffer);                                                           /* On libere le tampon reçu */
+       g_free(Package_received_buffer);                                                           /* On libere le tampon reÃ§u */
        Package_received_buffer = NULL;
      }
     curl_easy_cleanup(curl);
   }
 /******************************************************************************************************************************/
-/* Clic_classe_atelier: fonction appelée quand l'utilisateur appuie sur une des classes                                       */
-/* Entrée: rien                                                                                                               */
+/* Clic_classe_atelier: fonction appelÃ©e quand l'utilisateur appuie sur une des classes                                       */
+/* EntrÃ©e: rien                                                                                                               */
 /* Sortie: Niet                                                                                                               */
 /******************************************************************************************************************************/
  static void Clic_classe_atelier ( void )
@@ -223,15 +223,15 @@
     store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(Liste_classe) );
 
     nbr = gtk_tree_selection_count_selected_rows( selection );
-    if (!nbr) return;                                                                            /* Si rien n'est selectionné */
+    if (!nbr) return;                                                                            /* Si rien n'est selectionnÃ© */
 
     lignes = gtk_tree_selection_get_selected_rows ( selection, NULL );
-    gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnée */
+    gtk_tree_model_get_iter( store, &iter, lignes->data );                                 /* Recuperation ligne selectionnÃ©e */
     gtk_tree_model_get( store, &iter, COLONNE_CLASSE_ID, &classe_id, -1 );                                     /* Recup du id */
     Remplir_liste_icone ( classe_id );
     g_free(classe_id);
     g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-    g_list_free (lignes);                                                                               /* Liberation mémoire */
+    g_list_free (lignes);                                                                               /* Liberation mÃ©moire */
 
     if (Trame_motif_p0)                                                                    /* On efface la previsu de l'icone */
      { goo_canvas_item_remove( Trame_motif_p0->item_groupe );
@@ -244,7 +244,7 @@
   }
 /**********************************************************************************************************/
 /* Choisir_motif_a_ajouter: Affichage de la fenetre de choix du motif a ajouter                           */
-/* Entrée: rien                                                                                           */
+/* EntrÃ©e: rien                                                                                           */
 /* Sortie: rien                                                                                           */
 /**********************************************************************************************************/
  void Choisir_motif_a_ajouter ( void )
@@ -254,8 +254,8 @@
   }
 /**********************************************************************************************************/
 /* Detruire_page_propriete_TOR: Destruction de la page de parametres DLS                                  */
-/* Entrée: rien                                                                                           */
-/* Sortie: toute trace de la fenetre est eliminée                                                         */
+/* EntrÃ©e: rien                                                                                           */
+/* Sortie: toute trace de la fenetre est eliminÃ©e                                                         */
 /**********************************************************************************************************/
  void Detruire_fenetre_ajout_motif ( void )
   { if (Trame_preview0) { Trame_detruire_trame( Trame_preview0 );
@@ -266,8 +266,8 @@
     F_ajout_motif = NULL;
   }
 /**********************************************************************************************************/
-/* CB_editier_propriete_TOR: Fonction appelée qd on appuie sur un des boutons de l'interface              */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
+/* CB_editier_propriete_TOR: Fonction appelÃ©e qd on appuie sur un des boutons de l'interface              */
+/* EntrÃ©e: la reponse de l'utilisateur et un flag precisant l'edition/ajout                               */
 /* sortie: TRUE                                                                                           */
 /**********************************************************************************************************/
  static gboolean CB_ajout_motif ( GtkDialog *dialog, gint reponse )
@@ -288,13 +288,13 @@
                                  add_motif.syn_id = infos->syn.id;
                                  add_motif.access_level = 0;     /* Nom du groupe d'appartenance du motif */
                                  add_motif.bit_controle = 0;                                /* Ixxx, Cxxx */
-                                 add_motif.bit_clic = 0;        /* Bit à activer quand clic gauche souris */
-                                 add_motif.bit_clic2 = 0;       /* Bit à activer quand clic gauche souris */
+                                 add_motif.bit_clic = 0;        /* Bit Ã  activer quand clic gauche souris */
+                                 add_motif.bit_clic2 = 0;       /* Bit Ã  activer quand clic gauche souris */
                                  add_motif.angle = 0.0; /*infos->Adj_angle->value;*/
                                  add_motif.type_dialog = 0;               /* Type de la boite de dialogue */
                                  add_motif.type_gestion = 0;
                                  add_motif.mnemo_id = 0;
-                                 /*add_motif.position_x et posy positionné par le serveur */
+                                 /*add_motif.position_x et posy positionnÃ© par le serveur */
                                  add_motif.largeur = Trame_motif_p0->gif_largeur;
                                  add_motif.hauteur = Trame_motif_p0->gif_hauteur;
                                  add_motif.rouge0 = 255;
@@ -302,7 +302,7 @@
                                  add_motif.bleu0 = 255;
                                  Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_MOTIF,
                                                 (gchar *)&add_motif, sizeof(struct CMD_TYPE_MOTIF) );
-                                 printf("Requete envoyée au serveur....\n");
+                                 printf("Requete envoyÃ©e au serveur....\n");
                                  return(TRUE);                            /* On laisse la fenetre ouverte */
                                  break;
        case GTK_RESPONSE_CLOSE: break;
@@ -311,8 +311,8 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Remplir_liste_classe: envoie une requete dans le cloud pour récupérer la liste des classes                                 */
-/* Entrée / Sortie : Rien                                                                                                     */
+/* Remplir_liste_classe: envoie une requete dans le cloud pour rÃ©cupÃ©rer la liste des classes                                 */
+/* EntrÃ©e / Sortie : Rien                                                                                                     */
 /******************************************************************************************************************************/
  static void Remplir_liste_classe ( void )
   { gchar erreur[CURL_ERROR_SIZE+1], url[256];
@@ -320,8 +320,8 @@
     GtkTreeModel *store;
     CURL *curl;
 
-    Package_received_buffer = NULL;                                                     /* Init du tampon de reception à NULL */
-    Package_received_size = 0;                                                          /* Init du tampon de reception à NULL */
+    Package_received_buffer = NULL;                                                     /* Init du tampon de reception Ã  NULL */
+    Package_received_size = 0;                                                          /* Init du tampon de reception Ã  NULL */
     http_response = 0;
 
     curl = curl_easy_init();
@@ -373,14 +373,14 @@
                              );
         }
        json_node_unref(Response);      
-       g_free(Package_received_buffer);                                                           /* On libere le tampon reçu */
+       g_free(Package_received_buffer);                                                           /* On libere le tampon reÃ§u */
        Package_received_buffer = NULL;
      }
     curl_easy_cleanup(curl);
   }
 /**********************************************************************************************************/
 /* Creer_page_propriete_TOR: Creation de la fenetre d'edition des proprietes TOR                          */
-/* Entrée: niet                                                                                           */
+/* EntrÃ©e: niet                                                                                           */
 /* Sortie: niet                                                                                           */
 /**********************************************************************************************************/
  void Creer_fenetre_ajout_motif ( void )
@@ -441,7 +441,7 @@
     gtk_box_pack_start( GTK_BOX(vboite), scroll, TRUE, TRUE, 0 );
 
     store = gtk_list_store_new ( NBR_COLONNE, G_TYPE_STRING,                                                            /* Id */
-                                              G_TYPE_STRING                                                        /* libellé */
+                                              G_TYPE_STRING                                                        /* libellÃ© */
                                );
 
     Liste_icone = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );    /* Creation de la vue */
@@ -480,6 +480,6 @@
     gtk_widget_set_usize( Trame_preview0->trame_widget, TAILLE_ICONE_X, TAILLE_ICONE_Y );
 
     gtk_table_attach_defaults( GTK_TABLE(table), Trame_preview0->trame_widget, 0, 1, 0, 3 );
-    Remplir_liste_classe();                                  /* Récupération de la liste des classes et affichage sur l'ecran */
+    Remplir_liste_classe();                                  /* RÃ©cupÃ©ration de la liste des classes et affichage sur l'ecran */
   }
 /*--------------------------------------------------------------------------------------------------------*/
