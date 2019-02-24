@@ -75,22 +75,22 @@
           goto parse;
         }
        printf("Unable to parse config file %s, error %s\n", fichier_config, error->message );
-       g_error_free( error );
+       g_error_free( error ); error = NULL;
      }
 
-    if (g_key_file_load_from_file(gkf, fichier_etc, G_KEY_FILE_NONE, &error))
+    if (g_key_file_load_from_file(gkf, fichier_home, G_KEY_FILE_NONE, &error))
      { g_snprintf( Config.config_file, sizeof(Config.config_file), "%s", fichier_home );
        goto parse;
      }
     printf("Unable to parse config file %s, error %s\n", fichier_home, error->message );
-    g_error_free( error );
+    g_error_free( error ); error = NULL;
 
     if (g_key_file_load_from_file(gkf, fichier_etc, G_KEY_FILE_NONE, &error))
      { g_snprintf( Config.config_file, sizeof(Config.config_file), "%s", fichier_etc );
        goto parse;
      }
     printf("Unable to parse config file %s, error %s\n", fichier_etc, error->message );
-    g_error_free( error );
+    g_error_free( error ); error = NULL;
     printf("Error : Unable to parse any config file\n" );
     goto end;
 /******************************************************* Partie GLOBAL ********************************************************/
