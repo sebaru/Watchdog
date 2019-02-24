@@ -614,40 +614,20 @@
        for (i = 0; i < sms.Number; i++)
 			     { g_snprintf( from, sizeof(from), "%s", DecodeUnicodeConsole(sms.SMS[i].Number) );
           g_snprintf( texte, sizeof(texte), "%s", DecodeUnicodeConsole(sms.SMS[i].Text) );
-          if (sms.SMS[i].State == SMS_Read)                                                     /* Message deja lu, on efface */
-           { GSM_Error error;
-             error = GSM_DeleteSMS( s, &sms.SMS[0] );
-             if (error != ERR_NONE)
-              { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
-                         "%s: Delete read '%s' from '%s' Location %d/%d Folder %d Failed ('%s')!", __func__,
-                          texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder, GSM_ErrorString(error) );
-              }
-             else
-              { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG,
-                         "%s: Delete read '%s' from '%s' Location %d/%d Folder %d OK !", __func__,
-                          texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder );
-              }
-           }
-          else if (sms.SMS[i].State == SMS_UnRead)                           /* Pour tout nouveau message, nous le processons */
-           { found = TRUE;
-             error = GSM_DeleteSMS( s, &sms.SMS[i] );
-             if (error != ERR_NONE)
-              { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
-                         "%s: Delete '%s' from '%s' Location %d/%d Folder %d Failed ('%s')!", __func__,
-                          texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder, GSM_ErrorString(error) );
-              }
-             else
-              { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG,
-                         "%s: Delete '%s' from '%s' Location %d/%d Folder %d OK !", __func__,
-                          texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder );
-              }
-             break;
+          sms.SMS[0].Folder = 0;/* https://github.com/gammu/gammu/blob/ed2fec4a382e7ac4b5dfc92f5b10811f76f4817e/gammu/message.c */
+          error = GSM_DeleteSMS( s, &sms.SMS[i] );
+          if (error != ERR_NONE)
+           { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR,
+                      "%s: Delete '%s' from '%s' Location %d/%d Folder %d Failed ('%s')!", __func__,
+                       texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder, GSM_ErrorString(error) );
            }
           else
            { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG,
-                      "%s: SMS Received '%s' From %s, SMS#%d Location %d, Folder %d, State %d", __func__,
-                       texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder, sms.SMS[i].State);
+                      "%s: Delete '%s' from '%s' Location %d/%d Folder %d OK !", __func__,
+                       texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder );
            }
+          if (sms.SMS[i].State == SMS_UnRead)                                /* Pour tout nouveau message, nous le processons */
+           { found = TRUE; }
          }
 	     }
      else if (error != ERR_EMPTY)
