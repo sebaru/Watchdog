@@ -347,6 +347,10 @@
               { case TAG_ZMQ_SET_BIT:
                  { struct ZMQ_SET_BIT *bit;
                    bit = (struct ZMQ_SET_BIT *)payload;
+                   Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                             "%s: receive TAG_ZMQ_SET_BIT from %s/%s to %s/%s : bit type %d num %d, techid %s acronyme %s", __func__,
+                             event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
+                             bit->type, bit->num, bit->dls_tech_id, bit->acronyme );
                    if (bit->type == MNEMO_MONOSTABLE)
                     { if (bit->num != -1) Envoyer_commande_dls ( bit->num );
                                      else Envoyer_commande_dls_data ( bit->dls_tech_id, bit->acronyme );
