@@ -100,7 +100,6 @@
  struct SORTIE_TOR                                                                             /* Définition d'une sortie TOR */
   { gchar etat;                                                                                   /* Etat de la sortie 0 ou 1 */
     gint last_change;                                                                    /* Date du dernier changement d'etat */
-    gint changes;                               /* Compte le nombre de changes afin de ne pas depasser une limite par seconde */
   };
 
  struct DLS_BOOL
