@@ -372,6 +372,11 @@
                  { Send_zmq ( Partage->com_msrv.zmq_to_slave, buffer, byte );                    /* Sinon on envoi aux slaves */
                    break;
                  }
+                case TAG_ZMQ_SATELLITE_PING:
+                 { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive TAG_ZMQ_SATELLITE_PING from %s/%s to %s/%s",
+                             __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );
+                   break;
+                 }
                 default:
                  { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: receive wrong tag number '%d' for ZMQ '%s'",
                              __func__, event->tag, zmq_from_slave->name );
@@ -434,8 +439,14 @@
         }
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
-        { Sauver_compteur();
-          Exporter();
+        { if (Config.instance_is_master == TRUE)
+           { Sauver_compteur();
+             Exporter();
+           }
+          else
+           { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, TAG_ZMQ_SATELLITE_PING, NULL, "msrv", Config.master_host, "msrv",
+                                 NULL, 0 );
+           }
           cpt_5_minutes += 3000;                                                           /* Sauvegarde toutes les 5 minutes */
         }
 
