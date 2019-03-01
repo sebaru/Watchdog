@@ -581,20 +581,18 @@
     if ( Partage->a[num].etat != etat )
      { Partage->a[num].etat = etat;
 
-       if ( Partage->a[num].last_change + 10 <= Partage->top )                       /* Si pas de change depuis plus de 1 sec */
-        { Partage->a[num].changes = 0; }
-
-       if ( Partage->a[num].changes <= 5 )                    /* Arbitraire : si plus de 5 changes dans la seconde, on bloque */
+       if ( Partage->top <= Partage->a[num].last_change + 3 )        /* Si changement en moins de 3 dizieme depuis le dernier */
+        { if ( ! (Partage->top % 50 ))                                         /* Si persistence on prévient toutes les 5 sec */
+           { Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: last_change trop tot pour A%d !", __func__, num ); }
+        }
+       else
         { Ajouter_arch( MNEMO_SORTIE, num, 1.0*etat );                                              /* Sauvegarde de l'etat n */
           if (etat == 1)
            { pthread_mutex_lock( &Partage->com_msrv.synchro );                  /* Ajout dans la liste des Events A a traiter */
-             Partage->com_msrv.liste_a = g_slist_append( Partage->com_msrv.liste_a,
-                                                         GINT_TO_POINTER(num) );
+             Partage->com_msrv.liste_a = g_slist_append( Partage->com_msrv.liste_a, GINT_TO_POINTER(num) );
              pthread_mutex_unlock( &Partage->com_msrv.synchro );
            }
-          Partage->a[num].changes++;                                                                  /* Un change de plus !! */
-        } else if ( ! (Partage->top % 50 ))                                    /* Si persistence on prévient toutes les 5 sec */
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: last_change trop tot pour A%d !", __func__, num ); }
+        }
        Partage->a[num].last_change = Partage->top;
        Partage->audit_bit_interne_per_sec++;
      }

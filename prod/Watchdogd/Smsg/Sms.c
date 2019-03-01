@@ -597,7 +597,6 @@
  static void Lire_sms_gsm ( void )
   { gchar from[80], texte[180];
     GSM_MultiSMSMessage sms;
-    gboolean found = FALSE;
     GSM_Error error;
 
    	memset(&sms, 0, sizeof(sms));                                                                       /* Préparation du SMS */
@@ -627,7 +626,7 @@
                        texte, from, i, sms.SMS[i].Location, sms.SMS[i].Folder );
            }
           if (sms.SMS[i].State == SMS_UnRead)                                /* Pour tout nouveau message, nous le processons */
-           { found = TRUE; }
+           { Traiter_commande_sms ( from, texte ); }
          }
 	     }
      else if (error != ERR_EMPTY)
@@ -635,7 +634,6 @@
                   "%s: No sms received ('%s')!", __func__, GSM_ErrorString(error) );
       }
     Smsg_disconnect();                                                                                	/* Free up used memory */
-    if (found) Traiter_commande_sms ( from, texte );
                       
     if (error == ERR_NONE) if (Cfg_smsg.bit_comm) SB ( Cfg_smsg.bit_comm, 1 );                            /* Communication OK */
     else SB ( Cfg_smsg.bit_comm, 0 );                                                                    /* Communication NOK */

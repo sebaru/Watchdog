@@ -52,8 +52,8 @@
   };
 
  struct ZMQ_SET_BIT
-  { gint8 type;
-    gint8 num;
+  { gint type;
+    gint num;
     gchar acronyme [ NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1 ];
     gchar dls_tech_id [ NBR_CARAC_PLUGIN_DLS_TECHID ];
   };
@@ -65,6 +65,7 @@
     TAG_ZMQ_SET_SYN_VARS,
     TAG_ZMQ_CLI,
     TAG_ZMQ_CLI_RESPONSE,
+    TAG_ZMQ_SATELLITE_PING,
     NBR_ZMQ_TAG
   };
 /************************************************ Définitions des prototypes **************************************************/

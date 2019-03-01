@@ -101,7 +101,7 @@
     Connect_zmq ( zmq_motif, "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
 
     while( Cfg_ssrv.lib->Thread_run == TRUE )                                                /* On tourne tant que necessaire */
-     { usleep(1000);
+     { usleep(10000);
        sched_yield();
 
        if (client->mode == DECONNECTE) break;                                                     /* Deconnection des clients */
