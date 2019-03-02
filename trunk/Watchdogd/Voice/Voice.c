@@ -167,42 +167,39 @@
     close(id_fichier);
   }
 /******************************************************************************************************************************/
-/* Voice_Jouer_mp3 : Joue un fichier mp3 et attend la fin de la diffusion                                                     */
-/* Entrée : le message à jouer                                                                                                */
-/* Sortie : True si OK, False sinon                                                                                           */
+/* Jouer_wav_by_file: Jouer un fichier wav dont le nom est en paramètre                                                       */
+/* Entrée : le nom du fichier wav                                                                                             */
+/* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static gboolean Voice_Jouer_mp3 ( gchar *texte )
-  { gchar nom_fichier[128];
-    gint fd_cible, pid;
+ static gboolean Voice_Jouer_wav_by_file ( gchar *fichier )
+  { gint fd_cible, pid;
 
-    g_snprintf( nom_fichier, sizeof(nom_fichier), "Son/%s.mp3", texte );
-    fd_cible = open ( nom_fichier, O_RDONLY, 0 );
+    fd_cible = open ( fichier, O_RDONLY, 0 );
     if (fd_cible < 0) { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
-                                  "%s: '%s' not found", __func__, nom_fichier );
+                                  "%s: '%s' not found", __func__, fichier );
                         return(FALSE);
                       }
     else close (fd_cible);
 
-    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "Voice_Jouer_mp3: Send '%s'", nom_fichier );
+    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: Envoi d'un wav %s", __func__, fichier );
     pid = fork();
     if (pid<0)
      { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
-                 "%s: '%s' fork failed pid=%d (%s)", __func__, nom_fichier, pid, strerror(errno) );
+                "%s: PAPLAY '%s' fork failed pid=%d", __func__, fichier, pid );
        return(FALSE);
      }
     else if (!pid)
-     { execlp( "mpg123", "mpg123", "-o", "pulse", "-q", nom_fichier, NULL );
+     { execlp( "paplay", "paplay", fichier, NULL );
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
-                "%s: '%s' exec failed pid=%d (%s)", __func__, nom_fichier, pid, strerror( errno ) );
+                "%s: PAPLAY '%s' exec failed pid=%d", __func__, fichier, pid );
        _exit(0);
      }
     else
      { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_DEBUG,
-                "%s: '%s' waiting to finish pid=%d", __func__, nom_fichier, pid );
+                "%s: PAPLAY '%s' waiting to finish pid=%d", __func__, fichier, pid );
        waitpid(pid, NULL, 0 );
      }
-    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_DEBUG, "%s: MPG123 '%s' finished pid=%d", __func__, nom_fichier, pid );
-
+    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_DEBUG, "%s: PAPLAY '%s' finished pid=%d", __func__, fichier, pid );
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -354,20 +351,20 @@ reload:
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
                     "%s: No match found for '%s'", __func__, evenement );
           Libere_DB_SQL ( &db );
-          Voice_Jouer_mp3 ( "Je_ne_sais_pas_faire" );
+          Voice_Jouer_wav_by_file ( "Je_ne_sais_pas_faire.wav" );
         }
        else if (db->nbr_result > 1)
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
                     "%s: Too many event for '%s'", __func__, evenement );
           Libere_DB_SQL ( &db );
-          Voice_Jouer_mp3 ( "C_est_ambigue" );
+          Voice_Jouer_wav_by_file ( "C_est_ambigue.wav" );
         }
        else
         { struct CMD_TYPE_MNEMO_BASE *mnemo;
           while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
            { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Match found for '%s' Type %d Num %d - %s", __func__,
                        commande_vocale, mnemo->type, mnemo->num, mnemo->libelle );
-             Voice_Jouer_mp3 ( "C_est_parti" );
+             Voice_Jouer_wav_by_file ( "C_est_parti.wav" );
              if (Config.instance_is_master==TRUE)                                                 /* si l'instance est Maitre */
               { switch( mnemo->type )
                  { case MNEMO_MONOSTABLE:
@@ -397,8 +394,6 @@ reload:
              g_free(mnemo);
            }
         }
-       g_snprintf( mute, sizeof(mute), "pactl set-source-mute %s 0", Cfg_voice.audio_device );
-       system(mute);
      }
     Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: Sending kill to pocketsphinx pid %d", __func__, pidpocket );
     kill(pidpocket, SIGKILL);
