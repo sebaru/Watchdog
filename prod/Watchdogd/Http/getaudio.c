@@ -50,9 +50,9 @@
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s : URL Parsing filename=%s", __func__, url );
 
-    g_snprintf( fichier, sizeof(fichier), "Son/%s.mp3", url );
+    g_snprintf( fichier, sizeof(fichier), "Son/%s.wav", url );
 
-    retour = lws_serve_http_file ( wsi, fichier, "audio/mpeg", NULL, 0);
+    retour = lws_serve_http_file ( wsi, fichier, "audio/x-wav", NULL, 0);
     if (retour < 0) return(1);                                                          /* Si erreur (<0), on ferme la socket */
     return(0);
   }

@@ -74,14 +74,22 @@
 /* Entrée : le nom du fichier wav                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Jouer_wav ( gchar *fichier )
-  { gint pid;
+ static gboolean Jouer_wav_by_file ( gchar *fichier )
+  { gint fd_cible, pid;
+
+    fd_cible = open ( fichier, O_RDONLY, 0 );
+    if (fd_cible < 0) { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
+                                  "%s: '%s' not found", __func__, fichier );
+                        return(FALSE);
+                      }
+    else close (fd_cible);
 
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "Jouer_wav: Envoi d'un wav %s", fichier );
     pid = fork();
     if (pid<0)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
                 "%s: PAPLAY '%s' fork failed pid=%d", __func__, fichier, pid );
+       return(FALSE);
      }
     else if (!pid)
      { execlp( "paplay", "paplay", fichier, NULL );
@@ -94,47 +102,19 @@
                 "%s: PAPLAY '%s' waiting to finish pid=%d", __func__, fichier, pid );
        waitpid(pid, NULL, 0 );
      }
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-             "%s: PAPLAY '%s' finished pid=%d", __func__, fichier, pid );
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "%s: PAPLAY '%s' finished pid=%d", __func__, fichier, pid );
+    return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Jouer_mp3 : Joue un fichier mp3 et attend la fin de la diffusion                                                           */
-/* Entrée : le message à jouer                                                                                                */
-/* Sortie : True si OK, False sinon                                                                                           */
+/* Jouer_wav: Jouer un fichier wav dont le nom est en paramètre                                                               */
+/* Entrée : le nom du fichier wav                                                                                             */
+/* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- gboolean Jouer_mp3 ( struct CMD_TYPE_MESSAGE *msg )
-  { gchar nom_fichier[128];
-    gint fd_cible, pid;
-
-    g_snprintf( nom_fichier, sizeof(nom_fichier), "Son/%d.mp3", msg->num );
-    fd_cible = open ( nom_fichier, O_RDONLY, 0 );
-    if (fd_cible < 0) { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                                  "%s: '%s' not found", __func__, nom_fichier );
-                        return(FALSE);
-                      }
-    else close (fd_cible);
-
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "Jouer_mp3: Send '%s'", nom_fichier );
-    pid = fork();
-    if (pid<0)
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                 "%s: '%s' fork failed pid=%d (%s)", __func__, nom_fichier, pid, strerror(errno) );
-       return(FALSE);
-     }
-    else if (!pid)
-     { execlp( "mpg123", "mpg123", "-o", "pulse", "-q", nom_fichier, NULL );
-       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "%s: '%s' exec failed pid=%d (%s)", __func__, nom_fichier, pid, strerror( errno ) );
-       _exit(0);
-     }
-    else
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                "%s: '%s' waiting to finish pid=%d", __func__, nom_fichier, pid );
-       waitpid(pid, NULL, 0 );
-     }
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "%s: MPG123 '%s' finished pid=%d", __func__, nom_fichier, pid );
-
-    return(TRUE);
+ static gboolean Jouer_wav_by_id ( struct CMD_TYPE_MESSAGE *msg )
+  { gchar nom_fichier[80];
+    
+    g_snprintf( nom_fichier, sizeof(nom_fichier), "Son/%d.wav", msg->num );
+    return(Jouer_wav_by_file( nom_fichier ) );
   }
 /******************************************************************************************************************************/
 /* Jouer_google_speech : Joue un texte avec google_speech et attend la fin de la diffusion                                    */
@@ -265,10 +245,10 @@
            }
 
           if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)                              /* Si Pas de message depuis xx */
-           { Jouer_wav("Son/jingle.wav"); }                                                         /* On balance le jingle ! */
+           { Jouer_wav_by_file("jingle.wav"); }                                                     /* On balance le jingle ! */
           Cfg_audio.last_audio = Partage->top;
 
-          if (Jouer_mp3 ( &histo->msg ) == FALSE)                      /* Par priorité : mp3 d'abord, synthèse vocale ensuite */
+          if (Jouer_wav_by_id ( &histo->msg ) == FALSE)                /* Par priorité : wav d'abord, synthèse vocale ensuite */
            { if (strlen(histo->msg.libelle_audio))          /* Si libelle_audio, le jouer, sinon jouer le libelle tout court) */
               { Jouer_google_speech( histo->msg.libelle_audio ); }
              else
