@@ -297,8 +297,7 @@ reload:
      }
 
     while ( Cfg_voice.lib->Thread_run == TRUE )
-     { gchar mute[128];
-       struct DB *db;
+     { struct DB *db;
        gint retour;
        fd_set fd;
 
@@ -333,8 +332,8 @@ reload:
         }
        evenement = commande_vocale + strlen(Cfg_voice.key_words) + 1;
 
-       g_snprintf( mute, sizeof(mute), "pactl set-source-mute %s 1", Cfg_voice.audio_device );
-       system(mute);
+       /*g_snprintf( mute, sizeof(mute), "pactl set-source-mute %s 1", Cfg_voice.audio_device );
+       system(mute);*/
 
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_NOTICE, "%s: recu = '%s'. Searching...", __func__, evenement );
 
