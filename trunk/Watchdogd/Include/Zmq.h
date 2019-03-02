@@ -65,7 +65,9 @@
     TAG_ZMQ_SET_SYN_VARS,
     TAG_ZMQ_CLI,
     TAG_ZMQ_CLI_RESPONSE,
-    TAG_ZMQ_SATELLITE_PING,
+    TAG_ZMQ_SLAVE_PING,
+    TAG_ZMQ_AUDIO_PLAY_WAV,
+    TAG_ZMQ_AUDIO_PLAY_GOOGLE,
     NBR_ZMQ_TAG
   };
 /************************************************ Définitions des prototypes **************************************************/

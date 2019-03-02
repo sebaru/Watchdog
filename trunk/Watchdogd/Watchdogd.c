@@ -360,7 +360,7 @@
               { Send_zmq ( Partage->com_msrv.zmq_to_slave, buffer, byte );                    /* Sinon on envoi aux slaves */
                 break;
               }
-             case TAG_ZMQ_SATELLITE_PING:
+             case TAG_ZMQ_SLAVE_PING:
               { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive TAG_ZMQ_SATELLITE_PING from %s/%s to %s/%s",
                           __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );
                 break;
@@ -409,8 +409,8 @@
     Close_zmq ( Partage->com_msrv.zmq_motif );
     Close_zmq ( Partage->com_msrv.zmq_to_threads );
     Close_zmq ( zmq_from_threads );
-    Close_zmq( Partage->com_msrv.zmq_to_slave );
-    Close_zmq( zmq_from_slave );
+    Close_zmq ( Partage->com_msrv.zmq_to_slave );
+    Close_zmq ( zmq_from_slave );
 
 /********************************* Dechargement des zones de bits internes dynamiques *****************************************/
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Début libération mémoire dynamique", __func__ );
@@ -525,7 +525,7 @@
         }
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
-        { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, TAG_ZMQ_SATELLITE_PING, NULL, "msrv", Config.master_host, "msrv",
+        { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, TAG_ZMQ_SLAVE_PING, NULL, "msrv", Config.master_host, "msrv",
                               NULL, 0 );
           cpt_5_minutes += 3000;                                                           /* Sauvegarde toutes les 5 minutes */
         }
