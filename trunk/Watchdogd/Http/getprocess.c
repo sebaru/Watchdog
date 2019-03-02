@@ -127,15 +127,8 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- static gint Http_Traiter_request_getprocess_debug ( struct lws *wsi, gboolean status )
-  { gchar token_thread[80];
-    const gchar *thread;
-    
-    thread = lws_get_urlarg_by_name	( wsi, "thread=", token_thread, sizeof(token_thread) );      /* Recup du param get 'NAME' */
-    if (!thread)
-     { return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST )); }
-
-    if ( ! strcmp ( thread, "arch" ) ) { Config.log_arch = status; }
+ static gint Http_Traiter_request_getprocess_debug ( struct lws *wsi, gchar *thread, gboolean status )
+  { if ( ! strcmp ( thread, "arch" ) ) { Config.log_arch = status; }
     else
     if ( ! strcmp ( thread, "dls"  ) ) { Config.log_dls  = status; }
     else
@@ -157,15 +150,8 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
- static gint Http_Traiter_request_getprocess_start_stop ( struct lws *wsi, gboolean status )
-  { gchar token_thread[80];
-    const gchar *thread;
-    
-    thread = lws_get_urlarg_by_name	( wsi, "thread=", token_thread, sizeof(token_thread) );      /* Recup du param get 'NAME' */
-    if (!thread)
-     { return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST )); }
-
-    if ( ! strcmp ( thread, "arch" ) )
+ static gint Http_Traiter_request_getprocess_start_stop ( struct lws *wsi, gchar *thread, gboolean status )
+  { if ( ! strcmp ( thread, "arch" ) )
      { if (status==FALSE) { Partage->com_arch.Thread_run = FALSE; }
        else Demarrer_arch();                                                                   /* Demarrage gestion Archivage */
      } else
@@ -196,14 +182,14 @@
 /************************************************ Préparation du buffer JSON **************************************************/
     if (!strcmp(url, "list"))
      { return(Http_Traiter_request_getprocess_list(wsi)); }
-    else if (!strcmp(url, "stop"))
-     { return(Http_Traiter_request_getprocess_start_stop(wsi,FALSE));}
-    else if (!strcmp(url, "start"))
-     { return(Http_Traiter_request_getprocess_start_stop(wsi,TRUE));}
-    else if (!strcmp(url, "undebug"))
-     { return(Http_Traiter_request_getprocess_debug(wsi,FALSE));}
-    else if (!strcmp(url, "debug"))
-     { return(Http_Traiter_request_getprocess_debug(wsi,TRUE));}
+    else if (!strncmp(url, "stop/", 5))
+     { return(Http_Traiter_request_getprocess_start_stop(wsi, url+5, FALSE));}
+    else if (!strncmp(url, "start/", 6))
+     { return(Http_Traiter_request_getprocess_start_stop(wsi, url+6, TRUE));}
+    else if (!strncmp(url, "undebug/", 8))
+     { return(Http_Traiter_request_getprocess_debug(wsi, url+8, FALSE));}
+    else if (!strncmp(url, "debug/", 6))
+     { return(Http_Traiter_request_getprocess_debug(wsi, url+6, TRUE));}
 /*************************************************** WS Reload library ********************************************************/
     else if ( ! strncasecmp( url, "reload/", 7 ) )
      { gchar *target = url+7;
