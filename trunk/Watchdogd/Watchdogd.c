@@ -270,7 +270,7 @@
     struct CMD_TYPE_HISTO histo;
     struct ZMQUEUE *zmq_from_slave, *zmq_from_threads;
 
-    prctl(PR_SET_NAME, "W-MSRV-TOP", 0, 0, 0 );
+    prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
@@ -434,7 +434,7 @@
     struct CMD_TYPE_HISTO histo;
     struct ZMQUEUE *zmq_from_master, *zmq_from_threads;
 
-    prctl(PR_SET_NAME, "W-MSRV-SLV", 0, 0, 0 );
+    prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
@@ -489,13 +489,6 @@
                  }
                 break;
               }
-             case TAG_ZMQ_TO_THREADS:
-              { if (Send_zmq( Partage->com_msrv.zmq_to_threads, buffer, byte ) == -1)
-                 { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ '%s' socket failed (%s)",
-                             __func__, Partage->com_msrv.zmq_to_threads->name, zmq_strerror(errno) );
-                 }
-                break;
-              }
              case TAG_ZMQ_CLI:
               { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive TAG_ZMQ_CLI from %s/%s to %s/%s : %s",
                           __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
@@ -507,8 +500,11 @@
                 break;
               }
              default:
-              { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: receive wrong tag number '%d' for ZMQ '%s'",
-                          __func__, event->tag, zmq_from_master->name );
+              { if (Send_zmq( Partage->com_msrv.zmq_to_threads, buffer, byte ) == -1)
+                 { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ '%s' socket failed (%s)",
+                             __func__, Partage->com_msrv.zmq_to_threads->name, zmq_strerror(errno) );
+                 }
+                break;
               }
            }
         }

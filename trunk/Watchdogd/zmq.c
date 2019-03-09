@@ -149,10 +149,6 @@
                 "%s: Send to ZMQ '%s' ('%s') failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
        return(FALSE);
      }
-    else
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "%s: Send %d bytes to ZMQ '%s' ('%s') OK", __func__, taille, zmq->name, zmq->endpoint );
-     }
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -192,12 +188,14 @@
     g_free(buffer);
     if (retour==FALSE)    
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "%s: Send to ZMQ '%s' ('%s') failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
+                "%s: '%s' ('%s') : ERROR SENDING %s/%s -> %s/%s/TAG=%d", __func__, zmq->name, zmq->endpoint,
+                 event.src_instance, event.src_thread, event.dst_instance, event.dst_thread, event.tag );
        return(FALSE);
      }
     else
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "%s: Send TAG %d : %d bytes to ZMQ '%s' ('%s') OK", __func__, tag, taille, zmq->name, zmq->endpoint );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                "%s: '%s' ('%s') : SENDING %s/%s -> %s/%s/TAG=%d", __func__, zmq->name, zmq->endpoint,
+                 event.src_instance, event.src_thread, event.dst_instance, event.dst_thread, event.tag );
      }
     return(TRUE);
   }
@@ -209,10 +207,6 @@
  gint Recv_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille_buf )
   { gint byte;
     byte = zmq_recv ( zmq->socket, buf, taille_buf, ZMQ_DONTWAIT );
-    if (byte>0)
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "%s: Recv %d bytes from ZMQ '%s' ('%s')", __func__, byte, zmq->name, zmq->endpoint );
-     }
     return(byte);
   }
 /******************************************************************************************************************************/
@@ -223,11 +217,7 @@
  gint Recv_zmq_block ( struct ZMQUEUE *zmq, void *buf, gint taille_buf )
   { gint byte;
     byte = zmq_recv ( zmq->socket, buf, taille_buf, 0 );
-    if (byte>0)
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "%s: Recv %d bytes from ZMQ '%s' ('%s')", __func__, byte, zmq->name, zmq->endpoint );
-     }
-    else 
+    if (byte<=0)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
                 "%s: Error for ZMQ '%s' ('%s'): %s", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
      }
@@ -242,10 +232,11 @@
   { gint byte;
     byte = zmq_recv ( zmq->socket, buf, taille_buf, ZMQ_DONTWAIT );
     if (byte>=0)
-     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "%s: Recv %d bytes from ZMQ '%s' ('%s')", __func__, byte, zmq->name, zmq->endpoint );
-       *event = buf;
+     { *event = buf;
        *payload = buf+sizeof(struct ZMQ_TARGET);
+       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+                "%s: '%s' ('%s') : %s/%s -> %s/%s/TAG=%d", __func__, zmq->name, zmq->endpoint,
+       (*event)->src_instance, (*event)->src_thread, (*event)->dst_instance, (*event)->dst_thread, (*event)->tag );
      }
     return(byte);
   }
