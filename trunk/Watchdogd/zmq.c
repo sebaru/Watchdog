@@ -167,7 +167,7 @@
   { struct ZMQ_TARGET event;
     void *buffer;
     gboolean retour;
-    if (taille==-1) taille = strlen(source);
+    if (taille==-1) taille = strlen(source)+1;
     buffer = g_try_malloc( taille + sizeof(struct ZMQ_TARGET) );
     if (!buffer)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
