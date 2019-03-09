@@ -78,13 +78,13 @@
   { gint fd_cible, pid;
 
     fd_cible = open ( fichier, O_RDONLY, 0 );
-    if (fd_cible < 0) { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
-                                  "%s: '%s' not found", __func__, fichier );
-                        return(FALSE);
-                      }
+    if (fd_cible < 0)
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "%s: '%s' not found", __func__, fichier );
+       return(FALSE);
+     }
     else close (fd_cible);
 
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "Jouer_wav: Envoi d'un wav %s", fichier );
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "%s: Envoi d'un wav %s", __func__, fichier );
     pid = fork();
     if (pid<0)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
@@ -212,10 +212,22 @@
         }
 
        if (Recv_zmq_with_tag ( zmq_master, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
-        { if ( !strcasecmp( event->dst_instance, g_get_host_name() ) || !strcmp (event->dst_instance, "*") )
-           { if ( !strcasecmp( event->dst_thread, NOM_THREAD ) || !strcmp ( event->dst_thread, "*" ) )
-              { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                          "%s : Reception d'un message du master : %s", __func__, (gchar *)payload );
+        { if ( Zmq_instance_is_target(event) && !strcasecmp( event->dst_thread, NOM_THREAD ) )
+           { switch (event->tag)
+              { case TAG_ZMQ_AUDIO_PLAY_WAV:
+                 { gchar fichier[80];
+                   Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+                             "%s : Reception d'un message PLAY_WAV : %s", __func__, (gchar *)payload );
+                   g_snprintf( fichier, sizeof(fichier), "Son/%s.wav", payload );
+                   Jouer_wav_by_file ( fichier );
+                   break;
+                 }
+                case TAG_ZMQ_AUDIO_PLAY_GOOGLE:
+                 { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+                             "%s : Reception d'un message PLAY_GOOGLE : %s", __func__, (gchar *)payload );
+                   Jouer_google_speech ( payload );
+                   break;
+                 }
               }
            }
         }

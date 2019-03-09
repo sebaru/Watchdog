@@ -390,11 +390,11 @@
                else if ( ! strncasecmp ( url, "/setm", 5 ) )   { return( Http_Traiter_request_setm ( wsi ) ); }
                else if ( ! strcasecmp ( url, "/cli" ) )
                 { g_snprintf( pss->url, sizeof(pss->url), "/cli" );
-                  return(lws_http_transaction_completed(wsi));
+                  return(0);
                 }
                else if ( ! strcasecmp ( url, "/postfile" ) )
                 { g_snprintf( pss->url, sizeof(pss->url), "/postfile" );
-                  return(lws_http_transaction_completed(wsi));
+                  return(0);
                 }
 /****************************************** WS get Running config library *****************************************************/
                else if ( ! strncasecmp( url, "/run/", 5 ) )

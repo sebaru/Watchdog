@@ -41,16 +41,8 @@
 
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'AUDIO'" );
-       response = Admin_write ( response, " | - tell_mp3 $num         - Send message num with mp3 format" );
        response = Admin_write ( response, " | - tell_google $text     - Send $text with google_speech format" );
        response = Admin_write ( response, " | - help                  - This help" );
-     } else
-    if ( ! strcmp ( commande, "tell_mp3" ) )
-     { struct CMD_TYPE_MESSAGE msg;
-       sscanf ( ligne, "%s %d", commande, &msg.num );                                    /* Découpage de la ligne de commande */
-       Jouer_mp3 ( &msg );
-       g_snprintf( chaine, sizeof(chaine), " | - Message id %d sent with mp3", msg.num );
-       response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "tell_google" ) )
      { Jouer_google_speech ( ligne + 12 );

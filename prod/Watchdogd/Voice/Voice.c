@@ -167,72 +167,6 @@
     close(id_fichier);
   }
 /******************************************************************************************************************************/
-/* Jouer_wav_by_file: Jouer un fichier wav dont le nom est en paramètre                                                       */
-/* Entrée : le nom du fichier wav                                                                                             */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- static gboolean Voice_Jouer_wav_by_file ( gchar *fichier )
-  { gint fd_cible, pid;
-
-    fd_cible = open ( fichier, O_RDONLY, 0 );
-    if (fd_cible < 0) { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
-                                  "%s: '%s' not found", __func__, fichier );
-                        return(FALSE);
-                      }
-    else close (fd_cible);
-
-    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_INFO, "%s: Envoi d'un wav %s", __func__, fichier );
-    pid = fork();
-    if (pid<0)
-     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
-                "%s: PAPLAY '%s' fork failed pid=%d", __func__, fichier, pid );
-       return(FALSE);
-     }
-    else if (!pid)
-     { execlp( "paplay", "paplay", fichier, NULL );
-       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
-                "%s: PAPLAY '%s' exec failed pid=%d", __func__, fichier, pid );
-       _exit(0);
-     }
-    else
-     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_DEBUG,
-                "%s: PAPLAY '%s' waiting to finish pid=%d", __func__, fichier, pid );
-       waitpid(pid, NULL, 0 );
-     }
-    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_DEBUG, "%s: PAPLAY '%s' finished pid=%d", __func__, fichier, pid );
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Voice_Jouer_google_speech : Joue un texte avec google_speech et attend la fin de la diffusion                              */
-/* Entrée : le message à jouer                                                                                                */
-/* Sortie : True si OK, False sinon                                                                                           */
-/******************************************************************************************************************************/
- static gboolean Voice_Jouer_google_speech ( gchar *libelle_audio )
-  { gint pid;
-
-    pid = fork();
-    if (pid<0)
-     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
-                 "%s: '%s' fork failed pid=%d (%s)", __func__, libelle_audio, pid, strerror(errno) );
-       return(FALSE);
-     }
-    else if (!pid)
-     { execlp( "google_speech", "google_speech", "-v", "debug", "-l", "fr", libelle_audio, NULL );
-       Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
-                "%s: '%s' exec failed pid=%d (%s)", __func__, libelle_audio, pid, strerror( errno ) );
-       _exit(0);
-     }
-    else
-     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_DEBUG,
-                "%s: '%s' waiting to finish pid=%d", __func__, libelle_audio, pid );
-       waitpid(pid, NULL, 0 );
-     }
-    Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_DEBUG,
-             "%s: google_speech '%s' finished pid=%d", __func__, libelle_audio, pid );
-
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
 /* Entrée: un client et un utilisateur                                                                                        */
 /* Sortie: Niet                                                                                                               */
@@ -297,8 +231,7 @@ reload:
      }
 
     while ( Cfg_voice.lib->Thread_run == TRUE )
-     { gchar mute[128];
-       struct DB *db;
+     { struct DB *db;
        gint retour;
        fd_set fd;
 
@@ -333,15 +266,16 @@ reload:
         }
        evenement = commande_vocale + strlen(Cfg_voice.key_words) + 1;
 
-       g_snprintf( mute, sizeof(mute), "pactl set-source-mute %s 1", Cfg_voice.audio_device );
-       system(mute);
+       /*g_snprintf( mute, sizeof(mute), "pactl set-source-mute %s 1", Cfg_voice.audio_device );
+       system(mute);*/
 
        Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_NOTICE, "%s: recu = '%s'. Searching...", __func__, evenement );
 
        if (!strcmp( QUELLE_VERSION, evenement ))
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), "Ma version est la %s", PACKAGE_VERSION );
-          Voice_Jouer_google_speech ( chaine );
+          Send_zmq_with_tag( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_AUDIO_PLAY_GOOGLE, NULL, NOM_THREAD,
+                             g_get_host_name(), "audio", chaine, -1 );
         }
        else if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, evenement ) )
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
@@ -351,20 +285,23 @@ reload:
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
                     "%s: No match found for '%s'", __func__, evenement );
           Libere_DB_SQL ( &db );
-          Voice_Jouer_wav_by_file ( "Je_ne_sais_pas_faire.wav" );
+          Send_zmq_with_tag( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_AUDIO_PLAY_WAV, NULL, NOM_THREAD,
+                             g_get_host_name(), "audio", "Je_ne_sais_pas_faire", -1 );
         }
        else if (db->nbr_result > 1)
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
                     "%s: Too many event for '%s'", __func__, evenement );
           Libere_DB_SQL ( &db );
-          Voice_Jouer_wav_by_file ( "C_est_ambigue.wav" );
+          Send_zmq_with_tag( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_AUDIO_PLAY_WAV, NULL, NOM_THREAD,
+                             g_get_host_name(), "audio", "C'est_ambigue", -1 );
         }
        else
         { struct CMD_TYPE_MNEMO_BASE *mnemo;
           while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
            { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Match found for '%s' Type %d Num %d - %s", __func__,
                        commande_vocale, mnemo->type, mnemo->num, mnemo->libelle );
-             Voice_Jouer_wav_by_file ( "C_est_parti.wav" );
+             Send_zmq_with_tag( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_AUDIO_PLAY_WAV, NULL, NOM_THREAD,
+                                g_get_host_name(), "audio", "C_est_parti", -1 );
              if (Config.instance_is_master==TRUE)                                                 /* si l'instance est Maitre */
               { switch( mnemo->type )
                  { case MNEMO_MONOSTABLE:

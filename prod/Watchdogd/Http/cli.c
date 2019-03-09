@@ -39,11 +39,11 @@
 /* Sortie : 0 ou 1 selon si la transaction est completed                                                                      */
 /******************************************************************************************************************************/
  gint Http_Traiter_request_body_completion_cli ( struct lws *wsi )
-  { const gchar *ev_host, *ev_thread, *ev_text;
+  { const gchar *host, *thread, *text;
     struct HTTP_PER_SESSION_DATA *pss;
     JsonObject *object;
+    gint retour=1, tag;
     JsonNode *Query;
-    gint retour=1;
 
     pss = lws_wsi_user ( wsi );
     pss->post_data [ pss->post_data_length ] = 0;
@@ -62,31 +62,33 @@
        return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
      }
 
-    ev_host = json_object_get_string_member ( object, "ev_host" );
-    if (!ev_host)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: ev_host non trouvé", __func__ );
+    host = json_object_get_string_member ( object, "host" );
+    if (!host)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: host non trouvé", __func__ );
        return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
      }
 
-    ev_thread = json_object_get_string_member ( object, "ev_thread" );
-    if (!ev_thread)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: ev_thread non trouvé", __func__ );
+    thread = json_object_get_string_member ( object, "thread" );
+    if (!thread)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: thread non trouvé", __func__ );
        return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
      }
 
-    ev_text = json_object_get_string_member ( object, "ev_text" );
-    if (!ev_text)
-     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: ev_text non trouvé", __func__ );
+    text = json_object_get_string_member ( object, "text" );
+    if (!text)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: text non trouvé", __func__ );
        return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
      }
+
+    tag = json_object_get_int_member ( object, "tag" );
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-             "%s: HTTP/CLI request for %s:%s:%s", __func__, ev_host, ev_thread, ev_text );
+             "%s: HTTP/CLI request for %d:%s:%s:%s", __func__, tag, host, thread, text );
              
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave,   TAG_ZMQ_CLI, NULL, NOM_THREAD, ev_host, ev_thread,
-                        (void *)ev_text, pss->post_data_length+1 );
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_CLI, NULL, NOM_THREAD, ev_host, ev_thread,
-                        (void *)ev_text, pss->post_data_length+1 );
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, tag, NULL, NOM_THREAD, host, thread,
+                        (void *)text, strlen(text)+1 );
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, tag, NULL, NOM_THREAD, host, thread,
+                        (void *)text, strlen(text)+1 );
     return(Http_Send_response_code ( wsi, HTTP_200_OK ));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
