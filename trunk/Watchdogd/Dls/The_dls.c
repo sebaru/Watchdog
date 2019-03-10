@@ -587,11 +587,6 @@
         }
        else
         { Ajouter_arch( MNEMO_SORTIE, num, 1.0*etat );                                              /* Sauvegarde de l'etat n */
-          if (etat == 1)
-           { pthread_mutex_lock( &Partage->com_msrv.synchro );                  /* Ajout dans la liste des Events A a traiter */
-             Partage->com_msrv.liste_a = g_slist_append( Partage->com_msrv.liste_a, GINT_TO_POINTER(num) );
-             pthread_mutex_unlock( &Partage->com_msrv.synchro );
-           }
         }
        Partage->a[num].last_change = Partage->top;
        Partage->audit_bit_interne_per_sec++;
@@ -938,6 +933,21 @@
     if (!liste) return(FALSE);
     if (bool_p) *bool_p = (gpointer)bool;                                           /* Sauvegarde pour acceleration si besoin */
     return( bool->edge_down );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_bool: Positionne un boolean                                                                                   */
+/* Sortie : TRUE sur le boolean est UP                                                                                        */
+/******************************************************************************************************************************/
+ void Dls_data_set_DO ( gchar *tech_id, gchar *acronyme, gpointer *bool_p, gboolean valeur )
+  { struct DLS_BOOL *bool;
+    Dls_data_set_bool ( tech_id, acronyme, bool_p, valeur );
+    bool = *bool_p;
+             
+    if ( bool->edge_up )
+     { pthread_mutex_lock( &Partage->com_msrv.synchro );
+       Partage->com_msrv.Liste_DO = g_slist_prepend ( Partage->com_msrv.Liste_DO, bool );
+       pthread_mutex_unlock( &Partage->com_msrv.synchro );
+     }
   }
 /******************************************************************************************************************************/
 /* Met à jour l'entrée analogique num à partir de sa valeur avant mise a l'echelle                                            */

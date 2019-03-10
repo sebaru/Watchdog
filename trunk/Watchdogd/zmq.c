@@ -193,7 +193,7 @@
        return(FALSE);
      }
     else
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
+     { Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                 "%s: '%s' ('%s') : SENDING %s/%s -> %s/%s/TAG=%d", __func__, zmq->name, zmq->endpoint,
                  event.src_instance, event.src_thread, event.dst_instance, event.dst_thread, event.tag );
      }
@@ -233,10 +233,14 @@
     byte = zmq_recv ( zmq->socket, buf, taille_buf, ZMQ_DONTWAIT );
     if (byte>=0)
      { *event = buf;
-       *payload = buf+sizeof(struct ZMQ_TARGET);
-       Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                "%s: '%s' ('%s') : %s/%s -> %s/%s/TAG=%d", __func__, zmq->name, zmq->endpoint,
-       (*event)->src_instance, (*event)->src_thread, (*event)->dst_instance, (*event)->dst_thread, (*event)->tag );
+       if (Zmq_instance_is_target ( *event ))
+        { *payload = buf+sizeof(struct ZMQ_TARGET);
+          Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+                   "%s: '%s' ('%s') : %s/%s -> %s/%s/TAG=%d", __func__, zmq->name, zmq->endpoint,
+          (*event)->src_instance, (*event)->src_thread, (*event)->dst_instance, (*event)->dst_thread, (*event)->tag );
+          return(byte);
+        }
+       else return(0);                                                                        /* Si pas destinataire, on drop */
      }
     return(byte);
   }

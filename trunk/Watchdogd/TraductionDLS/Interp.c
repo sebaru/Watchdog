@@ -479,12 +479,11 @@
     struct ACTION *action = New_action();
     gint taille = 128;
     action->alors = New_chaine( taille );
-    g_snprintf( action->alors, taille, "SA(%d,%d);", alias->num, !barre );
     if ( (!barre && !alias->barre) || (barre && alias->barre) )
-         { g_snprintf( action->alors, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_A_%s_%s, 1 ); ",
+         { g_snprintf( action->alors, taille, " Dls_data_set_DO ( \"%s\", \"%s\", &_A_%s_%s, 1 ); ",
                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
-    else { g_snprintf( action->alors, taille, "Dls_data_set_bool ( \"%s\", \"%s\", &_A_%s_%s, 0 ); ",
+    else { g_snprintf( action->alors, taille, " Dls_data_set_DO ( \"%s\", \"%s\", &_A_%s_%s, 0 ); ",
                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
     return(action);

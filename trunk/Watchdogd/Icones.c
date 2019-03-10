@@ -271,23 +271,6 @@
     return(icone_version);
   }
 /******************************************************************************************************************************/
-/* Icone_set_data_version: Positionne le numéro de version des données Icones en bases de données                             */
-/* Entrée: Néant                                                                                                              */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void Icone_set_data_version ( void )
-  { gchar chaine[32];
-    g_snprintf( chaine, sizeof(chaine), "%d", (gint)time(NULL) );
-    if (Modifier_configDB ( "global", "icone_version", chaine ))
-     { Info_new( Config.log, Config.log_db, LOG_NOTICE,
-                "Icone_set_data_version: updating Database_version to %s OK", chaine );
-     }
-    else
-     { Info_new( Config.log, Config.log_db, LOG_WARNING,
-                "Icone_set_data_version: updating Database_version to %s FAILED", chaine );
-     }
-  }
-/******************************************************************************************************************************/
 /* Ajouter_Modifier_iconeDB: Ajoute ou modifie un icone Watchdog                                                              */
 /* Entrées: une structure referencant l'icone a ajouter ou modifier                                                           */
 /* Sortie: -1 si pb, nouvel id sinon                                                                                          */

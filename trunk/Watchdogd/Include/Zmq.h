@@ -60,6 +60,7 @@
 
  enum
   { TAG_ZMQ_TO_HISTO,
+    TAG_ZMQ_FROM_DLS,                                                             /* Pilotage d'event depuis DLS directmement */
     TAG_ZMQ_SET_BIT,
     TAG_ZMQ_SET_SYN_VARS,
     TAG_ZMQ_CLI,

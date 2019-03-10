@@ -204,7 +204,7 @@ end:
   }
 /******************************************************************************************************************************/
 /* Ajouter_configDB: Ajout ou edition d'un message                                                                            */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure msg                                               */
+/* Entrée: le thread, le nom du parametre, sa valeur                                                                          */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur )
