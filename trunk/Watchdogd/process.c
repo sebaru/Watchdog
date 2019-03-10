@@ -224,8 +224,10 @@
            { struct LIBRAIRIE *lib;
              g_snprintf( prompt, strlen(fichier->d_name)-21, "%s", fichier->d_name + 19 );
              lib = Charger_librairie_par_prompt( prompt );
-             lib->Thread_boot_start = TRUE;                                        /* Premier demarrage par detection opendir */
-             Start_librairie( lib );
+             if (lib)
+              { lib->Thread_boot_start = TRUE;                                     /* Premier demarrage par detection opendir */
+                Start_librairie( lib );
+              }
            }
         }
      }
