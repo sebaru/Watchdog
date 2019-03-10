@@ -1266,11 +1266,11 @@ reload:
     g_snprintf( Cfg_modbus.lib->admin_prompt, sizeof(Cfg_modbus.lib->admin_prompt), "modbus" );
     g_snprintf( Cfg_modbus.lib->admin_help,   sizeof(Cfg_modbus.lib->admin_help),   "Manage Modbus system" );
 
-    if (!Cfg_modbus.enable)
+    if (lib->Thread_boot_start && !Cfg_modbus.enable)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
        goto end;
-     }
+     } else lib->Thread_boot_start = FALSE;
 
     Cfg_modbus.Modules_MODBUS = NULL;                                                         /* Init des variables du thread */
 

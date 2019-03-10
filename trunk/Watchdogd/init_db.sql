@@ -102,7 +102,7 @@ INSERT INTO `syns` (`id`, `parent_id`, `libelle`, `page`, `access_level` ) VALUE
 
 CREATE TABLE IF NOT EXISTS `dls` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tech_id` VARCHAR(8) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
+  `tech_id` VARCHAR(25) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
   `package` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT "custom",
   `syn_id` int(11) NOT NULL DEFAULT '0',
   `name` text COLLATE utf8_unicode_ci NOT NULL,

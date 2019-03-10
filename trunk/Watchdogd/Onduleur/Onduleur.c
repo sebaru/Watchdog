@@ -658,11 +658,11 @@
     g_snprintf( Cfg_ups.lib->admin_prompt, sizeof(Cfg_ups.lib->admin_prompt), "ups" );
     g_snprintf( Cfg_ups.lib->admin_help,   sizeof(Cfg_ups.lib->admin_help),   "Manage UPS Modules" );
 
-    if (!Cfg_ups.enable)
+    if (lib->Thread_boot_start && !Cfg_ups.enable)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_NOTICE,
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
        goto end;
-     }
+     } else lib->Thread_boot_start = FALSE;
 
     Cfg_ups.Modules_UPS = NULL;                                                               /* Init des variables du thread */
 

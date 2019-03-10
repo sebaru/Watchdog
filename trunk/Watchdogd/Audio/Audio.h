@@ -28,6 +28,8 @@
 #ifndef _AUDIO_H_
  #define _AUDIO_H_
 
+ #include <json-glib/json-glib.h>
+
  #define NOM_THREAD                 "audio"
 
  #define AUDIO_JINGLE                3000                                    /* Jingle si pas de message au bout de 5 minutes */
@@ -41,12 +43,12 @@
     gint last_audio;                                                                   /* Date de la derniere emission sonore */
     gboolean enable;                                                                      /* Is this thread enabled at boot ? */
     gchar language[80];                                             /* Language de restitution vocal, au format google_speech */
+    guint nbr_diffusion_wav;
+    guint nbr_diffusion_google;
   } Cfg_audio;
 
 /*********************************************** Définitions des prototypes ***************************************************/
  extern gboolean Audio_Lire_config ( void );
- extern gboolean Jouer_mp3 ( struct CMD_TYPE_MESSAGE *msg );
- extern gboolean Jouer_google_speech ( gchar *libelle_audio );
  extern gchar *Audio_Admin_response( gchar *ligne );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

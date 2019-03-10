@@ -30,109 +30,54 @@
  #include "Sms.h"
 
 /******************************************************************************************************************************/
-/* Admin_sms_reload: Demande le rechargement des conf SMS                                                                     */
-/* Entrée: Le buffer d'entrée a compléter                                                                                     */
-/* Sortie: Le buffer de sortie complété                                                                                       */
+/* Admin_json_list : fonction appelée pour lister les modules modbus                                                          */
+/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static gchar *Admin_sms_reload ( gchar *response )
-  { Cfg_smsg.lib->Thread_reload = TRUE;
-    response = Admin_write ( response, " | - SMS Reload done" );
-    return(response);
+ static void Admin_json_status ( gchar **buffer_p, gint *taille_p )
+  { JsonBuilder *builder;
+    JsonGenerator *gen;
+    gsize taille_buf;
+    gint retour, num;
+    gchar *buf;
+
+    builder = json_builder_new ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       return;
+     }
+
+    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+
+    json_builder_set_member_name  ( builder, "nbr_sms" );
+    json_builder_add_int_value ( builder, Cfg_smsg.nbr_sms );
+
+    json_builder_end_object (builder);                                                                        /* End Document */
+
+    gen = json_generator_new ();
+    json_generator_set_root ( gen, json_builder_get_root(builder) );
+    json_generator_set_pretty ( gen, TRUE );
+    buf = json_generator_to_data (gen, &taille_buf);
+    g_object_unref(builder);
+    g_object_unref(gen);
+
+    *buffer_p = buf;
+    *taille_p = taille_buf;
   }
 /******************************************************************************************************************************/
-/* Admin_print_sms : Affiche le parametre sur la console d'admin CLI                                                          */
-/* Entrée: Le buffer d'entrée a compléter                                                                                     */
-/* Sortie: Le buffer de sortie complété                                                                                       */
+/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
+/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static gchar *Admin_print_sms ( gchar *response, struct SMSDB *sms )
-  { gchar chaine[256];
-
-    g_snprintf( chaine, sizeof(chaine),
-              " | ---------------------------------\n"
-              " | [%03d]%12s -> user_enable   = %d\n"
-              " |               -> sms_enable    = %d\n"
-              " |               -> phone     = %s\n"
-              " |               -> sms_allow_cde = %d\n"
-              " |----------------> %s",
-                sms->user_id, sms->user_name, sms->user_enable, sms->user_sms_enable, sms->user_phone,
-                sms->user_sms_allow_cde, sms->user_comment
-              );
-    response = Admin_write ( response, chaine );
-    return(response);
-  }
-/******************************************************************************************************************************/
-/* Admin_sms_list : L'utilisateur admin lance la commande "list" en mode sms                                                  */
-/* Entrée: Le buffer d'entrée a compléter                                                                                     */
-/* Sortie: Le buffer de sortie complété                                                                                       */
-/******************************************************************************************************************************/
- static gchar *Admin_sms_list ( gchar *response )
-  { struct SMSDB *sms;
-    gchar chaine[80];
-    struct DB *db;
-
-    g_snprintf( chaine, sizeof(chaine), " -- Liste des contacts SMS" );
-    response = Admin_write ( response, chaine );
-
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
-       return(response);
-     }
-
-/********************************************* Chargement des informations en bases *******************************************/
-    if ( ! Smsg_Recuperer_smsDB( db ) )
-     { Libere_DB_SQL( &db );
-       Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING, "%s: Recuperer_sms Failed", __func__ );
-       return(response);
-     }
-
-    while ( (sms = Smsg_Recuperer_smsDB_suite( db )) != NULL)
-     { response = Admin_print_sms ( response, sms ); }
-
-    Libere_DB_SQL( &db );
-    return(response);
-  }
-/******************************************************************************************************************************/
-/* Admin_sms: Gere une commande 'admin sms' depuis une response admin                                                         */
-/* Entrée: Le buffer d'entrée a compléter                                                                                     */
-/* Sortie: Le buffer de sortie complété                                                                                       */
-/******************************************************************************************************************************/
- gchar *Smsg_Admin_response ( gchar *ligne )
-  { gchar commande[128], chaine[128];
-    gchar *response = NULL;
-
-    sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
-    if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, "  | -- Watchdog ADMIN -- Help du mode 'SMS'" );
-       response = Admin_write ( response, "  | - reload                - Reload contacts from Database" );
-       response = Admin_write ( response, "  | - smsbox $message       - Send 'message' via smsbox" );
-       response = Admin_write ( response, "  | - gsm    $message       - Send 'message' via gsm" );
-       response = Admin_write ( response, "  | - list                  - Liste les contacts SMS" );
-       response = Admin_write ( response, "  | - help                  - This help" );
-     }
-    else if ( ! strcmp ( commande, "list" ) )
-     { response = Admin_sms_list ( response );
-     }
-    else if ( ! strcmp ( commande, "reload" ) )
-     { response = Admin_sms_reload ( response ); }
-    else if ( ! strcmp ( commande, "gsm" ) )
-     { gchar message[80];
-       sscanf ( ligne, "%s %s", commande, message );                                     /* Découpage de la ligne de commande */
-       Envoyer_smsg_gsm_text ( ligne + 4 );                   /* On envoie le reste de la liste, pas seulement le mot suivant. */
-       g_snprintf( chaine, sizeof(chaine), " | - Sms sent\n" );
-       response = Admin_write ( response, chaine );
-     }
-    else if ( ! strcmp ( commande, "smsbox" ) )
-     { gchar message[80];
-       sscanf ( ligne, "%s %s", commande, message );                                     /* Découpage de la ligne de commande */
-       Envoyer_smsg_smsbox_text ( ligne + 7 );                /* On envoie le reste de la liste, pas seulement le mot suivant. */
-       g_snprintf( chaine, sizeof(chaine), " | - Sms sent\n" );
-       response = Admin_write ( response, chaine );
-     }
-    else
-     { g_snprintf( chaine, sizeof(chaine), " | - Unknown command : %s\n", ligne );
-       response = Admin_write ( response, chaine );
-     }
-    return(response);
+ void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
+  { 
+    *buffer_p = NULL;
+    *taille_p = 0;
+/************************************************ Préparation du buffer JSON **************************************************/
+                                                                      /* Lancement de la requete de recuperation des messages */
+    if (!strcmp(commande, "/status"))
+     { Admin_json_status ( buffer_p, taille_p ); }
+    
+    return;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

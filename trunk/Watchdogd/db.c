@@ -1005,6 +1005,12 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4009)
+     { g_snprintf( requete, sizeof(requete),
+      "ALTER TABLE `dls` CHANGE `tech_id` `tech_id` VARCHAR(25) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL;" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 
 fin:

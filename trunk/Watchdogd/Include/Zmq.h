@@ -68,6 +68,8 @@
     TAG_ZMQ_SLAVE_PING,
     TAG_ZMQ_AUDIO_PLAY_WAV,
     TAG_ZMQ_AUDIO_PLAY_GOOGLE,
+    TAG_ZMQ_SMSG_SEND_SMSBOX,
+    TAG_ZMQ_SMSG_SEND_GSM,
     NBR_ZMQ_TAG
   };
 /************************************************ Définitions des prototypes **************************************************/

@@ -191,11 +191,12 @@ reload:
     g_snprintf( Cfg_voice.lib->admin_prompt, sizeof(Cfg_voice.lib->admin_prompt), NOM_THREAD );
     g_snprintf( Cfg_voice.lib->admin_help,   sizeof(Cfg_voice.lib->admin_help),   "Manage VOICE system" );
 
-    if (!Cfg_voice.enable)
+    if (lib->Thread_boot_start && !Cfg_voice.enable)
      { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_NOTICE,
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
        goto end;
-     }
+     } else lib->Thread_boot_start = FALSE;
+
     Voice_Make_pulseaudio_file();
     Voice_Make_jsgf_grammaire();
 /********************************************* Création du process de reconnaissance vocale ***********************************/

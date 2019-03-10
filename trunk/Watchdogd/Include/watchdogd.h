@@ -68,9 +68,10 @@
     gchar admin_prompt[32];                                                            /* Prompt auquel va répondre le thread */
     gchar admin_help[64];                                                              /* Designation de l'activité du thread */
 
+    gboolean Thread_boot_start;                             /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
-    gboolean Thread_reload;                                                          /* TRUE si le thread doit gerer le USR1 */
+    gboolean Thread_reload;                                                           /* TRUE si le thread doit gerer le USR1 */
 
     void (*Run_thread)( struct LIBRAIRIE *lib );                                  /* Fonction principale de gestion du thread */
                                                                                  /* Fonction de gestion des commandes d'admin */

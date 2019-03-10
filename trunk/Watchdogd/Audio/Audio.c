@@ -103,6 +103,7 @@
        waitpid(pid, NULL, 0 );
      }
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "%s: PAPLAY '%s' finished pid=%d", __func__, fichier, pid );
+    Cfg_audio.nbr_diffusion_wav++;
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -144,7 +145,7 @@
      }
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
              "%s: google_speech '%s' finished pid=%d", __func__, libelle_audio, pid );
-
+    Cfg_audio.nbr_diffusion_google++;
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -154,7 +155,6 @@
   { struct CMD_TYPE_HISTO *histo, histo_buf;
     struct ZMQUEUE *zmq_msg;
     struct ZMQUEUE *zmq_master;
-    struct ZMQUEUE *zmq_admin;
     static gboolean audio_stop = TRUE;
 
     prctl(PR_SET_NAME, "W-Audio", 0, 0, 0 );
@@ -170,12 +170,12 @@
     g_snprintf( Cfg_audio.lib->admin_prompt, sizeof(Cfg_audio.lib->admin_prompt), "audio" );
     g_snprintf( Cfg_audio.lib->admin_help,   sizeof(Cfg_audio.lib->admin_help),   "Manage Audio system" );
 
-    if (!Cfg_audio.enable)
+    if (lib->Thread_boot_start && !Cfg_audio.enable)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,
                 "Run_thread: Thread is not enabled in config. Shutting Down %p",
                  pthread_self() );
        goto end;
-     }
+     } else lib->Thread_boot_start = FALSE;
 
     zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
     Connect_zmq (zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
@@ -183,12 +183,9 @@
     zmq_master = New_zmq ( ZMQ_SUB, "listen-to-MSRV" );
     Connect_zmq (zmq_master, "inproc", ZMQUEUE_LIVE_THREADS, 0 );
 
-    zmq_admin = New_zmq ( ZMQ_REP, "listen-to-admin" );
-    Bind_zmq (zmq_admin, "inproc", NOM_THREAD "-admin", 0 );
-
     while(Cfg_audio.lib->Thread_run == TRUE)                                                 /* On tourne tant que necessaire */
-     { gchar buffer[256];
-       struct ZMQ_TARGET *event;
+     { struct ZMQ_TARGET *event;
+       gchar buffer[256];
        void *payload;
 
        if (Cfg_audio.lib->Thread_reload)                                                             /* On a recu reload ?? */
@@ -204,15 +201,8 @@
            }
         } else audio_stop = TRUE;
 
-       if (Recv_zmq (zmq_admin, &buffer, sizeof(buffer)) > 0)                             /* As-t'on recu un paquet d'admin ? */
-        { gchar *response;
-          response = Audio_Admin_response ( buffer );
-          Send_zmq ( zmq_admin, response, strlen(response) );
-          g_free(response);
-        }
-
        if (Recv_zmq_with_tag ( zmq_master, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
-        { if ( Zmq_instance_is_target(event) && !strcasecmp( event->dst_thread, NOM_THREAD ) )
+        { if ( !strcasecmp( event->dst_thread, NOM_THREAD ) )
            { switch (event->tag)
               { case TAG_ZMQ_AUDIO_PLAY_WAV:
                  { gchar fichier[80];
@@ -257,7 +247,7 @@
            }
 
           if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)                              /* Si Pas de message depuis xx */
-           { Jouer_wav_by_file("jingle.wav"); }                                                     /* On balance le jingle ! */
+           { Jouer_wav_by_file("Son/jingle.wav"); }                                                 /* On balance le jingle ! */
           Cfg_audio.last_audio = Partage->top;
 
           if (Jouer_wav_by_id ( &histo->msg ) == FALSE)                /* Par priorité : wav d'abord, synthèse vocale ensuite */
@@ -267,14 +257,9 @@
               { Jouer_google_speech( histo->msg.libelle ); }
            }
         }
-       else
-        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                   "%s : Msg Audio non envoye num=%d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
-        }
      }
     Close_zmq ( zmq_msg );
     Close_zmq ( zmq_master );
-    Close_zmq ( zmq_admin );
 end:
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_audio.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */

@@ -536,11 +536,6 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
              "%s: WebSocket Create OK. Listening on port %d with ssl=%d", __func__, Cfg_http.tcp_port, Cfg_http.ssl_enable );
 
-#ifdef bouh
-    Abonner_distribution_message ( Http_Gerer_message );                            /* Abonnement à la diffusion des messages */
-    Abonner_distribution_sortie  ( Http_Gerer_sortie );                              /* Abonnement à la diffusion des sorties */
-
-#endif
     Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
     while(Cfg_http.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */
      { usleep(10000);

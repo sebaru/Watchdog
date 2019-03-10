@@ -286,7 +286,7 @@
 
 
 	   GSM_FreeStateMachine(s);                                                                          	/* Free up used memory */
-    if (error == ERR_NONE) return(TRUE);
+    if (error == ERR_NONE) { Cfg_smsg.nbr_sms++; return(TRUE); }
     else return(FALSE);
   }
 /******************************************************************************************************************************/
@@ -351,6 +351,7 @@
        if (!res)
         { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO,
                    "%s: Envoi SMS '%s' to '%s'", __func__, msg->libelle_sms, telephone );
+          Cfg_smsg.nbr_sms++;
         }
        else
         { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_WARNING,
@@ -514,7 +515,7 @@
                 bit.num = mnemo->num;
                 g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", mnemo->dls_tech_id );
                 g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", mnemo->acronyme );
-                Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, TAG_ZMQ_SET_BIT, NULL, NOM_THREAD, "*", "*",
+                Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, TAG_ZMQ_SET_BIT, NULL, NOM_THREAD, "*", "msrv",
                                     &bit, sizeof(struct ZMQ_SET_BIT) );
               }
              else Info_new( Config.log, Config.log_msrv, LOG_ERR,
@@ -648,7 +649,7 @@
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct CMD_TYPE_HISTO *histo, histo_buf;
     struct ZMQUEUE *zmq_msg;
-    struct ZMQUEUE *zmq_admin;
+    struct ZMQUEUE *zmq_master;
     
     prctl(PR_SET_NAME, "W-SMSG", 0, 0, 0 );
     memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                        /* Mise a zero de la structure de travail */
@@ -663,17 +664,17 @@
     g_snprintf( Cfg_smsg.lib->admin_prompt, sizeof(Cfg_smsg.lib->admin_prompt), NOM_THREAD );
     g_snprintf( Cfg_smsg.lib->admin_help,   sizeof(Cfg_smsg.lib->admin_help),   "Manage SMS system" );
 
-    if (!Cfg_smsg.enable)
+    if (lib->Thread_boot_start && !Cfg_smsg.enable)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE,
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
        goto end;
-     }
+     } else lib->Thread_boot_start = FALSE;
 
     zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
     Connect_zmq (zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
 
-    zmq_admin = New_zmq ( ZMQ_REP, "listen-to-admin" );
-    Bind_zmq (zmq_admin, "inproc", NOM_THREAD "-admin", 0 );
+    zmq_master = New_zmq ( ZMQ_SUB, "listen-to-MSRV" );
+    Connect_zmq (zmq_master, "inproc", ZMQUEUE_LIVE_THREADS, 0 );
 
     if (Config.instance_is_master==FALSE)                                                          /* si l'instance est Slave */
      { Cfg_smsg.zmq_to_master = New_zmq ( ZMQ_PUB, "pub-to-master" );
@@ -683,10 +684,10 @@
     Envoyer_smsg_gsm_text ( "SMS System is running" );
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
     while(Cfg_smsg.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */
-     { gchar buffer[128];
-       usleep(10000);
-       sched_yield();
-
+     { struct ZMQ_TARGET *event;
+       gchar buffer[256];
+       void *payload;
+       
        if (Cfg_smsg.lib->Thread_reload)                                                      /* A-t'on recu un signal USR1 ? */
         { int nbr;
           Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: SIGUSR1", __func__ );
@@ -699,16 +700,23 @@
        Lire_sms_gsm();
 
 /********************************************************* Envoi de SMS *******************************************************/
-       if (Recv_zmq ( zmq_admin, &buffer, sizeof(buffer)) > 0 )                           /* As-t'on recu un paquet d'admin ? */
-        { gchar *response;
-          Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Recu commande admin %s", __func__, buffer );
-          response = Smsg_Admin_response ( buffer );
-          Send_zmq ( zmq_admin, response, strlen(response) );
-          Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_DEBUG, "%s: Response admin %s", __func__, response );
-          g_free(response);
+       if (Recv_zmq_with_tag ( zmq_master, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
+        { if ( !strcasecmp( event->dst_thread, NOM_THREAD ) )
+           { switch (event->tag)
+              { case TAG_ZMQ_SMSG_SEND_SMSBOX:
+                 { Envoyer_smsg_smsbox_text ( payload );       
+                   break;
+                 }
+                case TAG_ZMQ_SMSG_SEND_GSM:
+                 { Envoyer_smsg_gsm_text ( payload );       
+                   break;
+                 }
+              }
+           }
         }
 
-       if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) ) { continue; }
+       if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) )
+        { sleep(1); continue; }
 
        histo = &histo_buf;
 
@@ -730,7 +738,7 @@
         }
      }
     Close_zmq ( zmq_msg );
-    Close_zmq ( zmq_admin );
+    Close_zmq ( zmq_master );
     Close_zmq ( Cfg_smsg.zmq_to_master );
 
 end:
