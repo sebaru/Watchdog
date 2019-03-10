@@ -378,6 +378,7 @@
                                         (char *)&remote_ip, sizeof(remote_ip) );
 
                pss = lws_wsi_user ( wsi );
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: processing request '%s'.", __func__, url );
                if ( ! strcasecmp ( url, "/favicon.ico" ) )
                 { retour = lws_serve_http_file ( wsi, "WEB/favicon.gif", "image/gif", NULL, 0);
                   if (retour < 0) return(1);                              /* Si erreur (<0) ou si ok (>0), on ferme la socket */

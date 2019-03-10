@@ -179,7 +179,6 @@
 /******************************************************************************************************************************/
  gint Http_Traiter_request_getprocess ( struct lws *wsi, gchar *url )
   {
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: processing request /process/%s.", __func__, url );
     if (!strcmp(url, "list"))
      { return(Http_Traiter_request_getprocess_list(wsi)); }
     else if (!strncmp(url, "stop/", 5))

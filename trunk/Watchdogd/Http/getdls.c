@@ -158,7 +158,6 @@
 /******************************************************************************************************************************/
  gint Http_Traiter_request_getdls ( struct lws *wsi, gchar *url )
   { 
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: processing request /dls/%s.", __func__, url );
     if ( ! strcasecmp( url, "debug_trad_on" ) )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug ON", __func__ );
        Trad_dls_set_debug ( TRUE );
