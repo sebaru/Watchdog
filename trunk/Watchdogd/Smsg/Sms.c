@@ -366,7 +366,7 @@
     curl_formfree(formpost);
   }
 /******************************************************************************************************************************/
-/* Smsg_send_to_all_authorized_recipients : Envoi à tous les portables autorisés                                               */
+/* Smsg_send_to_all_authorized_recipients : Envoi à tous les portables autorisés                                              */
 /* Entrée: le message                                                                                                         */
 /* Sortie : néant                                                                                                             */
 /******************************************************************************************************************************/
@@ -667,8 +667,9 @@
     if (lib->Thread_boot_start && !Cfg_smsg.enable)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE,
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
+       lib->Thread_boot_start = FALSE;
        goto end;
-     } else lib->Thread_boot_start = FALSE;
+     }
 
     zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
     Connect_zmq (zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );

@@ -70,6 +70,7 @@
     TAG_ZMQ_AUDIO_PLAY_GOOGLE,
     TAG_ZMQ_SMSG_SEND_SMSBOX,
     TAG_ZMQ_SMSG_SEND_GSM,
+    TAG_ZMQ_RADIO_PLAY,
     NBR_ZMQ_TAG
   };
 /************************************************ Définitions des prototypes **************************************************/

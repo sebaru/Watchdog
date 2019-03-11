@@ -1269,8 +1269,9 @@ reload:
     if (lib->Thread_boot_start && !Cfg_modbus.enable)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE,
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
+       lib->Thread_boot_start = FALSE;
        goto end;
-     } else lib->Thread_boot_start = FALSE;
+     }
 
     Cfg_modbus.Modules_MODBUS = NULL;                                                         /* Init des variables du thread */
 

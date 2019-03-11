@@ -482,8 +482,9 @@
     if (lib->Thread_boot_start && !Cfg_imsgp.enable)
      { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
+       lib->Thread_boot_start = FALSE;
        goto end;
-     } else lib->Thread_boot_start = FALSE;
+     }
 
     Cfg_imsgp.lib->Thread_run = TRUE;                                                                   /* Le thread tourne ! */
     MainLoop = g_main_loop_new( NULL, FALSE );

@@ -45,7 +45,7 @@
 
 /******************************************************************************************************************************/
 /* Start_librairie: Demarre le thread en paremetre                                                                            */
-/* Entr√É¬©e: La structure associ√É¬©e au thread                                                                                    */
+/* Entr√Èe: La structure associ√Èe au thread                                                                                    */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Start_librairie ( struct LIBRAIRIE *lib )
@@ -71,13 +71,13 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: pthread_create failed (%s)", __func__, lib->nom_fichier );
        return(FALSE);
      }
-    pthread_attr_destroy(&attr);                                                                        /* Lib√É¬©ration m√É¬©moire */
+    pthread_attr_destroy(&attr);                                                                        /* Lib√Èration m√Èmoire */
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Starting thread %s OK (TID=%p)", __func__, lib->nom_fichier, tid );
     return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Stop_librairie: Arrete le thread en paremetre                                                                              */
-/* Entr√É¬©e: La structure associ√É¬©e au thread                                                                                    */
+/* Entr√Èe: La structure associ√Èe au thread                                                                                    */
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Stop_librairie ( struct LIBRAIRIE *lib )
@@ -93,7 +93,7 @@
   }
 /******************************************************************************************************************************/
 /* Charger_librarie_par_fichier: Ouverture d'une librairie par son nom                                                        */
-/* Entr√É¬©e: Le nom de fichier correspondant                                                                                    */
+/* Entr√Èe: Le nom de fichier correspondant                                                                                    */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  struct LIBRAIRIE *Charger_librairie_par_prompt ( gchar *nom_prompt )
@@ -149,8 +149,8 @@
     return(lib);
   }
 /******************************************************************************************************************************/
-/* Decharger_librairie_par_nom: Decharge la librairie dont le nom est en param√É¬®tre                                            */
-/* Entr√É¬©e: Le nom de la librairie                                                                                             */
+/* Decharger_librairie_par_nom: Decharge la librairie dont le nom est en paramËtre                                            */
+/* EntrÈe: Le nom de la librairie                                                                                             */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  gboolean Decharger_librairie_par_prompt ( gchar *prompt )
@@ -158,8 +158,8 @@
     GSList *liste;
 
     liste = Partage->com_msrv.Librairies;
-    while(liste)                                                                            /* Liberation m√É¬©moire des modules */
-     { lib = (struct LIBRAIRIE *)liste->data;                                         /* R√É¬©cup√É¬©ration des donn√É¬©es de la liste */
+    while(liste)                                                                            /* Liberation m√Èmoire des modules */
+     { lib = (struct LIBRAIRIE *)liste->data;                                         /* R√Ècup√Èration des donn√Èes de la liste */
 
        if ( ! strcmp ( lib->admin_prompt, prompt ) )
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: trying to unload %s", __func__, lib->nom_fichier );
@@ -168,7 +168,7 @@
           pthread_mutex_destroy( &lib->synchro );
           dlclose( lib->dl_handle );
           Partage->com_msrv.Librairies = g_slist_remove( Partage->com_msrv.Librairies, lib );
-                                                                             /* Destruction de l'entete associ√É¬© dans la GList */
+                                                                             /* Destruction de l'entete associ√È dans la GList */
           Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: library %s unloaded", __func__, lib->nom_fichier );
           g_free( lib );
           return(TRUE);
@@ -180,7 +180,7 @@
   }
 /******************************************************************************************************************************/
 /* Decharger_librairies: Decharge toutes les librairies                                                                       */
-/* Entr√É¬©e: Rien                                                                                                               */
+/* Entr√Èe: Rien                                                                                                               */
 /* Sortie: Rien                                                                                                               */
 /******************************************************************************************************************************/
  void Decharger_librairies ( void )
@@ -194,7 +194,7 @@
        liste = liste->next;
      }
 
-    while(Partage->com_msrv.Librairies)                                                     /* Liberation m√É¬©moire des modules */
+    while(Partage->com_msrv.Librairies)                                                     /* Liberation m√Èmoire des modules */
      { lib = (struct LIBRAIRIE *)Partage->com_msrv.Librairies->data;
        Decharger_librairie_par_prompt (lib->admin_prompt);
      }
@@ -208,7 +208,7 @@
   { struct dirent *fichier;
     DIR *repertoire;
 
-    repertoire = opendir ( Config.librairie_dir );                                  /* Ouverture du r√É¬©pertoire des librairies */
+    repertoire = opendir ( Config.librairie_dir );                                  /* Ouverture du r√Èpertoire des librairies */
     if (!repertoire)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Directory %s Unknown", __func__, Config.librairie_dir );
        return;
@@ -256,7 +256,7 @@
   }
 /******************************************************************************************************************************/
 /* Demarrer_admin: Thread un process admin                                                                                    */
-/* Entr√É¬©e: rien                                                                                                               */
+/* Entr√Èe: rien                                                                                                               */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Demarrer_admin ( void )
@@ -274,7 +274,7 @@
   }
 /******************************************************************************************************************************/
 /* Demarrer_arch: Thread un process arch                                                                                      */
-/* Entr√É¬©e: rien                                                                                                               */
+/* Entr√Èe: rien                                                                                                               */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Demarrer_arch ( void )
@@ -292,7 +292,7 @@
   }
 /******************************************************************************************************************************/
 /* Stopper_fils: arret de tous les fils Watchdog                                                                              */
-/* Entr√É¬©e/Sortie: flag = TRUE si on demande aussi l'arret du thread Admin                                                     */
+/* Entr√Èe/Sortie: flag = TRUE si on demande aussi l'arret du thread Admin                                                     */
 /******************************************************************************************************************************/
  void Stopper_fils ( gint flag )
   { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Debut stopper_fils", __func__ );

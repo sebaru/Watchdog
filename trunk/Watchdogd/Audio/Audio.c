@@ -174,8 +174,9 @@
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,
                 "Run_thread: Thread is not enabled in config. Shutting Down %p",
                  pthread_self() );
+       lib->Thread_boot_start = FALSE;
        goto end;
-     } else lib->Thread_boot_start = FALSE;
+     }
 
     zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
     Connect_zmq (zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );

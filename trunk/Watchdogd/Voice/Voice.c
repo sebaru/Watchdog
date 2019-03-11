@@ -194,8 +194,10 @@ reload:
     if (lib->Thread_boot_start && !Cfg_voice.enable)
      { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_NOTICE,
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
+       lib->Thread_boot_start = FALSE;
        goto end;
-     } else lib->Thread_boot_start = FALSE;
+     }
+
 
     Voice_Make_pulseaudio_file();
     Voice_Make_jsgf_grammaire();
