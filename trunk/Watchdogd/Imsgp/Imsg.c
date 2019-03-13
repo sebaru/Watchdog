@@ -540,8 +540,7 @@
     purple_signal_connect( purple_conversations_get_handle(), "buddy-typed", &handle,
                            PURPLE_CALLBACK(Imsgp_buddy_typed), NULL);
 
-    zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
-    Connect_zmq (zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+    zmq_msg = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
 
     while( Cfg_imsgp.lib->Thread_run == TRUE )                                               /* On tourne tant que necessaire */
      { struct CMD_TYPE_HISTO *histo, histo_buf;

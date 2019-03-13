@@ -154,7 +154,7 @@
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct CMD_TYPE_HISTO *histo, histo_buf;
     struct ZMQUEUE *zmq_msg;
-    struct ZMQUEUE *zmq_master;
+    struct ZMQUEUE *zmq_from_bus;
     static gboolean audio_stop = TRUE;
 
     prctl(PR_SET_NAME, "W-Audio", 0, 0, 0 );
@@ -178,11 +178,8 @@
        goto end;
      }
 
-    zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
-    Connect_zmq (zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
-
-    zmq_master = New_zmq ( ZMQ_SUB, "listen-to-MSRV" );
-    Connect_zmq (zmq_master, "inproc", ZMQUEUE_LIVE_THREADS, 0 );
+    zmq_msg      = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+    zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
 
     while(Cfg_audio.lib->Thread_run == TRUE)                                                 /* On tourne tant que necessaire */
      { struct ZMQ_TARGET *event;
@@ -202,24 +199,18 @@
            }
         } else audio_stop = TRUE;
 
-       if (Recv_zmq_with_tag ( zmq_master, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
-        { if ( !strcasecmp( event->dst_thread, NOM_THREAD ) )
-           { switch (event->tag)
-              { case TAG_ZMQ_AUDIO_PLAY_WAV:
-                 { gchar fichier[80];
-                   Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                             "%s : Reception d'un message PLAY_WAV : %s", __func__, (gchar *)payload );
-                   g_snprintf( fichier, sizeof(fichier), "Son/%s.wav", payload );
-                   Jouer_wav_by_file ( fichier );
-                   break;
-                 }
-                case TAG_ZMQ_AUDIO_PLAY_GOOGLE:
-                 { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                             "%s : Reception d'un message PLAY_GOOGLE : %s", __func__, (gchar *)payload );
-                   Jouer_google_speech ( payload );
-                   break;
-                 }
-              }
+       if (Recv_zmq_with_tag ( zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
+        { if ( !strcmp( event->tag, "play_wav" ) )
+           { gchar fichier[80];
+             Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+                      "%s : Reception d'un message PLAY_WAV : %s", __func__, (gchar *)payload );
+             g_snprintf( fichier, sizeof(fichier), "Son/%s.wav", payload );
+             Jouer_wav_by_file ( fichier );
+           }
+          else if ( !strcmp( event->tag, "play_google" ) )
+           { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+                      "%s : Reception d'un message PLAY_GOOGLE : %s", __func__, (gchar *)payload );
+             Jouer_google_speech ( payload );
            }
         }
 
@@ -260,7 +251,7 @@
         }
      }
     Close_zmq ( zmq_msg );
-    Close_zmq ( zmq_master );
+    Close_zmq ( zmq_from_bus );
 end:
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_audio.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */

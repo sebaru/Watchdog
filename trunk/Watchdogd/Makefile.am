@@ -6,6 +6,7 @@
 SUBDIRS = Include Serveur Dls TraductionDLS Archive Enocean \
 	  Rs485 Smsg Modbus Audio Onduleur Lirc Rfxcom Imsgp TeleinfoEDF Http Voice Radio
 
+bin_SCRIPTS = Wtd_set_volume.sh
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
                     zmq.c shm.c Config.c Mnemo_Registre.c \
@@ -33,7 +34,7 @@ Watchdogd_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 libcurl openssl lib
                    `mysql_config --cflags`
 
 sysconf_DATA = watchdogd.conf.sample Watchdogd.service.system Watchdogd.service.user watchdogd-httpd.conf.sample
-pkgdata_DATA = init_db.sql Wtd_set_volume.sh
+pkgdata_DATA = init_db.sql
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
             -I$(top_srcdir)/Watchdogd/Include

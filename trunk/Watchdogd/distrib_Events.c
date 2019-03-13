@@ -59,10 +59,8 @@
               bool->tech_id, bool->acronyme, mnemo->ev_host, mnemo->ev_thread, mnemo->ev_text, reste );
 
     if ( strlen ( mnemo->ev_text ) > 0 )                           /* Existe t'il un evenement associé ? (implique furtivité) */
-     { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_FROM_DLS,
-                           NULL, "msrv", mnemo->ev_host, mnemo->ev_thread, mnemo->ev_text, strlen(mnemo->ev_text)+1 );
-       Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, TAG_ZMQ_FROM_DLS,
-                           NULL, "msrv", mnemo->ev_host, mnemo->ev_thread, mnemo->ev_text, strlen(mnemo->ev_text)+1 );
+     { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus, NULL, "msrv",
+                           mnemo->ev_host, mnemo->ev_thread, mnemo->ev_text, "dls_event", strlen(mnemo->ev_text)+1 );
      }
     g_free(mnemo);
   }

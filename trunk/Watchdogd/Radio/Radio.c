@@ -116,7 +116,7 @@
 /* Main: Fonction principale du Thread Radio                                                                                  */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct ZMQUEUE *zmq_master;
+  { struct ZMQUEUE *zmq_from_bus;
 
     prctl(PR_SET_NAME, "W-RADIO", 0, 0, 0 );
     memset( &Cfg_radio, 0, sizeof(Cfg_radio) );                                     /* Mise a zero de la structure de travail */
@@ -138,9 +138,7 @@
        goto end;
      }
 
-
-    zmq_master = New_zmq ( ZMQ_SUB, "listen-to-MSRV" );
-    Connect_zmq (zmq_master, "inproc", ZMQUEUE_LIVE_THREADS, 0 );
+    zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
 
     while(Cfg_radio.lib->Thread_run == TRUE)                                                 /* On tourne tant que necessaire */
      { struct ZMQ_TARGET *event;
@@ -153,23 +151,18 @@
           Cfg_radio.lib->Thread_reload = FALSE;
         }
 
-       if (Recv_zmq_with_tag ( zmq_master, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
-        { if ( !strcasecmp( event->dst_thread, NOM_THREAD ) )
-           { switch (event->tag)
-              { case TAG_ZMQ_RADIO_PLAY:
-                 { gchar radio[80];
-                   Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_DEBUG,
-                             "%s : Reception d'un message PLAY RADIO : %s", __func__, (gchar *)payload );
-                   Jouer_radio ( (gchar *)payload );
-                   break;
-                 }
-              }
+       if (Recv_zmq_with_tag ( zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
+        { if ( !strcmp( event->tag, "play_radio" ) )
+           { gchar radio[80];
+             Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_DEBUG,
+                      "%s : Reception d'un message PLAY RADIO : %s", __func__, (gchar *)payload );
+             Jouer_radio ( (gchar *)payload );
            }
         }
 
        sleep(1);
      }
-    Close_zmq ( zmq_master );
+    Close_zmq ( zmq_from_bus );
     Stopper_radio();
 end:
     Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );

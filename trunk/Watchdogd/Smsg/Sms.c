@@ -515,7 +515,7 @@
                 bit.num = mnemo->num;
                 g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", mnemo->dls_tech_id );
                 g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", mnemo->acronyme );
-                Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, TAG_ZMQ_SET_BIT, NULL, NOM_THREAD, "*", "msrv",
+                Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_BIT",
                                     &bit, sizeof(struct ZMQ_SET_BIT) );
               }
              else Info_new( Config.log, Config.log_msrv, LOG_ERR,
@@ -649,7 +649,7 @@
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct CMD_TYPE_HISTO *histo, histo_buf;
     struct ZMQUEUE *zmq_msg;
-    struct ZMQUEUE *zmq_master;
+    struct ZMQUEUE *zmq_from_bus;
     
     prctl(PR_SET_NAME, "W-SMSG", 0, 0, 0 );
     memset( &Cfg_smsg, 0, sizeof(Cfg_smsg) );                                        /* Mise a zero de la structure de travail */
@@ -671,16 +671,9 @@
        goto end;
      }
 
-    zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
-    Connect_zmq (zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
-
-    zmq_master = New_zmq ( ZMQ_SUB, "listen-to-MSRV" );
-    Connect_zmq (zmq_master, "inproc", ZMQUEUE_LIVE_THREADS, 0 );
-
-    if (Config.instance_is_master==FALSE)                                                          /* si l'instance est Slave */
-     { Cfg_smsg.zmq_to_master = New_zmq ( ZMQ_PUB, "pub-to-master" );
-       Connect_zmq ( Cfg_smsg.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
-     }
+    zmq_msg                = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+    zmq_from_bus           = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    Cfg_smsg.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",  "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     Envoyer_smsg_gsm_text ( "SMS System is running" );
     sending_is_disabled = FALSE;                                                     /* A l'init, l'envoi de SMS est autorisé */
@@ -701,19 +694,9 @@
        Lire_sms_gsm();
 
 /********************************************************* Envoi de SMS *******************************************************/
-       if (Recv_zmq_with_tag ( zmq_master, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
-        { if ( !strcasecmp( event->dst_thread, NOM_THREAD ) )
-           { switch (event->tag)
-              { case TAG_ZMQ_SMSG_SEND_SMSBOX:
-                 { Envoyer_smsg_smsbox_text ( payload );       
-                   break;
-                 }
-                case TAG_ZMQ_SMSG_SEND_GSM:
-                 { Envoyer_smsg_gsm_text ( payload );       
-                   break;
-                 }
-              }
-           }
+       if (Recv_zmq_with_tag ( zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
+        { if ( !strcmp( event->tag, "send_smsbox" ) )   { Envoyer_smsg_smsbox_text ( payload ); }
+          else if ( !strcmp( event->tag, "send_sms" ) ) { Envoyer_smsg_gsm_text ( payload ); }
         }
 
        if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) != sizeof(struct CMD_TYPE_HISTO) )
@@ -739,7 +722,7 @@
         }
      }
     Close_zmq ( zmq_msg );
-    Close_zmq ( zmq_master );
+    Close_zmq ( zmq_from_bus );
     Close_zmq ( Cfg_smsg.zmq_to_master );
 
 end:

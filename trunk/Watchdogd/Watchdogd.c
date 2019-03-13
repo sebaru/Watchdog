@@ -268,30 +268,21 @@
  static void *Boucle_pere_master ( void )
   { gint cpt_5_minutes, cpt_1_minute;
     struct CMD_TYPE_HISTO histo;
-    struct ZMQUEUE *zmq_from_slave, *zmq_from_threads;
+    struct ZMQUEUE *zmq_from_slave, *zmq_from_bus;
 
     prctl(PR_SET_NAME, "W-MASTER", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
 /************************************************* Socket ZMQ interne *********************************************************/
-    Partage->com_msrv.zmq_msg = New_zmq ( ZMQ_PUB, "pub-int-msgs" );
-    Bind_zmq ( Partage->com_msrv.zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
-
-    Partage->com_msrv.zmq_motif = New_zmq ( ZMQ_PUB, "pub-int-motifs" );
-    Bind_zmq ( Partage->com_msrv.zmq_motif, "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
-
-    Partage->com_msrv.zmq_to_threads = New_zmq ( ZMQ_PUB, "pub-to-threads" );
-    Bind_zmq ( Partage->com_msrv.zmq_to_threads, "inproc", ZMQUEUE_LIVE_THREADS, 0 );
-
-    zmq_from_threads = New_zmq ( ZMQ_SUB, "listen-to-threads" );
-    Bind_zmq ( zmq_from_threads, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
+    Partage->com_msrv.zmq_msg = Bind_zmq ( ZMQ_PUB, "pub-int-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+    Partage->com_msrv.zmq_motif = Bind_zmq ( ZMQ_PUB, "pub-int-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
+    Partage->com_msrv.zmq_to_bus = Bind_zmq ( ZMQ_PUB, "pub-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    zmq_from_bus = Bind_zmq ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
 /***************************************** Socket pour une instance master ****************************************************/
-    Partage->com_msrv.zmq_to_slave = New_zmq ( ZMQ_PUB, "pub-to-slave" );
-    Bind_zmq ( Partage->com_msrv.zmq_to_slave, "tcp", "*", 5555 );
-    zmq_from_slave = New_zmq ( ZMQ_SUB, "listen-to-slave" );
-    Bind_zmq ( zmq_from_slave, "tcp", "*", 5556 );
+    Partage->com_msrv.zmq_to_slave = Bind_zmq ( ZMQ_PUB, "pub-to-slave", "tcp", "*", 5555 );
+    zmq_from_slave = Bind_zmq ( ZMQ_SUB, "listen-to-slave", "tcp", "*", 5556 );
 
 /************************************* Création des zones de bits internes dynamiques *****************************************/
     Partage->Dls_data_AI   = NULL;
@@ -330,47 +321,27 @@
        Gerer_arrive_Ixxx_dls();                                                 /* Distribution des changements d'etats motif */
        Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
 
-       if ( (byte=Recv_zmq_with_tag( zmq_from_slave, &buffer, sizeof(buffer), &event, &payload )) > 0 )
-        { switch(event->tag)
-           { case TAG_ZMQ_SET_BIT:
-              { struct ZMQ_SET_BIT *bit;
-                bit = (struct ZMQ_SET_BIT *)payload;
-                Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
-                          "%s: receive TAG_ZMQ_SET_BIT from %s/%s to %s/%s : bit type %d num %d, techid %s acronyme %s", __func__,
-                          event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
-                          bit->type, bit->num, bit->dls_tech_id, bit->acronyme );
-                if (bit->type == MNEMO_MONOSTABLE)
-                 { if (bit->num != -1) Envoyer_commande_dls ( bit->num );
-                                  else Envoyer_commande_dls_data ( bit->dls_tech_id, bit->acronyme );
-                 }
-                break;
+       if ( (byte=Recv_zmq_with_tag( zmq_from_slave, "msrv", &buffer, sizeof(buffer), &event, &payload )) > 0 )
+        { if ( !strcmp(event->tag,"SET_BIT") )
+           { struct ZMQ_SET_BIT *bit;
+             bit = (struct ZMQ_SET_BIT *)payload;
+             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                       "%s: receive TAG_ZMQ_SET_BIT from %s/%s to %s/%s : bit type %d num %d, techid %s acronyme %s", __func__,
+                       event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
+                       bit->type, bit->num, bit->dls_tech_id, bit->acronyme );
+             if (bit->type == MNEMO_MONOSTABLE)
+              { if (bit->num != -1) Envoyer_commande_dls ( bit->num );
+                               else Envoyer_commande_dls_data ( bit->dls_tech_id, bit->acronyme );
               }
-             case TAG_ZMQ_CLI:
-              { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive TAG_ZMQ_CLI from %s/%s to %s/%s : %s",
-                          __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
-                if (Zmq_instance_is_target ( event ))
-                 { if (!strcasecmp(event->dst_thread,"msrv"))                                             /* Thread MSRV ? */          
-                    { New_Processer_commande_admin ( event, payload ); }
-                   else Send_zmq ( Partage->com_msrv.zmq_to_threads, buffer, byte );  /* Sinon on envoi aux threads locaux */
-                 }
-                if (Zmq_other_is_target(event)) Send_zmq ( Partage->com_msrv.zmq_to_slave, buffer, byte ); /* Sinon on envoi aux slaves */
-                break;
-              }
-             case TAG_ZMQ_CLI_RESPONSE:
-              { Send_zmq ( Partage->com_msrv.zmq_to_slave, buffer, byte );                    /* Sinon on envoi aux slaves */
-                break;
-              }
-             case TAG_ZMQ_SLAVE_PING:
-              { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive TAG_ZMQ_SATELLITE_PING from %s/%s to %s/%s",
-                          __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );
-                break;
-              }
-             default:
-              { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: receive wrong tag number '%d' for ZMQ '%s'",
-                          __func__, event->tag, zmq_from_slave->name );
-              }
+           } else
+          if ( !strcmp(event->tag, "ping") )
+           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive TAG_ZMQ_SATELLITE_PING from %s/%s to %s/%s",
+                       __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );
            }
         }
+
+       if ( (byte=Recv_zmq( zmq_from_bus, &buffer, sizeof(buffer) )) > 0 )
+        { Send_zmq ( Partage->com_msrv.zmq_to_bus, buffer, byte ); }                        /* Sinon on envoi aux threads */
 
        if (Partage->com_msrv.Thread_reload)                                                               /* On a recu RELOAD */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: RELOAD", __func__ );
@@ -407,8 +378,8 @@
     Stopper_fils(TRUE);                                                                    /* Arret de tous les fils watchdog */
     Close_zmq ( Partage->com_msrv.zmq_msg );
     Close_zmq ( Partage->com_msrv.zmq_motif );
-    Close_zmq ( Partage->com_msrv.zmq_to_threads );
-    Close_zmq ( zmq_from_threads );
+    Close_zmq ( Partage->com_msrv.zmq_to_bus );
+    Close_zmq ( zmq_from_bus );
     Close_zmq ( Partage->com_msrv.zmq_to_slave );
     Close_zmq ( zmq_from_slave );
 
@@ -432,27 +403,20 @@
  static void *Boucle_pere_slave ( void )
   { gint cpt_5_minutes, cpt_1_minute;
     struct CMD_TYPE_HISTO histo;
-    struct ZMQUEUE *zmq_from_master, *zmq_from_threads;
+    struct ZMQUEUE *zmq_from_master, *zmq_from_bus;
 
     prctl(PR_SET_NAME, "W-SLAVE", 0, 0, 0 );
 
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Debut boucle sans fin", __func__ );
 
 /************************************************* Socket ZMQ interne *********************************************************/
-    Partage->com_msrv.zmq_msg = New_zmq ( ZMQ_PUB, "pub-int-msgs" );
-    Bind_zmq ( Partage->com_msrv.zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
-
-    Partage->com_msrv.zmq_to_threads = New_zmq ( ZMQ_PUB, "pub-to-threads" );
-    Bind_zmq ( Partage->com_msrv.zmq_to_threads, "inproc", ZMQUEUE_LIVE_THREADS, 0 );
-
-    zmq_from_threads = New_zmq ( ZMQ_SUB, "listen-to-threads" );
-    Bind_zmq ( zmq_from_threads, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
+    Partage->com_msrv.zmq_msg    = Bind_zmq ( ZMQ_PUB, "pub-int-msgs",  "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+    Partage->com_msrv.zmq_to_bus = Bind_zmq ( ZMQ_PUB, "pub-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    zmq_from_bus                 = Bind_zmq ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
 /***************************************** Socket de subscription au master ***************************************************/
-    Partage->com_msrv.zmq_to_master = New_zmq ( ZMQ_PUB, "pub-to-master" );
-    Connect_zmq ( Partage->com_msrv.zmq_to_master, "tcp", Config.master_host, 5556 );
-    zmq_from_master = New_zmq ( ZMQ_SUB, "listen-to-master" );
-    Connect_zmq ( zmq_from_master, "tcp", Config.master_host, 5555 );
+    Partage->com_msrv.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",    "tcp", Config.master_host, 5556 );
+    zmq_from_master                 = Connect_zmq ( ZMQ_SUB, "listen-to-master", "tcp", Config.master_host, 5555 );
 
 /************************************* Création des zones de bits internes dynamiques *****************************************/
     Partage->Dls_data_AI   = NULL;
@@ -480,37 +444,37 @@
        gchar buffer[2048];
        void *payload;
        gint byte;
-       if ( (byte=Recv_zmq_with_tag( zmq_from_master, &buffer, sizeof(buffer), &event, &payload )) > 0 )
-        { switch(event->tag)
-           { case TAG_ZMQ_TO_HISTO:
-              { if (Send_zmq( Partage->com_msrv.zmq_msg, payload, sizeof(struct CMD_TYPE_HISTO)) == -1)
-                 { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ '%s' socket failed (%s)",
-                             __func__, Partage->com_msrv.zmq_msg->name, zmq_strerror(errno) );
-                 }
-                break;
+       if ( (byte=Recv_zmq_with_tag( zmq_from_master, "msrv", &buffer, sizeof(buffer), &event, &payload )) > 0 )
+        { if (!strcmp(event->tag,"histo"))
+           { if (Send_zmq( Partage->com_msrv.zmq_msg, payload, sizeof(struct CMD_TYPE_HISTO)) == -1)
+              { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ '%s' socket failed (%s)",
+                          __func__, Partage->com_msrv.zmq_msg->name, zmq_strerror(errno) );
               }
+           }
+#ifdef bouh
              case TAG_ZMQ_CLI:
               { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive TAG_ZMQ_CLI from %s/%s to %s/%s : %s",
                           __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
                 if (Zmq_instance_is_target ( event ))
                  { if (!strcasecmp(event->dst_thread,"msrv"))                                             /* Thread MSRV ? */          
                     { New_Processer_commande_admin ( event, payload ); }
-                   else Send_zmq ( Partage->com_msrv.zmq_to_threads, buffer, byte );  /* Sinon on envoi aux threads locaux */
+                   else Send_zmq ( Partage->com_msrv.zmq_to_bus, buffer, byte );  /* Sinon on envoi aux threads locaux */
                  }
                 break;
               }
-             default:
-              { if (Send_zmq( Partage->com_msrv.zmq_to_threads, buffer, byte ) == -1)
-                 { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ '%s' socket failed (%s)",
-                             __func__, Partage->com_msrv.zmq_to_threads->name, zmq_strerror(errno) );
-                 }
-                break;
+#endif
+          else
+           { if (Send_zmq( Partage->com_msrv.zmq_to_bus, buffer, byte ) == -1)
+              { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ '%s' socket failed (%s)",
+                          __func__, Partage->com_msrv.zmq_to_bus->name, zmq_strerror(errno) );
               }
            }
         }
-                                                                      /* Si reception depuis un thread, report vers le master */
-       if ( (byte=Recv_zmq( zmq_from_threads, &buffer, sizeof(buffer) )) > 0 )
-        { Send_zmq ( Partage->com_msrv.zmq_to_master, buffer, byte ); }
+                                                /* Si reception depuis un thread, report vers le master et les autres threads */
+       if ( (byte=Recv_zmq( zmq_from_bus, &buffer, sizeof(buffer) )) > 0 )
+        { Send_zmq ( Partage->com_msrv.zmq_to_bus, buffer, byte );
+          Send_zmq ( Partage->com_msrv.zmq_to_master, buffer, byte );
+        }
 
        if (Partage->com_msrv.Thread_reload)                                                               /* On a recu RELOAD */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: RELOAD", __func__ );
@@ -521,8 +485,7 @@
         }
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
-        { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, TAG_ZMQ_SLAVE_PING, NULL, "msrv", Config.master_host, "msrv",
-                              NULL, 0 );
+        { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, NULL, "msrv", Config.master_host, "msrv", "ping", NULL, 0 );
           cpt_5_minutes += 3000;                                                           /* Sauvegarde toutes les 5 minutes */
         }
 
@@ -539,8 +502,8 @@
     Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
     Stopper_fils(TRUE);                                                                    /* Arret de tous les fils watchdog */
     Close_zmq ( Partage->com_msrv.zmq_msg );
-    Close_zmq ( Partage->com_msrv.zmq_to_threads );
-    Close_zmq ( zmq_from_threads );
+    Close_zmq ( Partage->com_msrv.zmq_to_bus );
+    Close_zmq ( zmq_from_bus );
     Close_zmq( Partage->com_msrv.zmq_to_master );
     Close_zmq( zmq_from_master );
 

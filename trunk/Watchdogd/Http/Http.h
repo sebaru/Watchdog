@@ -63,7 +63,8 @@
 
     struct lws_context_creation_info ws_info;                                             /* Paramétrage du context WebSocket */
     struct lws_context *ws_context;                                                                      /* Context WebSocket */
-    
+    struct ZMQUEUE *zmq_from_bus;                                                                       /* Envoi vers le msrv */
+    struct ZMQUEUE *zmq_to_master;                                                                      /* Envoi vers le msrv */
     gint nbr_max_connexion;                                           /* Nombre maximum de connexion autorisées simultanément */
     gint max_upload_bytes;                                                                   /* Taille max du fichier uploadé */
     gint lws_debug_level;                                                              /* Niveau de debug de la librairie LWS */

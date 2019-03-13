@@ -99,7 +99,7 @@
 
 /******************************************************* Envoi du message aux librairies abonnées *****************************/
     Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, TAG_ZMQ_TO_HISTO, NULL, "msrv", "*", "*",
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "*", "histo",
                        &histo, sizeof(struct CMD_TYPE_HISTO) );
 /************************************************** Gestion des repeat ********************************************************/
     if (histo.msg.time_repeat) 
@@ -157,7 +157,7 @@
 
 /******************************************************* Envoi du message aux librairies abonnées *****************************/
     Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, TAG_ZMQ_TO_HISTO, NULL, "msrv", "*", "*",
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "*", "histo",
                        &histo, sizeof(struct CMD_TYPE_HISTO) );
   }
 /******************************************************************************************************************************/
@@ -196,7 +196,7 @@
 
     Modifier_histo_msgsDB ( &histo );
     Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, TAG_ZMQ_TO_HISTO, NULL, "msrv", "*", "*",
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "*", "histo",
                        &histo, sizeof(struct CMD_TYPE_HISTO) );
   }
 /******************************************************************************************************************************/
@@ -219,7 +219,7 @@
 
     Modifier_histo_msgsDB ( &histo );
     Send_zmq ( Partage->com_msrv.zmq_msg, &histo, sizeof(struct CMD_TYPE_HISTO) );
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, TAG_ZMQ_TO_HISTO, NULL, "msrv", "*", "*",
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", "*", "*", "histo",
                        &histo, sizeof(struct CMD_TYPE_HISTO) );
   }
 /******************************************************************************************************************************/

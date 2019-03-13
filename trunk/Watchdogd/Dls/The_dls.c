@@ -1353,8 +1353,8 @@
        dls_tree->syn_vars.bit_derangement_fixe = bit_derangement_fixe;
        dls_tree->syn_vars.bit_danger           = bit_danger;
        dls_tree->syn_vars.bit_danger_fixe      = bit_danger_fixe;
-       Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_SET_SYN_VARS,
-                           NULL, "dls", "*", "ssrv",
+       Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, 
+                           NULL, "dls", "*", "ssrv", "SET_SYN_VARS",
                           &dls_tree->syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
      }
  }
@@ -1373,6 +1373,8 @@
     SB_SYS(1, 0);                                                                                      /* B1 est toujours à 0 */
     SB_SYS(2, 1);                                                                                      /* B2 est toujours à 1 */
     sleep(30);                    /* attente 30 secondes pour initialisation des bit internes et collection des infos modules */
+
+    Partage->com_dls.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
      { 
@@ -1416,6 +1418,7 @@
        sched_yield();
      }
     Decharger_plugins();                                                                      /* Dechargement des modules DLS */
+    Close_zmq(Partage->com_dls.zmq_to_master);
     Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: DLS Down (%p)", __func__, pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
