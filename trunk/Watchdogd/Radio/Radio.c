@@ -67,11 +67,11 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Jouer_wav: Jouer un fichier wav dont le nom est en paramètre                                                               */
-/* Entrée : le nom du fichier wav                                                                                             */
+/* Stopper_radio : Stop la diffusion radiophonique en cours                                                                   */
+/* Entrée : Néant                                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static gboolean Stopper_radio ( void )
+ static void Stopper_radio ( void )
   { if (Cfg_radio.radio_pid>0)
      { Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_DEBUG,
                 "%s: Sending kill to radio pid %d", __func__, Cfg_radio.radio_pid );
@@ -157,7 +157,9 @@
              Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_DEBUG,
                       "%s : Reception d'un message PLAY RADIO : %s", __func__, (gchar *)payload );
              Jouer_radio ( (gchar *)payload );
-           }
+           } else
+          if ( !strcmp( event->tag, "stop_radio" ) )
+           { Stopper_radio(); }
         }
 
        sleep(1);

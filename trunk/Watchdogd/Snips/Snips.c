@@ -1,0 +1,200 @@
+/******************************************************************************************************************************/
+/* Watchdogd/Snips/Snips.c  Gestion des messages Snips de Watchdog 2.0                                                        */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                                    14.03.2019 19:48:41 */
+/* Auteur: LEFEVRE Sebastien                                                                                                  */
+/******************************************************************************************************************************/
+/*
+ * Archive.c
+ * This file is part of Watchdog
+ *
+ * Copyright (C) 2010-2019 - Sebastien Lefevre
+ *
+ * Watchdog is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Watchdog is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Watchdog; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Boston, MA  02110-1301  USA
+ */
+
+ #include <sys/time.h>
+ #include <sys/prctl.h>
+ #include <unistd.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <sys/wait.h>
+ #include <fcntl.h>
+
+ #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
+ #include "Snips.h"
+/******************************************************************************************************************************/
+/* Snips_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static gboolean Snips_Lire_config ( void )
+  { gchar *nom, *valeur;
+    struct DB *db;
+
+    Cfg_snips.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
+    Cfg_snips.enable            = FALSE; 
+
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
+     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_WARNING,
+                "%s: Database connexion failed. Using Default Parameters", __func__ );
+       return(FALSE);
+     }
+
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
+     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_INFO, "%s: '%s' = %s", __func__, nom, valeur ); /* Print Config */
+            if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_snips.enable = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_snips.lib->Thread_debug = TRUE;  }
+       else
+        { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE,
+                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
+        }
+     }
+    return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Snips_message_CB: appeller par la librairie snips lorsque qu'un evenement Vocal est reconnu                                */
+/* Entrée : L'évènement                                                                                                       */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Snips_message_CB(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message)
+  {
+	   if(message->payloadlen)
+     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Message recu: %s - %s", __func__,
+                 message->topic, message->payload );
+     }
+		  else
+     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Message recu: %s - NoPayload", __func__,
+                 message->topic );
+     }
+    Cfg_snips.nbr_msg_recu++;
+ 	}
+/******************************************************************************************************************************/
+/* Snips_connect_CB: appeller par la librairie snips lors d'un evenement de connect                                           */
+/* Entrée : L'évènement                                                                                                       */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Snips_connect_CB(struct mosquitto *mosq, void *userdata, int result)
+  {	if(!result)
+     {	/* Subscribe to broker information topics on successful connect. */
+		     mosquitto_subscribe(mosq, NULL, "hermes/intent/#", 2);
+       Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Connect OK. subscribing...", __func__ );
+	    }
+    else
+     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Connect Error/ Result=%d.", __func__, result ); }
+  }
+/******************************************************************************************************************************/
+/* Snips_subscribe_CB: appeller par la librairie snips lors d'un evenement de subscribe arrive                                */
+/* Entrée : L'évènement                                                                                                       */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Snips_subscribe_CB(struct mosquitto *mosq, void *userdata, int mid, int qos_count, const int *granted_qos)
+  {
+    Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Subscribe ok for '%s'.", __func__, mid );
+  }
+/******************************************************************************************************************************/
+/* Snips_log_CB: appeller par la librairie snips lors d'un evenement de log                                                   */
+/* Entrée : L'évènement                                                                                                       */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Snips_log_CB(struct mosquitto *mosq, void *userdata, int level, const char *str)
+  { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_DEBUG, "%s: Level %d -> '%s'", __func__, level, str );
+  } 
+/******************************************************************************************************************************/
+/* Main: Fonction principale du Thread Snips                                                                                  */
+/******************************************************************************************************************************/
+ void Run_thread ( struct LIBRAIRIE *lib )
+  { struct ZMQUEUE *zmq_from_bus;
+   	struct mosquitto *mosq = NULL;
+
+    prctl(PR_SET_NAME, "W-SNIPS", 0, 0, 0 );
+    memset( &Cfg_snips, 0, sizeof(Cfg_snips) );                                     /* Mise a zero de la structure de travail */
+    Cfg_snips.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
+    Cfg_snips.lib->TID = pthread_self();                                                    /* Sauvegarde du TID pour le pere */
+    Snips_Lire_config ();                                                   /* Lecture de la configuration logiciel du thread */
+
+    Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE,
+              "%s: Demarrage %s . . . TID = %p", __func__, VERSION, pthread_self() );
+    Cfg_snips.lib->Thread_run = TRUE;                                                                   /* Le thread tourne ! */
+
+    g_snprintf( Cfg_snips.lib->admin_prompt, sizeof(Cfg_snips.lib->admin_prompt), "snips" );
+    g_snprintf( Cfg_snips.lib->admin_help,   sizeof(Cfg_snips.lib->admin_help),   "Manage Snips system" );
+
+    if (lib->Thread_boot_start && !Cfg_snips.enable)
+     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE,
+                "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
+       lib->Thread_boot_start = FALSE;
+       goto end;
+     }
+
+    zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+
+	   mosquitto_lib_init();
+ 	  mosq = mosquitto_new(NULL, TRUE, NULL);
+	   if(!mosq)
+     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE,
+                "%s: Unable to create Mosquitto MQTT. Shutting Down %p", __func__, pthread_self() );
+       lib->Thread_boot_start = FALSE;
+       goto end;
+     }
+   	mosquitto_log_callback_set(mosq, Snips_log_CB);
+	   mosquitto_connect_callback_set(mosq, Snips_connect_CB);
+	   mosquitto_message_callback_set(mosq, Snips_message_CB);
+	   mosquitto_subscribe_callback_set(mosq, Snips_subscribe_CB);
+
+   	if( mosquitto_connect(mosq, "localhost", 1883, 60) )
+     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE,
+                "%s: Unable to connect to MQTT local Queue. Shutting Down %p", __func__, pthread_self() );
+       lib->Thread_boot_start = FALSE;
+       goto end;
+     }
+
+    while(Cfg_snips.lib->Thread_run == TRUE)                                                 /* On tourne tant que necessaire */
+     { struct ZMQ_TARGET *event;
+       gchar buffer[256];
+       void *payload;
+
+       if (Cfg_snips.lib->Thread_reload)                                                             /* On a recu reload ?? */
+        { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: SIGUSR1", __func__ );
+          Snips_Lire_config();
+          Cfg_snips.lib->Thread_reload = FALSE;
+        }
+
+       mosquitto_loop(mosq, 1000, 1);
+
+       if (Recv_zmq_with_tag ( zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
+        { /*if ( !strcmp( event->tag, "play_snips" ) )
+           { gchar snips[80];
+             Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_DEBUG,
+                      "%s : Reception d'un message PLAY SNIPS : %s", __func__, (gchar *)payload );
+             Jouer_snips ( (gchar *)payload );
+           } else
+          if ( !strcmp( event->tag, "stop_snips" ) )
+           { Stopper_snips(); }*/
+        }
+       usleep(1000);
+     }
+    Close_zmq ( zmq_from_bus );
+end:
+   	mosquitto_destroy(mosq);
+   	mosquitto_lib_cleanup();
+    Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
+    Cfg_snips.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */
+    Cfg_snips.lib->TID = 0;                                                   /* On indique au master que le thread est mort. */
+    pthread_exit(GINT_TO_POINTER(0));
+  }
+/*----------------------------------------------------------------------------------------------------------------------------*/

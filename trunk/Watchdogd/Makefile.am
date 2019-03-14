@@ -4,7 +4,7 @@
 #* Auteur: LEFEVRE Sebastien                                                                              */
 #**********************************************************************************************************/
 SUBDIRS = Include Serveur Dls TraductionDLS Archive Enocean \
-	  Rs485 Smsg Modbus Audio Onduleur Lirc Rfxcom Imsgp TeleinfoEDF Http Voice Radio
+	  Rs485 Smsg Modbus Audio Onduleur Lirc Rfxcom Imsgp TeleinfoEDF Http Voice Radio Snips
 
 bin_SCRIPTS = Wtd_set_volume.sh
 bin_PROGRAMS = Watchdogd
