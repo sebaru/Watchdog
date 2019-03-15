@@ -60,7 +60,7 @@
 
     if ( strlen ( mnemo->ev_text ) > 0 )                           /* Existe t'il un evenement associé ? (implique furtivité) */
      { Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus, NULL, "msrv",
-                           mnemo->ev_host, mnemo->ev_thread, mnemo->ev_text, "dls_event", strlen(mnemo->ev_text)+1 );
+                           mnemo->ev_host, mnemo->ev_thread, "dls_event", mnemo->ev_text, strlen(mnemo->ev_text)+1 );
      }
     g_free(mnemo);
   }

@@ -36,9 +36,9 @@
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Snips.h"
 /******************************************************************************************************************************/
-/* Snips_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* Snips_Lire_config : Lit la config Watchdog et rempli la structure mÃ©moire                                                  */
+/* EntrÃ©e: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  static gboolean Snips_Lire_config ( void )
   { gchar *nom, *valeur;
@@ -46,19 +46,22 @@
 
     Cfg_snips.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
     Cfg_snips.enable            = FALSE; 
+    g_snprintf( Cfg_snips.snips_host, sizeof(Cfg_snips.snips_host), "localhost", valeur );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de donnÃ©es */
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_WARNING,
                 "%s: Database connexion failed. Using Default Parameters", __func__ );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* RÃ©cupÃ©ration d'une config dans la DB */
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_INFO, "%s: '%s' = %s", __func__, nom, valeur ); /* Print Config */
             if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_snips.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_snips.lib->Thread_debug = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "snips_host" ) )
+        { g_snprintf( Cfg_snips.snips_host, sizeof(Cfg_snips.snips_host), "%s", valeur ); }
        else
         { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE,
                    "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
@@ -67,15 +70,125 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
+/* Snips_traiter_commande_vocale: appeller pour faire correspondre une action a une demande vocale                            */
+/* EntrÃ©e : L'Ã©vÃ¨nement                                                                                                       */
+/* Sortie : NÃ©ant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Snips_traiter_commande_vocale ( gchar *texte )
+  { struct CMD_TYPE_MNEMO_BASE *mnemo;
+    gchar chaine[160];
+    struct DB *db;
+
+    if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, texte ) )
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte );
+       return;
+     }
+          
+    if ( db->nbr_result == 0 )                                                              /* Si pas d'enregistrement trouvÃ© */
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: No match found for '%s'", __func__, texte );
+       Libere_DB_SQL ( &db );
+     }
+    else if (db->nbr_result > 1)
+     { g_snprintf(chaine, sizeof(chaine), "Too many events found for '%s'", texte );             /* Envoi de l'erreur si trop */
+       Libere_DB_SQL ( &db );
+     }
+    else
+     { while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
+        { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Match found for '%s' Type %d Num %d - %s", __func__,
+                    texte, mnemo->type, mnemo->num, mnemo->libelle );
+
+          if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
+           { switch( mnemo->type )
+              { case MNEMO_MONOSTABLE:
+                     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Mise Ã  un du bit M%03d %s:%s", __func__,
+                               mnemo->num, mnemo->dls_tech_id, mnemo->acronyme );
+                     if (mnemo->num != -1) Envoyer_commande_dls ( mnemo->num );
+                                      else Envoyer_commande_dls_data ( mnemo->dls_tech_id, mnemo->acronyme );
+                     break;
+                default:
+                     Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                               "%s: Error, type of mnemo not handled", __func__);
+              }
+           }
+          else /* Envoi au master via thread HTTP */
+           { if (mnemo->type == MNEMO_MONOSTABLE)
+              { struct ZMQ_SET_BIT bit;
+                bit.type = mnemo->type;
+                bit.num = mnemo->num;
+                g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", mnemo->dls_tech_id );
+                g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", mnemo->acronyme );
+                /*Send_zmq_with_tag ( Cfg_snips.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_BIT",
+                                    &bit, sizeof(struct ZMQ_SET_BIT) );*/
+              }
+             else Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                           "%s: Error, type of mnemo not handled", __func__ );
+           }
+          g_free(mnemo);
+        }
+     }
+  }
+/******************************************************************************************************************************/
 /* Snips_message_CB: appeller par la librairie snips lorsque qu'un evenement Vocal est reconnu                                */
-/* Entrée : L'évènement                                                                                                       */
-/* Sortie : Néant                                                                                                             */
+/* EntrÃ©e : L'Ã©vÃ¨nement                                                                                                       */
+/* Sortie : NÃ©ant                                                                                                             */
 /******************************************************************************************************************************/
  static void Snips_message_CB(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message)
-  {
+  { JsonArray *slotArray;
+    const gchar *intent;
+    JsonObject *object;
+    JsonNode *Query;
+
 	   if(message->payloadlen)
-     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Message recu: %s - %s", __func__,
+     { gchar **decoupe, *result=NULL;
+       Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_DEBUG, "%s: Message recu: %s - %s", __func__,
                  message->topic, message->payload );
+       Query = json_from_string ( message->payload, NULL );
+       if (!Query)
+        { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_ERR, "%s: requete non Json", __func__ );
+          return;                                                                                              /* Bad Request */
+        }
+
+       object = json_node_get_object (Query);
+       if (!object)
+        { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_ERR, "%s: Object non trouvÃ©", __func__ );
+          return;                                                                                              /* Bad Request */
+        }
+
+       intent = json_object_get_string_member( json_object_get_object_member ( object, "intent" ), "intentName" );
+       if (!intent)
+        { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_ERR, "%s: intent non trouvÃ©", __func__ );
+          return;                                                                                              /* Bad Request */
+        }
+
+       decoupe = g_strsplit_set ( message->topic, ":-", -1 );
+       if (decoupe[1] && decoupe[2])
+        { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Message recu from thread %s, tag %s", __func__,
+                    decoupe[1], decoupe[2] );
+          result=g_strjoin(",",decoupe[1],decoupe[2],NULL);
+        }
+       else result=g_strdup(decoupe[1]);
+       g_strfreev(decoupe);
+
+
+       slotArray = json_object_get_array_member ( object, "slots" );
+       if (slotArray)
+        { const gchar *slotValue, *slotName;
+          gchar *temp;
+          gint nbr_slots, i;
+          nbr_slots = json_array_get_length (slotArray);
+          for( i=0;i<nbr_slots; i++)
+           { JsonObject *slot = json_array_get_object_element ( slotArray, i );
+             slotValue = json_object_get_string_member( json_object_get_object_member ( slot, "value" ), "value" );
+             slotName = json_object_get_string_member( slot, "slotName" );
+             Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_DEBUG,
+                       "%s: slot %d/%d trouvÃ©: %s - %s", __func__, i+1, nbr_slots, slotName, slotValue );
+             temp=result;
+             result=g_strjoin(",",result,slotValue,NULL);
+             g_free(temp);
+           }
+        }
+       Snips_traiter_commande_vocale ( result );
+       g_free(result);
      }
 		  else
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Message recu: %s - NoPayload", __func__,
@@ -85,8 +198,8 @@
  	}
 /******************************************************************************************************************************/
 /* Snips_connect_CB: appeller par la librairie snips lors d'un evenement de connect                                           */
-/* Entrée : L'évènement                                                                                                       */
-/* Sortie : Néant                                                                                                             */
+/* EntrÃ©e : L'Ã©vÃ¨nement                                                                                                       */
+/* Sortie : NÃ©ant                                                                                                             */
 /******************************************************************************************************************************/
  static void Snips_connect_CB(struct mosquitto *mosq, void *userdata, int result)
   {	if(!result)
@@ -99,17 +212,17 @@
   }
 /******************************************************************************************************************************/
 /* Snips_subscribe_CB: appeller par la librairie snips lors d'un evenement de subscribe arrive                                */
-/* Entrée : L'évènement                                                                                                       */
-/* Sortie : Néant                                                                                                             */
+/* EntrÃ©e : L'Ã©vÃ¨nement                                                                                                       */
+/* Sortie : NÃ©ant                                                                                                             */
 /******************************************************************************************************************************/
  static void Snips_subscribe_CB(struct mosquitto *mosq, void *userdata, int mid, int qos_count, const int *granted_qos)
   {
-    Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Subscribe ok for '%s'.", __func__, mid );
+    Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Subscribe ok for '%d'.", __func__, mid );
   }
 /******************************************************************************************************************************/
 /* Snips_log_CB: appeller par la librairie snips lors d'un evenement de log                                                   */
-/* Entrée : L'évènement                                                                                                       */
-/* Sortie : Néant                                                                                                             */
+/* EntrÃ©e : L'Ã©vÃ¨nement                                                                                                       */
+/* Sortie : NÃ©ant                                                                                                             */
 /******************************************************************************************************************************/
  static void Snips_log_CB(struct mosquitto *mosq, void *userdata, int level, const char *str)
   { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_DEBUG, "%s: Level %d -> '%s'", __func__, level, str );
@@ -156,7 +269,7 @@
 	   mosquitto_message_callback_set(mosq, Snips_message_CB);
 	   mosquitto_subscribe_callback_set(mosq, Snips_subscribe_CB);
 
-   	if( mosquitto_connect(mosq, "localhost", 1883, 60) )
+   	if( mosquitto_connect(mosq, Cfg_snips.snips_host, 1883, 60) )
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE,
                 "%s: Unable to connect to MQTT local Queue. Shutting Down %p", __func__, pthread_self() );
        lib->Thread_boot_start = FALSE;

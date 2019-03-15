@@ -37,6 +37,7 @@
   { struct LIBRAIRIE *lib;
     gboolean enable;                                                                      /* Is this thread enabled at boot ? */
     guint nbr_msg_recu;
+    gchar snips_host[24];
   } Cfg_snips;
 
 /*********************************************** Définitions des prototypes ***************************************************/
