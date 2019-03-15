@@ -54,6 +54,7 @@
     MNEMO_REGISTRE,
     MNEMO_HORLOGE,
     MNEMO_MSG,
+    MNEMO_BUS,
     NBR_TYPE_MNEMO
   };
 

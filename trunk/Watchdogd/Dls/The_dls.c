@@ -857,10 +857,9 @@
       }
     else bool = (struct DLS_BOOL *)*bool_p;
 
-    if (valeur == TRUE && bool->etat==FALSE) { bool->edge_up = TRUE; }
-    else if (valeur == FALSE && bool->etat==TRUE) { bool->edge_down = TRUE; }
-    else { bool->edge_up = bool->edge_down = FALSE; }
-    bool->etat = (valeur ? TRUE : FALSE);
+    if (valeur == TRUE && bool->etat==FALSE) { bool->edge_up = TRUE; } else { bool->edge_up = FALSE; }
+    if (valeur == FALSE && bool->etat==TRUE) { bool->edge_down = TRUE; } else { bool->edge_down = FALSE; }
+    bool->etat = valeur;
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_bool: Remonte l'etat d'un boolean                                                                             */
@@ -1130,6 +1129,16 @@
     if (!liste) return(FALSE);
     if (tempo_p) *tempo_p = (gpointer)tempo;                                        /* Sauvegarde pour acceleration si besoin */
     return( tempo->state );    
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_bus : Envoi un message sur le bus système                                                                     */
+/* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et les paramètres du message                                  */
+/******************************************************************************************************************************/
+ void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p, gboolean etat,
+                         gchar *host, gchar *thread, gchar *action, gchar *param1)
+  { Dls_data_set_bool ( tech_id, acronyme, bus_p, etat );                                         /* Utilisation d'un boolean */
+    if (Dls_data_get_bool_up (tech_id, acronyme, bus_p))
+     { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, action, param1, strlen(param1)+1 ); }
   }
 /******************************************************************************************************************************/
 /* Met à jour le message en parametre                                                                                         */

@@ -1,5 +1,5 @@
 /**********************************************************************************************************/
-/* Watchdogd/TraductionDLS/mots.l        Définitions des mots DLS                                         */
+/* Watchdogd/TraductionDLS/mots.l        DÃ©finitions des mots DLS                                         */
 /* Projet WatchDog version 2.0       Gestion d'habitat                    jeu. 24 juin 2010 19:37:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                              */
 /**********************************************************************************************************/
@@ -32,9 +32,9 @@
 #include "lignes.h"
 %}
 
-/* On n'utilise pas la fonction yywrap associée */
+/* On n'utilise pas la fonction yywrap associÃ©e */
 %option 8bit noyywrap nounput noinput
-/* On garde le numéro de ligne lors du scan des tokens */
+/* On garde le numÃ©ro de ligne lors du scan des tokens */
 %option yylineno
  /*%option debug*/
 
@@ -72,6 +72,7 @@ newline       [\n\r]+
 "_TRUE"                    { DlsScanner_lval.val = T_TRUE;      return T_TRUE;      }
 "_FALSE"                   { DlsScanner_lval.val = T_FALSE;     return T_FALSE;     }
 "_TOP_ALERTE"              { DlsScanner_lval.val = T_TOP_ALERTE;return T_TOP_ALERTE;}
+"_BUS"                     { DlsScanner_lval.val = T_BUS;       return T_BUS;       }
 
  /***************************************** Methodes speciales ********************************************/
 "_HEURE"                   { DlsScanner_lval.val = HEURE;       return HEURE;       }
@@ -135,6 +136,10 @@ newline       [\n\r]+
 "alerte"                   { DlsScanner_lval.val = T_ALERTE;    return T_ALERTE;    }
 "derangement"              { DlsScanner_lval.val = T_DERANGEMENT;return T_DERANGEMENT;}
 "danger"                   { DlsScanner_lval.val = T_DANGER;    return T_DANGER;    }
+"host"                     { DlsScanner_lval.val = T_HOST;      return T_HOST;      }
+"thread"                   { DlsScanner_lval.val = T_THREAD;    return T_THREAD;    }
+"action"                   { DlsScanner_lval.val = T_ACTION;    return T_ACTION;    }
+"param1"                   { DlsScanner_lval.val = T_PARAM1;    return T_PARAM1;    }
  /*********************************************** Le reste ************************************************/
 "#define"                  { DlsScanner_lval.val = T_DEFINE;    return T_DEFINE;    }
 "#static"                  { DlsScanner_lval.val = T_STATIC;    return T_STATIC;    }

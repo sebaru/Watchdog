@@ -38,12 +38,12 @@
  #include "watchdogd.h"
  #include "lignes.h"
 
- static GSList *Alias=NULL;                                                  /* Liste des alias identifiÈs dans le source DLS */
- static GSList *Liste_Actions_bit    = NULL;                              /* Liste des actions rencontrÈes dans le source DLS */
- static GSList *Liste_Actions_num    = NULL;                              /* Liste des actions rencontrÈes dans le source DLS */
- static GSList *Liste_Actions_msg    = NULL;                              /* Liste des actions rencontrÈes dans le source DLS */
- static GSList *Liste_edge_up_bi     = NULL;                               /* Liste des bits B utilisÈs avec l'option EDGE_UP */
- static GSList *Liste_edge_up_entree = NULL;                               /* Liste des bits E utilisÈs avec l'option EDGE_UP */
+ static GSList *Alias=NULL;                                                  /* Liste des alias identifi√©s dans le source DLS */
+ static GSList *Liste_Actions_bit    = NULL;                              /* Liste des actions rencontr√©es dans le source DLS */
+ static GSList *Liste_Actions_num    = NULL;                              /* Liste des actions rencontr√©es dans le source DLS */
+ static GSList *Liste_Actions_msg    = NULL;                              /* Liste des actions rencontr√©es dans le source DLS */
+ static GSList *Liste_edge_up_bi     = NULL;                               /* Liste des bits B utilis√©s avec l'option EDGE_UP */
+ static GSList *Liste_edge_up_entree = NULL;                               /* Liste des bits E utilis√©s avec l'option EDGE_UP */
  static gchar *Buffer=NULL;
  static gint Buffer_used=0, Buffer_taille=0;
  static int Id_log;                                                                     /* Pour la creation du fichier de log */
@@ -51,8 +51,8 @@
  static struct CMD_TYPE_PLUGIN_DLS Dls_plugin;
 
 /******************************************************************************************************************************/
-/* New_chaine: Alloue une certaine quantitÈ de mÈmoire pour utiliser des chaines de caractËres                                */
-/* EntrÈes: la longueur souhaitÈe                                                                                             */
+/* New_chaine: Alloue une certaine quantit√© de m√©moire pour utiliser des chaines de caract√®res                                */
+/* Entr√©es: la longueur souhait√©e                                                                                             */
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
  char *New_chaine( int longueur )
@@ -62,8 +62,8 @@
     return(chaine);
   }
 /******************************************************************************************************************************/
-/* Emettre: Met a jour le fichier temporaire en code intermÈdiaire                                                            */
-/* EntrÈes: la ligne d'instruction ‡ mettre                                                                                   */
+/* Emettre: Met a jour le fichier temporaire en code interm√©diaire                                                            */
+/* Entr√©es: la ligne d'instruction √† mettre                                                                                   */
 /* Sortie: void                                                                                                               */
 /******************************************************************************************************************************/
  void Emettre( char *chaine )
@@ -88,8 +88,8 @@
     Buffer_used += taille;
   }
 /******************************************************************************************************************************/
-/* DlsScanner_error: AppellÈ par le scanner en cas d'erreur de syntaxe (et non une erreur de grammaire !)                     */
-/* EntrÈe : la chaine source de l'erreur de syntaxe                                                                           */
+/* DlsScanner_error: Appell√© par le scanner en cas d'erreur de syntaxe (et non une erreur de grammaire !)                     */
+/* Entr√©e : la chaine source de l'erreur de syntaxe                                                                           */
 /* Sortie : appel de la fonction Emettre_erreur_new en backend                                                                */
 /******************************************************************************************************************************/
  int DlsScanner_error ( char *s )
@@ -98,7 +98,7 @@
   }
 /******************************************************************************************************************************/
 /* Emettre_erreur_new: collecte des erreurs de traduction D.L.S                                                               */
-/* EntrÈe: le numÈro de ligne, le format et les paramËtres associÈs                                                           */
+/* Entr√©e: le num√©ro de ligne, le format et les param√®tres associ√©s                                                           */
 /******************************************************************************************************************************/
  void Emettre_erreur_new( gchar *format, ... )
   { static gchar *too_many="Too many events. Limiting output...\n";
@@ -119,8 +119,8 @@
     nbr_erreur++;
   }
 /******************************************************************************************************************************/
-/* New_option: Alloue une certaine quantitÈ de mÈmoire pour les options                                                       */
-/* EntrÈes: rien                                                                                                              */
+/* New_option: Alloue une certaine quantit√© de m√©moire pour les options                                                       */
+/* Entr√©es: rien                                                                                                              */
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
  struct COMPARATEUR *New_comparateur( void )
@@ -129,8 +129,8 @@
     return(comparateur);
   }
 /******************************************************************************************************************************/
-/* New_option: Alloue une certaine quantitÈ de mÈmoire pour les options                                                       */
-/* EntrÈes: rien                                                                                                              */
+/* New_option: Alloue une certaine quantit√© de m√©moire pour les options                                                       */
+/* Entr√©es: rien                                                                                                              */
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
  struct OPTION *New_option( void )
@@ -140,8 +140,8 @@
   }
 /******************************************************************************************************************************/
 /* Get_option_entier: Cherche une option et renvoie sa valeur                                                                 */
-/* EntrÈes: la liste des options, le type a rechercher                                                                        */
-/* Sortie: -1 si pas trouvÈ                                                                                                   */
+/* Entr√©es: la liste des options, le type a rechercher                                                                        */
+/* Sortie: -1 si pas trouv√©                                                                                                   */
 /******************************************************************************************************************************/
  static int Get_option_entier( GList *liste_options, gint type )
   { struct OPTION *option;
@@ -157,7 +157,7 @@
   }
 /******************************************************************************************************************************/
 /* Get_option_chaine: Cherche une option de type chaine et renvoie sa valeur                                                  */
-/* EntrÈes: la liste des options, le type a rechercher                                                                        */
+/* Entr√©es: la liste des options, le type a rechercher                                                                        */
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
  static gchar *Get_option_chaine( GList *liste_options, gint type )
@@ -173,8 +173,8 @@
     return("no string");
   }
 /******************************************************************************************************************************/
-/* Check_msg_ownership: VÈrifie la propriÈtÈ du bit interne MSG en action                                                     */
-/* EntrÈes: le numÈro du message positionnÈ en action dans la ligne dls                                                       */
+/* Check_msg_ownership: V√©rifie la propri√©t√© du bit interne MSG en action                                                     */
+/* Entr√©es: le num√©ro du message positionn√© en action dans la ligne dls                                                       */
 /* Sortie: FALSE si probleme                                                                                                  */
 /******************************************************************************************************************************/
  static gboolean Check_msg_ownership ( gint num )
@@ -198,8 +198,8 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* New_condition_bi: Prepare la chaine de caractere associÈe ‡ la condition, en respectant les options                        */
-/* EntrÈes: numero du bit bistable et sa liste d'options                                                                      */
+/* New_condition_bi: Prepare la chaine de caractere associ√©e √† la condition, en respectant les options                        */
+/* Entr√©es: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
  static gchar *New_condition_bi_old( int barre, int num, GList *options )
@@ -219,18 +219,18 @@
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_condition_bi: Prepare la chaine de caractere associÈe ‡ la condition, en respectant les options                        */
-/* EntrÈes: numero du bit bistable et sa liste d'options                                                                      */
+/* New_condition_bi: Prepare la chaine de caractere associ√©e √† la condition, en respectant les options                        */
+/* Entr√©es: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
  gchar *New_condition_bi( int barre, struct ALIAS *alias, GList *options )
   { gchar *result;
     gint taille;
-    if (alias->num != -1) /* Alias par numÈro ? */
+    if (alias->num != -1) /* Alias par num√©ro ? */
      { return(New_condition_bi_old( barre, alias->num, options)); }
     else /* Alias par nom */
      { taille = 100;
-       result = New_chaine( taille ); /* 10 caractËres max */
+       result = New_chaine( taille ); /* 10 caract√®res max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
             { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_B_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
@@ -242,8 +242,8 @@
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_condition_bi: Prepare la chaine de caractere associÈe ‡ la condition, en respectant les options                        */
-/* EntrÈes: numero du bit bistable et sa liste d'options                                                                      */
+/* New_condition_bi: Prepare la chaine de caractere associ√©e √† la condition, en respectant les options                        */
+/* Entr√©es: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
  gchar *New_condition_entree_old( int barre, int num, GList *options )
@@ -263,18 +263,18 @@
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_condition_bi: Prepare la chaine de caractere associÈe ‡ la condition, en respectant les options                        */
-/* EntrÈes: numero du bit bistable et sa liste d'options                                                                      */
+/* New_condition_bi: Prepare la chaine de caractere associ√©e √† la condition, en respectant les options                        */
+/* Entr√©es: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
  gchar *New_condition_entree( int barre, struct ALIAS *alias, GList *options )
   { gchar *result;
     gint taille;
-    if (alias->num != -1) /* Alias par numÈro ? */
+    if (alias->num != -1) /* Alias par num√©ro ? */
      { return(New_condition_entree_old( barre, alias->num, options)); }
     else /* Alias par nom */
      { taille = 100;
-       result = New_chaine( taille ); /* 10 caractËres max */
+       result = New_chaine( taille ); /* 10 caract√®res max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
             { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_E_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
@@ -286,23 +286,23 @@
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_condition_mono: Prepare la chaine de caractere associÈe ‡ la condition, en respectant les options                      */
-/* EntrÈes: l'alias du monostable et sa liste d'options                                                                       */
+/* New_condition_mono: Prepare la chaine de caractere associ√©e √† la condition, en respectant les options                      */
+/* Entr√©es: l'alias du monostable et sa liste d'options                                                                       */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
  gchar *New_condition_mono( int barre, struct ALIAS *alias, GList *options )
   { gchar *result;
     gint taille;
-    if (alias->num != -1) /* Alias par numÈro ? */
+    if (alias->num != -1) /* Alias par num√©ro ? */
      { taille = 15;
-       result = New_chaine( taille ); /* 10 caractËres max */
+       result = New_chaine( taille ); /* 10 caract√®res max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
             { g_snprintf( result, taille, "M(%d)", alias->num ); }
        else { g_snprintf( result, taille, "!M(%d)", alias->num ); }
      }
     else /* Alias par nom */
      { taille = 100;
-       result = New_chaine( taille ); /* 10 caractËres max */
+       result = New_chaine( taille ); /* 10 caract√®res max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
             { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_M_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
@@ -314,8 +314,8 @@
    return(result);
  }
 /******************************************************************************************************************************/
-/* New_condition_tempo: Prepare la chaine de caractere associÈe ‡ la condition, en respectant les options                     */
-/* EntrÈes: l'alias de la temporisatio et sa liste d'options                                                                  */
+/* New_condition_tempo: Prepare la chaine de caractere associ√©e √† la condition, en respectant les options                     */
+/* Entr√©es: l'alias de la temporisatio et sa liste d'options                                                                  */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
  gchar *New_condition_tempo( int barre, struct ALIAS *alias, GList *options )
@@ -334,15 +334,15 @@
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_condition_horloge: Prepare la chaine de caractere associÈe ‡ la condition, en respectant les options                   */
-/* EntrÈes: l'alias de l'horloge et sa liste d'options                                                                        */
+/* New_condition_horloge: Prepare la chaine de caractere associ√©e √† la condition, en respectant les options                   */
+/* Entr√©es: l'alias de l'horloge et sa liste d'options                                                                        */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
  gchar *New_condition_horloge( int barre, struct ALIAS *alias, GList *options )
   { gchar *result;
     gint taille;
     taille = 100;                                                                               /* Alias par nom uniquement ! */
-    result = New_chaine( taille ); /* 10 caractËres max */
+    result = New_chaine( taille ); /* 10 caract√®res max */
     if ( !barre )
          { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_HOR_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
@@ -354,7 +354,7 @@
  }
 /******************************************************************************************************************************/
 /* New_condition_vars: formate une condition avec le nom de variable en parametre                                             */
-/* EntrÈes: numero du monostable, sa logique                                                                                  */
+/* Entr√©es: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
  gchar *New_condition_vars( int barre, gchar *nom )
@@ -362,14 +362,14 @@
     int taille;
 
     taille = strlen(nom)+5;
-    result = New_chaine( taille ); /* 10 caractËres max */
+    result = New_chaine( taille ); /* 10 caract√®res max */
     if (!barre) { g_snprintf( result, taille, "%s", nom ); }
            else { g_snprintf( result, taille, "!%s", nom ); }
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_action: Alloue une certaine quantitÈ de mÈmoire pour les actions DLS                                                   */
-/* EntrÈes: rien                                                                                                              */
+/* New_action: Alloue une certaine quantit√© de m√©moire pour les actions DLS                                                   */
+/* Entr√©es: rien                                                                                                              */
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
  struct ACTION *New_action( void )
@@ -382,7 +382,7 @@
   }
 /******************************************************************************************************************************/
 /* New_action_msg: Prepare une struct action avec une commande MSG                                                            */
-/* EntrÈes: numero du message                                                                                                 */
+/* Entr√©es: numero du message                                                                                                 */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
  struct ACTION *New_action_msg( int num )
@@ -409,14 +409,14 @@
   }
 /******************************************************************************************************************************/
 /* New_action_msg_by_alias: Prepare une struct action avec une commande de type MSG                                           */
-/* EntrÈes: L'alias decouvert                                                                                                 */
+/* Entr√©es: L'alias decouvert                                                                                                 */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
  struct ACTION *New_action_msg_by_alias( struct ALIAS *alias )
   { struct ACTION *action;
     int taille;
 
-    if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par numÈro ? */
+    if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par num√©ro ? */
      { return(New_action_msg ( alias->num )); }
 
     taille = 100;
@@ -431,8 +431,8 @@
     return(action);
   }
 /******************************************************************************************************************************/
-/* Add_bit_to_list: Ajoute un bit dans la liste des bits utilisÈ                                                              */
-/* EntrÈes: le type de bit et son numÈro                                                                                      */
+/* Add_bit_to_list: Ajoute un bit dans la liste des bits utilis√©                                                              */
+/* Entr√©es: le type de bit et son num√©ro                                                                                      */
 /* Sortie: FALSE si le bit est deja dans la liste                                                                             */
 /******************************************************************************************************************************/
  static gboolean Add_bit_to_list( int type, int num )
@@ -453,7 +453,7 @@
   }
 /******************************************************************************************************************************/
 /* New_action_sortie: Prepare une struct action avec une commande SA                                                          */
-/* EntrÈes: numero de la sortie, sa logique                                                                                   */
+/* Entr√©es: numero de la sortie, sa logique                                                                                   */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
  static struct ACTION *New_action_sortie_old( int num, int barre )
@@ -468,12 +468,12 @@
     return(action);
   }
 /******************************************************************************************************************************/
-/* New_action_sortie: Prepare la structure ACTION associÈe ‡ l'alias en paremetre                                             */
-/* EntrÈes: l'alias, le complement si besoin, les options                                                                     */
-/* Sortie: la structure ACTION associÈe                                                                                       */
+/* New_action_sortie: Prepare la structure ACTION associ√©e √† l'alias en paremetre                                             */
+/* Entr√©es: l'alias, le complement si besoin, les options                                                                     */
+/* Sortie: la structure ACTION associ√©e                                                                                       */
 /******************************************************************************************************************************/
  struct ACTION *New_action_sortie( struct ALIAS *alias, int barre, GList *options )
-  { if (alias->num != -1) /* Alias par numÈro ? */
+  { if (alias->num != -1) /* Alias par num√©ro ? */
      { return(New_action_sortie_old( alias->num, barre )); }
     /* Alias par nom */
     struct ACTION *action = New_action();
@@ -490,7 +490,7 @@
   }
 /******************************************************************************************************************************/
 /* New_action_vars_mono: Prepare une struct action avec une commande SM                                                       */
-/* EntrÈes: numero du monostable, sa logique                                                                                  */
+/* Entr√©es: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
  struct ACTION *New_action_vars_mono( gchar *nom )
@@ -508,14 +508,14 @@
   }
 /******************************************************************************************************************************/
 /* New_action_mono: Prepare une struct action avec une commande SM                                                            */
-/* EntrÈes: numero du monostable, sa logique                                                                                  */
+/* Entr√©es: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
  struct ACTION *New_action_mono_by_alias( struct ALIAS *alias )
   { struct ACTION *action;
     int taille;
 
-    if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par numÈro ? */
+    if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par num√©ro ? */
      { taille = 15;
        Add_bit_to_list(MNEMO_MONOSTABLE, alias->num);
        action = New_action();
@@ -540,7 +540,7 @@
   }
 /******************************************************************************************************************************/
 /* New_action_mono: Prepare une struct action avec une commande SM                                                            */
-/* EntrÈes: numero du monostable, sa logique                                                                                  */
+/* Entr√©es: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
  struct ACTION *New_action_cpt_h( int num, GList *options )
@@ -560,7 +560,7 @@
   }
 /******************************************************************************************************************************/
 /* New_action_cpt_imp: Prepare une struct action avec une commande SCI                                                        */
-/* EntrÈes: numero du compteur d'impulsion, sa logique, son reset                                                             */
+/* Entr√©es: numero du compteur d'impulsion, sa logique, son reset                                                             */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
  struct ACTION *New_action_cpt_imp( int num, GList *options )
@@ -581,7 +581,7 @@
   }
 /******************************************************************************************************************************/
 /* New_action_icone: Prepare une struct action avec une commande SI                                                           */
-/* EntrÈes: numero du motif                                                                                                   */
+/* Entr√©es: numero du motif                                                                                                   */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
  struct ACTION *New_action_icone( int num, GList *options )
@@ -611,10 +611,38 @@
                 num, num, val, rouge, vert, bleu, cligno );
     return(action);
   }
-
 /******************************************************************************************************************************/
 /* New_action_tempo: Prepare une struct action avec une commande TR                                                           */
-/* EntrÈes: numero de la tempo, sa consigne                                                                                   */
+/* Entr√©es: numero de la tempo, sa consigne                                                                                   */
+/* Sortie: la structure action                                                                                                */
+/******************************************************************************************************************************/
+ struct ACTION *New_action_bus( struct ALIAS *alias, GList *options )
+  { struct ACTION *result;
+    gint taille;
+    gchar *host, *thread, *action, *param1;
+
+    host   = Get_option_chaine ( options, T_HOST   );
+    thread = Get_option_chaine ( options, T_THREAD );
+    action = Get_option_chaine ( options, T_ACTION );
+    param1 = Get_option_chaine ( options, T_PARAM1 );
+
+    result = New_action();
+    taille = 256;
+    if (alias->type == ALIAS_TYPE_DYNAMIC)
+     { result->alors = New_chaine( taille );
+       g_snprintf( result->alors, taille, "Dls_data_set_bus ( \"%s\", \"%s\", &_BUS_%s_%s, 1, \"%s\", \"%s\", \"%s\", \"%s\" );",
+                                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
+                                           host, thread, action, param1 );
+       result->sinon = New_chaine( taille );
+       g_snprintf( result->sinon, taille, "Dls_data_set_bus ( \"%s\", \"%s\", &_BUS_%s_%s, 0, \"%s\", \"%s\", \"%s\", \"%s\" );",
+                                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
+                                           host, thread, action, param1 );
+     }
+    return(result);
+  }
+/******************************************************************************************************************************/
+/* New_action_tempo: Prepare une struct action avec une commande TR                                                           */
+/* Entr√©es: numero de la tempo, sa consigne                                                                                   */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
  struct ACTION *New_action_tempo( struct ALIAS *alias, GList *options )
@@ -650,7 +678,7 @@
   }
 /******************************************************************************************************************************/
 /* New_action_mono: Prepare une struct action avec une commande SM                                                            */
-/* EntrÈes: numero du monostable, sa logique                                                                                  */
+/* Entr√©es: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
  struct ACTION *New_action_bi_by_alias( struct ALIAS *alias, gint barre )
@@ -658,7 +686,7 @@
     int taille;
 
     action = New_action();
-    if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par numÈro ? */
+    if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par num√©ro ? */
      { taille = 20;
        Add_bit_to_list(MNEMO_BISTABLE, alias->num);
        action->alors = New_chaine( taille );
@@ -674,8 +702,8 @@
     return(action);
   }
 /******************************************************************************************************************************/
-/* New_alias: Alloue une certaine quantitÈ de mÈmoire pour utiliser des alias                                                 */
-/* EntrÈes: le nom de l'alias, le tableau et le numero du bit                                                                 */
+/* New_alias: Alloue une certaine quantit√© de m√©moire pour utiliser des alias                                                 */
+/* Entr√©es: le nom de l'alias, le tableau et le numero du bit                                                                 */
 /* Sortie: False si il existe deja, true sinon                                                                                */
 /******************************************************************************************************************************/
  gboolean New_alias( gint type, gchar *tech_id, gchar *acronyme, gint bit, gint num, gint barre, GList *options )
@@ -698,8 +726,8 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* New_alias: Alloue une certaine quantitÈ de mÈmoire pour utiliser des alias                                                 */
-/* EntrÈes: le nom de l'alias, le tableau et le numero du bit                                                                 */
+/* New_alias: Alloue une certaine quantit√© de m√©moire pour utiliser des alias                                                 */
+/* Entr√©es: le nom de l'alias, le tableau et le numero du bit                                                                 */
 /* Sortie: False si il existe deja, true sinon                                                                                */
 /******************************************************************************************************************************/
  struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme )
@@ -730,8 +758,8 @@
     return(alias);
   }
 /******************************************************************************************************************************/
-/* Get_alias: Recherche un alias donnÈ en paramËtre                                                                           */
-/* EntrÈes: le nom de l'alias                                                                                                 */
+/* Get_alias: Recherche un alias donn√© en param√®tre                                                                           */
+/* Entr√©es: le nom de l'alias                                                                                                 */
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
  struct ALIAS *Get_alias_par_acronyme( gchar *tech_id, gchar *acronyme )
@@ -747,8 +775,8 @@
     return(NULL);
   }
 /******************************************************************************************************************************/
-/* Liberer_alias: Liberation de toutes les zones de mÈmoire prÈcÈdemment allouÈes                                             */
-/* EntrÈes: kedal                                                                                                             */
+/* Liberer_alias: Liberation de toutes les zones de m√©moire pr√©c√©demment allou√©es                                             */
+/* Entr√©es: kedal                                                                                                             */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Liberer_options ( GList *options )
@@ -756,15 +784,21 @@
      { struct OPTION *option = (struct OPTION *)options->data;
        options = g_list_remove (options, option);
        switch (option->type)
-        { case T_LIBELLE: g_free(option->chaine); break;
-          case T_ETIQUETTE: g_free(option->chaine); break;
+        { case T_LIBELLE:
+          case T_ETIQUETTE:
+          case T_HOST:
+          case T_THREAD:
+          case T_ACTION:
+          case T_PARAM1:
+               g_free(option->chaine);
+               break;
         }
        g_free(option);
      }
   }
 /******************************************************************************************************************************/
-/* Liberer_alias: Liberation de toutes les zones de mÈmoire prÈcÈdemment allouÈes                                             */
-/* EntrÈes: kedal                                                                                                             */
+/* Liberer_alias: Liberation de toutes les zones de m√©moire pr√©c√©demment allou√©es                                             */
+/* Entr√©es: kedal                                                                                                             */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Liberer_alias ( struct ALIAS *alias )
@@ -775,8 +809,8 @@
     g_free(alias);
   }
 /******************************************************************************************************************************/
-/* Liberer_memoire: Liberation de toutes les zones de mÈmoire prÈcÈdemment allouÈes                                           */
-/* EntrÈes: kedal                                                                                                             */
+/* Liberer_memoire: Liberation de toutes les zones de m√©moire pr√©c√©demment allou√©es                                           */
+/* Entr√©es: kedal                                                                                                             */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Liberer_memoire( void )
@@ -791,13 +825,13 @@
   }
 /******************************************************************************************************************************/
 /* Trad_dls_set_debug: Positionne le flag de debug Bison/Flex                                                                 */
-/* EntrÈe : TRUE ou FALSE                                                                                                     */
+/* Entr√©e : TRUE ou FALSE                                                                                                     */
 /******************************************************************************************************************************/
  void Trad_dls_set_debug ( gboolean actif )
   { DlsScanner_debug = actif; }                                                                   /* Debug de la traduction ?? */
 /******************************************************************************************************************************/
-/* Traduire: Traduction du fichier en paramËtre du langage DLS vers le langage C                                              */
-/* EntrÈe: l'id du modul                                                                                                      */
+/* Traduire: Traduction du fichier en param√®tre du langage DLS vers le langage C                                              */
+/* Entr√©e: l'id du modul                                                                                                      */
 /* Sortie: TRAD_DLS_OK, _WARNING ou _ERROR                                                                                    */
 /******************************************************************************************************************************/
  gint Traduire_DLS( int id )
@@ -832,15 +866,15 @@
        return(TRAD_DLS_ERROR_FILE);
      }
 
-    pthread_mutex_lock( &Partage->com_dls.synchro_traduction );                           /* Attente unicitÈ de la traduction */
+    pthread_mutex_lock( &Partage->com_dls.synchro_traduction );                           /* Attente unicit√© de la traduction */
 
-    Alias = NULL;                                                                                  /* Par dÈfaut, pas d'alias */
-    Liste_Actions_bit = NULL;                                                                    /* Par dÈfaut, pas d'actions */
-    Liste_Actions_num = NULL;                                                                    /* Par dÈfaut, pas d'actions */
-    Liste_Actions_msg = NULL;                                                                    /* Par dÈfaut, pas d'actions */
-    Liste_edge_up_bi  = NULL;                                               /* Liste des bits B utilisÈ avec l'option EDGE UP */
-    DlsScanner_set_lineno(1);                                                                     /* Reset du numÈro de ligne */
-    nbr_erreur = 0;                                                                   /* Au dÈpart, nous n'avons pas d'erreur */
+    Alias = NULL;                                                                                  /* Par d√©faut, pas d'alias */
+    Liste_Actions_bit = NULL;                                                                    /* Par d√©faut, pas d'actions */
+    Liste_Actions_num = NULL;                                                                    /* Par d√©faut, pas d'actions */
+    Liste_Actions_msg = NULL;                                                                    /* Par d√©faut, pas d'actions */
+    Liste_edge_up_bi  = NULL;                                               /* Liste des bits B utilis√© avec l'option EDGE UP */
+    DlsScanner_set_lineno(1);                                                                     /* Reset du num√©ro de ligne */
+    nbr_erreur = 0;                                                                   /* Au d√©part, nous n'avons pas d'erreur */
     rc = fopen( source, "r" );
     if (!rc) retour = TRAD_DLS_ERROR;
     else
@@ -856,7 +890,7 @@
      }
     else
      { gint fd;
-       Emettre_erreur_new( "No error found" );                        /* Pas d'erreur rencontrÈ (mais peu etre des warning !) */
+       Emettre_erreur_new( "No error found" );                        /* Pas d'erreur rencontr√© (mais peu etre des warning !) */
        retour = TRAD_DLS_OK;
 
        unlink ( cible );
@@ -918,6 +952,10 @@
                         nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _MSG_%s_%s;\n", alias->tech_id, alias->acronyme );
                         write (fd, chaine, nb_car);
                         break;
+                   case MNEMO_BUS:
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _BUS_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        write (fd, chaine, nb_car);
+                        break;
                  }
               }
              liste = liste->next;
@@ -933,7 +971,7 @@
           write(fd, chaine, strlen(chaine) );                                                         /* Ecriture du prologue */
 
           write(fd, Chaine_bit, strlen(Chaine_bit) );                                                 /* Ecriture du prologue */
-          liste = Liste_Actions_bit;                                       /* Initialise les tableaux des actions rencontrÈes */
+          liste = Liste_Actions_bit;                                       /* Initialise les tableaux des actions rencontr√©es */
           while(liste)
            { gchar chaine[12];
              g_snprintf(chaine, sizeof(chaine), "%d, ", GPOINTER_TO_INT(liste->data) );
@@ -943,7 +981,7 @@
           write(fd, Tableau_end, strlen(Tableau_end) );                                               /* Ecriture du prologue */
 
           write(fd, Chaine_num, strlen(Chaine_num) );                                                 /* Ecriture du prologue */
-          liste = Liste_Actions_num;                                       /* Initialise les tableaux des actions rencontrÈes */
+          liste = Liste_Actions_num;                                       /* Initialise les tableaux des actions rencontr√©es */
           while(liste)
            { gchar chaine[12];
              g_snprintf(chaine, sizeof(chaine), "%d, ", GPOINTER_TO_INT(liste->data) );
@@ -953,7 +991,7 @@
           write(fd, Tableau_end, strlen(Tableau_end) );                                               /* Ecriture du prologue */
 
           write(fd, Chaine_msg, strlen(Chaine_msg) );                                                 /* Ecriture du prologue */
-          liste = Liste_Actions_msg;                                       /* Initialise les tableaux des actions rencontrÈes */
+          liste = Liste_Actions_msg;                                       /* Initialise les tableaux des actions rencontr√©es */
           while(liste)
            { gchar chaine[12];
              g_snprintf(chaine, sizeof(chaine), "%d, ", GPOINTER_TO_INT(liste->data) );
@@ -1045,7 +1083,7 @@
           close(fd);
         }
 
-       liste = Alias;                                           /* LibÈration des alias, et remontÈ d'un Warning si il y en a */
+       liste = Alias;                                           /* Lib√©ration des alias, et remont√© d'un Warning si il y en a */
        while(liste)
         { struct CMD_TYPE_MNEMO_FULL mnemo;
           alias = (struct ALIAS *)liste->data;
@@ -1082,7 +1120,7 @@
     Liberer_memoire();
     g_free(Buffer);
     Buffer = NULL;
-    pthread_mutex_unlock( &Partage->com_dls.synchro_traduction );                                         /* LibÈration Mutex */
+    pthread_mutex_unlock( &Partage->com_dls.synchro_traduction );                                         /* Lib√©ration Mutex */
     return(retour);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

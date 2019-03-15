@@ -93,7 +93,7 @@
  extern struct ACTION *New_action_msg_by_alias( struct ALIAS *alias );
  extern struct ACTION *New_action_sortie( struct ALIAS *alias, int barre, GList *options );
  extern struct ACTION *New_action_vars_mono( gchar *nom );
- extern struct ACTION *New_action_activite_fixe( void );
+ extern struct ACTION *New_action_bus( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_mono_by_alias( struct ALIAS *alias );
  extern struct ACTION *New_action_icone( int num, GList *options );
  extern struct ACTION *New_action_tempo( struct ALIAS *alias, GList *options );

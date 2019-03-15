@@ -60,6 +60,8 @@
  extern void     Dls_data_set_tempo     ( gchar *tech_id, gchar *acronyme, gpointer *tempo_p, gboolean etat,
                                           gint delai_on, gint min_on, gint max_on, gint delai_off, gint random);
  extern gboolean Dls_data_get_tempo     ( gchar *tech_id, gchar *acronyme, gpointer *tempo_p );
+ extern void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p, gboolean etat,
+                                gchar *host, gchar *thread, gchar *action, gchar *param1);
  extern gfloat   Dls_data_get_AI        ( gchar *tech_id, gchar *acronyme, gpointer *ai_p );
  extern int E( int num );
  extern int B( int num );
