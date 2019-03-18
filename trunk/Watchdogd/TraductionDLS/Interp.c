@@ -170,7 +170,7 @@
         { return (option->chaine); }
        liste = liste->next;
      }
-    return("no string");
+    return("");
   }
 /******************************************************************************************************************************/
 /* Check_msg_ownership: Vérifie la propriété du bit interne MSG en action                                                     */
@@ -1093,7 +1093,8 @@
            }
           if (alias->type == ALIAS_TYPE_DYNAMIC && !strcmp(alias->tech_id, Dls_plugin.tech_id))/* Alias Dynamiques uniquement */
            { switch(alias->bit)
-              { case MNEMO_MSG:
+              { case MNEMO_BUS: break;
+                case MNEMO_MSG:
                  { struct CMD_TYPE_MESSAGE msg;
                    g_snprintf( msg.acronyme, sizeof(msg.acronyme), "%s", alias->acronyme );
                    g_snprintf( msg.libelle,  sizeof(msg.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );

@@ -117,7 +117,8 @@
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct ZMQUEUE *zmq_from_bus;
-
+    gchar radio[128];
+             
     prctl(PR_SET_NAME, "W-RADIO", 0, 0, 0 );
     memset( &Cfg_radio, 0, sizeof(Cfg_radio) );                                     /* Mise a zero de la structure de travail */
     Cfg_radio.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
@@ -139,8 +140,9 @@
      }
 
     zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
-
-    while(Cfg_radio.lib->Thread_run == TRUE)                                                 /* On tourne tant que necessaire */
+    g_snprintf( radio, sizeof(radio), "%s",                                                               /* Radio par défaut */
+                "http://start-voltage.ice.infomaniak.ch/playlists/start-voltage-high.mp3.m3u" );
+    while ( Cfg_radio.lib->Thread_run == TRUE)                                               /* On tourne tant que necessaire */
      { struct ZMQ_TARGET *event;
        gchar buffer[256];
        void *payload;
@@ -153,10 +155,10 @@
 
        if (Recv_zmq_with_tag ( zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
         { if ( !strcmp( event->tag, "play_radio" ) )
-           { gchar radio[80];
+           { if (strlen(payload)) { g_snprintf(radio, sizeof(radio), "%s", (gchar *) payload); }
              Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_DEBUG,
-                      "%s : Reception d'un message PLAY RADIO : %s", __func__, (gchar *)payload );
-             Jouer_radio ( (gchar *)payload );
+                       "%s : Reception d'un message PLAY RADIO : %s", __func__, radio );
+             Jouer_radio ( radio );
            } else
           if ( !strcmp( event->tag, "stop_radio" ) )
            { Stopper_radio(); }
