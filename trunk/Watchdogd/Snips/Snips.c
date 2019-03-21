@@ -133,67 +133,85 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Snips_message_CB(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message)
-  { JsonArray *slotArray;
-    const gchar *intent;
+  { const gchar *intent, *targetAction, *targetObject[3], *targetRoom[3];
+    gint nbrObject = 0, nbrRoom = 0;
+    gint nbr_slots, i, j;
+    JsonArray *slotArray;
     JsonObject *object;
     JsonNode *Query;
 
-	   if(message->payloadlen)
-     { gchar **decoupe, *result=NULL;
-       Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_DEBUG, "%s: Message recu: %s - %s", __func__,
-                 message->topic, message->payload );
-       Query = json_from_string ( message->payload, NULL );
-       if (!Query)
-        { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_ERR, "%s: requete non Json", __func__ );
-          return;                                                                                              /* Bad Request */
-        }
-
-       object = json_node_get_object (Query);
-       if (!object)
-        { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_ERR, "%s: Object non trouvé", __func__ );
-          return;                                                                                              /* Bad Request */
-        }
-
-       intent = json_object_get_string_member( json_object_get_object_member ( object, "intent" ), "intentName" );
-       if (!intent)
-        { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_ERR, "%s: intent non trouvé", __func__ );
-          return;                                                                                              /* Bad Request */
-        }
-
-       decoupe = g_strsplit_set ( message->topic, ":-", -1 );
-       if (decoupe[1] && decoupe[2])
-        { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Message recu from thread %s, tag %s", __func__,
-                    decoupe[1], decoupe[2] );
-          result=g_strjoin(",",decoupe[1],decoupe[2],NULL);
-        }
-       else result=g_strdup(decoupe[1]);
-       g_strfreev(decoupe);
-
-
-       slotArray = json_object_get_array_member ( object, "slots" );
-       if (slotArray)
-        { const gchar *slotValue, *slotName;
-          gchar *temp;
-          gint nbr_slots, i;
-          nbr_slots = json_array_get_length (slotArray);
-          for( i=0;i<nbr_slots; i++)
-           { JsonObject *slot = json_array_get_object_element ( slotArray, i );
-             slotValue = json_object_get_string_member( json_object_get_object_member ( slot, "value" ), "value" );
-             slotName = json_object_get_string_member( slot, "slotName" );
-             Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_DEBUG,
-                       "%s: slot %d/%d trouvé: %s - %s", __func__, i+1, nbr_slots, slotName, slotValue );
-             temp=result;
-             result=g_strjoin(",",result,slotValue,NULL);
-             g_free(temp);
-           }
-        }
-       Snips_traiter_commande_vocale ( result );
-       g_free(result);
-     }
-		  else
+	   if(!message->payloadlen)
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Message recu: %s - NoPayload", __func__,
                  message->topic );
+       return;
      }
+
+    Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_DEBUG, "%s: Message recu: %s - %s", __func__,
+              message->topic, message->payload );
+    Query = json_from_string ( message->payload, NULL );
+    if (!Query)
+     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_ERR, "%s: requete non Json", __func__ );
+       return;                                                                                                 /* Bad Request */
+     }
+
+    object = json_node_get_object (Query);
+    if (!object)
+     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_ERR, "%s: Object non trouvé", __func__ );
+       json_node_unref (Query);
+       return;                                                                                                 /* Bad Request */
+     }
+
+    intent = json_object_get_string_member( json_object_get_object_member ( object, "intent" ), "intentName" );
+    if (!intent)
+     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_ERR, "%s: intent non trouvé", __func__ );
+       json_node_unref (Query);
+       return;                                                                                                 /* Bad Request */
+     }
+
+    Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Message recu from topic %s intent %s",
+              __func__, message->topic, intent );
+
+    slotArray = json_object_get_array_member ( object, "slots" );
+    if (!slotArray)
+     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: 0 slot array", __func__ );
+       json_node_unref (Query);
+       return;
+     }
+
+    nbr_slots = json_array_get_length (slotArray);
+    if (nbr_slots==0)
+     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: 0 slots", __func__ );
+       json_node_unref (Query);
+       return;
+     }
+
+    if (nbr_slots==1)
+     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Only one slot", __func__ );
+       json_node_unref (Query);
+       return;
+     }
+    
+    for( i=0;i<nbr_slots; i++)
+     { const gchar *slotValue, *slotName;
+       JsonObject *slot = json_array_get_object_element ( slotArray, i );
+       slotValue = json_object_get_string_member( json_object_get_object_member ( slot, "value" ), "value" );
+       slotName = json_object_get_string_member( slot, "slotName" );
+       Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_DEBUG,
+                 "%s: slot %d/%d trouvé: %s - %s", __func__, i+1, nbr_slots, slotName, slotValue );
+       if (!strcmp(slotName,"targetAction")) targetAction=slotValue;
+       if (nbrRoom<3   && !strcmp(slotName,"targetRoom"))   targetRoom  [nbrRoom++]   = slotValue;
+       if (nbrObject<3 && !strcmp(slotName,"targetObject")) targetObject[nbrObject++] = slotValue;
+     }
+
+    for ( i=0; i<nbrObject; i++ )
+     { for ( j=0; j<nbrRoom; j++ )
+        { gchar result[64];
+          g_snprintf ( result, sizeof(result), "%s,%s,%s,%s", intent, (targetAction ? targetAction : ""),
+                       (targetObject[i] ? targetObject[i] : ""), (targetRoom[j] ? targetRoom[j] : "") );
+          Snips_traiter_commande_vocale ( result );
+        }
+     }
+    json_node_unref (Query);
     Cfg_snips.nbr_msg_recu++;
  	}
 /******************************************************************************************************************************/
