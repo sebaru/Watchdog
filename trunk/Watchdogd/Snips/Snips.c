@@ -171,6 +171,8 @@
     Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Message recu from topic %s intent %s",
               __func__, message->topic, intent );
 
+    intent = g_strrstr ( intent, ":" ) + 1;
+    
     slotArray = json_object_get_array_member ( object, "slots" );
     if (!slotArray)
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: 0 slot array", __func__ );
