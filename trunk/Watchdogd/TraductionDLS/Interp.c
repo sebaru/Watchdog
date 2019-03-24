@@ -173,31 +173,6 @@
     return("");
   }
 /******************************************************************************************************************************/
-/* Check_msg_ownership: Vérifie la propriété du bit interne MSG en action                                                     */
-/* Entrées: le numéro du message positionné en action dans la ligne dls                                                       */
-/* Sortie: FALSE si probleme                                                                                                  */
-/******************************************************************************************************************************/
- static gboolean Check_msg_ownership ( gint num )
-  { struct CMD_TYPE_MESSAGE *message;
-    gchar chaine[80];
-    gboolean retour;
-    retour = FALSE;
-    message = Rechercher_messageDB ( num );
-    Info_new( Config.log, Config.log_dls, LOG_DEBUG,
-             "%s: Test Message %d for id %d: mnemo %p", __func__, num, Dls_plugin.id, message ); 
-    if (message)
-     { if (message->dls_id == Dls_plugin.id) retour=TRUE;
-       g_free(message);
-     }
-    
-    if(retour == FALSE)
-     { g_snprintf( chaine, sizeof(chaine), "Ligne %d: MSG%04d not owned by plugin", DlsScanner_get_lineno(), num );
-       Emettre_erreur_new( "%s", chaine );
-       return(FALSE);
-     }
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
 /* New_condition_bi: Prepare la chaine de caractere associée à la condition, en respectant les options                        */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
@@ -397,9 +372,7 @@
        liste=liste->next;
      }
     if(!liste)
-     { Liste_Actions_msg = g_slist_prepend ( Liste_Actions_msg, GINT_TO_POINTER(num) );
-       Check_msg_ownership ( num );
-     }
+     { Liste_Actions_msg = g_slist_prepend ( Liste_Actions_msg, GINT_TO_POINTER(num) ); }
     action = New_action();
     action->alors = New_chaine( taille );
     g_snprintf( action->alors, taille, "MSG(%d,1);", num );
