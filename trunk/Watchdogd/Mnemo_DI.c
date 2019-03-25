@@ -98,8 +98,8 @@
     g_snprintf( requete, sizeof(requete),
                "SELECT d.tech_id, m.acronyme, m.src_text, m.libelle "
                "FROM mnemos_DI as m INNER JOIN dls as d ON dls.id = m.dls_id"
-               " WHERE (mnemo.src_host='*' OR mnemo.src_host='%s') AND (mnemo.src_thread='*' OR mnemo.src_thread='%s')"
-               " AND mnemo.src_text LIKE '%s'",
+               " WHERE (m.src_host='*' OR m.src_host='%s') AND (m.src_thread='*' OR m.src_thread='%s')"
+               " AND m.src_text LIKE '%s'",
                g_get_host_name(), thread, commande );
     g_free(commande);
     db = Init_DB_SQL();       
