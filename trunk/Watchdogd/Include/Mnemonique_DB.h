@@ -87,5 +87,9 @@
  extern struct CMD_TYPE_MNEMO_REGISTRE *Rechercher_mnemo_registreDB ( guint id );
  extern gboolean Modifier_mnemo_registreDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
 
+ extern gboolean Mnemo_auto_create_DI ( gint dls_id, gchar *acronyme, gchar *libelle );                   /* Dans mnemos_DI.c */
+ extern gboolean Recuperer_mnemos_DI_by_text ( struct DB **db_retour, gchar *thread, gchar *text );
+ extern gboolean Recuperer_mnemos_DI_suite( struct DB **db_orig );
+
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

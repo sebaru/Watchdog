@@ -1067,6 +1067,10 @@
           if (alias->type == ALIAS_TYPE_DYNAMIC && !strcmp(alias->tech_id, Dls_plugin.tech_id))/* Alias Dynamiques uniquement */
            { switch(alias->bit)
               { case MNEMO_BUS: break;
+                case MNEMO_ENTREE:
+                 { Mnemo_auto_create_DI ( Dls_plugin.id, alias->acronyme, Get_option_chaine( alias->options, T_LIBELLE ) );
+                   break;
+                 }                 
                 case MNEMO_MSG:
                  { struct CMD_TYPE_MESSAGE msg;
                    g_snprintf( msg.acronyme, sizeof(msg.acronyme), "%s", alias->acronyme );

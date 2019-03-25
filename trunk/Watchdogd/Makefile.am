@@ -9,7 +9,7 @@ SUBDIRS = Include Serveur Dls TraductionDLS Archive Enocean \
 bin_SCRIPTS = Wtd_set_volume.sh
 bin_PROGRAMS = Watchdogd
 Watchdogd_SOURCES = Watchdogd.c process.c \
-                    zmq.c shm.c Config.c Mnemo_Registre.c \
+                    zmq.c shm.c Config.c Mnemo_Registre.c Mnemo_DI.c \
                     db.c Mnemonique.c Mnemo_AI.c Mnemo_CPT_IMP.c Mnemo_CPT_H.c Message.c \
 		    Mnemo_Horloges.c \
 		    Mnemo_Tempo.c Histo_msgs.c Camera.c distrib_Events.c \
