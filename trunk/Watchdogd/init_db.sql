@@ -326,18 +326,6 @@ CREATE TABLE IF NOT EXISTS `mnemos_Registre` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `mnemos_DigitalInput`
---
-
-CREATE TABLE IF NOT EXISTS `mnemos_DigitalInput` (
-  `id_mnemo` int(11) NOT NULL,
-  PRIMARY KEY (`id_mnemo`),
-  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `syns_camerasup`
 --
 

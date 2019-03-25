@@ -1013,7 +1013,6 @@
 
     if (database_version < 4024)
      { g_snprintf( requete, sizeof(requete),
-
        "CREATE TABLE IF NOT EXISTS `mnemos_DI` ("
        "`id` int(11) NOT NULL AUTO_INCREMENT,"
        "`dls_id` int(11) NOT NULL DEFAULT '0',"
@@ -1026,6 +1025,8 @@
        "UNIQUE (`dls_id`,`acronyme`),"
        "FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE"
        ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "DROP TABLE mnemos_DigitalInput" );
        Lancer_requete_SQL ( db, requete );
      }
 
