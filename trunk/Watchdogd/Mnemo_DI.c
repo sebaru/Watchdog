@@ -97,7 +97,7 @@
 
     g_snprintf( requete, sizeof(requete),
                "SELECT d.tech_id, m.acronyme, m.src_text, m.libelle "
-               "FROM mnemos_DI as m INNER JOIN dls as d ON dls.id = m.dls_id"
+               "FROM mnemos_DI as m INNER JOIN dls as d ON d.id = m.dls_id"
                " WHERE (m.src_host='*' OR m.src_host='%s') AND (m.src_thread='*' OR m.src_thread='%s')"
                " AND m.src_text LIKE '%s'",
                g_get_host_name(), thread, commande );
