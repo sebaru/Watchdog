@@ -59,7 +59,7 @@ then
 fi
 
 dnl parametres par defaut
-CFLAGS="-D_GNU_SOURCE -pipe -g -ggdb"
+CFLAGS="-pipe -g -ggdb -D_GNU_SOURCE"
 
 LIBW_MAJOR_VERSION=5
 LIBW_MINOR_VERSION=0

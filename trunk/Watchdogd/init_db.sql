@@ -247,6 +247,26 @@ CREATE TABLE IF NOT EXISTS `mnemos_DI` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `mnemos`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_DO` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `dls_id` int(11) NOT NULL DEFAULT '0',
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `dst_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
+  `dst_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
+  `dst_action` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `dst_param1` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  UNIQUE (`dls_id`,`acronyme`),
+  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `mnemos_CptHoraire`
 --
 
