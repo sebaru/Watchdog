@@ -74,12 +74,29 @@
 /* Entrée : le nom du fichier wav                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static gboolean Jouer_wav_by_file ( gchar *fichier )
+ static gboolean Jouer_wav_by_file ( gchar *texte )
   { gint fd_cible, pid;
+    gchar fichier[80];
 
+    g_snprintf( fichier, sizeof(fichier), "Son/%s.wav", texte );
     fd_cible = open ( fichier, O_RDONLY, 0 );
-    if (fd_cible < 0)
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "%s: '%s' not found", __func__, fichier );
+    if (fd_cible < 0 && Config.instance_is_master == FALSE)
+     { gchar chaine[80];
+       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
+                 "%s: '%s' not found trying down from master", __func__, fichier );
+       g_snprintf(chaine, sizeof(chaine), "wget http://%s:5560/audio/%s -O %s", Config.master_host, texte, fichier );
+       system(chaine);
+       fd_cible = open ( fichier, O_RDONLY, 0 );
+       if (fd_cible < 0)
+        { gchar chaine[80];
+          Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
+                    "%s: '%s' not found (even after download)", __func__, fichier );
+          return(FALSE);
+        }
+     }
+    else if (fd_cible < 0 && Config.instance_is_master == TRUE)
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
+                "%s: '%s' not found", __func__, fichier );
        return(FALSE);
      }
     else close (fd_cible);
@@ -114,7 +131,7 @@
  static gboolean Jouer_wav_by_id ( struct CMD_TYPE_MESSAGE *msg )
   { gchar nom_fichier[80];
     
-    g_snprintf( nom_fichier, sizeof(nom_fichier), "Son/%d.wav", msg->num );
+    g_snprintf( nom_fichier, sizeof(nom_fichier), "%d", msg->num );
     return(Jouer_wav_by_file( nom_fichier ) );
   }
 /******************************************************************************************************************************/
@@ -204,7 +221,7 @@
            { gchar fichier[80];
              Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
                       "%s : Reception d'un message PLAY_WAV : %s", __func__, (gchar *)payload );
-             g_snprintf( fichier, sizeof(fichier), "Son/%s.wav", payload );
+             g_snprintf( fichier, sizeof(fichier), "%s", payload );
              Jouer_wav_by_file ( fichier );
            }
           else if ( !strcmp( event->tag, "play_google" ) )
@@ -239,7 +256,7 @@
            }
 
           if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)                              /* Si Pas de message depuis xx */
-           { Jouer_wav_by_file("Son/jingle.wav"); }                                                 /* On balance le jingle ! */
+           { Jouer_wav_by_file("jingle"); }                                                         /* On balance le jingle ! */
           Cfg_audio.last_audio = Partage->top;
 
           if (Jouer_wav_by_id ( &histo->msg ) == FALSE)                /* Par priorité : wav d'abord, synthèse vocale ensuite */

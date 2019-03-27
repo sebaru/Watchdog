@@ -385,7 +385,7 @@
                   return(0);
                 }
                else if ( ! strcasecmp ( url, "/status" ) )         { return( Http_Traiter_request_getstatus ( wsi ) ); }
-               else if ( ! strncasecmp ( url, "/ws/audio/", 10 ) ) { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
+               else if ( ! strncasecmp ( url, "/audio/", 10 ) ) { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+7 ) ); }
                else if ( ! strncasecmp ( url, "/process/", 9 ) ) { return( Http_Traiter_request_getprocess ( wsi, url+9 ) ); }
                else if ( ! strncasecmp ( url, "/dls/", 5 ) ) { return( Http_Traiter_request_getdls ( wsi, url+5 ) ); }
                else if ( ! strncasecmp ( url, "/setm", 5 ) )   { return( Http_Traiter_request_setm ( wsi ) ); }

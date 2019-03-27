@@ -229,8 +229,7 @@
  extern void Proto_cacher_un_histo( struct CMD_TYPE_HISTO *histo );
  extern void Proto_rafraichir_un_histo( struct CMD_TYPE_HISTO *histo );
  extern void Creer_page_histo( void );                               
- extern void Jouer_remote_mp3 ( gchar *file, gint id );
- 
+
  extern void Proto_afficher_un_message( struct CMD_TYPE_MESSAGE *message );                           /* Dans liste_message.c */
  extern void Proto_cacher_un_message( struct CMD_TYPE_MESSAGE *message );
  extern void Proto_rafraichir_un_message( struct CMD_TYPE_MESSAGE *message );
