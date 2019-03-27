@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Watchdogd.c        Démarrage/Arret du systeme Watchdog, gestion des connexions clientes                          */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                           mar 14 fév 2006 15:56:40 CET */
+/* Watchdogd/Watchdogd.c        DÃ©marrage/Arret du systeme Watchdog, gestion des connexions clientes                          */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                           mar 14 fÃ©v 2006 15:56:40 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -50,8 +50,8 @@
  struct PARTAGE *Partage;                                                        /* Accès aux données partagées des processes */
 
 /******************************************************************************************************************************/
-/* Exporter : Exporte les données de base Watchdog pour préparer le RELOAD                                                    */
-/* Entrée: rien                                                                                                               */
+/* Exporter : Exporte les donnÃ©es de base Watchdog pour prÃ©parer le RELOAD                                                  */
+/* EntrÃ©e: rien                                                                                                              */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Exporter ( void )
@@ -104,8 +104,8 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Exporter: Export successfull" );
   }
 /******************************************************************************************************************************/
-/* Importe : Tente d'importer les données de base Watchdog juste apres le reload                                              */
-/* Entrée: rien                                                                                                               */
+/* Importe : Tente d'importer les donnÃ©es de base Watchdog juste apres le reload                                              */
+/* EntrÃ©e: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static gboolean Importer ( void )
@@ -166,8 +166,8 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Charger_config_bit_interne: Chargement des configs bit interne depuis la base de données                                   */
-/* Entrée: néant                                                                                                              */
+/* Charger_config_bit_interne: Chargement des configs bit interne depuis la base de donnÃ©es                                   */
+/* EntrÃ©e: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Charger_config_bit_interne( void )
   { if (Config.instance_is_master)
@@ -181,7 +181,7 @@
   }
 /******************************************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                                             */
-/* Entrée: numero du signal à gerer                                                                                           */
+/* EntrÃ©e: numero du signal Ã  gerer                                                                                           */
 /******************************************************************************************************************************/
  static void Traitement_signaux( int num )
   { static gpointer dls_wait, dls_tour_per_sec, dls_bit_per_sec;
@@ -194,7 +194,7 @@
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Timer: Partage->top = 0 !!", __func__ ); }
        if (!(Partage->top%5))                                                              /* Cligno toutes les demi-secondes */
         { SB_SYS(5, !B(5)); }
-       if (!(Partage->top%3))                                                                 /* Cligno toutes les 3 dixièmes */
+       if (!(Partage->top%3))                                                                 /* Cligno toutes les 3 dixiÃ¨mes */
         { SB_SYS(6, !B(6)); }
        if (!(Partage->top%10))                                                                  /* Cligno toutes les secondes */
         { SB_SYS(4, !B(4));
@@ -215,7 +215,7 @@
         }
 
        Partage->top_cdg_plugin_dls++;                                                            /* Chien de garde plugin DLS */
-       if (Partage->top_cdg_plugin_dls>200)                                         /* Si pas de réponse D.L.S en 20 secondes */
+       if (Partage->top_cdg_plugin_dls>200)                                         /* Si pas de rÃ©ponse D.L.S en 20 secondes */
         { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CDG plugin DLS !!", __func__ );
           Partage->top_cdg_plugin_dls = 0;
         }
@@ -250,9 +250,9 @@
      }
   }
 /******************************************************************************************************************************/
-/* Sauver_compteur : Envoie les infos Compteurs à la base de données pour sauvegarde !                                        */
-/* Entrée : Néant                                                                                                             */
-/* Sortie : Néant                                                                                                             */
+/* Sauver_compteur : Envoie les infos Compteurs Ã  la base de donnÃ©es pour sauvegarde !                                        */
+/* EntrÃ©e : NÃ©ant                                                                                                             */
+/* Sortie : NÃ©ant                                                                                                             */
 /******************************************************************************************************************************/
  static void Sauver_compteur ( void )
   { if (Config.instance_is_master == FALSE) return;                                /* Seul le master sauvegarde les compteurs */
@@ -262,7 +262,7 @@
   }
 /******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
-/* Entrée: rien                                                                                                               */
+/* EntrÃ©e: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void *Boucle_pere_master ( void )
@@ -284,7 +284,7 @@
     Partage->com_msrv.zmq_to_slave = Bind_zmq ( ZMQ_PUB, "pub-to-slave", "tcp", "*", 5555 );
     zmq_from_slave = Bind_zmq ( ZMQ_SUB, "listen-to-slave", "tcp", "*", 5556 );
 
-/************************************* Création des zones de bits internes dynamiques *****************************************/
+/************************************* CrÃ©ation des zones de bits internes dynamiques *****************************************/
     Partage->Dls_data_AI   = NULL;
     Partage->Dls_data_BOOL = NULL;
     Partage->Dls_data_MSG  = NULL;
@@ -294,7 +294,7 @@
      { if (!Demarrer_arch())                                                                   /* Demarrage gestion Archivage */
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb ARCH" ); }
 
-       if (!Demarrer_dls())                                                                               /* Démarrage D.L.S. */
+       if (!Demarrer_dls())                                                                               /* DÃ©marrage D.L.S. */
         { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Pb DLS" ); }
 
        Charger_librairies();                                                  /* Chargement de toutes les librairies Watchdog */
@@ -302,7 +302,7 @@
     else
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "NOT starting threads (single mode=true)" ); }
 
-    if (!Demarrer_admin())                                                                                 /* Démarrage ADMIN */
+    if (!Demarrer_admin())                                                                                 /* DÃ©marrage ADMIN */
      { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Pb Admin -> Arret" ); }
 
 /***************************************** Debut de la boucle sans fin ********************************************************/
@@ -352,7 +352,7 @@
           Print_config();
           Info_change_log_level ( Config.log, Config.log_level );
           Charger_config_bit_interne();                                             /* Rechargement des configs bits internes */
-          Partage->com_msrv.Thread_reload      = FALSE;                                                 /* signal traité. RAZ */
+          Partage->com_msrv.Thread_reload      = FALSE;                                                 /* signal traitÃ©. RAZ */
         }
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
@@ -373,8 +373,8 @@
      }
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/ 
-    Sauver_compteur();                                                                     /* Dernière sauvegarde avant arret */
-    Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
+    Sauver_compteur();                                                                     /* DerniÃ¨re sauvegarde avant arret */
+    Decharger_librairies();                                                   /* DÃ©chargement de toutes les librairies filles */
     Stopper_fils(TRUE);                                                                    /* Arret de tous les fils watchdog */
     Close_zmq ( Partage->com_msrv.zmq_msg );
     Close_zmq ( Partage->com_msrv.zmq_motif );
@@ -384,13 +384,13 @@
     Close_zmq ( zmq_from_slave );
 
 /********************************* Dechargement des zones de bits internes dynamiques *****************************************/
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique 1", __func__ );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: LibÃ©ration mÃ©moire dynamique 1", __func__ );
     g_slist_foreach (Partage->Dls_data_BOOL, (GFunc) g_free, NULL );
     g_slist_free (Partage->Dls_data_BOOL);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique 2", __func__ );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: LibÃ©ration mÃ©moire dynamique 2", __func__ );
     g_slist_foreach (Partage->Dls_data_AI, (GFunc) g_free, NULL );
     g_slist_free (Partage->Dls_data_AI);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Libération mémoire dynamique 3", __func__ );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: LibÃ©ration mÃ©moire dynamique 3", __func__ );
     g_slist_foreach (Partage->Dls_data_MSG, (GFunc) g_free, NULL );
     g_slist_free (Partage->Dls_data_MSG);
 
@@ -399,7 +399,7 @@
   }
 /******************************************************************************************************************************/
 /* Boucle_pere: boucle de controle du pere de tous les serveurs                                                               */
-/* Entrée: rien                                                                                                               */
+/* EntrÃ©e: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void *Boucle_pere_slave ( void )
@@ -420,7 +420,7 @@
     Partage->com_msrv.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master",    "tcp", Config.master_host, 5556 );
     zmq_from_master                 = Connect_zmq ( ZMQ_SUB, "listen-to-master", "tcp", Config.master_host, 5555 );
 
-/************************************* Création des zones de bits internes dynamiques *****************************************/
+/************************************* CrÃ©ation des zones de bits internes dynamiques *****************************************/
     Partage->Dls_data_AI   = NULL;
     Partage->Dls_data_BOOL = NULL;
     Partage->Dls_data_MSG  = NULL;
@@ -483,7 +483,7 @@
           Lire_config( NULL );                                                  /* Lecture sur le fichier /etc/watchdogd.conf */
           Print_config();
           Info_change_log_level ( Config.log, Config.log_level );
-          Partage->com_msrv.Thread_reload = FALSE;                                                      /* signal traité. RAZ */
+          Partage->com_msrv.Thread_reload = FALSE;                                                      /* signal traitÃ©. RAZ */
         }
 
        if (cpt_5_minutes < Partage->top)                                                    /* Update DB toutes les 5 minutes */
@@ -501,7 +501,7 @@
      }
 
 /*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/ 
-    Decharger_librairies();                                                   /* Déchargement de toutes les librairies filles */
+    Decharger_librairies();                                                   /* DÃ©chargement de toutes les librairies filles */
     Stopper_fils(TRUE);                                                                    /* Arret de tous les fils watchdog */
     Close_zmq ( Partage->com_msrv.zmq_msg );
     Close_zmq ( Partage->com_msrv.zmq_to_bus );
@@ -516,11 +516,11 @@
   }
 /******************************************************************************************************************************/
 /* Lire_ligne_commande: Parse la ligne de commande pour d'eventuels parametres                                                */
-/* Entrée: argc, argv                                                                                                         */
+/* EntrÃ©e: argc, argv                                                                                                         */
 /* Sortie: -1 si erreur, 0 si ok                                                                                              */
 /******************************************************************************************************************************/
  static gboolean Lire_ligne_commande( int argc, char *argv[] )
-  { gint help = 0, log_level = -1, fg = 0, single = 0, compil = 0, version = 0;
+  { gint help = 0, log_level = -1, fg = 0, single = 0, version = 0;
     gchar *home = NULL, *file= NULL, *run_as = NULL;
     struct passwd *pwd, *old;
     struct poptOption Options[]= 
@@ -536,8 +536,6 @@
          &run_as,           0, "Run as user", "USER" },
        { "conffile",   'c', POPT_ARG_STRING,
          &file,             0, "Configuration file", "FILE" },
-       { "compil",     'C', POPT_ARG_NONE,
-         &compil,           0, "Compilation des plugins DLS au demarrage", NULL },
        { "help",       'h', POPT_ARG_NONE,
          &help,             0, "Help", NULL },
        { "single",     's', POPT_ARG_NONE,
@@ -563,7 +561,7 @@
      }
     poptFreeContext( context );                                                                         /* Liberation memoire */
 
-    if (version)                                                                            /* Affichage du numéro de version */
+    if (version)                                                                            /* Affichage du numÃ©ro de version */
      { printf(" Watchdogd - Version %s\n", VERSION );
        exit(EXIT_OK);
      }
@@ -572,7 +570,6 @@
 
     if (single)          Config.single      = TRUE;                                            /* Demarrage en mode single ?? */
     if (log_level!=-1)   Config.log_level   = log_level;
-    if (compil)          Config.compil      = 1;                                   /* Compilation de tous les plugins D.L.S ? */
     if (home)            g_snprintf( Config.home,   sizeof(Config.home),   "%s", home );
     if (run_as)          g_snprintf( Config.run_as, sizeof(Config.run_as), "%s", run_as );
 
@@ -591,23 +588,23 @@
     
     if (old->pw_uid != pwd->pw_uid)                                                      /* Besoin de changer d'utilisateur ? */
      { printf("Dropping privileges '%s' (%d) -> '%s' (%d).\n", old->pw_name, old->pw_uid, pwd->pw_name, pwd->pw_uid );
-       if (initgroups ( Config.run_as, pwd->pw_gid )==-1)                                           /* On drop les privilèges */
+       if (initgroups ( Config.run_as, pwd->pw_gid )==-1)                                           /* On drop les privilÃ¨ges */
         { printf("Error, cannot Initgroups for user '%s' (%s)\n", Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
         }
 
-       if (setgid ( pwd->pw_gid )==-1)                                                              /* On drop les privilèges */
+       if (setgid ( pwd->pw_gid )==-1)                                                              /* On drop les privilÃ¨ges */
         { printf("Error, cannot setGID for user '%s' (%s)\n", Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
         }
 
-       if (setuid ( pwd->pw_uid )==-1)                                                              /* On drop les privilèges */
+       if (setuid ( pwd->pw_uid )==-1)                                                              /* On drop les privilÃ¨ges */
         { printf("Error, cannot setUID for user '%s' (%s)\n", Config.run_as, strerror(errno) );
           exit(EXIT_ERREUR);
         }
      }
        
-    if (chdir(Config.home))                                                             /* Positionnement à la racine du home */
+    if (chdir(Config.home))                                                             /* Positionnement Ã  la racine du home */
      { printf( "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
     else
      { printf( "Chdir %s successfull. PID=%d\n", Config.home, getpid() ); }
@@ -616,7 +613,7 @@
   }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du serveur watchdog                                                                              */
-/* Entrée: argc, argv                                                                                                         */
+/* EntrÃ©e: argc, argv                                                                                                         */
 /* Sortie: -1 si erreur, 0 si ok                                                                                              */
 /******************************************************************************************************************************/
  int main ( int argc, char *argv[], char *envp[] )
@@ -635,15 +632,15 @@
      { gint pid;
        pid = fork();
        if (pid<0) { printf("Fork 1 failed\n"); exit(EXIT_ERREUR); }                                           /* On daemonize */
-       if (pid>0) exit(EXIT_OK);                                                                           /* On kill le père */
+       if (pid>0) exit(EXIT_OK);                                                                           /* On kill le pÃ¨re */
       
        pid = fork();
        if (pid<0) { printf("Fork 2 failed\n"); exit(EXIT_ERREUR); }                         /* Evite des pb (linuxmag 44 p78) */
-       if (pid>0) exit(EXIT_OK);                                                                           /* On kill le père */
+       if (pid>0) exit(EXIT_OK);                                                                           /* On kill le pÃ¨re */
 
-       setsid();                                                                                 /* Indépendance du processus */
+       setsid();                                                                                 /* IndÃ©pendance du processus */
      }
-                                                                                      /* Verification de l'unicité du process */
+                                                                                      /* Verification de l'unicitÃ© du process */
     fd_lock = open( VERROU_SERVEUR, O_RDWR | O_CREAT | O_SYNC, 0640 );
     if (fd_lock<0)
      { printf( "Lock file creation failed: %s/%s\n", Config.home, VERROU_SERVEUR );
@@ -669,13 +666,13 @@
     gcry_check_version(NULL);                                                        /* Initialisation de la librairie GCRYPT */
     curl_global_init (CURL_GLOBAL_ALL);                                                 /* Initialisation de la libraire CURL */
     Partage = NULL;                                                                                         /* Initialisation */
-    Partage = Shm_init();                                                            /* Initialisation de la mémoire partagée */
+    Partage = Shm_init();                                                            /* Initialisation de la mÃ©moire partagÃ©e */
     if (!Partage)
      { Info_new( Config.log, Config.log_msrv, LOG_CRIT, "Shared memory failed to allocate" ); }
     else
      { pthread_mutexattr_t attr;                                                       /* Initialisation des mutex de synchro */
        memset( Partage, 0, sizeof(struct PARTAGE) );                                                 /* RAZ des bits internes */
-       import = Importer();                                             /* Tente d'importer les données juste après un reload */
+       import = Importer();                                             /* Tente d'importer les donnÃ©es juste aprÃ¨s un reload */
        time ( &Partage->start_time );
        pthread_mutexattr_init( &attr );
        pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_SHARED );
@@ -687,7 +684,7 @@
        pthread_mutex_init( &Partage->com_admin.synchro, &attr );
        pthread_mutex_init( &Partage->com_db.synchro, &attr );
 
-       sigfillset (&sig.sa_mask);                                                 /* Par défaut tous les signaux sont bloqués */
+       sigfillset (&sig.sa_mask);                                                 /* Par dÃ©faut tous les signaux sont bloquÃ©s */
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
 
        if (!import)
@@ -696,7 +693,7 @@
           Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Clear Histo done", __func__ );
         } else Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Import => pas de clear histo", __func__ );
 
-       Update_database_schema();                                                    /* Update du schéma de Database si besoin */
+       Update_database_schema();                                                    /* Update du schÃ©ma de Database si besoin */
        Charger_config_bit_interne ();                         /* Chargement des configurations des bits internes depuis la DB */
        Modifier_configDB ( "global", "instance_version", VERSION );                      /* Update du champs instance_version */
 
@@ -729,7 +726,7 @@
        sigaction( SIGTERM, &sig, NULL );
        sigaction( SIGABRT, &sig, NULL );
        sigaction( SIGPIPE, &sig, NULL );                                               /* Pour prevenir un segfault du client */
-       sigfillset (&sig.sa_mask);                                                 /* Par défaut tous les signaux sont bloqués */
+       sigfillset (&sig.sa_mask);                                                 /* Par dÃ©faut tous les signaux sont bloquÃ©s */
        sigdelset ( &sig.sa_mask, SIGALRM );
        sigdelset ( &sig.sa_mask, SIGUSR1 );
        sigdelset ( &sig.sa_mask, SIGUSR2 );
@@ -758,7 +755,7 @@
 
     close(fd_lock);                                           /* Fermeture du FileDescriptor correspondant au fichier de lock */
 
-    if (Partage->com_msrv.Thread_clear_reboot == FALSE) Exporter();                           /* Tente d'exporter les données */
+    if (Partage->com_msrv.Thread_clear_reboot == FALSE) Exporter();                           /* Tente d'exporter les donnÃ©es */
     else { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "CLEAR-REBOOT : Erasing export file %s", FICHIER_EXPORT );
            unlink ( FICHIER_EXPORT );
          }
@@ -777,10 +774,10 @@
         }
      }
 
-    sigfillset (&sig.sa_mask);                                                    /* Par défaut tous les signaux sont bloqués */
+    sigfillset (&sig.sa_mask);                                                    /* Par dÃ©faut tous les signaux sont bloquÃ©s */
     pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
     curl_global_cleanup();
-    Shm_stop( Partage );                                                                       /* Libération mémoire partagée */
+    Shm_stop( Partage );                                                                       /* LibÃ©ration mÃ©moire partagÃ©e */
     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "Stopped" );
     return(EXIT_OK);
   }

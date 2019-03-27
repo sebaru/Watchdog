@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -45,7 +45,7 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_cadranDB: DB connexion failed" );
        return(FALSE);
@@ -69,7 +69,7 @@
     struct DB *db;
     gint id;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_cadranDB: DB connexion failed" );
        return(-1);
@@ -83,7 +83,7 @@
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if ( retour == FALSE )
-     { Libere_DB_SQL(&db); 
+     { Libere_DB_SQL(&db);
        return(-1);
      }
     id = Recuperer_last_ID_SQL ( db );
@@ -100,17 +100,17 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_plugins_dlsDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.libelle,%s.posx,%s.posy,%s.angle,acro_syn"
                 " FROM %s,%s WHERE %s.type=%s.type AND %s.bitctrl=%s.num AND syn_id=%d",
-                NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, 
-                NOM_TABLE_MNEMO, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, 
+                NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
+                NOM_TABLE_MNEMO, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
                 NOM_TABLE_CADRAN, NOM_TABLE_MNEMO,                                                                   /* From */
                 NOM_TABLE_CADRAN, NOM_TABLE_MNEMO, NOM_TABLE_CADRAN, NOM_TABLE_MNEMO,
                 id_syn );
@@ -162,7 +162,7 @@
     gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_cadranDB: DB connexion failed" );
        return(NULL);
@@ -171,8 +171,8 @@
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.libelle,%s.posx,%s.posy,%s.angle,acro_syn"
                 " FROM %s,%s WHERE %s.type=%s.type AND %s.bitctrl=%s.num AND %s.id=%d",
-                NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, 
-                NOM_TABLE_MNEMO, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, 
+                NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
+                NOM_TABLE_MNEMO, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
                 NOM_TABLE_CADRAN, NOM_TABLE_MNEMO,                                               /* From */
                 NOM_TABLE_CADRAN, NOM_TABLE_MNEMO, NOM_TABLE_CADRAN, NOM_TABLE_MNEMO,
                 NOM_TABLE_CADRAN, id );
@@ -183,7 +183,7 @@
      }
 
     cadran = Recuperer_cadranDB_suite( &db );
-    if (!cadran) Info_new( Config.log, Config.log_dls, LOG_INFO, "Rechercher_cadranDB: Capteur %03d not found in DB", id );
+    if (!cadran) Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_cadranDB: Capteur %03d not found in DB", id );
     else Libere_DB_SQL( &db );
     return(cadran);
   }
@@ -197,14 +197,14 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_cadranDB: DB connexion failed" );
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "UPDATE %s SET "             
+                "UPDATE %s SET "
                 "type=%d,bitctrl=%d,posx=%d,posy=%d,angle='%f'"
                 " WHERE id=%d;", NOM_TABLE_CADRAN,
                 cadran->type, cadran->bit_controle,

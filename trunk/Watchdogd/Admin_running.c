@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <unistd.h>                                                                                      /* Pour gethostname */
  #include "watchdogd.h"
@@ -83,7 +83,7 @@
                    " | - run as '%s' (uid=%d)\n"
                    " | - home = '%s'",
                    (Config.instance_is_master ? "Master" : "Slave"), g_get_host_name(), date, getpid(),
-                   VERSION, nom, 
+                   VERSION, nom,
                    Config.run_as, getuid(),
                    Config.home );
        response = Admin_write ( response, chaine );
@@ -172,7 +172,7 @@
        if ( ! strcmp ( debug, "all"       ) )
         { Config.log_msrv = TRUE;
           Config.log_db   = TRUE;
-          Config.log_dls  = TRUE;
+          Partage->com_dls.Thread_debug  = TRUE;
           Config.log_arch = TRUE;
           liste = Partage->com_msrv.Librairies;                                          /* Parcours de toutes les librairies */
           while(liste)
@@ -187,7 +187,7 @@
        if ( ! strcmp ( debug, "none"      ) )
         { Config.log_msrv = FALSE;
           Config.log_db   = FALSE;
-          Config.log_dls  = FALSE;
+          Partage->com_dls.Thread_debug  = FALSE;
           Config.log_arch = FALSE;
           liste = Partage->com_msrv.Librairies;                                          /* Parcours de toutes les librairies */
           while(liste)
@@ -211,7 +211,7 @@
            }
           g_snprintf( chaine, sizeof(chaine), " | - Debug is %s for db",   (Config.log_db ? " enabled" : "disabled") );
           response = Admin_write ( response, chaine );
-          g_snprintf( chaine, sizeof(chaine), " | - Debug is %s for dls",  (Config.log_dls ? " enabled" : "disabled") );
+          g_snprintf( chaine, sizeof(chaine), " | - Debug is %s for dls",  (Partage->com_dls.Thread_debug ? " enabled" : "disabled") );
           response = Admin_write ( response, chaine );
           g_snprintf( chaine, sizeof(chaine), " | - Debug is %s for archive", (Config.log_arch ? " enabled" : "disabled") );
           response = Admin_write ( response, chaine );
@@ -225,9 +225,9 @@
           response = Admin_write ( response, chaine );
         } else
        if ( ! strcmp ( debug, "dls"   ) )
-        { if (Config.log_dls == TRUE) Config.log_dls = FALSE;
-          else Config.log_dls = TRUE;
-          g_snprintf( chaine, sizeof(chaine), " | - Debug is now %s for dls", (Config.log_dls ? " enabled" : "disabled") );
+        { if (Partage->com_dls.Thread_debug == TRUE) Partage->com_dls.Thread_debug = FALSE;
+          else Partage->com_dls.Thread_debug = TRUE;
+          g_snprintf( chaine, sizeof(chaine), " | - Debug is now %s for dls", (Partage->com_dls.Thread_debug ? " enabled" : "disabled") );
           response = Admin_write ( response, chaine );
         } else
        if ( ! strcmp ( debug, "archive"   ) )
@@ -256,7 +256,7 @@
                  { lib->Thread_debug = TRUE;
                    g_snprintf( chaine, sizeof(chaine), " | - Debug enabled for library %s (%s)",
                                lib->admin_prompt, lib->nom_fichier );
-                 } 
+                 }
                 response = Admin_write ( response, chaine );
                 break;
               }

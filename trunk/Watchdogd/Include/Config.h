@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _CONFIG_H_
  #define _CONFIG_H_
 
@@ -50,13 +50,11 @@
     gchar master_host[ TAILLE_DB_HOST+1 ];
     guint log_level;                                                      /* Niveau de debug du programme */
     gboolean log_msrv;                                                            /* TRUE si log_override */
-    gboolean log_dls;                                                             /* TRUE si log_override */
     gboolean log_arch;                                                            /* TRUE si log_override */
     gboolean log_db;                                                          /* TRUE si log des acces DB */
     guint max_login_attempts;   /* a virer */                            /* Nombre maximum d'echec de login */
     struct LOG *log;                                                         /* Pour l'affichage des logs */
     gint single;                                                                /* Demarrage des thread ? */
-    gint compil;                                            /* Compilation des plugins DLS au demarrage ? */
   };
 
  #define DEFAUT_DB_HOST                 "localhost"          /* Ne pas depasser TAILLE_DB_HOST caracteres */
@@ -73,8 +71,7 @@
  extern gboolean Modifier_configDB ( gchar *nom_thread, gchar *nom, gchar *valeur );
  extern gboolean Recuperer_configDB ( struct DB **db_retour, gchar *nom_thread );
  extern gboolean Recuperer_configDB_suite( struct DB **db_orig, gchar **nom, gchar **valeur );
-/* extern gboolean Rechercher_configDB ( gchar *nom_thread, gchar *nom_param, gchar *retour, gint size_retour );*/
 
 #endif
-  
+
 /*--------------------------------------------------------------------------------------------------------*/

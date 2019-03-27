@@ -138,7 +138,7 @@ newline       [\n\r]+
 "danger"                   { DlsScanner_lval.val = T_DANGER;    return T_DANGER;    }
 "host"                     { DlsScanner_lval.val = T_HOST;      return T_HOST;      }
 "thread"                   { DlsScanner_lval.val = T_THREAD;    return T_THREAD;    }
-"action"                   { DlsScanner_lval.val = T_ACTION;    return T_ACTION;    }
+"tag"                      { DlsScanner_lval.val = T_TAG;       return T_TAG;       }
 "param1"                   { DlsScanner_lval.val = T_PARAM1;    return T_PARAM1;    }
  /*********************************************** Le reste ************************************************/
 "#define"                  { DlsScanner_lval.val = T_DEFINE;    return T_DEFINE;    }

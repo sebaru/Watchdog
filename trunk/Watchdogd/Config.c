@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <stdio.h>
  #include <sys/time.h>
  #include <sys/stat.h>
@@ -60,7 +60,6 @@
 
     Config.log_level = LOG_NOTICE;
     Config.log_msrv  = FALSE;
-    Config.log_dls   = FALSE;
     Config.log_arch  = FALSE;
 
     g_snprintf( fichier_etc,  sizeof(fichier_etc),  "/etc/watchdogd.conf" );
@@ -150,7 +149,6 @@ parse:
      }
 
     Config.log_msrv = g_key_file_get_boolean ( gkf, "LOG", "debug_msrv", NULL );
-    Config.log_dls  = g_key_file_get_boolean ( gkf, "LOG", "debug_dls", NULL );
     Config.log_arch = g_key_file_get_boolean ( gkf, "LOG", "debug_arch", NULL );
 end:
     g_key_file_free(gkf);
@@ -160,7 +158,7 @@ end:
 /* Entrée: une config !! -> le champ log doit etre initialisé via la librairie Erreur                                         */
 /******************************************************************************************************************************/
  void Print_config ( void )
-  { 
+  {
     if (!Config.log) return;
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config file                 %s", Config.config_file );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config run_as               %s", Config.run_as );
@@ -175,7 +173,6 @@ end:
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db password          *******" );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db port              %d", Config.db_port );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config db debug             %d", Config.log_db );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config compil               %d", Config.compil );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "Config single               %d", Config.single );
   }
 /******************************************************************************************************************************/
@@ -192,7 +189,7 @@ end:
                 "DELETE FROM %s WHERE instance_id = '%s' AND nom_thread='%s' AND nom = '%s'",
                  NOM_TABLE_CONFIG, g_get_host_name(), nom_thread, nom );
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_configDB: DB connexion failed" );
        return(FALSE);
@@ -212,7 +209,7 @@ end:
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_configDB: DB connexion failed" );
        return(FALSE);
@@ -245,7 +242,7 @@ end:
                 NOM_TABLE_CONFIG, g_get_host_name(), nom_thread
               );
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_configDB: DB connexion failed" );
        return(FALSE);

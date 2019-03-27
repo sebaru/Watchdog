@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -45,7 +45,7 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
@@ -76,7 +76,7 @@
        return(-1);
      }
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        g_free(libelle);
@@ -103,7 +103,7 @@
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if ( retour == FALSE )
-     { Libere_DB_SQL(&db); 
+     { Libere_DB_SQL(&db);
        return(-1);
      }
     id = Recuperer_last_ID_SQL ( db );
@@ -120,7 +120,7 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
@@ -171,7 +171,7 @@
        motif->hauteur      = atof(db->row[10]);
        motif->angle        = atof(db->row[11]);
        motif->type_dialog  = atoi(db->row[12]);                      /* Type de la boite de dialogue pour le clic de commande */
-       motif->type_gestion = atoi(db->row[13]);              
+       motif->type_gestion = atoi(db->row[13]);
        motif->rouge0       = atoi(db->row[14]);
        motif->vert0        = atoi(db->row[15]);
        motif->bleu0        = atoi(db->row[16]);
@@ -196,7 +196,7 @@
     gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
@@ -217,7 +217,7 @@
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: DLS %03d not found in DB", __func__, id );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: DLS %03d not found in DB", __func__, id );
        return(NULL);
      }
 
@@ -238,7 +238,7 @@
        motif->hauteur      = atof(db->row[10]);
        motif->angle        = atof(db->row[11]);
        motif->type_dialog  = atoi(db->row[12]);                      /* Type de la boite de dialogue pour le clic de commande */
-       motif->type_gestion = atoi(db->row[13]);              
+       motif->type_gestion = atoi(db->row[13]);
        motif->rouge0       = atoi(db->row[14]);
        motif->vert0        = atoi(db->row[15]);
        motif->bleu0        = atoi(db->row[16]);
@@ -265,7 +265,7 @@
        return(-1);
      }
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        g_free(libelle);
@@ -273,7 +273,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "UPDATE %s SET "             
+                "UPDATE %s SET "
                 "libelle='%s',access_level='%d',bitctrl='%d',bitclic='%d',posx='%d',posy='%d',larg='%f',"
                 "haut='%f',angle='%f',dialog='%d',gestion='%d',rouge='%d',vert='%d',bleu='%d',bitclic2='%d',"
                 "rafraich='%d',layer='%d'"

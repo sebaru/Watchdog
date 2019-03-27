@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <string.h>
  #include <unistd.h>
 
@@ -70,7 +70,7 @@
     json_builder_set_member_name  ( builder, "thread" );
     json_builder_add_string_value ( builder, "dls" );
     json_builder_set_member_name  ( builder, "debug" );
-    json_builder_add_boolean_value( builder, Config.log_dls );
+    json_builder_add_boolean_value( builder, Partage->com_dls.Thread_debug );
     json_builder_set_member_name  ( builder, "started" );
     json_builder_add_boolean_value( builder, Partage->com_dls.Thread_run );
     json_builder_set_member_name  ( builder, "objet" );
@@ -130,7 +130,7 @@
  static gint Http_Traiter_request_getprocess_debug ( struct lws *wsi, gchar *thread, gboolean status )
   { if ( ! strcmp ( thread, "arch" ) ) { Config.log_arch = status; }
     else
-    if ( ! strcmp ( thread, "dls"  ) ) { Config.log_dls  = status; }
+    if ( ! strcmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
     else
     if ( ! strcmp ( thread, "msrv" ) ) { Config.log_msrv = status; }
     else
@@ -206,12 +206,12 @@
            { if (lib->Thread_run == FALSE)
               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
                          "%s: reloading %s -> Library found but not started.", __func__, target );
-              }    
+              }
              else
               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
                          "%s: reloading %s -> Library found. Sending Reload.", __func__, target );
                 lib->Thread_reload = TRUE;
-              }    
+              }
            }
           liste = g_slist_next(liste);
         }

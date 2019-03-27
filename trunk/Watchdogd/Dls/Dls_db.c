@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <unistd.h>
  #include <stdio.h>
@@ -45,7 +45,7 @@
 
     if (dls->id == 1) return(FALSE);                                                /* On ne peut pas effacer le plugin n°1 ! */
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
@@ -78,14 +78,14 @@
 
     nom = Normaliser_chaine ( dls->nom );                                                    /* Formatage correct des chaines */
     if (!nom)
-     { Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: Normalisation nom impossible", __func__ );
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation nom impossible", __func__ );
        return(-1);
      }
 
     shortname = Normaliser_chaine ( dls->shortname );                                        /* Formatage correct des chaines */
     if (!shortname)
      { g_free(nom);
-       Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: Normalisation shortname impossible", __func__ );
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation shortname impossible", __func__ );
        return(-1);
      }
 
@@ -93,7 +93,7 @@
     if (!tech_id)
      { g_free(nom);
        g_free(shortname);
-       Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: Normalisation shortname impossible", __func__ );
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation shortname impossible", __func__ );
        return(-1);
      }
 
@@ -102,20 +102,20 @@
      { g_free(nom);
        g_free(shortname);
        g_free(tech_id);
-       Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: Normalisation package impossible", __func__ );
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation package impossible", __func__ );
        return(-1);
      }
 
     if (ajout)
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "INSERT INTO %s"             
+                   "INSERT INTO %s"
                    "(name,shortname,package,tech_id,actif,syn_id,compil_date,compil_status,nbr_compil,sourcecode) "
                    "VALUES ('%s','%s','%s','%s','%d','%d',NOW(),0,0,'/* Source Code */');",
                    NOM_TABLE_DLS, nom, shortname, package, tech_id, dls->on, dls->syn_id );
      }
     else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                  "UPDATE %s SET "             
+                  "UPDATE %s SET "
                   "name='%s',shortname='%s',package='%s',tech_id='%s',actif='%d',syn_id=%d WHERE id=%d",
                    NOM_TABLE_DLS, nom, shortname, package, tech_id, dls->on, dls->syn_id, dls->id );
      }
@@ -125,7 +125,7 @@
     g_free(tech_id);
     g_free(package);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(-1);
@@ -160,7 +160,7 @@
     retour = Ajouter_Modifier_plugin_dlsDB ( dls, FALSE );
     if (retour == -1) return(FALSE);
     return(TRUE);
-  }  
+  }
 /******************************************************************************************************************************/
 /* Recuperer_plugins_dlsDB: Recuperation de tous les plugins D.L.S                                                            */
 /* Entrées: un log, une db                                                                                                    */
@@ -171,7 +171,7 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
@@ -226,7 +226,7 @@
      }
 
     dls = (struct CMD_TYPE_PLUGIN_DLS *)g_try_malloc0( sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-    if (!dls) Info_new( Config.log, Config.log_dls, LOG_ERR,
+    if (!dls) Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
                        "%s: Erreur allocation mémoire", __func__ );
     else
      { g_snprintf( dls->tech_id, sizeof(dls->tech_id), "%s", db->row[11] );
@@ -255,7 +255,7 @@
     gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
@@ -292,7 +292,7 @@
 
     log = Normaliser_chaine ( log_buffer );                                                  /* Formatage correct des chaines */
     if (!log)
-     { Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: Normalisation shortname impossible", __func__ );
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation shortname impossible", __func__ );
        return(FALSE);
      }
 
@@ -305,7 +305,7 @@
                 NOM_TABLE_DLS, status, log, id );
     g_free(log);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
@@ -326,7 +326,7 @@
     gint taille;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed" );
        return(FALSE);
@@ -351,7 +351,7 @@
     taille = atoi(db->row[1]);
     buffer = (gchar *)g_try_malloc0( taille + 1 );
     if (!buffer)
-     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: Memory Error", __func__ ); }
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory Error", __func__ ); }
     else
      { memcpy( buffer, db->row[0], taille ); }                                                   /* Recopie dans la structure */
     *result_buffer = buffer;
@@ -372,7 +372,7 @@
 
     buffer = (gchar *)g_try_malloc0( taille+1 );
     if (!buffer)
-     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: Memory Error", __func__ );
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory Error", __func__ );
        return(FALSE);
      }
     memcpy ( buffer, buffer_raw, taille );                                            /* On s'assure du caractere nul d'arret */
@@ -380,14 +380,14 @@
     source = Normaliser_chaine ( buffer );                                                   /* Formatage correct des chaines */
     g_free(buffer);
     if (!source)
-     { Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: Normalisation source impossible", __func__ );
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: Normalisation source impossible", __func__ );
        return(FALSE);
      }
 
     taille_requete = taille+256;
     requete = (gchar *)g_try_malloc( taille_requete );
     if (!requete)
-     { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s: Memory Error", __func__ );
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Memory Error", __func__ );
        g_free(source);
        return(FALSE);
      }
@@ -398,7 +398,7 @@
 
     g_free(source);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        g_free(requete);

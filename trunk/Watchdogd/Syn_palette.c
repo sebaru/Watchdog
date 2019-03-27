@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -45,7 +45,7 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_paletteDB: DB connexion failed" );
        return(FALSE);
@@ -69,7 +69,7 @@
     struct DB *db;
     gint id;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_paletteDB: DB connexion failed" );
        return(-1);
@@ -82,7 +82,7 @@
 
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
     if ( retour == FALSE )
-     { Libere_DB_SQL(&db); 
+     { Libere_DB_SQL(&db);
        return(-1);
      }
     id = Recuperer_last_ID_SQL ( db );
@@ -99,7 +99,7 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_plugins_dlsDB: DB connexion failed" );
        return(FALSE);
@@ -158,7 +158,7 @@
     gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_paletteDB: DB connexion failed" );
        return(NULL);
@@ -166,7 +166,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
                 "SELECT %s.syn_id,%s.syn_cible_id,%s.titre,%s.pos "
-                "FROM %s,%s WHERE %s.id=%d AND %s.id=%s.syn_cible_id", 
+                "FROM %s,%s WHERE %s.id=%d AND %s.id=%s.syn_cible_id",
                 NOM_TABLE_PALETTE, NOM_TABLE_PALETTE, NOM_TABLE_SYNOPTIQUE,
                 NOM_TABLE_PALETTE,
                 NOM_TABLE_PALETTE, NOM_TABLE_SYNOPTIQUE,                                          /* From */
@@ -181,7 +181,7 @@
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "Rechercher_paletteDB: DLS %03d not found in DB", id );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_paletteDB: DLS %03d not found in DB", id );
        return(NULL);
      }
 
@@ -207,17 +207,17 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_paletteDB: DB connexion failed" );
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET "             
+                "UPDATE %s SET "
                 "pos=(SELECT pos FROM %s WHERE id=%d)"
                 " WHERE syn_id=%d AND pos=%d;"
-                "UPDATE %s SET "             
+                "UPDATE %s SET "
                 "pos=%d"
                 " WHERE id=%d;",
                 NOM_TABLE_PALETTE, NOM_TABLE_PALETTE, palette->id,

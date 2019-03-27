@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <fcntl.h>
  #include <string.h>
@@ -35,9 +35,40 @@
  #include <sys/time.h>
  #include <sys/prctl.h>
  #include <semaphore.h>
- 
+
  #include "watchdogd.h"
 
+
+/******************************************************************************************************************************/
+/* Http_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                   */
+/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: Néant                                                                                                              */
+/******************************************************************************************************************************/
+ static gboolean Dls_Lire_config ( void )
+  { gchar *nom, *valeur;
+    struct DB *db;
+
+    Partage->com_dls.Compil_at_boot = FALSE;                                                   /* Settings default parameters */
+    Partage->com_dls.Thread_debug   = FALSE;                                                   /* Settings default parameters */
+
+    if ( ! Recuperer_configDB( &db, "dls" ) )                                               /* Connexion a la base de données */
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING,
+                "%s: Database connexion failed. Using Default Parameters", __func__ );
+       return(FALSE);
+     }
+
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
+     {      if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Partage->com_dls.Thread_debug = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "compil_at_boot" ) )
+        { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Partage->com_dls.Compil_at_boot = TRUE;  }
+       else
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE,
+                   "%s: Unknown Parameter '%s'(='%s') in Database", __func__, nom, valeur );
+        }
+     }
+    return(TRUE);
+  }
 /******************************************************************************************************************************/
 /* Dls_print_debug: Affiche les valeurs des bits utilisés dans le plugin.                                                     */
 /* Entrée: Appelé directement par le plugin, avec ne parametre les tableaux de bit et de valeur                               */
@@ -100,7 +131,7 @@
        cpt++;
      }
    if (change)
-    { Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : DLS[%06d]->%s", __func__, id, result ); }
+    { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : DLS[%06d]->%s", __func__, id, result ); }
  }
 /******************************************************************************************************************************/
 /* Dls_get_top_alerte: Remonte la valeur du plus haut bit d'alerte dans l'arbre DLS                                           */
@@ -126,7 +157,7 @@
   { if ( (num>=0) && (num<NBR_ENTRE_TOR) ) return ( (Partage->e[ num ].etat ? 1 : 0) );
     else
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "E : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "E : num %d out of range", num ); }
      }
     return(0);
   }
@@ -149,7 +180,7 @@
      { return ( Partage->registre[ num ].val );
      }
     if (!(Partage->top % 600))
-     { Info_new( Config.log, Config.log_dls, LOG_INFO, "%s : num %d out of range", __func__, num ); }
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : num %d out of range", __func__, num ); }
     return(0.0);
   }
 /******************************************************************************************************************************/
@@ -159,7 +190,7 @@
   { if (num>=0 && num<NBR_REGISTRE)
      { Partage->registre[ num ].val = val; }
     else if (!(Partage->top % 600))
-     { Info_new( Config.log, Config.log_dls, LOG_INFO, "%s : num %d out of range", __func__, num ); }
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s : num %d out of range", __func__, num ); }
   }
 /******************************************************************************************************************************/
 /* EA_inrange : Renvoie 1 si l'EA en paramètre est dans le range de mesure                                                    */
@@ -168,7 +199,7 @@
   { if (num>=0 && num<NBR_ENTRE_ANA) return( Partage->ea[ num ].inrange);
     else
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_range : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "EA_range : num %d out of range", num ); }
      }
     return(0);
   }
@@ -183,7 +214,7 @@
      }
     else
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "EA_ech : num %d out of range", num ); }
      }
     return(0.0);
   }
@@ -194,7 +225,7 @@
   { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) < val); }
     else
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_inf : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "EA_ech_inf : num %d out of range", num ); }
      }
     return(0);
   }
@@ -205,7 +236,7 @@
   { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) <= val); }
     else
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_inf_egal : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "EA_ech_inf_egal : num %d out of range", num ); }
      }
     return(0);
   }
@@ -216,7 +247,7 @@
   { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) > val); }
     else
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_sup : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "EA_ech_sup : num %d out of range", num ); }
      }
     return(0);
   }
@@ -227,7 +258,7 @@
   { if (num>=0 && num<NBR_ENTRE_ANA) { if (EA_inrange(num)) return (EA_ech(num) >= val); }
     else
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "EA_ech_sup_egal : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "EA_ech_sup_egal : num %d out of range", num ); }
      }
     return(0);
   }
@@ -238,7 +269,7 @@
   { if (num<NBR_COMPTEUR_IMP) return (Partage->ci[ num ].confDB.valeur);
     else
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "CI : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "CI : num %d out of range", num ); }
      }
     return(0.0);
   }
@@ -249,7 +280,7 @@
   { if ( num>=0 && num<NBR_SORTIE_TOR ) return ( Partage->a[ num ].etat );
     else
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "A : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "A : num %d out of range", num ); }
      }
     return(0);
   }
@@ -260,7 +291,7 @@
   { if (num>=0 && num<NBR_BIT_BISTABLE) return( ((Partage->b[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
     else
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "B : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "B : num %d out of range", num ); }
      }
     return(0);
   }
@@ -271,7 +302,7 @@
   { if (num>=0 && num<NBR_BIT_MONOSTABLE) return( ((Partage->m[ num>>3 ]) & (1<<(num%8)) ? 1 : 0 ) );
     else
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "M : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "M : num %d out of range", num ); }
      }
     return(0);
   }
@@ -282,7 +313,7 @@
   { if (num>=0 && num<NBR_TEMPO) return ( Partage->Tempo_R[num].state );
     else
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "TR : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "TR : num %d out of range", num ); }
      }
     return(0);
   }
@@ -292,7 +323,7 @@
  void SEA_range( int num, int range )
   { if (num<0 || num>=NBR_ENTRE_ANA)
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SEA_range : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SEA_range : num %d out of range", num ); }
        return;
      }
     Partage->ea[num].inrange = range;
@@ -305,7 +336,7 @@
   { gboolean need_arch;
     if (num<0 || num>=NBR_ENTRE_ANA)
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SEA : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SEA : num %d out of range", num ); }
        return;
      }
 
@@ -322,40 +353,40 @@
                break;
           case ENTREEANA_4_20_MA_10BITS:
                if (val_avant_ech < 100)                            /* 204) Modification du range pour 4mA */
-                { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */ 
+                { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */
                   Partage->ea[ num ].inrange = 0;
                 }
                else
                 { if (val_avant_ech < 204) val_avant_ech = 204;
                   Partage->ea[ num ].val_ech = (gfloat)
                   ((val_avant_ech-204)*(Partage->ea[num].confDB.max - Partage->ea[num].confDB.min))/820.0
-                  + Partage->ea[num].confDB.min;                                    /* Valeur à l'echelle */ 
+                  + Partage->ea[num].confDB.min;                                    /* Valeur à l'echelle */
 
                   Partage->ea[ num ].inrange = 1;
                 }
                break;
           case ENTREEANA_4_20_MA_12BITS:
                if (val_avant_ech < 400)
-                { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */ 
+                { Partage->ea[ num ].val_ech = 0.0;                                 /* Valeur à l'echelle */
                   Partage->ea[ num ].inrange = 0;
                 }
                else
                 { if (val_avant_ech < 816) val_avant_ech = 816;
                   Partage->ea[ num ].val_ech = (gfloat)
                   ((val_avant_ech-816)*(Partage->ea[num].confDB.max - Partage->ea[num].confDB.min))/3280.0
-                     + Partage->ea[num].confDB.min;                          /* Valeur à l'echelle */ 
+                     + Partage->ea[num].confDB.min;                          /* Valeur à l'echelle */
                   Partage->ea[ num ].inrange = 1;
                 }
                break;
           case ENTREEANA_WAGO_750455:                                                                              /* 4/20 mA */
                Partage->ea[ num ].val_ech = (gfloat)
                   (val_avant_ech*(Partage->ea[num].confDB.max - Partage->ea[num].confDB.min))/4095.0
-                     + Partage->ea[num].confDB.min;                          /* Valeur à l'echelle */ 
+                     + Partage->ea[num].confDB.min;                          /* Valeur à l'echelle */
                Partage->ea[ num ].inrange = 1;
                break;
           case ENTREEANA_WAGO_750461:                                                                          /* Borne PT100 */
                if (val_avant_ech > -32767 && val_avant_ech < 8500)
-                { Partage->ea[ num ].val_ech = (gfloat)(val_avant_ech/10.0);                         /* Valeur à l'echelle */ 
+                { Partage->ea[ num ].val_ech = (gfloat)(val_avant_ech/10.0);                         /* Valeur à l'echelle */
                   Partage->ea[ num ].inrange = 1;
                 }
                else Partage->ea[ num ].inrange = 0;
@@ -382,13 +413,13 @@
   { gint numero, bit;
     if (num<0 || num>=NBR_BIT_BISTABLE)
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SB : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SB : num %d out of range", num ); }
        return;
      }
     numero = num>>3;
     bit = 1<<(num & 0x07);
     if (etat)                                                                                           /* Mise a jour du bit */
-     { Partage->b[numero] |= bit; 
+     { Partage->b[numero] |= bit;
        Partage->audit_bit_interne_per_sec++;
      }
     else
@@ -404,7 +435,7 @@
  void SB( int num, int etat )
   { if (num<=NBR_BIT_BISTABLE_RESERVED || num>=NBR_BIT_BISTABLE)
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SB : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SB : num %d out of range", num ); }
        return;
      }
     SB_SYS( num, etat );
@@ -418,13 +449,13 @@
   { gint numero, bit;
     if (num<0 || num>=NBR_BIT_MONOSTABLE)
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SM : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SM : num %d out of range", num ); }
        return;
      }
     numero = num>>3;
     bit = 1<<(num & 0x07);
     if (etat)                                                                       /* Mise a jour du bit */
-     { Partage->m[numero] |= bit; 
+     { Partage->m[numero] |= bit;
        Partage->audit_bit_interne_per_sec++;
      }
     else
@@ -440,11 +471,11 @@
  void SI( int num, int etat, int rouge, int vert, int bleu, int cligno )
   { if ( num<0 || num>=NBR_BIT_CONTROLE )
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SI : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SI : num %d out of range", num ); }
        return;
      }
 
-    if (Partage->i[num].etat   != etat || Partage->i[num].rouge != rouge || 
+    if (Partage->i[num].etat   != etat || Partage->i[num].rouge != rouge ||
         Partage->i[num].vert   != vert || Partage->i[num].bleu  != bleu  ||
         Partage->i[num].cligno != cligno
        )
@@ -513,7 +544,7 @@
        else { tempo->date_off = Partage->top+tempo->confDB.delai_off; }
        tempo->status = DLS_TEMPO_WAIT_FOR_DELAI_OFF;
      }
-    
+
     if (tempo->status == DLS_TEMPO_WAIT_FOR_MIN_ON && etat == 0 &&
         tempo->date_on + tempo->confDB.min_on <= Partage->top )
      { tempo->date_off = Partage->top+tempo->confDB.delai_off;
@@ -560,7 +591,7 @@
 
     if (num<0 || num>=NBR_TEMPO)
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "STR: num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "STR: num %d out of range", num ); }
        return;
      }
     tempo = &Partage->Tempo_R[num];                                                  /* Récupération de la structure statique */
@@ -574,7 +605,7 @@
  void SA( int num, int etat )
   { if (num<0 || num>=NBR_SORTIE_TOR)
      { if (!(Partage->top % 600))
-        { Info_new( Config.log, Config.log_dls, LOG_INFO, "SA : num %d out of range", num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SA : num %d out of range", num ); }
        return;
      }
 
@@ -583,7 +614,7 @@
 
        if ( Partage->top <= Partage->a[num].last_change + 3 )        /* Si changement en moins de 3 dizieme depuis le dernier */
         { if ( ! (Partage->top % 50 ))                                         /* Si persistence on prévient toutes les 5 sec */
-           { Info_new( Config.log, Config.log_dls, LOG_INFO, "%s: last_change trop tot pour A%d !", __func__, num ); }
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: last_change trop tot pour A%d !", __func__, num ); }
         }
        else
         { Ajouter_arch( MNEMO_SORTIE, num, 1.0*etat );                                              /* Sauvegarde de l'etat n */
@@ -598,7 +629,7 @@
 /**********************************************************************************************************/
  void SCH( int num, int etat, int reset )
   { if (num<0 || num>=NBR_COMPTEUR_H)
-     { Info_new( Config.log, Config.log_dls, LOG_INFO, "SCH : num %d out of range", num );
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "SCH : num %d out of range", num );
        return;
      }
 
@@ -634,7 +665,7 @@
  void SCI( int num, int etat, int reset, int ratio )
   { gboolean changed = FALSE;
     if (num<0 || num>=NBR_COMPTEUR_IMP)
-     { Info_new( Config.log, Config.log_dls, LOG_INFO, "CI : num %d out of range", num );
+     { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "CI : num %d out of range", num );
        return;
      }
     if (etat)
@@ -690,7 +721,7 @@
  void MSG( int num, int etat )
   { if ( num<0 || num>=NBR_MESSAGE_ECRITS )
       { if (!(Partage->top % 600))
-         { Info_new( Config.log, Config.log_dls, LOG_WARNING, "%s: num %03d out of range", __func__, num ); }
+         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_WARNING, "%s: num %03d out of range", __func__, num ); }
         return;
       }
 
@@ -701,12 +732,12 @@
         { Partage->g[num].changes = 0; }
 
        if ( Partage->g[num].changes > 5 && !(Partage->top % 50) )   /* Si persistence d'anomalie on prévient toutes les 5 sec */
-        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: last_change trop tot for MSG%03d!", __func__, num ); }
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: last_change trop tot for MSG%03d!", __func__, num ); }
        else if ( Partage->g[num].persist == FALSE)                    /* Si pas de persistence, on envoi l'evenement de suite */
         { struct MESSAGES_EVENT *event;
           event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
           if (!event)
-           { Info_new( Config.log, Config.log_dls, LOG_ERR,
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
                       "%s: malloc Event failed. Memory error for MSG%d", __func__, num );
            }
           else
@@ -724,7 +755,7 @@
         { struct MESSAGES_EVENT *event;
           event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
           if (!event)
-           { Info_new( Config.log, Config.log_dls, LOG_ERR,
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
                       "%s: malloc Event failed. Memory error for MSG%d", __func__, num );
            }
           else
@@ -737,7 +768,7 @@
 
           event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
           if (!event)
-           { Info_new( Config.log, Config.log_dls, LOG_ERR,
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
                       "%s: malloc Event failed. Memory error for MSG%d", __func__, num );
            }
           else
@@ -774,7 +805,7 @@
     pthread_mutex_lock( &Partage->com_dls.synchro );
     Partage->com_dls.Set_Dls_Data = g_slist_append ( Partage->com_dls.Set_Dls_Data, bool );
     pthread_mutex_unlock( &Partage->com_dls.synchro );
-    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit '%s:%s' demandée", __func__, tech_id, acronyme );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Mise a un du bit '%s:%s' demandée", __func__, tech_id, acronyme );
   }
 /******************************************************************************************************************************/
 /* Set_cde_exterieure: Mise à un des bits de commande exterieure                                                              */
@@ -786,19 +817,19 @@
     pthread_mutex_lock( &Partage->com_dls.synchro );
     while( Partage->com_dls.Set_M )                                                      /* A-t-on un monostable a allumer ?? */
      { num = GPOINTER_TO_INT( Partage->com_dls.Set_M->data );
-       Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a un du bit M%03d", __func__, num );
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Mise a un du bit M%03d", __func__, num );
        Partage->com_dls.Set_M   = g_slist_remove ( Partage->com_dls.Set_M,   GINT_TO_POINTER(num) );
-       Partage->com_dls.Reset_M = g_slist_append ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) ); 
+       Partage->com_dls.Reset_M = g_slist_append ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) );
        SM( num, 1 );                                                                           /* Mise a un du bit monostable */
      }
     while( Partage->com_dls.Set_Dls_Data )                                               /* A-t-on un monostable a allumer ?? */
      { struct DLS_BOOL *bool = Partage->com_dls.Set_Dls_Data->data;
-       Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Mise a 1 du bit %s:%s", __func__, bool->tech_id, bool->acronyme );
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Mise a 1 du bit %s:%s", __func__, bool->tech_id, bool->acronyme );
        Partage->com_dls.Set_Dls_Data = g_slist_remove ( Partage->com_dls.Set_Dls_Data, bool );
-       Partage->com_dls.Reset_Dls_Data = g_slist_append ( Partage->com_dls.Reset_Dls_Data, bool ); 
+       Partage->com_dls.Reset_Dls_Data = g_slist_append ( Partage->com_dls.Reset_Dls_Data, bool );
        Dls_data_set_bool ( NULL, NULL, (gpointer *)&bool, TRUE );                              /* Mise a un du bit monostable */
      }
-    pthread_mutex_unlock( &Partage->com_dls.synchro ); 
+    pthread_mutex_unlock( &Partage->com_dls.synchro );
   }
 /******************************************************************************************************************************/
 /* Reset_cde_exterieure: Mise à zero des bits de commande exterieure                                                          */
@@ -810,14 +841,14 @@
     pthread_mutex_lock( &Partage->com_dls.synchro );
     while( Partage->com_dls.Reset_M )                                                                /* Reset des monostables */
      { num = GPOINTER_TO_INT(Partage->com_dls.Reset_M->data);
-       Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: Mise a zero du bit M%03d", __func__, num );
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Mise a zero du bit M%03d", __func__, num );
        Partage->com_dls.Reset_M = g_slist_remove ( Partage->com_dls.Reset_M, GINT_TO_POINTER(num) );
        SM( num, 0 );
      }
     while( Partage->com_dls.Reset_Dls_Data )                                            /* A-t-on un monostable a éteindre ?? */
      { struct DLS_BOOL *bool = Partage->com_dls.Reset_Dls_Data->data;
-       Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s: Mise a 0 du bit %s:%s", __func__, bool->tech_id, bool->acronyme );
-       Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, bool ); 
+       Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: Mise a 0 du bit %s:%s", __func__, bool->tech_id, bool->acronyme );
+       Partage->com_dls.Reset_Dls_Data = g_slist_remove ( Partage->com_dls.Reset_Dls_Data, bool );
        Dls_data_set_bool ( NULL, NULL, (gpointer *)&bool, FALSE );                             /* Mise a un du bit monostable */
      }
     pthread_mutex_unlock( &Partage->com_dls.synchro );
@@ -839,11 +870,11 @@
           if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
-       
+
        if (!liste)
         { bool = g_try_malloc0 ( sizeof(struct DLS_BOOL) );
           if (!bool)
-           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( bool->acronyme, sizeof(bool->acronyme), "%s", acronyme );
@@ -851,7 +882,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_BOOL = g_slist_prepend ( Partage->Dls_data_BOOL, bool );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding DLS_BOOL '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding DLS_BOOL '%s:%s'", __func__, tech_id, acronyme );
         }
        if (bool_p) *bool_p = (gpointer)bool;                                        /* Sauvegarde pour acceleration si besoin */
       }
@@ -880,7 +911,7 @@
        if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
-       
+
     if (!liste) return(FALSE);
     if (bool_p) *bool_p = (gpointer)bool;                                           /* Sauvegarde pour acceleration si besoin */
     return( bool->etat );
@@ -904,7 +935,7 @@
        if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
-       
+
     if (!liste) return(FALSE);
     if (bool_p) *bool_p = (gpointer)bool;                                           /* Sauvegarde pour acceleration si besoin */
     return( bool->edge_up );
@@ -928,7 +959,7 @@
        if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
-       
+
     if (!liste) return(FALSE);
     if (bool_p) *bool_p = (gpointer)bool;                                           /* Sauvegarde pour acceleration si besoin */
     return( bool->edge_down );
@@ -941,7 +972,7 @@
   { struct DLS_BOOL *bool;
     Dls_data_set_bool ( tech_id, acronyme, bool_p, valeur );
     bool = *bool_p;
-             
+
     if ( bool->edge_up )
      { pthread_mutex_lock( &Partage->com_msrv.synchro );
        Partage->com_msrv.Liste_DO = g_slist_prepend ( Partage->com_msrv.Liste_DO, bool );
@@ -965,11 +996,11 @@
           if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
-       
+
        if (!liste)
         { ai = g_try_malloc0 ( sizeof(struct ANALOG_INPUT) );
           if (!ai)
-           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( ai->acronyme, sizeof(ai->acronyme), "%s", acronyme );
@@ -977,7 +1008,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding AI '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding AI '%s:%s'", __func__, tech_id, acronyme );
           Charger_conf_AI ( ai );                                                     /* Chargment de la conf AI depuis la DB */
         }
        if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */
@@ -996,22 +1027,22 @@
                break;
           case ENTREEANA_4_20_MA_10BITS:
                if (val_avant_ech < 100)                                                /* 204) Modification du range pour 4mA */
-                { ai->val_ech = 0.0;                                                                    /* Valeur à l'echelle */ 
+                { ai->val_ech = 0.0;                                                                    /* Valeur à l'echelle */
                   ai->inrange = 0;
                 }
                else
-                { if (val_avant_ech < 204) val_avant_ech = 204;                                         /* Valeur à l'echelle */ 
+                { if (val_avant_ech < 204) val_avant_ech = 204;                                         /* Valeur à l'echelle */
                   ai->val_ech = (gfloat) ((val_avant_ech-204)*(ai->confDB.max - ai->confDB.min))/820.0 + ai->confDB.min;
                   ai->inrange = 1;
                 }
                break;
           case ENTREEANA_4_20_MA_12BITS:
                if (val_avant_ech < 400)
-                { ai->val_ech = 0.0;                                                                    /* Valeur à l'echelle */ 
+                { ai->val_ech = 0.0;                                                                    /* Valeur à l'echelle */
                   ai->inrange = 0;
                 }
                else
-                { if (val_avant_ech < 816) val_avant_ech = 816;                                         /* Valeur à l'echelle */ 
+                { if (val_avant_ech < 816) val_avant_ech = 816;                                         /* Valeur à l'echelle */
                   ai->val_ech = (gfloat) ((val_avant_ech-816)*(ai->confDB.max - ai->confDB.min))/3280.0 + ai->confDB.min;
                   ai->inrange = 1;
                 }
@@ -1022,7 +1053,7 @@
                break;
           case ENTREEANA_WAGO_750461:                                                                          /* Borne PT100 */
                if (val_avant_ech > -32767 && val_avant_ech < 8500)
-                { ai->val_ech = (gfloat)(val_avant_ech/10.0);                                           /* Valeur à l'echelle */ 
+                { ai->val_ech = (gfloat)(val_avant_ech/10.0);                                           /* Valeur à l'echelle */
                   ai->inrange = 1;
                 }
                else ai->inrange = 0;
@@ -1059,10 +1090,10 @@
        if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
-       
+
     if (!liste) return(0.0);
     if (ai_p) *ai_p = (gpointer)ai;                                                 /* Sauvegarde pour acceleration si besoin */
-    return( ai->val_ech );    
+    return( ai->val_ech );
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
@@ -1081,11 +1112,11 @@
           if ( !strcmp ( tempo->acronyme, acronyme ) && !strcmp( tempo->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
-       
+
        if (!liste)
         { tempo = g_try_malloc0 ( sizeof(struct DLS_TEMPO) );
           if (!tempo)
-           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( tempo->acronyme, sizeof(tempo->acronyme), "%s", acronyme );
@@ -1098,7 +1129,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_TEMPO = g_slist_prepend ( Partage->Dls_data_TEMPO, tempo );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding TEMPO '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding TEMPO '%s:%s'", __func__, tech_id, acronyme );
         }
        if (tempo_p) *tempo_p = (gpointer)tempo;                                     /* Sauvegarde pour acceleration si besoin */
       }
@@ -1125,20 +1156,20 @@
        if ( !strcmp ( tempo->acronyme, acronyme ) && !strcmp( tempo->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
-       
+
     if (!liste) return(FALSE);
     if (tempo_p) *tempo_p = (gpointer)tempo;                                        /* Sauvegarde pour acceleration si besoin */
-    return( tempo->state );    
+    return( tempo->state );
   }
 /******************************************************************************************************************************/
 /* Dls_data_set_bus : Envoi un message sur le bus système                                                                     */
 /* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et les paramètres du message                                  */
 /******************************************************************************************************************************/
  void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p, gboolean etat,
-                         gchar *host, gchar *thread, gchar *action, gchar *param1)
+                         gchar *host, gchar *thread, gchar *tag, gchar *param1)
   { Dls_data_set_bool ( tech_id, acronyme, bus_p, etat );                                         /* Utilisation d'un boolean */
     if (Dls_data_get_bool_up (tech_id, acronyme, bus_p))
-     { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, action, param1, strlen(param1)+1 ); }
+     { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, param1, strlen(param1)+1 ); }
   }
 /******************************************************************************************************************************/
 /* Met à jour le message en parametre                                                                                         */
@@ -1156,11 +1187,11 @@
           if ( !strcmp ( msg->acronyme, acronyme ) && !strcmp( msg->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
-       
+
        if (!liste)
         { msg = g_try_malloc0 ( sizeof(struct DLS_MESSAGES) );
           if (!msg)
-           { Info_new( Config.log, Config.log_dls, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
            }
           g_snprintf( msg->acronyme, sizeof(msg->acronyme), "%s", acronyme );
@@ -1168,7 +1199,7 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_MSG = g_slist_prepend ( Partage->Dls_data_MSG, msg );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Config.log_dls, LOG_DEBUG, "%s : adding MSG '%s:%s'", __func__, tech_id, acronyme );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding MSG '%s:%s'", __func__, tech_id, acronyme );
         }
        if (msg_p) *msg_p = (gpointer)msg;                                           /* Sauvegarde pour acceleration si besoin */
       }
@@ -1180,14 +1211,14 @@
        if ( msg->last_change + 10 <= Partage->top ) { msg->changes = 0; }            /* Si pas de change depuis plus de 1 sec */
 
        if ( msg->changes > 5 && !(Partage->top % 50) )              /* Si persistence d'anomalie on prévient toutes les 5 sec */
-        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: last_change trop tot for MSG '%s':'%s' !", __func__,
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: last_change trop tot for MSG '%s':'%s' !", __func__,
                     msg->tech_id, msg->acronyme );
         }
        else
         { struct MESSAGES_EVENT *event;
           event = (struct MESSAGES_EVENT *)g_try_malloc0( sizeof ( struct MESSAGES_EVENT ) );
           if (!event)
-           { Info_new( Config.log, Config.log_dls, LOG_ERR,
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR,
                       "%s: malloc Event failed. Memory error for MSG'%s:%s'", __func__, msg->tech_id, msg->acronyme );
            }
           else
@@ -1223,10 +1254,10 @@
        if ( !strcmp ( msg->acronyme, acronyme ) && !strcmp( msg->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
-       
+
     if (!liste) return(FALSE);
     if (msg_p) *msg_p = (gpointer)msg;                                              /* Sauvegarde pour acceleration si besoin */
-    return( msg->etat );    
+    return( msg->etat );
   }
 /******************************************************************************************************************************/
 /* Dls_foreach_dls_tree: Parcours recursivement l'arbre DLS et execute des commandes en parametres                            */
@@ -1248,7 +1279,7 @@
     while(liste && do_plugin)                                                        /* On execute tous les modules un par un */
      { struct PLUGIN_DLS *plugin_actuel;
        plugin_actuel = (struct PLUGIN_DLS *)liste->data;
-       do_plugin( user_data, plugin_actuel );       
+       do_plugin( user_data, plugin_actuel );
        liste = liste->next;
      }
     if (do_tree) do_tree( user_data, dls_tree );
@@ -1273,7 +1304,7 @@
   { struct timeval tv_avant, tv_apres;
     gboolean bit_comm_out, bit_defaut, bit_defaut_fixe, bit_alarme, bit_alarme_fixe;                              /* Activité */
     gboolean bit_veille_partielle, bit_veille_totale, bit_alerte, bit_alerte_fixe;             /* Synthese Sécurité des Biens */
-    gboolean bit_derangement, bit_derangement_fixe, bit_danger, bit_danger_fixe;           /* synthèse Sécurité des Personnes */ 
+    gboolean bit_derangement, bit_derangement_fixe, bit_danger, bit_danger_fixe;           /* synthèse Sécurité des Personnes */
     GSList *liste;
 
     bit_comm_out = bit_defaut = bit_defaut_fixe = bit_alarme = bit_alarme_fixe = FALSE;
@@ -1362,7 +1393,7 @@
        dls_tree->syn_vars.bit_derangement_fixe = bit_derangement_fixe;
        dls_tree->syn_vars.bit_danger           = bit_danger;
        dls_tree->syn_vars.bit_danger_fixe      = bit_danger_fixe;
-       Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, 
+       Send_zmq_with_tag ( Partage->com_dls.zmq_to_master,
                            NULL, "dls", "*", "ssrv", "SET_SYN_VARS",
                           &dls_tree->syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
      }
@@ -1375,8 +1406,9 @@
     GSList *plugins;
 
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
-    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
     Partage->com_dls.Thread_run         = TRUE;                                                         /* Le thread tourne ! */
+    Dls_Lire_config ();                                                     /* Lecture de la configuration logiciel du thread */
     Prendre_heure();                                                     /* On initialise les variables de gestion de l'heure */
     Charger_plugins();                                                                          /* Chargement des modules dls */
     SB_SYS(1, 0);                                                                                      /* B1 est toujours à 0 */
@@ -1386,10 +1418,10 @@
     Partage->com_dls.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     while(Partage->com_dls.Thread_run == TRUE)                                               /* On tourne tant que necessaire */
-     { 
+     {
 
        if (Partage->com_dls.Thread_reload)
-        { Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: RELOADING", __func__ );
+        { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: RELOADING", __func__ );
           Decharger_plugins();
           Charger_plugins();
           Partage->com_dls.Thread_reload = FALSE;
@@ -1428,7 +1460,7 @@
      }
     Decharger_plugins();                                                                      /* Dechargement des modules DLS */
     Close_zmq(Partage->com_dls.zmq_to_master);
-    Info_new( Config.log, Config.log_dls, LOG_NOTICE, "%s: DLS Down (%p)", __func__, pthread_self() );
+    Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: DLS Down (%p)", __func__, pthread_self() );
     Partage->com_dls.TID = 0;                                                 /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));
   }
