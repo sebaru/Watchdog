@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -69,7 +69,7 @@
     g_free(libelle);
     g_free(acro);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
@@ -83,26 +83,26 @@
 /* Entrée: un pointeur vers une nouvelle connexion de base de données, le critere de recherche                                */
 /* Sortie: FALSE si erreur                                                      ********************                          */
 /******************************************************************************************************************************/
- gboolean Recuperer_mnemos_DO_by_action ( struct DB **db_retour, gchar *thread, gchar *action )
+ gboolean Recuperer_mnemos_DO_by_tag ( struct DB **db_retour, gchar *thread, gchar *tag )
   { gchar requete[1024];
     gchar *commande;
     gboolean retour;
     struct DB *db;
 
-    commande = Normaliser_chaine ( action );
+    commande = Normaliser_chaine ( tag );
     if (!commande)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible commande", __func__ );
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),
-               "SELECT d.tech_id, m.acronyme, m.dst_action, m.libelle "
+               "SELECT d.tech_id, m.acronyme, m.dst_tag, m.libelle "
                "FROM mnemos_DO as m INNER JOIN dls as d ON d.id = m.dls_id"
                " WHERE (m.dst_host='*' OR m.dst_host='%s') AND (m.dst_thread='*' OR m.dst_thread='%s')"
-               " AND m.dst_action LIKE '%s'",
+               " AND m.dst_tag LIKE '%s'",
                g_get_host_name(), thread, commande );
     g_free(commande);
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);

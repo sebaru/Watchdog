@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _MNEMONIQUE_H_
  #define _MNEMONIQUE_H_
 
@@ -60,7 +60,7 @@
  extern struct CMD_TYPE_MNEMO_AI *Rechercher_mnemo_aiDB ( guint id );
  extern gboolean Modifier_mnemo_aiDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
  extern void Charger_conf_AI ( struct ANALOG_INPUT *ai );
- 
+
  extern gboolean Modifier_mnemo_horlogeDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );                 /* Dans Mnemo_HORLOGES.c */
  extern gint Ajouter_mnemo_horlogeDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
  extern gboolean Retirer_horlogeDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
@@ -92,7 +92,7 @@
  extern gboolean Recuperer_mnemos_DI_suite( struct DB **db_orig );
 
  extern gboolean Mnemo_auto_create_DO ( gint dls_id, gchar *acronyme, gchar *libelle );                   /* Dans mnemos_DO.c */
- extern gboolean Recuperer_mnemos_DO_by_action ( struct DB **db_retour, gchar *thread, gchar *action );
+ extern gboolean Recuperer_mnemos_DO_by_tag ( struct DB **db_retour, gchar *thread, gchar *tag );
  extern gboolean Recuperer_mnemos_DO_suite( struct DB **db_orig );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/
