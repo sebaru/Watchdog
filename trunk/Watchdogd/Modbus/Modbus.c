@@ -825,18 +825,18 @@
     if ( ! Recuperer_mnemos_DO_by_tag ( &db, NOM_THREAD, critere ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
     else while ( Recuperer_mnemos_DO_suite( &db ) )
-     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *dst_action = db->row[2];
+     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *dst_tag = db->row[2];
        char debut[80];
        gint num;
        Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
-                 dst_action, tech_id, acro, libelle );
-       if ( sscanf ( mnemo->ev_text, "%[^:]:DO%d", debut, &num ) == 2 )                      /* Découpage de la ligne ev_text */
+                 dst_tag, tech_id, acro, libelle );
+       if ( sscanf ( dst_tag, "%[^:]:DO%d", debut, &num ) == 2 )                      /* Découpage de la ligne ev_text */
         { if (num<module->nbr_sortie_tor)
            { Dls_data_set_bool ( tech_id, acro, &module->DO[num], FALSE ); }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
-                         dst_action, num, module->nbr_entree_tor );
+                         dst_tag, num, module->nbr_entree_tor );
         }
-       else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__, dst_action );
+       else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__, dst_tag );
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
     g_snprintf( critere, sizeof(critere),"%s:COMM", module->modbus.tech_id );
