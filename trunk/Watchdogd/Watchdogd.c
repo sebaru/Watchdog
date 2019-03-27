@@ -698,6 +698,7 @@
 
        Update_database_schema();                                                    /* Update du schéma de Database si besoin */
        Charger_config_bit_interne ();                         /* Chargement des configurations des bits internes depuis la DB */
+       Modifier_configDB ( "global", "instance_version", VERSION );                      /* Update du champs instance_version */
 
        Partage->zmq_ctx = zmq_ctx_new ();                                          /* Initialisation du context d'echange ZMQ */
        if (!Partage->zmq_ctx)
