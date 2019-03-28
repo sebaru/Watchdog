@@ -9,12 +9,12 @@ lib_LTLIBRARIES     = libwatchdog-server-snips.la
 libwatchdog_server_snips_la_SOURCES    = Snips.c Snips.h admin_snips.c
 
 
-libwatchdog_server_snips_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 json-glib-1.0 libmosquitto` \
+libwatchdog_server_snips_la_LDFLAGS = `pkg-config --libs glib-2.0 gthread-2.0 json-glib-1.0` -lmosquitto \
                                        `mysql_config --libs` \
                                        -rdynamic \
                                        -version-info $(LIBDLS_MAJOR_VERSION):$(LIBDLS_MINOR_VERSION):$(LIBDLS_MICRO_VERSION)
 
-libwatchdog_server_snips_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 json-glib-1.0 libmosquitto` \
+libwatchdog_server_snips_la_CFLAGS = `pkg-config --cflags glib-2.0 gthread-2.0 json-glib-1.0` \
                                       `mysql_config --cflags`
 
 AM_CPPFLAGS=-I$(top_srcdir)/Include \
