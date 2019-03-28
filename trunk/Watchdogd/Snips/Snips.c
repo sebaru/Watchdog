@@ -79,51 +79,22 @@
     gchar chaine[160];
     struct DB *db;
 
-    if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, texte ) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte );
-       return;
-     }
+    if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, texte ) )
+     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte ); }
+    else while ( Recuperer_mnemos_DI_suite( &db ) )
+     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
+       Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
+                 src_text, tech_id, acro, libelle );
 
-    if ( db->nbr_result == 0 )                                                              /* Si pas d'enregistrement trouvé */
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: No match found for '%s'", __func__, texte );
-       Libere_DB_SQL ( &db );
-     }
-    else if (db->nbr_result > 1)
-     { g_snprintf(chaine, sizeof(chaine), "Too many events found for '%s'", texte );             /* Envoi de l'erreur si trop */
-       Libere_DB_SQL ( &db );
-     }
-    else
-     { while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
-        { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Match found for '%s' Type %d Num %d - %s", __func__,
-                    texte, mnemo->type, mnemo->num, mnemo->libelle );
-
-          if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
-           { switch( mnemo->type )
-              { case MNEMO_MONOSTABLE:
-                     Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Mise à un du bit M%03d %s:%s", __func__,
-                               mnemo->num, mnemo->dls_tech_id, mnemo->acronyme );
-                     if (mnemo->num != -1) Envoyer_commande_dls ( mnemo->num );
-                                      else Envoyer_commande_dls_data ( mnemo->dls_tech_id, mnemo->acronyme );
-                     break;
-                default:
-                     Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                               "%s: Error, type of mnemo not handled", __func__);
-              }
-           }
-          else /* Envoi au master via thread HTTP */
-           { if (mnemo->type == MNEMO_MONOSTABLE)
-              { struct ZMQ_SET_BIT bit;
-                bit.type = mnemo->type;
-                bit.num = mnemo->num;
-                g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", mnemo->dls_tech_id );
-                g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", mnemo->acronyme );
-                /*Send_zmq_with_tag ( Cfg_snips.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_BIT",
-                                    &bit, sizeof(struct ZMQ_SET_BIT) );*/
-              }
-             else Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                           "%s: Error, type of mnemo not handled", __func__ );
-           }
-          g_free(mnemo);
+       if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
+        { Envoyer_commande_dls_data ( tech_id, acro ); }
+       else /* Envoi au master via thread HTTP */
+        { struct ZMQ_SET_BIT bit;
+          bit.type = 0;
+          bit.num = -1;
+          g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", mnemo->dls_tech_id );
+          g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", mnemo->acronyme );
+          Send_zmq_with_tag ( Cfg_snips.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_BIT", &bit, sizeof(struct ZMQ_SET_BIT) );
         }
      }
   }
@@ -273,7 +244,8 @@
        goto end;
      }
 
-    zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    zmq_from_bus            = Connect_zmq ( ZMQ_SUB, "listen-to-bus", "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    Cfg_snips.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
 	   mosquitto_lib_init();
  	  mosq = mosquitto_new(NULL, TRUE, NULL);
@@ -319,6 +291,7 @@
        usleep(1000);
      }
     Close_zmq ( zmq_from_bus );
+    Close_zmq ( Cfg_snips.zmq_to_master );
 end:
    	mosquitto_destroy(mosq);
    	mosquitto_lib_cleanup();

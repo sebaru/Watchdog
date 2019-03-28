@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _SNIPS_H_
  #define _SNIPS_H_
 
@@ -36,6 +36,7 @@
  struct SNIPS_CONFIG
   { struct LIBRAIRIE *lib;
     gboolean enable;                                                                      /* Is this thread enabled at boot ? */
+    void *zmq_to_master;                                                             /* Queue de remontée des infos au master */
     guint nbr_msg_recu;
     gchar snips_host[24];
   } Cfg_snips;

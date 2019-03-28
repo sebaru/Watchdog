@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -317,7 +317,7 @@
        void *payload;
        gint byte;
 
-       Gerer_arrive_MSGxxx_dls();                                 /* Redistrib des messages DLS vers les clients + Historique */ 
+       Gerer_arrive_MSGxxx_dls();                                 /* Redistrib des messages DLS vers les clients + Historique */
        Gerer_arrive_Ixxx_dls();                                                 /* Distribution des changements d'etats motif */
        Gerer_arrive_Axxx_dls();                                           /* Distribution des changements d'etats sorties TOR */
 
@@ -329,10 +329,8 @@
                        "%s: receive TAG_ZMQ_SET_BIT from %s/%s to %s/%s : bit type %d num %d, techid %s acronyme %s", __func__,
                        event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
                        bit->type, bit->num, bit->dls_tech_id, bit->acronyme );
-             if (bit->type == MNEMO_MONOSTABLE)
-              { if (bit->num != -1) Envoyer_commande_dls ( bit->num );
-                               else Envoyer_commande_dls_data ( bit->dls_tech_id, bit->acronyme );
-              }
+             if (bit->num != -1) Envoyer_commande_dls ( bit->num );
+                            else Envoyer_commande_dls_data ( bit->dls_tech_id, bit->acronyme );
            } else
           if ( !strcmp(event->tag, "ping") )
            { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive TAG_ZMQ_SATELLITE_PING from %s/%s to %s/%s",
@@ -372,7 +370,7 @@
        sched_yield();
      }
 
-/*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/ 
+/*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
     Sauver_compteur();                                                                     /* DerniÃ¨re sauvegarde avant arret */
     Decharger_librairies();                                                   /* DÃ©chargement de toutes les librairies filles */
     Stopper_fils(TRUE);                                                                    /* Arret de tous les fils watchdog */
@@ -458,7 +456,7 @@
               { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive TAG_ZMQ_CLI from %s/%s to %s/%s : %s",
                           __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
                 if (Zmq_instance_is_target ( event ))
-                 { if (!strcasecmp(event->dst_thread,"msrv"))                                             /* Thread MSRV ? */          
+                 { if (!strcasecmp(event->dst_thread,"msrv"))                                             /* Thread MSRV ? */
                     { New_Processer_commande_admin ( event, payload ); }
                    else Send_zmq ( Partage->com_msrv.zmq_to_bus, buffer, byte );  /* Sinon on envoi aux threads locaux */
                  }
@@ -500,7 +498,7 @@
        sched_yield();
      }
 
-/*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/ 
+/*********************************** Terminaison: Deconnexion DB et kill des serveurs *****************************************/
     Decharger_librairies();                                                   /* DÃ©chargement de toutes les librairies filles */
     Stopper_fils(TRUE);                                                                    /* Arret de tous les fils watchdog */
     Close_zmq ( Partage->com_msrv.zmq_msg );
@@ -523,7 +521,7 @@
   { gint help = 0, log_level = -1, fg = 0, single = 0, version = 0;
     gchar *home = NULL, *file= NULL, *run_as = NULL;
     struct passwd *pwd, *old;
-    struct poptOption Options[]= 
+    struct poptOption Options[]=
      { { "foreground", 'f', POPT_ARG_NONE,
          &fg,               0, "Run in foreground", NULL },
        { "version",    'v', POPT_ARG_NONE,
@@ -585,7 +583,7 @@
      { printf("Error, actual user '%d' not found in /etc/passwd (%s).. Could not set run_as user\n", getuid(), strerror(errno) );
        exit(EXIT_ERREUR);
      }
-    
+
     if (old->pw_uid != pwd->pw_uid)                                                      /* Besoin de changer d'utilisateur ? */
      { printf("Dropping privileges '%s' (%d) -> '%s' (%d).\n", old->pw_name, old->pw_uid, pwd->pw_name, pwd->pw_uid );
        if (initgroups ( Config.run_as, pwd->pw_gid )==-1)                                           /* On drop les privilÃ¨ges */
@@ -603,7 +601,7 @@
           exit(EXIT_ERREUR);
         }
      }
-       
+
     if (chdir(Config.home))                                                             /* Positionnement Ã  la racine du home */
      { printf( "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
     else
@@ -633,7 +631,7 @@
        pid = fork();
        if (pid<0) { printf("Fork 1 failed\n"); exit(EXIT_ERREUR); }                                           /* On daemonize */
        if (pid>0) exit(EXIT_OK);                                                                           /* On kill le pÃ¨re */
-      
+
        pid = fork();
        if (pid<0) { printf("Fork 2 failed\n"); exit(EXIT_ERREUR); }                         /* Evite des pb (linuxmag 44 p78) */
        if (pid>0) exit(EXIT_OK);                                                                           /* On kill le pÃ¨re */
