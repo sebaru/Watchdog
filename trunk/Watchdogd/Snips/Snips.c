@@ -74,8 +74,19 @@
 /* Entrée : L'évènement                                                                                                       */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Snips_traiter_commande_vocale ( gchar *texte )
+ static void Snips_traiter_commande_vocale ( const gchar *intent, const gchar *action, const gchar *object, const gchar *room )
   { struct DB *db;
+    gchar texte[80], insert[32];
+
+    g_snprintf ( texte, sizeof(texte), "%s,%s", intent, action );
+    if (object)
+     { g_snprintf ( insert, sizeof(insert), ",%s", object );
+       g_strlcat( texte, insert, sizeof(texte) );
+     }
+    if (room)
+     { g_snprintf ( insert, sizeof(insert), ",%s", room );
+       g_strlcat( texte, insert, sizeof(texte) );
+     }
 
     if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, texte ) )
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte ); }
@@ -102,12 +113,13 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Snips_message_CB(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message)
-  { const gchar *intent, *targetAction, *targetObject[3], *targetRoom[3];
-    gint nbrObject = 0, nbrRoom = 0;
-    gint nbr_slots, i, j;
+  { const gchar *targetAction, *targetObject, *targetRoom;
+    const gchar *slotValue, *slotName;
+    const gchar *intent;
     JsonArray *slotArray;
     JsonObject *object;
     JsonNode *Query;
+    gint nbr_slots, i;
 
 	   if(!message->payloadlen)
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Message recu: %s - NoPayload", __func__,
@@ -162,37 +174,23 @@
        return;
      }
 
+    if (nbr_slots>=3)
+     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: %d slots -> Too many slots", __func__, nbr_slots );
+       json_node_unref (Query);
+       return;
+     }
+
     for( i=0;i<nbr_slots; i++)
-     { const gchar *slotValue, *slotName;
-       JsonObject *slot = json_array_get_object_element ( slotArray, i );
+     { JsonObject *slot = json_array_get_object_element ( slotArray, i );
        slotValue = json_object_get_string_member( json_object_get_object_member ( slot, "value" ), "value" );
        slotName = json_object_get_string_member( slot, "slotName" );
        Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_DEBUG,
                  "%s: slot %d/%d trouvé: %s - %s", __func__, i+1, nbr_slots, slotName, slotValue );
-       if (!strcmp(slotName,"targetAction")) targetAction=slotValue;
-       if (nbrRoom<3   && !strcmp(slotName,"targetRoom"))   targetRoom  [nbrRoom++]   = slotValue;
-       if (nbrObject<3 && !strcmp(slotName,"targetObject")) targetObject[nbrObject++] = slotValue;
+       if (!strcmp(slotName,"targetAction")) targetAction = slotValue;
+       if (!strcmp(slotName,"targetObject")) targetObject = slotValue;
+       if (!strcmp(slotName,"targetRoom"))   targetRoom   = slotValue;
      }
-
-    for ( i=0; i<nbrObject; i++ )
-     { for ( j=0; j<nbrRoom; j++ )
-        { gchar result[64],insert[32];
-          g_snprintf ( result, sizeof(result), "%s", intent );
-          if (targetAction)
-           { g_snprintf ( insert, sizeof(insert), ",%s", targetAction );
-             g_strlcat( result, insert, sizeof(result) );
-           }
-          if (targetObject)
-           { g_snprintf ( insert, sizeof(insert), ",%s", targetObject );
-             g_strlcat( result, insert, sizeof(result) );
-           }
-          if (targetRoom)
-           { g_snprintf ( insert, sizeof(insert), ",%s", targetObject );
-             g_strlcat( result, insert, sizeof(result) );
-           }
-          Snips_traiter_commande_vocale ( result );
-        }
-     }
+    Snips_traiter_commande_vocale ( intent, targetAction, targetObject, targetRoom );
     json_node_unref (Query);
     Cfg_snips.nbr_msg_recu++;
  	}
@@ -201,14 +199,14 @@
 /* Entrée : L'évènement                                                                                                       */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Snips_connect_CB(struct mosquitto *mosq, void *userdata, int result)
-  {	if(!result)
+ static void Snips_connect_CB(struct mosquitto *mosq, void *userdata, int texte)
+  {	if(!texte)
      {	/* Subscribe to broker information topics on successful connect. */
 		     mosquitto_subscribe(mosq, NULL, "hermes/intent/#", 2);
        Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Connect OK. subscribing...", __func__ );
 	    }
     else
-     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Connect Error/ Result=%d.", __func__, result ); }
+     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Connect Error/ Result=%d.", __func__, texte ); }
   }
 /******************************************************************************************************************************/
 /* Snips_subscribe_CB: appeller par la librairie snips lors d'un evenement de subscribe arrive                                */
