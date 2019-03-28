@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <sys/time.h>
  #include <sys/prctl.h>
  #include <string.h>
@@ -49,7 +49,7 @@
     struct DB *db;
 
     Cfg_voice.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
-    Cfg_voice.enable            = FALSE; 
+    Cfg_voice.enable            = FALSE;
     g_snprintf( Cfg_voice.audio_device,  sizeof(Cfg_voice.audio_device),  "default" );
     g_snprintf( Cfg_voice.key_words,     sizeof(Cfg_voice.key_words),     "dis moi jolie maison" );
     g_snprintf( Cfg_voice.gain_control,  sizeof(Cfg_voice.gain_control),  "noise" );
@@ -106,7 +106,7 @@
 
     g_snprintf(chaine, sizeof(chaine), "default-server=/run/user/%d/pulse/native", getuid() );
     if (write( id_fichier, chaine, strlen(chaine) )<0)
-     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: Write to file '%s' failed (%s)", __func__, 
+     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: Write to file '%s' failed (%s)", __func__,
                  file, strerror(errno) );
        close(id_fichier);
        return;
@@ -144,7 +144,7 @@
 
     g_snprintf(chaine, sizeof(chaine), "#JSGF V1.0 UTF-8;\n\ngrammar watchdog.fr;\n\n" );
     if (write( id_fichier, chaine, strlen(chaine) )<0)
-     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: Write to file '%s' failed (%s)", __func__, 
+     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: Write to file '%s' failed (%s)", __func__,
                  file, strerror(errno) );
        Libere_DB_SQL ( &db );
        close(id_fichier);
@@ -191,10 +191,9 @@ reload:
     g_snprintf( Cfg_voice.lib->admin_prompt, sizeof(Cfg_voice.lib->admin_prompt), NOM_THREAD );
     g_snprintf( Cfg_voice.lib->admin_help,   sizeof(Cfg_voice.lib->admin_help),   "Manage VOICE system" );
 
-    if (lib->Thread_boot_start && !Cfg_voice.enable)
+    if (!Cfg_voice.enable)
      { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_NOTICE,
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
-       lib->Thread_boot_start = FALSE;
        goto end;
      }
 

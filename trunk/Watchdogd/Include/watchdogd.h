@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #ifndef _WATCHDOGD_H_
  #define _WATCHDOGD_H_
 
@@ -68,7 +68,6 @@
     gchar admin_prompt[32];                                                            /* Prompt auquel va répondre le thread */
     gchar admin_help[64];                                                              /* Designation de l'activité du thread */
 
-    gboolean Thread_boot_start;                             /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
     gboolean Thread_reload;                                                           /* TRUE si le thread doit gerer le USR1 */
@@ -114,9 +113,9 @@
     void *zmq_ctx;                                                    /* Contexte d'échange inter-thread et message queue ZMQ */
     guint top;                                                                         /* Gestion des contraintes temporelles */
     guint top_cdg_plugin_dls;                                                        /* Top de chien de garde des plugins DLS */
-    guint audit_bit_interne_per_sec;     
+    guint audit_bit_interne_per_sec;
     guint audit_bit_interne_per_sec_hold;
-    guint audit_tour_dls_per_sec;     
+    guint audit_tour_dls_per_sec;
     guint audit_tour_dls_per_sec_hold;
                                                                                                     /* Interfacage avec D.L.S */
     struct COM_DB com_db;                                                      /* Interfaçage avec le code de gestion des BDD */

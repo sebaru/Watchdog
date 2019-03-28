@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -129,7 +129,7 @@
 
     lib->Run_thread = dlsym( lib->dl_handle, "Run_thread" );                                      /* Recherche de la fonction */
     if (!lib->Run_thread)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Candidat %s rejected (Run_thread not found)", __func__, nom_absolu ); 
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Candidat %s rejected (Run_thread not found)", __func__, nom_absolu );
        dlclose( lib->dl_handle );
        g_free(lib);
        return(NULL);
@@ -224,10 +224,7 @@
            { struct LIBRAIRIE *lib;
              g_snprintf( prompt, strlen(fichier->d_name)-21, "%s", fichier->d_name + 19 );
              lib = Charger_librairie_par_prompt( prompt );
-             if (lib)
-              { lib->Thread_boot_start = TRUE;                                     /* Premier demarrage par detection opendir */
-                Start_librairie( lib );
-              }
+             if (lib) { Start_librairie( lib ); }
            }
         }
      }

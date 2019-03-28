@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -45,7 +45,7 @@
     struct DB *db;
 
     Cfg_audio.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
-    Cfg_audio.enable            = FALSE; 
+    Cfg_audio.enable            = FALSE;
     g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", AUDIO_DEFAUT_LANGUAGE );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
@@ -130,7 +130,7 @@
 /******************************************************************************************************************************/
  static gboolean Jouer_wav_by_id ( struct CMD_TYPE_MESSAGE *msg )
   { gchar nom_fichier[80];
-    
+
     g_snprintf( nom_fichier, sizeof(nom_fichier), "%d", msg->num );
     return(Jouer_wav_by_file( nom_fichier ) );
   }
@@ -187,11 +187,10 @@
     g_snprintf( Cfg_audio.lib->admin_prompt, sizeof(Cfg_audio.lib->admin_prompt), "audio" );
     g_snprintf( Cfg_audio.lib->admin_help,   sizeof(Cfg_audio.lib->admin_help),   "Manage Audio system" );
 
-    if (lib->Thread_boot_start && !Cfg_audio.enable)
+    if (!Cfg_audio.enable)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE,
                 "Run_thread: Thread is not enabled in config. Shutting Down %p",
                  pthread_self() );
-       lib->Thread_boot_start = FALSE;
        goto end;
      }
 
@@ -238,7 +237,7 @@
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
                 "%s : Recu message num=%d (histo->msg.audio=%d, alive=%d)", __func__,
                 histo->msg.num, histo->msg.audio, histo->alive );
-                   
+
        if ( M(NUM_BIT_M_AUDIO_INHIB) == 1 &&
            ! (histo->msg.type == MSG_ALERTE || histo->msg.type == MSG_DANGER || histo->msg.type == MSG_ALARME)
           )                                                                     /* Bit positionné quand arret diffusion audio */

@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <sys/prctl.h>
 
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
@@ -44,7 +44,7 @@
     struct DB *db;
 
     Cfg_imsgp.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
-    Cfg_imsgp.enable            = FALSE; 
+    Cfg_imsgp.enable            = FALSE;
     g_snprintf( Cfg_imsgp.username, sizeof(Cfg_imsgp.username), IMSGP_DEFAUT_USERNAME );
     g_snprintf( Cfg_imsgp.password, sizeof(Cfg_imsgp.password), IMSGP_DEFAUT_PASSWORD );
 
@@ -171,7 +171,7 @@
                 NOM_TABLE_UTIL, jabberid );
     g_free(jabberid);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
        return(NULL);
@@ -196,7 +196,7 @@
   { struct IMSGPDB *imsg;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
        return;
@@ -224,7 +224,7 @@
     struct DB *db;
     if (conv==NULL)
      { conv = purple_conversation_new(PURPLE_CONV_TYPE_IM, account, from); }
-  
+
     Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
              "%s: (%s) %s %s: %s", __func__,
 		           purple_conversation_get_name(conv),
@@ -239,14 +239,14 @@
     g_free(imsg);
 
     if ( ! strcasecmp( message, "ping" ) )                                                             /* Interfacage de test */
-     { Imsgp_Envoi_message_to( from, "Pong !" ); }   
+     { Imsgp_Envoi_message_to( from, "Pong !" ); }
     else if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, message ) )
-     { Imsgp_Envoi_message_to( from, "Error searching Database .. Sorry .." ); }   
-    else 
+     { Imsgp_Envoi_message_to( from, "Error searching Database .. Sorry .." ); }
+    else
      { struct CMD_TYPE_MNEMO_BASE *mnemo, *result_mnemo = NULL;
-          
+
        if ( db->nbr_result == 0 )                                             /* Si pas d'enregistrement, demande de préciser */
-        { Imsgp_Envoi_message_to( from, "Error... No result found .. Sorry .." ); }   
+        { Imsgp_Envoi_message_to( from, "Error... No result found .. Sorry .." ); }
        if ( db->nbr_result > 1 )                                             /* Si trop d'enregistrement, demande de préciser */
         { Imsgp_Envoi_message_to( from, " Need to choose ... :" ); }
 
@@ -263,8 +263,8 @@
                   Imsgp_Envoi_message_to( from, chaine );
                   Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
                              "%s: Mise a un du bit M%03d by %s", __func__, result_mnemo->num, imsg->user_name );
-                  if (result_mnemo->num!=-1) Envoyer_commande_dls(result_mnemo->num); 
-                                        else Envoyer_commande_dls_data (result_mnemo->dls_tech_id, result_mnemo->acronyme); 
+                  if (result_mnemo->num!=-1) Envoyer_commande_dls(result_mnemo->num);
+                                        else Envoyer_commande_dls_data (result_mnemo->dls_tech_id, result_mnemo->acronyme);
                   break;
              case MNEMO_ENTREE:
                   g_snprintf( chaine, sizeof(chaine), " Result = %d", E(result_mnemo->num) );
@@ -309,7 +309,7 @@
                 "UPDATE %s SET imsg_available=%d WHERE imsg_jabberid='%s'", NOM_TABLE_UTIL, available, jabberid );
     g_free(jabberid);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_WARNING,
                 "%s: Database Connection Failed", __func__ );
@@ -322,7 +322,7 @@
      }
     else { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_DEBUG,
                     "%s : jabber_id %s -> Availability updated to %d.", __func__, jabber_id, available );
-         } 
+         }
     Libere_DB_SQL( &db );
   }
 /******************************************************************************************************************************/
@@ -339,7 +339,7 @@
 /******************************************************************************************************************************/
  static void Imsgp_buddy_signed_off(PurpleBuddy *buddy)
   { Imsgp_Sauvegarder_statut_contact ( purple_buddy_get_name(buddy), FALSE ); }
- 
+
 /******************************************************************************************************************************/
 /* Imsgp_buddy_xxx : Ensemble de fonctions de notification sur le statut des contacts                                         */
 /* Entrée: le buddy                                                                                                           */
@@ -350,7 +350,7 @@
              "%s: '%s' with proto %s", __func__,
               purple_buddy_get_name(buddy), purple_account_get_protocol_id(purple_buddy_get_account(buddy)));
   }
- 
+
  static void Imsgp_buddy_idle(PurpleBuddy *buddy, gboolean old_idle, gboolean idle)
   { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
              "%s: '%s' with proto %s", __func__,
@@ -362,13 +362,13 @@
              "%s: '%s' with proto %s", __func__,
               name, purple_account_get_protocol_id(account));
   }
- 
+
  static void Imsgp_buddy_typed(PurpleAccount *account, const char *name) //not supported on all protocols
   { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
              "%s: '%s' with proto %s", __func__,
               name, purple_account_get_protocol_id(account));
   }
- 
+
  static void Imsgp_buddy_typing_stopped(PurpleAccount *account, const char *name)
   { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
              "%s: '%s' with proto %s", __func__,
@@ -453,7 +453,7 @@
 	   return closure->result;
   }
 
- static PurpleEventLoopUiOps glib_eventloops = 
+ static PurpleEventLoopUiOps glib_eventloops =
   {	g_timeout_add,	g_source_remove,	glib_input_add,	g_source_remove,
 	   NULL,	g_timeout_add_seconds,
 	   /* padding */
@@ -479,10 +479,9 @@
     g_snprintf( Cfg_imsgp.lib->admin_prompt, sizeof(Cfg_imsgp.lib->admin_prompt), NOM_THREAD );
     g_snprintf( Cfg_imsgp.lib->admin_help,   sizeof(Cfg_imsgp.lib->admin_help),   "Manage Instant Messaging system (libpurple)" );
 
-    if (lib->Thread_boot_start && !Cfg_imsgp.enable)
+    if (!Cfg_imsgp.enable)
      { Info_new( Config.log, Cfg_imsgp.lib->Thread_debug, LOG_NOTICE,
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
-       lib->Thread_boot_start = FALSE;
        goto end;
      }
 

@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -45,7 +45,7 @@
     struct DB *db;
 
     Cfg_snips.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
-    Cfg_snips.enable            = FALSE; 
+    Cfg_snips.enable            = FALSE;
     g_snprintf( Cfg_snips.snips_host, sizeof(Cfg_snips.snips_host), "localhost", valeur );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
@@ -83,7 +83,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte );
        return;
      }
-          
+
     if ( db->nbr_result == 0 )                                                              /* Si pas d'enregistrement trouvé */
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: No match found for '%s'", __func__, texte );
        Libere_DB_SQL ( &db );
@@ -172,7 +172,7 @@
               __func__, message->topic, intent );
 
     intent = g_strrstr ( intent, ":" ) + 1;
-    
+
     slotArray = json_object_get_array_member ( object, "slots" );
     if (!slotArray)
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: 0 slot array", __func__ );
@@ -192,7 +192,7 @@
        json_node_unref (Query);
        return;
      }
-    
+
     for( i=0;i<nbr_slots; i++)
      { const gchar *slotValue, *slotName;
        JsonObject *slot = json_array_get_object_element ( slotArray, i );
@@ -246,7 +246,7 @@
 /******************************************************************************************************************************/
  static void Snips_log_CB(struct mosquitto *mosq, void *userdata, int level, const char *str)
   { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_DEBUG, "%s: Level %d -> '%s'", __func__, level, str );
-  } 
+  }
 /******************************************************************************************************************************/
 /* Main: Fonction principale du Thread Snips                                                                                  */
 /******************************************************************************************************************************/
@@ -267,10 +267,9 @@
     g_snprintf( Cfg_snips.lib->admin_prompt, sizeof(Cfg_snips.lib->admin_prompt), "snips" );
     g_snprintf( Cfg_snips.lib->admin_help,   sizeof(Cfg_snips.lib->admin_help),   "Manage Snips system" );
 
-    if (lib->Thread_boot_start && !Cfg_snips.enable)
+    if (!Cfg_snips.enable)
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE,
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
-       lib->Thread_boot_start = FALSE;
        goto end;
      }
 
@@ -281,7 +280,6 @@
 	   if(!mosq)
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE,
                 "%s: Unable to create Mosquitto MQTT. Shutting Down %p", __func__, pthread_self() );
-       lib->Thread_boot_start = FALSE;
        goto end;
      }
    	mosquitto_log_callback_set(mosq, Snips_log_CB);
@@ -292,7 +290,6 @@
    	if( mosquitto_connect(mosq, Cfg_snips.snips_host, 1883, 60) )
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE,
                 "%s: Unable to connect to MQTT local Queue. Shutting Down %p", __func__, pthread_self() );
-       lib->Thread_boot_start = FALSE;
        goto end;
      }
 

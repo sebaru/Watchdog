@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -45,7 +45,7 @@
     struct DB *db;
 
     Cfg_radio.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
-    Cfg_radio.enable            = FALSE; 
+    Cfg_radio.enable            = FALSE;
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_WARNING,
@@ -118,7 +118,7 @@
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct ZMQUEUE *zmq_from_bus;
     gchar radio[128];
-             
+
     prctl(PR_SET_NAME, "W-RADIO", 0, 0, 0 );
     memset( &Cfg_radio, 0, sizeof(Cfg_radio) );                                     /* Mise a zero de la structure de travail */
     Cfg_radio.lib = lib;                                           /* Sauvegarde de la structure pointant sur cette librairie */
@@ -132,10 +132,9 @@
     g_snprintf( Cfg_radio.lib->admin_prompt, sizeof(Cfg_radio.lib->admin_prompt), "radio" );
     g_snprintf( Cfg_radio.lib->admin_help,   sizeof(Cfg_radio.lib->admin_help),   "Manage Radio system" );
 
-    if (lib->Thread_boot_start && !Cfg_radio.enable)
+    if (!Cfg_radio.enable)
      { Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_NOTICE,
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
-       lib->Thread_boot_start = FALSE;
        goto end;
      }
 
