@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -69,7 +69,7 @@
     g_free(libelle);
     g_free(acro);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
@@ -98,11 +98,11 @@
     g_snprintf( requete, sizeof(requete),
                "SELECT d.tech_id, m.acronyme, m.src_text, m.libelle "
                "FROM mnemos_DI as m INNER JOIN dls as d ON d.id = m.dls_id"
-               " WHERE (m.src_host='*' OR m.src_host='%s') AND (m.src_thread='*' OR m.src_thread='%s')"
+               " WHERE (m.src_host='*' OR m.src_host LIKE '%s') AND (m.src_thread='*' OR m.src_thread LIKE '%s')"
                " AND m.src_text LIKE '%s'",
                g_get_host_name(), thread, commande );
     g_free(commande);
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);

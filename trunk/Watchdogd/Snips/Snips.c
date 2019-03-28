@@ -75,9 +75,7 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Snips_traiter_commande_vocale ( gchar *texte )
-  { struct CMD_TYPE_MNEMO_BASE *mnemo;
-    gchar chaine[160];
-    struct DB *db;
+  { struct DB *db;
 
     if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, texte ) )
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte ); }
@@ -92,8 +90,8 @@
         { struct ZMQ_SET_BIT bit;
           bit.type = 0;
           bit.num = -1;
-          g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", mnemo->dls_tech_id );
-          g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", mnemo->acronyme );
+          g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", tech_id );
+          g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", acro );
           Send_zmq_with_tag ( Cfg_snips.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_BIT", &bit, sizeof(struct ZMQ_SET_BIT) );
         }
      }
