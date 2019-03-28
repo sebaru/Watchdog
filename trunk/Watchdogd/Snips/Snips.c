@@ -176,9 +176,20 @@
 
     for ( i=0; i<nbrObject; i++ )
      { for ( j=0; j<nbrRoom; j++ )
-        { gchar result[64];
-          g_snprintf ( result, sizeof(result), "%s,%s,%s,%s", intent, (targetAction ? targetAction : ""),
-                       (targetObject[i] ? targetObject[i] : ""), (targetRoom[j] ? targetRoom[j] : "") );
+        { gchar result[64],insert[32];
+          g_snprintf ( result, sizeof(result), "%s", intent );
+          if (targetAction)
+           { g_snprintf ( insert, sizeof(insert), ",%s", targetAction );
+             g_strlcat( result, insert, sizeof(result) );
+           }
+          if (targetObject)
+           { g_snprintf ( insert, sizeof(insert), ",%s", targetObject );
+             g_strlcat( result, insert, sizeof(result) );
+           }
+          if (targetRoom)
+           { g_snprintf ( insert, sizeof(insert), ",%s", targetObject );
+             g_strlcat( result, insert, sizeof(result) );
+           }
           Snips_traiter_commande_vocale ( result );
         }
      }
