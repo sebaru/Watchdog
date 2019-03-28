@@ -180,6 +180,7 @@
        return;
      }
 
+    targetAction = targetObject = targetRoom = NULL;
     for( i=0;i<nbr_slots; i++)
      { JsonObject *slot = json_array_get_object_element ( slotArray, i );
        slotValue = json_object_get_string_member( json_object_get_object_member ( slot, "value" ), "value" );
