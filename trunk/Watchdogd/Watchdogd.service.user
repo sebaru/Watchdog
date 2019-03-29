@@ -8,4 +8,4 @@ ExecReload=/bin/kill -USR2 $MAINPID
 #User=watchdog
 #Group=users
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
