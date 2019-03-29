@@ -23,16 +23,6 @@ sudo systemctl daemon-reload
 echo "done."
 sleep 2
 
-echo "Enabling pulseaudio systemd service"
-if [ "$1" = "server" ]
-then
-	loginctl enable-linger $wtd_user
-fi
-systemctl --user enable pulseaudio
-systemctl --user start pulseaudio
-echo "done."
-sleep 2
-
 echo "Copying data files"
 mkdir -p $wtd_home
 mkdir -p $wtd_home/Son

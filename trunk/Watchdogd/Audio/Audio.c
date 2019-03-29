@@ -105,21 +105,21 @@
     pid = fork();
     if (pid<0)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "%s: PAPLAY '%s' fork failed pid=%d", __func__, fichier, pid );
+                "%s: APLAY '%s' fork failed pid=%d", __func__, fichier, pid );
        return(FALSE);
      }
     else if (!pid)
-     { execlp( "paplay", "paplay", fichier, NULL );
+     { execlp( "aplay", "aplay", fichier, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "%s: PAPLAY '%s' exec failed pid=%d", __func__, fichier, pid );
+                "%s: APLAY '%s' exec failed pid=%d", __func__, fichier, pid );
        _exit(0);
      }
     else
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                "%s: PAPLAY '%s' waiting to finish pid=%d", __func__, fichier, pid );
+                "%s: APLAY '%s' waiting to finish pid=%d", __func__, fichier, pid );
        waitpid(pid, NULL, 0 );
      }
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "%s: PAPLAY '%s' finished pid=%d", __func__, fichier, pid );
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "%s: APLAY '%s' finished pid=%d", __func__, fichier, pid );
     Cfg_audio.nbr_diffusion_wav++;
     return(TRUE);
   }
