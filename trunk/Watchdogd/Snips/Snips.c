@@ -174,7 +174,7 @@
        return;
      }
 
-    if (nbr_slots>=3)
+    if (nbr_slots>3)
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: %d slots -> Too many slots", __func__, nbr_slots );
        json_node_unref (Query);
        return;
