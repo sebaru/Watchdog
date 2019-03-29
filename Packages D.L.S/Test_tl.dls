@@ -6,6 +6,8 @@
  #define OSMS_TL_OFF    <-> _M(libelle="Demande SMS d'extinction TL"); /* Ordre TL  OFF */
  #define ODLS_TL_OFF    <-> _M(libelle="Demande DLS d'extinction TL");
  #define ODLS_TL_ON     <-> _M(libelle="Demande DLS d'allumage TL");
+ #define OVOC_TL_OFF    <-> _E(libelle="Demande VOCALE d'extinction TL");
+ #define OVOC_TL_ON     <-> _E(libelle="Demande VOCALE d'allumage TL");
 
  /* Bits de production du module */
  #define ACT_TL         <-> _A(libelle="Sortie physique de pilotage du télérupteur");
@@ -37,37 +39,37 @@
                              -> MDEF_REPOS;                         /* Détection Discordance Repos du Télérupteur */
   - _OSYN_ACQUIT . MDEF_REPOS ->/MDEF_REPOS, MDEF_REPOS_F;                                    /* Acquit du défaut */
   -/POS_TL . MDEF_REPOS_F    ->/MDEF_REPOS_F;                                            /* Suppression du défaut */
- 
+
   -/POS_TL . TR_DEF ./MDEF_TRAVAIL_F
                                -> MDEF_TRAVAIL;                   /* Détection Discordance Travail du Télérupteur */
   - _OSYN_ACQUIT . MDEF_TRAVAIL ->/MDEF_TRAVAIL, MDEF_TRAVAIL_F;                              /* Acquit du défaut */
   - POS_TL . MDEF_TRAVAIL_F    ->/MDEF_TRAVAIL_F;                                        /* Suppression du défaut */
- 
+
                                     /*******************************************/
  /***********************************        SYNTHESES DEFAUTS ET ALARMES       ***********************************/
                                     /*******************************************/
  /* SYNTHESES DEFAUTS ---------------------------------------------------------*/
  /* DEFAUTS */
   - MDEF_REPOS + MDEF_TRAVAIL     -> _MEMSA_DEFAUT;
- 
+
  /* DEFAUTS FIXES */
   - MDEF_REPOS_F + MDEF_TRAVAIL_F -> _MEMSA_DEFAUT_FIXE;
- 
+
                                     /*******************************************/
  /***********************************              FONCTIONS PILOTEES           ***********************************/
                                     /*******************************************/
- 
+
  /* ORDRES DU MODULE ----------------------------------------------------------*/
- 
+
  /* CALCUL ETAT ATTENDU TELERUPTEUR */
-  - /_MEMSA_DOWN. (OSMS_TL_ON  + ODLS_TL_ON ). /POS_TL -> MEWANTTL, MEACTELE;
-  - /_MEMSA_DOWN. (OSMS_TL_OFF + ODLS_TL_OFF).  POS_TL ->/MEWANTTL, MEACTELE;
- 
+  - /_MEMSA_DOWN. (OSMS_TL_ON  + ODLS_TL_ON  + OVOC_TL_ON ). /POS_TL -> MEWANTTL, MEACTELE;
+  - /_MEMSA_DOWN. (OSMS_TL_OFF + ODLS_TL_OFF + OVOC_TL_OFF).  POS_TL ->/MEWANTTL, MEACTELE;
+
  /* PILOTAGE TELE SUR COMMANDE DE MANOEUVRE */
   - MEACTELE -> TR_IMP, TR_DEF;
   - TR_IMP   -> ACT_TL;
   -/TR_IMP   ->/ACT_TL;
- 
+
  /* FIN DE MANOEUVRE */
   - MEWANTTL .  POS_TL -> /MEACTELE;
   -/MEWANTTL . /POS_TL -> /MEACTELE;
@@ -78,4 +80,4 @@
                                     /*******************************************/
   - POS_TL                        -> MSG_TELE_ON;
   - MDEF_REPOS + MDEF_REPOS_F     -> MSG_DEF_REPOS;
-  - MDEF_TRAVAIL + MDEF_TRAVAIL_F -> MSG_DEF_TRAVAIL;            
+  - MDEF_TRAVAIL + MDEF_TRAVAIL_F -> MSG_DEF_TRAVAIL;
