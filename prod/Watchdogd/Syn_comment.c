@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -47,7 +47,7 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Retirer_commentDB: DB connexion failed" );
        return(FALSE);
@@ -85,7 +85,7 @@
        return(-1);
      }
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_commentDB: DB connexion failed" );
        g_free(libelle);
@@ -104,7 +104,7 @@
 
     retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
     if ( retour == FALSE )
-     { Libere_DB_SQL(&db); 
+     { Libere_DB_SQL(&db);
        return(-1);
      }
     id = Recuperer_last_ID_SQL ( db );
@@ -121,7 +121,7 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Recuperer_commentDB: DB connexion failed" );
        return(FALSE);
@@ -179,7 +179,7 @@
     gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_commentDB: DB connexion failed" );
        return(NULL);
@@ -198,7 +198,7 @@
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
        Libere_DB_SQL( &db );
-       Info_new( Config.log, Config.log_dls, LOG_INFO, "Rechercher_commentDB: Comment %03d not found in DB", id );
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "Rechercher_commentDB: Comment %03d not found in DB", id );
        return(NULL);
      }
 
@@ -243,7 +243,7 @@
        return(FALSE);
      }
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_commentDB: DB connexion failed" );
        g_free(libelle);
@@ -252,7 +252,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET "             
+                "UPDATE %s SET "
                 "libelle='%s',font='%s',rouge=%d,vert=%d,bleu=%d,posx=%d,posy=%d,angle='%f' "
                 " WHERE id=%d;", NOM_TABLE_COMMENT,
                 libelle, font,

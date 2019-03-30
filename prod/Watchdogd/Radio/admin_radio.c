@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Admin/admin_sms.c        Gestion des responses Admin SET au serveur watchdog                                    */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                        sam. 19 mai 2012 11:03:52 CEST  */
+/* Watchdogd/Imsg/admin_imsg.c        Gestion des connexions Admin IMSG au serveur watchdog                                   */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                      sam. 28 juil. 2012 16:35:09 CEST  */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * admin_sms.c
+ * admin_imsg.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2019 - Sebastien Lefevre
@@ -24,15 +24,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
- 
- #include <unistd.h>                                                                                      /* Pour gethostname */
+
  #include "watchdogd.h"
- #include "Sms.h"
+ #include "Radio.h"
 
 /******************************************************************************************************************************/
-/* Admin_json_list : fonction appelée pour lister les modules modbus                                                          */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/* Admin_json_list : fonction appelÃ©e pour lister les modules modbus                                                          */
+/* EntrÃ©e : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrÃ©e sont mis Ã  jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_status ( gchar **buffer_p, gint *taille_p )
   { JsonBuilder *builder;
@@ -43,14 +42,17 @@
 
     builder = json_builder_new ();
     if (builder == NULL)
-     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+     { Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        return;
      }
 
-    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+    json_builder_begin_object (builder);                                                       /* CrÃ©ation du noeud principal */
 
-    json_builder_set_member_name  ( builder, "nbr_sms" );
-    json_builder_add_int_value ( builder, Cfg_smsg.nbr_sms );
+    json_builder_set_member_name  ( builder, "nbr_diffusion_radio" );
+    json_builder_add_int_value ( builder, Cfg_radio.nbr_diffusion );
+
+    json_builder_set_member_name  ( builder, "radio_en_cours" );
+    json_builder_add_int_value ( builder, Cfg_radio.radio_en_cours );
 
     json_builder_end_object (builder);                                                                        /* End Document */
 
@@ -65,15 +67,15 @@
     *taille_p = taille_buf;
   }
 /******************************************************************************************************************************/
-/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/* Admin_json : fonction appelÃ© par le thread http lors d'une requete /run/                                                   */
+/* EntrÃ©e : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrÃ©e sont mis Ã  jour                                                                           */
 /******************************************************************************************************************************/
  void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
   { 
     *buffer_p = NULL;
     *taille_p = 0;
-/************************************************ Préparation du buffer JSON **************************************************/
+/************************************************ PrÃ©paration du buffer JSON **************************************************/
                                                                       /* Lancement de la requete de recuperation des messages */
     if (!strcmp(commande, "/status"))
      { Admin_json_status ( buffer_p, taille_p ); }

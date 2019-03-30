@@ -63,42 +63,11 @@
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Memory Error", __func__ );
        return(FALSE);
      }
-    g_snprintf( Data->setting, sizeof(Data->setting), "%s", util->hash );
-    g_snprintf( Data->input, sizeof(Data->input), "%s", pwd );
-    result = crypt_r( Data->input, Data->setting, Data);
-    retour = memcmp( Data->output, util->hash, strlen( util->hash ) );                                /* Comparaison des hash */
+    result = crypt_r( pwd, util->hash, Data);
+    retour = memcmp( result, util->hash, strlen( util->hash ) );                                      /* Comparaison des hash */
     g_free(Data);
     if (retour==0) return(TRUE);
     return(FALSE);
-  }
-/******************************************************************************************************************************/
-/* Retirer_utilisateur: Elimine un utilisateur dans la base de données                                                        */
-/* Entrées: une structure utilisateur contenant l'id à supprimer                                                              */
-/* Sortie: true si pas de pb, false sinon                                                                                     */
-/******************************************************************************************************************************/
- gboolean Retirer_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util )
-  { gchar requete[512];
-    gboolean retour;
-    struct DB *db;
-
-    if (util->id < NBR_UTILISATEUR_RESERVE) 
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: elimination failed: id (%d) reserve %s", __func__,
-                 util->id, util->username );
-       return(FALSE);
-     }
-
-    db = Init_DB_SQL();       
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "DELETE FROM %s WHERE id=%d", NOM_TABLE_UTIL, util->id );
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-
-    Libere_DB_SQL(&db);
-    return(retour);
   }
 /******************************************************************************************************************************/
 /* Rechercher_utilsDB: Recuperation de tous les champs des utilisateurs                                                       */
@@ -204,45 +173,5 @@
     if (util)
      { Libere_DB_SQL( &db ); }
     return( util );
-  }
-/**********************************************************************************************************/
-/* Retirer_utilisateur: Elimine un utilisateur dans la base de données                                    */
-/* Entrées: un log, une db, un nom                                                                        */
-/* Sortie: true si pas de pb, false sinon                                                                 */
-/**********************************************************************************************************/
- gboolean Set_enable_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util )
-  { gchar requete[512];
-    gboolean retour;
-    struct DB *db;
-
-    if (util->id == UID_ROOT || !strcmp(util->username, "root"))
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Root couldn't be disabled", __func__ );
-       return(FALSE);
-     }
-
-    db = Init_DB_SQL();      
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
-       return(FALSE);
-     }
-
-    if (util->id != -1)
-     { g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                   "UPDATE %s SET enable=%d WHERE id=%d", NOM_TABLE_UTIL, util->enable, util->id );
-     }
-    else
-     { gchar *nom;
-       nom        = Normaliser_chaine ( util->username );                        /* Formatage correct des chaines */
-       if (!nom)
-        { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
-          return(FALSE);
-        }
-       g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                   "UPDATE %s SET enable=%d WHERE name='%s'", NOM_TABLE_UTIL, util->enable, nom );
-       g_free(nom);
-     }
-    retour = Lancer_requete_SQL ( db, requete );                           /* Execution de la requete SQL */
-    Libere_DB_SQL(&db);
-    return(retour);
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

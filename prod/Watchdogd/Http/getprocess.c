@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <string.h>
  #include <unistd.h>
 
@@ -70,7 +70,7 @@
     json_builder_set_member_name  ( builder, "thread" );
     json_builder_add_string_value ( builder, "dls" );
     json_builder_set_member_name  ( builder, "debug" );
-    json_builder_add_boolean_value( builder, Config.log_dls );
+    json_builder_add_boolean_value( builder, Partage->com_dls.Thread_debug );
     json_builder_set_member_name  ( builder, "started" );
     json_builder_add_boolean_value( builder, Partage->com_dls.Thread_run );
     json_builder_set_member_name  ( builder, "objet" );
@@ -128,18 +128,18 @@
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
  static gint Http_Traiter_request_getprocess_debug ( struct lws *wsi, gchar *thread, gboolean status )
-  { if ( ! strcmp ( thread, "arch" ) ) { Config.log_arch = status; }
+  { if ( ! strcasecmp ( thread, "arch" ) ) { Config.log_arch = status; }
     else
-    if ( ! strcmp ( thread, "dls"  ) ) { Config.log_dls  = status; }
+    if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
     else
-    if ( ! strcmp ( thread, "msrv" ) ) { Config.log_msrv = status; }
+    if ( ! strcasecmp ( thread, "msrv" ) ) { Config.log_msrv = status; }
     else
      { GSList *liste;
        liste = Partage->com_msrv.Librairies;                                             /* Parcours de toutes les librairies */
        while(liste)
         { struct LIBRAIRIE *lib;
           lib = (struct LIBRAIRIE *)liste->data;
-          if ( ! strcmp( lib->admin_prompt, thread ) ) { lib->Thread_debug = status; }
+          if ( ! strcasecmp( lib->admin_prompt, thread ) ) { lib->Thread_debug = status; }
           liste = liste->next;
         }
      }
@@ -151,11 +151,11 @@
 /* Sortie : HTTP Response code                                                                                                */
 /******************************************************************************************************************************/
  static gint Http_Traiter_request_getprocess_start_stop ( struct lws *wsi, gchar *thread, gboolean status )
-  { if ( ! strcmp ( thread, "arch" ) )
+  { if ( ! strcasecmp ( thread, "arch" ) )
      { if (status==FALSE) { Partage->com_arch.Thread_run = FALSE; }
        else Demarrer_arch();                                                                   /* Demarrage gestion Archivage */
      } else
-    if ( ! strcmp ( thread, "dls"  ) )
+    if ( ! strcasecmp ( thread, "dls"  ) )
      { if (status==FALSE) { Partage->com_dls.Thread_run  = FALSE; }
        else Demarrer_dls();                                                                               /* Démarrage D.L.S. */
      }
@@ -165,7 +165,7 @@
        while(liste)
         { struct LIBRAIRIE *lib;
           lib = (struct LIBRAIRIE *)liste->data;
-          if ( ! strcmp( lib->admin_prompt, thread ) )
+          if ( ! strcasecmp( lib->admin_prompt, thread ) )
            { if (status) Start_librairie(lib); else Stop_librairie(lib); }
           liste = liste->next;
         }
@@ -179,8 +179,7 @@
 /******************************************************************************************************************************/
  gint Http_Traiter_request_getprocess ( struct lws *wsi, gchar *url )
   {
-/************************************************ Préparation du buffer JSON **************************************************/
-    if (!strcmp(url, "list"))
+    if (!strcasecmp(url, "list"))
      { return(Http_Traiter_request_getprocess_list(wsi)); }
     else if (!strncmp(url, "stop/", 5))
      { return(Http_Traiter_request_getprocess_start_stop(wsi, url+5, FALSE));}
@@ -203,16 +202,16 @@
        liste = Partage->com_msrv.Librairies;                                  /* Parcours de toutes les librairies */
        while(liste)
         { struct LIBRAIRIE *lib = liste->data;
-          if ( ! strcmp( target, lib->admin_prompt ) )
+          if ( ! strcasecmp( target, lib->admin_prompt ) )
            { if (lib->Thread_run == FALSE)
               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
                          "%s: reloading %s -> Library found but not started.", __func__, target );
-              }    
+              }
              else
               { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
                          "%s: reloading %s -> Library found. Sending Reload.", __func__, target );
                 lib->Thread_reload = TRUE;
-              }    
+              }
            }
           liste = g_slist_next(liste);
         }

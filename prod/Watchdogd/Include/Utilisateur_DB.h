@@ -55,8 +55,6 @@
  extern gboolean Recuperer_utilisateurDB( struct DB **db );                                             /* Dans Utilisateur.c */
  extern gboolean Tester_level_util( struct CMD_TYPE_UTILISATEUR *util, guint id_groupe );
  extern struct CMD_TYPE_UTILISATEUR *Recuperer_utilisateurDB_suite( struct DB **db );
- extern gboolean Retirer_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util );
- extern gboolean Set_enable_utilisateurDB( struct CMD_TYPE_UTILISATEUR *util );
  extern struct CMD_TYPE_UTILISATEUR *Rechercher_utilisateurDB_by_name( gchar *nom );
  extern gboolean Check_utilisateur_password( struct CMD_TYPE_UTILISATEUR *util, gchar *pwd );
 #endif

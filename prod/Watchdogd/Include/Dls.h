@@ -20,10 +20,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #ifndef _DLS_H_
   #define _DLS_H_
 
@@ -153,13 +153,16 @@
     pthread_mutex_t synchro_traduction;                  /* Mutex pour interdire les traductions simultanées de plugins D.L.S */
     struct DLS_TREE *Dls_tree;                                                                       /* Arbre d'execution DLS */
     pthread_mutex_t synchro_data;                                      /* Mutex pour les acces concurrents à l'arbre des data */
+    struct ZMQUEUE *zmq_to_master;
     GSList *Set_M;                                                              /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_M;                                                      /* liste des Mxxx a désactiver à la fin du tour prg */
     GSList *Set_Dls_Data;                                                       /* liste des Mxxx a activer au debut tour prg */
     GSList *Reset_Dls_Data;                                               /* liste des Mxxx a désactiver à la fin du tour prg */
 
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
+    gboolean Thread_debug;                                                             /* TRUE si le thread doit tout logguer */
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
+    gboolean Compil_at_boot;                                            /* True si DLS doit compiler les plugins au démarrage */
     guint admin_start;                                                                              /* Demande de deconnexion */
     guint admin_stop;                                                                               /* Demande de deconnexion */
     guint temps_sched;
@@ -183,7 +186,7 @@
  extern gint Compiler_source_dls( gboolean reset, gint id, gchar *buffer, gint taille_buffer );
  extern void Activer_plugin_by_id ( gint id, gboolean actif );
  extern void Reseter_un_plugin ( gint id );                                                                 /* Dans plugins.c */
- 
+
  extern void Run_dls ( void );                                                                              /* Dans The_dls.c */
  extern int A( int num );
  extern int EA_inrange( int num );
@@ -196,10 +199,10 @@
  extern void SEA_ech( int num, float val_ech );
  extern void Envoyer_commande_dls ( int num );
  extern void Envoyer_commande_dls_data ( gchar *tech_id, gchar *acronyme );
- extern void Dls_foreach ( void *user_data, 
+ extern void Dls_foreach ( void *user_data,
                            void (*do_plugin) (void *user_data, struct PLUGIN_DLS *),
                            void (*do_tree)   (void *user_data, struct DLS_TREE *) );
 
- extern void Prendre_heure ( void );                                                                          /* Dans heure.c */ 
+ extern void Prendre_heure ( void );                                                                          /* Dans heure.c */
  #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Include/Audio.h        Déclaration structure internes pour audio                                                 */
+/* Watchdogd/Include/Radio.h        Déclaration structure internes pour radio                                                 */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                         mer 15 avr 2009 15:40:43 CEST  */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * Audio.h
+ * Radio.h
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -25,30 +25,21 @@
  * Boston, MA  02110-1301  USA
  */
  
-#ifndef _AUDIO_H_
- #define _AUDIO_H_
+#ifndef _RADIO_H_
+ #define _RADIO_H_
 
  #include <json-glib/json-glib.h>
 
- #define NOM_THREAD                 "audio"
+ #define NOM_THREAD                 "radio"
 
- #define AUDIO_JINGLE                3000                                    /* Jingle si pas de message au bout de 5 minutes */
- #define AUDIO_DEFAUT_LANGUAGE       "fr"                                                  /* Language par défaut pour le TTS */
- #define NUM_BIT_M_AUDIO_START       4                                          /* bit positionné quand start diffusion audio */
- #define NUM_BIT_M_AUDIO_END         5                                          /* Bit positionné quand arret diffusion audio */
- #define NUM_BIT_M_AUDIO_INHIB       6                                    /* Bit positionné si inhibition des messages vocaux */
-
- struct AUDIO_CONFIG
+ struct RADIO_CONFIG
   { struct LIBRAIRIE *lib;
-    gint last_audio;                                                                   /* Date de la derniere emission sonore */
     gboolean enable;                                                                      /* Is this thread enabled at boot ? */
-    gchar language[80];                                             /* Language de restitution vocal, au format google_speech */
-    guint nbr_diffusion_wav;
-    guint nbr_diffusion_google;
-  } Cfg_audio;
+    guint nbr_diffusion;
+    gchar radio_en_cours;
+    gint  radio_pid;
+  } Cfg_radio;
 
 /*********************************************** Définitions des prototypes ***************************************************/
- extern gboolean Audio_Lire_config ( void );
- extern gchar *Audio_Admin_response( gchar *ligne );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

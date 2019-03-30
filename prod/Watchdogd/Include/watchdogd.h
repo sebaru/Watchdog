@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #ifndef _WATCHDOGD_H_
  #define _WATCHDOGD_H_
 
@@ -70,7 +70,7 @@
 
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
-    gboolean Thread_reload;                                                          /* TRUE si le thread doit gerer le USR1 */
+    gboolean Thread_reload;                                                           /* TRUE si le thread doit gerer le USR1 */
 
     void (*Run_thread)( struct LIBRAIRIE *lib );                                  /* Fonction principale de gestion du thread */
                                                                                  /* Fonction de gestion des commandes d'admin */
@@ -94,10 +94,10 @@
                                                                        /* Distribution aux threads (par systeme d'abonnement) */
     GSList *liste_msg;                                                                 /* liste de struct MSGDB msg a envoyer */
     GSList *liste_i;                                                             /* liste de I a traiter dans la distribution */
-    GSList *liste_a;                                                             /* liste de A a traiter dans la distribution */
+    GSList *Liste_DO;                                                            /* liste de A a traiter dans la distribution */
     struct ZMQUEUE *zmq_msg;                                                           /* Message Queue des messages Watchdog */
     struct ZMQUEUE *zmq_motif;                                                           /* Message Queue des motifs Watchdog */
-    struct ZMQUEUE *zmq_to_threads;                                                  /* Message Queue des evenements Watchdog */
+    struct ZMQUEUE *zmq_to_bus;                                                      /* Message Queue des evenements Watchdog */
     union
      { struct ZMQUEUE *zmq_to_slave;                                                         /* Message Queue vers les slaves */
        struct ZMQUEUE *zmq_to_master;
@@ -113,9 +113,9 @@
     void *zmq_ctx;                                                    /* Contexte d'échange inter-thread et message queue ZMQ */
     guint top;                                                                         /* Gestion des contraintes temporelles */
     guint top_cdg_plugin_dls;                                                        /* Top de chien de garde des plugins DLS */
-    guint audit_bit_interne_per_sec;     
+    guint audit_bit_interne_per_sec;
     guint audit_bit_interne_per_sec_hold;
-    guint audit_tour_dls_per_sec;     
+    guint audit_tour_dls_per_sec;
     guint audit_tour_dls_per_sec_hold;
                                                                                                     /* Interfacage avec D.L.S */
     struct COM_DB com_db;                                                      /* Interfaçage avec le code de gestion des BDD */

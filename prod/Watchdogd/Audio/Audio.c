@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -45,7 +45,7 @@
     struct DB *db;
 
     Cfg_audio.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
-    Cfg_audio.enable            = FALSE; 
+    Cfg_audio.enable            = FALSE;
     g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", AUDIO_DEFAUT_LANGUAGE );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
@@ -74,12 +74,29 @@
 /* Entrée : le nom du fichier wav                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static gboolean Jouer_wav_by_file ( gchar *fichier )
+ static gboolean Jouer_wav_by_file ( gchar *texte )
   { gint fd_cible, pid;
+    gchar fichier[80];
 
+    g_snprintf( fichier, sizeof(fichier), "Son/%s.wav", texte );
     fd_cible = open ( fichier, O_RDONLY, 0 );
-    if (fd_cible < 0)
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING, "%s: '%s' not found", __func__, fichier );
+    if (fd_cible < 0 && Config.instance_is_master == FALSE)
+     { gchar chaine[80];
+       Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
+                 "%s: '%s' not found trying down from master", __func__, fichier );
+       g_snprintf(chaine, sizeof(chaine), "wget http://%s:5560/audio/%s -O %s", Config.master_host, texte, fichier );
+       system(chaine);
+       fd_cible = open ( fichier, O_RDONLY, 0 );
+       if (fd_cible < 0)
+        { gchar chaine[80];
+          Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
+                    "%s: '%s' not found (even after download)", __func__, fichier );
+          return(FALSE);
+        }
+     }
+    else if (fd_cible < 0 && Config.instance_is_master == TRUE)
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
+                "%s: '%s' not found", __func__, fichier );
        return(FALSE);
      }
     else close (fd_cible);
@@ -88,21 +105,22 @@
     pid = fork();
     if (pid<0)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "%s: PAPLAY '%s' fork failed pid=%d", __func__, fichier, pid );
+                "%s: APLAY '%s' fork failed pid=%d", __func__, fichier, pid );
        return(FALSE);
      }
     else if (!pid)
-     { execlp( "paplay", "paplay", fichier, NULL );
+     { execlp( "aplay", "aplay", fichier, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "%s: PAPLAY '%s' exec failed pid=%d", __func__, fichier, pid );
+                "%s: APLAY '%s' exec failed pid=%d", __func__, fichier, pid );
        _exit(0);
      }
     else
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                "%s: PAPLAY '%s' waiting to finish pid=%d", __func__, fichier, pid );
+                "%s: APLAY '%s' waiting to finish pid=%d", __func__, fichier, pid );
        waitpid(pid, NULL, 0 );
      }
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "%s: PAPLAY '%s' finished pid=%d", __func__, fichier, pid );
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG, "%s: APLAY '%s' finished pid=%d", __func__, fichier, pid );
+    Cfg_audio.nbr_diffusion_wav++;
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -112,8 +130,8 @@
 /******************************************************************************************************************************/
  static gboolean Jouer_wav_by_id ( struct CMD_TYPE_MESSAGE *msg )
   { gchar nom_fichier[80];
-    
-    g_snprintf( nom_fichier, sizeof(nom_fichier), "Son/%d.wav", msg->num );
+
+    g_snprintf( nom_fichier, sizeof(nom_fichier), "%d", msg->num );
     return(Jouer_wav_by_file( nom_fichier ) );
   }
 /******************************************************************************************************************************/
@@ -144,7 +162,7 @@
      }
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
              "%s: google_speech '%s' finished pid=%d", __func__, libelle_audio, pid );
-
+    Cfg_audio.nbr_diffusion_google++;
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -153,8 +171,7 @@
  void Run_thread ( struct LIBRAIRIE *lib )
   { struct CMD_TYPE_HISTO *histo, histo_buf;
     struct ZMQUEUE *zmq_msg;
-    struct ZMQUEUE *zmq_master;
-    struct ZMQUEUE *zmq_admin;
+    struct ZMQUEUE *zmq_from_bus;
     static gboolean audio_stop = TRUE;
 
     prctl(PR_SET_NAME, "W-Audio", 0, 0, 0 );
@@ -177,18 +194,12 @@
        goto end;
      }
 
-    zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
-    Connect_zmq (zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
-
-    zmq_master = New_zmq ( ZMQ_SUB, "listen-to-MSRV" );
-    Connect_zmq (zmq_master, "inproc", ZMQUEUE_LIVE_THREADS, 0 );
-
-    zmq_admin = New_zmq ( ZMQ_REP, "listen-to-admin" );
-    Bind_zmq (zmq_admin, "inproc", NOM_THREAD "-admin", 0 );
+    zmq_msg      = Connect_zmq ( ZMQ_SUB, "listen-to-msgs", "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+    zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus",  "inproc", ZMQUEUE_LOCAL_BUS, 0 );
 
     while(Cfg_audio.lib->Thread_run == TRUE)                                                 /* On tourne tant que necessaire */
-     { gchar buffer[256];
-       struct ZMQ_TARGET *event;
+     { struct ZMQ_TARGET *event;
+       gchar buffer[256];
        void *payload;
 
        if (Cfg_audio.lib->Thread_reload)                                                             /* On a recu reload ?? */
@@ -204,31 +215,18 @@
            }
         } else audio_stop = TRUE;
 
-       if (Recv_zmq (zmq_admin, &buffer, sizeof(buffer)) > 0)                             /* As-t'on recu un paquet d'admin ? */
-        { gchar *response;
-          response = Audio_Admin_response ( buffer );
-          Send_zmq ( zmq_admin, response, strlen(response) );
-          g_free(response);
-        }
-
-       if (Recv_zmq_with_tag ( zmq_master, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
-        { if ( Zmq_instance_is_target(event) && !strcasecmp( event->dst_thread, NOM_THREAD ) )
-           { switch (event->tag)
-              { case TAG_ZMQ_AUDIO_PLAY_WAV:
-                 { gchar fichier[80];
-                   Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                             "%s : Reception d'un message PLAY_WAV : %s", __func__, (gchar *)payload );
-                   g_snprintf( fichier, sizeof(fichier), "Son/%s.wav", payload );
-                   Jouer_wav_by_file ( fichier );
-                   break;
-                 }
-                case TAG_ZMQ_AUDIO_PLAY_GOOGLE:
-                 { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                             "%s : Reception d'un message PLAY_GOOGLE : %s", __func__, (gchar *)payload );
-                   Jouer_google_speech ( payload );
-                   break;
-                 }
-              }
+       if (Recv_zmq_with_tag ( zmq_from_bus, NOM_THREAD, &buffer, sizeof(buffer), &event, &payload ) > 0) /* Reception d'un paquet master ? */
+        { if ( !strcmp( event->tag, "play_wav" ) )
+           { gchar fichier[80];
+             Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+                      "%s : Reception d'un message PLAY_WAV : %s", __func__, (gchar *)payload );
+             g_snprintf( fichier, sizeof(fichier), "%s", payload );
+             Jouer_wav_by_file ( fichier );
+           }
+          else if ( !strcmp( event->tag, "play_google" ) )
+           { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
+                      "%s : Reception d'un message PLAY_GOOGLE : %s", __func__, (gchar *)payload );
+             Jouer_google_speech ( payload );
            }
         }
 
@@ -239,7 +237,7 @@
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
                 "%s : Recu message num=%d (histo->msg.audio=%d, alive=%d)", __func__,
                 histo->msg.num, histo->msg.audio, histo->alive );
-                   
+
        if ( M(NUM_BIT_M_AUDIO_INHIB) == 1 &&
            ! (histo->msg.type == MSG_ALERTE || histo->msg.type == MSG_DANGER || histo->msg.type == MSG_ALARME)
           )                                                                     /* Bit positionné quand arret diffusion audio */
@@ -257,7 +255,7 @@
            }
 
           if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)                              /* Si Pas de message depuis xx */
-           { Jouer_wav_by_file("jingle.wav"); }                                                     /* On balance le jingle ! */
+           { Jouer_wav_by_file("jingle"); }                                                         /* On balance le jingle ! */
           Cfg_audio.last_audio = Partage->top;
 
           if (Jouer_wav_by_id ( &histo->msg ) == FALSE)                /* Par priorité : wav d'abord, synthèse vocale ensuite */
@@ -267,14 +265,9 @@
               { Jouer_google_speech( histo->msg.libelle ); }
            }
         }
-       else
-        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-                   "%s : Msg Audio non envoye num=%d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
-        }
      }
     Close_zmq ( zmq_msg );
-    Close_zmq ( zmq_master );
-    Close_zmq ( zmq_admin );
+    Close_zmq ( zmq_from_bus );
 end:
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_audio.lib->Thread_run = FALSE;                                                          /* Le thread ne tourne plus ! */

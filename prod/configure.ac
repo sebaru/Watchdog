@@ -59,7 +59,7 @@ then
 fi
 
 dnl parametres par defaut
-CFLAGS="-pipe -g -ggdb"
+CFLAGS="-pipe -g -ggdb -D_GNU_SOURCE"
 
 LIBW_MAJOR_VERSION=5
 LIBW_MINOR_VERSION=0
@@ -105,5 +105,7 @@ Watchdogd/Serveur/Makefile \
 Watchdogd/TraductionDLS/Makefile \
 Watchdogd/Dls/Makefile \
 WatchdogdAdmin/Makefile \
+Watchdogd/Snips/Makefile \
 Watchdogd/Voice/Makefile \
+Watchdogd/Radio/Makefile \
 )

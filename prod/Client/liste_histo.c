@@ -88,33 +88,6 @@
     GNOMEUIINFO_ITEM_STOCK ( N_("Go to Syn"), NULL, Menu_go_to_syn, GNOME_STOCK_PIXMAP_SEARCH ),
     GNOMEUIINFO_END
   };
-
-/******************************************************************************************************************************/
-/* Jouer_remote_mp3 : Joue un fichier mp3 du serveur                                                                          */
-/* Entrée : le message à jouer au format file, ou id si file=NULL                                                             */
-/* Sortie : néant                                                                                                             */
-/******************************************************************************************************************************/
- void Jouer_remote_mp3 ( gchar *file, gint id )
-  { gchar url[256];
-    gint pid;
-
-    if (file)
-     { g_snprintf( url, sizeof(url), "http://%s/ws/audio/%s", Client.host, file ); }
-    else
-     { g_snprintf( url, sizeof(url), "http://%s/ws/audio/%d", Client.host, id ); }
-
-    pid = fork();
-    if (pid<0)
-     { Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                 "Jouer_remote_mp3: '%s' fork failed pid=%d (%s)", url, id, pid, strerror(errno) );
-     }
-    else if (!pid)
-     { execlp( "mpg123", "mpg123", "-v", url, NULL );
-       Info_new( Config_cli.log, Config_cli.log_override, LOG_ERR,
-                "Jouer_remote_mp3: '%s' exec failed pid=%d (%s)", url, pid, strerror( errno ) );
-       _exit(0);
-     }
-  }
 /**********************************************************************************************************/
 /* Menu_acquitter_histo: Acquittement d'un des messages histo                                             */
 /* Entrée: rien                                                                                           */

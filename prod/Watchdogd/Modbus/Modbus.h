@@ -28,6 +28,8 @@
 #ifndef _MODBUS_H_
  #define _MODBUS_H_
 
+ #include <json-glib/json-glib.h>
+
  #define MBUS_READ_COIL                0x01
  #define MBUS_WRITE_MULTIPLE_COIL      0x0F
  #define MBUS_READ_REGISTER            0x04

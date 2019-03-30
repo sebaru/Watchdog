@@ -264,8 +264,8 @@
             g_free(util);
             
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback established for %s", __func__, pss->util );
-            pss->zmq = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
-            Connect_zmq ( pss->zmq, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+            /*pss->zmq = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
+            Connect_zmq ( pss->zmq, "inproc", ZMQUEUE_LIVE_MSGS, 0 );*/
             break;
        case LWS_CALLBACK_CLOSED:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback closed", __func__ );
@@ -378,13 +378,14 @@
                                         (char *)&remote_ip, sizeof(remote_ip) );
 
                pss = lws_wsi_user ( wsi );
+               Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: processing request '%s'.", __func__, url );
                if ( ! strcasecmp ( url, "/favicon.ico" ) )
                 { retour = lws_serve_http_file ( wsi, "WEB/favicon.gif", "image/gif", NULL, 0);
                   if (retour < 0) return(1);                              /* Si erreur (<0) ou si ok (>0), on ferme la socket */
                   return(0);
                 }
                else if ( ! strcasecmp ( url, "/status" ) )         { return( Http_Traiter_request_getstatus ( wsi ) ); }
-               else if ( ! strncasecmp ( url, "/ws/audio/", 10 ) ) { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+10 ) ); }
+               else if ( ! strncasecmp ( url, "/audio/", 10 ) ) { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+7 ) ); }
                else if ( ! strncasecmp ( url, "/process/", 9 ) ) { return( Http_Traiter_request_getprocess ( wsi, url+9 ) ); }
                else if ( ! strncasecmp ( url, "/dls/", 5 ) ) { return( Http_Traiter_request_getdls ( wsi, url+5 ) ); }
                else if ( ! strncasecmp ( url, "/setm", 5 ) )   { return( Http_Traiter_request_setm ( wsi ) ); }
@@ -532,14 +533,14 @@
        goto end;
      }
 
+    /*Cfg_http.zmq_from_bus = New_zmq ( ZMQ_SUB, "listen-to-bus" );
+    Connect_zmq ( Cfg_http.zmq_from_bus, "inproc", ZMQUEUE_LOCAL_BUS, 0 );*/
+
+    Cfg_http.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
+
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO,
              "%s: WebSocket Create OK. Listening on port %d with ssl=%d", __func__, Cfg_http.tcp_port, Cfg_http.ssl_enable );
 
-#ifdef bouh
-    Abonner_distribution_message ( Http_Gerer_message );                            /* Abonnement à la diffusion des messages */
-    Abonner_distribution_sortie  ( Http_Gerer_sortie );                              /* Abonnement à la diffusion des sorties */
-
-#endif
     Cfg_http.lib->Thread_run = TRUE;                                                                    /* Le thread tourne ! */
     while(Cfg_http.lib->Thread_run == TRUE)                                                  /* On tourne tant que necessaire */
      { usleep(10000);
@@ -560,9 +561,10 @@
     lws_context_destroy(Cfg_http.ws_context);                                                   /* Arret du serveur WebSocket */
     Cfg_http.ws_context = NULL;
 
+    /*Close_zmq ( Cfg_http.zmq_from_bus );*/
+    Close_zmq ( Cfg_http.zmq_to_master );
 end:
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-             "%s: Down . . . TID = %p", __func__, pthread_self() );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_http.lib->Thread_run = FALSE;                                                           /* Le thread ne tourne plus ! */
     Cfg_http.lib->TID = 0;                                                    /* On indique au master que le thread est mort. */
     pthread_exit(GINT_TO_POINTER(0));

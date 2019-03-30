@@ -7,27 +7,19 @@ then
         wtd_user=watchdog
 	echo "Installation in standalone mode in $wtd_home for $wtd_user"
         sudo cp /usr/local/etc/Watchdogd.service.system /etc/systemd/system/Watchdogd.service
+        sudo systemctl daemon-reload
         sudo systemctl enable Watchdogd.service
-        sudo usermod -a -G audio,dialout $wtd_user
+        sudo usermod -a -G audio,dialout,wheels $wtd_user
 else
 	wtd_home=~/.watchdog
         wtd_user=`whoami`
 	echo "Installation in user mode in $wtd_home for $wtd_user"
         sudo cp /usr/local/etc/Watchdogd.service.user /etc/systemd/user/Watchdogd.service
+        sudo systemctl daemon-reload
         systemctl --user enable Watchdogd.service
         sudo usermod -a -G audio,dialout $wtd_user
 fi
 sudo systemctl daemon-reload
-echo "done."
-sleep 2
-
-echo "Enabling pulseaudio systemd service"
-if [ "$1" = "server" ]
-then
-	loginctl enable-linger $wtd_user
-fi
-systemctl --user enable pulseaudio
-systemctl --user start pulseaudio
 echo "done."
 sleep 2
 

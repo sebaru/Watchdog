@@ -12,7 +12,6 @@
 # debug, info, notice, warning, error, critical
 log_level = notice
 debug_msrv = false
-debug_dls  = false
 debug_arch = false
 
 ######################################

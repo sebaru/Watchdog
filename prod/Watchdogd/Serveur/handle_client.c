@@ -83,7 +83,7 @@
     gchar nom[16];
     struct ZMQUEUE *zmq_msg;
     struct ZMQUEUE *zmq_motif;
-    struct ZMQUEUE *zmq_threads;
+    struct ZMQUEUE *zmq_from_bus;
 
     client->ssrv_id = thread_count++;
     g_snprintf(nom, sizeof(nom), "W-SSRV-%03d", client->ssrv_id );
@@ -91,14 +91,9 @@
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
 
-    zmq_threads = New_zmq ( ZMQ_SUB, "listen-to-master" );
-    Connect_zmq ( zmq_threads, "inproc", ZMQUEUE_LIVE_THREADS, 0 );
-
-    zmq_msg = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
-    Connect_zmq ( zmq_msg, "inproc", ZMQUEUE_LIVE_MSGS, 0 );
-     
-    zmq_motif = New_zmq ( ZMQ_SUB, "listen-to-motifs" );
-    Connect_zmq ( zmq_motif, "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
+    zmq_from_bus = Connect_zmq ( ZMQ_SUB, "listen-to-bus",    "inproc", ZMQUEUE_LOCAL_BUS, 0 );
+    zmq_msg      = Connect_zmq ( ZMQ_SUB, "listen-to-msgs",   "inproc", ZMQUEUE_LIVE_MSGS, 0 );
+    zmq_motif    = Connect_zmq ( ZMQ_SUB, "listen-to-motifs", "inproc", ZMQUEUE_LIVE_MOTIFS, 0 );
 
     while( Cfg_ssrv.lib->Thread_run == TRUE )                                                /* On tourne tant que necessaire */
      { usleep(10000);
@@ -160,20 +155,13 @@
           if ( Recv_zmq ( zmq_motif, &num_i, sizeof(gint) ) == sizeof(gint) )
            { Envoyer_new_motif_au_client ( client, num_i ); }
 
-          if ( (byte=Recv_zmq_with_tag( zmq_threads, &buffer, sizeof(buffer), &event, &payload )) > 0 )
-           { switch(event->tag)
-              { case TAG_ZMQ_SET_SYN_VARS:
-                 { struct CMD_TYPE_SYN_VARS *syn_vars;
-                   syn_vars = (struct CMD_TYPE_SYN_VARS *)payload;
-                   if ( g_slist_find( client->Liste_pass, GINT_TO_POINTER(syn_vars->syn_id) ) )/* Envoi uniquement si le client en a besoin */
-                    { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_SET_SYN_VARS,
-                                    (gchar *)syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
-                    }
-                   break;
-                 }
-                default:
-                 { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: receive wrong tag number '%d' for ZMQ '%s'",
-                             __func__, event->tag, zmq_threads->name );
+          if ( (byte=Recv_zmq_with_tag( zmq_from_bus, "ssrv", &buffer, sizeof(buffer), &event, &payload )) > 0 )
+           { if (!strcmp(event->tag, "SET_SYN_VARS"))
+              { struct CMD_TYPE_SYN_VARS *syn_vars;
+                syn_vars = (struct CMD_TYPE_SYN_VARS *)payload;
+                if ( g_slist_find( client->Liste_pass, GINT_TO_POINTER(syn_vars->syn_id) ) )/* Envoi uniquement si le client en a besoin */
+                 { Envoi_client( client, TAG_SUPERVISION, SSTAG_SERVEUR_SUPERVISION_SET_SYN_VARS,
+                                 (gchar *)syn_vars, sizeof(struct CMD_TYPE_SYN_VARS) );
                  }
               }
            }
@@ -189,7 +177,7 @@
 /**************************************************** Arret du handle_client **************************************************/
     Close_zmq ( zmq_msg );
     Close_zmq ( zmq_motif );
-    Close_zmq ( zmq_threads );
+    Close_zmq ( zmq_from_bus );
     Deconnecter(client);
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     pthread_exit( NULL );

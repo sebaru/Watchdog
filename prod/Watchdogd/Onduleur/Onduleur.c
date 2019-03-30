@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <stdio.h>
  #include <sys/prctl.h>
  #include <termios.h>
@@ -49,7 +49,7 @@
     struct DB *db;
 
     Cfg_ups.lib->Thread_debug = FALSE;                                                         /* Settings default parameters */
-    Cfg_ups.enable            = FALSE; 
+    Cfg_ups.enable            = FALSE;
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING,
@@ -81,7 +81,7 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
        return(FALSE);
@@ -189,7 +189,7 @@
      }
     else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE %s SET "             
+                   "UPDATE %s SET "
                    "host='%s',ups='%s',bit_comm=%d,enable=%d,"
                    "map_EA=%d,map_E=%d,map_A=%d,"
                    "username='%s',password='%s' "
@@ -204,7 +204,7 @@
     g_free(username);
     g_free(password);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
        return(-1);
@@ -265,7 +265,7 @@
   { struct DB *db;
     gint cpt;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
        return(FALSE);
@@ -399,7 +399,7 @@
         }
        else
         { g_snprintf( module->libelle, sizeof(module->libelle), "%s", buffer + strlen(module->ups.ups) + 9 );
-          Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG, 
+          Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
                    "%s: Reading GET UPSDESC %s", __func__,
                    module->libelle );
         }
@@ -469,7 +469,7 @@
   { gchar buffer[80];
 
     if (module->started != TRUE) return(FALSE);
-    
+
     g_snprintf( buffer, sizeof(buffer), "INSTCMD %s %s\n", module->ups.ups, nom_cmd );
     Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_DEBUG,
              "%s: Sending '%s' to %s", __func__, buffer, module->ups.ups );
@@ -582,7 +582,7 @@
     num_ea = module->ups.map_EA;
     if ( (reponse = Onduleur_get_var ( module, "ups.load" )) != NULL )
      { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
-    
+
     num_ea++;
     if ( (reponse = Onduleur_get_var ( module, "ups.realpower" )) != NULL )
      { SEA( num_ea, atof(reponse+1) ); }                                                     /* Numéro de l'EA pour la valeur */
@@ -635,7 +635,7 @@
     num_e++;
     if (reponse != NULL)
      { SE( num_e, !strcmp(reponse, "\"OB\"") ); }                                             /* Numéro de l'E pour la valeur */
-    
+
     return(TRUE);
   }
 /******************************************************************************************************************************/
@@ -663,6 +663,7 @@
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
        goto end;
      }
+
 
     Cfg_ups.Modules_UPS = NULL;                                                               /* Init des variables du thread */
 

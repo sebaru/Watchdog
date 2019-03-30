@@ -39,11 +39,11 @@
 /* Sortie : 0 ou 1 selon si la transaction est completed                                                                      */
 /******************************************************************************************************************************/
  gint Http_Traiter_request_body_completion_cli ( struct lws *wsi )
-  { const gchar *host, *thread, *text;
+  { const gchar *host, *thread, *tag, *text;
     struct HTTP_PER_SESSION_DATA *pss;
     JsonObject *object;
-    gint retour=1, tag;
     JsonNode *Query;
+    gint retour=1;
 
     pss = lws_wsi_user ( wsi );
     pss->post_data [ pss->post_data_length ] = 0;
@@ -74,21 +74,22 @@
        return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
      }
 
-    text = json_object_get_string_member ( object, "text" );
-    if (!text)
+    tag = json_object_get_string_member ( object, "tag" );
+    if (!tag)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: text non trouvé", __func__ );
        return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
      }
 
-    tag = json_object_get_int_member ( object, "tag" );
+    text = json_object_get_string_member ( object, "text" );
+    if (!text)
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: tag non trouvé", __func__ );
+       return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+     }
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
-             "%s: HTTP/CLI request for %d:%s:%s:%s", __func__, tag, host, thread, text );
+             "%s: HTTP/CLI request for %s:%s:%s:%s", __func__, host, thread, tag, text );
              
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, tag, NULL, NOM_THREAD, host, thread,
-                        (void *)text, strlen(text)+1 );
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_threads, tag, NULL, NOM_THREAD, host, thread,
-                        (void *)text, strlen(text)+1 );
+    Send_zmq_with_tag ( Cfg_http.zmq_to_master, NULL, NOM_THREAD, host, thread, tag, (void *)text, strlen(text)+1 );
     return(Http_Send_response_code ( wsi, HTTP_200_OK ));
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

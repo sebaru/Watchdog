@@ -24,35 +24,62 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, 
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include "watchdogd.h"
  #include "Audio.h"
 
 /******************************************************************************************************************************/
-/* Admin_command : Appeller par le thread admin pour traiter une commande                                                     */
-/* Entr�e: Le connexion d'admin, la ligne a traiter                                                                           */
-/* Sortie: n�ant                                                                                                              */
+/* Admin_json_list : fonction appelée pour lister les modules modbus                                                          */
+/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- gchar *Audio_Admin_response( gchar *ligne )
-  { gchar commande[128], chaine[80];
-    gchar *response = NULL;
+ static void Admin_json_status ( gchar **buffer_p, gint *taille_p )
+  { JsonBuilder *builder;
+    JsonGenerator *gen;
+    gsize taille_buf;
+    gint retour, num;
+    gchar *buf;
 
-    sscanf ( ligne, "%s", commande );                                                    /* D�coupage de la ligne de commande */
-
-    if ( ! strcmp ( commande, "help" ) )
-     { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'AUDIO'" );
-       response = Admin_write ( response, " | - tell_google $text     - Send $text with google_speech format" );
-       response = Admin_write ( response, " | - help                  - This help" );
-     } else
-    if ( ! strcmp ( commande, "tell_google" ) )
-     { Jouer_google_speech ( ligne + 12 );
-       g_snprintf( chaine, sizeof(chaine), " | - Message sent with google_speech" );
-       response = Admin_write ( response, chaine );
-     } else
-     { gchar chaine[128];
-       g_snprintf( chaine, sizeof(chaine), " | - Unknown command : %s", ligne );
-       response = Admin_write ( response, chaine );
+    builder = json_builder_new ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       return;
      }
-   return(response);
+
+    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+
+    json_builder_set_member_name  ( builder, "nbr_diffusion_wav" );
+    json_builder_add_int_value ( builder, Cfg_audio.nbr_diffusion_wav );
+
+    json_builder_set_member_name  ( builder, "nbr_diffusion_google" );
+    json_builder_add_int_value ( builder, Cfg_audio.nbr_diffusion_google );
+
+    json_builder_end_object (builder);                                                                        /* End Document */
+
+    gen = json_generator_new ();
+    json_generator_set_root ( gen, json_builder_get_root(builder) );
+    json_generator_set_pretty ( gen, TRUE );
+    buf = json_generator_to_data (gen, &taille_buf);
+    g_object_unref(builder);
+    g_object_unref(gen);
+
+    *buffer_p = buf;
+    *taille_p = taille_buf;
+  }
+/******************************************************************************************************************************/
+/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
+/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/******************************************************************************************************************************/
+ void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
+  { 
+    *buffer_p = NULL;
+    *taille_p = 0;
+/************************************************ Préparation du buffer JSON **************************************************/
+                                                                      /* Lancement de la requete de recuperation des messages */
+    if (!strcmp(commande, "/status"))
+     { Admin_json_status ( buffer_p, taille_p ); }
+    
+    return;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

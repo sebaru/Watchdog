@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <sys/time.h>
  #include <sys/prctl.h>
  #include <string.h>
@@ -49,7 +49,7 @@
     struct DB *db;
 
     Cfg_voice.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
-    Cfg_voice.enable            = FALSE; 
+    Cfg_voice.enable            = FALSE;
     g_snprintf( Cfg_voice.audio_device,  sizeof(Cfg_voice.audio_device),  "default" );
     g_snprintf( Cfg_voice.key_words,     sizeof(Cfg_voice.key_words),     "dis moi jolie maison" );
     g_snprintf( Cfg_voice.gain_control,  sizeof(Cfg_voice.gain_control),  "noise" );
@@ -106,7 +106,7 @@
 
     g_snprintf(chaine, sizeof(chaine), "default-server=/run/user/%d/pulse/native", getuid() );
     if (write( id_fichier, chaine, strlen(chaine) )<0)
-     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: Write to file '%s' failed (%s)", __func__, 
+     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: Write to file '%s' failed (%s)", __func__,
                  file, strerror(errno) );
        close(id_fichier);
        return;
@@ -144,7 +144,7 @@
 
     g_snprintf(chaine, sizeof(chaine), "#JSGF V1.0 UTF-8;\n\ngrammar watchdog.fr;\n\n" );
     if (write( id_fichier, chaine, strlen(chaine) )<0)
-     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: Write to file '%s' failed (%s)", __func__, 
+     { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR, "%s: Write to file '%s' failed (%s)", __func__,
                  file, strerror(errno) );
        Libere_DB_SQL ( &db );
        close(id_fichier);
@@ -196,6 +196,8 @@ reload:
                 "%s: Thread is not enabled in config. Shutting Down %p", __func__, pthread_self() );
        goto end;
      }
+
+
     Voice_Make_pulseaudio_file();
     Voice_Make_jsgf_grammaire();
 /********************************************* Création du process de reconnaissance vocale ***********************************/
@@ -225,10 +227,7 @@ reload:
 
     close(pipefd[1]);  // close the write end of the pipe in the parent
 
-    if (Config.instance_is_master==FALSE)                                                          /* si l'instance est Slave */
-     { Cfg_voice.zmq_to_master = New_zmq ( ZMQ_PUB, "pub-to-master" );
-       Connect_zmq ( Cfg_voice.zmq_to_master, "inproc", ZMQUEUE_LIVE_MASTER, 0 );
-     }
+    Cfg_voice.zmq_to_master = Connect_zmq ( ZMQ_PUB, "pub-to-master", "inproc", ZMQUEUE_LOCAL_MASTER, 0 );
 
     while ( Cfg_voice.lib->Thread_run == TRUE )
      { struct DB *db;
@@ -274,8 +273,8 @@ reload:
        if (!strcmp( QUELLE_VERSION, evenement ))
         { gchar chaine[80];
           g_snprintf( chaine, sizeof(chaine), "Ma version est la %s", PACKAGE_VERSION );
-          Send_zmq_with_tag( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_AUDIO_PLAY_GOOGLE, NULL, NOM_THREAD,
-                             g_get_host_name(), "audio", chaine, -1 );
+          Send_zmq_with_tag( Cfg_voice.zmq_to_master, NULL, NOM_THREAD,
+                             g_get_host_name(), "audio", "play_google", chaine, -1 );
         }
        else if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, evenement ) )
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,
@@ -285,23 +284,23 @@ reload:
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
                     "%s: No match found for '%s'", __func__, evenement );
           Libere_DB_SQL ( &db );
-          Send_zmq_with_tag( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_AUDIO_PLAY_WAV, NULL, NOM_THREAD,
-                             g_get_host_name(), "audio", "Je_ne_sais_pas_faire", -1 );
+          Send_zmq_with_tag( Cfg_voice.zmq_to_master, NULL, NOM_THREAD,
+                             g_get_host_name(), "audio", "play_wav", "Je_ne_sais_pas_faire", -1 );
         }
        else if (db->nbr_result > 1)
         { Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_WARNING,
                     "%s: Too many event for '%s'", __func__, evenement );
           Libere_DB_SQL ( &db );
-          Send_zmq_with_tag( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_AUDIO_PLAY_WAV, NULL, NOM_THREAD,
-                             g_get_host_name(), "audio", "C'est_ambigue", -1 );
+          Send_zmq_with_tag( Cfg_voice.zmq_to_master, NULL, NOM_THREAD,
+                             g_get_host_name(), "audio", "play_wav", "C'est_ambigue", -1 );
         }
        else
         { struct CMD_TYPE_MNEMO_BASE *mnemo;
           while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
            { Info_new( Config.log, Config.log_msrv, LOG_DEBUG, "%s: Match found for '%s' Type %d Num %d - %s", __func__,
                        commande_vocale, mnemo->type, mnemo->num, mnemo->libelle );
-             Send_zmq_with_tag( Partage->com_msrv.zmq_to_threads, TAG_ZMQ_AUDIO_PLAY_WAV, NULL, NOM_THREAD,
-                                g_get_host_name(), "audio", "C_est_parti", -1 );
+             Send_zmq_with_tag( Cfg_voice.zmq_to_master, NULL, NOM_THREAD,
+                                g_get_host_name(), "audio", "play_wav", "C_est_parti", -1 );
              if (Config.instance_is_master==TRUE)                                                 /* si l'instance est Maitre */
               { switch( mnemo->type )
                  { case MNEMO_MONOSTABLE:
@@ -322,7 +321,7 @@ reload:
                    bit.num = mnemo->num;
                    g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", mnemo->dls_tech_id );
                    g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", mnemo->acronyme );
-                   Send_zmq_with_tag ( Cfg_voice.zmq_to_master, TAG_ZMQ_SET_BIT, NULL, NOM_THREAD, "*", "*",
+                   Send_zmq_with_tag ( Cfg_voice.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_BIT",
                                        &bit, sizeof(struct ZMQ_SET_BIT) );
                  }
                 else Info_new( Config.log, Cfg_voice.lib->Thread_debug, LOG_ERR,

@@ -94,9 +94,6 @@
     sscanf ( ligne, "%s", commande );                                /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, " |  -- Watchdog ADMIN -- Help du mode 'running'" );
-       response = Admin_write ( response, " | - del $name                  - Erase user $name" );
-       response = Admin_write ( response, " | - enable $name               - Allow user $name to connect" );
-       response = Admin_write ( response, " | - disable $name              - Deny user $id to connect $name" );
        response = Admin_write ( response, " | - list                       - Liste les users Watchdog" );
        response = Admin_write ( response, " | - show $name                 - Show user $name" );
        response = Admin_write ( response, " | - help                       - This help" );
@@ -118,55 +115,6 @@
        else
         { response = Admin_print_user ( response, util );
           g_free(util);
-        }
-     } else
-    if ( ! strcmp ( commande, "del" ) )
-     { struct CMD_TYPE_UTILISATEUR *util;
-       gchar name[80];
-       sscanf ( ligne, "%s %s", commande, name );                    /* Découpage de la ligne de commande */
-       util = Rechercher_utilisateurDB_by_name( name );          /* suppression par nom plutot que par id */
-       if (!util)
-        { g_snprintf( chaine, sizeof(chaine), " | - User %s not found in Database", name );
-          response = Admin_write ( response, chaine );
-        }
-       else
-        { if (Retirer_utilisateurDB ( util ) == FALSE)
-           { g_snprintf( chaine, sizeof(chaine), " | - User %s couldn't be removed", name );
-             response = Admin_write ( response, chaine );
-           }
-          else
-           { g_snprintf( chaine, sizeof(chaine), " | - User %s (id=%d) removed", util->username, util->id );
-             response = Admin_write ( response, chaine );
-           }
-          g_free(util);
-        }
-     } else
-    if ( ! strcmp ( commande, "enable" ) )
-     { struct CMD_TYPE_UTILISATEUR util;
-       sscanf ( ligne, "%s %s", commande, util.username );                /* Découpage de la ligne de commande */
-       util.id = -1;                                            /* suppression par nom plutot que par id */
-       util.enable = TRUE;
-       if (Set_enable_utilisateurDB ( &util ) == FALSE)
-        { g_snprintf( chaine, sizeof(chaine), " | - User %s couldn't be enabled", util.username );
-          response = Admin_write ( response, chaine );
-        }
-       else
-        { g_snprintf( chaine, sizeof(chaine), " | - User %s enabled", util.username );
-          response = Admin_write ( response, chaine );
-        }
-     } else
-    if ( ! strcmp ( commande, "disable" ) )
-     { struct CMD_TYPE_UTILISATEUR util;
-       sscanf ( ligne, "%s %s", commande, util.username );                                    /* Découpage de la ligne de commande */
-       util.id = -1;                                                                 /* suppression par nom plutot que par id */
-       util.enable = FALSE;
-       if (Set_enable_utilisateurDB ( &util ) == FALSE)
-        { g_snprintf( chaine, sizeof(chaine), " | - User %s couldn't be disabled", util.username );
-          response = Admin_write ( response, chaine );
-        }
-       else
-        { g_snprintf( chaine, sizeof(chaine), " | - User %s disabled", util.username );
-          response = Admin_write ( response, chaine );
         }
      } else
      { g_snprintf( chaine, sizeof(chaine), " | - Unknown command : %s", ligne );

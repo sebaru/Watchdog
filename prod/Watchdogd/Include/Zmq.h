@@ -31,10 +31,10 @@
  #include <glib.h>
  #include <zmq.h>
 
- #define ZMQUEUE_LIVE_MSGS     "live-msgs"
- #define ZMQUEUE_LIVE_MOTIFS   "live-motifs"
- #define ZMQUEUE_LIVE_THREADS  "live-threads"
- #define ZMQUEUE_LIVE_MASTER   "live-master"
+ #define ZMQUEUE_LIVE_MSGS       "live-msgs"
+ #define ZMQUEUE_LIVE_MOTIFS     "live-motifs"
+ #define ZMQUEUE_LOCAL_MASTER    "local_msrv"
+ #define ZMQUEUE_LOCAL_BUS       "local_bus"
 
  struct ZMQUEUE
   { void *socket;
@@ -44,11 +44,11 @@
   };
 
  struct ZMQ_TARGET
-  { gint8 tag;
-    gchar src_instance[24];
+  { gchar src_instance[24];
     gchar src_thread[12];
     gchar dst_instance[24];
     gchar dst_thread[12];
+    gchar tag[12];
   };
 
  struct ZMQ_SET_BIT
@@ -58,31 +58,19 @@
     gchar dls_tech_id [ NBR_CARAC_PLUGIN_DLS_TECHID ];
   };
 
- enum
-  { TAG_ZMQ_TO_HISTO,
-    TAG_ZMQ_TO_THREADS,
-    TAG_ZMQ_SET_BIT,
-    TAG_ZMQ_SET_SYN_VARS,
-    TAG_ZMQ_CLI,
-    TAG_ZMQ_CLI_RESPONSE,
-    TAG_ZMQ_SLAVE_PING,
-    TAG_ZMQ_AUDIO_PLAY_WAV,
-    TAG_ZMQ_AUDIO_PLAY_GOOGLE,
-    NBR_ZMQ_TAG
-  };
 /************************************************ Définitions des prototypes **************************************************/
- extern struct ZMQUEUE *New_zmq ( gint pattern, gchar *name );                                                  /* Dans zmq.c */
- extern gboolean Bind_zmq ( struct ZMQUEUE *zmq, gchar *type, gchar *nom, gint port );
- extern gboolean Connect_zmq ( struct ZMQUEUE *zmq, gchar *type, gchar *nom, gint port );
+ extern struct ZMQUEUE *Connect_zmq ( gint pattern, gchar *name, gchar *type, gchar *endpoint, gint port );     /* Dans zmq.c */
+ extern struct ZMQUEUE *Bind_zmq ( gint pattern, gchar *name, gchar *type, gchar *endpoint, gint port );
  extern void Close_zmq ( struct ZMQUEUE *zmq );
  extern gboolean Send_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille );
- extern gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq, gint tag,
+ extern gboolean Send_zmq_with_tag ( struct ZMQUEUE *zmq,
                                      const gchar *source_instance, const gchar *source_thread,
                                      const gchar *target_instance, const gchar *target_thread,
-                                     void *source, gint taille );
+                                     const gchar *target_tag, void *source, gint taille );
  extern gint Recv_zmq ( struct ZMQUEUE *zmq, void *buf, gint taille_buf );
  extern gint Recv_zmq_block ( struct ZMQUEUE *zmq, void *buf, gint taille_buf );
- extern gint Recv_zmq_with_tag ( struct ZMQUEUE *zmq, void *buf, gint taille_buf, struct ZMQ_TARGET **event, void **payload );
+ extern gint Recv_zmq_with_tag ( struct ZMQUEUE *zmq, const gchar *thread, void *buf, gint taille_buf,
+                                 struct ZMQ_TARGET **event, void **payload );
  extern gboolean Zmq_instance_is_target ( struct ZMQ_TARGET *event );
  extern gboolean Zmq_other_is_target ( struct ZMQ_TARGET *event );
  #endif

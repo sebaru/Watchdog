@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/TraductionDLS/ligne.y        Définitions des ligne dls DLS                                                       */
+/* Watchdogd/TraductionDLS/ligne.y        DÃ©finitions des ligne dls DLS                                                       */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                        jeu. 24 juin 2010 19:37:44 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -7,7 +7,7 @@
  * lignes.y
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - Sébastien Lefevre
+ * Copyright (C) 2010 - SÃ©bastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@
 %token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_TOP_ALERTE
 %token <val>    T_SPERS_DER T_SPERS_DERF T_SPERS_DAN T_SPERS_DANF T_OSYN_ACQ
 %token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_DOWN
+%token <val>    T_BUS T_HOST T_THREAD T_TAG T_PARAM1
 
 %token <val>    MODE CONSIGNE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE
 %token <val>    T_DAA T_DMINA T_DMAXA T_DAD T_RANDOM
@@ -108,11 +109,13 @@ un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                                  if ( New_alias(ALIAS_TYPE_STATIC, NULL, $2, $5, $6, $4, NULL) == FALSE )    /* Deja defini ? */
                                   { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
                                  break;
+                      case MNEMO_TEMPO:
+                                 Emettre_erreur_new( "Ligne %d: Use of #static _T is obsolete", DlsScanner_get_lineno() );
+                                 break;
                       case MNEMO_ENTREE_ANA:
                       case MNEMO_MONOSTABLE  :
                       case MNEMO_CPTH:
                       case MNEMO_CPT_IMP:
-                      case MNEMO_TEMPO:
                       case MNEMO_MSG:
                       case MNEMO_REGISTRE :
                       case MNEMO_MOTIF:
@@ -141,6 +144,7 @@ alias_bit:        T_BI       {{ $$=MNEMO_BISTABLE;   }}
                 | EANA       {{ $$=MNEMO_ENTREE_ANA; }}
                 | T_REGISTRE {{ $$=MNEMO_REGISTRE;   }}
                 | T_HORLOGE  {{ $$=MNEMO_HORLOGE;    }}
+                | T_BUS      {{ $$=MNEMO_BUS;        }}
                 ;
 /**************************************************** Gestion des instructions ************************************************/
 listeInstr:     une_instr listeInstr
@@ -251,19 +255,19 @@ calcul_expr3:   VALF
                     { switch(alias->bit)               /* On traite que ce qui peut passer en "condition" */
                        { case MNEMO_ENTREE_ANA:
                           { taille = 15;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
                             g_snprintf( $$, taille, "EA_ech(%d)", alias->num );
                             break;
                           }
                          case MNEMO_REGISTRE:
                           { taille = 15;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
                             g_snprintf( $$, taille, "R(%d)", alias->num );
                             break;
                           }
                          case MNEMO_CPT_IMP:
                           { taille = 15;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
                             g_snprintf( $$, taille, "CI(%d)", alias->num );
                             break;
                           }
@@ -298,7 +302,7 @@ calcul_ea_result: T_REGISTRE ENTIER
                             break;
                           }
                          default: 
-                          { Emettre_erreur_new( "Ligne %d :'%s' ne peut s'utiliser dans un résultat de calcul", DlsScanner_get_lineno(), $1 );
+                          { Emettre_erreur_new( "Ligne %d :'%s' ne peut s'utiliser dans un rÃ©sultat de calcul", DlsScanner_get_lineno(), $1 );
                             $$=0;
                           }
                        }
@@ -427,7 +431,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                 | T_CPT_IMP ordre VALF
                 {{ int taille;
                    taille = 30;
-                   $$ = New_chaine( taille ); /* 10 caractères max */
+                   $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
                    switch( $1 )
                     { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", $1, $3 );  break;
                       case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", $1, $3 );  break;
@@ -477,7 +481,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                    alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
                    if (!alias && $3) { alias = Set_new_external_alias(tech_id,acro); }/* Si dependance externe, on va chercher */
                    if (alias)
-                    { if ($5 && (alias->bit==MNEMO_TEMPO ||                              /* Vérification des bits non comparables */
+                    { if ($5 && (alias->bit==MNEMO_TEMPO ||                              /* VÃ©rification des bits non comparables */
                                  alias->bit==MNEMO_ENTREE ||
                                  alias->bit==MNEMO_BISTABLE ||
                                  alias->bit==MNEMO_MONOSTABLE ||
@@ -487,7 +491,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                          $$=New_chaine(2);
                          g_snprintf( $$, 2, "0" );                                      
                        } else
-                      if (!$5 && (alias->bit==MNEMO_ENTREE_ANA ||        /* Vérification des bits obligatoirement comparables */
+                      if (!$5 && (alias->bit==MNEMO_ENTREE_ANA ||        /* VÃ©rification des bits obligatoirement comparables */
                                   alias->bit==MNEMO_REGISTRE ||
                                   alias->bit==MNEMO_CPT_IMP ||
                                   alias->bit==MNEMO_CPTH)
@@ -533,7 +537,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                              }
                             else
                              { taille = 50;
-                               $$ = New_chaine( taille ); /* 10 caractères max */
+                               $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
                                switch($5->type)
                                 { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $5->valf, alias->num ); break;
                                   case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $5->valf, alias->num ); break;
@@ -558,7 +562,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                            }
                          case MNEMO_CPT_IMP:
                           { taille = 30;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
                             switch($5->type)
                              { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", alias->num, $5->valf );  break;
                                case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", alias->num, $5->valf );  break;
@@ -579,10 +583,10 @@ unite:          modulateur ENTIER HEURE ENTIER
                           $$=New_chaine(2);
                           g_snprintf( $$, 2, "0" );
                         }
-                   if ($3) g_free($3);                                                   /* Libération du prefixe s'il existe */
+                   if ($3) g_free($3);                                                   /* LibÃ©ration du prefixe s'il existe */
                    g_free($2);                                                         /* On n'a plus besoin de l'identifiant */
                    Liberer_options($4);
-                   if ($5) g_free($5);                                               /* Libération du comparateur s'il existe */
+                   if ($5) g_free($5);                                               /* LibÃ©ration du comparateur s'il existe */
                 }}
                 ;
 
@@ -673,13 +677,14 @@ une_action:     ICONE ENTIER liste_options
                       g_snprintf( $$->alors, taille, " " ); 
                       $$->sinon = NULL;
                     }
-                   else                                                           /* L'alias existe, vérifions ses parametres */
+                   else                                                           /* L'alias existe, vÃ©rifions ses parametres */
                     { GList *options, *options_g, *options_d;
                       options_g = g_list_copy( $4 );
                       options_d = g_list_copy( alias->options );
-                      options = g_list_concat( options_g, options_d );                  /* Concaténation des listes d'options */
+                      options = g_list_concat( options_g, options_d );                  /* ConcatÃ©nation des listes d'options */
                       if ($1 && (alias->bit==MNEMO_TEMPO ||
                                  alias->bit==MNEMO_MSG ||
+                                 alias->bit==MNEMO_BUS ||
                                  alias->bit==MNEMO_MONOSTABLE)
                          )
                        { Emettre_erreur_new( "Ligne %d: '/%s' ne peut s'utiliser", DlsScanner_get_lineno(), alias->acronyme );
@@ -692,6 +697,7 @@ une_action:     ICONE ENTIER liste_options
                       else switch(alias->bit)
                        { case MNEMO_TEMPO : $$=New_action_tempo( alias, options ); break;
                          case MNEMO_MSG   : $$=New_action_msg_by_alias( alias );   break;
+                         case MNEMO_BUS   : $$=New_action_bus( alias, options );   break;
                          case MNEMO_SORTIE: $$=New_action_sortie( alias, $1, options );  break;
                          case MNEMO_BISTABLE:
                                     if (alias->num >= NBR_BIT_BISTABLE_RESERVED || alias->type==ALIAS_TYPE_DYNAMIC)
@@ -720,7 +726,7 @@ une_action:     ICONE ENTIER liste_options
                        }
                       g_list_free(options);
                     }
-                   Liberer_options($4);                                                    /* On libére les options "locales" */
+                   Liberer_options($4);                                                    /* On libÃ©re les options "locales" */
                    if ($3) g_free($3);
                    g_free($2);
                 }}
@@ -846,6 +852,26 @@ une_option:     MODE T_EGAL ENTIER
                 {{ $$=New_option();
                    $$->type = T_TYPE;
                    $$->entier = $3;
+                }}
+                | T_HOST T_EGAL T_CHAINE
+                {{ $$=New_option();
+                   $$->type = T_HOST;
+                   $$->chaine = $3;
+                }}
+                | T_THREAD T_EGAL T_CHAINE
+                {{ $$=New_option();
+                   $$->type = T_THREAD;
+                   $$->chaine = $3;
+                }}
+                | T_TAG T_EGAL T_CHAINE
+                {{ $$=New_option();
+                   $$->type = T_TAG;
+                   $$->chaine = $3;
+                }}
+                | T_PARAM1 T_EGAL T_CHAINE
+                {{ $$=New_option();
+                   $$->type = T_PARAM1;
+                   $$->chaine = $3;
                 }}
                 ;
 

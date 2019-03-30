@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Include/Audio.h        Déclaration structure internes pour audio                                                 */
-/* Projet WatchDog version 2.0       Gestion d'habitat                                         mer 15 avr 2009 15:40:43 CEST  */
+/* Watchdogd/Snips/Snips.h        Déclaration structure internes pour snips                                                   */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                                    14.03.2019 19:48:41 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * Audio.h
+ * Snips.h
  * This file is part of Watchdog
  *
  * Copyright (C) 2010 - Sebastien Lefevre
@@ -21,34 +21,26 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
-#ifndef _AUDIO_H_
- #define _AUDIO_H_
+
+#ifndef _SNIPS_H_
+ #define _SNIPS_H_
 
  #include <json-glib/json-glib.h>
+ #include <mosquitto.h>
 
- #define NOM_THREAD                 "audio"
+ #define NOM_THREAD                 "snips"
 
- #define AUDIO_JINGLE                3000                                    /* Jingle si pas de message au bout de 5 minutes */
- #define AUDIO_DEFAUT_LANGUAGE       "fr"                                                  /* Language par défaut pour le TTS */
- #define NUM_BIT_M_AUDIO_START       4                                          /* bit positionné quand start diffusion audio */
- #define NUM_BIT_M_AUDIO_END         5                                          /* Bit positionné quand arret diffusion audio */
- #define NUM_BIT_M_AUDIO_INHIB       6                                    /* Bit positionné si inhibition des messages vocaux */
-
- struct AUDIO_CONFIG
+ struct SNIPS_CONFIG
   { struct LIBRAIRIE *lib;
-    gint last_audio;                                                                   /* Date de la derniere emission sonore */
     gboolean enable;                                                                      /* Is this thread enabled at boot ? */
-    gchar language[80];                                             /* Language de restitution vocal, au format google_speech */
-    guint nbr_diffusion_wav;
-    guint nbr_diffusion_google;
-  } Cfg_audio;
+    void *zmq_to_master;                                                             /* Queue de remontée des infos au master */
+    guint nbr_msg_recu;
+    gchar snips_host[24];
+  } Cfg_snips;
 
 /*********************************************** Définitions des prototypes ***************************************************/
- extern gboolean Audio_Lire_config ( void );
- extern gchar *Audio_Admin_response( gchar *ligne );
 #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

@@ -42,8 +42,8 @@
 /* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  static gboolean Activer_ecoute_admin ( void )
-  { Socket = New_zmq ( ZMQ_REP, "listen-local-admin" );
-    return (Bind_zmq ( Socket, "ipc", NOM_SOCKET, 0 ));
+  { Socket = Bind_zmq ( ZMQ_REP, "listen-local-admin", "ipc", NOM_SOCKET, 0 );
+    return (Socket!=NULL);
   }
 /******************************************************************************************************************************/
 /* Desactiver_ecoute_admin: Ferme la socker fifo d'administration                                                             */
@@ -106,19 +106,6 @@
                      }    
                     if (lib->Admin_command)                        /* Ancienne mode, via appel de fonction intégrée au thread */
                      { response =  lib->Admin_command ( response, ligne + strlen(lib->admin_prompt)+1 ); }     /* Appel local */
-                    else if (lib->Thread_run == TRUE)                         /* Nouvelle méthode, en utilisant les files ZMQ */
-                     { gchar endpoint[128], buffer[2048];
-                       gint byte;
-                       struct ZMQUEUE *zmq_admin;
-                       zmq_admin = New_zmq ( ZMQ_REQ, "send-to-admin" );
-                       g_snprintf(endpoint, sizeof(endpoint), "%s-admin", lib->admin_prompt );
-                       Connect_zmq (zmq_admin, "inproc", endpoint, 0 );
-                       Send_zmq ( zmq_admin, ligne + strlen(lib->admin_prompt)+1, strlen(ligne) - strlen(lib->admin_prompt) );
-                       byte = Recv_zmq_block ( zmq_admin, &buffer, sizeof(buffer) );
-                       buffer[byte-1]=0;                                              /* caractere NULL de fin si depassement */
-                       response = Admin_write ( response, buffer );                                    /* Appel via zmq local */
-                       Close_zmq ( zmq_admin );
-                     }
                     found = TRUE;
                   }
                  liste = liste->next;
@@ -151,8 +138,8 @@
     else if ( g_str_has_prefix ( ligne, "arch"      ) ) { response = Admin_arch     ( response, ligne + 5);  }
     else response = Admin_running (response, ligne);
 
-    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master, TAG_ZMQ_CLI_RESPONSE,                          /* Send to local msrv */
-                        NULL, "msrv", event->src_instance, event->src_thread, response, strlen(response)+1 );
+    Send_zmq_with_tag ( Partage->com_msrv.zmq_to_master,                           /* Send to local msrv */
+                        NULL, "msrv", event->src_instance, event->src_thread, "cli_response", response, strlen(response)+1 );
   }
 /******************************************************************************************************************************/
 /* Run_admin: Ecoute les commandes d'admin locale et les traite                                                               */

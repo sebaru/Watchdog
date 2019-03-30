@@ -28,6 +28,8 @@
 #ifndef _SMSG_H_
  #define _SMSG_H_
 
+ #include <json-glib/json-glib.h>
+
  #define NOM_THREAD                    "smsg"
 
  #define TOP_MIN_ENVOI_SMS              1200                                      /* 2 minutes sans envoi de SMS au démarrage */
@@ -40,6 +42,7 @@
     gchar smsbox_apikey[TAILLE_SMSBOX_APIKEY+1];                                                           /* Clef API SMSBOX */
     guint bit_comm;                                                           /* Bit B d'état de la communication avec le GSM */
     void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */
+    guint nbr_sms;
   } Cfg_smsg;
 
  struct SMSDB

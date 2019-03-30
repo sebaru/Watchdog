@@ -1,9 +1,14 @@
 #!/bin/sh
 
 echo "Installing dependencies"
-apt-get install -y subversion libtool automake autoconf gcc
-apt-get install -y libglib2.0-dev bison flex libreadline-dev libgif-dev libgcrypt11-dev libwebsockets-dev
-apt-get install -y libupsclient1-dev libcurl4-gnutls-dev libssl-dev libmysqlclient-dev libpurple-dev
-apt-get install -y liblircclient-dev libloudmouth1-dev libpopt-dev libssl-dev libmariadbclient-dev libzmq-dev
-apt-get install -y libgnomeui-dev libgoocanvas-dev libgtksourceview2.0-dev libjson-glib-dev pocketsphinx 
+apt-get install -y subversion libtool automake autoconf gcc git cmake
+apt-get install -y libglib2.0-dev bison flex libreadline-dev libgif-dev libgcrypt11-dev
+apt-get install -y libupsclient-dev libcurl4-gnutls-dev libssl-dev default-libmysqlclient-dev libpurple-dev libgammu-dev
+apt-get install -y liblircclient-dev libpopt-dev libssl-dev libmariadbclient-dev libzmq3-dev
+apt-get install -y libgnomeui-dev libgoocanvas-dev libgtksourceview2.0-dev libjson-glib-dev pocketsphinx libmosquitto-dev 
 
+git clone https://github.com/warmcat/libwebsockets.git
+cd libwebsockets
+cmake .
+make -j 2
+sudo make install

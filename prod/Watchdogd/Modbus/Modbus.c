@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <stdio.h>
  #include <fcntl.h>
  #include <sys/types.h>
@@ -43,7 +43,7 @@
 
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Modbus.h"
- 
+
 /******************************************************************************************************************************/
 /* Modbus_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                 */
 /* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
@@ -54,7 +54,7 @@
     struct DB *db;
 
     Cfg_modbus.lib->Thread_debug = FALSE;                                                      /* Settings default parameters */
-    Cfg_modbus.enable            = FALSE; 
+    Cfg_modbus.enable            = FALSE;
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
@@ -86,7 +86,7 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
        return(FALSE);
@@ -144,7 +144,7 @@
      }
     else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                  "UPDATE %s SET "             
+                  "UPDATE %s SET "
                   "enable='%d',hostname='%s',tech_id='%s',bit='%d',watchdog='%d',description='%s',"
                   "map_E='%d',map_EA='%d',map_A='%d',map_AA='%d',max_nbr_E='%d'"
                   " WHERE id=%d",
@@ -157,7 +157,7 @@
     g_free(tech_id);
     g_free(description);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
        return(-1);
@@ -270,7 +270,7 @@
     struct timeval sndtimeout;
     struct addrinfo hints;
     gint connexion = 0, s;
-       
+
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
     hints.ai_socktype = SOCK_STREAM; /* Datagram socket */
@@ -311,7 +311,7 @@
                     module->modbus.id, module->modbus.hostname );
           continue;
         }
-        
+
        if (connect(connexion, rp->ai_addr, rp->ai_addrlen) != -1)
         { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
                    "%s: %d (%s) family=%d", __func__,
@@ -717,7 +717,7 @@
         else if (A(cpt_a)) requete.data[cpt_byte] |= cpt_poid;
         cpt_poid = cpt_poid << 1;
       }
-               
+
     if ( write ( module->connexion, &requete, taille+6 ) != taille+6 )/* Envoi de la requete (taille + header )*/
      { Deconnecter_module( module ); }
     else module->request = TRUE;                                              /* Une requete a élé lancée */
@@ -749,7 +749,7 @@
         requete.data [cpt_byte+1] = 0x00; /*(Partage->aa[cpt_a].val_int & 0x1F)<<3;*/
         cpt_a++; cpt_byte += 2;
       }
-               
+
     if ( write ( module->connexion, &requete, taille+6 ) != taille+6 )/* Envoi de la requete (taille + header )*/
      { Deconnecter_module( module ); }
     else module->request = TRUE;                                              /* Une requete a élé lancée */
@@ -782,7 +782,7 @@
      }
 
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    g_snprintf( critere, sizeof(critere),"%s:AI%%", module->modbus.tech_id ); 
+    g_snprintf( critere, sizeof(critere),"%s:AI%%", module->modbus.tech_id );
     if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
     else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
@@ -803,57 +803,52 @@
        g_free(mnemo);
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    g_snprintf( critere, sizeof(critere),"%s:DI%%", module->modbus.tech_id ); 
-    if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
+    g_snprintf( critere, sizeof(critere),"%s:DI%%", module->modbus.tech_id );
+    if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, critere ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
-    else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' Type %d Num %d '%s:%s' - %s", __func__,
-                 mnemo->ev_text, mnemo->type, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme, mnemo->libelle );
-       if ( mnemo->type == MNEMO_ENTREE )
-        { gchar debut[80];
-          gint num;
-          if ( sscanf ( mnemo->ev_text, "%[^:]:DI%d", debut, &num ) == 2 )                   /* Découpage de la ligne ev_text */
-           { if (num<module->nbr_entree_tor)
-              { Dls_data_set_bool ( mnemo->dls_tech_id, mnemo->acronyme, &module->DI[num], FALSE ); }
-             else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
-                            mnemo->ev_text, num, module->nbr_entree_tor );
-           }
-          else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__,
-                         mnemo->ev_text );
+    else while ( Recuperer_mnemos_DI_suite( &db ) )
+     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
+       char debut[80];
+       gint num;
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
+                 src_text, tech_id, acro, libelle );
+       if ( sscanf ( src_text, "%[^:]:DI%d", debut, &num ) == 2 )                            /* Découpage de la ligne ev_text */
+        { if (num<module->nbr_entree_tor)
+           { Dls_data_set_bool ( tech_id, acro, &module->DI[num], FALSE ); }
+          else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
+                         src_text, num, module->nbr_entree_tor );
         }
-       g_free(mnemo);
+       else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__, src_text );
      }
 /*********************************** Recherche des events DO a raccrocher aux bits internes ***********************************/
-    g_snprintf( critere, sizeof(critere),"%s:DO%%", module->modbus.tech_id ); 
-    if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
+    g_snprintf( critere, sizeof(critere),"%s:DO%%", module->modbus.tech_id );
+    if ( ! Recuperer_mnemos_DO_by_tag ( &db, NOM_THREAD, critere ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
-    else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' Type %d Num %d '%s:%s' - %s", __func__,
-                 mnemo->ev_text, mnemo->type, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme, mnemo->libelle );
-       if ( mnemo->type == MNEMO_SORTIE )
-        { gchar debut[80];
-          gint num;
-          if ( sscanf ( mnemo->ev_text, "%[^:]:DO%d", debut, &num ) == 2 )                   /* Découpage de la ligne ev_text */
-           { if (num<module->nbr_sortie_tor)
-              { Dls_data_set_bool ( mnemo->dls_tech_id, mnemo->acronyme, &module->DO[num], FALSE ); }
-             else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
-                            mnemo->ev_text, num, module->nbr_entree_tor );
-           }
-          else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__,
-                         mnemo->ev_text );
+    else while ( Recuperer_mnemos_DO_suite( &db ) )
+     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *dst_tag = db->row[2];
+       char debut[80];
+       gint num;
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
+                 dst_tag, tech_id, acro, libelle );
+       if ( sscanf ( dst_tag, "%[^:]:DO%d", debut, &num ) == 2 )                      /* Découpage de la ligne ev_text */
+        { if (num<module->nbr_sortie_tor)
+           { Dls_data_set_bool ( tech_id, acro, &module->DO[num], FALSE ); }
+          else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: event '%s': num %d out of range '%d'", __func__,
+                         dst_tag, num, module->nbr_entree_tor );
         }
-       g_free(mnemo);
+       else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: event '%s': Sscanf Error", __func__, dst_tag );
      }
 /******************************* Recherche des event text EA a raccrocher aux bits internes ***********************************/
-    g_snprintf( critere, sizeof(critere),"%s:COMM", module->modbus.tech_id ); 
-    if ( ! Recuperer_mnemo_baseDB_by_event_text ( &db, NOM_THREAD, critere ) )
+    g_snprintf( critere, sizeof(critere),"%s:COMM", module->modbus.tech_id );
+    if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, critere ) )
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
-    else while ( (mnemo = Recuperer_mnemo_baseDB_suite( &db )) != NULL)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' Type %d Num %d '%s:%s' - %s", __func__,
-                 mnemo->ev_text, mnemo->type, mnemo->num, mnemo->dls_tech_id, mnemo->acronyme, mnemo->libelle );
-       if ( mnemo->type == MNEMO_BISTABLE && !module->bit_comm )
-        { Dls_data_set_bool ( mnemo->dls_tech_id, mnemo->acronyme, &module->bit_comm, FALSE ); }
-       g_free(mnemo);
+    else while ( Recuperer_mnemos_DI_suite( &db ) )
+     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
+       char debut[80];
+       gint num;
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
+                 src_text, tech_id, acro, libelle );
+       Dls_data_set_bool ( tech_id, acro, &module->bit_comm, FALSE );
      }
     Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_NOTICE, "%s: Module '%s' : mapping done", __func__,
               module->modbus.description );
@@ -1052,7 +1047,7 @@
                 "transactionID=%06d, nbr_deconnect=%02d, last_reponse=%03ds ago, retente=in %03ds, date_next_eana=in %03ds",
                  __func__, module->modbus.id, module->modbus.enable, module->started, module->mode,
                  module->transaction_id, module->nbr_deconnect,
-                (Partage->top - module->date_last_reponse)/10,                   
+                (Partage->top - module->date_last_reponse)/10,
                 (module->date_retente > Partage->top   ? (module->date_retente   - Partage->top)/10 : -1),
                 (module->date_next_eana > Partage->top ? (module->date_next_eana - Partage->top)/10 : -1)
                );
@@ -1140,7 +1135,7 @@
        else
         { if ( module->request )                                                         /* Requete en cours pour ce module ? */
            { Recuperer_reponse_module ( module ); }
-          else 
+          else
            { if (module->date_next_eana<Partage->top)                                  /* Gestion décalée des I/O Analogiques */
               { module->date_next_eana = Partage->top + MBUS_TEMPS_UPDATE_IO_ANA;                       /* Tous les 2 dixieme */
                 module->do_check_eana = TRUE;
@@ -1173,13 +1168,13 @@
                                              module->do_check_eana = FALSE;                              /* Le check est fait */
                                              module->nbr_request++;
                                              break;
-                
+
               }
            }
        }
      }
     pthread_exit(GINT_TO_POINTER(0));
-  }        
+  }
 /******************************************************************************************************************************/
 /* Charger_tous_Modbus: Requete la DB pour charger les modules et les bornes modbus                                           */
 /* Entrée: rien                                                                                                               */
@@ -1190,7 +1185,7 @@
     struct DB *db;
     gint cpt;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db) return(FALSE);
 
 /*************************************************** Chargement des modules ***************************************************/
@@ -1217,7 +1212,7 @@
        g_free(modbus);
        cpt++;                                                                  /* Nous avons ajouté un module dans la liste ! */
                                                                                             /* Ajout dans la liste de travail */
-       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, 
+       Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO,
                 "%s: id=%d, enable=%d", __func__, module->modbus.id, module->modbus.enable );
        pthread_create( &tid, NULL, (void *)Run_modbus_thread, module );
        Cfg_modbus.Modules_MODBUS = g_slist_prepend ( Cfg_modbus.Modules_MODBUS, module );
