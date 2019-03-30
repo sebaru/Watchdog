@@ -24,8 +24,8 @@
  #define ODLS_OUVRE  <-> _M(libelle="Demande DLS d'ouverture");
  #define ODLS_FERME  <-> _M(libelle="Demande DLS de fermeture");
 
- #define OVOC_OUVRE  <-> _M(libelle="Demande VOCALE d'ouverture");
- #define OVOC_FERME  <-> _M(libelle="Demande VOCALE de fermeture");
+ #define OVOC_OUVRE  <-> _E(libelle="Demande VOCALE d'ouverture");
+ #define OVOC_FERME  <-> _E(libelle="Demande VOCALE de fermeture");
 
  #define MSG_VOLET_OUVERT <-> _MSG(type=etat,libelle="Volet ouvert");
  #define MSG_VOLET_FERME  <-> _MSG(type=etat,libelle="Volet fermé");
