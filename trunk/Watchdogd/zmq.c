@@ -52,7 +52,7 @@
 /* Sortie: TRUE ou FALSE                                                                                                      */
 /******************************************************************************************************************************/
  static gboolean Zmq_thread_is_target ( struct ZMQ_TARGET *event, const gchar *thread )
-  { 
+  { if (thread==NULL) return(TRUE);
     if (!strcmp( event->dst_thread, "*" )) return(TRUE);
     if (!strcmp( event->dst_thread, thread )) return(TRUE);
     return(FALSE);

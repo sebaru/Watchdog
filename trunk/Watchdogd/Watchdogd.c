@@ -446,7 +446,7 @@
        gchar buffer[2048];
        void *payload;
        gint byte;
-       if ( (byte=Recv_zmq_with_tag( zmq_from_master, "*", &buffer, sizeof(buffer), &event, &payload )) > 0 )
+       if ( (byte=Recv_zmq_with_tag( zmq_from_master, NULL, &buffer, sizeof(buffer), &event, &payload )) > 0 )
         { if (!strcmp(event->dst_thread,"msrv") && !strcmp(event->tag,"histo"))
            { if (Send_zmq( Partage->com_msrv.zmq_msg, payload, sizeof(struct CMD_TYPE_HISTO)) == -1)
               { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ '%s' socket failed (%s)",
