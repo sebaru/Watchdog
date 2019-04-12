@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/prctl.h>
  #include <string.h>
@@ -115,7 +115,7 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
     else { result = Rechercher_plugin_dlsDB( rezo_dls->id );
-           if (result) 
+           if (result)
             { Partage->com_dls.Thread_reload = TRUE;
               Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_VALIDE_EDIT_PLUGIN_DLS_OK,
                             (gchar *)result, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
@@ -145,7 +145,7 @@
                 "%s: Cannot get Source DLS for id '%d'", __func__, rezo_dls->id );
        return;
      }
-    
+
     Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_SOURCE_DLS_START,
                   (gchar *)rezo_dls, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
 
@@ -238,7 +238,7 @@
     Envoi_client ( client, TAG_DLS, SSTAG_SERVEUR_DLS_COMPIL_STATUS, (gchar *)&erreur, sizeof(erreur) );
 
     result = Rechercher_plugin_dlsDB( client->dls.id );                     /* Mise a jour de l'onglet "plugin" en temps reel */
-    if (result) 
+    if (result)
      { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_VALIDE_EDIT_PLUGIN_DLS_OK,
                      (gchar *)result, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
        g_free(result);
@@ -265,7 +265,7 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
     else { result = Rechercher_plugin_dlsDB( id );
-           if (!result) 
+           if (!result)
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
                           "Unable to add plugin %s", rezo_dls->nom);
@@ -273,30 +273,10 @@
                             (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
             }
            else
-            { gchar chaine[80];
-              gint id_fichier;
-
-              g_snprintf(chaine, sizeof(chaine), "Dls/%d.dls", result->id );
-              id_fichier = open( chaine, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR );
-              if (id_fichier == -1)
-               { struct CMD_GTK_MESSAGE erreur;
-                 g_snprintf( erreur.message, sizeof(erreur.message),
-                             "Unable to create file %s:\n", chaine );
-                 Envoi_client( client, TAG_GTK_MESSAGE, SSTAG_SERVEUR_ERREUR,
-                               (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
-               }
-              else { g_snprintf(chaine, sizeof(chaine), "/* %06d.dls: %s */\n", result->id, result->nom );
-                     if (write(id_fichier, chaine, strlen(chaine) )<0)
-                      { Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_ERR,
-                                 "%s: Init .dls failed %d (%s)", __func__, result->id, strerror(errno) );
-                      }
-                     close(id_fichier); 
-
-                     Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_ADD_PLUGIN_DLS_OK,                          /* Tout va bien */
-                                   (gchar *)result, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
-                     Partage->com_dls.Thread_reload = TRUE; 
-                     g_free(result);
-                   }
+            { Envoi_client( client, TAG_DLS, SSTAG_SERVEUR_ADD_PLUGIN_DLS_OK,                          /* Tout va bien */
+                            (gchar *)result, sizeof(struct CMD_TYPE_PLUGIN_DLS) );
+              Partage->com_dls.Thread_reload = TRUE;
+              g_free(result);
             }
          }
   }
@@ -309,13 +289,13 @@
   { struct CMD_ENREG nbr;
     struct CMD_TYPE_PLUGIN_DLS *dls;
     struct DB *db;
-    
+
     prctl(PR_SET_NAME, "W-EnvoiDLS", 0, 0, 0 );
 
     Info_new( Config.log, Cfg_ssrv.lib->Thread_debug, LOG_DEBUG,
               "Envoyer_plugins_dls_thread_tag: Starting (TAG=%d, SSTAG=%d, SSTAGFIN=%d)",
                tag, sstag, sstag_fin );
-          
+
     if ( ! Recuperer_plugins_dlsDB( &db ) )
      { return(NULL);
      }                                                                                               /* Si pas de histos (??) */
