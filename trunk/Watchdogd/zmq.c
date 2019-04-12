@@ -195,6 +195,8 @@
                 "%s: Send to ZMQ '%s' ('%s') failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
        return(FALSE);
      }
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+             "%s: Send to ZMQ '%s' ('%s') %d bytes", __func__, zmq->name, zmq->endpoint, taille );
     return(TRUE);
   }
 /******************************************************************************************************************************/
