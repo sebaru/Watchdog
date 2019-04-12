@@ -69,7 +69,7 @@
 /******************************************************************************************************************************/
  void Emettre( char *chaine )
   { int taille;
-    taille = strlen(chaine);
+    taille = strlen(chaine)+1;
     if ( Buffer_used + taille > Buffer_taille)
      { gchar *new_Buffer;
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG,
