@@ -69,19 +69,18 @@
 /******************************************************************************************************************************/
  void Emettre( char *chaine )
   { int taille;
-    taille = strlen(chaine)+1;
+    taille = strlen(chaine);
     if ( Buffer_used + taille > Buffer_taille)
      { gchar *new_Buffer;
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG,
-                "%s: buffer too small, trying to expand it to %d (chaine='%s', strlen=%d)", __func__,
-                 Buffer_taille + 1024, chaine, taille );
-       new_Buffer = g_try_realloc( Buffer, Buffer_taille + 1024 );
+                "%s: buffer too small, trying to expand it to %d)", __func__, Buffer_taille + taille );
+       new_Buffer = g_try_realloc( Buffer, Buffer_taille + taille );
        if (!new_Buffer)
         { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s: Fail to expand buffer. skipping", __func__ );
           return;
         }
        Buffer = new_Buffer;
-       Buffer_taille = Buffer_taille + 1024;
+       Buffer_taille = Buffer_taille + taille;
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: Buffer expanded to %d bytes", __func__, Buffer_taille );
      }
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s: ligne %d : %s", __func__, DlsScanner_get_lineno(), chaine );
