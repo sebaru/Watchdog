@@ -337,8 +337,8 @@
                        __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );
            } else
           if ( !strcmp(event->tag, "sudo") )
-           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s/%s to %s/%s",
-                       __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );
+           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s/%s to %s/%s/%s",
+                       __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
              system(payload);
            }
         }
@@ -459,16 +459,15 @@
               }
            } else
           if (!strcmp(event->dst_thread,"msrv") && !strcmp(event->tag, "sudo") )
-           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s/%s to %s/%s",
-                       __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );
+           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s/%s to %s/%s/%s",
+                       __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
              system(payload);
-           }
-          else
-           { if (Send_zmq( Partage->com_msrv.zmq_to_bus, buffer, byte ) == -1)
-              { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ '%s' socket failed (%s)",
-                          __func__, Partage->com_msrv.zmq_to_bus->name, zmq_strerror(errno) );
-              }
-           }
+           } else
+          if ( !strcmp(event->tag, "ping") )
+           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s/%s to %s/%s",
+                       __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );
+           } else
+           { Send_zmq( Partage->com_msrv.zmq_to_bus, buffer, byte ); }
         }
                                                 /* Si reception depuis un thread, report vers le master et les autres threads */
        if ( (byte=Recv_zmq( zmq_from_bus, &buffer, sizeof(buffer) )) > 0 )
