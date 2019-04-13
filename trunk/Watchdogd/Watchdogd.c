@@ -333,8 +333,13 @@
                             else Envoyer_commande_dls_data ( bit->dls_tech_id, bit->acronyme );
            } else
           if ( !strcmp(event->tag, "ping") )
-           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive TAG_ZMQ_SATELLITE_PING from %s/%s to %s/%s",
+           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s/%s to %s/%s",
                        __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );
+           } else
+          if ( !strcmp(event->tag, "sudo") )
+           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s/%s to %s/%s",
+                       __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );
+             system(payload);
            }
         }
 
