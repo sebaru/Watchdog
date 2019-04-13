@@ -457,6 +457,11 @@
               { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Send to ZMQ '%s' socket failed (%s)",
                           __func__, Partage->com_msrv.zmq_msg->name, zmq_strerror(errno) );
               }
+           } else
+          if (!strcmp(event->dst_thread,"msrv") && !strcmp(event->tag, "sudo") )
+           { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SUDO from %s/%s to %s/%s",
+                       __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );
+             system(payload);
            }
           else
            { if (Send_zmq( Partage->com_msrv.zmq_to_bus, buffer, byte ) == -1)
