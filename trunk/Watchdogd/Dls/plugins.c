@@ -441,7 +441,7 @@
        g_snprintf( source, sizeof(source), "Dls/%06d.c", id );
        g_snprintf( cible,  sizeof(cible),  "Dls/libdls%06d.so", id );
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: GCC start (pid %d) source %s cible %s!",
-                 __func__, pidgcc, source, cible );
+                 __func__, getpid(), source, cible );
        execlp( "gcc", "gcc", "-I/usr/include/glib-2.0", "-I/usr/lib/glib-2.0/include", "-I/usr/lib64/glib-2.0/include",
                "-shared", "-o3", "-Wall", "-lwatchdog-dls", source, "-fPIC", "-o", cible, NULL );
        Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s_Fils: lancement GCC failed", __func__ );
