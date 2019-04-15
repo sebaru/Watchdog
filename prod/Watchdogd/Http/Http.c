@@ -139,9 +139,7 @@
     gint retour;
 
     pss = lws_wsi_user ( wsi );
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
-             "%s:  Sending Response code '%d'", __func__, code
-            );
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s:  Sending Response code '%d'", __func__, code );
 
     header_cur = header;
     header_end = header + sizeof(header);
@@ -161,7 +159,7 @@
     gint retour;
 
     pss = lws_wsi_user ( wsi );
-    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_WARNING,
+    Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
              "%s: Sending Response code '%d' (taille_buf=%d)", __func__, code, taille_buf
             );
 

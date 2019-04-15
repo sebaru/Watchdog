@@ -52,7 +52,7 @@
 /* Sortie: TRUE ou FALSE                                                                                                      */
 /******************************************************************************************************************************/
  static gboolean Zmq_thread_is_target ( struct ZMQ_TARGET *event, const gchar *thread )
-  { 
+  { if (thread==NULL) return(TRUE);
     if (!strcmp( event->dst_thread, "*" )) return(TRUE);
     if (!strcmp( event->dst_thread, thread )) return(TRUE);
     return(FALSE);
@@ -195,6 +195,8 @@
                 "%s: Send to ZMQ '%s' ('%s') failed (%s)", __func__, zmq->name, zmq->endpoint, zmq_strerror(errno) );
        return(FALSE);
      }
+    Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
+             "%s: Send to ZMQ '%s' ('%s') %d bytes", __func__, zmq->name, zmq->endpoint, taille );
     return(TRUE);
   }
 /******************************************************************************************************************************/
