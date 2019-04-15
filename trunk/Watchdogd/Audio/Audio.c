@@ -36,9 +36,9 @@
  #include "watchdogd.h"                                                                             /* Pour la struct PARTAGE */
  #include "Audio.h"
 /******************************************************************************************************************************/
-/* Audio_Lire_config : Lit la config Watchdog et rempli la structure mémoire                                                  */
-/* Entrée: le pointeur sur la LIBRAIRIE                                                                                       */
-/* Sortie: Néant                                                                                                              */
+/* Audio_Lire_config : Lit la config Watchdog et rempli la structure mÃ©moire                                                  */
+/* EntrÃ©e: le pointeur sur la LIBRAIRIE                                                                                       */
+/* Sortie: NÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  gboolean Audio_Lire_config ( void )
   { gchar *nom, *valeur;
@@ -47,19 +47,22 @@
     Cfg_audio.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
     Cfg_audio.enable            = FALSE;
     g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", AUDIO_DEFAUT_LANGUAGE );
+    g_snprintf( Cfg_audio.device,   sizeof(Cfg_audio.device), "default" );
 
-    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de donnÃ©es */
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
                 "%s: Database connexion failed. Using Default Parameters", __func__ );
        return(FALSE);
      }
 
-    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
+    while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* RÃ©cupÃ©ration d'une config dans la DB */
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "%s: '%s' = %s", __func__, nom, valeur ); /* Print Config */
             if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_audio.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_audio.lib->Thread_debug = TRUE;  }
+       else if ( ! g_ascii_strcasecmp ( nom, "device" ) )
+        { g_snprintf( Cfg_audio.device, sizeof(Cfg_audio.device), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "language" ) )
         { g_snprintf( Cfg_audio.language, sizeof(Cfg_audio.language), "%s", valeur ); }
        else
@@ -70,9 +73,9 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Jouer_wav: Jouer un fichier wav dont le nom est en paramètre                                                               */
-/* Entrée : le nom du fichier wav                                                                                             */
-/* Sortie : Néant                                                                                                             */
+/* Jouer_wav: Jouer un fichier wav dont le nom est en paramÃ¨tre                                                               */
+/* EntrÃ©e : le nom du fichier wav                                                                                             */
+/* Sortie : NÃ©ant                                                                                                             */
 /******************************************************************************************************************************/
  static gboolean Jouer_wav_by_file ( gchar *texte )
   { gint fd_cible, pid;
@@ -95,8 +98,7 @@
         }
      }
     else if (fd_cible < 0 && Config.instance_is_master == TRUE)
-     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
-                "%s: '%s' not found", __func__, fichier );
+     { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR, "%s: '%s' not found", __func__, fichier );
        return(FALSE);
      }
     else close (fd_cible);
@@ -109,7 +111,7 @@
        return(FALSE);
      }
     else if (!pid)
-     { execlp( "aplay", "aplay", fichier, NULL );
+     { execlp( "aplay", "aplay", "--device", Cfg_audio.device, fichier, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
                 "%s: APLAY '%s' exec failed pid=%d", __func__, fichier, pid );
        _exit(0);
@@ -124,9 +126,9 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Jouer_wav: Jouer un fichier wav dont le nom est en paramètre                                                               */
-/* Entrée : le nom du fichier wav                                                                                             */
-/* Sortie : Néant                                                                                                             */
+/* Jouer_wav: Jouer un fichier wav dont le nom est en paramÃ¨tre                                                               */
+/* EntrÃ©e : le nom du fichier wav                                                                                             */
+/* Sortie : NÃ©ant                                                                                                             */
 /******************************************************************************************************************************/
  static gboolean Jouer_wav_by_id ( struct CMD_TYPE_MESSAGE *msg )
   { gchar nom_fichier[80];
@@ -136,7 +138,7 @@
   }
 /******************************************************************************************************************************/
 /* Jouer_google_speech : Joue un texte avec google_speech et attend la fin de la diffusion                                    */
-/* Entrée : le message à jouer                                                                                                */
+/* EntrÃ©e : le message Ã  jouer                                                                                                */
 /* Sortie : True si OK, False sinon                                                                                           */
 /******************************************************************************************************************************/
  gboolean Jouer_google_speech ( gchar *libelle_audio )
@@ -150,7 +152,7 @@
        return(FALSE);
      }
     else if (!pid)
-     { execlp( "google_speech", "google_speech", "-v", "debug", "-l", Cfg_audio.language, libelle_audio, NULL );
+     { execlp( "Wtd_play_google.sh", "Wtd_play_google", Cfg_audio.language, libelle_audio, Cfg_audio.device, NULL );
        Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
                 "%s: '%s' exec failed pid=%d (%s)", __func__, libelle_audio, pid, strerror( errno ) );
        _exit(0);
@@ -209,8 +211,8 @@
         }
 
        if (Cfg_audio.last_audio + 100 < Partage->top)                                /* Au bout de 10 secondes sans diffusion */
-        { if (audio_stop == TRUE)                                /* Avons-nous deja envoyé une commande de STOP AUDIO a DLS ? */
-           { audio_stop = FALSE;                                         /* Positionné quand il n'y a plus de diffusion audio */
+        { if (audio_stop == TRUE)                                /* Avons-nous deja envoyÃ© une commande de STOP AUDIO a DLS ? */
+           { audio_stop = FALSE;                                         /* PositionnÃ© quand il n'y a plus de diffusion audio */
              if (Config.instance_is_master) Envoyer_commande_dls( NUM_BIT_M_AUDIO_END );
            }
         } else audio_stop = TRUE;
@@ -240,7 +242,7 @@
 
        if ( M(NUM_BIT_M_AUDIO_INHIB) == 1 &&
            ! (histo->msg.type == MSG_ALERTE || histo->msg.type == MSG_DANGER || histo->msg.type == MSG_ALARME)
-          )                                                                     /* Bit positionné quand arret diffusion audio */
+          )                                                                     /* Bit positionnÃ© quand arret diffusion audio */
         { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_WARNING,
                    "%s : Envoi audio inhibe pour num=%d (histo->msg.audio=%d)", __func__, histo->msg.num, histo->msg.audio );
           continue;
@@ -251,14 +253,14 @@
 
           if (Config.instance_is_master)
            { Envoyer_commande_dls( histo->msg.bit_audio );                   /* Positionnement du profil audio via monostable */
-             Envoyer_commande_dls( NUM_BIT_M_AUDIO_START );                  /* Positionné quand on envoi une diffusion audio */
+             Envoyer_commande_dls( NUM_BIT_M_AUDIO_START );                  /* PositionnÃ© quand on envoi une diffusion audio */
            }
 
           if (Cfg_audio.last_audio + AUDIO_JINGLE < Partage->top)                              /* Si Pas de message depuis xx */
            { Jouer_wav_by_file("jingle"); }                                                         /* On balance le jingle ! */
           Cfg_audio.last_audio = Partage->top;
 
-          if (Jouer_wav_by_id ( &histo->msg ) == FALSE)                /* Par priorité : wav d'abord, synthèse vocale ensuite */
+          if (Jouer_wav_by_id ( &histo->msg ) == FALSE)                /* Par prioritÃ© : wav d'abord, synthÃ¨se vocale ensuite */
            { if (strlen(histo->msg.libelle_audio))          /* Si libelle_audio, le jouer, sinon jouer le libelle tout court) */
               { Jouer_google_speech( histo->msg.libelle_audio ); }
              else
