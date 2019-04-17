@@ -114,7 +114,7 @@
     fd = open( FICHIER_EXPORT, O_RDONLY );                                                            /* Ouverture du fichier */
     if ( fd <= 0 )
      { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "Importer : Open Errort %s (%s).", FICHIER_EXPORT, strerror(errno) );
+                "Importer : Open Error %s (%s).", FICHIER_EXPORT, strerror(errno) );
        return(FALSE);
      }
 
@@ -683,12 +683,6 @@
 
        sigfillset (&sig.sa_mask);                                                 /* Par dÃ©faut tous les signaux sont bloquÃ©s */
        pthread_sigmask( SIG_SETMASK, &sig.sa_mask, NULL );
-
-       if (!import)
-        { Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Clear Histo", __func__ );
-          Clear_histoDB ();                                                                /* Clear de la table histo au boot */
-          Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Clear Histo done", __func__ );
-        } else Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Import => pas de clear histo", __func__ );
 
        Update_database_schema();                                                    /* Update du schÃ©ma de Database si besoin */
        Charger_config_bit_interne ();                         /* Chargement des configurations des bits internes depuis la DB */

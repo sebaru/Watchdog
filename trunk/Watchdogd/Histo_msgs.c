@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Histo/Histo_msgs.c        Déclaration des fonctions pour la gestion des message                                  */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                          ven 15 aoû 2003 13:02:48 CEST */
+/* Watchdogd/Histo/Histo_msgs.c        DÃ©claration des fonctions pour la gestion des message                                  */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                          ven 15 aoÃ» 2003 13:02:48 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -37,7 +37,7 @@
 
 /******************************************************************************************************************************/
 /* Clear_histoDB: Elimination des messages histo au boot systeme                                                              */
-/* Entrée: un log et une database                                                                                             */
+/* EntrÃ©e: un log et une database                                                                                             */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  void Clear_histoDB ( void )
@@ -57,8 +57,8 @@
     Libere_DB_SQL( &db );
   }
 /******************************************************************************************************************************/
-/* Modifier_Ajouter_histo_msgsDB: Ajout ou modifier un enregistrement MSGS de la base de données                              */
-/* Entrée: un flag d'ajout et un enregistrement à modifier                                                                    */
+/* Modifier_Ajouter_histo_msgsDB: Ajout ou modifier un enregistrement MSGS de la base de donnÃ©es                              */
+/* EntrÃ©e: un flag d'ajout et un enregistrement Ã  modifier                                                                    */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  static gboolean Modifier_Ajouter_histo_msgsDB ( gboolean ajout, struct CMD_TYPE_HISTO *histo )
@@ -116,22 +116,22 @@
     return(retour);
   }
 /******************************************************************************************************************************/
-/* Ajouter_histo_msgsDB: Ajoute un enregistrement dans la base de données                                                     */
-/* Entrée: L'enregistrement à modifier, en tant que structure complete                                                        */
+/* Ajouter_histo_msgsDB: Ajoute un enregistrement dans la base de donnÃ©es                                                     */
+/* EntrÃ©e: L'enregistrement Ã  modifier, en tant que structure complete                                                        */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Ajouter_histo_msgsDB ( struct CMD_TYPE_HISTO *histo )
   { return ( Modifier_Ajouter_histo_msgsDB ( TRUE, histo ) ); }
 /******************************************************************************************************************************/
 /* Modifier_histo_msgsDB: Modifie l'enregistrement MSGS en parametre                                                          */
-/* Entrée: L'enregistrement à modifier, en tant que structure complete                                                        */
+/* EntrÃ©e: L'enregistrement Ã  modifier, en tant que structure complete                                                        */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Modifier_histo_msgsDB ( struct CMD_TYPE_HISTO *histo )
   { return ( Modifier_Ajouter_histo_msgsDB ( FALSE, histo ) ); }
 /******************************************************************************************************************************/
-/* Recuperer_histo_msgsDB: Recupération de l'historique MSGS du système, via requete                                          */
-/* Entrée: un log et une database, et des champs de requete                                                                   */
+/* Recuperer_histo_msgsDB: RecupÃ©ration de l'historique MSGS du systÃ¨me, via requete                                          */
+/* EntrÃ©e: un log et une database, et des champs de requete                                                                   */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
  gboolean Recuperer_histo_msgsDB ( struct DB **db_retour, struct CMD_CRITERE_HISTO_MSGS *critere )
@@ -214,8 +214,8 @@
     return ( retour );
   }
 /******************************************************************************************************************************/
-/* Recuperer_histo_msgsDB_alive: Recupération de l'ensemble des messages encore Alive dans le BDD                             */
-/* Entrée: La base de données de travail                                                                                      */
+/* Recuperer_histo_msgsDB_alive: RecupÃ©ration de l'ensemble des messages encore Alive dans le BDD                             */
+/* EntrÃ©e: La base de donnÃ©es de travail                                                                                      */
 /* Sortie: False si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Recuperer_histo_msgsDB_alive ( struct DB **db_retour )
@@ -248,8 +248,8 @@
     return ( retour );
   }
 /******************************************************************************************************************************/
-/* Rechercher_histo_msgsDB_by_id: Recupération du l'histo by id dans la BDD                                                   */
-/* Entrée: La base de données de travail                                                                                      */
+/* Rechercher_histo_msgsDB_by_id: RecupÃ©ration du l'histo by id dans la BDD                                                   */
+/* EntrÃ©e: La base de donnÃ©es de travail                                                                                      */
 /* Sortie: False si probleme                                                                                                  */
 /******************************************************************************************************************************/
  struct CMD_TYPE_HISTO *Rechercher_histo_msgsDB_by_id ( guint id )
@@ -286,15 +286,15 @@
     return(histo);
   }
 /******************************************************************************************************************************/
-/* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                                    */
-/* Entrée: un log et une database                                                                                             */
+/* Recuperer_liste_id_msgDB: RecupÃ©ration de la liste des ids des messages                                                    */
+/* EntrÃ©e: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
 /******************************************************************************************************************************/
  struct CMD_TYPE_HISTO *Recuperer_histo_msgsDB_suite( struct DB **db_orig )
   { struct CMD_TYPE_HISTO *histo_msgs;
     struct DB *db;
 
-    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
+    db = *db_orig;                                          /* RÃ©cupÃ©ration du pointeur initialisÃ© par la fonction prÃ©cÃ©dente */
     Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
@@ -304,7 +304,7 @@
 
     histo_msgs = (struct CMD_TYPE_HISTO *)g_try_malloc0( sizeof(struct CMD_TYPE_HISTO) );
     if (!histo_msgs) Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                              "Recuperer_histo_msgsDB_suite: Erreur allocation mémoire" );
+                              "Recuperer_histo_msgsDB_suite: Erreur allocation mÃ©moire" );
     else                                                                                         /* Recopie dans la structure */
      { g_snprintf( histo_msgs->msg.libelle,         sizeof(histo_msgs->msg.libelle),         "%s", db->row[3]  );
        g_snprintf( histo_msgs->msg.syn_parent_page, sizeof(histo_msgs->msg.syn_parent_page), "%s", db->row[6]  );
