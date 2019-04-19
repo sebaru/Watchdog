@@ -132,6 +132,8 @@
     else
     if ( ! strcasecmp ( thread, "dls"  ) ) { Partage->com_dls.Thread_debug = status; }
     else
+    if ( ! strcasecmp ( thread, "db" ) )   { Config.log_db = status; }
+    else
     if ( ! strcasecmp ( thread, "msrv" ) ) { Config.log_msrv = status; }
     else
      { GSList *liste;

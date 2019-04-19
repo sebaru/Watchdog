@@ -139,7 +139,10 @@
     while(liste)                                                                            /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)liste->data;
        if ( plugin->plugindb.id == dls_id )
-        { if (plugin->handle) { dlclose( plugin->handle ); }    /* Peut etre à 0 si changement de librairie et erreur de link */
+        { if (plugin->handle)                                   /* Peut etre à 0 si changement de librairie et erreur de link */
+           { dlclose( plugin->handle );
+             plugin->handle = NULL;
+           }
           plugin->plugindb.on = TRUE;                                                              /* On tente de l'allumer ! */
           Reseter_all_bit_interne ( plugin );
           Charger_un_plugin ( plugin );
