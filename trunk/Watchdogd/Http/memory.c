@@ -32,11 +32,11 @@
  #include "Http.h"
 
 /******************************************************************************************************************************/
-/* Http_Traiter_request_getstatus: Traite une requete sur l'URI status                                                        */
+/* Http_Memory_get : Renvoi, au format json, la valeur d'un bit interne                                                       */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static gint Http_Memory_send_json ( struct lws *wsi, gchar *type, gchar *tech_id, gchar *acronyme )
+ static gint Http_Memory_get ( struct lws *wsi, gchar *type, gchar *tech_id, gchar *acronyme )
   { JsonBuilder *builder;
     JsonGenerator *gen;
     gsize taille_buf;
@@ -77,6 +77,32 @@
 
 /*************************************************** Envoi au client **********************************************************/
     return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf ));
+  }
+/******************************************************************************************************************************/
+/* Http_Memory_set: Positionne le bit interne en parametre                                                                    */
+/* Entrées: la connexion Websocket                                                                                            */
+/* Sortie : FALSE si pb                                                                                                       */
+/******************************************************************************************************************************/
+ static gint Http_Memory_set ( struct lws *wsi, JsonObject *object, gchar *type, gchar *tech_id, gchar *acronyme )
+  {
+
+/************************************************ Préparation du buffer JSON **************************************************/
+    if (!strcasecmp(type,"CI"))
+     { struct DLS_CPT_IMP *cpt_imp=NULL;
+       gchar *valeur = json_object_get_string_member ( object, "valeur" );
+       if (!valeur)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: valeur non trouvée", __func__ );
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+        }
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                 "%s: HTTP/ request for SET CI %s:%s = %s", __func__, tech_id, acronyme, valeur );
+       Dls_data_get_CPT_IMP ( tech_id, acronyme, (gpointer *)&cpt_imp );
+       if (cpt_imp)
+        { cpt_imp->valeur = atoi(valeur); }
+       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+     }
+/*************************************************** Envoi au client **********************************************************/
+    return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));
   }
 /******************************************************************************************************************************/
 /* Http_Traiter_request_body_completion_memory: le payload est arrivé, il faut traiter le json                                */
@@ -131,10 +157,9 @@
      }
 
     if (!strcasecmp(mode, "get"))
-     { return(Http_Memory_send_json ( wsi, type, tech_id, acronyme )); }
+     { return(Http_Memory_get ( wsi, type, tech_id, acronyme )); }
     else if (!strcasecmp(mode, "set"))
-     { return(Http_Send_response_code ( wsi, HTTP_200_OK ));
-     }
+     { return(Http_Memory_set ( wsi, object, type, tech_id, acronyme )); }
     return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                                 /* Bad Request */
 
   }
