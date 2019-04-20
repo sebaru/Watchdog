@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #ifndef _MODULE_DLS_H_
  #define _MODULE_DLS_H_
  #include <glib.h>
@@ -63,6 +63,8 @@
  extern void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p, gboolean etat,
                                 gchar *host, gchar *thread, gchar *tag, gchar *param1);
  extern gfloat   Dls_data_get_AI        ( gchar *tech_id, gchar *acronyme, gpointer *ai_p );
+ extern void Dls_data_set_CPT_IMP ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p, gboolean etat, gint reset, gint ratio );
+ extern gint Dls_data_get_CPT_IMP ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p );
  extern int E( int num );
  extern int B( int num );
  extern int M( int num );
@@ -84,10 +86,10 @@
  extern void SM( int num, int etat );
  extern void SA( int num, int etat );
  extern void MSG( int num, int etat );
-                           
+
  extern int Heure( int heure, int minute );                                                        /* Tester l'heure actuelle */
  extern int Heure_avant( int heure, int minute );
  extern int Heure_apres( int heure, int minute );
  extern int Jour_semaine( int jour );                                     /* Sommes nous le jour de la semaine en parametre ? */
- #endif 
+ #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

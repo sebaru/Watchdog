@@ -267,6 +267,26 @@ CREATE TABLE IF NOT EXISTS `mnemos_DO` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `dls_cpt_imp`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_CPT_IMP` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `dls_id` INT(11) NOT NULL DEFAULT '0',
+  `etat` BOOLEAN NOT NULL DEFAULT '0',
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `valeur` INT(11) NOT NULL DEFAULT '0',
+  `multi` float NOT NULL DEFAULT '1',
+  `unite` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'fois',
+  PRIMARY KEY (`id`),
+  UNIQUE (`dls_id`,`acronyme`),
+  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `mnemos_CptHoraire`
 --
 

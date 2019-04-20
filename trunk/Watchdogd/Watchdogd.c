@@ -126,11 +126,9 @@
      }
 
     if ( strncmp (Partage->version, VERSION, sizeof(Partage->version)) )
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                "Importer : Wrong version number on %s (Import Version %s but Watchdog v%s)",
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "Importer : version number mismatch on %s (Import Version %s but Watchdog v%s)",
                  FICHIER_EXPORT, Partage->version, VERSION );
-       close(fd);
-       return(FALSE);
      }
 
     if ( read (fd, &Partage->top, sizeof(Partage->top)) != sizeof(Partage->top) )

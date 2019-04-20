@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -49,7 +49,7 @@
      }
     source = pre_comment;
     cible  = comment;
-    
+
     while( (car = g_utf8_get_char( source )) )
      { if ( car == '\'' )                                                                     /* Dédoublage de la simple cote */
         { g_utf8_strncpy( cible, "\'", 1 ); cible = g_utf8_next_char( cible );
@@ -206,7 +206,7 @@
                     db->id, (char *) mysql_error(db->mysql) );
           db->nbr_result = 0;
         }
-       else 
+       else
         { /*Info( Config.log, DEBUG_DB, "Lancer_requete_SQL: store_result OK" );*/
           db->nbr_result = mysql_num_rows ( db->result );
         }
@@ -307,12 +307,12 @@
 
     if (database_version==0) goto fin;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_db, LOG_ERR, "Update_database_schema: DB connexion failed" );
        return;
      }
-    
+
     if (database_version < 2500)
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE users DROP `imsg_bit_presence`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
@@ -334,7 +334,7 @@
     if (database_version < 2532)
      { g_snprintf( requete, sizeof(requete), "RENAME TABLE eana TO mnemos_AnalogInput" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
-       g_snprintf( requete, sizeof(requete), 
+       g_snprintf( requete, sizeof(requete),
                   "CREATE TABLE `mnemos_DigitalInput`"
                   "(`id_mnemo` int(11) NOT NULL, `furtif` int(1) NOT NULL, PRIMARY KEY (`id_mnemo`)"
                   ") ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"
@@ -630,7 +630,7 @@
        g_snprintf( requete, sizeof(requete), "ALTER TABLE msgs ADD `persist` TINYINT(1) NOT NULL DEFAULT '0' AFTER `enable`" );
        Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
      }
-       
+
     if (database_version < 3086)
      { g_snprintf( requete, sizeof(requete),
                   "CREATE TABLE IF NOT EXISTS `mnemos_Registre` ("
@@ -865,7 +865,7 @@
      { g_snprintf( requete, sizeof(requete), "ALTER TABLE `mnemos` DROP `created_by_user`" );
        Lancer_requete_SQL ( db, requete );
      }
-       
+
     if (database_version < 3663)
      { g_snprintf( requete, sizeof(requete), "UPDATE mnemos SET num='-1', nom='ARCH_REQUEST_NUMBER' WHERE id=13" );
        Lancer_requete_SQL ( db, requete );
@@ -979,7 +979,7 @@
                                              " COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT hostname");
        Lancer_requete_SQL ( db, requete );
      }
-  
+
     if (database_version < 3796)
      { g_snprintf( requete, sizeof(requete), "DROP TABLE gids" );
        Lancer_requete_SQL ( db, requete );
@@ -1048,10 +1048,29 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+
+    if (database_version < 4079)
+     { g_snprintf( requete, sizeof(requete),
+                   "CREATE TABLE IF NOT EXISTS `mnemos_CPT_IMP` ("
+                   "`id` INT(11) NOT NULL AUTO_INCREMENT,"
+                   "`dls_id` INT(11) NOT NULL DEFAULT '0',"
+                   "`etat` BOOLEAN NOT NULL DEFAULT '0',"
+                   "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
+                   "`libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
+                   "`valeur` INT(11) NOT NULL DEFAULT '0',"
+                   "`multi` float NOT NULL DEFAULT '1',"
+                   "`unite` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'fois',"
+                   "PRIMARY KEY (`id`),"
+                   "UNIQUE (`dls_id`,`acronyme`),"
+                   "FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE"
+                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 
 fin:
-    database_version=4030;
+    database_version=4079;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }

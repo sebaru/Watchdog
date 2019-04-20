@@ -70,6 +70,8 @@
  extern void Activer_horlogeDB ( void );
 
  extern void Updater_cpt_impDB ( void );                                                              /* Dans Mnemo_CPT_IMP.c */
+ extern void Charger_conf_CPT_IMP ( struct DLS_CPT_IMP *cpt_imp );
+ extern gboolean Mnemo_auto_create_CPT_IMP ( gint dls_id, gchar *acronyme, gchar *libelle_src );
  extern void Charger_cpt_imp ( void );
  extern struct CMD_TYPE_MNEMO_CPT_IMP *Rechercher_mnemo_cptimpDB ( guint id );
  extern gboolean Modifier_mnemo_cptimpDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );

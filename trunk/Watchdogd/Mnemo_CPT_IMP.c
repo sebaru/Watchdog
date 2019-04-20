@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -37,6 +37,88 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                                      */
+/* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
+/* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
+/******************************************************************************************************************************/
+ gboolean Mnemo_auto_create_CPT_IMP ( gint dls_id, gchar *acronyme, gchar *libelle_src )
+  { gchar *acro, *libelle;
+    gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
+
+/******************************************** Préparation de la base du mnemo *************************************************/
+    acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
+    if ( !acro )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation acro impossible. Mnemo NOT added nor modified.", __func__ );
+       return(FALSE);
+     }
+
+    libelle    = Normaliser_chaine ( libelle_src );                                          /* Formatage correct des chaines */
+    if ( !libelle )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation libelle impossible. Mnemo NOT added nor modified.", __func__ );
+       g_free(acro);
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "INSERT INTO mnemos_CPT_IMP SET dls_id='%d',acronyme='%s',libelle='%s' "
+                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
+                dls_id, acro, libelle );
+    g_free(libelle);
+    g_free(acro);
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return (retour);
+  }
+/******************************************************************************************************************************/
+/* Charger_conf_ai: Recupération de la conf de l'entrée analogique en parametre                                               */
+/* Entrée: l'id a récupérer                                                                                                   */
+/* Sortie: une structure hébergeant l'entrée analogique                                                                       */
+/******************************************************************************************************************************/
+ void Charger_conf_CPT_IMP ( struct DLS_CPT_IMP *cpt_imp )
+  { gchar requete[512];
+    struct DB *db;
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return;
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT cpt.valeur, cpt.etat"
+                " FROM mnemos_CPT_IMP as cpt"
+                " INNER JOIN dls as d ON cpt.dls_id = d.id"
+                " WHERE d.tech_id='%s' AND cpt.acronyme='%s' LIMIT 1",
+                NOM_TABLE_MNEMO_AI, cpt_imp->tech_id, cpt_imp->acronyme
+              );
+
+    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
+     { Libere_DB_SQL (&db);
+       return;
+     }
+
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Libere_DB_SQL( &db );
+       return;
+     }
+
+    cpt_imp->valeur = atoi(db->row[0]);
+    cpt_imp->etat   = atoi(db->row[1]);
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CI '%s:%s'=%d (%d) loaded", __func__,
+              cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur, cpt_imp->etat );
+  }
+/******************************************************************************************************************************/
 /* Rechercher_mnemocpt_impDB: Recherche les valeurs en DB du compteurs d'impulsion dont l'id est en parametre                 */
 /* Entrée: un id_mnemo                                                                                                        */
 /* Sortie: les valeurs en base du compteur                                                                                    */
@@ -46,7 +128,7 @@
     gchar requete[200];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_mnemo_cptimpDB: DB connexion failed" );
        return(NULL);
@@ -110,7 +192,7 @@
                 mnemo_full->mnemo_cptimp.multi, unite );
     g_free(unite);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_mnemo_cptimpDB: DB connexion failed" );
        return(FALSE);
@@ -130,7 +212,7 @@
   { gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_cpt_impDB: Connexion DB impossible" );
        return;
@@ -174,11 +256,12 @@
  void Updater_cpt_impDB ( void )
   { struct CMD_TYPE_MNEMO_CPT_IMP *cpt_imp;
     gchar requete[200];
+    GSList *liste;
     struct DB *db;
     gint cpt;
 
     setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
        return;
@@ -192,6 +275,18 @@
                    cpt_imp->valeur, cpt );
        Lancer_requete_SQL ( db, requete );
      }
+
+    liste = Partage->Dls_data_CPT_IMP;
+    while ( liste )
+     { struct DLS_CPT_IMP *cpt_imp = (struct DLS_CPT_IMP *)liste->data;
+       g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
+                   "UPDATE mnemos_CPT_IMP as m INNER JOIN dls ON dls.id = m.dls_id SET valeur='%d', etat='%d' "
+                   "WHERE dls.tech_id='%s' AND m.acronyme='%s';",
+                   cpt_imp->valeur, cpt_imp->etat, cpt_imp->tech_id, cpt_imp->acronyme );
+       Lancer_requete_SQL ( db, requete );
+       liste = g_slist_next(liste);
+     }
+
     Libere_DB_SQL( &db );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CptIMP updated", __func__ );
   }

@@ -52,7 +52,7 @@
  static struct CMD_TYPE_PLUGIN_DLS Dls_plugin;
 
 /******************************************************************************************************************************/
-/* New_chaine: Alloue une certaine quantité de mémoire pour utiliser des chaines de caractères                                */
+/* New_chaine: Alloue une certaine quantité de mémoire pour utiliser des chaines de caractÃ¨res                                */
 /* Entrées: la longueur souhaitée                                                                                             */
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
@@ -64,7 +64,7 @@
   }
 /******************************************************************************************************************************/
 /* Emettre: Met a jour le fichier temporaire en code intermédiaire                                                            */
-/* Entrées: la ligne d'instruction à  mettre                                                                                   */
+/* Entrées: la ligne d'instruction Ã Â  mettre                                                                                   */
 /* Sortie: void                                                                                                               */
 /******************************************************************************************************************************/
  void Emettre( char *chaine )
@@ -98,7 +98,7 @@
   }
 /******************************************************************************************************************************/
 /* Emettre_erreur_new: collecte des erreurs de traduction D.L.S                                                               */
-/* Entrée: le numéro de ligne, le format et les paramètres associés                                                           */
+/* Entrée: le numéro de ligne, le format et les paramÃ¨tres associés                                                           */
 /******************************************************************************************************************************/
  void Emettre_erreur_new( gchar *format, ... )
   { static gchar *too_many="Too many events. Limiting output...\n";
@@ -173,7 +173,7 @@
     return("");
   }
 /******************************************************************************************************************************/
-/* New_condition_bi: Prepare la chaine de caractere associée à  la condition, en respectant les options                        */
+/* New_condition_bi: Prepare la chaine de caractere associée Ã Â  la condition, en respectant les options                        */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
@@ -194,7 +194,7 @@
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_condition_bi: Prepare la chaine de caractere associée à  la condition, en respectant les options                        */
+/* New_condition_bi: Prepare la chaine de caractere associée Ã Â  la condition, en respectant les options                        */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
@@ -205,7 +205,7 @@
      { return(New_condition_bi_old( barre, alias->num, options)); }
     else /* Alias par nom */
      { taille = 100;
-       result = New_chaine( taille ); /* 10 caractères max */
+       result = New_chaine( taille ); /* 10 caractÃ¨res max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
             { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_B_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
@@ -217,11 +217,11 @@
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_condition_bi: Prepare la chaine de caractere associée à  la condition, en respectant les options                        */
+/* New_condition_bi: Prepare la chaine de caractere associée Ã Â  la condition, en respectant les options                        */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
- gchar *New_condition_entree_old( int barre, int num, GList *options )
+ static gchar *New_condition_entree_old( int barre, int num, GList *options )
   { gchar *result;
     gint taille;
     taille = 24;
@@ -238,7 +238,7 @@
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_condition_bi: Prepare la chaine de caractere associée à  la condition, en respectant les options                        */
+/* New_condition_bi: Prepare la chaine de caractere associée Ã Â  la condition, en respectant les options                        */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
@@ -249,7 +249,7 @@
      { return(New_condition_entree_old( barre, alias->num, options)); }
     else /* Alias par nom */
      { taille = 100;
-       result = New_chaine( taille ); /* 10 caractères max */
+       result = New_chaine( taille ); /* 10 caractÃ¨res max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
             { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_E_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
@@ -261,7 +261,7 @@
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_condition_mono: Prepare la chaine de caractere associée à  la condition, en respectant les options                      */
+/* New_condition_mono: Prepare la chaine de caractere associée Ã Â  la condition, en respectant les options                      */
 /* Entrées: l'alias du monostable et sa liste d'options                                                                       */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
@@ -270,14 +270,14 @@
     gint taille;
     if (alias->num != -1) /* Alias par numéro ? */
      { taille = 15;
-       result = New_chaine( taille ); /* 10 caractères max */
+       result = New_chaine( taille ); /* 10 caractÃ¨res max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
             { g_snprintf( result, taille, "M(%d)", alias->num ); }
        else { g_snprintf( result, taille, "!M(%d)", alias->num ); }
      }
     else /* Alias par nom */
      { taille = 100;
-       result = New_chaine( taille ); /* 10 caractères max */
+       result = New_chaine( taille ); /* 10 caractÃ¨res max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
             { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_M_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
@@ -289,7 +289,7 @@
    return(result);
  }
 /******************************************************************************************************************************/
-/* New_condition_tempo: Prepare la chaine de caractere associée à  la condition, en respectant les options                     */
+/* New_condition_tempo: Prepare la chaine de caractere associée Ã Â  la condition, en respectant les options                     */
 /* Entrées: l'alias de la temporisatio et sa liste d'options                                                                  */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
@@ -309,7 +309,7 @@
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_condition_horloge: Prepare la chaine de caractere associée à  la condition, en respectant les options                   */
+/* New_condition_horloge: Prepare la chaine de caractere associée Ã Â  la condition, en respectant les options                   */
 /* Entrées: l'alias de l'horloge et sa liste d'options                                                                        */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
@@ -317,7 +317,7 @@
   { gchar *result;
     gint taille;
     taille = 100;                                                                               /* Alias par nom uniquement ! */
-    result = New_chaine( taille ); /* 10 caractères max */
+    result = New_chaine( taille ); /* 10 caractÃ¨res max */
     if ( !barre )
          { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_HOR_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
@@ -337,7 +337,7 @@
     int taille;
 
     taille = strlen(nom)+5;
-    result = New_chaine( taille ); /* 10 caractères max */
+    result = New_chaine( taille ); /* 10 caractÃ¨res max */
     if (!barre) { g_snprintf( result, taille, "%s", nom ); }
            else { g_snprintf( result, taille, "!%s", nom ); }
     return(result);
@@ -360,7 +360,7 @@
 /* Entrées: numero du message                                                                                                 */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- struct ACTION *New_action_msg( int num )
+ static struct ACTION *New_action_msg_old( int num )
   { struct ACTION *action;
     GSList *liste;
     int taille;
@@ -385,12 +385,12 @@
 /* Entrées: L'alias decouvert                                                                                                 */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- struct ACTION *New_action_msg_by_alias( struct ALIAS *alias )
+ struct ACTION *New_action_msg( struct ALIAS *alias )
   { struct ACTION *action;
     int taille;
 
     if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par numéro ? */
-     { return(New_action_msg ( alias->num )); }
+     { return(New_action_msg_old ( alias->num )); }
 
     taille = 100;
     action = New_action();
@@ -441,7 +441,7 @@
     return(action);
   }
 /******************************************************************************************************************************/
-/* New_action_sortie: Prepare la structure ACTION associée à  l'alias en paremetre                                             */
+/* New_action_sortie: Prepare la structure ACTION associée Ã Â  l'alias en paremetre                                             */
 /* Entrées: l'alias, le complement si besoin, les options                                                                     */
 /* Sortie: la structure ACTION associée                                                                                       */
 /******************************************************************************************************************************/
@@ -484,7 +484,7 @@
 /* Entrées: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- struct ACTION *New_action_mono_by_alias( struct ALIAS *alias )
+ struct ACTION *New_action_mono( struct ALIAS *alias )
   { struct ACTION *action;
     int taille;
 
@@ -532,24 +532,37 @@
     return(action);
   }
 /******************************************************************************************************************************/
-/* New_action_cpt_imp: Prepare une struct action avec une commande SCI                                                        */
-/* Entrées: numero du compteur d'impulsion, sa logique, son reset                                                             */
+/* New_action_mono: Prepare une struct action avec une commande SM                                                            */
+/* Entrées: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- struct ACTION *New_action_cpt_imp( int num, GList *options )
+ struct ACTION *New_action_cpt_imp( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
     int taille, reset, ratio;
+
     reset = Get_option_entier ( options, RESET ); if (reset == -1) reset = 0;
     ratio = Get_option_entier ( options, RATIO ); if (ratio == -1) ratio = 1;
 
-    taille = 20;
-    Add_bit_to_list(MNEMO_CPT_IMP, num);
-    action = New_action();
-    action->alors = New_chaine( taille );
-    action->sinon = New_chaine( taille );
+    if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par numéro ? */
+     { taille = 20;
+       action = New_action();
+       action->alors = New_chaine( taille );
+       action->sinon = New_chaine( taille );
 
-    g_snprintf( action->alors, taille, "SCI(%d,1,%d,%d);", num, reset, ratio );
-    g_snprintf( action->sinon, taille, "SCI(%d,0,%d,%d);", num, reset, ratio );
+       g_snprintf( action->alors, taille, "SCI(%d,1,%d,%d);", alias->num, reset, ratio );
+       g_snprintf( action->sinon, taille, "SCI(%d,0,%d,%d);", alias->num, reset, ratio );
+     }
+    else /* Alias par nom */
+     { taille = 100;
+       action = New_action();
+       action->alors = New_chaine( taille );
+       action->sinon = New_chaine( taille );
+
+       g_snprintf( action->alors, taille, "   Dls_data_set_CPT_IMP ( \"%s\", \"%s\", &_CI_%s_%s, TRUE, %d, %d );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset, ratio );
+       g_snprintf( action->sinon, taille, "   Dls_data_set_CPT_IMP ( \"%s\", \"%s\", &_CI_%s_%s, FALSE, %d, %d );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset, ratio );
+     }
     return(action);
   }
 /******************************************************************************************************************************/
@@ -735,7 +748,7 @@
     return(alias);
   }
 /******************************************************************************************************************************/
-/* Get_alias: Recherche un alias donné en paramètre                                                                           */
+/* Get_alias: Recherche un alias donné en paramÃ¨tre                                                                           */
 /* Entrées: le nom de l'alias                                                                                                 */
 /* Sortie: NULL si probleme                                                                                                   */
 /******************************************************************************************************************************/
@@ -807,7 +820,7 @@
  void Trad_dls_set_debug ( gboolean actif )
   { DlsScanner_debug = actif; }                                                                   /* Debug de la traduction ?? */
 /******************************************************************************************************************************/
-/* Traduire: Traduction du fichier en paramètre du langage DLS vers le langage C                                              */
+/* Traduire: Traduction du fichier en paramÃ¨tre du langage DLS vers le langage C                                              */
 /* Entrée: l'id du modul                                                                                                      */
 /* Sortie: TRAD_DLS_OK, _WARNING ou _ERROR                                                                                    */
 /******************************************************************************************************************************/
@@ -908,6 +921,10 @@
                         break;
                    case MNEMO_BISTABLE:
                         nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _B_%s_%s;\n", alias->tech_id, alias->acronyme );
+                        write (fd, chaine, nb_car);
+                        break;
+                   case MNEMO_CPT_IMP:
+                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _CI_%s_%s;\n", alias->tech_id, alias->acronyme );
                         write (fd, chaine, nb_car);
                         break;
                    case MNEMO_ENTREE:
@@ -1078,6 +1095,10 @@
                  }
                 case MNEMO_ENTREE:
                  { Mnemo_auto_create_DI ( Dls_plugin.id, alias->acronyme, Get_option_chaine( alias->options, T_LIBELLE ) );
+                   break;
+                 }
+                case MNEMO_CPT_IMP:
+                 { Mnemo_auto_create_CPT_IMP ( Dls_plugin.id, alias->acronyme, Get_option_chaine( alias->options, T_LIBELLE ) );
                    break;
                  }
                 case MNEMO_MSG:

@@ -1072,6 +1072,89 @@
      }
   }
 /******************************************************************************************************************************/
+/* Dls_data_set_INT: Positionne un integer dans la mémoire DLS                                                                */
+/* Entrée: le tech_id, l'acronyme, le pointeur d'accélération et la valeur entière                                            */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_CPT_IMP ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p, gboolean etat, gint reset, gint ratio )
+  { struct DLS_CPT_IMP *cpt_imp;
+
+    if (!cpt_imp_p || !*cpt_imp_p)
+     { GSList *liste;
+       if ( !(acronyme && tech_id) ) return;
+       liste = Partage->Dls_data_CPT_IMP;
+       while (liste)
+        { cpt_imp = (struct DLS_CPT_IMP *)liste->data;
+          if ( !strcmp ( cpt_imp->acronyme, acronyme ) && !strcmp( cpt_imp->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+
+       if (!liste)
+        { cpt_imp = g_try_malloc0 ( sizeof(struct DLS_CPT_IMP) );
+          if (!cpt_imp)
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+             return;
+           }
+          g_snprintf( cpt_imp->acronyme, sizeof(cpt_imp->acronyme), "%s", acronyme );
+          g_snprintf( cpt_imp->tech_id,  sizeof(cpt_imp->tech_id),  "%s", tech_id );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_CPT_IMP = g_slist_prepend ( Partage->Dls_data_CPT_IMP, cpt_imp );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding INT '%s:%s'", __func__, tech_id, acronyme );
+          Charger_conf_CPT_IMP ( cpt_imp );                                /* Chargement des valeurs en base pour ce compteur */
+        }
+       if (cpt_imp_p) *cpt_imp_p = (gpointer)cpt_imp;                   /* Sauvegarde pour acceleration si besoin */
+      }
+    else cpt_imp = (struct DLS_CPT_IMP *)*cpt_imp_p;
+
+    gboolean need_arch = FALSE;
+    if (etat)
+     { if (reset)                                                                       /* Le compteur doit-il etre resetté ? */
+        { cpt_imp->val_en_cours1 = 0;                                          /* Valeur transitoire pour gérer les ratio */
+          cpt_imp->valeur = 0;                                                 /* Valeur transitoire pour gérer les ratio */
+          need_arch = TRUE;
+        }
+       else if ( cpt_imp->etat == FALSE )                                                             /* Passage en actif */
+        { cpt_imp->etat = TRUE;
+          cpt_imp->val_en_cours1++;
+          if (cpt_imp->val_en_cours1>=ratio)
+           { cpt_imp->valeur++;
+             cpt_imp->val_en_cours1=0;                                                    /* RAZ de la valeur de calcul 1 */
+             need_arch = TRUE;
+           }
+        }
+     }
+    else
+     { if (reset==0) cpt_imp->etat = FALSE; }
+
+    if (need_arch == TRUE)
+     { Ajouter_arch_by_nom( cpt_imp->acronyme, cpt_imp->tech_id, cpt_imp->valeur*1.0 ); }  /* Archivage si besoin */
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_CPT_IMP : Recupere la valeur de l'EA en parametre                                                             */
+/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ gint Dls_data_get_CPT_IMP ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p )
+  { struct DLS_CPT_IMP *cpt_imp;
+    GSList *liste;
+    if (cpt_imp_p && *cpt_imp_p)                                                     /* Si pointeur d'acceleration disponible */
+     { cpt_imp = (struct DLS_CPT_IMP *)*cpt_imp_p;
+       return( cpt_imp->valeur );
+     }
+    if (!tech_id || !acronyme) return(0.0);
+
+    liste = Partage->Dls_data_CPT_IMP;
+    while (liste)
+     { cpt_imp = (struct DLS_CPT_IMP *)liste->data;
+       if ( !strcmp ( cpt_imp->acronyme, acronyme ) && !strcmp( cpt_imp->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+
+    if (!liste) return(0);
+    if (cpt_imp_p) *cpt_imp_p = (gpointer)cpt_imp;                                  /* Sauvegarde pour acceleration si besoin */
+    return( cpt_imp->valeur );
+  }
+/******************************************************************************************************************************/
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/

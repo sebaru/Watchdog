@@ -21,13 +21,13 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #ifndef _PROTO_TRADDLS_H_
  #define _PROTO_TRADDLS_H_
- 
+
  #include <glib.h>
  #include "Erreur.h"
 
@@ -41,7 +41,7 @@
   { gchar *alors;                                                          /* Chaine pointant sur le nom du tableau (B/M/E..) */
     gchar *sinon;
   };
- 
+
 
  struct OPTION
   { gint type;
@@ -81,7 +81,6 @@
  extern void Emettre_erreur_new( gchar *format, ... );
  extern void Emettre_init_alias( void );
  extern struct COMPARATEUR *New_comparateur( void );
- extern gchar *New_condition_entree_old( int barre, int num, GList *options );
  extern gchar *New_condition_entree( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_bi( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_mono( int barre, struct ALIAS *alias, GList *options );
@@ -89,17 +88,16 @@
  extern gchar *New_condition_horloge( int barre, struct ALIAS *alias, GList *options );
  extern gchar *New_condition_vars( int barre, gchar *nom );
  extern struct ACTION *New_action( void );
- extern struct ACTION *New_action_msg( int num );
- extern struct ACTION *New_action_msg_by_alias( struct ALIAS *alias );
+ extern struct ACTION *New_action_msg( struct ALIAS *alias );
  extern struct ACTION *New_action_sortie( struct ALIAS *alias, int barre, GList *options );
  extern struct ACTION *New_action_vars_mono( gchar *nom );
  extern struct ACTION *New_action_bus( struct ALIAS *alias, GList *options );
- extern struct ACTION *New_action_mono_by_alias( struct ALIAS *alias );
+ extern struct ACTION *New_action_mono( struct ALIAS *alias );
  extern struct ACTION *New_action_icone( int num, GList *options );
  extern struct ACTION *New_action_tempo( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_bi_by_alias( struct ALIAS *alias, gint barre );
  extern struct ACTION *New_action_cpt_h( int num, GList *options );
- extern struct ACTION *New_action_cpt_imp( int num, GList *options );
+ extern struct ACTION *New_action_cpt_imp( struct ALIAS *alias, GList *options );
  extern gboolean New_alias( gint type, gchar *tech_id, gchar *acronyme, gint bit, gint num, gint barre, GList *options );
  extern struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme );
  extern struct ALIAS *Get_alias_par_acronyme( gchar *tech_id, gchar *acronyme );
@@ -112,5 +110,5 @@
  extern void DlsScanner_restart (FILE * input_file);
  extern int  DlsScanner_get_lineno (void );
  extern void DlsScanner_set_lineno (int _line_number);
- #endif 
+ #endif
 /*----------------------------------------------------------------------------------------------------------------------------*/

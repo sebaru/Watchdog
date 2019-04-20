@@ -139,6 +139,7 @@
     GSList *Dls_data_BOOL;                                                              /* Liste des bistables et monostables */
     GSList *Dls_data_AI;                                                                   /* Liste des entrees dynamique ANA */
     GSList *Dls_data_MSG;                                                                  /* Liste des entrees dynamique TOR */
+    GSList *Dls_data_CPT_IMP;                                                             /* Liste des compteurs d'impulsions */
   };
 
 /************************************************ Définitions des prototypes **************************************************/
