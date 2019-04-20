@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -42,7 +42,7 @@
  void Gerer_protocole_dls ( struct CONNEXION *connexion )
   { static GList *Arrivee_dls = NULL;
     static GList *Arrivee_syn     = NULL;
-               
+
     switch ( Reseau_ss_tag ( connexion ) )
      { case SSTAG_SERVEUR_CREATE_PAGE_DLS_OK:
              { if (!Tester_page_notebook(TYPE_PAGE_PLUGIN_DLS)) { Creer_page_plugin_dls(); }
@@ -102,9 +102,9 @@
                Set_progress_plus(1);
 
                dls = (struct CMD_TYPE_PLUGIN_DLS *)g_try_malloc0( sizeof( struct CMD_TYPE_PLUGIN_DLS ) );
-               if (!dls) return; 
+               if (!dls) return;
                memcpy( dls, connexion->donnees, sizeof(struct CMD_TYPE_PLUGIN_DLS ) );
-               printf("One plugin receive %s %d\n", dls->nom, dls->compil_date );
+               printf("One plugin receive %s %s\n", dls->nom, dls->compil_date );
                Arrivee_dls = g_list_append( Arrivee_dls, dls );
              }
             break;
@@ -120,7 +120,7 @@
              { struct CMD_TYPE_SYNOPTIQUE *syn;
                Set_progress_plus(1);
                syn = (struct CMD_TYPE_SYNOPTIQUE *)g_try_malloc0( sizeof( struct CMD_TYPE_SYNOPTIQUE ) );
-               if (!syn) return; 
+               if (!syn) return;
 printf("recu un syn\n");
                memcpy( syn, connexion->donnees, sizeof(struct CMD_TYPE_SYNOPTIQUE ) );
                Arrivee_syn = g_list_append( Arrivee_syn, syn );

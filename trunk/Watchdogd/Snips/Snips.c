@@ -46,7 +46,7 @@
 
     Cfg_snips.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
     Cfg_snips.enable            = FALSE;
-    g_snprintf( Cfg_snips.snips_host, sizeof(Cfg_snips.snips_host), "localhost", valeur );
+    g_snprintf( Cfg_snips.snips_host, sizeof(Cfg_snips.snips_host), "localhost" );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_WARNING,

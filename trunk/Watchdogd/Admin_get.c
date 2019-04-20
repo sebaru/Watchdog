@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <unistd.h>                                                                                      /* Pour gethostname */
  #include "watchdogd.h"
@@ -129,8 +129,7 @@
        response = Admin_write ( response, chaine );
      } else
     if ( ! strcmp ( commande, "new_msg" ) )
-     { int num;
-       gchar tech_id[80], acronyme[80];
+     { gchar tech_id[80], acronyme[80];
        if (sscanf ( ligne, "%s %s %s", commande, tech_id, acronyme ) == 3)               /* Découpage de la ligne de commande */
         { struct DLS_MESSAGES *msg = NULL;
           Dls_data_get_MSG ( tech_id, acronyme, (gpointer)&msg );
@@ -164,9 +163,9 @@
         { g_snprintf( chaine, sizeof(chaine),
                       " | - EA%03d = %8.2f %s, val_avant_ech=%8.2f, inrange=%d, type=%d, last_arch=%d (%ds ago), min=%8.2f, max=%8.2f",
                       num, EA_ech(num), Partage->ea[num].confDB.unite, Partage->ea[num].val_avant_ech, EA_inrange(num),
-                      Partage->ea[num].confDB.type, Partage->ea[num].last_arch, 
+                      Partage->ea[num].confDB.type, Partage->ea[num].last_arch,
                       (Partage->top - Partage->ea[num].last_arch)/10,
-                      Partage->ea[num].confDB.min, Partage->ea[num].confDB.max 
+                      Partage->ea[num].confDB.min, Partage->ea[num].confDB.max
                     );
         } else
         { g_snprintf( chaine, sizeof(chaine), " | - EA -> num '%d' out of range (max=%d)", num, NBR_ENTRE_ANA ); }
@@ -211,7 +210,7 @@
                          "                  type=%d, last_arch=%d (%ds ago), min=%8.2f, max=%8.2f",
                          ai->tech_id, ai->acronyme, ai->val_ech, ai->confDB.unite, ai->val_avant_ech, ai->inrange,
                          ai->confDB.type, ai->last_arch, (Partage->top - ai->last_arch)/10,
-                         ai->confDB.min, ai->confDB.max 
+                         ai->confDB.min, ai->confDB.max
                        );
              response = Admin_write ( response, chaine );
            }

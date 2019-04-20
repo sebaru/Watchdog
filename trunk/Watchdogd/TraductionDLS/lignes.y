@@ -548,11 +548,11 @@ unite:          modulateur ENTIER HEURE ENTIER
                             taille = 40;
                             $$ = New_chaine( taille );
                             switch( $5->type )
-                             { case INF        : g_snprintf( $$, taille, "R(%d)<%f", $3, $5 ); break;
-                               case SUP        : g_snprintf( $$, taille, "R(%d)>%f", $3, $5 ); break;
-                               case INF_OU_EGAL: g_snprintf( $$, taille, "R(%d)<=%f", $3, $5 ); break;
-                               case SUP_OU_EGAL: g_snprintf( $$, taille, "R(%d)>=%f", $3, $5 ); break;
-                               case T_EGAL     : g_snprintf( $$, taille, "R(%d)==%f", $3, $5 ); break;
+                             { case INF        : g_snprintf( $$, taille, "R(%d)<%f", alias->num, $5->valf ); break;
+                               case SUP        : g_snprintf( $$, taille, "R(%d)>%f", alias->num, $5->valf ); break;
+                               case INF_OU_EGAL: g_snprintf( $$, taille, "R(%d)<=%f", alias->num, $5->valf ); break;
+                               case SUP_OU_EGAL: g_snprintf( $$, taille, "R(%d)>=%f", alias->num, $5->valf ); break;
+                               case T_EGAL     : g_snprintf( $$, taille, "R(%d)==%f", alias->num, $5->valf ); break;
                              }
                             break;
                            }

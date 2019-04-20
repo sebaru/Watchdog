@@ -1,6 +1,6 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Mnemo_CPT_IMP.c      Déclaration des fonctions pour la gestion des compteurs d'impulsions                        */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                         mar. 07 déc. 2010 17:26:52 CET */
+/* Watchdogd/Mnemo_CPT_IMP.c      DÃ©claration des fonctions pour la gestion des compteurs d'impulsions                        */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                         mar. 07 dÃ©c. 2010 17:26:52 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
@@ -38,7 +38,7 @@
 
 /******************************************************************************************************************************/
 /* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                                      */
-/* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
+/* EntrÃ©e: un mnemo, et un flag d'edition ou d'ajout                                                                          */
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
  gboolean Mnemo_auto_create_CPT_IMP ( gint dls_id, gchar *acronyme, gchar *libelle_src )
@@ -47,7 +47,7 @@
     gboolean retour;
     struct DB *db;
 
-/******************************************** Préparation de la base du mnemo *************************************************/
+/******************************************** PrÃ©paration de la base du mnemo *************************************************/
     acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
     if ( !acro )
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
@@ -80,9 +80,9 @@
     return (retour);
   }
 /******************************************************************************************************************************/
-/* Charger_conf_ai: Recupération de la conf de l'entrée analogique en parametre                                               */
-/* Entrée: l'id a récupérer                                                                                                   */
-/* Sortie: une structure hébergeant l'entrée analogique                                                                       */
+/* Charger_conf_ai: RecupÃ©ration de la conf de l'entrÃ©e analogique en parametre                                               */
+/* EntrÃ©e: l'id a rÃ©cupÃ©rer                                                                                                   */
+/* Sortie: une structure hÃ©bergeant l'entrÃ©e analogique                                                                       */
 /******************************************************************************************************************************/
  void Charger_conf_CPT_IMP ( struct DLS_CPT_IMP *cpt_imp )
   { gchar requete[512];
@@ -99,7 +99,7 @@
                 " FROM mnemos_CPT_IMP as cpt"
                 " INNER JOIN dls as d ON cpt.dls_id = d.id"
                 " WHERE d.tech_id='%s' AND cpt.acronyme='%s' LIMIT 1",
-                NOM_TABLE_MNEMO_AI, cpt_imp->tech_id, cpt_imp->acronyme
+                cpt_imp->tech_id, cpt_imp->acronyme
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
@@ -120,7 +120,7 @@
   }
 /******************************************************************************************************************************/
 /* Rechercher_mnemocpt_impDB: Recherche les valeurs en DB du compteurs d'impulsion dont l'id est en parametre                 */
-/* Entrée: un id_mnemo                                                                                                        */
+/* EntrÃ©e: un id_mnemo                                                                                                        */
 /* Sortie: les valeurs en base du compteur                                                                                    */
 /******************************************************************************************************************************/
  struct CMD_TYPE_MNEMO_CPT_IMP *Rechercher_mnemo_cptimpDB ( guint id )
@@ -156,7 +156,7 @@
      }
 
     cpt_imp = (struct CMD_TYPE_MNEMO_CPT_IMP *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_CPT_IMP) );
-    if (!cpt_imp) Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Recuperer_mnemo_cptimpDB_suite: Erreur allocation mémoire" );
+    if (!cpt_imp) Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Recuperer_mnemo_cptimpDB_suite: Erreur allocation mÃ©moire" );
     else
      { cpt_imp->valeur   = atof(db->row[0]);
        cpt_imp->type     = atoi(db->row[1]);
@@ -167,7 +167,7 @@
   }
 /******************************************************************************************************************************/
 /* Modifier_cpt_impDB: Modification d'un compteur d'impulsion                                                                 */
-/* Entrées: la structure mnemo_full (base+options)                                                                            */
+/* EntrÃ©es: la structure mnemo_full (base+options)                                                                            */
 /* Sortie: FALSE si pb                                                                                                        */
 /******************************************************************************************************************************/
  gboolean Modifier_mnemo_cptimpDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
@@ -205,7 +205,7 @@
   }
 /******************************************************************************************************************************/
 /* Charger_cpt_imp: Chargement des infos sur les compteurs impulsions depuis la DB                                            */
-/* Entrée: rien                                                                                                               */
+/* EntrÃ©e: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Charger_cpt_imp ( void )
@@ -250,8 +250,8 @@
   }
 /******************************************************************************************************************************/
 /* Ajouter_cpt_impDB: Ajout ou edition d'un entreeANA                                                                         */
-/* Entrée: néant                                                                                                              */
-/* Sortie: néant                                                                                                              */
+/* EntrÃ©e: nÃ©ant                                                                                                              */
+/* Sortie: nÃ©ant                                                                                                              */
 /******************************************************************************************************************************/
  void Updater_cpt_impDB ( void )
   { struct CMD_TYPE_MNEMO_CPT_IMP *cpt_imp;

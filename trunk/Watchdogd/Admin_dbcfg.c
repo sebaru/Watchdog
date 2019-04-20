@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
@@ -32,7 +32,7 @@
 /* Entrée: la response et le thread a reloader                                                                                */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- static gchar *Admin_dbcfg_reload ( gchar *thread )
+ static void Admin_dbcfg_reload ( gchar *thread )
   { struct LIBRAIRIE *lib;
     GSList *liste;
     liste = Partage->com_msrv.Librairies;                                                /* Parcours de toutes les librairies */
@@ -68,7 +68,7 @@
         { g_snprintf(chaine, sizeof(chaine), " | - Database connexion failed" );
           response = Admin_write ( response, chaine );
         }
-       else 
+       else
         { g_snprintf(chaine, sizeof(chaine), " | - Instance_id '%s', Thread '%s'", g_get_host_name(), thread );
           response = Admin_write ( response, chaine );
           while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                     /* Récupération d'une config dans la DB */

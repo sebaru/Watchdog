@@ -120,7 +120,7 @@
            }*/
           case MNEMO_CPT_IMP:
            { if (CI(Tableau_num[cpt])!=Tableau_val[cpt])
-              { g_snprintf( chaine, sizeof(chaine), "CI[%04d]=%d, ", Tableau_num[cpt], CI(Tableau_num[cpt]) );
+              { g_snprintf( chaine, sizeof(chaine), "CI[%04d]=%f, ", Tableau_num[cpt], CI(Tableau_num[cpt]) );
                 g_strlcat(result, chaine, sizeof(result));
                 Tableau_val[cpt] = (float)CI(Tableau_num[cpt]);
                 change=TRUE;
@@ -1486,7 +1486,6 @@
 /******************************************************************************************************************************/
  void Run_dls ( void )
   { gint Update_heure=0;
-    GSList *plugins;
 
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );

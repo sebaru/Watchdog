@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <unistd.h>                                                                                      /* Pour gethostname */
  #include "watchdogd.h"
@@ -148,10 +148,9 @@
      } else
     if ( ! strcmp ( commande, "new_m" ) )
      { gchar tech_id[80], acronyme[80];
-       int val;
        if (sscanf ( ligne, "%s %s %s", commande, tech_id, acronyme ) == 3)               /* Découpage de la ligne de commande */
         { Envoyer_commande_dls_data ( tech_id, acronyme );
-          g_snprintf( chaine, sizeof(chaine), " | - %s:%s set to 1", tech_id, acronyme, val );
+          g_snprintf( chaine, sizeof(chaine), " | - %s:%s set to 1", tech_id, acronyme );
         }
        else { g_snprintf( chaine, sizeof(chaine), " | - Wrong number of parameters" ); }
        response = Admin_write ( response, chaine );

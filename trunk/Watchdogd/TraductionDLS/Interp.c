@@ -792,8 +792,7 @@
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  static void Liberer_alias ( struct ALIAS *alias )
-  { GList *liste;
-    Liberer_options(alias->options);
+  { Liberer_options(alias->options);
     g_free(alias->tech_id);
     g_free(alias->acronyme);
     g_free(alias);

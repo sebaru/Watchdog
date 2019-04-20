@@ -88,10 +88,7 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static gboolean Jouer_radio ( gchar *radio )
-  { gint fd_cible, pid;
-
-    Stopper_radio();
-
+  { Stopper_radio();
     Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_NOTICE, "%s: Starting playing radio %s", __func__, radio );
     Cfg_radio.radio_pid = fork();
     if (Cfg_radio.radio_pid<0)
@@ -107,7 +104,7 @@
      }
     else
      { Info_new( Config.log, Cfg_radio.lib->Thread_debug, LOG_DEBUG,
-                "%s: CVLC '%s' is playing pid=%d", __func__, radio, pid );
+                "%s: CVLC '%s' is playing pid=%d", __func__, radio, Cfg_radio.radio_pid );
      }
     Cfg_radio.nbr_diffusion++;
     return(TRUE);

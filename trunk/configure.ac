@@ -59,7 +59,7 @@ then
 fi
 
 dnl parametres par defaut
-CFLAGS="-pipe -g -ggdb -D_GNU_SOURCE"
+CFLAGS="-Wall -Wno-unused-result -Wno-comment -Wno-pointer-sign -Wno-discarded-qualifiers -pipe -g -ggdb -D_GNU_SOURCE"
 
 LIBW_MAJOR_VERSION=5
 LIBW_MINOR_VERSION=0

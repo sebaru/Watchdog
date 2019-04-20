@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/time.h>
  #include <string.h>
@@ -71,7 +71,7 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
     else { result = Rechercher_passerelleDB( id );
-           if (!result) 
+           if (!result)
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
                           "Unable to locate pass %s", rezo_pass->libelle);
@@ -124,12 +124,11 @@
  void Envoyer_passerelle_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin )
   { struct CMD_TYPE_PASSERELLE *pass;
     struct CMD_ENREG nbr;
-    GSList *liste_bit_init = NULL;
     struct DB *db;
 
     if ( ! Recuperer_passerelleDB( &db, client->syn_to_send->id ) )                                   /* Si pas de passerelle */
      { return; }
-     
+
     nbr.num = db->nbr_result;
     if (nbr.num)
      { g_snprintf( nbr.comment, sizeof(nbr.comment), "Loading %d gateways", nbr.num );

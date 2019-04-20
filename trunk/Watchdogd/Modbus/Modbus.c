@@ -77,117 +77,6 @@
     return(TRUE);
   }
 /******************************************************************************************************************************/
-/* Retirer_modbusDB: Elimination d'un module modbus                                                                           */
-/* Entrée: un log et une database                                                                                             */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gboolean Retirer_modbusDB ( struct MODBUSDB *modbus )
-  { gchar requete[200];
-    gboolean retour;
-    struct DB *db;
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
-       return(FALSE);
-     }
-
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "DELETE FROM %s WHERE id=%d", NOM_TABLE_MODULE_MODBUS, modbus->id );
-
-    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
-    Libere_DB_SQL( &db );
-    Cfg_modbus.lib->Thread_reload = TRUE;                           /* Rechargement des modules MODBUS en mémoire de travail */
-    return(retour);
-  }
-/******************************************************************************************************************************/
-/* Ajouter_modbusDB: Ajout ou edition d'un modbus                                                                             */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure modbus                                            */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- static gint Ajouter_modifier_modbusDB ( struct MODBUSDB *modbus, gboolean ajout )
-  { gchar requete[2048];
-    gchar *description, *hostname, *tech_id;
-    gboolean retour_sql;
-    struct DB *db;
-    gint retour;
-
-    description = Normaliser_chaine ( modbus->description );                                         /* Formatage correct des chaines */
-    if (!description)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: Normalisation description impossible", __func__ );
-       return(-1);
-     }
-
-    tech_id = Normaliser_chaine ( modbus->tech_id );                                         /* Formatage correct des chaines */
-    if (!tech_id)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: Normalisation tech_id impossible", __func__ );
-       g_free(description);
-       return(-1);
-     }
-
-    hostname = Normaliser_chaine ( modbus->hostname );                                                   /* Formatage correct des chaines */
-    if (!hostname)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: Normalisation hostname impossible", __func__ );
-       g_free(tech_id);
-       g_free(description);
-       return(-1);
-     }
-
-    if ( ajout == TRUE )
-     { g_snprintf( requete, sizeof(requete),
-                  "INSERT INTO %s(instance_id,date_create,enable,hostname,tech_id,bit,watchdog,description,"
-                  "map_E,map_EA,map_A,map_AA,max_nbr_E) "
-                  "VALUES ('%s',NOW(),'%d','%s',%d,%d,'%s','%s','%d','%d','%d','%d','%d')",
-                   NOM_TABLE_MODULE_MODBUS, g_get_host_name(), modbus->enable, hostname, tech_id, modbus->bit, modbus->watchdog, description,
-                   modbus->map_E, modbus->map_EA, modbus->map_A, modbus->map_AA, modbus->max_nbr_E
-                 );
-     }
-    else
-     { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                  "UPDATE %s SET "
-                  "enable='%d',hostname='%s',tech_id='%s',bit='%d',watchdog='%d',description='%s',"
-                  "map_E='%d',map_EA='%d',map_A='%d',map_AA='%d',max_nbr_E='%d'"
-                  " WHERE id=%d",
-                   NOM_TABLE_MODULE_MODBUS,
-                   modbus->enable, hostname, tech_id, modbus->bit, modbus->watchdog, description,
-                   modbus->map_E, modbus->map_EA, modbus->map_A, modbus->map_AA, modbus->max_nbr_E,
-                   modbus->id );
-      }
-    g_free(hostname);
-    g_free(tech_id);
-    g_free(description);
-
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: Database Connection Failed", __func__ );
-       return(-1);
-     }
-
-    retour_sql = Lancer_requete_SQL ( db, requete );                                               /* Lancement de la requete */
-    if ( retour_sql == TRUE )                                                                              /* Si pas d'erreur */
-     { if (ajout==TRUE) retour = Recuperer_last_ID_SQL ( db );                                /* Retourne le nouvel ID modbus */
-       else retour = 0;
-     }
-    else retour = -1;
-    Libere_DB_SQL( &db );
-    Cfg_modbus.lib->Thread_reload = TRUE;                           /* Rechargement des modules MODBUS en mémoire de travail */
-    return ( retour );                                                                /* Pas d'erreur lors de la modification */
-  }
-/******************************************************************************************************************************/
-/* Ajouter_modbusDB: Ajout ou edition d'un modbus                                                                             */
-/* Entrée: un log et une database, un flag d'ajout/edition, et la structure modbus                                            */
-/* Sortie: false si probleme                                                                                                  */
-/******************************************************************************************************************************/
- gint Ajouter_modbusDB ( struct MODBUSDB *modbus )
-  { return ( Ajouter_modifier_modbusDB ( modbus, TRUE ) ); }
-/******************************************************************************************************************************/
-/* Modifier_modbusDB: Modification d'un modbus Watchdog                                                                       */
-/* Entrées: un log, une db et une clef de cryptage, une structure utilisateur.                                                */
-/* Sortie: -1 si pb, id sinon                                                                                                 */
-/******************************************************************************************************************************/
- gint Modifier_modbusDB( struct MODBUSDB *modbus )
-  { return ( Ajouter_modifier_modbusDB ( modbus, FALSE ) ); }
-/******************************************************************************************************************************/
 /* Recuperer_liste_id_modbusDB: Recupération de la liste des ids des modbuss                                                  */
 /* Entrée: un log et une database                                                                                             */
 /* Sortie: une GList                                                                                                          */
@@ -844,8 +733,6 @@
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, critere ); }
     else while ( Recuperer_mnemos_DI_suite( &db ) )
      { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
-       char debut[80];
-       gint num;
        Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
                  src_text, tech_id, acro, libelle );
        Dls_data_set_bool ( tech_id, acro, &module->bit_comm, FALSE );
@@ -1244,10 +1131,7 @@
 /* Main: Fonction principale du MODBUS                                                                                        */
 /******************************************************************************************************************************/
  void Run_thread ( struct LIBRAIRIE *lib )
-  { struct MODULE_MODBUS *module;
-    GSList *liste;
-
-    prctl(PR_SET_NAME, "W-MODBUS", 0, 0, 0 );
+  { prctl(PR_SET_NAME, "W-MODBUS", 0, 0, 0 );
     memset( &Cfg_modbus, 0, sizeof(Cfg_modbus) );                                   /* Mise a zero de la structure de travail */
     Cfg_modbus.lib = lib;                                          /* Sauvegarde de la structure pointant sur cette librairie */
     Cfg_modbus.lib->TID = pthread_self();                                                   /* Sauvegarde du TID pour le pere */
