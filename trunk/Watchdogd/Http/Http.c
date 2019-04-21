@@ -293,10 +293,10 @@
        return(1);
      }
 
-    pss->post_data = g_try_realloc ( pss->post_data, pss->post_data_length + taille );
+    pss->post_data = g_try_realloc ( pss->post_data, pss->post_data_length + taille + 1 );
     memcpy ( pss->post_data + pss->post_data_length, buffer, taille );
     pss->post_data_length += taille;
-
+    pss->post_data[pss->post_data_length] = 0;
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
              "%s:  received %d bytes (total length=%d, max %d)", __func__,
               taille, pss->post_data_length, Cfg_http.max_upload_bytes );
@@ -354,10 +354,7 @@
              }
             break;
        case LWS_CALLBACK_HTTP_BODY_COMPLETION:
-             { /*lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
-                                       (char *)&remote_name, sizeof(remote_name),
-                                       (char *)&remote_ip, sizeof(remote_ip) );*/
-               if ( ! strcasecmp ( pss->url, "/postfile" ) )
+             { if ( ! strcasecmp ( pss->url, "/postfile" ) )
                 { return( Http_Traiter_request_body_completion_postfile ( wsi ) ); }
                else if ( ! strcasecmp ( pss->url, "/bus" ) )
                 { return( Http_Traiter_request_body_completion_bus ( wsi ) ); }
@@ -375,6 +372,8 @@
                                         (char *)&remote_ip, sizeof(remote_ip) );
 
                pss = lws_wsi_user ( wsi );
+               pss->post_data = NULL;
+               pss->post_data_length = 0;
                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: processing request '%s'.", __func__, url );
                if ( ! strcasecmp ( url, "/favicon.ico" ) )
                 { retour = lws_serve_http_file ( wsi, "WEB/favicon.gif", "image/gif", NULL, 0);

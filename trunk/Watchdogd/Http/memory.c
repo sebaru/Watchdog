@@ -36,7 +36,7 @@
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
- static gint Http_Memory_get ( struct lws *wsi, gchar *type, gchar *tech_id, gchar *acronyme )
+ static gint Http_Memory_get ( struct lws *wsi, JsonObject *object, gchar *type, gchar *tech_id, gchar *acronyme )
   { JsonBuilder *builder;
     JsonGenerator *gen;
     gsize taille_buf;
@@ -55,7 +55,7 @@
 
     if (!strcasecmp(type,"CI"))
      { struct DLS_CPT_IMP *cpt_imp=NULL;
-       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                  "%s: HTTP/ request for GET CI %s:%s", __func__, tech_id, acronyme );
        Dls_data_get_CPT_IMP ( tech_id, acronyme, (gpointer *)&cpt_imp );
        if (cpt_imp)
@@ -64,6 +64,27 @@
           json_builder_set_member_name  ( builder, "etat" );
           json_builder_add_boolean_value ( builder, cpt_imp->etat );
         }
+     }
+    else if (!strcasecmp(type,"I"))
+     { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: HTTP/ request for GET I. cheking num", __func__ );
+       gchar *num_s = json_object_get_string_member ( object, "num" );
+       gint num;
+       if (!num_s)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: num non trouvée", __func__ );
+          g_object_unref(builder);
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+        }
+       num = atoi(num_s);
+       json_builder_set_member_name  ( builder, "etat" );
+       json_builder_add_int_value    ( builder, Partage->i[num].etat );
+       json_builder_set_member_name  ( builder, "rouge" );
+       json_builder_add_int_value    ( builder, Partage->i[num].rouge);
+       json_builder_set_member_name  ( builder, "vert" );
+       json_builder_add_int_value    ( builder, Partage->i[num].vert );
+       json_builder_set_member_name  ( builder, "bleu" );
+       json_builder_add_int_value    ( builder, Partage->i[num].bleu );
+       json_builder_set_member_name  ( builder, "cligno" );
+       json_builder_add_int_value    ( builder, Partage->i[num].cligno );
      }
 
     json_builder_end_object (builder);                                                                        /* End Document */
@@ -114,53 +135,73 @@
     struct HTTP_PER_SESSION_DATA *pss;
     JsonObject *object;
     JsonNode *Query;
+    gint retour;
 
     pss = lws_wsi_user ( wsi );
-    pss->post_data [ pss->post_data_length ] = 0;
     Query = json_from_string ( pss->post_data, NULL );
     pss->post_data_length = 0;
-    g_free(pss->post_data);
 
     if (!Query)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: requete non Json", __func__ );
+       g_free(pss->post_data);
        return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
      }
 
     object = json_node_get_object (Query);
     if (!object)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: Object non trouvé", __func__ );
+       json_node_unref (Query);
+       g_free(pss->post_data);
        return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
      }
 
     mode = json_object_get_string_member ( object, "mode" );
     if (!mode)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: mode non trouvé", __func__ );
+       json_node_unref (Query);
+       g_free(pss->post_data);
        return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
      }
 
     type = json_object_get_string_member ( object, "type" );
     if (!type)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: type non trouvé", __func__ );
+       json_node_unref (Query);
+       g_free(pss->post_data);
        return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
      }
 
     tech_id = json_object_get_string_member ( object, "tech_id" );
     if (!tech_id)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: tech_id non trouvé", __func__ );
+       json_node_unref (Query);
+       g_free(pss->post_data);
        return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
      }
 
     acronyme = json_object_get_string_member ( object, "acronyme" );
     if (!acronyme)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: acronyme non trouvé", __func__ );
+       json_node_unref (Query);
+       g_free(pss->post_data);
        return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
      }
 
     if (!strcasecmp(mode, "get"))
-     { return(Http_Memory_get ( wsi, type, tech_id, acronyme )); }
+     { retour = Http_Memory_get ( wsi, object, type, tech_id, acronyme );
+       json_node_unref (Query);
+       g_free(pss->post_data);
+       return(retour);
+     }
     else if (!strcasecmp(mode, "set"))
-     { return(Http_Memory_set ( wsi, object, type, tech_id, acronyme )); }
-    return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                                 /* Bad Request */
+     { retour = Http_Memory_set ( wsi, object, type, tech_id, acronyme );
+       json_node_unref (Query);
+       g_free(pss->post_data);
+       return(retour);
+     }
 
+    json_node_unref (Query);
+    g_free(pss->post_data);
+    return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                                 /* Bad Request */
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
