@@ -104,14 +104,14 @@ un_alias:       T_DEFINE ID EQUIV alias_bit liste_options PVIRGULE
                 {{ int taille;
                    switch($5)
                     { case MNEMO_ENTREE:
-                      case MNEMO_SORTIE:
-                      case MNEMO_BISTABLE:
                                  if ( New_alias(ALIAS_TYPE_STATIC, NULL, $2, $5, $6, $4, NULL) == FALSE )    /* Deja defini ? */
                                   { Emettre_erreur_new( "Ligne %d: '%s' is already defined", DlsScanner_get_lineno(), $2 ); }
                                  break;
                       case MNEMO_TEMPO:
                                  Emettre_erreur_new( "Ligne %d: Use of #static _T is obsolete", DlsScanner_get_lineno() );
                                  break;
+                      case MNEMO_SORTIE:
+                      case MNEMO_BISTABLE:
                       case MNEMO_ENTREE_ANA:
                       case MNEMO_MONOSTABLE  :
                       case MNEMO_CPTH:
