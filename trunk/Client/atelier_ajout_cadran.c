@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -41,6 +41,8 @@
 
  static GtkWidget *F_ajout_cadran = NULL;                                             /* Fenetre graphique de choix de cadran */
  static GtkWidget *Entry_bitctrl;                                                                   /* Libelle proprement dit */
+ static GtkWidget *Entry_tech_id;                                                                   /* Libelle proprement dit */
+ static GtkWidget *Entry_acronyme;                                                                  /* Libelle proprement dit */
  static GtkWidget *Spin_bitctrl;
  static GtkWidget *Combo_type;
 
@@ -86,9 +88,9 @@
     type_char = gtk_combo_box_get_active_text( GTK_COMBO_BOX(Combo_type) );
     mnemo.type = Type_bit_interne_int( type_char );
     g_free(type_char);
-                                
+
     mnemo.num = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_bitctrl) );
-    
+
     Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_TYPE_NUM_MNEMONIQUE_EA,
                    (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
   }
@@ -109,30 +111,38 @@
     infos = (struct TYPE_INFO_ATELIER *)page->infos;                             /* Pointeur sur les infos de la page atelier */
 
     switch(reponse)
-     { case GTK_RESPONSE_OK: if (!trame_cadran)                                                          /* Ajout d'un cadran */
-                              { gchar *type;
-                                add_cadran.position_x = TAILLE_SYNOPTIQUE_X/2;
-                                add_cadran.position_y = TAILLE_SYNOPTIQUE_Y/2;                            
-                                add_cadran.syn_id  = infos->syn.id;
-                                add_cadran.angle   = 0.0;
-                                type = gtk_combo_box_get_active_text( GTK_COMBO_BOX(Combo_type) );
-                                add_cadran.type = Type_bit_interne_int( type );
-                                g_free(type);
-                                add_cadran.bit_controle = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bitctrl) );
+     { case GTK_RESPONSE_OK:
+        { if (!trame_cadran)                                                          /* Ajout d'un cadran */
+           { gchar *type;
+             add_cadran.position_x = TAILLE_SYNOPTIQUE_X/2;
+             add_cadran.position_y = TAILLE_SYNOPTIQUE_Y/2;
+             add_cadran.syn_id  = infos->syn.id;
+             add_cadran.angle   = 0.0;
+             type = gtk_combo_box_get_active_text( GTK_COMBO_BOX(Combo_type) );
+             add_cadran.type = Type_bit_interne_int( type );
+             g_free(type);
+             add_cadran.bit_controle = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bitctrl) );
+             g_snprintf( add_cadran.tech_id, sizeof(add_cadran.tech_id), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_tech_id) ) );
+             g_snprintf( add_cadran.acronyme, sizeof(add_cadran.acronyme), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acronyme) ) );
 
-                                Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CADRAN,
-                                               (gchar *)&add_cadran, sizeof(struct CMD_TYPE_CADRAN) );
-                                printf("Requete d'ajout de cadran envoyée au serveur....\n");
-                                return(TRUE);                                                 /* On laisse la fenetre ouverte */
-                              }
-                             else                                                                              /* Mise a jour */
-                              { type = gtk_combo_box_get_active_text( GTK_COMBO_BOX(Combo_type) );
-                                trame_cadran->cadran->type = Type_bit_interne_int( type );
-                                g_free(type);
-                                trame_cadran->cadran->bit_controle = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bitctrl) );
-                                printf("Maj cadran  type=%d\n", trame_cadran->cadran->type );
-                              }
-                             break;
+             Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_ATELIER_ADD_CADRAN,
+                            (gchar *)&add_cadran, sizeof(struct CMD_TYPE_CADRAN) );
+             printf("Requete d'ajout de cadran envoyée au serveur....\n");
+             return(TRUE);                                                                    /* On laisse la fenetre ouverte */
+           }
+          else                                                                              /* Mise a jour */
+           { type = gtk_combo_box_get_active_text( GTK_COMBO_BOX(Combo_type) );
+             trame_cadran->cadran->type = Type_bit_interne_int( type );
+             g_free(type);
+             trame_cadran->cadran->bit_controle = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_bitctrl) );
+             g_snprintf( trame_cadran->cadran->tech_id, sizeof(trame_cadran->cadran->tech_id),
+                         "%s", gtk_entry_get_text( GTK_ENTRY(Entry_tech_id) ) );
+             g_snprintf( trame_cadran->cadran->acronyme, sizeof(trame_cadran->cadran->acronyme),
+                         "%s", gtk_entry_get_text( GTK_ENTRY(Entry_acronyme) ) );
+             printf("Maj cadran  type=%d\n", trame_cadran->cadran->type );
+           }
+          break;
+        }
        case GTK_RESPONSE_CLOSE: break;
      }
     gtk_widget_destroy( F_ajout_cadran );
@@ -160,15 +170,13 @@
     hboite = gtk_hbox_new( FALSE, 6 );
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
     gtk_box_pack_start( GTK_BOX( GTK_DIALOG(F_ajout_cadran)->vbox ), hboite, TRUE, TRUE, 0 );
-    
-    table = gtk_table_new( 3, 4, TRUE );
+
+    table = gtk_table_new( 4, 2, TRUE );
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(hboite), table, TRUE, TRUE, 0 );
 
 /**************************************************** Entrys de commande ******************************************************/
-    label = gtk_label_new( _("Type Control bit") );
-    gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 2, 0, 1 );
     Combo_type = gtk_combo_box_new_text();
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_type), Type_bit_interne(MNEMO_ENTREE_ANA) );
     gtk_combo_box_append_text( GTK_COMBO_BOX(Combo_type), Type_bit_interne(MNEMO_ENTREE) );
@@ -179,20 +187,27 @@
     gtk_combo_box_set_active( GTK_COMBO_BOX(Combo_type), 0 );
     g_signal_connect( G_OBJECT(Combo_type), "changed",
                       G_CALLBACK(Afficher_mnemo_cadran_ctrl), NULL );
-    gtk_table_attach_defaults( GTK_TABLE(table), Combo_type, 2, 4, 0, 1 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Combo_type, 0, 1, 0, 1 );
 
-    label = gtk_label_new( _("Control bit") );
-    gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 2, 1, 2 );
-
-    adj = gtk_adjustment_new( 0, 0, NBR_BIT_DLS-1, 1, 100, 0 );
+    adj = gtk_adjustment_new( -1, -1, NBR_BIT_DLS-1, 1, 100, 0 );
     Spin_bitctrl = gtk_spin_button_new( (GtkAdjustment *)adj, 0.5, 0.5);
     g_signal_connect( G_OBJECT(Spin_bitctrl), "changed",
                       G_CALLBACK(Afficher_mnemo_cadran_ctrl), NULL );
-    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bitctrl, 2, 4, 1, 2 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Spin_bitctrl, 1, 2, 0, 1 );
+
+    label = gtk_label_new( _("Tech_ID") );
+    gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 1, 1, 2 );
+    Entry_tech_id = gtk_entry_new();
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_tech_id, 1, 2, 1, 2 );
+
+    label = gtk_label_new( _("Acronyme") );
+    gtk_table_attach_defaults( GTK_TABLE(table), label, 0, 1, 2, 3 );
+    Entry_acronyme = gtk_entry_new();
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_acronyme, 1, 2, 2, 3 );
 
     Entry_bitctrl = gtk_entry_new();
     gtk_entry_set_editable( GTK_ENTRY(Entry_bitctrl), FALSE );
-    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bitctrl, 0, 4, 2, 3 );
+    gtk_table_attach_defaults( GTK_TABLE(table), Entry_bitctrl, 0, 2, 3, 4 );
 
     if (trame_cadran)
      { gtk_entry_set_text( GTK_ENTRY(Entry_bitctrl), trame_cadran->cadran->libelle );
@@ -219,7 +234,7 @@
   { struct TRAME_ITEM_CADRAN *trame_cadran;
     struct TYPE_INFO_ATELIER *infos;
     struct CMD_TYPE_CADRAN *cadran;
-        
+
     infos = Rechercher_infos_atelier_par_id_syn ( rezo_cadran->syn_id );
     cadran = (struct CMD_TYPE_CADRAN *)g_try_malloc0( sizeof(struct CMD_TYPE_CADRAN) );
     if (!cadran)
@@ -250,7 +265,7 @@
  void Proto_cacher_un_cadran_atelier( struct CMD_TYPE_CADRAN *cadran )
   { struct TRAME_ITEM_CADRAN *trame_cadran;
     struct TYPE_INFO_ATELIER *infos;
-        
+
     infos = Rechercher_infos_atelier_par_id_syn ( cadran->syn_id );
     trame_cadran = Id_vers_trame_cadran( infos, cadran->id );
     printf("Proto_cacher_un_cadran_atelier debut: ID=%d %p\n", cadran->id, trame_cadran );

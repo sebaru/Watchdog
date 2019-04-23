@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #ifndef _PROTO_SRV_H_
  #define _PROTO_SRV_H_
  #include <openssl/rsa.h>
@@ -46,7 +46,7 @@
   { struct LIBRAIRIE *lib;
     gint Socket_ecoute;                                                          /* Socket de connexion (d'écoute) du serveur */
     SSL_CTX *Ssl_ctx;                                                                  /* Contexte de cryptage des connexions */
-    X509 *ssrv_certif; 
+    X509 *ssrv_certif;
     gint  port;                                                                        /* Port d'ecoute des requetes clientes */
     gint  taille_bloc_reseau;
     gboolean ssl_needed;                                                                     /* Cryptage des transmissions ?? */
@@ -61,8 +61,11 @@
 
  struct CADRAN
   { gint   type;                                                                                   /* type du bit de controle */
-    guint  bit_controle;
+    gint   bit_controle;
     gfloat val_ech;
+    gchar   tech_id[32];                                                                         /* Visuel Acronyme du cadran */
+    gchar   acronyme[64];                                                                        /* Visuel Acronyme du cadran */
+    gpointer dls_data;                                                    /* Pointer de raccourci pour les cadrans dynamiques */
   };
 
 /*---------------------------------------- Déclarations des prototypes de fonctions ------------------------------------------*/
@@ -76,7 +79,7 @@
 
  extern void Ecouter_client ( struct CLIENT *client );                                                    /* Dans protocole.c */
 
- extern void Liberer_SSL ( void );                                                                              /* Dans ssl.c */ 
+ extern void Liberer_SSL ( void );                                                                              /* Dans ssl.c */
 
                                                                                                       /* Dans protocole_***.c */
  extern void Gerer_protocole_atelier( struct CLIENT *client );
@@ -150,7 +153,7 @@
                                                        struct CMD_TYPE_PASSERELLE *rezo_pass );
  extern void Proto_effacer_passerelle_atelier ( struct CLIENT *client,
                                                 struct CMD_TYPE_PASSERELLE *rezo_pass );
-                                                
+
                                                                                           /* Dans envoi_synoptique_comments.c */
  extern void Envoyer_comment_tag ( struct CLIENT *client, gint tag, gint sstag, gint sstag_fin );
  extern void Proto_effacer_comment_atelier ( struct CLIENT *client, struct CMD_TYPE_COMMENT *rezo_comment );
@@ -185,7 +188,7 @@
  extern void Proto_effacer_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_BASE *rezo_mnemo );
  extern void Proto_ajouter_mnemonique ( struct CLIENT *client, struct CMD_TYPE_MNEMO_FULL *rezo_mnemo );
 
- 
+
  extern void *Envoyer_histo_thread ( struct CLIENT *client );                                           /* Dans envoi_histo.c */
  extern void Proto_acquitter_histo ( struct CLIENT *client, struct CMD_TYPE_HISTO *rezo_histo );
 

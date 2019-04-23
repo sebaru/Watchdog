@@ -37,7 +37,7 @@
 
 /******************************************************************************************************************************/
 /* Retirer_cadranDB: Elimination d'un cadran                                                                                  */
-/* Entrée: un cadran                                                                                                          */
+/* EntrÃ©e: un cadran                                                                                                          */
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Retirer_cadranDB ( struct CMD_TYPE_CADRAN *cadran )
@@ -60,26 +60,41 @@
   }
 /******************************************************************************************************************************/
 /* Ajouter_msgDB: Ajout ou edition d'un message                                                                               */
-/* Entrée: un cadran                                                                                                         */
+/* EntrÃ©e: un cadran                                                                                                         */
 /* Sortie: -1 si probleme sinon last_id_sql                                                                                   */
 /******************************************************************************************************************************/
  gint Ajouter_cadranDB ( struct CMD_TYPE_CADRAN *cadran )
-  { gchar requete[512];
+  { gchar requete[512], *tech_id, *acronyme;
     gboolean retour;
     struct DB *db;
     gint id;
 
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Ajouter_cadranDB: DB connexion failed" );
+    tech_id = Normaliser_chaine ( cadran->tech_id );                                         /* Formatage correct des chaines */
+    if (!tech_id)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation tech_id impossible", __func__ );
+       return(-1);
+     }
+    acronyme = Normaliser_chaine ( cadran->acronyme );                                       /* Formatage correct des chaines */
+    if (!acronyme)
+     { g_free(tech_id);
+       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation acronyme impossible", __func__ );
        return(-1);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s(syn_id,type,bitctrl,posx,posy,angle)"
-                " VALUES (%d,%d,%d,%d,%d,'%f')", NOM_TABLE_CADRAN,
+                "INSERT INTO %s(syn_id,type,bitctrl,posx,posy,angle,tech_id,acronyme)"
+                " VALUES (%d,%d,%d,%d,%d,'%f','%s','%s')", NOM_TABLE_CADRAN,
                 cadran->syn_id, cadran->type, cadran->bit_controle,
-                cadran->position_x, cadran->position_y, cadran->angle );
+                cadran->position_x, cadran->position_y, cadran->angle, tech_id, acronyme );
+    g_free(tech_id);
+    g_free(acronyme);
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(-1);
+     }
+
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if ( retour == FALSE )
@@ -91,8 +106,8 @@
     return(id);
   }
 /******************************************************************************************************************************/
-/* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                                    */
-/* Entrée: un id de synoptique et une database                                                                                */
+/* Recuperer_liste_id_msgDB: RecupÃ©ration de la liste des ids des messages                                                    */
+/* EntrÃ©e: un id de synoptique et une database                                                                                */
 /* Sortie: FALSE si pb                                                                                                        */
 /******************************************************************************************************************************/
  gboolean Recuperer_cadranDB ( struct DB **db_retour, gint id_syn )
@@ -107,7 +122,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.libelle,%s.posx,%s.posy,%s.angle,acro_syn"
+                "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.libelle,%s.posx,%s.posy,%s.angle,acro_syn,tech_id,acronyme"
                 " FROM %s,%s WHERE %s.type=%s.type AND %s.bitctrl=%s.num AND syn_id=%d",
                 NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
                 NOM_TABLE_MNEMO, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
@@ -120,15 +135,15 @@
     return ( retour );
   }
 /******************************************************************************************************************************/
-/* Recuperer_liste_id_msgDB: Recupération de la liste des ids des messages                                                    */
-/* Entrée: une database                                                                                                       */
+/* Recuperer_liste_id_msgDB: RecupÃ©ration de la liste des ids des messages                                                    */
+/* EntrÃ©e: une database                                                                                                       */
 /* Sortie: un cadran                                                                                                         */
 /******************************************************************************************************************************/
  struct CMD_TYPE_CADRAN *Recuperer_cadranDB_suite( struct DB **db_orig )
   { struct CMD_TYPE_CADRAN *cadran;
     struct DB *db;
 
-    db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
+    db = *db_orig;                                          /* RÃ©cupÃ©ration du pointeur initialisÃ© par la fonction prÃ©cÃ©dente */
     Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
     if ( ! db->row )
      { Liberer_resultat_SQL (db);
@@ -141,21 +156,23 @@
                            "Recuperer_cadranDB_suite: memory error" );
     else
      { cadran->id           = atoi(db->row[0]);
-       cadran->syn_id       = atoi(db->row[1]);                                       /* Synoptique ou est placée le cadran */
+       cadran->syn_id       = atoi(db->row[1]);                                         /* Synoptique ou est placÃ©e le cadran */
        cadran->type         = atoi(db->row[2]);
-       cadran->bit_controle = atoi(db->row[3]);                                                                /* Ixxx, Cxxx */
-       cadran->position_x   = atoi(db->row[5]);                                                 /* en abscisses et ordonnées */
+       cadran->bit_controle = atoi(db->row[3]);                                                                 /* Ixxx, Cxxx */
+       cadran->position_x   = atoi(db->row[5]);                                                  /* en abscisses et ordonnÃ©es */
        cadran->position_y   = atoi(db->row[6]);
        cadran->angle        = atof(db->row[7]);
-       g_snprintf( cadran->libelle, sizeof(cadran->libelle), "%s" ,db->row[4] );               /* Recopie dans la structure */
-       g_snprintf( cadran->acro_syn, sizeof(cadran->acro_syn), "%s" ,db->row[8] );             /* Recopie dans la structure */
+       g_snprintf( cadran->libelle,  sizeof(cadran->libelle),  "%s" ,db->row[4] );               /* Recopie dans la structure */
+       g_snprintf( cadran->acro_syn, sizeof(cadran->acro_syn), "%s" ,db->row[8] );               /* Recopie dans la structure */
+       g_snprintf( cadran->tech_id,  sizeof(cadran->tech_id),  "%s" ,db->row[9] );               /* Recopie dans la structure */
+       g_snprintf( cadran->acronyme, sizeof(cadran->acronyme), "%s" ,db->row[10] );              /* Recopie dans la structure */
      }
     return(cadran);
   }
 /******************************************************************************************************************************/
-/* Rechercher_cadranDB: Recupération du cadran dont l'id est en parametre                                                   */
-/* Entrée: un id de cadran                                                                                                   */
-/* Sortie: un cadran                                                                                                         */
+/* Rechercher_cadranDB: RecupÃ©ration du cadran dont l'id est en parametre                                                     */
+/* EntrÃ©e: un id de cadran                                                                                                    */
+/* Sortie: un cadran                                                                                                          */
 /******************************************************************************************************************************/
  struct CMD_TYPE_CADRAN *Rechercher_cadranDB ( guint id )
   { struct CMD_TYPE_CADRAN *cadran;
@@ -169,7 +186,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.libelle,%s.posx,%s.posy,%s.angle,acro_syn"
+                "SELECT %s.id,%s.syn_id,%s.type,%s.bitctrl,%s.libelle,%s.posx,%s.posy,%s.angle,acro_syn,tech_id,acronyme"
                 " FROM %s,%s WHERE %s.type=%s.type AND %s.bitctrl=%s.num AND %s.id=%d",
                 NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
                 NOM_TABLE_MNEMO, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN, NOM_TABLE_CADRAN,
@@ -189,27 +206,41 @@
   }
 /******************************************************************************************************************************/
 /* Modifier_cadranDB: Modification d'un cadran Watchdog                                                                     */
-/* Entrées: un cadran                                                                                                        */
+/* EntrÃ©es: un cadran                                                                                                        */
 /* Sortie: FALSE si pb                                                                                                        */
 /******************************************************************************************************************************/
  gboolean Modifier_cadranDB( struct CMD_TYPE_CADRAN *cadran )
-  { gchar requete[1024];
+  { gchar requete[1024], *tech_id, *acronyme;
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_cadranDB: DB connexion failed" );
-       return(FALSE);
+    tech_id = Normaliser_chaine ( cadran->tech_id );                                         /* Formatage correct des chaines */
+    if (!tech_id)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation tech_id impossible", __func__ );
+       return(-1);
+     }
+    acronyme = Normaliser_chaine ( cadran->acronyme );                                       /* Formatage correct des chaines */
+    if (!acronyme)
+     { g_free(tech_id);
+       Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation acronyme impossible", __func__ );
+       return(-1);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "
-                "type=%d,bitctrl=%d,posx=%d,posy=%d,angle='%f'"
+                "type=%d,bitctrl=%d,posx=%d,posy=%d,angle='%f',tech_id='%s',acronyme='%s'"
                 " WHERE id=%d;", NOM_TABLE_CADRAN,
                 cadran->type, cadran->bit_controle,
                 cadran->position_x, cadran->position_y, cadran->angle,
-                cadran->id );
+                tech_id, acronyme, cadran->id );
+    g_free(tech_id);
+    g_free(acronyme);
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);

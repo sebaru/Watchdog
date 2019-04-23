@@ -1067,10 +1067,19 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4084)
+     { g_snprintf( requete, sizeof(requete),
+                   "ALTER TABLE syns_cadrans ADD `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                   "ALTER TABLE syns_cadrans ADD `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
+       Lancer_requete_SQL ( db, requete );
+     }
+
     Libere_DB_SQL(&db);
 
 fin:
-    database_version=4079;
+    database_version=4084;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
