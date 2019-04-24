@@ -35,6 +35,8 @@
  #include <sys/time.h>
  #include <sys/prctl.h>
  #include <semaphore.h>
+ #include <locale.h>
+ #include <math.h>
 
  #include "watchdogd.h"
 
@@ -1349,7 +1351,7 @@
 /* sortie : Une nouvelle chaine de caractere à g_freer                                                                        */
 /******************************************************************************************************************************/
  gchar *Dls_dyn_string ( gchar *format, gint type_bit, gchar *tech_id, gchar *acronyme, gpointer *dlsdata_p )
-  { gchar result[120], *debut, valeur[24];
+  { gchar result[128], *debut, chaine[64];
     struct DB *db;
     debut = g_strrstr ( format, "$1" );                            /* Début pointe sur le $ de "$1" si présent dans la chaine */
     if (!debut) return(g_strdup(format));
@@ -1357,15 +1359,32 @@
     switch (type_bit)
      { case MNEMO_CPT_IMP:
             if ( (db=Rechercher_CPT_IMP ( tech_id, acronyme )) != NULL )
-             { struct DLS_CPT_IMP *cpt = (struct DLS_CPT_IMP *)*dlsdata_p;
-               g_snprintf( valeur, sizeof(valeur), "%d %s", cpt->valeur, db->row[1] ); /* Row1 = unite */
+             { gint valeur = Dls_data_get_CPT_IMP ( tech_id, acronyme, dlsdata_p );
+               g_snprintf( chaine, sizeof(chaine), "%d %s", valeur, db->row[1] ); /* Row1 = unite */
+               Libere_DB_SQL (&db);
+             }
+            break;
+       case MNEMO_ENTREE_ANA:
+            if (!strcmp(tech_id, "SYS") && !strcmp(acronyme, "TIME"))
+             { struct tm tm;
+               time_t temps;
+               time(&temps);
+               localtime_r( &temps, &tm );
+               g_snprintf( chaine, sizeof(chaine), "%d heure et %d minute", tm.tm_hour, tm.tm_min );
+             }
+            else if ( (db=Rechercher_AI ( tech_id, acronyme )) != NULL )
+             { gfloat valeur = Dls_data_get_AI ( tech_id, acronyme, dlsdata_p );
+               if (valeur-roundf(valeur) == 0.0)
+                { g_snprintf( chaine, sizeof(chaine), "%.0f %s", valeur, db->row[0] ); }                     /* Row0 = unite */
+               else
+                { g_snprintf( chaine, sizeof(chaine), "%.2f %s", valeur, db->row[0] ); }                     /* Row0 = unite */
+               Libere_DB_SQL (&db);
              }
             break;
        default: return(NULL);
      }
-    g_strlcat ( result, valeur, sizeof(result) );
+    g_strlcat ( result, chaine, sizeof(result) );
     g_strlcat ( result, debut+2, sizeof(result) );
-    Libere_DB_SQL (&db);
     return(g_strdup(result));
   }
 /******************************************************************************************************************************/
@@ -1513,6 +1532,7 @@
  void Run_dls ( void )
   { gint Update_heure=0;
 
+    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
     Partage->com_dls.Thread_run         = TRUE;                                                         /* Le thread tourne ! */

@@ -142,15 +142,13 @@
      }
 
     Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
-    if ( ! db->row )
-     { Libere_DB_SQL( &db );
-       return;
+    if ( db->row )
+     { cpt_imp->valeur = atoi(db->row[0]);
+       cpt_imp->etat   = atoi(db->row[1]);
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CI '%s:%s'=%d (%d) loaded", __func__,
+                 cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur, cpt_imp->etat );
+       Libere_DB_SQL( &db );
      }
-
-    cpt_imp->valeur = atoi(db->row[0]);
-    cpt_imp->etat   = atoi(db->row[1]);
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CI '%s:%s'=%d (%d) loaded", __func__,
-              cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur, cpt_imp->etat );
   }
 /******************************************************************************************************************************/
 /* Rechercher_mnemocpt_impDB: Recherche les valeurs en DB du compteurs d'impulsion dont l'id est en parametre                 */

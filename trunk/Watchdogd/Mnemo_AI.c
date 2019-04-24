@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -36,6 +36,59 @@
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
+/* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                                      */
+/* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
+/* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
+/******************************************************************************************************************************/
+ gboolean Mnemo_auto_create_AI ( gint dls_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src )
+  { gchar *acro, *libelle, *unite;
+    gchar requete[1024];
+    gboolean retour;
+    struct DB *db;
+
+/******************************************** Préparation de la base du mnemo *************************************************/
+    acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
+    if ( !acro )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation acro impossible. Mnemo NOT added nor modified.", __func__ );
+       return(FALSE);
+     }
+
+    libelle    = Normaliser_chaine ( libelle_src );                                          /* Formatage correct des chaines */
+    if ( !libelle )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation libelle impossible. Mnemo NOT added nor modified.", __func__ );
+       g_free(acro);
+       return(FALSE);
+     }
+
+    unite      = Normaliser_chaine ( unite_src );                                            /* Formatage correct des chaines */
+    if ( !unite )
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
+                "%s: Normalisation unite impossible. Mnemo NOT added nor modified.", __func__ );
+       g_free(acro);
+       g_free(libelle);
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "INSERT INTO mnemos_AI SET dls_id='%d',acronyme='%s',libelle='%s', unite='%s' "
+                " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
+                dls_id, acro, libelle, unite );
+    g_free(unite);
+    g_free(libelle);
+    g_free(acro);
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    Libere_DB_SQL(&db);
+    return (retour);
+  }
+/******************************************************************************************************************************/
 /* Rechercher_mnemo_aiDB: Recupération de la conf de l'entrée analogique en parametre                                         */
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */
@@ -45,12 +98,12 @@
     gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_mnemo_aiDB: DB connexion failed" );
        return(NULL);
      }
- 
+
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT %s.min,%s.max,%s.type,%s.unite"
                 " FROM %s"
@@ -86,6 +139,40 @@
     return(mnemo_ai);
   }
 /******************************************************************************************************************************/
+/* Rechercher_CPT_IMP: Recupération des champs de base de données pour le CI tech_id:acro en parametre                        */
+/* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
+/* Sortie: la struct DB                                                                                                       */
+/******************************************************************************************************************************/
+ struct DB *Rechercher_AI ( gchar *tech_id, gchar *acronyme )
+  { gchar requete[512];
+    struct DB *db;
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(NULL);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT ai.unite"
+                " FROM mnemos_AI as ai"
+                " INNER JOIN dls as d ON ai.dls_id = d.id"
+                " WHERE d.tech_id='%s' AND ai.acronyme='%s' LIMIT 1",
+                tech_id, acronyme
+              );
+
+    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
+     { Libere_DB_SQL (&db);
+       return(NULL);
+     }
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
+    return(db);
+  }
+/******************************************************************************************************************************/
 /* Charger_conf_ai: Recupération de la conf de l'entrée analogique en parametre                                               */
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */
@@ -94,12 +181,12 @@
   { gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return;
      }
- 
+
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT a.min,a.max,a.type,a.unite"
                 " FROM %s as a"
@@ -156,7 +243,7 @@
        return(FALSE);
      }
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_analogInputDB: DB connexion failed" );
        g_free(unite);
@@ -168,7 +255,7 @@
                 "('%d','%f','%f','%s','%d') "
                 "ON DUPLICATE KEY UPDATE "
                 "min=VALUES(min),max=VALUES(max),unite=VALUES(unite),type=VALUES(type)",
-                NOM_TABLE_MNEMO_AI, mnemo_full->mnemo_base.id, 
+                NOM_TABLE_MNEMO_AI, mnemo_full->mnemo_base.id,
                 mnemo_full->mnemo_ai.min, mnemo_full->mnemo_ai.max, unite, mnemo_full->mnemo_ai.type
               );
 
@@ -187,7 +274,7 @@
   { gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_analogInput: Connexion DB impossible" );
        return;

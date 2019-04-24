@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -51,6 +51,7 @@
   { if ( msg && msg->num < NBR_MESSAGE_ECRITS )
      { Partage->g[msg->num].persist = msg->persist;
      }
+    return(TRUE);
   }
 /******************************************************************************************************************************/
 /* Charger_messages: Chargement de la configuration des messages depuis la DB vers la running config                          */
@@ -61,7 +62,7 @@
   { gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
        return;
@@ -107,7 +108,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "DELETE FROM %s WHERE id=%d", NOM_TABLE_MSG, msg->id );
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
@@ -130,7 +131,7 @@
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET is_mp3='%d' WHERE id='%d'", NOM_TABLE_MSG, valeur, id );
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed" );
        return(FALSE);
@@ -183,7 +184,7 @@
     g_free(libelle_audio);
     g_free(libelle_sms);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(-1);
@@ -191,7 +192,7 @@
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if ( retour == FALSE )
-     { Libere_DB_SQL(&db); 
+     { Libere_DB_SQL(&db);
        return(-1);
      }
     id = Recuperer_last_ID_SQL ( db );
@@ -240,7 +241,7 @@
     g_free(libelle_audio);
     g_free(libelle_sms);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(-1);
@@ -248,7 +249,7 @@
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if ( retour == FALSE )
-     { Libere_DB_SQL(&db); 
+     { Libere_DB_SQL(&db);
        return(-1);
      }
     id = Recuperer_last_ID_SQL ( db );
@@ -279,7 +280,7 @@
        g_strlcat( requete, critere, sizeof(requete) );
      }
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
@@ -353,7 +354,7 @@
                 " WHERE num=%d LIMIT 1", num                                                                         /* Where */
               );
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
@@ -378,12 +379,12 @@
     gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
      }
-   
+
     g_snprintf( requete, sizeof(requete), MSGS_SQL_SELECT                                                      /* Requete SQL */
                 " WHERE msg.id=%d LIMIT 1", id                                                                       /* Where */
               );
@@ -406,12 +407,12 @@
     gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
      }
-   
+
     g_snprintf( requete, sizeof(requete), MSGS_SQL_SELECT                                                      /* Requete SQL */
                 " WHERE msg.mnemo_id=%d LIMIT 1", mnemo_id                                                                       /* Where */
               );
@@ -434,12 +435,12 @@
     gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
      }
-   
+
     g_snprintf( requete, sizeof(requete), MSGS_SQL_SELECT                                                      /* Requete SQL */
                 " WHERE dls.tech_id='%s' AND msg.acronyme='%s' LIMIT 1", tech_id, acronyme                           /* Where */
               );
@@ -462,7 +463,7 @@
     gchar requete[2048];
     gboolean retour;
     struct DB *db;
-  
+
     libelle = Normaliser_chaine ( msg->libelle );                   /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation libelle impossible", __func__ );
@@ -483,7 +484,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
-                "UPDATE %s SET "             
+                "UPDATE %s SET "
                 "num=%d,libelle='%s',type=%d,audio=%d,bit_audio=%d,enable=%d,sms=%d,"
                 "libelle_audio='%s',libelle_sms='%s',time_repeat=%d,dls_id=%d,persist=%d "
                 "WHERE id=%d",
@@ -495,7 +496,7 @@
     g_free(libelle_audio);
     g_free(libelle_sms);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);

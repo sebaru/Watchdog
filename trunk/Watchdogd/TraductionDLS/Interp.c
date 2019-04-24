@@ -732,6 +732,12 @@
        alias->type_bit      = MNEMO_CPT_IMP;
        Libere_DB_SQL (&db);
      }
+    else if ( (db=Rechercher_AI ( tech_id, acronyme )) != NULL )
+     { alias->tech_id  = g_strdup(tech_id);
+       alias->acronyme = g_strdup(acronyme);
+       alias->type_bit      = MNEMO_ENTREE_ANA;
+       Libere_DB_SQL (&db);
+     }
     else
      { g_free(alias);
        Emettre_erreur_new( "Bit %s:%s not found", tech_id, acronyme );
@@ -906,7 +912,7 @@
           while(liste)
            { alias = (struct ALIAS *)liste->data;
              if (alias->type == ALIAS_TYPE_DYNAMIC)                      /* alias par nom ? creation du pointeur de raccourci */
-              { nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _%s_%s;\n", alias->tech_id, alias->acronyme );
+              { nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _%s_%s = NULL;\n", alias->tech_id, alias->acronyme );
                 write (fd, chaine, nb_car);
               }
              liste = liste->next;
@@ -1053,6 +1059,12 @@
                  }
                 case MNEMO_ENTREE:
                  { Mnemo_auto_create_DI ( Dls_plugin.id, alias->acronyme, libelle );
+                   break;
+                 }
+                case MNEMO_ENTREE_ANA:
+                 { gchar *unite = Get_option_chaine( alias->options, T_UNITE );
+                   if (!unite) unite="no unit";
+                   Mnemo_auto_create_AI ( Dls_plugin.id, alias->acronyme, libelle, unite );
                    break;
                  }
                 case MNEMO_CPT_IMP:

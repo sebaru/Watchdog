@@ -57,7 +57,9 @@
  extern gboolean Mnemo_auto_create_for_dls ( struct CMD_TYPE_MNEMO_FULL *mnemo );
 
  extern void Charger_analogInput ( void );                                                                 /* Dans Mnemo_AI.c */
+ extern gboolean Mnemo_auto_create_AI ( gint dls_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src );
  extern struct CMD_TYPE_MNEMO_AI *Rechercher_mnemo_aiDB ( guint id );
+ extern struct DB *Rechercher_AI ( gchar *tech_id, gchar *acronyme );
  extern gboolean Modifier_mnemo_aiDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
  extern void Charger_conf_AI ( struct ANALOG_INPUT *ai );
 
