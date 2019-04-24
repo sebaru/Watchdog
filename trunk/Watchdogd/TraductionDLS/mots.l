@@ -144,6 +144,7 @@ newline       [\n\r]+
  /*********************************************** Le reste ************************************************/
 "#define"                  { DlsScanner_lval.val = T_DEFINE;    return T_DEFINE;    }
 "#static"                  { DlsScanner_lval.val = T_STATIC;    return T_STATIC;    }
+"dyn_string"               { DlsScanner_lval.val = T_DYN_STRING;return T_DYN_STRING;}
 "."                        { DlsScanner_lval.val = ET;          return ET;          }
 "+"                        { DlsScanner_lval.val = OU;          return OU;          }
 "/"                        { DlsScanner_lval.val = BARRE;       return BARRE;       }

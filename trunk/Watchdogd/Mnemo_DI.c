@@ -74,14 +74,14 @@
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
      }
-    retour = Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return (retour);
   }
 /******************************************************************************************************************************/
 /* Recuperer_mnemo_baseDB_by_command_text: Recupération de la liste des mnemo par command_text                                */
 /* Entrée: un pointeur vers une nouvelle connexion de base de données, le critere de recherche                                */
-/* Sortie: FALSE si erreur                                                      ********************                          */
+/* Sortie: FALSE si erreur                                                                                                    */
 /******************************************************************************************************************************/
  gboolean Recuperer_mnemos_DI_by_text ( struct DB **db_retour, gchar *thread, gchar *text )
   { gchar requete[1024];
@@ -119,8 +119,7 @@
 /* Sortie: une structure nouvellement allouée                                                                                 */
 /******************************************************************************************************************************/
  gboolean Recuperer_mnemos_DI_suite( struct DB **db_orig )
-  { struct CMD_TYPE_MNEMO_BASE *mnemo;
-    struct DB *db;
+  { struct DB *db;
 
     db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
     Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */

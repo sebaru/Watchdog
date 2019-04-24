@@ -65,6 +65,7 @@
  extern gfloat   Dls_data_get_AI        ( gchar *tech_id, gchar *acronyme, gpointer *ai_p );
  extern void Dls_data_set_CPT_IMP ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p, gboolean etat, gint reset, gint ratio );
  extern gint Dls_data_get_CPT_IMP ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p );
+ extern gchar *Dls_dyn_string ( gchar *format, gint type_bit, gchar *tech_id, gchar *acronyme, gpointer *dlsdata_p );
  extern int E( int num );
  extern int B( int num );
  extern int M( int num );

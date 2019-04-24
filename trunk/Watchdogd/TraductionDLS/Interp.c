@@ -64,7 +64,7 @@
   }
 /******************************************************************************************************************************/
 /* Emettre: Met a jour le fichier temporaire en code intermédiaire                                                            */
-/* Entrées: la ligne d'instruction à  mettre                                                                                   */
+/* Entrées: la ligne d'instruction à mettre                                                                                   */
 /* Sortie: void                                                                                                               */
 /******************************************************************************************************************************/
  void Emettre( char *chaine )
@@ -170,10 +170,10 @@
         { return (option->chaine); }
        liste = liste->next;
      }
-    return("");
+    return(NULL);
   }
 /******************************************************************************************************************************/
-/* New_condition_bi: Prepare la chaine de caractere associée à  la condition, en respectant les options                        */
+/* New_condition_bi: Prepare la chaine de caractere associée à la condition, en respectant les options                        */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
@@ -194,7 +194,7 @@
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_condition_bi: Prepare la chaine de caractere associée à la condition, en respectant les options                        */
+/* New_condition_bi: Prepare la chaine de caractere associée àla condition, en respectant les options                        */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
@@ -207,17 +207,17 @@
      { taille = 100;
        result = New_chaine( taille ); /* 10 caractères max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
-            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_B_%s_%s )",
+            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
             }
-       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_B_%s_%s )",
+       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
             }
      }
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_condition_bi: Prepare la chaine de caractere associée à  la condition, en respectant les options                        */
+/* New_condition_bi: Prepare la chaine de caractere associée à la condition, en respectant les options                        */
 /* Entrées: numero du bit bistable et sa liste d'options                                                                      */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
@@ -243,17 +243,17 @@
      { taille = 100;
        result = New_chaine( taille ); /* 10 caractères max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
-            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_E_%s_%s )",
+            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
             }
-       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_E_%s_%s )",
+       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
             }
      }
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_condition_mono: Prepare la chaine de caractere associée à  la condition, en respectant les options                      */
+/* New_condition_mono: Prepare la chaine de caractere associée à la condition, en respectant les options                      */
 /* Entrées: l'alias du monostable et sa liste d'options                                                                       */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
@@ -271,17 +271,17 @@
      { taille = 100;
        result = New_chaine( taille ); /* 10 caractères max */
        if ( (!barre && !alias->barre) || (barre && alias->barre) )
-            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_M_%s_%s )",
+            { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
             }
-       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_M_%s_%s )",
+       else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
             }
      }
    return(result);
  }
 /******************************************************************************************************************************/
-/* New_condition_tempo: Prepare la chaine de caractere associée à  la condition, en respectant les options                     */
+/* New_condition_tempo: Prepare la chaine de caractere associée à la condition, en respectant les options                     */
 /* Entrées: l'alias de la temporisatio et sa liste d'options                                                                  */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
@@ -291,7 +291,7 @@
     taille = 128;
     result = New_chaine( taille );
     if ( alias->type == ALIAS_TYPE_DYNAMIC)
-     { g_snprintf( result, taille, "%sDls_data_get_tempo ( \"%s\", \"%s\", &_T_%s_%s )",
+     { g_snprintf( result, taille, "%sDls_data_get_tempo ( \"%s\", \"%s\", &_%s_%s )",
                    (barre==1 ? "!" : ""), alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     else
@@ -301,7 +301,7 @@
     return(result);
   }
 /******************************************************************************************************************************/
-/* New_condition_horloge: Prepare la chaine de caractere associée à  la condition, en respectant les options                   */
+/* New_condition_horloge: Prepare la chaine de caractere associée à la condition, en respectant les options                   */
 /* Entrées: l'alias de l'horloge et sa liste d'options                                                                        */
 /* Sortie: la chaine de caractere en C                                                                                        */
 /******************************************************************************************************************************/
@@ -311,10 +311,10 @@
     taille = 100;                                                                               /* Alias par nom uniquement ! */
     result = New_chaine( taille ); /* 10 caractères max */
     if ( !barre )
-         { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_HOR_%s_%s )",
+         { g_snprintf( result, taille, "Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
-    else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_HOR_%s_%s )",
+    else { g_snprintf( result, taille, "!Dls_data_get_bool ( \"%s\", \"%s\", &_%s_%s )",
                           alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
    return(result);
@@ -389,9 +389,9 @@
     action->alors = New_chaine( taille );
     action->sinon = New_chaine( taille );
 
-    g_snprintf( action->alors, taille, "   Dls_data_set_MSG ( \"%s\", \"%s\", &_MSG_%s_%s, TRUE );\n",
+    g_snprintf( action->alors, taille, "   Dls_data_set_MSG ( \"%s\", \"%s\", &_%s_%s, TRUE );\n",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-    g_snprintf( action->sinon, taille, "   Dls_data_set_MSG ( \"%s\", \"%s\", &_MSG_%s_%s, FALSE );\n",
+    g_snprintf( action->sinon, taille, "   Dls_data_set_MSG ( \"%s\", \"%s\", &_%s_%s, FALSE );\n",
                 alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
     return(action);
   }
@@ -433,7 +433,7 @@
     return(action);
   }
 /******************************************************************************************************************************/
-/* New_action_sortie: Prepare la structure ACTION associée à  l'alias en paremetre                                             */
+/* New_action_sortie: Prepare la structure ACTION associée à l'alias en paremetre                                             */
 /* Entrées: l'alias, le complement si besoin, les options                                                                     */
 /* Sortie: la structure ACTION associée                                                                                       */
 /******************************************************************************************************************************/
@@ -445,10 +445,10 @@
     gint taille = 128;
     action->alors = New_chaine( taille );
     if ( (!barre && !alias->barre) || (barre && alias->barre) )
-         { g_snprintf( action->alors, taille, "   Dls_data_set_DO ( \"%s\", \"%s\", &_A_%s_%s, 1 );\n",
+         { g_snprintf( action->alors, taille, "   Dls_data_set_DO ( \"%s\", \"%s\", &_%s_%s, 1 );\n",
                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
-    else { g_snprintf( action->alors, taille, "   Dls_data_set_DO ( \"%s\", \"%s\", &_A_%s_%s, 0 );\n",
+    else { g_snprintf( action->alors, taille, "   Dls_data_set_DO ( \"%s\", \"%s\", &_%s_%s, 0 );\n",
                        alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
          }
     return(action);
@@ -496,9 +496,9 @@
        action->alors = New_chaine( taille );
        action->sinon = New_chaine( taille );
 
-       g_snprintf( action->alors, taille, "   Dls_data_set_bool ( \"%s\", \"%s\", &_M_%s_%s, TRUE );\n",
+       g_snprintf( action->alors, taille, "   Dls_data_set_bool ( \"%s\", \"%s\", &_%s_%s, TRUE );\n",
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
-       g_snprintf( action->sinon, taille, "   Dls_data_set_bool ( \"%s\", \"%s\", &_M_%s_%s, FALSE );\n",
+       g_snprintf( action->sinon, taille, "   Dls_data_set_bool ( \"%s\", \"%s\", &_%s_%s, FALSE );\n",
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme );
      }
     return(action);
@@ -550,9 +550,9 @@
        action->alors = New_chaine( taille );
        action->sinon = New_chaine( taille );
 
-       g_snprintf( action->alors, taille, "   Dls_data_set_CPT_IMP ( \"%s\", \"%s\", &_CI_%s_%s, TRUE, %d, %d );\n",
+       g_snprintf( action->alors, taille, "   Dls_data_set_CPT_IMP ( \"%s\", \"%s\", &_%s_%s, TRUE, %d, %d );\n",
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset, ratio );
-       g_snprintf( action->sinon, taille, "   Dls_data_set_CPT_IMP ( \"%s\", \"%s\", &_CI_%s_%s, FALSE, %d, %d );\n",
+       g_snprintf( action->sinon, taille, "   Dls_data_set_CPT_IMP ( \"%s\", \"%s\", &_%s_%s, FALSE, %d, %d );\n",
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset, ratio );
      }
     return(action);
@@ -599,24 +599,24 @@
     gint taille;
     gchar *host, *thread, *tag, *param1;
 
-    host   = Get_option_chaine ( options, T_HOST   );
-    thread = Get_option_chaine ( options, T_THREAD );
-    tag    = Get_option_chaine ( options, T_TAG    );
-    param1 = Get_option_chaine ( options, T_PARAM1 );
+    host   = Get_option_chaine ( options, T_HOST   ); if(!host) host="*";
+    thread = Get_option_chaine ( options, T_THREAD ); if (!thread) thread="*";
+    tag    = Get_option_chaine ( options, T_TAG    ); if (!tag) tag="no tag";
+    param1 = Get_option_chaine ( options, T_PARAM1 );                            /* Param1 est un appel de fonction ou NULL ! */
 
     result = New_action();
     taille = 256;
     if (alias->type == ALIAS_TYPE_DYNAMIC)
      { result->alors = New_chaine( taille );
        g_snprintf( result->alors, taille,
-                   "   Dls_data_set_bus ( \"%s\", \"%s\", &_BUS_%s_%s, 1, \"%s\", \"%s\", \"%s\", \"%s\" );\n",
+                   "   Dls_data_set_bus ( \"%s\", \"%s\", &_%s_%s, 1, \"%s\", \"%s\", \"%s\", %s );\n",
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
-                   host, thread, tag, param1 );
+                   host, thread, tag, (param1?param1:"NULL") );
        result->sinon = New_chaine( taille );
        g_snprintf( result->sinon, taille,
-                   "   Dls_data_set_bus ( \"%s\", \"%s\", &_BUS_%s_%s, 0, \"%s\", \"%s\", \"%s\", \"%s\" );\n",
+                   "   Dls_data_set_bus ( \"%s\", \"%s\", &_%s_%s, 0, \"%s\", \"%s\", \"%s\", NULL );\n",
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
-                   host, thread, tag, param1 );
+                   host, thread, tag );
      }
     return(result);
   }
@@ -640,12 +640,12 @@
     if (alias->type == ALIAS_TYPE_DYNAMIC)
      { action->alors = New_chaine( taille );
        g_snprintf( action->alors, taille,
-                   "   Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s_%s, 1, %d, %d, %d, %d, %d );\n",
+                   "   Dls_data_set_tempo ( \"%s\", \"%s\", &_%s_%s, 1, %d, %d, %d, %d, %d );\n",
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
                    daa, dma, dMa, dad, random );
        action->sinon = New_chaine( taille );
        g_snprintf( action->sinon, taille,
-                   "   Dls_data_set_tempo ( \"%s\", \"%s\", &_T_%s_%s, 0, %d, %d, %d, %d, %d );\n",
+                   "   Dls_data_set_tempo ( \"%s\", \"%s\", &_%s_%s, 0, %d, %d, %d, %d, %d );\n",
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
                    daa, dma, dMa, dad, random );
      }
@@ -663,7 +663,7 @@
 /* Entrées: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- struct ACTION *New_action_bi_by_alias( struct ALIAS *alias, gint barre )
+ struct ACTION *New_action_bi( struct ALIAS *alias, gint barre )
   { struct ACTION *action;
     int taille;
 
@@ -678,7 +678,7 @@
      { taille = 100;
        action = New_action();
        action->alors = New_chaine( taille );
-       g_snprintf( action->alors, taille, "   Dls_data_set_bool ( \"%s\", \"%s\", &_B_%s_%s, %d );\n",
+       g_snprintf( action->alors, taille, "   Dls_data_set_bool ( \"%s\", \"%s\", &_%s_%s, %d );\n",
                                            alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, !barre );
      }
     return(action);
@@ -699,7 +699,7 @@
     if (!tech_id) alias->tech_id = g_strdup(Dls_plugin.tech_id);
              else alias->tech_id = g_strdup(tech_id);
     alias->acronyme = g_strdup(acronyme);
-    alias->bit      = bit;
+    alias->type_bit      = bit;
     alias->num      = num;
     alias->barre    = barre;
     alias->options  = options;
@@ -713,30 +713,31 @@
 /* Sortie: False si il existe deja, true sinon                                                                                */
 /******************************************************************************************************************************/
  struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme )
-  { struct CMD_TYPE_MNEMO_BASE *mnemo;
-    struct ALIAS *alias;
+  { struct ALIAS *alias;
+    struct DB *db;
 
     alias=(struct ALIAS *)g_try_malloc0( sizeof(struct ALIAS) );
     if (!alias) { return(NULL); }
-
-    if (!strcmp(tech_id,"THIS")) tech_id=Dls_plugin.tech_id;
-
-    mnemo = Rechercher_mnemo_baseDB_by_acronyme ( tech_id, acronyme );
-    if (!mnemo)
-     { g_free(alias);
-       Emettre_erreur_new( "Bit %s:%s not found", tech_id, acronyme );
-       return(NULL);
-     }
     alias->type     = ALIAS_TYPE_DYNAMIC;
-    alias->tech_id  = g_strdup(mnemo->dls_tech_id);
-    alias->acronyme = g_strdup(mnemo->acronyme);
-    alias->bit      = mnemo->type;
     alias->num      = -1;
     alias->barre    = 0;
     alias->options  = NULL;
     alias->used     = 1;
+
+    if (!strcmp(tech_id,"THIS")) tech_id=Dls_plugin.tech_id;
+
+    if ( (db=Rechercher_CPT_IMP ( tech_id, acronyme )) != NULL )
+     { alias->tech_id  = g_strdup(tech_id);
+       alias->acronyme = g_strdup(acronyme);
+       alias->type_bit      = MNEMO_CPT_IMP;
+       Libere_DB_SQL (&db);
+     }
+    else
+     { g_free(alias);
+       Emettre_erreur_new( "Bit %s:%s not found", tech_id, acronyme );
+       return(NULL);
+     }
     Alias = g_slist_prepend( Alias, alias );
-    g_free(mnemo);
     return(alias);
   }
 /******************************************************************************************************************************/
@@ -905,44 +906,8 @@
           while(liste)
            { alias = (struct ALIAS *)liste->data;
              if (alias->type == ALIAS_TYPE_DYNAMIC)                      /* alias par nom ? creation du pointeur de raccourci */
-              { switch (alias->bit)
-                 { case MNEMO_MONOSTABLE:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _M_%s_%s;\n", alias->tech_id, alias->acronyme );
-                        write (fd, chaine, nb_car);
-                        break;
-                   case MNEMO_BISTABLE:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _B_%s_%s;\n", alias->tech_id, alias->acronyme );
-                        write (fd, chaine, nb_car);
-                        break;
-                   case MNEMO_CPT_IMP:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _CI_%s_%s;\n", alias->tech_id, alias->acronyme );
-                        write (fd, chaine, nb_car);
-                        break;
-                   case MNEMO_ENTREE:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _E_%s_%s;\n", alias->tech_id, alias->acronyme );
-                        write (fd, chaine, nb_car);
-                        break;
-                   case MNEMO_SORTIE:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _A_%s_%s;\n", alias->tech_id, alias->acronyme );
-                        write (fd, chaine, nb_car);
-                        break;
-                   case MNEMO_TEMPO:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _T_%s_%s;\n", alias->tech_id, alias->acronyme );
-                        write (fd, chaine, nb_car);
-                        break;
-                   case MNEMO_HORLOGE:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _HOR_%s_%s;\n", alias->tech_id, alias->acronyme );
-                        write (fd, chaine, nb_car);
-                        break;
-                   case MNEMO_MSG:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _MSG_%s_%s;\n", alias->tech_id, alias->acronyme );
-                        write (fd, chaine, nb_car);
-                        break;
-                   case MNEMO_BUS:
-                        nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _BUS_%s_%s;\n", alias->tech_id, alias->acronyme );
-                        write (fd, chaine, nb_car);
-                        break;
-                 }
+              { nb_car = g_snprintf(chaine, sizeof(chaine), " gpointer _%s_%s;\n", alias->tech_id, alias->acronyme );
+                write (fd, chaine, nb_car);
               }
              liste = liste->next;
            }
@@ -1078,24 +1043,26 @@
              retour = TRAD_DLS_WARNING;
            }
           if (alias->type == ALIAS_TYPE_DYNAMIC && !strcmp(alias->tech_id, Dls_plugin.tech_id))/* Alias Dynamiques uniquement */
-           { switch(alias->bit)
+           { gchar *libelle = Get_option_chaine( alias->options, T_LIBELLE );
+             if (!libelle) libelle="no libelle";
+             switch(alias->type_bit)
               { case MNEMO_BUS: break;
                 case MNEMO_SORTIE:
-                 { Mnemo_auto_create_DO ( Dls_plugin.id, alias->acronyme, Get_option_chaine( alias->options, T_LIBELLE ) );
+                 { Mnemo_auto_create_DO ( Dls_plugin.id, alias->acronyme, libelle );
                    break;
                  }
                 case MNEMO_ENTREE:
-                 { Mnemo_auto_create_DI ( Dls_plugin.id, alias->acronyme, Get_option_chaine( alias->options, T_LIBELLE ) );
+                 { Mnemo_auto_create_DI ( Dls_plugin.id, alias->acronyme, libelle );
                    break;
                  }
                 case MNEMO_CPT_IMP:
-                 { Mnemo_auto_create_CPT_IMP ( Dls_plugin.id, alias->acronyme, Get_option_chaine( alias->options, T_LIBELLE ) );
+                 { Mnemo_auto_create_CPT_IMP ( Dls_plugin.id, alias->acronyme, libelle );
                    break;
                  }
                 case MNEMO_MSG:
                  { struct CMD_TYPE_MESSAGE msg;
                    g_snprintf( msg.acronyme, sizeof(msg.acronyme), "%s", alias->acronyme );
-                   g_snprintf( msg.libelle,  sizeof(msg.libelle), "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
+                   g_snprintf( msg.libelle,  sizeof(msg.libelle), "%s", libelle );
                    msg.dls_id = Dls_plugin.id;
                    msg.type = Get_option_entier ( alias->options, T_TYPE );
                    Ajouter_messageDB_for_dls ( &msg );
@@ -1103,11 +1070,11 @@
                  }
                 default: g_snprintf( mnemo.mnemo_base.acronyme, sizeof(mnemo.mnemo_base.acronyme), "%s", alias->acronyme );
                          g_snprintf( mnemo.mnemo_base.libelle,  sizeof(mnemo.mnemo_base.libelle),
-                                     "%s", Get_option_chaine( alias->options, T_LIBELLE ) );
-                         g_snprintf( mnemo.mnemo_base.acro_syn, sizeof(mnemo.mnemo_base.acro_syn),
-                                     "%s", Get_option_chaine( alias->options, T_ETIQUETTE ) );
+                                     "%s", libelle );
+                         /*g_snprintf( mnemo.mnemo_base.acro_syn, sizeof(mnemo.mnemo_base.acro_syn),
+                                     "%s", Get_option_chaine( alias->options, T_ETIQUETTE ) );*/
                          mnemo.mnemo_base.dls_id = Dls_plugin.id;
-                         mnemo.mnemo_base.type = alias->bit;
+                         mnemo.mnemo_base.type = alias->type_bit;
                          Mnemo_auto_create_for_dls ( &mnemo );
                          break;
               }

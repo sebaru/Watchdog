@@ -66,7 +66,7 @@
   { gint type;                                                                                 /* Alias static ou dynamique ? */
     gchar *tech_id;
     gchar *acronyme;
-    gint bit;                                                                                /* Type de tableau (E/A/B/M....) */
+    gint type_bit;                                                                           /* Type de tableau (E/A/B/M....) */
     gint num;                                                                                  /* Numero du bit interne ciblé */
     int barre;                                                                               /* Represente la negation ou pas */
     GList *options;
@@ -95,7 +95,7 @@
  extern struct ACTION *New_action_mono( struct ALIAS *alias );
  extern struct ACTION *New_action_icone( int num, GList *options );
  extern struct ACTION *New_action_tempo( struct ALIAS *alias, GList *options );
- extern struct ACTION *New_action_bi_by_alias( struct ALIAS *alias, gint barre );
+ extern struct ACTION *New_action_bi( struct ALIAS *alias, gint barre );
  extern struct ACTION *New_action_cpt_h( int num, GList *options );
  extern struct ACTION *New_action_cpt_imp( struct ALIAS *alias, GList *options );
  extern gboolean New_alias( gint type, gchar *tech_id, gchar *acronyme, gint bit, gint num, gint barre, GList *options );

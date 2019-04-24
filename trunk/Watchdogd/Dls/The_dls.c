@@ -1253,6 +1253,7 @@
   { Dls_data_set_bool ( tech_id, acronyme, bus_p, etat );                                         /* Utilisation d'un boolean */
     if (Dls_data_get_bool_up (tech_id, acronyme, bus_p))
      { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, param1, strlen(param1)+1 ); }
+    if (param1) g_free(param1);                                       /* Param1 est issu d'un g_strdup ou d'un Dls_dyn_string */
   }
 /******************************************************************************************************************************/
 /* Met à jour le message en parametre                                                                                         */
@@ -1341,6 +1342,31 @@
     if (!liste) return(FALSE);
     if (msg_p) *msg_p = (gpointer)msg;                                              /* Sauvegarde pour acceleration si besoin */
     return( msg->etat );
+  }
+/******************************************************************************************************************************/
+/* Dls_dyn_string: Formate la chaine en parametre avec le bit également en parametre                                          */
+/* Entrée : La chaine source, le type de bit, le tech_id/acronyme, le pointeur de raccourci                                   */
+/* sortie : Une nouvelle chaine de caractere à g_freer                                                                        */
+/******************************************************************************************************************************/
+ gchar *Dls_dyn_string ( gchar *format, gint type_bit, gchar *tech_id, gchar *acronyme, gpointer *dlsdata_p )
+  { gchar result[120], *debut, valeur[24];
+    struct DB *db;
+    debut = g_strrstr ( format, "$1" );                            /* Début pointe sur le $ de "$1" si présent dans la chaine */
+    if (!debut) return(g_strdup(format));
+    g_snprintf( result, debut-format+1, "%s", format );                                                           /* Prologue */
+    switch (type_bit)
+     { case MNEMO_CPT_IMP:
+            if ( (db=Rechercher_CPT_IMP ( tech_id, acronyme )) != NULL )
+             { struct DLS_CPT_IMP *cpt = (struct DLS_CPT_IMP *)*dlsdata_p;
+               g_snprintf( valeur, sizeof(valeur), "%d %s", cpt->valeur, db->row[1] ); /* Row1 = unite */
+             }
+            break;
+       default: return(NULL);
+     }
+    g_strlcat ( result, valeur, sizeof(result) );
+    g_strlcat ( result, debut+2, sizeof(result) );
+    Libere_DB_SQL (&db);
+    return(g_strdup(result));
   }
 /******************************************************************************************************************************/
 /* Dls_foreach_dls_tree: Parcours recursivement l'arbre DLS et execute des commandes en parametres                            */

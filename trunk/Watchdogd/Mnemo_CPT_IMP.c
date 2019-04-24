@@ -80,6 +80,40 @@
     return (retour);
   }
 /******************************************************************************************************************************/
+/* Rechercher_CPT_IMP: Recupération des champs de base de données pour le CI tech_id:acro en parametre                        */
+/* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
+/* Sortie: la struct DB                                                                                                       */
+/******************************************************************************************************************************/
+ struct DB *Rechercher_CPT_IMP ( gchar *tech_id, gchar *acronyme )
+  { gchar requete[512];
+    struct DB *db;
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(NULL);
+     }
+
+    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
+                "SELECT cpt.valeur, cpt.unite"
+                " FROM mnemos_CPT_IMP as cpt"
+                " INNER JOIN dls as d ON cpt.dls_id = d.id"
+                " WHERE d.tech_id='%s' AND cpt.acronyme='%s' LIMIT 1",
+                tech_id, acronyme
+              );
+
+    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
+     { Libere_DB_SQL (&db);
+       return(NULL);
+     }
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Libere_DB_SQL( &db );
+       return(NULL);
+     }
+    return(db);
+  }
+/******************************************************************************************************************************/
 /* Charger_conf_ai: Recupération de la conf de l'entrée analogique en parametre                                               */
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */
