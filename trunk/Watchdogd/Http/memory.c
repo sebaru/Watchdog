@@ -54,7 +54,7 @@
     json_builder_begin_object (builder);                                                                 /* Contenu du Status */
 
     if (!strcasecmp(type,"CI"))
-     { struct DLS_CPT_IMP *cpt_imp=NULL;
+     { struct DLS_CI *cpt_imp=NULL;
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                  "%s: HTTP/ request for GET CI %s:%s", __func__, tech_id, acronyme );
        Dls_data_get_CPT_IMP ( tech_id, acronyme, (gpointer *)&cpt_imp );
@@ -109,7 +109,7 @@
 
 /************************************************ Préparation du buffer JSON **************************************************/
     if (!strcasecmp(type,"CI"))
-     { struct DLS_CPT_IMP *cpt_imp=NULL;
+     { struct DLS_CI *cpt_imp=NULL;
        gchar *valeur = json_object_get_string_member ( object, "valeur" );
        if (!valeur)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: valeur non trouvée", __func__ );

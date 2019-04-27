@@ -1079,20 +1079,20 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_data_set_CPT_IMP ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p, gboolean etat, gint reset, gint ratio )
-  { struct DLS_CPT_IMP *cpt_imp;
+  { struct DLS_CI *cpt_imp;
 
     if (!cpt_imp_p || !*cpt_imp_p)
      { GSList *liste;
        if ( !(acronyme && tech_id) ) return;
        liste = Partage->Dls_data_CPT_IMP;
        while (liste)
-        { cpt_imp = (struct DLS_CPT_IMP *)liste->data;
+        { cpt_imp = (struct DLS_CI *)liste->data;
           if ( !strcmp ( cpt_imp->acronyme, acronyme ) && !strcmp( cpt_imp->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
 
        if (!liste)
-        { cpt_imp = g_try_malloc0 ( sizeof(struct DLS_CPT_IMP) );
+        { cpt_imp = g_try_malloc0 ( sizeof(struct DLS_CI) );
           if (!cpt_imp)
            { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
@@ -1107,7 +1107,7 @@
         }
        if (cpt_imp_p) *cpt_imp_p = (gpointer)cpt_imp;                   /* Sauvegarde pour acceleration si besoin */
       }
-    else cpt_imp = (struct DLS_CPT_IMP *)*cpt_imp_p;
+    else cpt_imp = (struct DLS_CI *)*cpt_imp_p;
 
     gboolean need_arch = FALSE;
     if (etat)
@@ -1137,17 +1137,17 @@
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
  gint Dls_data_get_CPT_IMP ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p )
-  { struct DLS_CPT_IMP *cpt_imp;
+  { struct DLS_CI *cpt_imp;
     GSList *liste;
     if (cpt_imp_p && *cpt_imp_p)                                                     /* Si pointeur d'acceleration disponible */
-     { cpt_imp = (struct DLS_CPT_IMP *)*cpt_imp_p;
+     { cpt_imp = (struct DLS_CI *)*cpt_imp_p;
        return( cpt_imp->valeur );
      }
     if (!tech_id || !acronyme) return(0.0);
 
     liste = Partage->Dls_data_CPT_IMP;
     while (liste)
-     { cpt_imp = (struct DLS_CPT_IMP *)liste->data;
+     { cpt_imp = (struct DLS_CI *)liste->data;
        if ( !strcmp ( cpt_imp->acronyme, acronyme ) && !strcmp( cpt_imp->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }

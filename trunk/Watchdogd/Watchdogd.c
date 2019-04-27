@@ -179,7 +179,7 @@
   }
 /******************************************************************************************************************************/
 /* Traitement_signaux: Gestion des signaux de controle du systeme                                                             */
-/* Entrée: numero du signal Ã  gerer                                                                                           */
+/* Entrée: numero du signal à gerer                                                                                           */
 /******************************************************************************************************************************/
  static void Traitement_signaux( int num )
   { static gpointer dls_wait, dls_tour_per_sec, dls_bit_per_sec;
@@ -248,7 +248,7 @@
      }
   }
 /******************************************************************************************************************************/
-/* Sauver_compteur : Envoie les infos Compteurs Ã  la base de données pour sauvegarde !                                        */
+/* Sauver_compteur : Envoie les infos Compteurs à la base de données pour sauvegarde !                                        */
 /* Entrée : Néant                                                                                                             */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
@@ -597,7 +597,7 @@
         }
      }
 
-    if (chdir(Config.home))                                                             /* Positionnement Ã  la racine du home */
+    if (chdir(Config.home))                                                             /* Positionnement à la racine du home */
      { printf( "Chdir %s failed\n", Config.home ); exit(EXIT_ERREUR); }
     else
      { printf( "Chdir %s successfull. PID=%d\n", Config.home, getpid() ); }

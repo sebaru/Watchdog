@@ -64,7 +64,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_CPT_IMP SET dls_id='%d',acronyme='%s',libelle='%s' "
+                "INSERT INTO mnemos_CI SET dls_id='%d',acronyme='%s',libelle='%s' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
                 dls_id, acro, libelle );
     g_free(libelle);
@@ -96,7 +96,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT cpt.valeur, cpt.unite"
-                " FROM mnemos_CPT_IMP as cpt"
+                " FROM mnemos_CI as cpt"
                 " INNER JOIN dls as d ON cpt.dls_id = d.id"
                 " WHERE d.tech_id='%s' AND cpt.acronyme='%s' LIMIT 1",
                 tech_id, acronyme
@@ -118,7 +118,7 @@
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */
 /******************************************************************************************************************************/
- void Charger_conf_CPT_IMP ( struct DLS_CPT_IMP *cpt_imp )
+ void Charger_conf_CPT_IMP ( struct DLS_CI *cpt_imp )
   { gchar requete[512];
     struct DB *db;
 
@@ -130,7 +130,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT cpt.valeur, cpt.etat"
-                " FROM mnemos_CPT_IMP as cpt"
+                " FROM mnemos_CI as cpt"
                 " INNER JOIN dls as d ON cpt.dls_id = d.id"
                 " WHERE d.tech_id='%s' AND cpt.acronyme='%s' LIMIT 1",
                 cpt_imp->tech_id, cpt_imp->acronyme
@@ -310,9 +310,9 @@
 
     liste = Partage->Dls_data_CPT_IMP;
     while ( liste )
-     { struct DLS_CPT_IMP *cpt_imp = (struct DLS_CPT_IMP *)liste->data;
+     { struct DLS_CI *cpt_imp = (struct DLS_CI *)liste->data;
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE mnemos_CPT_IMP as m INNER JOIN dls ON dls.id = m.dls_id SET valeur='%d', etat='%d' "
+                   "UPDATE mnemos_CI as m INNER JOIN dls ON dls.id = m.dls_id SET valeur='%d', etat='%d' "
                    "WHERE dls.tech_id='%s' AND m.acronyme='%s';",
                    cpt_imp->valeur, cpt_imp->etat, cpt_imp->tech_id, cpt_imp->acronyme );
        Lancer_requete_SQL ( db, requete );

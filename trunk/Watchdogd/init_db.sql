@@ -290,7 +290,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AI` (
 -- Structure de la table `dls_cpt_imp`
 --
 
-CREATE TABLE IF NOT EXISTS `mnemos_CPT_IMP` (
+CREATE TABLE IF NOT EXISTS `mnemos_CI` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `dls_id` INT(11) NOT NULL DEFAULT '0',
   `etat` BOOLEAN NOT NULL DEFAULT '0',

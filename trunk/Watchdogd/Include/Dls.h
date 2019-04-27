@@ -110,7 +110,7 @@
     gboolean edge_down;
   };
 
- struct DLS_CPT_IMP
+ struct DLS_CI
   { gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gint    valeur;
