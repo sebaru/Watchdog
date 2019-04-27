@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Mnemo_CPT_IMP.c      Déclaration des fonctions pour la gestion des compteurs d'impulsions                        */
+/* Watchdogd/Mnemo_CI.c      Déclaration des fonctions pour la gestion des compteurs d'impulsions                        */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                         mar. 07 déc. 2010 17:26:52 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * Mnemo_CPT_IMP.c
+ * Mnemo_CI.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2019 - Sebastien Lefevre
@@ -41,7 +41,7 @@
 /* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_CPT_IMP ( gint dls_id, gchar *acronyme, gchar *libelle_src )
+ gboolean Mnemo_auto_create_CI ( gint dls_id, gchar *acronyme, gchar *libelle_src )
   { gchar *acro, *libelle;
     gchar requete[1024];
     gboolean retour;
@@ -80,7 +80,7 @@
     return (retour);
   }
 /******************************************************************************************************************************/
-/* Rechercher_CPT_IMP: Recupération des champs de base de données pour le CI tech_id:acro en parametre                        */
+/* Rechercher_CI: Recupération des champs de base de données pour le CI tech_id:acro en parametre                        */
 /* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
 /* Sortie: la struct DB                                                                                                       */
 /******************************************************************************************************************************/
@@ -308,7 +308,7 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    liste = Partage->Dls_data_CPT_IMP;
+    liste = Partage->Dls_data_CI;
     while ( liste )
      { struct DLS_CI *cpt_imp = (struct DLS_CI *)liste->data;
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */

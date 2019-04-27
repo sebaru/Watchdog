@@ -1068,7 +1068,7 @@
                    break;
                  }
                 case MNEMO_CPT_IMP:
-                 { Mnemo_auto_create_CPT_IMP ( Dls_plugin.id, alias->acronyme, libelle );
+                 { Mnemo_auto_create_CI ( Dls_plugin.id, alias->acronyme, libelle );
                    break;
                  }
                 case MNEMO_MSG:

@@ -1084,7 +1084,7 @@
     if (!cpt_imp_p || !*cpt_imp_p)
      { GSList *liste;
        if ( !(acronyme && tech_id) ) return;
-       liste = Partage->Dls_data_CPT_IMP;
+       liste = Partage->Dls_data_CI;
        while (liste)
         { cpt_imp = (struct DLS_CI *)liste->data;
           if ( !strcmp ( cpt_imp->acronyme, acronyme ) && !strcmp( cpt_imp->tech_id, tech_id ) ) break;
@@ -1100,7 +1100,7 @@
           g_snprintf( cpt_imp->acronyme, sizeof(cpt_imp->acronyme), "%s", acronyme );
           g_snprintf( cpt_imp->tech_id,  sizeof(cpt_imp->tech_id),  "%s", tech_id );
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
-          Partage->Dls_data_CPT_IMP = g_slist_prepend ( Partage->Dls_data_CPT_IMP, cpt_imp );
+          Partage->Dls_data_CI = g_slist_prepend ( Partage->Dls_data_CI, cpt_imp );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding INT '%s:%s'", __func__, tech_id, acronyme );
           Charger_conf_CPT_IMP ( cpt_imp );                                /* Chargement des valeurs en base pour ce compteur */
@@ -1145,7 +1145,7 @@
      }
     if (!tech_id || !acronyme) return(0.0);
 
-    liste = Partage->Dls_data_CPT_IMP;
+    liste = Partage->Dls_data_CI;
     while (liste)
      { cpt_imp = (struct DLS_CI *)liste->data;
        if ( !strcmp ( cpt_imp->acronyme, acronyme ) && !strcmp( cpt_imp->tech_id, tech_id ) ) break;
