@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Mnemo_AI.c        Déclaration des fonctions pour la gestion des Analog Input                                     */
+/* Watchdogd/Mnemo_AI.c        DÃ©claration des fonctions pour la gestion des Analog Input                                     */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                          sam 18 avr 2009 13:30:10 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -37,7 +37,7 @@
 
 /******************************************************************************************************************************/
 /* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                                      */
-/* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
+/* EntrÃ©e: un mnemo, et un flag d'edition ou d'ajout                                                                          */
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
  gboolean Mnemo_auto_create_AI ( gint dls_id, gchar *acronyme, gchar *libelle_src, gchar *unite_src )
@@ -46,7 +46,7 @@
     gboolean retour;
     struct DB *db;
 
-/******************************************** Préparation de la base du mnemo *************************************************/
+/******************************************** PrÃ©paration de la base du mnemo *************************************************/
     acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
     if ( !acro )
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
@@ -89,9 +89,9 @@
     return (retour);
   }
 /******************************************************************************************************************************/
-/* Rechercher_mnemo_aiDB: Recupération de la conf de l'entrée analogique en parametre                                         */
-/* Entrée: l'id a récupérer                                                                                                   */
-/* Sortie: une structure hébergeant l'entrée analogique                                                                       */
+/* Rechercher_mnemo_aiDB: RecupÃ©ration de la conf de l'entrÃ©e analogique en parametre                                         */
+/* EntrÃ©e: l'id a rÃ©cupÃ©rer                                                                                                   */
+/* Sortie: une structure hÃ©bergeant l'entrÃ©e analogique                                                                       */
 /******************************************************************************************************************************/
  struct CMD_TYPE_MNEMO_AI *Rechercher_mnemo_aiDB ( guint id )
   { struct CMD_TYPE_MNEMO_AI *mnemo_ai;
@@ -128,7 +128,7 @@
 
     mnemo_ai = (struct CMD_TYPE_MNEMO_AI *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_AI) );
     if (!mnemo_ai) Info_new( Config.log, Config.log_msrv, LOG_ERR,
-                             "Rechercher_mnemo_aiDB: Erreur allocation mémoire" );
+                             "Rechercher_mnemo_aiDB: Erreur allocation mÃ©moire" );
     else
      { mnemo_ai->min      = atof(db->row[0]);
        mnemo_ai->max      = atof(db->row[1]);
@@ -139,8 +139,8 @@
     return(mnemo_ai);
   }
 /******************************************************************************************************************************/
-/* Rechercher_CPT_IMP: Recupération des champs de base de données pour le CI tech_id:acro en parametre                        */
-/* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
+/* Rechercher_CPT_IMP: RecupÃ©ration des champs de base de donnÃ©es pour le CI tech_id:acro en parametre                        */
+/* EntrÃ©e: le tech_id et l'acronyme a rÃ©cupÃ©rer                                                                               */
 /* Sortie: la struct DB                                                                                                       */
 /******************************************************************************************************************************/
  struct DB *Rechercher_AI ( gchar *tech_id, gchar *acronyme )
@@ -173,9 +173,61 @@
     return(db);
   }
 /******************************************************************************************************************************/
-/* Charger_conf_ai: Recupération de la conf de l'entrée analogique en parametre                                               */
-/* Entrée: l'id a récupérer                                                                                                   */
-/* Sortie: une structure hébergeant l'entrée analogique                                                                       */
+/* Rechercher_CPT_IMP: RecupÃ©ration des champs de base de donnÃ©es pour le CI tech_id:acro en parametre                        */
+/* EntrÃ©e: le tech_id et l'acronyme a rÃ©cupÃ©rer                                                                               */
+/* Sortie: la struct DB                                                                                                       */
+/******************************************************************************************************************************/
+ gboolean Recuperer_mnemos_AI_by_text ( struct DB **db_retour, gchar *thread, gchar *text )
+  { gchar requete[1024];
+    gchar *commande;
+    gboolean retour;
+    struct DB *db;
+
+    commande = Normaliser_chaine ( text );
+    if (!commande)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible commande", __func__ );
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),
+               "SELECT d.tech_id, m.acronyme, m.map_text, m.libelle "
+               "FROM mnemos_AI as m INNER JOIN dls as d ON d.id = m.dls_id"
+               " WHERE m.map_text LIKE '%s'", commande );
+    g_free(commande);
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
+  }
+/******************************************************************************************************************************/
+/* Recuperer_mnemo_base_DB_suite: Fonction itÃ©rative de rÃ©cupÃ©ration des mnÃ©moniques de base                                  */
+/* EntrÃ©e: un pointeur sur la connexion de baase de donnÃ©es                                                                   */
+/* Sortie: une structure nouvellement allouÃ©e                                                                                 */
+/******************************************************************************************************************************/
+ gboolean Recuperer_mnemos_AI_suite( struct DB **db_orig )
+  { struct DB *db;
+
+    db = *db_orig;                                          /* RÃ©cupÃ©ration du pointeur initialisÃ© par la fonction prÃ©cÃ©dente */
+    Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
+    if ( ! db->row )
+     { Liberer_resultat_SQL (db);
+       Libere_DB_SQL( &db );
+       return(FALSE);
+     }
+
+    return(TRUE);                                                                                    /* RÃ©sultat dans db->row */
+  }
+/******************************************************************************************************************************/
+/* Charger_conf_ai: RecupÃ©ration de la conf de l'entrÃ©e analogique en parametre                                               */
+/* EntrÃ©e: l'id a rÃ©cupÃ©rer                                                                                                   */
+/* Sortie: une structure hÃ©bergeant l'entrÃ©e analogique                                                                       */
 /******************************************************************************************************************************/
  void Charger_conf_AI ( struct ANALOG_INPUT *ai )
   { gchar requete[512];
@@ -214,8 +266,8 @@
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AI '%s:%s' loaded", __func__, ai->tech_id, ai->acronyme );
   }
 /******************************************************************************************************************************/
-/* Dls_data_load_AI: Charge une configuration spécifique d'entrée analogique                                                  */
-/* Sortie : Néant                                                                                                             */
+/* Dls_data_load_AI: Charge une configuration spÃ©cifique d'entrÃ©e analogique                                                  */
+/* Sortie : NÃ©ant                                                                                                             */
 /******************************************************************************************************************************/
  static void Charger_conf_AI_by_name ( gchar *tech_id, gchar *acronyme )
   { GSList *liste;
@@ -228,7 +280,7 @@
   }
 /******************************************************************************************************************************/
 /* Modifier_analogInputDB: Modification d'un entreeANA Watchdog                                                               */
-/* Entrées: une structure hébergeant l'entrée analogique a modifier                                                           */
+/* EntrÃ©es: une structure hÃ©bergeant l'entrÃ©e analogique a modifier                                                           */
 /* Sortie: FALSE si pb                                                                                                        */
 /******************************************************************************************************************************/
  gboolean Modifier_mnemo_aiDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
@@ -267,7 +319,7 @@
   }
 /******************************************************************************************************************************/
 /* Charger_analogInput: Chargement des infos sur les Entrees ANA                                                              */
-/* Entrée: rien                                                                                                               */
+/* EntrÃ©e: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
  void Charger_analogInput ( void )
@@ -302,7 +354,7 @@
           Partage->ea[num].confDB.max      = atof(db->row[2]);
           Partage->ea[num].confDB.type     = atoi(db->row[3]);
           g_snprintf( Partage->ea[num].confDB.unite, sizeof(Partage->ea[num].confDB.unite), "%s", db->row[4] );
-          Partage->ea[num].last_arch = 0;                             /* Mise à zero du champ de la derniere date d'archivage */
+          Partage->ea[num].last_arch = 0;                             /* Mise Ã  zero du champ de la derniere date d'archivage */
           Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
                    "Charger_analogInput: Chargement config EA[%04d]=%d", num );
         }

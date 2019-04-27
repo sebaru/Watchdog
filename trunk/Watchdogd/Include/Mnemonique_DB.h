@@ -62,6 +62,8 @@
  extern struct DB *Rechercher_AI ( gchar *tech_id, gchar *acronyme );
  extern gboolean Modifier_mnemo_aiDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
  extern void Charger_conf_AI ( struct ANALOG_INPUT *ai );
+ extern gboolean Recuperer_mnemos_AI_by_text ( struct DB **db_retour, gchar *thread, gchar *text );
+ extern gboolean Recuperer_mnemos_AI_suite( struct DB **db_orig );
 
  extern gboolean Modifier_mnemo_horlogeDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );                 /* Dans Mnemo_HORLOGES.c */
  extern gint Ajouter_mnemo_horlogeDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
@@ -71,7 +73,7 @@
  extern struct CMD_TYPE_MNEMO_FULL *Recuperer_horlogeDB_suite( struct DB **db_orig );
  extern void Activer_horlogeDB ( void );
 
- extern void Updater_cpt_impDB ( void );                                                              /* Dans Mnemo_CPT_IMP.c */
+ extern void Updater_cpt_impDB ( void );                                                                   /* Dans Mnemo_CI.c */
  extern void Charger_conf_CPT_IMP ( struct DLS_CI *cpt_imp );
  extern gboolean Mnemo_auto_create_CI ( gint dls_id, gchar *acronyme, gchar *libelle_src );
  extern struct DB *Rechercher_CPT_IMP ( gchar *tech_id, gchar *acronyme );
