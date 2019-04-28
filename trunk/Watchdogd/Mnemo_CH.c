@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Mnemo_CI.c      Déclaration des fonctions pour la gestion des compteurs d'impulsions                        */
-/* Projet WatchDog version 3.0       Gestion d'habitat                                         mar. 07 déc. 2010 17:26:52 CET */
+/* Watchdogd/Mnemo_CH.c      Déclaration des fonctions pour la gestion des cpt_h                                              */
+/* Projet WatchDog version 3.0       Gestion d'habitat                                           mar 14 fév 2006 15:03:51 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * Mnemo_CI.c
+ * Mnemo_CH.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2019 - Sebastien Lefevre
@@ -32,16 +32,15 @@
  #include <unistd.h>
  #include <fcntl.h>
  #include <string.h>
- #include <locale.h>
 
  #include "watchdogd.h"
-
+ #include "Erreur.h"
 /******************************************************************************************************************************/
 /* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                                      */
 /* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
- gboolean Mnemo_auto_create_CI ( gint dls_id, gchar *acronyme, gchar *libelle_src )
+ gboolean Mnemo_auto_create_CH ( gint dls_id, gchar *acronyme, gchar *libelle_src )
   { gchar *acro, *libelle;
     gchar requete[1024];
     gboolean retour;
@@ -64,7 +63,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO mnemos_CI SET dls_id='%d',acronyme='%s',libelle='%s' "
+                "INSERT INTO mnemos_CH SET dls_id='%d',acronyme='%s',libelle='%s' "
                 " ON DUPLICATE KEY UPDATE libelle=VALUES(libelle)",
                 dls_id, acro, libelle );
     g_free(libelle);
@@ -80,11 +79,11 @@
     return (retour);
   }
 /******************************************************************************************************************************/
-/* Rechercher_CI: Recupération des champs de base de données pour le CI tech_id:acro en parametre                        */
+/* Rechercher_CH: Recupération des champs de base de données pour le CH tech_id:acro en parametre                        */
 /* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
 /* Sortie: la struct DB                                                                                                       */
 /******************************************************************************************************************************/
- struct DB *Rechercher_CI ( gchar *tech_id, gchar *acronyme )
+ struct DB *Rechercher_CH ( gchar *tech_id, gchar *acronyme )
   { gchar requete[512];
     struct DB *db;
 
@@ -96,7 +95,7 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT cpt.valeur, cpt.unite"
-                " FROM mnemos_CI as cpt"
+                " FROM mnemos_CH as cpt"
                 " INNER JOIN dls as d ON cpt.dls_id = d.id"
                 " WHERE d.tech_id='%s' AND cpt.acronyme='%s' LIMIT 1",
                 tech_id, acronyme
@@ -118,7 +117,7 @@
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */
 /******************************************************************************************************************************/
- void Charger_conf_CI ( struct DLS_CI *cpt_imp )
+ void Charger_conf_CH ( struct DLS_CH *cpt_h )
   { gchar requete[512];
     struct DB *db;
 
@@ -130,10 +129,10 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT cpt.valeur, cpt.etat"
-                " FROM mnemos_CI as cpt"
+                " FROM mnemos_CH as cpt"
                 " INNER JOIN dls as d ON cpt.dls_id = d.id"
                 " WHERE d.tech_id='%s' AND cpt.acronyme='%s' LIMIT 1",
-                cpt_imp->tech_id, cpt_imp->acronyme
+                cpt_h->tech_id, cpt_h->acronyme
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
@@ -143,40 +142,41 @@
 
     Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */
     if ( db->row )
-     { cpt_imp->valeur = atoi(db->row[0]);
-       cpt_imp->etat   = atoi(db->row[1]);
-       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CI '%s:%s'=%d (%d) loaded", __func__,
-                 cpt_imp->tech_id, cpt_imp->acronyme, cpt_imp->valeur, cpt_imp->etat );
+     { cpt_h->valeur = atoi(db->row[0]);
+       cpt_h->etat   = FALSE;
+       Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CH '%s:%s'=%d (%d) loaded", __func__,
+                 cpt_h->tech_id, cpt_h->acronyme, cpt_h->valeur, cpt_h->etat );
        Libere_DB_SQL( &db );
      }
   }
 /******************************************************************************************************************************/
-/* Rechercher_mnemocpt_impDB: Recherche les valeurs en DB du compteurs d'impulsion dont l'id est en parametre                 */
-/* Entrée: un id_mnemo                                                                                                        */
-/* Sortie: les valeurs en base du compteur                                                                                    */
+/* Rechercher_cpthDB: Recupération du compteur horaire dont l'id est en parametre                                             */
+/* Entrée: l'id a récupérer                                                                                                   */
+/* Sortie: une structure hébergeant le compteur                                                                               */
 /******************************************************************************************************************************/
- struct CMD_TYPE_MNEMO_CPT_IMP *Rechercher_mnemo_cptimpDB ( guint id )
-  { struct CMD_TYPE_MNEMO_CPT_IMP *cpt_imp;
-    gchar requete[200];
+ struct CMD_TYPE_MNEMO_CPT_H *Rechercher_MNEMO_CPTHDB ( guint id )
+  { struct CMD_TYPE_MNEMO_CPT_H *cpth;
+    gchar requete[512];
     struct DB *db;
 
     db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_mnemo_cptimpDB: DB connexion failed" );
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Rechercher_MNEMO_CPTHDB: DB connexion failed" );
        return(NULL);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT valeur,type_ci,multi,unite_string"
+                "SELECT %s.valeur"
                 " FROM %s"
                 " INNER JOIN %s ON id_mnemo = id"
-                " WHERE id=%d LIMIT 1",
-                NOM_TABLE_MNEMO_CPTIMP,                                                                               /* From */
-                NOM_TABLE_MNEMO,                                                                                /* INNER JOIN */
-                id
+                " WHERE id_mnemo=%d LIMIT 1",
+                NOM_TABLE_MNEMO_CPTH,
+                NOM_TABLE_MNEMO,                                                                                      /* FROM */
+                NOM_TABLE_MNEMO_CPTH,                                                                           /* INNER JOIN */
+                id                                                                                                   /* WHERE */
               );
 
-    if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
+   if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
      { Libere_DB_SQL (&db);
        return(NULL);
      }
@@ -187,74 +187,68 @@
        return(NULL);
      }
 
-    cpt_imp = (struct CMD_TYPE_MNEMO_CPT_IMP *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_CPT_IMP) );
-    if (!cpt_imp) Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Recuperer_mnemo_cptimpDB_suite: Erreur allocation mémoire" );
+    cpth = (struct CMD_TYPE_MNEMO_CPT_H *)g_try_malloc0( sizeof(struct CMD_TYPE_MNEMO_CPT_H) );
+    if (!cpth) Info_new( Config.log, Config.log_msrv, LOG_ERR,
+                        "Recuperer_cpthDB_suite: Erreur allocation mémoire" );
     else
-     { cpt_imp->valeur   = atof(db->row[0]);
-       cpt_imp->type     = atoi(db->row[1]);
-       cpt_imp->multi    = atof(db->row[2]);
-       g_snprintf( cpt_imp->unite, sizeof(cpt_imp->unite), "%s", db->row[3] );
+     { cpth->valeur = atoi(db->row[0]);
      }
-    return(cpt_imp);
+    Libere_DB_SQL( &db );
+    return(cpth);
   }
 /******************************************************************************************************************************/
-/* Modifier_cpt_impDB: Modification d'un compteur d'impulsion                                                                 */
-/* Entrées: la structure mnemo_full (base+options)                                                                            */
-/* Sortie: FALSE si pb                                                                                                        */
+/* Modifier_cpthDB: Modification d'un compteur horaire Watchdog                                                               */
+/* Entrées: une structure hébergeant le compteur horaire a modifier                                                           */
+/* Sortie: FALSE si probleme                                                                                                  */
 /******************************************************************************************************************************/
- gboolean Modifier_mnemo_cptimpDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
-  { gchar requete[1024], *unite;
+ gboolean Modifier_mnemo_cpthDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full )
+  { gchar requete[1024];
     gboolean retour;
     struct DB *db;
 
-    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
-    unite = Normaliser_chaine ( mnemo_full->mnemo_cptimp.unite );                            /* Formatage correct des chaines */
-    if (!unite)
-     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "Modifier_mnemo_cptimpDB: Normalisation unite impossible" );
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_cpthDB: DB connexion failed" );
        return(FALSE);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "INSERT INTO %s (id_mnemo,type_ci,multi,unite_string,valeur) VALUES "
-                "('%d','%d','%f','%s','0') "
-                "ON DUPLICATE KEY UPDATE "
-                "type_ci=VALUES(type_ci), multi=VALUES(multi), unite_string=VALUES(unite_string) ",
-                NOM_TABLE_MNEMO_CPTIMP,
-                mnemo_full->mnemo_base.id, mnemo_full->mnemo_cptimp.type,
-                mnemo_full->mnemo_cptimp.multi, unite );
-    g_free(unite);
 
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Modifier_mnemo_cptimpDB: DB connexion failed" );
-       return(FALSE);
-     }
+                "INSERT INTO %s (id_mnemo) VALUES "
+                "('%d') "
+                "ON DUPLICATE KEY UPDATE "
+                "id_mnemo=id_mnemo",
+                NOM_TABLE_MNEMO_CPTH, mnemo_full->mnemo_base.id
+              );
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
-    if (mnemo_full->mnemo_cptimp.reset) Partage->ci[mnemo_full->mnemo_base.num].val_en_cours1 = 0;
     return(retour);
   }
 /******************************************************************************************************************************/
-/* Charger_cpt_imp: Chargement des infos sur les compteurs impulsions depuis la DB                                            */
+/* Charger_cpth: Chargement des infos sur les compteurs horaires depuis la DB                                                 */
 /* Entrée: rien                                                                                                               */
 /* Sortie: rien                                                                                                               */
 /******************************************************************************************************************************/
- void Charger_cpt_imp ( void )
+ void Charger_cpth ( void )
   { gchar requete[512];
     struct DB *db;
 
     db = Init_DB_SQL();
     if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "Charger_cpt_impDB: Connexion DB impossible" );
+     { Info_new( Config.log, FALSE, LOG_ERR, "Charger_cpth: Connexion DB failed" );
        return;
-     }
+     }                                                                                               /* Si pas de histos (??) */
 
-    g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT num,valeur,type_ci,multi,unite_string"
+    g_snprintf( requete, sizeof(requete),                                                  /* Requete SQL */
+                "SELECT num, %s.valeur"
                 " FROM %s"
                 " INNER JOIN %s ON id_mnemo = id ORDER BY num",
-                NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO );
+                NOM_TABLE_MNEMO_CPTH,
+                NOM_TABLE_MNEMO,                                                                                      /* FROM */
+                NOM_TABLE_MNEMO_CPTH                                                                            /* INNER JOIN */
+              );
+
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
      { Libere_DB_SQL (&db);
@@ -264,62 +258,57 @@
     while ( Recuperer_ligne_SQL(db) )                                                      /* Chargement d'une ligne resultat */
      { gint num;
        num = atoi( db->row[0] );
-       if (num < NBR_COMPTEUR_IMP)
-        { Partage->ci[num].confDB.valeur = atof( db->row[1] );
-          Partage->ci[num].confDB.type   = atoi( db->row[2] );
-          Partage->ci[num].confDB.multi  = atof( db->row[3] );
-          g_snprintf( Partage->ci[num].confDB.unite, sizeof(Partage->ci[num].confDB.unite), "%s", db->row[4] );
-          Partage->ci[num].val_en_cours2 = Partage->ci[num].confDB.valeur;                                            /* Init */
+       if (num < NBR_COMPTEUR_H)
+        { Partage->ch[num].confDB.valeur = atoi(db->row[1]);
           Info_new( Config.log, Config.log_msrv, LOG_DEBUG,
-                    "Charger_cpt_imp: Chargement config CI[%04d]", num );
+                   "Charger_cpth: Chargement config CH[%04d]", num );
         }
        else
         { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
-			       "Charger_cpt_imp: num (%d) out of range (max=%d)", num, NBR_COMPTEUR_IMP ); }
+			       "Charger_cpth: num (%d) out of range (max=%d)", num, NBR_COMPTEUR_H ); }
      }
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Charger_cpt_imp: DB reloaded" );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "Charger_cpth: DB reloaded" );
     Libere_DB_SQL (&db);
   }
 /******************************************************************************************************************************/
-/* Ajouter_cpt_impDB: Ajout ou edition d'un entreeANA                                                                         */
+/* Updater_cpthDB : Met à jour l'ensemble des CompteurHoraire dans la base de données                                         */
 /* Entrée: néant                                                                                                              */
 /* Sortie: néant                                                                                                              */
 /******************************************************************************************************************************/
- void Updater_cpt_impDB ( void )
-  { struct CMD_TYPE_MNEMO_CPT_IMP *cpt_imp;
+ void Updater_cpthDB ( void )
+  { struct CMD_TYPE_MNEMO_CPT_H *cpth;
     gchar requete[200];
     GSList *liste;
     struct DB *db;
     gint cpt;
 
-    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: Connexion DB impossible", __func__ );
        return;
      }
 
-    for( cpt=0; cpt<NBR_COMPTEUR_IMP; cpt++)
-     { cpt_imp = &Partage->ci[cpt].confDB;
+    for( cpt=0; cpt<NBR_COMPTEUR_H; cpt++)
+     { cpth = &Partage->ch[cpt].confDB;
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE %s JOIN %s ON id_mnemo=id SET valeur='%f' WHERE num='%d';",
-                   NOM_TABLE_MNEMO_CPTIMP, NOM_TABLE_MNEMO,
-                   cpt_imp->valeur, cpt );
+                   "UPDATE %s JOIN %s ON id_mnemo=id SET valeur='%d' WHERE num='%d';",
+                   NOM_TABLE_MNEMO_CPTH, NOM_TABLE_MNEMO,
+                   cpth->valeur, cpt );
        Lancer_requete_SQL ( db, requete );
      }
 
-    liste = Partage->Dls_data_CI;
+    liste = Partage->Dls_data_CH;
     while ( liste )
-     { struct DLS_CI *cpt_imp = (struct DLS_CI *)liste->data;
+     { struct DLS_CH *cpt_h = (struct DLS_CH *)liste->data;
        g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE mnemos_CI as m INNER JOIN dls ON dls.id = m.dls_id SET valeur='%d', etat='%d' "
+                   "UPDATE mnemos_CH as m INNER JOIN dls ON dls.id = m.dls_id SET valeur='%d', etat='%d' "
                    "WHERE dls.tech_id='%s' AND m.acronyme='%s';",
-                   cpt_imp->valeur, cpt_imp->etat, cpt_imp->tech_id, cpt_imp->acronyme );
+                   cpt_h->valeur, cpt_h->etat, cpt_h->tech_id, cpt_h->acronyme );
        Lancer_requete_SQL ( db, requete );
        liste = g_slist_next(liste);
      }
 
     Libere_DB_SQL( &db );
-    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CptIMP updated", __func__ );
+    Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: CptH updated", __func__ );
   }
-/*----------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------*/

@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/watchdogd.h      Déclarations générales watchdog                                                                 */
+/* Watchdogd/watchdogd.h      DÃ©clarations gÃ©nÃ©rales watchdog                                                                 */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                          sam 11 avr 2009 12:23:32 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -49,11 +49,11 @@
  #include "Mnemonique_DB.h"
  #include "Proto_traductionDLS.h"
 
- extern struct PARTAGE *Partage;                                                 /* Accès aux données partagées des processes */
+ extern struct PARTAGE *Partage;                                                 /* AccÃ¨s aux donnÃ©es partagÃ©es des processes */
 
  #define EXIT_ERREUR       -1                                                                   /* Sortie sur erreur inconnue */
  #define EXIT_OK           0                                                                                /* Sortie normale */
- #define EXIT_INACTIF      1                                                                 /* Un fils est mort d'inactivité */
+ #define EXIT_INACTIF      1                                                                 /* Un fils est mort d'inactivitÃ© */
 
  #define VERROU_SERVEUR              "watchdogd.lock"
  #define FICHIER_EXPORT              "export.wdg"
@@ -65,8 +65,8 @@
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     void *dl_handle;                                                                     /* handle de gestion de la librairie */
     gchar nom_fichier[128];                                                                 /* Nom de fichier de la librairie */
-    gchar admin_prompt[32];                                                            /* Prompt auquel va répondre le thread */
-    gchar admin_help[64];                                                              /* Designation de l'activité du thread */
+    gchar admin_prompt[32];                                                            /* Prompt auquel va rÃ©pondre le thread */
+    gchar admin_help[64];                                                              /* Designation de l'activitÃ© du thread */
 
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                    /* TRUE si le thread doit tourner en mode debug */
@@ -78,15 +78,15 @@
     void *(*Admin_json)( gchar *commande, gchar **buffer, gint *taille_buf );
   };
 
- struct COM_DB                                                                 /* Interfaçage avec le code de gestion des BDD */
+ struct COM_DB                                                                 /* InterfaÃ§age avec le code de gestion des BDD */
   { pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
     GSList *Liste;                                                              /* Liste des requetes en cours de realisation */
   };
 
  struct COM_MSRV                                                            /* Communication entre DLS et le serveur Watchdog */
   { gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
-    gboolean Thread_reboot;                                                  /* TRUE si le reboot doit suivre une RAZ mémoire */
-    gboolean Thread_clear_reboot;                                            /* TRUE si le reboot doit suivre une RAZ mémoire */
+    gboolean Thread_reboot;                                                  /* TRUE si le reboot doit suivre une RAZ mÃ©moire */
+    gboolean Thread_clear_reboot;                                            /* TRUE si le reboot doit suivre une RAZ mÃ©moire */
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
 
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
@@ -103,14 +103,14 @@
        struct ZMQUEUE *zmq_to_master;
      };
 
-    GSList *Librairies;                                                        /* Liste des librairies chargées pour Watchdog */
+    GSList *Librairies;                                                        /* Liste des librairies chargÃ©es pour Watchdog */
   };
 
- struct PARTAGE                                                                            /* Structure des données partagées */
+ struct PARTAGE                                                                            /* Structure des donnÃ©es partagÃ©es */
   { gint  taille_partage;
     gchar version[16];
     time_t start_time;                                                                         /* Date de start de l'instance */
-    void *zmq_ctx;                                                    /* Contexte d'échange inter-thread et message queue ZMQ */
+    void *zmq_ctx;                                                    /* Contexte d'Ã©change inter-thread et message queue ZMQ */
     guint top;                                                                         /* Gestion des contraintes temporelles */
     guint top_cdg_plugin_dls;                                                        /* Top de chien de garde des plugins DLS */
     guint audit_bit_interne_per_sec;
@@ -118,8 +118,8 @@
     guint audit_tour_dls_per_sec;
     guint audit_tour_dls_per_sec_hold;
                                                                                                     /* Interfacage avec D.L.S */
-    struct COM_DB com_db;                                                      /* Interfaçage avec le code de gestion des BDD */
-    struct COM_MSRV com_msrv;                                                                        /* Changement du à D.L.S */
+    struct COM_DB com_db;                                                      /* InterfaÃ§age avec le code de gestion des BDD */
+    struct COM_MSRV com_msrv;                                                                        /* Changement du Ã  D.L.S */
     struct COM_DLS com_dls;                                                                       /* Changement du au serveur */
     struct COM_ARCH com_arch;                                                                      /* Com avec le thread ARCH */
     struct COM_ADMIN com_admin;                                                                   /* Com avec le thread ADMIN */
@@ -139,10 +139,11 @@
     GSList *Dls_data_BOOL;                                                              /* Liste des bistables et monostables */
     GSList *Dls_data_AI;                                                                   /* Liste des entrees dynamique ANA */
     GSList *Dls_data_MSG;                                                                  /* Liste des entrees dynamique TOR */
-    GSList *Dls_data_CI;                                                             /* Liste des compteurs d'impulsions */
+    GSList *Dls_data_CI;                                                                  /* Liste des compteurs d'impulsions */
+    GSList *Dls_data_CH;                                                                      /* Liste des compteurs horaires */
   };
 
-/************************************************ Définitions des prototypes **************************************************/
+/************************************************ DÃ©finitions des prototypes **************************************************/
  extern void Charger_config_bit_interne( void );                                                          /* Dans Watchdogd.c */
  extern gint Activer_ecoute ( void );                                                                        /* Dans ecoute.c */
 

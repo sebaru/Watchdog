@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Include/Mnemonique.h        Déclaration structure internes des mnemoniques watchdog                              */
+/* Watchdogd/Include/Mnemonique.h        DÃ©claration structure internes des mnemoniques watchdog                              */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                           mer 21 jan 2004 18:45:59 CET */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -40,7 +40,7 @@
  #define NOM_TABLE_MNEMO_REGISTRE "mnemos_Registre"
  #define NOM_TABLE_MNEMO_HORLOGE  "mnemos_Horloge"
 
-/***************************************************** Définitions des prototypes *********************************************/
+/***************************************************** DÃ©finitions des prototypes *********************************************/
  extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB ( guint id );
  extern gboolean Recuperer_mnemo_baseDB_with_conditions ( struct DB **db_retour, gchar *conditions, gint start, gint length );
  extern gboolean Recuperer_mnemo_baseDB_by_event_text ( struct DB **db_retour, gchar *thread, gchar *commande_pure );
@@ -74,14 +74,17 @@
  extern void Activer_horlogeDB ( void );
 
  extern void Updater_cpt_impDB ( void );                                                                   /* Dans Mnemo_CI.c */
- extern void Charger_conf_CPT_IMP ( struct DLS_CI *cpt_imp );
+ extern void Charger_conf_CI ( struct DLS_CI *cpt_imp );
  extern gboolean Mnemo_auto_create_CI ( gint dls_id, gchar *acronyme, gchar *libelle_src );
- extern struct DB *Rechercher_CPT_IMP ( gchar *tech_id, gchar *acronyme );
+ extern struct DB *Rechercher_CI ( gchar *tech_id, gchar *acronyme );
  extern void Charger_cpt_imp ( void );
  extern struct CMD_TYPE_MNEMO_CPT_IMP *Rechercher_mnemo_cptimpDB ( guint id );
  extern gboolean Modifier_mnemo_cptimpDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
 
  extern void Updater_cpthDB ( void );                                                                   /* Dans Mnemo_CPT_H.c */
+ extern void Charger_conf_CH ( struct DLS_CH *cpt_h );
+ extern gboolean Mnemo_auto_create_CH ( gint dls_id, gchar *acronyme, gchar *libelle_src );
+ extern struct DB *Rechercher_CH ( gchar *tech_id, gchar *acronyme );
  extern void Charger_cpth ( void );
  extern struct CMD_TYPE_MNEMO_CPT_H *Rechercher_mnemo_cpthDB ( guint id );
  extern gboolean Modifier_mnemo_cpthDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );

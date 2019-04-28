@@ -508,19 +508,32 @@
 /* Entrées: numero du monostable, sa logique                                                                                  */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- struct ACTION *New_action_cpt_h( int num, GList *options )
+ struct ACTION *New_action_cpt_h( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
     int taille, reset;
 
     reset = Get_option_entier ( options, RESET ); if (reset == -1) reset = 0;
-    taille = 15;
-    Add_bit_to_list(MNEMO_CPTH, num);
-    action = New_action();
-    action->alors = New_chaine( taille );
-    action->sinon = New_chaine( taille );
+    if (alias->type == ALIAS_TYPE_STATIC)                                                               /* Alias par numéro ? */
+     { taille = 15;
+       Add_bit_to_list(MNEMO_CPTH, alias->num);
+       action = New_action();
+       action->alors = New_chaine( taille );
+       action->sinon = New_chaine( taille );
 
-    g_snprintf( action->alors, taille, "SCH(%d,1,%d);", num, reset );
-    g_snprintf( action->sinon, taille, "SCH(%d,0,%d);", num, reset );
+       g_snprintf( action->alors, taille, "SCH(%d,1,%d);", alias->num, reset );
+       g_snprintf( action->sinon, taille, "SCH(%d,0,%d);", alias->num, reset );
+     }
+    else /* Alias par nom */
+     { taille = 100;
+       action = New_action();
+       action->alors = New_chaine( taille );
+       action->sinon = New_chaine( taille );
+
+       g_snprintf( action->alors, taille, "   Dls_data_set_CH ( \"%s\", \"%s\", &_%s_%s, TRUE, %d );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset );
+       g_snprintf( action->sinon, taille, "   Dls_data_set_CH ( \"%s\", \"%s\", &_%s_%s, FALSE, %d );\n",
+                   alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset );
+     }
     return(action);
   }
 /******************************************************************************************************************************/
@@ -550,9 +563,9 @@
        action->alors = New_chaine( taille );
        action->sinon = New_chaine( taille );
 
-       g_snprintf( action->alors, taille, "   Dls_data_set_CPT_IMP ( \"%s\", \"%s\", &_%s_%s, TRUE, %d, %d );\n",
+       g_snprintf( action->alors, taille, "   Dls_data_set_CI ( \"%s\", \"%s\", &_%s_%s, TRUE, %d, %d );\n",
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset, ratio );
-       g_snprintf( action->sinon, taille, "   Dls_data_set_CPT_IMP ( \"%s\", \"%s\", &_%s_%s, FALSE, %d, %d );\n",
+       g_snprintf( action->sinon, taille, "   Dls_data_set_CI ( \"%s\", \"%s\", &_%s_%s, FALSE, %d, %d );\n",
                    alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, reset, ratio );
      }
     return(action);
@@ -727,7 +740,7 @@
 
     if (!strcmp(tech_id,"THIS")) tech_id=Dls_plugin.tech_id;
 
-    if ( (db=Rechercher_CPT_IMP ( tech_id, acronyme )) != NULL )
+    if ( (db=Rechercher_CI ( tech_id, acronyme )) != NULL )
      { alias->tech_id  = g_strdup(tech_id);
        alias->acronyme = g_strdup(acronyme);
        alias->type_bit      = MNEMO_CPT_IMP;
@@ -739,10 +752,16 @@
        alias->type_bit      = MNEMO_ENTREE_ANA;
        Libere_DB_SQL (&db);
      }
+    else if ( (db=Rechercher_CH ( tech_id, acronyme )) != NULL )
+     { alias->tech_id  = g_strdup(tech_id);
+       alias->acronyme = g_strdup(acronyme);
+       alias->type_bit      = MNEMO_CPTH;
+       Libere_DB_SQL (&db);
+     }
     else if ( (mnemo=Rechercher_mnemo_baseDB_by_acronyme ( tech_id, acronyme )) != NULL )
      { alias->tech_id  = g_strdup(tech_id);
        alias->acronyme = g_strdup(acronyme);
-       alias->type_bit = MNEMO_MONOSTABLE;
+       alias->type_bit = mnemo->type;
        g_free(mnemo);
      }
     else
@@ -1076,6 +1095,10 @@
                  }
                 case MNEMO_CPT_IMP:
                  { Mnemo_auto_create_CI ( Dls_plugin.id, alias->acronyme, libelle );
+                   break;
+                 }
+                case MNEMO_CPTH:
+                 { Mnemo_auto_create_CH ( Dls_plugin.id, alias->acronyme, libelle );
                    break;
                  }
                 case MNEMO_MSG:

@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Include/Dls.h                  DÈfinitions des constantes programme DLS                                          */
+/* Watchdogd/Include/Dls.h                  D√©finitions des constantes programme DLS                                          */
 /*        projet Watchdog v2.0     par LEFEVRE Sebastien                                        sam 09 oct 2004 10:10:32 CEST */
 /******************************************************************************************************************************/
 /*
@@ -33,7 +33,7 @@
 
  #define NOM_TABLE_DLS         "dls"
 
- #define NBR_BIT_BISTABLE_RESERVED     40                      /* Nombre de bits bistables reservÈs pour le systËme B00 - B39 */
+ #define NBR_BIT_BISTABLE_RESERVED     40                      /* Nombre de bits bistables reserv√©s pour le syst√®me B00 - B39 */
 
  struct PLUGIN_DLS
   { struct CMD_TYPE_PLUGIN_DLS plugindb;
@@ -42,22 +42,22 @@
     void *handle;                                                                              /* Handle du fichier librairie */
     void (*go)(struct DLS_TO_PLUGIN *);                                                   /* Fonction de traitement du module */
     float conso;                                                                         /* Consommation temporelle du plugin */
-    gint (*Get_Tableau_bit)(gint);                                             /* Fonction d'identification des bits utilisÈs */
-    gint (*Get_Tableau_num)(gint);                                             /* Fonction d'identification des bits utilisÈs */
-    gint (*Get_Tableau_msg)(gint);                                             /* Fonction d'identification des bits utilisÈs */
+    gint (*Get_Tableau_bit)(gint);                                             /* Fonction d'identification des bits utilis√©s */
+    gint (*Get_Tableau_num)(gint);                                             /* Fonction d'identification des bits utilis√©s */
+    gint (*Get_Tableau_msg)(gint);                                             /* Fonction d'identification des bits utilis√©s */
     struct DLS_TO_PLUGIN vars;
   };
 
- enum                                                                                  /* diffÈrent statut des temporisations */
+ enum                                                                                  /* diff√©rent statut des temporisations */
   { DLS_TEMPO_NOT_COUNTING,                                                                 /* La tempo ne compte pas du tout */
-    DLS_TEMPO_WAIT_FOR_DELAI_ON,                                       /* La tempo compte, en attendant le delai de mise ‡ un */
-    DLS_TEMPO_WAIT_FOR_MIN_ON,                                         /* Delai de MAU dÈpassÈ, en attente du creneau minimum */
+    DLS_TEMPO_WAIT_FOR_DELAI_ON,                                       /* La tempo compte, en attendant le delai de mise √† un */
+    DLS_TEMPO_WAIT_FOR_MIN_ON,                                         /* Delai de MAU d√©pass√©, en attente du creneau minimum */
     DLS_TEMPO_WAIT_FOR_MAX_ON,                                      /* Creneau minimum atteint, en attente du creneau maximum */
     DLS_TEMPO_WAIT_FOR_DELAI_OFF,                                /* Creneau max atteint, en attente du delai de remise a zero */
-    DLS_TEMPO_WAIT_FOR_COND_OFF                                            /* Attend que la condition soit tombÈe avant reset */
+    DLS_TEMPO_WAIT_FOR_COND_OFF                                            /* Attend que la condition soit tomb√©e avant reset */
   };
 
- struct DLS_TEMPO                                                                           /* DÈfinition d'une temporisation */
+ struct DLS_TEMPO                                                                           /* D√©finition d'une temporisation */
   { struct CMD_TYPE_MNEMO_TEMPO confDB;
     gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
@@ -83,44 +83,53 @@
 
  struct CPT_IMP
   { struct CMD_TYPE_MNEMO_CPT_IMP confDB;
-    gboolean actif;                                                                           /* MÈmorisation de l'etat du CI */
+    gboolean actif;                                                                           /* M√©morisation de l'etat du CI */
     gfloat val_en_cours1;                                                     /* valeur en cours pour le calcul via les ratio */
-    gfloat val_en_cours2;                                         /* valeur en cours avant interprÈtation selon le type de CI */
+    gfloat val_en_cours2;                                         /* valeur en cours avant interpr√©tation selon le type de CI */
     time_t last_update;                                                   /* date de derniere update de la valeur du compteur */
-    guint last_arch;                                                     /* Date de dernier enregistrement en base de donnÈes */
+    guint last_arch;                                                     /* Date de dernier enregistrement en base de donn√©es */
   };
 
  struct CPT_HORAIRE
   { struct CMD_TYPE_MNEMO_CPT_H confDB;
-    guint last_arch;                                 /* Date de dernier enregistrement en base de donnÈes */
+    guint last_arch;                                 /* Date de dernier enregistrement en base de donn√©es */
     guint old_top;                                                     /* Date de debut du comptage du CH */
     gboolean actif;
   };
 
- struct SORTIE_TOR                                                                             /* DÈfinition d'une sortie TOR */
+ struct SORTIE_TOR                                                                             /* D√©finition d'une sortie TOR */
   { gchar etat;                                                                                   /* Etat de la sortie 0 ou 1 */
     gint last_change;                                                                    /* Date du dernier changement d'etat */
   };
 
  struct DLS_BOOL
-  { gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+  { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gboolean etat;
     gboolean edge_up;
     gboolean edge_down;
   };
 
  struct DLS_CI
-  { gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+  { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gint    valeur;
     gint    val_en_cours1;                                                     /* valeur en cours pour le calcul via les ratio */
     gboolean etat;
   };
 
+ struct DLS_CH
+  { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    guint valeur;
+    guint last_arch;                                 /* Date de dernier enregistrement en base de donn√©es */
+    guint old_top;                                                     /* Date de debut du comptage du CH */
+    gboolean etat;
+  };
+
  struct DLS_MESSAGES
-  { gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+  { gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
     gboolean etat;
     gint last_change;
     gint changes;
@@ -151,26 +160,26 @@
 
  struct DLS_TREE
   { struct CMD_TYPE_SYN_VARS syn_vars;
-    GSList *Liste_plugin_dls;                                                /* Liste des plugins D.L.S associÈ au synoptique */
-    GSList *Liste_dls_tree;                                               /* Liste des sous_synoptiques associÈs au synoptique */
+    GSList *Liste_plugin_dls;                                                /* Liste des plugins D.L.S associ√© au synoptique */
+    GSList *Liste_dls_tree;                                               /* Liste des sous_synoptiques associ√©s au synoptique */
   };
 
  struct COM_DLS                                                                      /* Communication entre le serveur et DLS */
   { pthread_t TID;                                                                                   /* Identifiant du thread */
     pthread_mutex_t synchro;                                                              /* Bit de synchronisation processus */
-    pthread_mutex_t synchro_traduction;                  /* Mutex pour interdire les traductions simultanÈes de plugins D.L.S */
+    pthread_mutex_t synchro_traduction;                  /* Mutex pour interdire les traductions simultan√©es de plugins D.L.S */
     struct DLS_TREE *Dls_tree;                                                                       /* Arbre d'execution DLS */
-    pthread_mutex_t synchro_data;                                      /* Mutex pour les acces concurrents ‡ l'arbre des data */
+    pthread_mutex_t synchro_data;                                      /* Mutex pour les acces concurrents √† l'arbre des data */
     struct ZMQUEUE *zmq_to_master;
     GSList *Set_M;                                                              /* liste des Mxxx a activer au debut tour prg */
-    GSList *Reset_M;                                                      /* liste des Mxxx a dÈsactiver ‡ la fin du tour prg */
+    GSList *Reset_M;                                                      /* liste des Mxxx a d√©sactiver √† la fin du tour prg */
     GSList *Set_Dls_Data;                                                       /* liste des Mxxx a activer au debut tour prg */
-    GSList *Reset_Dls_Data;                                               /* liste des Mxxx a dÈsactiver ‡ la fin du tour prg */
+    GSList *Reset_Dls_Data;                                               /* liste des Mxxx a d√©sactiver √† la fin du tour prg */
 
     gboolean Thread_run;                                    /* TRUE si le thread tourne, FALSE pour lui demander de s'arreter */
     gboolean Thread_debug;                                                             /* TRUE si le thread doit tout logguer */
     gboolean Thread_reload;                                              /* TRUE si le thread doit recharger sa configuration */
-    gboolean Compil_at_boot;                                            /* True si DLS doit compiler les plugins au dÈmarrage */
+    gboolean Compil_at_boot;                                            /* True si DLS doit compiler les plugins au d√©marrage */
     guint admin_start;                                                                              /* Demande de deconnexion */
     guint admin_stop;                                                                               /* Demande de deconnexion */
     guint temps_sched;

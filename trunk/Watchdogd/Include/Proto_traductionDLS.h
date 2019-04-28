@@ -67,7 +67,7 @@
     gchar *tech_id;
     gchar *acronyme;
     gint type_bit;                                                                           /* Type de tableau (E/A/B/M....) */
-    gint num;                                                                                  /* Numero du bit interne ciblé */
+    gint num;                                                                                  /* Numero du bit interne ciblÃ© */
     int barre;                                                                               /* Represente la negation ou pas */
     GList *options;
     gint used;
@@ -96,7 +96,7 @@
  extern struct ACTION *New_action_icone( int num, GList *options );
  extern struct ACTION *New_action_tempo( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_bi( struct ALIAS *alias, gint barre );
- extern struct ACTION *New_action_cpt_h( int num, GList *options );
+ extern struct ACTION *New_action_cpt_h( struct ALIAS *alias, GList *options );
  extern struct ACTION *New_action_cpt_imp( struct ALIAS *alias, GList *options );
  extern gboolean New_alias( gint type, gchar *tech_id, gchar *acronyme, gint bit, gint num, gint barre, GList *options );
  extern struct ALIAS *Set_new_external_alias( gchar *tech_id, gchar *acronyme );

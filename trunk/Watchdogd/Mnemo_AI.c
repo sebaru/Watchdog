@@ -139,7 +139,7 @@
     return(mnemo_ai);
   }
 /******************************************************************************************************************************/
-/* Rechercher_CPT_IMP: Recupération des champs de base de données pour le CI tech_id:acro en parametre                        */
+/* Rechercher_AI: Recupération des champs de base de données pour le AI tech_id:acro en parametre                             */
 /* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
 /* Sortie: la struct DB                                                                                                       */
 /******************************************************************************************************************************/
@@ -173,7 +173,7 @@
     return(db);
   }
 /******************************************************************************************************************************/
-/* Rechercher_CPT_IMP: Recupération des champs de base de données pour le CI tech_id:acro en parametre                        */
+/* Rechercher_AI_by_text: Recupération des champs de base de données pour le AI par map                                       */
 /* Entrée: le tech_id et l'acronyme a récupérer                                                                               */
 /* Sortie: la struct DB                                                                                                       */
 /******************************************************************************************************************************/

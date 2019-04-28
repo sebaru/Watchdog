@@ -1078,7 +1078,7 @@
 /* Entrée: le tech_id, l'acronyme, le pointeur d'accélération et la valeur entière                                            */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- void Dls_data_set_CPT_IMP ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p, gboolean etat, gint reset, gint ratio )
+ void Dls_data_set_CI ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p, gboolean etat, gint reset, gint ratio )
   { struct DLS_CI *cpt_imp;
 
     if (!cpt_imp_p || !*cpt_imp_p)
@@ -1102,8 +1102,8 @@
           pthread_mutex_lock( &Partage->com_dls.synchro_data );
           Partage->Dls_data_CI = g_slist_prepend ( Partage->Dls_data_CI, cpt_imp );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
-          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding INT '%s:%s'", __func__, tech_id, acronyme );
-          Charger_conf_CPT_IMP ( cpt_imp );                                /* Chargement des valeurs en base pour ce compteur */
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding CI '%s:%s'", __func__, tech_id, acronyme );
+          Charger_conf_CI ( cpt_imp );                                     /* Chargement des valeurs en base pour ce compteur */
         }
        if (cpt_imp_p) *cpt_imp_p = (gpointer)cpt_imp;                   /* Sauvegarde pour acceleration si besoin */
       }
@@ -1133,10 +1133,10 @@
      { Ajouter_arch_by_nom( cpt_imp->acronyme, cpt_imp->tech_id, cpt_imp->valeur*1.0 ); }  /* Archivage si besoin */
   }
 /******************************************************************************************************************************/
-/* Dls_data_get_CPT_IMP : Recupere la valeur de l'EA en parametre                                                             */
+/* Dls_data_get_CI : Recupere la valeur de l'EA en parametre                                                             */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
- gint Dls_data_get_CPT_IMP ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p )
+ gint Dls_data_get_CI ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p )
   { struct DLS_CI *cpt_imp;
     GSList *liste;
     if (cpt_imp_p && *cpt_imp_p)                                                     /* Si pointeur d'acceleration disponible */
@@ -1155,6 +1155,91 @@
     if (!liste) return(0);
     if (cpt_imp_p) *cpt_imp_p = (gpointer)cpt_imp;                                  /* Sauvegarde pour acceleration si besoin */
     return( cpt_imp->valeur );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_INT: Positionne un integer dans la mémoire DLS                                                                */
+/* Entrée: le tech_id, l'acronyme, le pointeur d'accélération et la valeur entière                                            */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_CH ( gchar *tech_id, gchar *acronyme, gpointer *cpt_h_p, gboolean etat, gint reset )
+  { struct DLS_CH *cpt_h;
+
+    if (!cpt_h_p || !*cpt_h_p)
+     { GSList *liste;
+       if ( !(acronyme && tech_id) ) return;
+       liste = Partage->Dls_data_CH;
+       while (liste)
+        { cpt_h = (struct DLS_CH *)liste->data;
+          if ( !strcmp ( cpt_h->acronyme, acronyme ) && !strcmp( cpt_h->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+
+       if (!liste)
+        { cpt_h = g_try_malloc0 ( sizeof(struct DLS_CH) );
+          if (!cpt_h)
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+             return;
+           }
+          g_snprintf( cpt_h->acronyme, sizeof(cpt_h->acronyme), "%s", acronyme );
+          g_snprintf( cpt_h->tech_id,  sizeof(cpt_h->tech_id),  "%s", tech_id );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_CH = g_slist_prepend ( Partage->Dls_data_CH, cpt_h );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding CH '%s:%s'", __func__, tech_id, acronyme );
+          Charger_conf_CH ( cpt_h );                                       /* Chargement des valeurs en base pour ce compteur */
+        }
+       if (cpt_h_p) *cpt_h_p = (gpointer)cpt_h;                                     /* Sauvegarde pour acceleration si besoin */
+      }
+    else cpt_h = (struct DLS_CH *)*cpt_h_p;
+
+    if (reset)
+     { if (etat)
+        { cpt_h->valeur = 0;
+          cpt_h->etat = FALSE;
+        }
+     }
+    else if (etat)
+     { if ( ! cpt_h->etat )
+        { cpt_h->etat = TRUE;
+          cpt_h->old_top = Partage->top;
+        }
+       else
+        { int new_top, delta;
+          new_top = Partage->top;
+          delta = new_top - cpt_h->old_top;
+          if (delta > 600)                                           /* On compte +1 toutes les minutes ! */
+           { cpt_h->valeur++;
+             cpt_h->old_top = new_top;
+             Ajouter_arch_by_nom( cpt_h->acronyme, cpt_h->tech_id, 1.0*cpt_h->valeur );
+           }
+        }
+     }
+    else
+     { cpt_h->etat = FALSE; }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_CI : Recupere la valeur de l'EA en parametre                                                             */
+/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ gint Dls_data_get_CH ( gchar *tech_id, gchar *acronyme, gpointer *cpt_h_p )
+  { struct DLS_CH *cpt_h;
+    GSList *liste;
+    if (cpt_h_p && *cpt_h_p)                                                         /* Si pointeur d'acceleration disponible */
+     { cpt_h = (struct DLS_CH *)*cpt_h_p;
+       return( cpt_h->valeur );
+     }
+    if (!tech_id || !acronyme) return(0.0);
+
+    liste = Partage->Dls_data_CH;
+    while (liste)
+     { cpt_h = (struct DLS_CH *)liste->data;
+       if ( !strcmp ( cpt_h->acronyme, acronyme ) && !strcmp( cpt_h->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+
+    if (!liste) return(0);
+    if (cpt_h_p) *cpt_h_p = (gpointer)cpt_h;                                        /* Sauvegarde pour acceleration si besoin */
+    return( cpt_h->valeur );
   }
 /******************************************************************************************************************************/
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
@@ -1358,8 +1443,8 @@
     g_snprintf( result, debut-format+1, "%s", format );                                                           /* Prologue */
     switch (type_bit)
      { case MNEMO_CPT_IMP:
-            if ( (db=Rechercher_CPT_IMP ( tech_id, acronyme )) != NULL )
-             { gint valeur = Dls_data_get_CPT_IMP ( tech_id, acronyme, dlsdata_p );
+            if ( (db=Rechercher_CI ( tech_id, acronyme )) != NULL )
+             { gint valeur = Dls_data_get_CI ( tech_id, acronyme, dlsdata_p );
                g_snprintf( chaine, sizeof(chaine), "%d %s", valeur, db->row[1] ); /* Row1 = unite */
                Libere_DB_SQL (&db);
              }
