@@ -57,12 +57,24 @@
      { struct DLS_CI *cpt_imp=NULL;
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                  "%s: HTTP/ request for GET CI %s:%s", __func__, tech_id, acronyme );
-       Dls_data_get_CPT_IMP ( tech_id, acronyme, (gpointer *)&cpt_imp );
+       Dls_data_get_CI ( tech_id, acronyme, (gpointer *)&cpt_imp );
        if (cpt_imp)
         { json_builder_set_member_name  ( builder, "valeur" );
           json_builder_add_int_value    ( builder, cpt_imp->valeur );
           json_builder_set_member_name  ( builder, "etat" );
           json_builder_add_boolean_value ( builder, cpt_imp->etat );
+        }
+     }
+    if (!strcasecmp(type,"CH"))
+     { struct DLS_CH *cpt_h=NULL;
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                 "%s: HTTP/ request for GET CH %s:%s", __func__, tech_id, acronyme );
+       Dls_data_get_CH ( tech_id, acronyme, (gpointer *)&cpt_h );
+       if (cpt_h)
+        { json_builder_set_member_name  ( builder, "valeur" );
+          json_builder_add_int_value    ( builder, cpt_h->valeur );
+          json_builder_set_member_name  ( builder, "etat" );
+          json_builder_add_boolean_value ( builder, cpt_h->etat );
         }
      }
     else if (!strcasecmp(type,"I"))
@@ -117,9 +129,23 @@
         }
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
                  "%s: HTTP/ request for SET CI %s:%s = %s", __func__, tech_id, acronyme, valeur );
-       Dls_data_get_CPT_IMP ( tech_id, acronyme, (gpointer *)&cpt_imp );
+       Dls_data_get_CI ( tech_id, acronyme, (gpointer *)&cpt_imp );
        if (cpt_imp)
         { cpt_imp->valeur = atoi(valeur); }
+       return(Http_Send_response_code ( wsi, HTTP_200_OK ));
+     }
+    else if (!strcasecmp(type,"CH"))
+     { struct DLS_CH *cpt_h=NULL;
+       gchar *valeur = json_object_get_string_member ( object, "valeur" );
+       if (!valeur)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: valeur non trouvée", __func__ );
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+        }
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
+                 "%s: HTTP/ request for SET CH %s:%s = %s", __func__, tech_id, acronyme, valeur );
+       Dls_data_get_CH ( tech_id, acronyme, (gpointer *)&cpt_h );
+       if (cpt_h)
+        { cpt_h->valeur = atoi(valeur); }
        return(Http_Send_response_code ( wsi, HTTP_200_OK ));
      }
 /*************************************************** Envoi au client **********************************************************/
