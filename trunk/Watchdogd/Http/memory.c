@@ -58,24 +58,30 @@
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                  "%s: HTTP/ request for GET CI %s:%s", __func__, tech_id, acronyme );
        Dls_data_get_CI ( tech_id, acronyme, (gpointer *)&cpt_imp );
-       if (cpt_imp)
-        { json_builder_set_member_name  ( builder, "valeur" );
-          json_builder_add_int_value    ( builder, cpt_imp->valeur );
-          json_builder_set_member_name  ( builder, "etat" );
-          json_builder_add_boolean_value ( builder, cpt_imp->etat );
+       if (!cpt_imp)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: cpt_imp non trouvée", __func__ );
+          g_object_unref(builder);
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
         }
+       json_builder_set_member_name  ( builder, "valeur" );
+       json_builder_add_int_value    ( builder, cpt_imp->valeur );
+       json_builder_set_member_name  ( builder, "etat" );
+       json_builder_add_boolean_value ( builder, cpt_imp->etat );
      }
     if (!strcasecmp(type,"CH"))
      { struct DLS_CH *cpt_h=NULL;
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                  "%s: HTTP/ request for GET CH %s:%s", __func__, tech_id, acronyme );
        Dls_data_get_CH ( tech_id, acronyme, (gpointer *)&cpt_h );
-       if (cpt_h)
-        { json_builder_set_member_name  ( builder, "valeur" );
-          json_builder_add_int_value    ( builder, cpt_h->valeur );
-          json_builder_set_member_name  ( builder, "etat" );
-          json_builder_add_boolean_value ( builder, cpt_h->etat );
+       if (!cpt_h)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: cpth non trouvée", __func__ );
+          g_object_unref(builder);
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
         }
+       json_builder_set_member_name  ( builder, "valeur" );
+       json_builder_add_int_value    ( builder, cpt_h->valeur );
+       json_builder_set_member_name  ( builder, "etat" );
+       json_builder_add_boolean_value ( builder, cpt_h->etat );
      }
     else if (!strcasecmp(type,"I"))
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: HTTP/ request for GET I. cheking num", __func__ );
