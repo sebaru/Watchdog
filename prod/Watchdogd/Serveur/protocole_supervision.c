@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/prctl.h>
 /**************************************************** Prototypes de fonctions *************************************************/
@@ -192,7 +192,6 @@
              { struct DB *db;
                struct CMD_ENREG nbr;
                struct CMD_TYPE_MNEMO_FULL *mnemo;
-               gchar critere[128];
                gint id_mnemo;
                id_mnemo = *(gint *)connexion->donnees;                   /* Récupération de l'id du mnemo associé à l'horloge */
 

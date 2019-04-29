@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
-  
+
  #include <stdio.h>
  #include <fcntl.h>
  #include <sys/types.h>
@@ -50,7 +50,7 @@
     struct DB *db;
 
     Cfg_rs485.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
-    Cfg_rs485.enable            = FALSE; 
+    Cfg_rs485.enable            = FALSE;
     g_snprintf( Cfg_rs485.port, sizeof(Cfg_rs485.port), "%s", DEFAUT_PORT_RS485 );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
@@ -74,7 +74,7 @@
         }
      }
     return(TRUE);
-  } 
+  }
 /******************************************************************************************************************************/
 /* Retirer_rs485DB: Elimination d'un module rs485                                                                             */
 /* Entrée: un log et une database                                                                                             */
@@ -85,7 +85,7 @@
     gboolean retour;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "Retirer_rs485DB: Database Connection Failed" );
        return(FALSE);
@@ -111,7 +111,7 @@
     struct DB *db;
     gint last_id;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db) return(FALSE);
 
     libelle = Normaliser_chaine ( rs485->libelle );          /* Formatage correct des chaines */
@@ -152,7 +152,7 @@
     gchar *libelle;
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db) return(FALSE);
 
     libelle = Normaliser_chaine ( rs485->libelle );                                          /* Formatage correct des chaines */
@@ -164,7 +164,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "UPDATE %s SET "             
+                "UPDATE %s SET "
                 "num='%d',bit_comm='%d',libelle='%s',enable='%d',"
                 "ea_min='%d',ea_max='%d',e_min='%d',e_max='%d',"
                 "sa_min='%d',sa_max='%d',s_min='%d',s_max='%d',forced_e_min='%d'"
@@ -260,7 +260,7 @@
  static gboolean Charger_tous_rs485 ( void  )
   { struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if ( !db )
      { Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING, "Charger_tous_rs485: Database Connection Failed" );
        return(-1);
@@ -314,7 +314,7 @@
 /**********************************************************************************************************/
  static void Deconnecter_rs485 ( struct MODULE_RS485 *module )
   { gint nbr_ea, cpt;
-                
+
     if (!module) return;
     if (module->rs485.ea_min == -1) nbr_ea = 0;
     else nbr_ea = module->rs485.ea_max - module->rs485.ea_min + 1;
@@ -345,7 +345,7 @@
 /* Entrée: la trame a tester                                                                              */
 /* Sortie: le crc 16 bits                                                                                 */
 /**********************************************************************************************************/
- static int Calcul_crc16 (struct TRAME_RS485 *Trame)  
+ static int Calcul_crc16 (struct TRAME_RS485 *Trame)
   { unsigned int index_bits;                                    /* nombre de bits a traiter dans un octet */
     unsigned int retenue;                        /* valeur de la retenue éventuelle suite aux calculs CRC */
     unsigned int index_octets;                              /* position des octets formant la trame RS485 */
@@ -357,7 +357,7 @@
      {                                                                         /* CRC OUEX octet en cours */
        CRC16 = CRC16 ^ (short)*((unsigned char *)Trame + index_octets);
        for( index_bits = 0; index_bits<8; index_bits++ )
-        { retenue = CRC16 & 1;                             /* Récuperer la retenue avant traitement CRC16 */ 
+        { retenue = CRC16 & 1;                             /* Récuperer la retenue avant traitement CRC16 */
           CRC16 = CRC16 >> 1;                                      /* décalage d'un bit à droite du CRC16 */
           if (retenue == 1)
            { CRC16 = CRC16 ^ 0xA001; }                                         /* CRC16 OUEX A001 en hexa */
@@ -508,7 +508,7 @@
                for( cpt = 0; cpt<nbr_e; cpt++)
                 { gint num_e = module->rs485.e_min + cpt;
                   e = ! (trame->donnees[cpt >> 3] & (0x80 >> (cpt & 0x07)));
-                  if ( num_e >= module->rs485.forced_e_min > 0 )
+                  if ( num_e >= module->rs485.forced_e_min )
                    { SE( num_e, e ); }
                 }
              }
@@ -632,7 +632,7 @@
                           "Run_thread: module %03d down. Restarting communication....", module->rs485.id );
                 if (module->nbr_deconnect>4)                                  /* Arret sur pb comm module */
                  { Deconnecter_rs485 ( module );
-                   module->rs485.enable=FALSE; 
+                   module->rs485.enable=FALSE;
                    Info_new( Config.log, Cfg_rs485.lib->Thread_debug, LOG_WARNING,
                             "Run_thread: module %03d down too many times -> Stopping.", module->rs485.id );
                  }
@@ -654,7 +654,7 @@
 	   { int bute, cpt;
              if (nbr_oct_lu<TAILLE_ENTETE)
 	      { bute = TAILLE_ENTETE; } else { bute = sizeof(Trame); }
- 
+
              cpt = read( Cfg_rs485.fd, (unsigned char *)&Trame + nbr_oct_lu, bute-nbr_oct_lu );
              if (cpt>0)
               { nbr_oct_lu = nbr_oct_lu + cpt;

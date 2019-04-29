@@ -267,6 +267,69 @@ CREATE TABLE IF NOT EXISTS `mnemos_DO` (
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `mnemos_AnalogInput`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_AI` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `dls_id` int(11) NOT NULL DEFAULT '0',
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `type` int(11) NOT NULL DEFAULT '0',
+  `min` float NOT NULL DEFAULT '0',
+  `max` float NOT NULL DEFAULT '0',
+  `unite` text COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `map_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
+  `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
+  `map_text` VARCHAR(160) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `map_snips` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`),
+  UNIQUE (`dls_id`,`acronyme`),
+  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `dls_cpt_imp`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_CI` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `dls_id` INT(11) NOT NULL DEFAULT '0',
+  `etat` BOOLEAN NOT NULL DEFAULT '0',
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `valeur` INT(11) NOT NULL DEFAULT '0',
+  `multi` float NOT NULL DEFAULT '1',
+  `unite` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'fois',
+  PRIMARY KEY (`id`),
+  UNIQUE (`dls_id`,`acronyme`),
+  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `mnemos_CH`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_CH` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `dls_id` INT(11) NOT NULL DEFAULT '0',
+  `etat` BOOLEAN NOT NULL DEFAULT '0',
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `valeur` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE (`dls_id`,`acronyme`),
+  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
+
+
+-- --------------------------------------------------------
+
+--
 -- Structure de la table `mnemos_CptHoraire`
 --
 
@@ -308,13 +371,6 @@ CREATE TABLE IF NOT EXISTS `mnemos_AnalogInput` (
   PRIMARY KEY (`id_mnemo`),
   FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-INSERT INTO `mnemos_AnalogInput` (`id_mnemo`, `type`, `min`, `max`, `unite`) VALUES
-(10, 0, 0, 100, 'ms'),
-(11, 0, 0, 100, 't/s'),
-(12, 0, 0, 100, 'bit/s'),
-(13, 0, 0, 100, 'arch'),
-(14, 0, 0, 100, 'dbs');
 
 -- --------------------------------------------------------
 
@@ -374,6 +430,8 @@ CREATE TABLE IF NOT EXISTS `syns_cadrans` (
   `posy` int(11) NOT NULL DEFAULT '0',
   `type` int(11) NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;

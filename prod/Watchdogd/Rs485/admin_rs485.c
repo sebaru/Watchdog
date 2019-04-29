@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include "watchdogd.h"
  #include "Rs485.h"
@@ -36,10 +36,10 @@
 /******************************************************************************************************************************/
  static gchar *Admin_rs485_reload ( gchar *response )
   { if (Cfg_rs485.lib->Thread_run == FALSE)
-     { response = response = Admin_write ( response, " Thread RS485 is not running" );
+     { response = Admin_write ( response, " Thread RS485 is not running" );
        return(response);
      }
-    
+
     Cfg_rs485.lib->Thread_reload = TRUE;
     while (Cfg_rs485.lib->Thread_reload) sched_yield();
     response = Admin_write ( response, " RS485 Reload done" );
@@ -63,7 +63,7 @@
                 " | - %03d Analog  Output, map_AA = AA%03d(->AA%03d)\n"
                 " | - next_get_ana=in %03ds, nbr_deconnect=%02d",
                 module->rs485.id, module->rs485.libelle, module->rs485.date_ajout,
-                module->rs485.num, (Partage->top - module->date_requete)/10, 
+                module->rs485.num, (Partage->top - module->date_requete)/10,
                 module->rs485.enable, module->started, module->rs485.bit_comm, B(module->rs485.bit_comm),
                 module->rs485.e_max  - module->rs485.e_min,  module->rs485.e_min, module->rs485.e_max, module->rs485.forced_e_min,
                 module->rs485.ea_max - module->rs485.ea_min, module->rs485.ea_min, module->rs485.ea_max,

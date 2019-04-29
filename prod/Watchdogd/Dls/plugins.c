@@ -143,7 +143,6 @@
            { dlclose( plugin->handle );
              plugin->handle = NULL;
            }
-          plugin->plugindb.on = TRUE;                                                              /* On tente de l'allumer ! */
           Reseter_all_bit_interne ( plugin );
           Charger_un_plugin ( plugin );
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_INFO, "%s: plugin %06d reloaded (%s)", __func__,
@@ -219,7 +218,6 @@
 /******************************************************************************************************************************/
  static void Decharger_plugins_dls_tree ( struct DLS_TREE *dls_tree )
   { struct PLUGIN_DLS *plugin;
-    GSList *liste;
 
     while(dls_tree->Liste_plugin_dls)                                                        /* Liberation mémoire des modules */
      { plugin = (struct PLUGIN_DLS *)dls_tree->Liste_plugin_dls->data;

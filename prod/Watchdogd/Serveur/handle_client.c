@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/prctl.h>
  #include <unistd.h>
@@ -40,8 +40,7 @@
 /******************************************************************************************************************************/
  static void Envoyer_new_motif_au_client ( struct CLIENT *client, gint num_i )
   { struct CMD_ETAT_BIT_CTRL motif;
-    gint num;
-    
+
 /**************************************** Création de la structure passée aux clients *****************************************/
     motif.num    = num_i;
     motif.etat   = Partage->i[num_i].etat;
@@ -79,7 +78,6 @@
 /******************************************************************************************************************************/
  void Run_handle_client ( struct CLIENT *client )
   { static gint thread_count = 0;
-    pthread_t tid;
     gchar nom[16];
     struct ZMQUEUE *zmq_msg;
     struct ZMQUEUE *zmq_motif;
@@ -106,7 +104,7 @@
                Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_PAQUETSIZE,
                              NULL, client->connexion->taille_bloc );
                if (Cfg_ssrv.ssl_needed)
-                { Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_SSLNEEDED, NULL, 0 ); 
+                { Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_SSLNEEDED, NULL, 0 );
                   if (Cfg_ssrv.ssl_peer_cert)
                    { Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_SSLNEEDED_WITH_CERT, NULL, 0 );  }
                   Client_mode ( client, ATTENTE_CONNEXION_SSL );
@@ -115,7 +113,7 @@
                 { Client_mode ( client, WAIT_FOR_IDENT ); }
                Envoi_client( client, TAG_INTERNAL, SSTAG_INTERNAL_END,                                          /* Tag de fin */
                              NULL, 0 );
-               break;                 
+               break;
           case ATTENTE_CONNEXION_SSL:
                Connecter_ssl ( client );                                                  /* Tentative de connexion securisée */
                break;

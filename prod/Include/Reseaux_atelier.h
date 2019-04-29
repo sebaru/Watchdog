@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -97,17 +97,19 @@
     gchar   libelle[NBR_CARAC_PAGE_SYNOPTIQUE_UTF8+1];                     /* Libelle du synoptique cible */
     guint   position;                                                        /* en abscisses et ordonnées */
   };
-/*********************************************** Gestion des cadrans ***************************************/
+/****************************************************** Gestion des cadrans ***************************************************/
  struct CMD_TYPE_CADRAN
   { gint    id;
-    gint    syn_id;                                                /* Numéro du synoptique ou est l'icone */
-    gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                       /* Libelle du synoptique cible */
-    gchar   acro_syn [ NBR_CARAC_ACRO_SYN_MNEMONIQUE_UTF8 + 1 ];            /* Visuel Acronyme du cadran */
-    gint    type;                                                              /* type du bit de controle */
-    gint    bit_controle;                                                                   /* Ixxx, Cxxx */
-    guint   position_x;                                                      /* en abscisses et ordonnées */
+    gint    syn_id;                                                                    /* Numéro du synoptique ou est l'icone */
+    gchar   libelle[NBR_CARAC_LIBELLE_MOTIF_UTF8+1];                                           /* Libelle du synoptique cible */
+    gchar   acro_syn [ NBR_CARAC_ACRO_SYN_MNEMONIQUE_UTF8 + 1 ];                                 /* Visuel Acronyme du cadran */
+    gint    type;                                                                                  /* type du bit de controle */
+    gint    bit_controle;                                                                                       /* Ixxx, Cxxx */
+    guint   position_x;                                                                          /* en abscisses et ordonnées */
     guint   position_y;
     gfloat  angle;
+    gchar   tech_id[32];                                                                         /* Visuel Acronyme du cadran */
+    gchar   acronyme[64];                                                                        /* Visuel Acronyme du cadran */
   };
 
 /************************************************* Gestion des cameras de supervision *****************************************/
@@ -148,7 +150,7 @@
   };
 
 /******************************************************* Tag de communication *************************************************/
- enum 
+ enum
   { SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE,                      /* Envoi des groupes pour l'edition motif */
     SSTAG_SERVEUR_ADDPROGRESS_GROUPE_FOR_PROPRIETE_SYNOPTIQUE_FIN,                                /* Le transfert est terminé */
 
@@ -177,7 +179,7 @@
 
     SSTAG_CLIENT_TYPE_NUM_MNEMONIQUE_EA,                          /* Le client desire un mnémonique EAxxx */
     SSTAG_SERVEUR_TYPE_NUM_MNEMONIQUE_EA,
-    
+
     SSTAG_CLIENT_ATELIER_ADD_COMMENT,  /* Le client veut ajouter un commentaire au syn en cours d'edition */
     SSTAG_SERVEUR_ATELIER_ADD_COMMENT_OK,                   /* Le serveur valide l'ajout d'un commentaire */
     SSTAG_CLIENT_ATELIER_DEL_COMMENT,                           /* Le client veut detruire un commentaire */
@@ -213,11 +215,11 @@
     SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_FIN,
 
     SSTAG_CLIENT_WANT_PAGE_SYNOPTIQUE_FOR_ATELIER_PALETTE,     /* noms des syn pour les choix de palettes */
-    SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_PALETTE, 
+    SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_PALETTE,
     SSTAG_SERVEUR_ADDPROGRESS_SYNOPTIQUE_FOR_ATELIER_PALETTE_FIN,
 
     SSTAG_CLIENT_WANT_PAGE_CAMERA_FOR_ATELIER,                 /* noms des syn pour les choix de palettes */
-    SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FOR_ATELIER, 
+    SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FOR_ATELIER,
     SSTAG_SERVEUR_ADDPROGRESS_CAMERA_FOR_ATELIER_FIN,
 
     SSTAG_CLIENT_TYPE_NUM_MNEMO_CLIC,                    /* Envoi des informations mnemonique à l'atelier */

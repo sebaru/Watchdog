@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <unistd.h>
  #include <stdio.h>
@@ -32,7 +32,7 @@
  #include <string.h>
  #include <time.h>
  #include <crypt.h>
- 
+
 /*********************************************** Prototypes des fonctions *****************************************************/
  #include "watchdogd.h"
 
@@ -42,8 +42,7 @@
 /* Sortie: false si pb                                                                                                        */
 /******************************************************************************************************************************/
  gboolean Tester_level_util( struct CMD_TYPE_UTILISATEUR *util, guint level )
-  { gint cpt;
-    if (!util) return(FALSE);
+  { if (!util) return(FALSE);
     if ( util->id == UID_ROOT) return(TRUE);                                             /* Le tech est dans tous les groupes */
     if (!util->enable) return(FALSE);
     return( util->access_level >= level );
@@ -85,7 +84,7 @@
                 "imsg_enable,imsg_jabberid,imsg_allow_cde,imsg_available,ssrv_bit_presence "
                 "FROM %s", NOM_TABLE_UTIL );
 
-    db = Init_DB_SQL();      
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
@@ -158,7 +157,7 @@
                 "FROM %s WHERE username='%s' LIMIT 1", NOM_TABLE_UTIL, name );
     g_free(name);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed for user '%s'", __func__, nom );
        return(NULL);

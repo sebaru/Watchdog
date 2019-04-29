@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -41,8 +41,6 @@
  static void *socket;                                                                                 /* connexion au serveur */
  static void *zmq_ctx;
  static void *to_master, *from_master;
- static struct LOG *Log = NULL;
- static gint Log_level = 0;
  static gchar Socket_file[128];
  static gchar Master_host[128];
  static gboolean Connect_like_slave;
@@ -64,7 +62,6 @@
  void Lire_config ( char *fichier_config )
   { gchar *chaine, *fichier;
     GError *error = NULL;
-	   gint num;
     GKeyFile *gkf;
 
     g_snprintf( Master_host, sizeof(Master_host), "%s", g_get_host_name() );                             /* Valeur par défaut */
@@ -80,7 +77,7 @@
        if (chaine)
         { g_snprintf( Socket_file, sizeof(Socket_file), "%s/socket.wdg", chaine ); g_free(chaine); }
      }
-    else 
+    else
      { printf("Unable to parse config file %s, error %s\n", fichier, error->message );
        g_error_free( error );
      }
@@ -95,7 +92,6 @@
     gchar commande[256], thread[32];
     gchar buffer[256];
     gchar ligne[256];
-    gint recu;
 
     if (strlen(ligne_ref) == 0) return;
 
@@ -157,14 +153,14 @@
      { printf( "%s: New ZMQ Socket to_master Failed (%s)", __func__, zmq_strerror(errno) ); return; }
 
     g_snprintf( endpoint, sizeof(endpoint), "tcp://%s:%d", Master_host, 5556 );
-    if ( zmq_connect (to_master, endpoint) == -1 ) 
+    if ( zmq_connect (to_master, endpoint) == -1 )
      { printf( "%s: ZMQ Connect to '%s' Failed (%s)", __func__, endpoint, zmq_strerror(errno) ); return; }
 
     if ( (from_master = zmq_socket ( zmq_ctx, ZMQ_SUB )) == NULL)
      { printf( "%s: New ZMQ Socket from_master Failed (%s)", __func__, zmq_strerror(errno) ); return; }
 
     g_snprintf( endpoint, sizeof(endpoint), "tcp://%s:%d", Master_host, 5555 );
-    if ( zmq_connect (from_master, endpoint) == -1 ) 
+    if ( zmq_connect (from_master, endpoint) == -1 )
      { printf( "%s: ZMQ Connect to '%s' Failed (%s)", __func__, endpoint, zmq_strerror(errno) ); return; }
 
     if ( zmq_setsockopt ( from_master, ZMQ_SUBSCRIBE, NULL, 0 ) == -1 )                          /* Subscribe to all messages */
@@ -244,7 +240,7 @@
  static void Lire_ligne_commande( int argc, char *argv[] )
   { gchar *file, *master;
     gint help, old;
-    struct poptOption Options[]= 
+    struct poptOption Options[]=
      { { "socket",     's', POPT_ARG_STRING,
          &file,        0, "Admin Socket (old Style Connect)", "FILE" },
        { "help",       'h', POPT_ARG_NONE,

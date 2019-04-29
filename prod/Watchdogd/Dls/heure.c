@@ -21,12 +21,13 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <time.h>
 
+ #include "watchdogd.h"
  #include "Module_dls.h"                                    /* Inclusion des prototypes de fonctions de controle/commande DLS */
 
  static int nbr_heure, nbr_minute;                                                     /* Gestion des demarrages à heure fixe */

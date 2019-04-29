@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/prctl.h>
  #include <sys/time.h>
@@ -76,7 +76,7 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
     else { camera = Rechercher_cameraDB( rezo_camera->id );
-           if (camera) 
+           if (camera)
             { Envoi_client( client, TAG_LOWLEVEL, SSTAG_SERVEUR_VALIDE_EDIT_CAMERA_OK,
                             (gchar *)camera, sizeof(struct CMD_TYPE_CAMERA) );
               g_free(camera);
@@ -119,7 +119,6 @@
 /******************************************************************************************************************************/
  void Proto_ajouter_camera ( struct CLIENT *client, struct CMD_TYPE_CAMERA *rezo_camera )
   { struct CMD_TYPE_CAMERA *camera;
-    struct DB *Db_watchdog;
     gint id;
 
     id = Ajouter_cameraDB ( rezo_camera );
@@ -131,7 +130,7 @@
                      (gchar *)&erreur, sizeof(struct CMD_GTK_MESSAGE) );
      }
     else { camera = Rechercher_cameraDB( id );
-           if (!camera) 
+           if (!camera)
             { struct CMD_GTK_MESSAGE erreur;
               g_snprintf( erreur.message, sizeof(erreur.message),
                           "Unable to locate camera %s", rezo_camera->libelle);

@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 #ifndef _HTTP_H_
  #define _HTTP_H_
  #include <libwebsockets.h>
@@ -49,7 +49,7 @@
 
  #define HTTP_CONTENT_JSON             "application/json"
  #define HTTP_CONTENT_XML              "application/xml"
- 
+
  enum WS_PROTO
   {	/* always first */
     WS_PROTO_HTTP = 0,
@@ -115,10 +115,10 @@
  extern gboolean Http_Traiter_request_getstatus ( struct lws *wsi );
  extern gint Http_Traiter_request_getprocess ( struct lws *wsi, gchar *url );
  extern gint Http_Traiter_request_getaudio ( struct lws *wsi, gchar *remote_name, gchar *remote_ip, gchar *url );
- extern gint Http_Traiter_request_body_completion_cli ( struct lws *wsi );
+ extern gint Http_Traiter_request_body_completion_bus ( struct lws *wsi );
  extern gint Http_Traiter_request_body_postfile ( struct lws *wsi, void *data, size_t taille );
  extern gint Http_Traiter_request_body_completion_postfile ( struct lws *wsi );
- extern gint Http_Traiter_request_setm ( struct lws *wsi );
+ extern gint Http_Traiter_request_body_completion_memory ( struct lws *wsi );
  extern gboolean Http_Traiter_request_getdls ( struct lws *wsi, gchar *url ) ;
  extern gint Http_get_arg_int ( struct lws *wsi, gchar *arg );
  #endif

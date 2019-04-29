@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -39,7 +39,7 @@
                           " INNER JOIN dls as dls ON mnemo.dls_id=dls.id" \
                           " INNER JOIN syns as syn ON dls.syn_id = syn.id" \
                           " INNER JOIN syns as parent_syn ON parent_syn.id = syn.parent_id"
-       
+
  #include "watchdogd.h"
 
 /******************************************************************************************************************************/
@@ -48,14 +48,13 @@
 /* Sortie: FALSE si probleme                                                                                                  */
 /******************************************************************************************************************************/
  gboolean Retirer_mnemo_baseDB ( struct CMD_TYPE_MNEMO_BASE *mnemo )
-  { struct CMD_TYPE_MNEMO_BASE *mnemo_a_virer;
-    gchar requete[200];
+  { gchar requete[200];
     gboolean retour;
     struct DB *db;
 
     if (mnemo->id < 10000) return(FALSE);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
@@ -112,7 +111,7 @@
     g_free(acro);
     g_free(acro_syn);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
@@ -171,11 +170,11 @@
                    mnemo->num, mnemo->dls_id, acro, libelle, ev_host, ev_thread, ev_text, tableau, acro_syn );
      } else
      { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "UPDATE %s SET "             
+                   "UPDATE %s SET "
                    "type=%d,libelle='%s',acronyme='%s',ev_host='%s',ev_thread='%s',ev_text='%s',dls_id=%d,"
                    "num=IF(num='-1', '-1','%d'),tableau='%s',acro_syn='%s' "
                    "WHERE id=%d",
-                   NOM_TABLE_MNEMO, mnemo->type, libelle, acro, ev_host, ev_thread, ev_text, 
+                   NOM_TABLE_MNEMO, mnemo->type, libelle, acro, ev_host, ev_thread, ev_text,
                    mnemo->dls_id, mnemo->num, tableau, acro_syn, mnemo->id );
      }
     g_free(libelle);
@@ -186,7 +185,7 @@
     g_free(ev_thread);
     g_free(ev_text);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(-1);
@@ -194,7 +193,7 @@
 
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     if ( retour == FALSE )
-     { Libere_DB_SQL(&db); 
+     { Libere_DB_SQL(&db);
        return(-1);
      }
 
@@ -260,7 +259,7 @@
                " AND mnemo.ev_text LIKE '%s'",
                g_get_host_name(), thread, commande );
     g_free(commande);
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
@@ -285,7 +284,7 @@
                " WHERE (mnemo.ev_host='*' OR mnemo.ev_host='%s') AND mnemo.ev_thread='%s'",
                g_get_host_name(), thread );
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
@@ -319,7 +318,7 @@
        g_strlcat( requete, critere, sizeof(requete) );
      }
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(FALSE);
@@ -384,7 +383,7 @@
                 " WHERE mnemo.id = %d", id
               );
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
@@ -414,7 +413,7 @@
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible tech_id_s", __func__ );
        return(NULL);
      }
-     
+
     acronyme_s = Normaliser_chaine ( acronyme );
     if (!acronyme_s)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible acronyme_s", __func__ );
@@ -427,7 +426,7 @@
     g_free(tech_id_s);
     g_free(acronyme_s);
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
@@ -456,7 +455,7 @@
                 " WHERE mnemo.type = %d AND mnemo.num = %d LIMIT 1", critere->type, critere->num
               );
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return(NULL);
@@ -502,7 +501,7 @@
      { case MNEMO_ENTREE_ANA:
         { struct CMD_TYPE_MNEMO_AI *mnemo_ai;
           mnemo_ai = Rechercher_mnemo_aiDB ( id );
-          if (mnemo_ai) 
+          if (mnemo_ai)
            { memcpy ( &mnemo_full->mnemo_ai, mnemo_ai, sizeof(struct CMD_TYPE_MNEMO_AI) );
              g_free(mnemo_ai);
            }
@@ -511,7 +510,7 @@
        case MNEMO_CPT_IMP:
         { struct CMD_TYPE_MNEMO_CPT_IMP *mnemo_cpt;
           mnemo_cpt = Rechercher_mnemo_cptimpDB ( id );
-          if (mnemo_cpt) 
+          if (mnemo_cpt)
            { memcpy ( &mnemo_full->mnemo_cptimp, mnemo_cpt, sizeof(struct CMD_TYPE_MNEMO_CPT_IMP) );
              g_free(mnemo_cpt);
            }
@@ -520,7 +519,7 @@
        case MNEMO_TEMPO:
         { struct CMD_TYPE_MNEMO_TEMPO *mnemo_tempo;
           mnemo_tempo = Rechercher_mnemo_tempoDB ( id );
-          if (mnemo_tempo) 
+          if (mnemo_tempo)
            { memcpy ( &mnemo_full->mnemo_tempo, mnemo_tempo, sizeof(struct CMD_TYPE_MNEMO_TEMPO) );
              g_free(mnemo_tempo);
            }
@@ -529,7 +528,7 @@
        case MNEMO_REGISTRE:
         { struct CMD_TYPE_MNEMO_REGISTRE *mnemo_r;
           mnemo_r = Rechercher_mnemo_registreDB ( id );
-          if (mnemo_r) 
+          if (mnemo_r)
            { memcpy ( &mnemo_full->mnemo_r, mnemo_r, sizeof(struct CMD_TYPE_MNEMO_REGISTRE) );
              g_free(mnemo_r);
            }

@@ -35,6 +35,8 @@
  #include <sys/time.h>
  #include <sys/prctl.h>
  #include <semaphore.h>
+ #include <locale.h>
+ #include <math.h>
 
  #include "watchdogd.h"
 
@@ -120,7 +122,7 @@
            }*/
           case MNEMO_CPT_IMP:
            { if (CI(Tableau_num[cpt])!=Tableau_val[cpt])
-              { g_snprintf( chaine, sizeof(chaine), "CI[%04d]=%d, ", Tableau_num[cpt], CI(Tableau_num[cpt]) );
+              { g_snprintf( chaine, sizeof(chaine), "CI[%04d]=%f, ", Tableau_num[cpt], CI(Tableau_num[cpt]) );
                 g_strlcat(result, chaine, sizeof(result));
                 Tableau_val[cpt] = (float)CI(Tableau_num[cpt]);
                 change=TRUE;
@@ -1072,6 +1074,174 @@
      }
   }
 /******************************************************************************************************************************/
+/* Dls_data_set_INT: Positionne un integer dans la mémoire DLS                                                                */
+/* Entrée: le tech_id, l'acronyme, le pointeur d'accélération et la valeur entière                                            */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_CI ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p, gboolean etat, gint reset, gint ratio )
+  { struct DLS_CI *cpt_imp;
+
+    if (!cpt_imp_p || !*cpt_imp_p)
+     { GSList *liste;
+       if ( !(acronyme && tech_id) ) return;
+       liste = Partage->Dls_data_CI;
+       while (liste)
+        { cpt_imp = (struct DLS_CI *)liste->data;
+          if ( !strcmp ( cpt_imp->acronyme, acronyme ) && !strcmp( cpt_imp->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+
+       if (!liste)
+        { cpt_imp = g_try_malloc0 ( sizeof(struct DLS_CI) );
+          if (!cpt_imp)
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+             return;
+           }
+          g_snprintf( cpt_imp->acronyme, sizeof(cpt_imp->acronyme), "%s", acronyme );
+          g_snprintf( cpt_imp->tech_id,  sizeof(cpt_imp->tech_id),  "%s", tech_id );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_CI = g_slist_prepend ( Partage->Dls_data_CI, cpt_imp );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding CI '%s:%s'", __func__, tech_id, acronyme );
+          Charger_conf_CI ( cpt_imp );                                     /* Chargement des valeurs en base pour ce compteur */
+        }
+       if (cpt_imp_p) *cpt_imp_p = (gpointer)cpt_imp;                   /* Sauvegarde pour acceleration si besoin */
+      }
+    else cpt_imp = (struct DLS_CI *)*cpt_imp_p;
+
+    gboolean need_arch = FALSE;
+    if (etat)
+     { if (reset)                                                                       /* Le compteur doit-il etre resetté ? */
+        { cpt_imp->val_en_cours1 = 0;                                          /* Valeur transitoire pour gérer les ratio */
+          cpt_imp->valeur = 0;                                                 /* Valeur transitoire pour gérer les ratio */
+          need_arch = TRUE;
+        }
+       else if ( cpt_imp->etat == FALSE )                                                             /* Passage en actif */
+        { cpt_imp->etat = TRUE;
+          cpt_imp->val_en_cours1++;
+          if (cpt_imp->val_en_cours1>=ratio)
+           { cpt_imp->valeur++;
+             cpt_imp->val_en_cours1=0;                                                    /* RAZ de la valeur de calcul 1 */
+             need_arch = TRUE;
+           }
+        }
+     }
+    else
+     { if (reset==0) cpt_imp->etat = FALSE; }
+
+    if (need_arch == TRUE)
+     { Ajouter_arch_by_nom( cpt_imp->acronyme, cpt_imp->tech_id, cpt_imp->valeur*1.0 ); }  /* Archivage si besoin */
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_CI : Recupere la valeur de l'EA en parametre                                                             */
+/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ gint Dls_data_get_CI ( gchar *tech_id, gchar *acronyme, gpointer *cpt_imp_p )
+  { struct DLS_CI *cpt_imp;
+    GSList *liste;
+    if (cpt_imp_p && *cpt_imp_p)                                                     /* Si pointeur d'acceleration disponible */
+     { cpt_imp = (struct DLS_CI *)*cpt_imp_p;
+       return( cpt_imp->valeur );
+     }
+    if (!tech_id || !acronyme) return(0.0);
+
+    liste = Partage->Dls_data_CI;
+    while (liste)
+     { cpt_imp = (struct DLS_CI *)liste->data;
+       if ( !strcmp ( cpt_imp->acronyme, acronyme ) && !strcmp( cpt_imp->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+
+    if (!liste) return(0);
+    if (cpt_imp_p) *cpt_imp_p = (gpointer)cpt_imp;                                  /* Sauvegarde pour acceleration si besoin */
+    return( cpt_imp->valeur );
+  }
+/******************************************************************************************************************************/
+/* Dls_data_set_INT: Positionne un integer dans la mémoire DLS                                                                */
+/* Entrée: le tech_id, l'acronyme, le pointeur d'accélération et la valeur entière                                            */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ void Dls_data_set_CH ( gchar *tech_id, gchar *acronyme, gpointer *cpt_h_p, gboolean etat, gint reset )
+  { struct DLS_CH *cpt_h;
+
+    if (!cpt_h_p || !*cpt_h_p)
+     { GSList *liste;
+       if ( !(acronyme && tech_id) ) return;
+       liste = Partage->Dls_data_CH;
+       while (liste)
+        { cpt_h = (struct DLS_CH *)liste->data;
+          if ( !strcmp ( cpt_h->acronyme, acronyme ) && !strcmp( cpt_h->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+
+       if (!liste)
+        { cpt_h = g_try_malloc0 ( sizeof(struct DLS_CH) );
+          if (!cpt_h)
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+             return;
+           }
+          g_snprintf( cpt_h->acronyme, sizeof(cpt_h->acronyme), "%s", acronyme );
+          g_snprintf( cpt_h->tech_id,  sizeof(cpt_h->tech_id),  "%s", tech_id );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_CH = g_slist_prepend ( Partage->Dls_data_CH, cpt_h );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding CH '%s:%s'", __func__, tech_id, acronyme );
+          Charger_conf_CH ( cpt_h );                                       /* Chargement des valeurs en base pour ce compteur */
+        }
+       if (cpt_h_p) *cpt_h_p = (gpointer)cpt_h;                                     /* Sauvegarde pour acceleration si besoin */
+      }
+    else cpt_h = (struct DLS_CH *)*cpt_h_p;
+
+    if (reset)
+     { if (etat)
+        { cpt_h->valeur = 0;
+          cpt_h->etat = FALSE;
+        }
+     }
+    else if (etat)
+     { if ( ! cpt_h->etat )
+        { cpt_h->etat = TRUE;
+          cpt_h->old_top = Partage->top;
+        }
+       else
+        { int new_top, delta;
+          new_top = Partage->top;
+          delta = new_top - cpt_h->old_top;
+          if (delta > 600)                                           /* On compte +1 toutes les minutes ! */
+           { cpt_h->valeur++;
+             cpt_h->old_top = new_top;
+             Ajouter_arch_by_nom( cpt_h->acronyme, cpt_h->tech_id, 1.0*cpt_h->valeur );
+           }
+        }
+     }
+    else
+     { cpt_h->etat = FALSE; }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_CI : Recupere la valeur de l'EA en parametre                                                             */
+/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ gint Dls_data_get_CH ( gchar *tech_id, gchar *acronyme, gpointer *cpt_h_p )
+  { struct DLS_CH *cpt_h;
+    GSList *liste;
+    if (cpt_h_p && *cpt_h_p)                                                         /* Si pointeur d'acceleration disponible */
+     { cpt_h = (struct DLS_CH *)*cpt_h_p;
+       return( cpt_h->valeur );
+     }
+    if (!tech_id || !acronyme) return(0.0);
+
+    liste = Partage->Dls_data_CH;
+    while (liste)
+     { cpt_h = (struct DLS_CH *)liste->data;
+       if ( !strcmp ( cpt_h->acronyme, acronyme ) && !strcmp( cpt_h->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+
+    if (!liste) return(0);
+    if (cpt_h_p) *cpt_h_p = (gpointer)cpt_h;                                        /* Sauvegarde pour acceleration si besoin */
+    return( cpt_h->valeur );
+  }
+/******************************************************************************************************************************/
 /* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
@@ -1170,6 +1340,7 @@
   { Dls_data_set_bool ( tech_id, acronyme, bus_p, etat );                                         /* Utilisation d'un boolean */
     if (Dls_data_get_bool_up (tech_id, acronyme, bus_p))
      { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, param1, strlen(param1)+1 ); }
+    if (param1) g_free(param1);                                       /* Param1 est issu d'un g_strdup ou d'un Dls_dyn_string */
   }
 /******************************************************************************************************************************/
 /* Met à jour le message en parametre                                                                                         */
@@ -1258,6 +1429,48 @@
     if (!liste) return(FALSE);
     if (msg_p) *msg_p = (gpointer)msg;                                              /* Sauvegarde pour acceleration si besoin */
     return( msg->etat );
+  }
+/******************************************************************************************************************************/
+/* Dls_dyn_string: Formate la chaine en parametre avec le bit également en parametre                                          */
+/* Entrée : La chaine source, le type de bit, le tech_id/acronyme, le pointeur de raccourci                                   */
+/* sortie : Une nouvelle chaine de caractere à g_freer                                                                        */
+/******************************************************************************************************************************/
+ gchar *Dls_dyn_string ( gchar *format, gint type_bit, gchar *tech_id, gchar *acronyme, gpointer *dlsdata_p )
+  { gchar result[128], *debut, chaine[64];
+    struct DB *db;
+    debut = g_strrstr ( format, "$1" );                            /* Début pointe sur le $ de "$1" si présent dans la chaine */
+    if (!debut) return(g_strdup(format));
+    g_snprintf( result, debut-format+1, "%s", format );                                                           /* Prologue */
+    switch (type_bit)
+     { case MNEMO_CPT_IMP:
+            if ( (db=Rechercher_CI ( tech_id, acronyme )) != NULL )
+             { gint valeur = Dls_data_get_CI ( tech_id, acronyme, dlsdata_p );
+               g_snprintf( chaine, sizeof(chaine), "%d %s", valeur, db->row[1] ); /* Row1 = unite */
+               Libere_DB_SQL (&db);
+             }
+            break;
+       case MNEMO_ENTREE_ANA:
+            if (!strcmp(tech_id, "SYS") && !strcmp(acronyme, "TIME"))
+             { struct tm tm;
+               time_t temps;
+               time(&temps);
+               localtime_r( &temps, &tm );
+               g_snprintf( chaine, sizeof(chaine), "%d heure et %d minute", tm.tm_hour, tm.tm_min );
+             }
+            else if ( (db=Rechercher_AI ( tech_id, acronyme )) != NULL )
+             { gfloat valeur = Dls_data_get_AI ( tech_id, acronyme, dlsdata_p );
+               if (valeur-roundf(valeur) == 0.0)
+                { g_snprintf( chaine, sizeof(chaine), "%.0f %s", valeur, db->row[0] ); }                     /* Row0 = unite */
+               else
+                { g_snprintf( chaine, sizeof(chaine), "%.2f %s", valeur, db->row[0] ); }                     /* Row0 = unite */
+               Libere_DB_SQL (&db);
+             }
+            break;
+       default: return(NULL);
+     }
+    g_strlcat ( result, chaine, sizeof(result) );
+    g_strlcat ( result, debut+2, sizeof(result) );
+    return(g_strdup(result));
   }
 /******************************************************************************************************************************/
 /* Dls_foreach_dls_tree: Parcours recursivement l'arbre DLS et execute des commandes en parametres                            */
@@ -1403,8 +1616,8 @@
 /******************************************************************************************************************************/
  void Run_dls ( void )
   { gint Update_heure=0;
-    GSList *plugins;
 
+    setlocale( LC_ALL, "C" );                                            /* Pour le formattage correct des , . dans les float */
     prctl(PR_SET_NAME, "W-DLS", 0, 0, 0 );
     Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_NOTICE, "%s: Demarrage . . . TID = %p", __func__, pthread_self() );
     Partage->com_dls.Thread_run         = TRUE;                                                         /* Le thread tourne ! */

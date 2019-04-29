@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/time.h>
  #include <sys/prctl.h>
@@ -225,11 +225,11 @@
 
        if (!Partage->com_arch.liste_arch)                                                     /* Si pas de message, on tourne */
         { sched_yield();
-          sleep(5);
+          sleep(2);
           continue;
         }
 
-       db = Init_ArchDB_SQL();       
+       db = Init_ArchDB_SQL();
        if (!db)
         { Info_new( Config.log, Config.log_arch, LOG_ERR, "%s: Unable to open database %s/%s/%s", __func__,
                     Partage->com_arch.archdb_host, Partage->com_arch.archdb_username, Partage->com_arch.archdb_database );

@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
 %{
 #include <stdio.h>
 #include <string.h>
@@ -51,8 +51,8 @@ newline       [\n\r]+
 %x chaine_directe
 %x comment
 
-%%                         
-{blanc}                    
+%%
+{blanc}
 {newline}
 
  /******************************************** Methodes ***************************************************/
@@ -121,6 +121,7 @@ newline       [\n\r]+
 "cligno"                   { DlsScanner_lval.val = CLIGNO;      return CLIGNO;      }
 "edge_up"                  { DlsScanner_lval.val = T_EDGE_UP;   return T_EDGE_UP;   }
 "libelle"                  { DlsScanner_lval.val = T_LIBELLE;   return T_LIBELLE;   }
+"unite"                    { DlsScanner_lval.val = T_UNITE;     return T_UNITE;     }
 "random"                   { DlsScanner_lval.val = T_RANDOM;    return T_RANDOM;    }
 "etiquette"                { DlsScanner_lval.val = T_ETIQUETTE; return T_ETIQUETTE; }
 "daa"                      { DlsScanner_lval.val = T_DAA;       return T_DAA;       }
@@ -143,6 +144,7 @@ newline       [\n\r]+
  /*********************************************** Le reste ************************************************/
 "#define"                  { DlsScanner_lval.val = T_DEFINE;    return T_DEFINE;    }
 "#static"                  { DlsScanner_lval.val = T_STATIC;    return T_STATIC;    }
+"dyn_string"               { DlsScanner_lval.val = T_DYN_STRING;return T_DYN_STRING;}
 "."                        { DlsScanner_lval.val = ET;          return ET;          }
 "+"                        { DlsScanner_lval.val = OU;          return OU;          }
 "/"                        { DlsScanner_lval.val = BARRE;       return BARRE;       }

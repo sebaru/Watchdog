@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
 
 /************************************************ Prototypes de fonctions *****************************************************/
@@ -37,19 +37,39 @@
 /******************************************************************************************************************************/
  gboolean Tester_update_cadran( struct CADRAN *cadran )
   { if (!cadran) return(FALSE);
+    if (cadran->bit_controle!=-1)
+     { switch(cadran->type)
+        { case MNEMO_ENTREE:
+               return( cadran->val_ech != E(cadran->bit_controle) );
+          case MNEMO_BISTABLE:
+               return( cadran->val_ech != B(cadran->bit_controle) );
+          case MNEMO_ENTREE_ANA:
+               return( TRUE );
+          case MNEMO_CPTH:
+               return( cadran->val_ech != Partage->ch[cadran->bit_controle].confDB.valeur );
+          case MNEMO_CPT_IMP:
+               return( cadran->val_ech != Partage->ci[cadran->bit_controle].confDB.valeur );
+          case MNEMO_REGISTRE:
+               return( cadran->val_ech != Partage->registre[cadran->bit_controle].val );
+          default: return(FALSE);
+        }
+     }
     switch(cadran->type)
      { case MNEMO_ENTREE:
-            return( cadran->val_ech != E(cadran->bit_controle) );
        case MNEMO_BISTABLE:
-            return( cadran->val_ech != B(cadran->bit_controle) );
+        { gboolean valeur;
+          valeur = Dls_data_get_bool ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+          return( cadran->val_ech != valeur );
+        }
        case MNEMO_ENTREE_ANA:
             return( TRUE );
-       case MNEMO_CPTH:
-            return( cadran->val_ech != Partage->ch[cadran->bit_controle].confDB.valeur );
        case MNEMO_CPT_IMP:
-            return( cadran->val_ech != Partage->ci[cadran->bit_controle].confDB.valeur );
+        { gint valeur;
+          valeur = Dls_data_get_CPT_IMP ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+          return( cadran->val_ech != valeur );
+        }
+       case MNEMO_CPTH:
        case MNEMO_REGISTRE:
-            return( cadran->val_ech != Partage->registre[cadran->bit_controle].val );
        default: return(FALSE);
      }
   }
@@ -68,21 +88,40 @@
 
     etat_cadran->type         = cadran->type;
     etat_cadran->bit_controle = cadran->bit_controle;
+    g_snprintf( etat_cadran->tech_id, sizeof(etat_cadran->tech_id), "%s", cadran->tech_id );
+    g_snprintf( etat_cadran->acronyme, sizeof(etat_cadran->acronyme), "%s", cadran->acronyme );
 
     switch(cadran->type)
      { case MNEMO_BISTABLE:
-            g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
-                        "B%04d = %d", cadran->bit_controle, B(cadran->bit_controle)
-                      );
-            cadran->val_ech = B(cadran->bit_controle);
+            if (cadran->bit_controle!=-1)
+             { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
+                           "B%04d = %d", cadran->bit_controle, B(cadran->bit_controle)
+                         );
+               cadran->val_ech = B(cadran->bit_controle);
+             }
+            else
+             { gboolean valeur;
+               valeur = Dls_data_get_bool ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+               g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "B = %d", valeur );
+               cadran->val_ech = valeur;
+             }
             return(etat_cadran);
        case MNEMO_ENTREE:
-            g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
-                        "E%04d = %d", cadran->bit_controle, E(cadran->bit_controle)
-                      );
-            cadran->val_ech = B(cadran->bit_controle);
+            if (cadran->bit_controle!=-1)
+             { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle),
+                           "E%04d = %d", cadran->bit_controle, E(cadran->bit_controle)
+                         );
+               cadran->val_ech = B(cadran->bit_controle);
+             }
+            else
+             { gboolean valeur;
+               valeur = Dls_data_get_bool ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+               g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "E = %d", valeur );
+               cadran->val_ech = valeur;
+             }
             return(etat_cadran);
        case MNEMO_ENTREE_ANA:
+            if(cadran->bit_controle==-1) break;
             cadran->val_ech = Partage->ea[cadran->bit_controle].val_ech;
             if (EA_inrange(cadran->bit_controle))
              { if(-1000000.0<cadran->val_ech && cadran->val_ech<1000000.0)
@@ -117,6 +156,7 @@
        case MNEMO_CPT_IMP:
              { gfloat valeur;
                gchar *format;
+               if(cadran->bit_controle==-1) break;
                valeur = Partage->ci[cadran->bit_controle].confDB.valeur;
                valeur = valeur * (gfloat)Partage->ci[cadran->bit_controle].confDB.multi;                 /* Multiplication ! */
                switch (Partage->ci[cadran->bit_controle].confDB.type)
@@ -130,6 +170,7 @@
              }
             break;
        case MNEMO_REGISTRE:
+            if(cadran->bit_controle==-1) break;
             cadran->val_ech = Partage->registre[cadran->bit_controle].val;
             if(-1000000.0<cadran->val_ech && cadran->val_ech<1000000.0)
              { g_snprintf( etat_cadran->libelle, sizeof(etat_cadran->libelle), "%6.2f %s", cadran->val_ech,

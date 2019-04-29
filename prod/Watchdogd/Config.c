@@ -73,7 +73,7 @@
           g_snprintf( Config.home, sizeof(Config.home), "%s", g_get_home_dir() );
           goto parse;
         }
-       printf("Unable to parse config file %s, error %s\n", fichier_config, error->message );
+       printf("Unable to parse config file %s, error %s. Trying another file.\n", fichier_config, error->message );
        g_error_free( error ); error = NULL;
      }
 
@@ -82,7 +82,7 @@
        g_snprintf( Config.home, sizeof(Config.home), "%s/.watchdog", g_get_home_dir() );
        goto parse;
      }
-    printf("Unable to parse config file %s, error %s\n", fichier_home, error->message );
+    printf("Unable to parse config file %s, error %s. Trying another file.\n", fichier_home, error->message );
     g_error_free( error ); error = NULL;
 
     if (g_key_file_load_from_file(gkf, fichier_etc, G_KEY_FILE_NONE, &error))
@@ -96,6 +96,7 @@
     goto end;
 /******************************************************* Partie GLOBAL ********************************************************/
 parse:
+    printf("Using config file %s.\n", Config.config_file );
     chaine = g_key_file_get_string ( gkf, "GLOBAL", "home", NULL );
     if (chaine)
      { g_snprintf( Config.home, sizeof(Config.home), "%s", chaine ); g_free(chaine); }

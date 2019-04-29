@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -37,9 +37,11 @@
     guchar  cligno;
   };
  struct CMD_ETAT_BIT_CADRAN
-  { guint   bit_controle;
-    guint   type;
+  { gint    bit_controle;
+    gint    type;
     gchar   libelle[25];
+    gchar   tech_id[32];                                                                         /* Visuel Acronyme du cadran */
+    gchar   acronyme[64];                                                                        /* Visuel Acronyme du cadran */
   };
 
  struct CMD_SET_BIT_INTERNE
@@ -48,7 +50,7 @@
     gfloat valeur;
   };
 
- enum 
+ enum
   { SSTAG_CLIENT_WANT_PAGE_SUPERVISION,                                  /* Le client desire la page de supervision graphique */
     SSTAG_SERVEUR_AFFICHE_PAGE_SUP,
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_MOTIF,                              /* Le serveur envoi des motifs page supervision */

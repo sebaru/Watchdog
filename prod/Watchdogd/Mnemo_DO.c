@@ -119,8 +119,7 @@
 /* Sortie: une structure nouvellement allouée                                                                                 */
 /******************************************************************************************************************************/
  gboolean Recuperer_mnemos_DO_suite( struct DB **db_orig )
-  { struct CMD_TYPE_MNEMO_BASE *mnemo;
-    struct DB *db;
+  { struct DB *db;
 
     db = *db_orig;                                          /* Récupération du pointeur initialisé par la fonction précédente */
     Recuperer_ligne_SQL(db);                                                               /* Chargement d'une ligne resultat */

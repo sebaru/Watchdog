@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <sys/time.h>
  #include <sys/prctl.h>
  #include <sys/types.h>
@@ -51,8 +51,8 @@
 
     Cfg_http.lib->Thread_debug = FALSE;                                                        /* Settings default parameters */
     Cfg_http.tcp_port          = HTTP_DEFAUT_TCP_PORT;
-    Cfg_http.ssl_enable        = FALSE; 
-    Cfg_http.authenticate      = TRUE; 
+    Cfg_http.ssl_enable        = FALSE;
+    Cfg_http.authenticate      = TRUE;
     Cfg_http.nbr_max_connexion = HTTP_DEFAUT_MAX_CONNEXION;
     Cfg_http.max_upload_bytes  = HTTP_DEFAUT_MAX_UPLOAD_BYTES;
     Cfg_http.lws_debug_level   = HTTP_DEFAUT_LWS_DEBUG_LEVEL;
@@ -114,7 +114,7 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
              "%s: Parsing value type %d ('%s') for attribut '%s'", __func__,
               G_VALUE_TYPE(&valeur), G_VALUE_TYPE_NAME(&valeur), name );
-    switch( G_VALUE_TYPE(&valeur) )             
+    switch( G_VALUE_TYPE(&valeur) )
      { case G_TYPE_BOOLEAN:
             return( json_node_get_boolean(node) );
        case G_TYPE_INT64:
@@ -135,17 +135,13 @@
 /******************************************************************************************************************************/
  gint Http_Send_response_code ( struct lws *wsi, gint code )
   { unsigned char header[256], *header_cur, *header_end;
-   	struct HTTP_PER_SESSION_DATA *pss;
-    gint retour;
-
-    pss = lws_wsi_user ( wsi );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_INFO, "%s:  Sending Response code '%d'", __func__, code );
 
     header_cur = header;
     header_end = header + sizeof(header);
 
-    retour = lws_add_http_header_status( wsi, code, &header_cur, header_end );
-    retour = lws_finalize_write_http_header ( wsi, header, &header_cur, header_end );
+    lws_add_http_header_status( wsi, code, &header_cur, header_end );
+    lws_finalize_write_http_header ( wsi, header, &header_cur, header_end );
     return(1);
   }
 /******************************************************************************************************************************/
@@ -156,7 +152,6 @@
  gint Http_Send_response_code_with_buffer ( struct lws *wsi, gint code, gchar *content_type, gchar *buffer, gint taille_buf )
   { unsigned char header[256], *header_cur, *header_end;
    	struct HTTP_PER_SESSION_DATA *pss;
-    gint retour;
 
     pss = lws_wsi_user ( wsi );
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
@@ -166,12 +161,12 @@
     header_cur = header;
     header_end = header + sizeof(header);
 
-    retour = lws_add_http_header_status( wsi, code, &header_cur, header_end );
-    retour = lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE,
-                                           (const unsigned char *)content_type, strlen(content_type),
-                                           &header_cur, header_end );
-    retour = lws_add_http_header_content_length ( wsi, taille_buf, &header_cur, header_end );
-    retour = lws_finalize_write_http_header ( wsi, header, &header_cur, header_end );
+    lws_add_http_header_status( wsi, code, &header_cur, header_end );
+    lws_add_http_header_by_token ( wsi, WSI_TOKEN_HTTP_CONTENT_TYPE,
+                                  (const unsigned char *)content_type, strlen(content_type),
+                                  &header_cur, header_end );
+    lws_add_http_header_content_length ( wsi, taille_buf, &header_cur, header_end );
+    lws_finalize_write_http_header ( wsi, header, &header_cur, header_end );
     pss->send_buffer = buffer;
     pss->size_buffer = taille_buf;
     lws_callback_on_writable(wsi);
@@ -236,16 +231,17 @@
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
               "%s: send %d byte to '%s' ('%s')", __func__, taille_buf, pss->sid, pss->util );
     g_free(buf);
-  }   
+  }
 /******************************************************************************************************************************/
 /* CB_ws_histos : Gere le protocole WS histos (appellée par libwebsockets)                                                    */
 /* Entrées : le contexte, le message, l'URL                                                                                   */
 /* Sortie : 1 pour clore, 0 pour continuer                                                                                    */
 /******************************************************************************************************************************/
  static gint CB_ws_histos ( struct lws *wsi, enum lws_callback_reasons tag, void *user, void *data, size_t taille )
-  { struct WS_PER_SESSION_DATA *pss;
+  {
+#ifdef bouh
+    struct WS_PER_SESSION_DATA *pss;
     gchar *util;
-
     pss = lws_wsi_user ( wsi );
     switch (tag)
      { case LWS_CALLBACK_ESTABLISHED: lws_callback_on_writable(wsi);
@@ -260,7 +256,7 @@
              }
             g_snprintf( pss->util, sizeof(pss->util), "%s", util );
             g_free(util);
-            
+
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: WS callback established for %s", __func__, pss->util );
             /*pss->zmq = New_zmq ( ZMQ_SUB, "listen-to-msgs" );
             Connect_zmq ( pss->zmq, "inproc", ZMQUEUE_LIVE_MSGS, 0 );*/
@@ -278,6 +274,7 @@
             lws_callback_on_writable(wsi);
             break;
      }
+#endif
     return(0);
   }
 /******************************************************************************************************************************/
@@ -288,7 +285,7 @@
  gint Http_CB_file_upload( struct lws *wsi, char *buffer, int taille )
   { struct HTTP_PER_SESSION_DATA *pss;
     pss = lws_wsi_user ( wsi );
-   
+
     if (pss->post_data_length >= Cfg_http.max_upload_bytes)                  /* Si taille de fichier trop importante, on vire */
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                 "%s:  file too long (%d/%d), aborting", __func__,
@@ -296,10 +293,10 @@
        return(1);
      }
 
-    pss->post_data = g_try_realloc ( pss->post_data, pss->post_data_length + taille );
+    pss->post_data = g_try_realloc ( pss->post_data, pss->post_data_length + taille + 1 );
     memcpy ( pss->post_data + pss->post_data_length, buffer, taille );
     pss->post_data_length += taille;
-
+    pss->post_data[pss->post_data_length] = 0;
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
              "%s:  received %d bytes (total length=%d, max %d)", __func__,
               taille, pss->post_data_length, Cfg_http.max_upload_bytes );
@@ -313,8 +310,7 @@
  gint Http_get_arg_int ( struct lws *wsi, gchar *arg )
   { gchar token_id[12];
     const gchar *id_s;
-    gint id;
-    
+
     id_s = lws_get_urlarg_by_name	( wsi, "id=", token_id, sizeof(token_id) );                      /* Recup du param get 'ID' */
     if (id_s) return(atoi(id_s));
     return(0);
@@ -350,25 +346,25 @@
        case LWS_CALLBACK_HTTP_BODY:
              { if ( ! strcasecmp ( pss->url, "/postfile" ) )
                 { return( Http_Traiter_request_body_postfile ( wsi, data, taille ) ); }             /* Utilisation du lws_spa */
-               else if ( ! strcasecmp ( pss->url, "/cli" ) )
+               else if ( ! strcasecmp ( pss->url, "/bus" ) )
+                { return( Http_CB_file_upload( wsi, data, taille ) ); }     /* Sinon, c'est un buffer type json ou un fichier */
+               else if ( ! strcasecmp ( pss->url, "/memory" ) )
                 { return( Http_CB_file_upload( wsi, data, taille ) ); }     /* Sinon, c'est un buffer type json ou un fichier */
                return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));
              }
             break;
        case LWS_CALLBACK_HTTP_BODY_COMPLETION:
-             { /*lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
-                                       (char *)&remote_name, sizeof(remote_name),
-                                       (char *)&remote_ip, sizeof(remote_ip) );*/
-               if ( ! strcasecmp ( pss->url, "/postfile" ) )
+             { if ( ! strcasecmp ( pss->url, "/postfile" ) )
                 { return( Http_Traiter_request_body_completion_postfile ( wsi ) ); }
-               else if ( ! strcasecmp ( pss->url, "/cli" ) )
-                { return( Http_Traiter_request_body_completion_cli ( wsi ) ); }
+               else if ( ! strcasecmp ( pss->url, "/bus" ) )
+                { return( Http_Traiter_request_body_completion_bus ( wsi ) ); }
+               else if ( ! strcasecmp ( pss->url, "/memory" ) )
+                { return( Http_Traiter_request_body_completion_memory ( wsi ) ); }
                return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));
               }
             break;
        case LWS_CALLBACK_HTTP:
              { struct HTTP_PER_SESSION_DATA *pss;
-               struct HTTP_SESSION *session;
                gchar *url = (gchar *)data;
                gint retour;
                lws_get_peer_addresses ( wsi, lws_get_socket_fd(wsi),
@@ -376,6 +372,8 @@
                                         (char *)&remote_ip, sizeof(remote_ip) );
 
                pss = lws_wsi_user ( wsi );
+               pss->post_data = NULL;
+               pss->post_data_length = 0;
                Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: processing request '%s'.", __func__, url );
                if ( ! strcasecmp ( url, "/favicon.ico" ) )
                 { retour = lws_serve_http_file ( wsi, "WEB/favicon.gif", "image/gif", NULL, 0);
@@ -386,9 +384,12 @@
                else if ( ! strncasecmp ( url, "/audio/", 10 ) ) { return( Http_Traiter_request_getaudio ( wsi, remote_name, remote_ip, url+7 ) ); }
                else if ( ! strncasecmp ( url, "/process/", 9 ) ) { return( Http_Traiter_request_getprocess ( wsi, url+9 ) ); }
                else if ( ! strncasecmp ( url, "/dls/", 5 ) ) { return( Http_Traiter_request_getdls ( wsi, url+5 ) ); }
-               else if ( ! strncasecmp ( url, "/setm", 5 ) )   { return( Http_Traiter_request_setm ( wsi ) ); }
-               else if ( ! strcasecmp ( url, "/cli" ) )
-                { g_snprintf( pss->url, sizeof(pss->url), "/cli" );
+               else if ( ! strncasecmp ( url, "/memory", 7 ) )
+                { g_snprintf( pss->url, sizeof(pss->url), "/memory" );
+                  return(0);
+                }
+               else if ( ! strcasecmp ( url, "/bus" ) )
+                { g_snprintf( pss->url, sizeof(pss->url), "/bus" );
                   return(0);
                 }
                else if ( ! strcasecmp ( url, "/postfile" ) )
@@ -396,7 +397,7 @@
                   return(0);
                 }
 /****************************************** WS get Running config library *****************************************************/
-               else if ( ! strncasecmp( url, "/run/", 5 ) )
+               else if ( ! strncasecmp( url, "/library/", 9 ) )
                 { gchar *target = url+5;
                   GSList *liste;
                   Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
@@ -408,7 +409,7 @@
                       { if (!lib->Admin_json)
                          { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                                     "%s: library %s do not have Admin_json.", __func__, lib->admin_prompt );
-                         }    
+                         }
                         else
                          { gint taille_buf;
                            gchar *buffer;
@@ -417,7 +418,7 @@
                                     lib->admin_prompt, target+strlen(lib->admin_prompt) );
                            lib->Admin_json ( target+strlen(lib->admin_prompt), &buffer, &taille_buf );
                            return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buffer, taille_buf ));
-                         }    
+                         }
                       }
                      liste = g_slist_next(liste);
                    }
@@ -448,6 +449,7 @@
        case LWS_CALLBACK_OPENSSL_PERFORM_CLIENT_CERT_VERIFICATION:
             Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "CB_http: need to verify Client SSL Certs" );
 		          break;
+       default: return(0);
      }
     return(0);                                                      /* Poursuite du processus de prise en charge des requetes */
   }
@@ -523,7 +525,7 @@
      }
 
 	   Cfg_http.ws_context = lws_create_context(&Cfg_http.ws_info);
- 
+
     if (!Cfg_http.ws_context)
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR,
                 "%s: WebSocket Create Context creation error (%s). Shutting Down %p", __func__,

@@ -1,10 +1,10 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Http/cli.c       Gestion des request cli pour le thread HTTP de watchdog                                         */
+/* Watchdogd/Http/bus.c       Gestion des request bus pour le thread HTTP de watchdog                                         */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    26.12.2017 15:56:43 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
 /*
- * cli.c
+ * bus.c
  * This file is part of Watchdog
  *
  * Copyright (C) 2010-2019 - Sebastien Lefevre
@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <sys/types.h>
  #include <sys/stat.h>
  #include <fcntl.h>
@@ -34,11 +34,11 @@
  #include "Http.h"
 
 /******************************************************************************************************************************/
-/* Http_Traiter_request_body_completion_cli: le payload est arrivé, il faut traiter le fichier                                */
+/* Http_Traiter_request_body_completion_bus: le payload est arrivé, il faut traiter le fichier                                */
 /* Entrées: la connexion Websocket                                                                                            */
 /* Sortie : 0 ou 1 selon si la transaction est completed                                                                      */
 /******************************************************************************************************************************/
- gint Http_Traiter_request_body_completion_cli ( struct lws *wsi )
+ gint Http_Traiter_request_body_completion_bus ( struct lws *wsi )
   { const gchar *host, *thread, *tag, *text;
     struct HTTP_PER_SESSION_DATA *pss;
     JsonObject *object;
@@ -88,7 +88,7 @@
 
     Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
              "%s: HTTP/CLI request for %s:%s:%s:%s", __func__, host, thread, tag, text );
-             
+
     Send_zmq_with_tag ( Cfg_http.zmq_to_master, NULL, NOM_THREAD, host, thread, tag, (void *)text, strlen(text)+1 );
     return(Http_Send_response_code ( wsi, HTTP_200_OK ));
   }

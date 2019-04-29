@@ -46,7 +46,7 @@
 
     Cfg_snips.lib->Thread_debug = FALSE;                                                       /* Settings default parameters */
     Cfg_snips.enable            = FALSE;
-    g_snprintf( Cfg_snips.snips_host, sizeof(Cfg_snips.snips_host), "localhost", valeur );
+    g_snprintf( Cfg_snips.snips_host, sizeof(Cfg_snips.snips_host), "localhost" );
 
     if ( ! Recuperer_configDB( &db, NOM_THREAD ) )                                          /* Connexion a la base de données */
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_WARNING,
@@ -74,11 +74,11 @@
 /* Entrée : L'évènement                                                                                                       */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Snips_traiter_commande_vocale ( const gchar *intent, const gchar *action, const gchar *object, const gchar *room )
+ static void Snips_traiter_commande_vocale ( const gchar *intent, const gchar *quoi, const gchar *object, const gchar *room )
   { struct DB *db;
     gchar texte[80], insert[32];
 
-    g_snprintf ( texte, sizeof(texte), "%s,%s", intent, action );
+    g_snprintf ( texte, sizeof(texte), "%s,%s", intent, quoi );
     if (object)
      { g_snprintf ( insert, sizeof(insert), ",%s", object );
        g_strlcat( texte, insert, sizeof(texte) );
@@ -113,7 +113,7 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Snips_message_CB(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message)
-  { const gchar *targetAction, *targetObject, *targetRoom;
+  { const gchar *targetAction, *targetObject, *targetRoom, *targetAI;
     const gchar *slotValue, *slotName;
     const gchar *intent;
     JsonArray *slotArray;
@@ -180,18 +180,22 @@
        return;
      }
 
-    targetAction = targetObject = targetRoom = NULL;
+    targetAI = targetAction = targetObject = targetRoom = NULL;
     for( i=0;i<nbr_slots; i++)
      { JsonObject *slot = json_array_get_object_element ( slotArray, i );
        slotValue = json_object_get_string_member( json_object_get_object_member ( slot, "value" ), "value" );
        slotName = json_object_get_string_member( slot, "slotName" );
        Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_DEBUG,
                  "%s: slot %d/%d trouvé: %s - %s", __func__, i+1, nbr_slots, slotName, slotValue );
+       if (!strcmp(slotName,"targetAI")) targetAI = slotValue;
        if (!strcmp(slotName,"targetAction")) targetAction = slotValue;
        if (!strcmp(slotName,"targetObject")) targetObject = slotValue;
        if (!strcmp(slotName,"targetRoom"))   targetRoom   = slotValue;
      }
-    Snips_traiter_commande_vocale ( intent, targetAction, targetObject, targetRoom );
+    if (!strcmp(intent,"ACTION"))
+     { Snips_traiter_commande_vocale ( intent, targetAction, targetObject, targetRoom ); }
+    else if (!strcmp(intent,"QUESTION-AI"))
+     { Snips_traiter_commande_vocale ( intent, targetAI, targetObject, targetRoom ); }
     json_node_unref (Query);
     Cfg_snips.nbr_msg_recu++;
  	}
