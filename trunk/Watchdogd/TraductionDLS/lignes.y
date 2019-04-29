@@ -533,13 +533,17 @@ unite:          modulateur ENTIER HEURE ENTIER
                                $$ = New_chaine( taille ); /* 10 caractères max */
                                switch($5->type)
                                 { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,Dls_data_get_AI(%s,%s,&_%s_%s))",
-                                                                $5->valf, tech_id, acro, tech_id, acro ); break;
+                                                                $5->valf, alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+                                                                break;
                                   case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,Dls_data_get_AI(%s,%s,&_%s_%s))",
-                                                                $5->valf, tech_id, acro, tech_id, acro ); break;
+                                                                $5->valf, alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+                                                                break;
                                   case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,Dls_data_get_AI(%s,%s,&_%s_%s))",
-                                                                $5->valf, tech_id, acro, tech_id, acro ); break;
+                                                                $5->valf, alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+                                                                break;
                                   case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,Dls_data_get_AI(%s,%s,&_%s_%s))",
-                                                                $5->valf, tech_id, acro, tech_id, acro ); break;
+                                                                $5->valf, alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
+                                                                break;
                                 }
                              }
                             break;
