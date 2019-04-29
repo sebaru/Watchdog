@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/TraductionDLS/ligne.y        DÃ©finitions des ligne dls DLS                                                       */
+/* Watchdogd/TraductionDLS/ligne.y        Définitions des ligne dls DLS                                                       */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                        jeu. 24 juin 2010 19:37:44 CEST */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -7,7 +7,7 @@
  * lignes.y
  * This file is part of Watchdog
  *
- * Copyright (C) 2010 - SÃ©bastien Lefevre
+ * Copyright (C) 2010 - Sébastien Lefevre
  *
  * Watchdog is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -300,7 +300,7 @@ calcul_ea_result: T_REGISTRE ENTIER
                             break;
                           }
                          default:
-                          { Emettre_erreur_new( "Ligne %d :'%s' ne peut s'utiliser dans un rÃ©sultat de calcul", DlsScanner_get_lineno(), $1 );
+                          { Emettre_erreur_new( "Ligne %d :'%s' ne peut s'utiliser dans un résultat de calcul", DlsScanner_get_lineno(), $1 );
                             $$=0;
                           }
                        }
@@ -475,7 +475,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                    alias = Get_alias_par_acronyme(tech_id,acro);                                       /* On recupere l'alias */
                    if (!alias && $3) { alias = Set_new_external_alias(tech_id,acro); }/* Si dependance externe, on va chercher */
                    if (alias)
-                    { if ($5 && (alias->type_bit==MNEMO_TEMPO ||                              /* VÃ©rification des bits non comparables */
+                    { if ($5 && (alias->type_bit==MNEMO_TEMPO ||                              /* Vérification des bits non comparables */
                                  alias->type_bit==MNEMO_ENTREE ||
                                  alias->type_bit==MNEMO_BISTABLE ||
                                  alias->type_bit==MNEMO_MONOSTABLE ||
@@ -485,7 +485,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                          $$=New_chaine(2);
                          g_snprintf( $$, 2, "0" );
                        } else
-                      if (!$5 && (alias->type_bit==MNEMO_ENTREE_ANA ||        /* VÃ©rification des bits obligatoirement comparables */
+                      if (!$5 && (alias->type_bit==MNEMO_ENTREE_ANA ||        /* Vérification des bits obligatoirement comparables */
                                   alias->type_bit==MNEMO_REGISTRE ||
                                   alias->type_bit==MNEMO_CPT_IMP ||
                                   alias->type_bit==MNEMO_CPTH)
@@ -529,13 +529,35 @@ unite:          modulateur ENTIER HEURE ENTIER
                                g_snprintf( $$, 2, "0" );
                              }
                             else
-                             { taille = 50;
+                             { taille = 100;
                                $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
-                               switch($5->type)
-                                { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $5->valf, alias->num ); break;
-                                  case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $5->valf, alias->num ); break;
-                                  case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $5->valf, alias->num ); break;
-                                  case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $5->valf, alias->num ); break;
+                               if (alias->type==ALIAS_TYPE_STATIC)
+                                { switch($5->type)
+                                   { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $5->valf, alias->num ); break;
+                                     case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $5->valf, alias->num ); break;
+                                     case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $5->valf, alias->num ); break;
+                                     case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $5->valf, alias->num ); break;
+                                   }
+                                }
+                               else
+                                { switch($5->type)
+                                   { case INF:
+                                       g_snprintf( $$, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)<%f",
+                                                   alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                       break;
+                                     case SUP:
+                                       g_snprintf( $$, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)>%f",
+                                                   alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                       break;
+                                     case INF_OU_EGAL:
+                                       g_snprintf( $$, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)<=%f",
+                                                   alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                       break;
+                                     case SUP_OU_EGAL:
+                                       g_snprintf( $$, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)>=%f",
+                                                   alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                       break;
+                                   }
                                 }
                              }
                             break;
@@ -575,10 +597,10 @@ unite:          modulateur ENTIER HEURE ENTIER
                           $$=New_chaine(2);
                           g_snprintf( $$, 2, "0" );
                         }
-                   if ($3) g_free($3);                                                   /* LibÃ©ration du prefixe s'il existe */
+                   if ($3) g_free($3);                                                   /* Libération du prefixe s'il existe */
                    g_free($2);                                                         /* On n'a plus besoin de l'identifiant */
                    Liberer_options($4);
-                   if ($5) g_free($5);                                               /* LibÃ©ration du comparateur s'il existe */
+                   if ($5) g_free($5);                                               /* Libération du comparateur s'il existe */
                 }}
                 ;
 
@@ -658,11 +680,11 @@ une_action:     ICONE ENTIER liste_options
                       g_snprintf( $$->alors, taille, " " );
                       $$->sinon = NULL;
                     }
-                   else                                                           /* L'alias existe, vÃ©rifions ses parametres */
+                   else                                                           /* L'alias existe, vérifions ses parametres */
                     { GList *options, *options_g, *options_d;
                       options_g = g_list_copy( $4 );
                       options_d = g_list_copy( alias->options );
-                      options = g_list_concat( options_g, options_d );                  /* ConcatÃ©nation des listes d'options */
+                      options = g_list_concat( options_g, options_d );                  /* Concaténation des listes d'options */
                       if ($1 && (alias->type_bit==MNEMO_TEMPO ||
                                  alias->type_bit==MNEMO_MSG ||
                                  alias->type_bit==MNEMO_BUS ||
@@ -707,7 +729,7 @@ une_action:     ICONE ENTIER liste_options
                        }
                       g_list_free(options);
                     }
-                   Liberer_options($4);                                                    /* On libÃ©re les options "locales" */
+                   Liberer_options($4);                                                    /* On libére les options "locales" */
                    if ($3) g_free($3);
                    g_free($2);
                 }}
