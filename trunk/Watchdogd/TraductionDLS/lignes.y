@@ -542,19 +542,19 @@ unite:          modulateur ENTIER HEURE ENTIER
                                else
                                 { switch($5->type)
                                    { case INF:
-                                       g_snprintf( $$, taille, "Dls_data_get_AI(%s,%s,&_%s_%s)<%f",
+                                       g_snprintf( $$, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)<%f",
                                                    alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
                                        break;
                                      case SUP:
-                                       g_snprintf( $$, taille, "Dls_data_get_AI(%s,%s,&_%s_%s)>%f",
+                                       g_snprintf( $$, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)>%f",
                                                    alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
                                        break;
                                      case INF_OU_EGAL:
-                                       g_snprintf( $$, taille, "Dls_data_get_AI(%s,%s,&_%s_%s)<=%f",
+                                       g_snprintf( $$, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)<=%f",
                                                    alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
                                        break;
                                      case SUP_OU_EGAL:
-                                       g_snprintf( $$, taille, "Dls_data_get_AI(%s,%s,&_%s_%s)>=%f",
+                                       g_snprintf( $$, taille, "Dls_data_get_AI(\"%s\",\"%s\",&_%s_%s)>=%f",
                                                    alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
                                        break;
                                    }
