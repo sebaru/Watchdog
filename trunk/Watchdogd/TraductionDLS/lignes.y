@@ -255,19 +255,19 @@ calcul_expr3:   VALF
                     { switch(alias->type_bit)               /* On traite que ce qui peut passer en "condition" */
                        { case MNEMO_ENTREE_ANA:
                           { taille = 15;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
                             g_snprintf( $$, taille, "EA_ech(%d)", alias->num );
                             break;
                           }
                          case MNEMO_REGISTRE:
                           { taille = 15;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
                             g_snprintf( $$, taille, "R(%d)", alias->num );
                             break;
                           }
                          case MNEMO_CPT_IMP:
                           { taille = 15;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
                             g_snprintf( $$, taille, "CI(%d)", alias->num );
                             break;
                           }
@@ -425,7 +425,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                 | T_CPT_IMP ordre VALF
                 {{ int taille;
                    taille = 30;
-                   $$ = New_chaine( taille ); /* 10 caractères max */
+                   $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
                    switch( $1 )
                     { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", $1, $3 );  break;
                       case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", $1, $3 );  break;
@@ -523,27 +523,41 @@ unite:          modulateur ENTIER HEURE ENTIER
                           }
                          case MNEMO_ENTREE_ANA:
                           { if ($5->type == T_EGAL)
-                             { Emettre_erreur_new( "Ligne %d: '%s:%s' ne peut s'utiliser avec le comparateur '='",
-                                                   DlsScanner_get_lineno(), tech_id, acro );
+                             { Emettre_erreur_new( "Ligne %d: '%s (EA%4d)' ne peut s'utiliser avec le comparateur '='",
+                                                   DlsScanner_get_lineno(), $3, alias->num );
                                $$=New_chaine(2);
                                g_snprintf( $$, 2, "0" );
                              }
                             else
                              { taille = 100;
-                               $$ = New_chaine( taille ); /* 10 caractères max */
-                               switch($5->type)
-                                { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,Dls_data_get_AI(%s,%s,&_%s_%s))",
-                                                                $5->valf, alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
-                                                                break;
-                                  case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,Dls_data_get_AI(%s,%s,&_%s_%s))",
-                                                                $5->valf, alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
-                                                                break;
-                                  case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,Dls_data_get_AI(%s,%s,&_%s_%s))",
-                                                                $5->valf, alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
-                                                                break;
-                                  case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,Dls_data_get_AI(%s,%s,&_%s_%s))",
-                                                                $5->valf, alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme );
-                                                                break;
+                               $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
+                               if (alias->type==ALIAS_TYPE_STATIC)
+                                { switch($5->type)
+                                   { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $5->valf, alias->num ); break;
+                                     case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $5->valf, alias->num ); break;
+                                     case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $5->valf, alias->num ); break;
+                                     case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $5->valf, alias->num ); break;
+                                   }
+                                }
+                               else
+                                { switch($5->type)
+                                   { case INF:
+                                       g_snprintf( $$, taille, "Dls_data_get_AI(%s,%s,&_%s_%s)<%f",
+                                                   alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                       break;
+                                     case SUP:
+                                       g_snprintf( $$, taille, "Dls_data_get_AI(%s,%s,&_%s_%s)>%f",
+                                                   alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                       break;
+                                     case INF_OU_EGAL:
+                                       g_snprintf( $$, taille, "Dls_data_get_AI(%s,%s,&_%s_%s)<=%f",
+                                                   alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                       break;
+                                     case SUP_OU_EGAL:
+                                       g_snprintf( $$, taille, "Dls_data_get_AI(%s,%s,&_%s_%s)>=%f",
+                                                   alias->tech_id, alias->acronyme,alias->tech_id, alias->acronyme, $5->valf );
+                                       break;
+                                   }
                                 }
                              }
                             break;
@@ -562,7 +576,7 @@ unite:          modulateur ENTIER HEURE ENTIER
                            }
                          case MNEMO_CPT_IMP:
                           { taille = 30;
-                            $$ = New_chaine( taille ); /* 10 caractères max */
+                            $$ = New_chaine( taille ); /* 10 caractÃ¨res max */
                             switch($5->type)
                              { case INF        : g_snprintf( $$, taille, "CI(%d)<%f", alias->num, $5->valf );  break;
                                case SUP        : g_snprintf( $$, taille, "CI(%d)>%f", alias->num, $5->valf );  break;
