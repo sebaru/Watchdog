@@ -575,31 +575,41 @@
 /* Entrées: numero du motif                                                                                                   */
 /* Sortie: la structure action                                                                                                */
 /******************************************************************************************************************************/
- struct ACTION *New_action_icone( int num, GList *options )
+ struct ACTION *New_action_icone( struct ALIAS *alias, GList *options )
   { struct ACTION *action;
-    int taille, rouge, vert, bleu, val, coul, cligno;
+    int taille, rouge, vert, bleu, mode, coul, cligno;
+    gchar *color;
 
-    val    = Get_option_entier ( options, MODE   ); if (val    == -1) val = 0;
-    coul   = Get_option_entier ( options, COLOR  ); if (coul   == -1) coul = 0;
+    mode   = Get_option_entier ( options, MODE   ); if (mode   == -1) mode   = 0;
+    coul   = Get_option_entier ( options, COLOR  ); if (coul   == -1) coul   = 0;
     cligno = Get_option_entier ( options, CLIGNO ); if (cligno == -1) cligno = 0;
-    taille = 128;
-    Add_bit_to_list(MNEMO_MOTIF, num);
+    taille = 256;
     action = New_action();
     action->alors = New_chaine( taille );
     switch (coul)
-     { case ROUGE   : rouge = 255; vert =   0; bleu =   0; break;
-       case VERT    : rouge =   0; vert = 255; bleu =   0; break;
-       case BLEU    : rouge =   0; vert =   0; bleu = 255; break;
-       case JAUNE   : rouge = 255; vert = 255; bleu =   0; break;
-       case ORANGE  : rouge = 255; vert = 190; bleu =   0; break;
-       case BLANC   : rouge = 255; vert = 255; bleu = 255; break;
-       case GRIS    : rouge = 127; vert = 127; bleu = 127; break;
-       case KAKI    : rouge =   0; vert = 100; bleu =   0; break;
-       default      : rouge = vert = bleu = 0;
+     { case ROUGE   : rouge = 255; vert =   0; bleu =   0; color="red"; break;
+       case VERT    : rouge =   0; vert = 255; bleu =   0; color="green"; break;
+       case BLEU    : rouge =   0; vert =   0; bleu = 255; color="blue"; break;
+       case JAUNE   : rouge = 255; vert = 255; bleu =   0; color="yellow"; break;
+       case ORANGE  : rouge = 255; vert = 190; bleu =   0; color="orange"; break;
+       case BLANC   : rouge = 255; vert = 255; bleu = 255; color="white"; break;
+       case GRIS    : rouge = 127; vert = 127; bleu = 127; color="lightgray"; break;
+       case KAKI    : rouge =   0; vert = 100; bleu =   0; color="brown"; break;
+       default      : rouge = vert = bleu = 0; color="black";
      }
-    g_snprintf( action->alors, taille,
-               " if (vars->bit_comm_out) SI(%d, 0, 0, 100, 0, 1); else SI(%d,%d,%d,%d,%d,%d);",
-                num, num, val, rouge, vert, bleu, cligno );
+    if (alias->type==ALIAS_TYPE_STATIC)
+     { g_snprintf( action->alors, taille,
+                   "  if (vars->bit_comm_out) SI(%d, 0, 0, 100, 0, 1);\n"
+                   "                     else SI(%d,%d,%d,%d,%d,%d);\n",
+                     alias->num, alias->num, mode, rouge, vert, bleu, cligno );
+     }
+    else
+     { g_snprintf( action->alors, taille,
+                   "  if (vars->bit_comm_out) Dls_data_set_VISUEL( \"%s\", \"%s\", &_%s_%s, 0, \"darkgreen\", 1 );\n"
+                   "                     else Dls_data_set_VISUEL( \"%s\", \"%s\", &_%s_%s, %d, \"%s\", %d );\n",
+                     alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme,
+                     alias->tech_id, alias->acronyme, alias->tech_id, alias->acronyme, mode, color, cligno );
+     }
     return(action);
   }
 /******************************************************************************************************************************/
@@ -1078,7 +1088,9 @@
            { gchar *libelle = Get_option_chaine( alias->options, T_LIBELLE );
              if (!libelle) libelle="no libelle";
              switch(alias->type_bit)
-              { case MNEMO_BUS: break;
+              { case MNEMO_BUS:
+                case MNEMO_MOTIF:
+                   break;
                 case MNEMO_SORTIE:
                  { Mnemo_auto_create_DO ( Dls_plugin.id, alias->acronyme, libelle );
                    break;

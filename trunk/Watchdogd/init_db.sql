@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS `class` (
 
 CREATE TABLE IF NOT EXISTS `icons` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` varchar(4) NOT NULL DEFAULT 'svg',
   `date_create` datetime NOT NULL DEFAULT NOW(),
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `id_classe` int(11) NOT NULL DEFAULT '0',
@@ -486,6 +487,9 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `bleu` int(11) NOT NULL DEFAULT '0',
   `layer` int(11) NOT NULL DEFAULT '0',
   `mnemo_id` int(11) NOT NULL DEFAULT '0',
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
+  `color` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT "lightgray",
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
   FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE

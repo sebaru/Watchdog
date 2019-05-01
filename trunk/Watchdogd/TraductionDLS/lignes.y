@@ -392,24 +392,6 @@ unite:          modulateur ENTIER HEURE ENTIER
                    if ($1) { g_snprintf( $$, taille, "!B(%d)", $3 ); }
                    else    { g_snprintf( $$, taille, "B(%d)", $3 ); }
                 }}
-               | EANA ENTIER ordre VALF
-                {{ int taille;
-                   if ($3 == T_EGAL)
-                    { Emettre_erreur_new( "Ligne %d: EA%04d ne peut s'utiliser avec le comparateur '='", DlsScanner_get_lineno(), $2 );
-                      $$=New_chaine(2);
-                      g_snprintf( $$, 2, "0" );
-                    }
-                   else
-                    { taille = 40;
-                      $$ = New_chaine( taille );
-                      switch( $3 )
-                       { case INF        : g_snprintf( $$, taille, "EA_ech_inf(%f,%d)", $4, $2 ); break;
-                         case SUP        : g_snprintf( $$, taille, "EA_ech_sup(%f,%d)", $4, $2 ); break;
-                         case INF_OU_EGAL: g_snprintf( $$, taille, "EA_ech_inf_egal(%f,%d)", $4, $2 ); break;
-                         case SUP_OU_EGAL: g_snprintf( $$, taille, "EA_ech_sup_egal(%f,%d)", $4, $2 ); break;
-                       }
-                    }
-                }}
                | T_REGISTRE ENTIER ordre VALF
                 {{ int taille;
                    taille = 40;
@@ -633,11 +615,7 @@ action:         action VIRGULE une_action
                 | une_action {{ $$=$1; }}
                 ;
 
-une_action:     ICONE ENTIER liste_options
-                  {{ $$=New_action_icone($2, $3);
-                     Liberer_options($3);
-                  }}
-                | T_ACT_COMOUT
+une_action:     T_ACT_COMOUT
                   {{ $$=New_action_vars_mono("vars->bit_comm_out"); }}
                 | T_ACT_DEF
                   {{ $$=New_action_vars_mono("vars->bit_defaut"); }}
@@ -688,6 +666,7 @@ une_action:     ICONE ENTIER liste_options
                       if ($1 && (alias->type_bit==MNEMO_TEMPO ||
                                  alias->type_bit==MNEMO_MSG ||
                                  alias->type_bit==MNEMO_BUS ||
+                                 alias->type_bit==MNEMO_MOTIF ||
                                  alias->type_bit==MNEMO_MONOSTABLE)
                          )
                        { Emettre_erreur_new( "Ligne %d: '/%s' ne peut s'utiliser", DlsScanner_get_lineno(), alias->acronyme );
@@ -717,7 +696,7 @@ une_action:     ICONE ENTIER liste_options
                          case MNEMO_MONOSTABLE: $$=New_action_mono( alias );             break;
                          case MNEMO_CPTH      : $$=New_action_cpt_h( alias, options );   break;
                          case MNEMO_CPT_IMP   : $$=New_action_cpt_imp( alias, options ); break;
-                         case MNEMO_MOTIF     : $$=New_action_icone( alias->num, options );   break;
+                         case MNEMO_MOTIF     : $$=New_action_icone( alias, options );   break;
                          default: { Emettre_erreur_new( "Ligne %d: '%s:%s' syntax error", DlsScanner_get_lineno(),
                                                         alias->tech_id, alias->acronyme );
                                     $$=New_action();

@@ -93,16 +93,35 @@
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
         }
        num = atoi(num_s);
-       json_builder_set_member_name  ( builder, "etat" );
-       json_builder_add_int_value    ( builder, Partage->i[num].etat );
-       json_builder_set_member_name  ( builder, "rouge" );
-       json_builder_add_int_value    ( builder, Partage->i[num].rouge);
-       json_builder_set_member_name  ( builder, "vert" );
-       json_builder_add_int_value    ( builder, Partage->i[num].vert );
-       json_builder_set_member_name  ( builder, "bleu" );
-       json_builder_add_int_value    ( builder, Partage->i[num].bleu );
-       json_builder_set_member_name  ( builder, "cligno" );
-       json_builder_add_int_value    ( builder, Partage->i[num].cligno );
+       if (num!=-1)
+        { json_builder_set_member_name  ( builder, "etat" );
+          json_builder_add_int_value    ( builder, Partage->i[num].etat );
+          json_builder_set_member_name  ( builder, "rouge" );
+          json_builder_add_int_value    ( builder, Partage->i[num].rouge);
+          json_builder_set_member_name  ( builder, "vert" );
+          json_builder_add_int_value    ( builder, Partage->i[num].vert );
+          json_builder_set_member_name  ( builder, "bleu" );
+          json_builder_add_int_value    ( builder, Partage->i[num].bleu );
+          json_builder_set_member_name  ( builder, "cligno" );
+          json_builder_add_int_value    ( builder, Partage->i[num].cligno );
+        }
+       else
+        { struct DLS_VISUEL *visu=NULL;
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                    "%s: HTTP/ request for GET I %s:%s", __func__, tech_id, acronyme );
+          Dls_data_get_VISUEL ( tech_id, acronyme, (gpointer *)&visu );
+          if (!visu)
+           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: visu non trouvée", __func__ );
+             g_object_unref(builder);
+             return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+           }
+          json_builder_set_member_name  ( builder, "etat" );
+          json_builder_add_int_value    ( builder, visu->etat );
+          json_builder_set_member_name  ( builder, "color" );
+          json_builder_add_string_value ( builder, visu->color);
+          json_builder_set_member_name  ( builder, "cligno" );
+          json_builder_add_int_value    ( builder, visu->cligno );
+        }
      }
 
     json_builder_end_object (builder);                                                                        /* End Document */
