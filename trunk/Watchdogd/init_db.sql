@@ -480,6 +480,7 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `larg` float NOT NULL DEFAULT '0',
   `haut` float NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
+  `scale` float NOT NULL DEFAULT '1',
   `dialog` int(11) NOT NULL DEFAULT '0',
   `gestion` int(11) NOT NULL DEFAULT '0',
   `rouge` int(11) NOT NULL DEFAULT '0',
@@ -489,7 +490,7 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `mnemo_id` int(11) NOT NULL DEFAULT '0',
   `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
   `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
-  `color` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT "lightgray",
+  `def_color` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT "#c0c0c0",
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
   FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
