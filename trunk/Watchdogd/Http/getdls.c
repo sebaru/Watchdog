@@ -80,13 +80,10 @@
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
  static gint Http_dls_getlist ( struct lws *wsi )
-  { unsigned char header[256], *header_cur, *header_end;
-	   gchar date[64], *buf;
+  { gchar *buf;
     JsonBuilder *builder;
     JsonGenerator *gen;
     gsize taille_buf;
-    struct tm *temps;
-    gint retour, num;
 
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = json_builder_new ();

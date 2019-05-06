@@ -108,8 +108,7 @@
 /* Sortie : 0 ou 1 selon si la transaction est completed                                                                      */
 /******************************************************************************************************************************/
  gint Http_Traiter_request_body_completion_postfile ( struct lws *wsi )
-  { unsigned char header[512], *header_cur, *header_end;
-    struct HTTP_PER_SESSION_DATA *pss;
+  { struct HTTP_PER_SESSION_DATA *pss;
     gint retour, code, id;
     const gchar *type;
 

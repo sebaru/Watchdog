@@ -54,7 +54,7 @@
                 "SELECT d.tech_id, m.acronyme"
                 " FROM %s as m INNER JOIN %s as d ON m.dls_id = d.id"
                 " INNER JOIN %s as h ON h.id_mnemo = m.id"
-                " WHERE CURTIME() LIKE CONCAT(LPAD(h.heure,2,'0'),':',LPAD(h.minute,2,'0'),':%')",
+                " WHERE CURTIME() LIKE CONCAT(LPAD(h.heure,2,'0'),':',LPAD(h.minute,2,'0'),':%%')",
                 NOM_TABLE_MNEMO, NOM_TABLE_DLS, NOM_TABLE_MNEMO_HORLOGE
               );
 

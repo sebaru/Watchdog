@@ -38,8 +38,7 @@
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
  gboolean Http_Traiter_request_getstatus ( struct lws *wsi )
-  { unsigned char header[256], *header_cur, *header_end;
-	   gchar date[64], *buf;
+  { gchar date[64], *buf;
     JsonBuilder *builder;
     JsonGenerator *gen;
     gsize taille_buf;
