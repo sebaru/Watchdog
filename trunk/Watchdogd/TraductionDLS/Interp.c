@@ -1099,6 +1099,10 @@
                  { Mnemo_auto_create_DI ( Dls_plugin.id, alias->acronyme, libelle );
                    break;
                  }
+                case MNEMO_HORLOGE:
+                 { Mnemo_auto_create_HORLOGE ( Dls_plugin.id, alias->acronyme, libelle );
+                   break;
+                 }
                 case MNEMO_ENTREE_ANA:
                  { gchar *unite = Get_option_chaine( alias->options, T_UNITE );
                    if (!unite) unite="no unit";

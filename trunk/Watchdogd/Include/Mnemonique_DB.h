@@ -38,7 +38,6 @@
  #define NOM_TABLE_MNEMO_CPTIMP   "mnemos_CptImp"
  #define NOM_TABLE_MNEMO_TEMPO    "mnemos_Tempo"
  #define NOM_TABLE_MNEMO_REGISTRE "mnemos_Registre"
- #define NOM_TABLE_MNEMO_HORLOGE  "mnemos_Horloge"
 
 /***************************************************** Définitions des prototypes *********************************************/
  extern struct CMD_TYPE_MNEMO_BASE *Rechercher_mnemo_baseDB ( guint id );
@@ -65,12 +64,7 @@
  extern gboolean Recuperer_mnemos_AI_by_text ( struct DB **db_retour, gchar *thread, gchar *text );
  extern gboolean Recuperer_mnemos_AI_suite( struct DB **db_orig );
 
- extern gboolean Modifier_mnemo_horlogeDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );                 /* Dans Mnemo_HORLOGES.c */
- extern gint Ajouter_mnemo_horlogeDB( struct CMD_TYPE_MNEMO_FULL *mnemo_full );
- extern gboolean Retirer_horlogeDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
- extern gboolean Recuperer_horloge_by_id_mnemo ( struct DB **db_retour, gint id_mnemo );
- extern struct CMD_TYPE_MNEMO_FULL *Rechercher_horloge_by_id ( gint id );
- extern struct CMD_TYPE_MNEMO_FULL *Recuperer_horlogeDB_suite( struct DB **db_orig );
+ extern gboolean Mnemo_auto_create_HORLOGE ( gint dls_id, gchar *acronyme, gchar *libelle_src );    /* Dans Mnemos_Horloges.c */
  extern void Activer_horlogeDB ( void );
 
  extern void Updater_cpt_impDB ( void );                                                                   /* Dans Mnemo_CI.c */

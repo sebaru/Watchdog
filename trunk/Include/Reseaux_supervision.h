@@ -65,8 +65,6 @@
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CADRAN_FIN,                        /* Le serveur envoi des cadrans page supervision */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP,                         /* Le serveur envoi des camera page supervision */
     SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_CAMERA_SUP_FIN,                     /* Le serveur envoi des camera page supervision */
-    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGE,                                     /* Le serveur envoi des ticks horloges */
-    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGE_FIN,                                    /* Fin de l'envoi des ticks horloge */
 
     SSTAG_SERVEUR_SUPERVISION_CHANGE_MOTIF,                            /* Un motif à changé d'etat, nous l'envoyons au client */
     SSTAG_CLIENT_CHANGE_MOTIF_UNKNOWN,                          /* Reponse si le numero Ixxx n'est pas utilisé dans le client */
@@ -77,18 +75,6 @@
     SSTAG_SERVEUR_SUPERVISION_SET_SYN_VARS,                                           /* Changement des variables synoptiques */
     SSTAG_CLIENT_SET_SYN_VARS_UNKNOWN,                                                                  /* Synoptique inconnu */
     SSTAG_CLIENT_ACQ_SYN,                                                                 /* Le client acquitte un synoptique */
-    SSTAG_CLIENT_WANT_HORLOGES,                                    /* Le client demande la liste des horloges d'un synoptique */
-    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGES,                         /* Le serveur envoi des scenario page supervision */
-    SSTAG_SERVEUR_ADDPROGRESS_SUPERVISION_HORLOGES_FIN,                     /* Le serveur envoi des scenario page supervision */
-    SSTAG_CLIENT_WANT_HORLOGE,                                    /* Le client demande les ticks d'une horloge en particulier */
-    SSTAG_CLIENT_EDIT_HORLOGE,                                                       /* Le client souhaite editer une horloge */
-    SSTAG_SERVEUR_EDIT_HORLOGE_OK,
-    SSTAG_CLIENT_VALIDE_EDIT_HORLOGE,
-    SSTAG_SERVEUR_VALIDE_EDIT_HORLOGE_OK,
-    SSTAG_CLIENT_ADD_HORLOGE,
-    SSTAG_SERVEUR_ADD_HORLOGE_OK,
-    SSTAG_CLIENT_DEL_HORLOGE,
-    SSTAG_SERVEUR_DEL_HORLOGE_OK,
   };
 
 #endif

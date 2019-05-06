@@ -327,6 +327,24 @@ CREATE TABLE IF NOT EXISTS `mnemos_CH` (
   FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `mnemos_Horloge`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `dls_id` INT(11) NOT NULL DEFAULT '0',
+  `etat` BOOLEAN NOT NULL DEFAULT '0',
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `heure` int(11) NOT NULL DEFAULT '0',
+  `minute` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE (`dls_id`,`acronyme`),
+  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 
@@ -372,21 +390,6 @@ CREATE TABLE IF NOT EXISTS `mnemos_AnalogInput` (
   PRIMARY KEY (`id_mnemo`),
   FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `mnemos_Horloge`
---
-
-CREATE TABLE IF NOT EXISTS `mnemos_Horloge` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_mnemo` int(11) NOT NULL,
-  `heure` int(11) NOT NULL,
-  `minute` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 

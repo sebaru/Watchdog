@@ -120,14 +120,6 @@
 /********************************* Préparation des options et Envoi des requetes **********************************************/
     Lancer_requete_SQL ( db, "START TRANSACTION" );                                            /* Execution de la requete SQL */
     Lancer_requete_SQL ( db, requete );                                                        /* Execution de la requete SQL */
-    if (mnemo->mnemo_base.type == MNEMO_HORLOGE)                                                       /* Ajout d'une horloge */
-     { g_snprintf( requete, sizeof(requete),                                                                   /* Requete SQL */
-                   "INSERT INTO syns_motifs "
-                   "SET mnemo_id=LAST_INSERT_ID(),libelle='Horloge',syn_id='%d',"
-                   "posx = '150.0', posy = '150.0', larg = '50.0', haut = '50.0'",
-                   mnemo->mnemo_base.syn_id );
-       Lancer_requete_SQL ( db, requete );                                                     /* Execution de la requete SQL */
-     }
     retour = Lancer_requete_SQL ( db, "COMMIT;" );                                             /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return (retour);

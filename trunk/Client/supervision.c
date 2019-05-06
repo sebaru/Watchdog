@@ -127,119 +127,6 @@
  static void Menu_acquitter_synoptique( struct TYPE_INFO_SUPERVISION *infos )
   { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_ACQ_SYN, (gchar *)&infos->syn_id, sizeof(gint) ); }
 /******************************************************************************************************************************/
-/* CB_Editer_horloge: Fonction appelée qd on appuie sur un des boutons de l'interface                                         */
-/* Entrée: la reponse de l'utilisateur et un flag precisant l'edition/ajout                                                   */
-/* sortie: TRUE                                                                                                               */
-/******************************************************************************************************************************/
- static gboolean CB_Editer_horloge ( GtkDialog *dialog, gint reponse, struct TYPE_INFO_SUPERVISION *infos )
-  { GtkTreeSelection *selection;
-    GtkTreeModel *store;
-    GList *lignes;
-    GtkTreeIter iter;
-    switch(reponse)
-     { /*case GTK_RESPONSE_APPLY:*/
-       case GTK_RESPONSE_OK:
-             { gchar *libelle;
-               selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(infos->Liste_horloge) );
-               store     = gtk_tree_view_get_model    ( GTK_TREE_VIEW(infos->Liste_horloge) );
-               lignes    = gtk_tree_selection_get_selected_rows ( selection, NULL );
-               if ( lignes )
-                { gint id_mnemo;
-                  gtk_tree_model_get_iter( store, &iter, lignes->data );                   /* Recuperation ligne selectionnée */
-                  gtk_tree_model_get( store, &iter, COLONNE_HORLOGE_ID_MNEMO, &id_mnemo, -1 );                 /* Recup du id */
-                  gtk_tree_model_get( store, &iter, COLONNE_HORLOGE_LIBELLE, &libelle, -1 );
-                  Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_HORLOGE, (gchar *)&id_mnemo, sizeof( gint ) );
-                  gtk_tree_selection_unselect_iter( selection, &iter );
-                  Creer_page_horloge ( libelle, id_mnemo );
-                }
-               g_list_foreach (lignes, (GFunc) gtk_tree_path_free, NULL);
-               g_list_free (lignes);                                                                    /* Liberation mémoire */
-               g_free(libelle);               
-               break;
-             }
-            break;
-       case GTK_RESPONSE_CANCEL:
-       default:              break;
-     }
-    gtk_widget_destroy(infos->Dialog_horloge);
-    return(TRUE);
-  }
-/******************************************************************************************************************************/
-/* Rafraichir_visu_horloge: Met à jour l'entrée horloge correspondante                                                        */
-/* Entrée: une reference sur l'horloge                                                                                        */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Rafraichir_visu_horloge( GtkListStore *store, GtkTreeIter *iter, struct CMD_TYPE_MNEMO_BASE *mnemo )
-  { gtk_list_store_set ( GTK_LIST_STORE(store), iter,
-                         COLONNE_HORLOGE_LIBELLE, mnemo->libelle,
-                         COLONNE_HORLOGE_ID_MNEMO, mnemo->id,
-                         -1
-                       );
-  }
-/******************************************************************************************************************************/
-/* Afficher_une_horloge: Ajoute une horloge dans la liste des horloges du synoptiques                                         */
-/* Entrée: une reference sur la page et sur l'horloge                                                                         */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- void Proto_afficher_une_horloge( struct TYPE_INFO_SUPERVISION *infos, struct CMD_TYPE_MNEMO_BASE *mnemo )
-  { GtkListStore *store;
-    GtkTreeIter iter;
-    printf(" print horloge infos=%p\n", infos );
-    store = GTK_LIST_STORE(gtk_tree_view_get_model( GTK_TREE_VIEW(infos->Liste_horloge) ));
-    gtk_list_store_append ( store, &iter );                                                          /* Acquisition iterateur */
-    Rafraichir_visu_horloge ( store, &iter, mnemo );
-  }
-/******************************************************************************************************************************/
-/* Menu_ouvrir_horloges_synoptique: Envoi une demande de liste des horloges liées au synoptique                               */
-/* Entrée: La page d'information synoptique                                                                                   */
-/* Sortie: Néant                                                                                                              */
-/******************************************************************************************************************************/
- static void Menu_ouvrir_horloges_synoptique( struct TYPE_INFO_SUPERVISION *infos )
-  { GtkTreeSelection *selection;
-    GtkTreeViewColumn *colonne;
-    GtkCellRenderer *renderer;
-    GtkListStore *store;
-    GtkWidget *scroll;
-
-printf(" On veut les horloges du syn %d\n", infos->syn_id );
-    Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_WANT_HORLOGES, (gchar *)&infos->syn_id, sizeof(gint) );
-    infos->Dialog_horloge = gtk_dialog_new_with_buttons( "Liste des horloges", GTK_WINDOW(F_client),
-                                                         GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
-                                                         GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                                         GTK_STOCK_EDIT, GTK_RESPONSE_OK,
-                                                         NULL);
-    g_signal_connect( infos->Dialog_horloge, "response", G_CALLBACK(CB_Editer_horloge), infos );
-    g_signal_connect( infos->Dialog_horloge, "delete-event", G_CALLBACK(gtk_widget_destroy), infos->Dialog_horloge );
-    gtk_container_set_border_width( GTK_CONTAINER(GTK_DIALOG(infos->Dialog_horloge)->vbox), 6 );
-/***************************************************** La liste des groupes ***************************************************/
-    scroll = gtk_scrolled_window_new( NULL, NULL );
-    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
-    gtk_box_pack_start( GTK_BOX( GTK_DIALOG(infos->Dialog_horloge)->vbox ), scroll, TRUE, TRUE, 0 );
-
-    store = gtk_list_store_new ( NBR_COLONNE_HORLOGE, G_TYPE_INT,                                                       /* Id */
-                                                      G_TYPE_STRING                                                /* Libelle */
-                               );
-
-    infos->Liste_horloge = gtk_tree_view_new_with_model ( GTK_TREE_MODEL(store) );                      /* Creation de la vue */
-
-    selection = gtk_tree_view_get_selection( GTK_TREE_VIEW(infos->Liste_horloge) );
-    /*gtk_tree_selection_set_mode( selection, GTK_SELECTION_MULTIPLE );*/
-    gtk_container_add( GTK_CONTAINER(scroll), infos->Liste_horloge );
-
-    renderer = gtk_cell_renderer_text_new();                                               /* Colonne du libelle de l'horloge */
-    /*g_object_set( renderer, "xalign", 0.5, NULL );*/
-    colonne = gtk_tree_view_column_new_with_attributes ( "Commande", renderer, "text", COLONNE_HORLOGE_LIBELLE, NULL);
-    gtk_tree_view_column_set_sort_column_id(colonne, COLONNE_HORLOGE_LIBELLE);                            /* On peut la trier */
-    gtk_tree_view_append_column ( GTK_TREE_VIEW (infos->Liste_horloge), colonne );
-
-/*    g_signal_connect( G_OBJECT(infos->Liste_horloge), "button_press_event",                          /* Gestion du menu popup */
-  /*                    G_CALLBACK(Gerer_popup_liste_horloge), NULL );
-    g_object_unref (G_OBJECT (store));                                            /* nous n'avons plus besoin de notre modele */
-
-    gtk_widget_show_all( infos->Dialog_horloge );
-
-  }
-/******************************************************************************************************************************/
 /* Creer_page_message: Creation de la page du notebook consacrée aux messages watchdog                                        */
 /* Entrée: Le libelle a afficher dans le notebook et l'ID du synoptique                                                       */
 /* Sortie: rien                                                                                                               */
@@ -322,11 +209,6 @@ printf(" On veut les horloges du syn %d\n", infos->syn_id );
     gtk_box_pack_start( GTK_BOX(boite), infos->bouton_acq, FALSE, FALSE, 0 );
     g_signal_connect_swapped( G_OBJECT(infos->bouton_acq), "clicked",
                               G_CALLBACK(Menu_acquitter_synoptique), infos );
-
-    bouton = gtk_button_new_with_label( "Horloges" );
-    gtk_box_pack_start( GTK_BOX(boite), bouton, FALSE, FALSE, 0 );
-    g_signal_connect_swapped( G_OBJECT(bouton), "clicked",
-                              G_CALLBACK(Menu_ouvrir_horloges_synoptique), infos );
 
     gtk_widget_show_all( page->child );
 
@@ -469,9 +351,7 @@ printf(" On veut les horloges du syn %d\n", infos->syn_id );
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Changer_etat_etiquette( struct TYPE_INFO_SUPERVISION *infos, struct CMD_TYPE_SYN_VARS *vars )
-  { struct CMD_ETAT_BIT_CTRL etat_motif;
-    printf("Changer_etat_etiquette syn %d!\n", vars->syn_id );
-    etat_motif.etat = 0;
+  { printf("Changer_etat_etiquette syn %d!\n", vars->syn_id );
     if (vars->bit_comm_out == TRUE)  /****************************  Vignette Activite *****************************************/
      { Trame_set_svg ( infos->Trame->Vignette_activite, "kaki", 0, TRUE ); }
     else if (vars->bit_alarme == TRUE)
@@ -518,7 +398,6 @@ printf(" On veut les horloges du syn %d\n", infos->syn_id );
 /******************************************************************************************************************************/
  void Proto_changer_etat_motif( struct CMD_ETAT_BIT_CTRL *etat_motif )
   { struct TRAME_ITEM_MOTIF *trame_motif;
-    struct TRAME_ITEM_PASS *trame_pass;
     struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
     GList *liste_motifs;
@@ -563,7 +442,6 @@ printf("Recu changement etat motif: %d = %d r%d v%d b%d\n", etat_motif->num, eta
  void Proto_set_syn_vars( struct CMD_TYPE_SYN_VARS *syn_vars )
   { struct TYPE_INFO_SUPERVISION *infos;
     struct PAGE_NOTEBOOK *page;
-    GSList *liste_pass;
     GdkColor color;
     GList *objet;
     GList *liste;
@@ -583,7 +461,8 @@ printf("Recu set syn_vars %d  comm_out=%d, def=%d, ala=%d, vp=%d, vt=%d, ale=%d,
 
        if (infos->syn_id == syn_vars->syn_id)
         {                                                     /* Positionnement de la couleur du bouton d'acquit du synotique */
-          if (syn_vars->bit_defaut || syn_vars->bit_alarme, syn_vars->bit_alerte, syn_vars->bit_derangement, syn_vars->bit_danger)
+          if (syn_vars->bit_defaut || syn_vars->bit_alarme || syn_vars->bit_alerte ||
+              syn_vars->bit_derangement || syn_vars->bit_danger)
            { gdk_color_parse ("blue", &color);
              gtk_widget_modify_bg ( infos->bouton_acq, GTK_STATE_NORMAL, &color );
            } else
