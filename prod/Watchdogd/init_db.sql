@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS `class` (
 
 CREATE TABLE IF NOT EXISTS `icons` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` varchar(4) NOT NULL DEFAULT 'svg',
   `date_create` datetime NOT NULL DEFAULT NOW(),
   `libelle` text COLLATE utf8_unicode_ci NOT NULL,
   `id_classe` int(11) NOT NULL DEFAULT '0',
@@ -326,6 +327,24 @@ CREATE TABLE IF NOT EXISTS `mnemos_CH` (
   FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
 ) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `mnemos_Horloge`
+--
+
+CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `dls_id` INT(11) NOT NULL DEFAULT '0',
+  `etat` BOOLEAN NOT NULL DEFAULT '0',
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,
+  `libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',
+  `heure` int(11) NOT NULL DEFAULT '0',
+  `minute` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE (`dls_id`,`acronyme`),
+  FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 
@@ -371,21 +390,6 @@ CREATE TABLE IF NOT EXISTS `mnemos_AnalogInput` (
   PRIMARY KEY (`id_mnemo`),
   FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `mnemos_Horloge`
---
-
-CREATE TABLE IF NOT EXISTS `mnemos_Horloge` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_mnemo` int(11) NOT NULL,
-  `heure` int(11) NOT NULL,
-  `minute` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`id_mnemo`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE
-) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;
 
 -- --------------------------------------------------------
 
@@ -479,6 +483,7 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `larg` float NOT NULL DEFAULT '0',
   `haut` float NOT NULL DEFAULT '0',
   `angle` float NOT NULL DEFAULT '0',
+  `scale` float NOT NULL DEFAULT '1',
   `dialog` int(11) NOT NULL DEFAULT '0',
   `gestion` int(11) NOT NULL DEFAULT '0',
   `rouge` int(11) NOT NULL DEFAULT '0',
@@ -486,6 +491,9 @@ CREATE TABLE IF NOT EXISTS `syns_motifs` (
   `bleu` int(11) NOT NULL DEFAULT '0',
   `layer` int(11) NOT NULL DEFAULT '0',
   `mnemo_id` int(11) NOT NULL DEFAULT '0',
+  `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
+  `tech_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT "",
+  `def_color` varchar(16) COLLATE utf8_unicode_ci NOT NULL DEFAULT "#c0c0c0",
   PRIMARY KEY (`id`),
   FOREIGN KEY (`syn_id`) REFERENCES `syns` (`id`) ON DELETE CASCADE,
   FOREIGN KEY (`mnemo_id`) REFERENCES `mnemos` (`id`) ON DELETE CASCADE

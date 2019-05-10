@@ -1431,6 +1431,92 @@
     return( msg->etat );
   }
 /******************************************************************************************************************************/
+/* Dls_data_set_tempo : Gestion du positionnement des tempos DLS en mode dynamique                                            */
+/* Entrée : l'acronyme, le owner dls, un pointeur de raccourci, et la valeur on ou off de la tempo                            */
+/******************************************************************************************************************************/
+ void Dls_data_set_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visu_p, gboolean etat,
+                            gchar *color, gint cligno )
+  { struct DLS_VISUEL *visu;
+
+    if (!visu_p || !*visu_p)
+     { GSList *liste;
+       if ( !(acronyme && tech_id) ) return;
+       liste = Partage->Dls_data_VISUEL;
+       while (liste)
+        { visu = (struct DLS_VISUEL *)liste->data;
+          if ( !strcmp ( visu->acronyme, acronyme ) && !strcmp( visu->tech_id, tech_id ) ) break;
+          liste = g_slist_next(liste);
+        }
+
+       if (!liste)
+        { visu = g_try_malloc0 ( sizeof(struct DLS_VISUEL) );
+          if (!visu)
+           { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
+             return;
+           }
+          g_snprintf( visu->acronyme, sizeof(visu->acronyme), "%s", acronyme );
+          g_snprintf( visu->tech_id,  sizeof(visu->tech_id),  "%s", tech_id );
+          pthread_mutex_lock( &Partage->com_dls.synchro_data );
+          Partage->Dls_data_VISUEL = g_slist_prepend ( Partage->Dls_data_VISUEL, visu );
+          pthread_mutex_unlock( &Partage->com_dls.synchro_data );
+          Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding VISUEL '%s:%s'", __func__, tech_id, acronyme );
+        }
+       if (visu_p) *visu_p = (gpointer)visu;                                        /* Sauvegarde pour acceleration si besoin */
+      }
+    else visu = (struct DLS_VISUEL *)*visu_p;
+
+    if (visu->etat != etat || strcmp( visu->color, color ) || visu->cligno != cligno )
+     { if ( visu->last_change + 50 <= Partage->top )                                 /* Si pas de change depuis plus de 5 sec */
+        { visu->changes = 0; }
+
+       if ( visu->changes <= 10 )                                                          /* Si moins de 10 changes en 5 sec */
+        { if ( visu->changes == 10 )                                                /* Est-ce le dernier change avant blocage */
+           { visu->etat   = 0;                                                   /* Si oui, on passe le visuel en kaki cligno */
+             g_snprintf( visu->color, sizeof(visu->color), "brown" );
+             visu->cligno = 1;                                                    /* Clignotant */
+           }
+          else { visu->etat   = etat;  /* Sinon on recopie ce qui est demandé par le plugin DLS */
+                 g_snprintf( visu->color, sizeof(visu->color), "%s", color );
+                 visu->cligno = cligno;
+               }
+
+          visu->last_change = Partage->top;                               /* Date de la photo ! */
+          #ifdef bouh
+          pthread_mutex_lock( &Partage->com_msrv.synchro );                             /* Ajout dans la liste de i a traiter */
+          Partage->com_msrv.liste_i = g_slist_append( Partage->com_msrv.liste_i,
+                                                      GINT_TO_POINTER(num) );
+          pthread_mutex_unlock( &Partage->com_msrv.synchro );
+          #endif
+        }
+       visu->changes++;                                                                                /* Un change de plus ! */
+       Partage->audit_bit_interne_per_sec++;
+     }
+  }
+/******************************************************************************************************************************/
+/* Dls_data_get_AI : Recupere la valeur de l'EA en parametre                                                                  */
+/* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
+/******************************************************************************************************************************/
+ gint Dls_data_get_VISUEL ( gchar *tech_id, gchar *acronyme, gpointer *visu_p )
+  { struct DLS_VISUEL *visu;
+    GSList *liste;
+    if (visu_p && *visu_p)                                                             /* Si pointeur d'acceleration disponible */
+     { visu = (struct DLS_VISUEL *)*visu_p;
+       return( visu->etat );
+     }
+    if (!tech_id || !acronyme) return(FALSE);
+
+    liste = Partage->Dls_data_VISUEL;
+    while (liste)
+     { visu = (struct DLS_VISUEL *)liste->data;
+       if ( !strcmp ( visu->acronyme, acronyme ) && !strcmp( visu->tech_id, tech_id ) ) break;
+       liste = g_slist_next(liste);
+     }
+
+    if (!liste) return(FALSE);
+    if (visu_p) *visu_p = (gpointer)visu;                                           /* Sauvegarde pour acceleration si besoin */
+    return( visu->etat );
+  }
+/******************************************************************************************************************************/
 /* Dls_dyn_string: Formate la chaine en parametre avec le bit également en parametre                                          */
 /* Entrée : La chaine source, le type de bit, le tech_id/acronyme, le pointeur de raccourci                                   */
 /* sortie : Une nouvelle chaine de caractere à g_freer                                                                        */

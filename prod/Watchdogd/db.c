@@ -1115,10 +1115,48 @@
        Lancer_requete_SQL ( db, requete );
      }
 
+    if (database_version < 4103)
+     { g_snprintf( requete, sizeof(requete),
+                   "ALTER TABLE `icons` ADD `type` VARCHAR(4) NOT NULL DEFAULT 'svg' AFTER `id`");
+       g_snprintf( requete, sizeof(requete),
+                   "UPDATE `icons` SET `type`='gif'");
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                   "ALTER TABLE `syns_motifs` ADD `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '';"
+                   "ALTER TABLE `syns_motifs` ADD `acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '';" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 4105)
+     { g_snprintf( requete, sizeof(requete),
+                   "ALTER TABLE `syns_motifs` ADD `scale` float NOT NULL DEFAULT '1' AFTER `angle`;"
+                   "ALTER TABLE `syns_motifs` ADD `def_color` VARCHAR(12) NOT NULL DEFAULT '#c0c0c0' AFTER `scale`;" );
+       Lancer_requete_SQL ( db, requete );
+     }
+
+    if (database_version < 4110)
+     { g_snprintf( requete, sizeof(requete),
+                   "CREATE TABLE IF NOT EXISTS `mnemos_HORLOGE` ("
+                   "`id` INT(11) NOT NULL AUTO_INCREMENT,"
+                   "`dls_id` INT(11) NOT NULL DEFAULT '0',"
+                   "`etat` BOOLEAN NOT NULL DEFAULT '0',"
+                   "`acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL,"
+                   "`libelle` text COLLATE utf8_unicode_ci NOT NULL DEFAULT 'default',"
+                   "`heure` int(11) NOT NULL DEFAULT '0',"
+                   "`minute` int(11) NOT NULL DEFAULT '0',"
+                   "PRIMARY KEY (`id`),"
+                   "UNIQUE (`dls_id`,`acronyme`),"
+                   "FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE"
+                   ") ENGINE=INNODB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=10000 ;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete), "DROP TABLE mnamos_Horloge");
+       Lancer_requete_SQL ( db, requete );
+     }
+
 
     Libere_DB_SQL(&db);
 fin:
-    database_version=4094;
+    database_version=4110;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
     if (Modifier_configDB ( "global", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }

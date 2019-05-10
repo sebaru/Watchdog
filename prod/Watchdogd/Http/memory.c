@@ -53,6 +53,7 @@
 /*------------------------------------------------------- Dumping status -----------------------------------------------------*/
     json_builder_begin_object (builder);                                                                 /* Contenu du Status */
 
+/*------------------------------------------------ Compteur d'impulsions -----------------------------------------------------*/
     if (!strcasecmp(type,"CI"))
      { struct DLS_CI *cpt_imp=NULL;
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
@@ -61,14 +62,15 @@
        if (!cpt_imp)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: cpt_imp non trouvée", __func__ );
           g_object_unref(builder);
-          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
        json_builder_set_member_name  ( builder, "valeur" );
        json_builder_add_int_value    ( builder, cpt_imp->valeur );
        json_builder_set_member_name  ( builder, "etat" );
        json_builder_add_boolean_value ( builder, cpt_imp->etat );
      }
-    if (!strcasecmp(type,"CH"))
+/*------------------------------------------------ Compteur horaire ----------------------------------------------------------*/
+    else if (!strcasecmp(type,"CH"))
      { struct DLS_CH *cpt_h=NULL;
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                  "%s: HTTP/ request for GET CH %s:%s", __func__, tech_id, acronyme );
@@ -76,13 +78,42 @@
        if (!cpt_h)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: cpth non trouvée", __func__ );
           g_object_unref(builder);
-          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
        json_builder_set_member_name  ( builder, "valeur" );
        json_builder_add_int_value    ( builder, cpt_h->valeur );
        json_builder_set_member_name  ( builder, "etat" );
        json_builder_add_boolean_value ( builder, cpt_h->etat );
      }
+/*----------------------------------------------- Entrée Analogique ----------------------------------------------------------*/
+    else if (!strcasecmp(type,"EA"))
+     { struct ANALOG_INPUT *ai=NULL;
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                 "%s: HTTP/ request for GET EA %s:%s", __func__, tech_id, acronyme );
+       Dls_data_get_AI ( tech_id, acronyme, (gpointer *)&ai );
+       if (!ai)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: ai non trouvée", __func__ );
+          g_object_unref(builder);
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
+        }
+       json_builder_set_member_name  ( builder, "valeur" );
+       json_builder_add_double_value  ( builder, ai->val_ech );
+     }
+/*----------------------------------------------- Bistable et Monostables ----------------------------------------------------*/
+    else if (!strcasecmp(type,"B") || !!strcasecmp(type,"M"))
+     { struct DLS_BOOL *bool=NULL;
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                 "%s: HTTP/ request for GET B/M %s:%s", __func__, tech_id, acronyme );
+       Dls_data_get_bool ( tech_id, acronyme, (gpointer *)&bool );
+       if (!bool)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: bool non trouvé", __func__ );
+          g_object_unref(builder);
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
+        }
+       json_builder_set_member_name  ( builder, "etat" );
+       json_builder_add_boolean_value  ( builder, bool->etat );
+     }
+/*---------------------------------------------------- Visuels ---------------------------------------------------------------*/
     else if (!strcasecmp(type,"I"))
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: HTTP/ request for GET I. cheking num", __func__ );
        gchar *num_s = json_object_get_string_member ( object, "num" );
@@ -90,19 +121,38 @@
        if (!num_s)
         { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: num non trouvée", __func__ );
           g_object_unref(builder);
-          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
        num = atoi(num_s);
-       json_builder_set_member_name  ( builder, "etat" );
-       json_builder_add_int_value    ( builder, Partage->i[num].etat );
-       json_builder_set_member_name  ( builder, "rouge" );
-       json_builder_add_int_value    ( builder, Partage->i[num].rouge);
-       json_builder_set_member_name  ( builder, "vert" );
-       json_builder_add_int_value    ( builder, Partage->i[num].vert );
-       json_builder_set_member_name  ( builder, "bleu" );
-       json_builder_add_int_value    ( builder, Partage->i[num].bleu );
-       json_builder_set_member_name  ( builder, "cligno" );
-       json_builder_add_int_value    ( builder, Partage->i[num].cligno );
+       if (num!=-1)
+        { json_builder_set_member_name  ( builder, "etat" );
+          json_builder_add_int_value    ( builder, Partage->i[num].etat );
+          json_builder_set_member_name  ( builder, "rouge" );
+          json_builder_add_int_value    ( builder, Partage->i[num].rouge);
+          json_builder_set_member_name  ( builder, "vert" );
+          json_builder_add_int_value    ( builder, Partage->i[num].vert );
+          json_builder_set_member_name  ( builder, "bleu" );
+          json_builder_add_int_value    ( builder, Partage->i[num].bleu );
+          json_builder_set_member_name  ( builder, "cligno" );
+          json_builder_add_int_value    ( builder, Partage->i[num].cligno );
+        }
+       else
+        { struct DLS_VISUEL *visu=NULL;
+          Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                    "%s: HTTP/ request for GET I %s:%s", __func__, tech_id, acronyme );
+          Dls_data_get_VISUEL ( tech_id, acronyme, (gpointer *)&visu );
+          if (!visu)
+           { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: visu non trouvée", __func__ );
+             g_object_unref(builder);
+             return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                              /* Bad Request */
+           }
+          json_builder_set_member_name  ( builder, "etat" );
+          json_builder_add_int_value    ( builder, visu->etat );
+          json_builder_set_member_name  ( builder, "color" );
+          json_builder_add_string_value ( builder, visu->color);
+          json_builder_set_member_name  ( builder, "cligno" );
+          json_builder_add_int_value    ( builder, visu->cligno );
+        }
      }
 
     json_builder_end_object (builder);                                                                        /* End Document */

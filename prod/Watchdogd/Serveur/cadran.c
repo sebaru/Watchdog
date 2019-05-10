@@ -65,7 +65,7 @@
             return( TRUE );
        case MNEMO_CPT_IMP:
         { gint valeur;
-          valeur = Dls_data_get_CPT_IMP ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
+          valeur = Dls_data_get_CI ( cadran->tech_id, cadran->acronyme, &cadran->dls_data );
           return( cadran->val_ech != valeur );
         }
        case MNEMO_CPTH:

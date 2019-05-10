@@ -141,6 +141,7 @@
     GSList *Dls_data_MSG;                                                                  /* Liste des entrees dynamique TOR */
     GSList *Dls_data_CI;                                                                  /* Liste des compteurs d'impulsions */
     GSList *Dls_data_CH;                                                                      /* Liste des compteurs horaires */
+    GSList *Dls_data_VISUEL;                                                                     /* Liste des visuel (bits I) */
   };
 
 /************************************************ Définitions des prototypes **************************************************/

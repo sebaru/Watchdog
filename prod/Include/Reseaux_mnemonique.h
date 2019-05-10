@@ -100,13 +100,6 @@
   { gchar  unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                                          /* Km, h, ° ... */
   };
 
-/**************************************************** AddOns pour les Horlorges ***********************************************/
- struct CMD_TYPE_MNEMO_HORLOGE
-  { gint id;
-    gint heure;
-    gint minute;
-  };
-
 /****************************************************** Pour les compteurs d'impulsions ***************************************/
  enum
   { CI_TOTALISATEUR,
@@ -154,7 +147,6 @@
             struct CMD_TYPE_MNEMO_CPT_IMP mnemo_cptimp;
             struct CMD_TYPE_MNEMO_TEMPO mnemo_tempo;
             struct CMD_TYPE_MNEMO_REGISTRE mnemo_r;
-            struct CMD_TYPE_MNEMO_HORLOGE mnemo_horloge;
           };
   };
 
