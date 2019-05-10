@@ -40,8 +40,7 @@
 /* Sortie: Kedal                                                                                          */
 /**********************************************************************************************************/
  void Gerer_protocole_atelier ( struct CONNEXION *connexion )
-  { static GList *Arrivee_groupe = NULL;
-    static GList *Arrivee_synoptique_for_atelier = NULL;
+  { static GList *Arrivee_synoptique_for_atelier = NULL;
     static GList *Arrivee_synoptique_for_atelier_palette = NULL;
     static GList *Arrivee_motif = NULL;
     static GList *Arrivee_pass = NULL;
@@ -49,8 +48,6 @@
     static GList *Arrivee_comment = NULL;
     static GList *Arrivee_palette = NULL;
     static GList *Arrivee_camera_sup = NULL;
-    static GList *Arrivee_scenario = NULL;
-    static GList *Arrivee_groupe_propriete_syn = NULL;
     static GList *Arrivee_camera_for_atelier = NULL;
     static int save_id;
            

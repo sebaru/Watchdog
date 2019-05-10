@@ -1338,8 +1338,12 @@
  void Dls_data_set_bus ( gchar *tech_id, gchar *acronyme, gpointer *bus_p, gboolean etat,
                          gchar *host, gchar *thread, gchar *tag, gchar *param1)
   { Dls_data_set_bool ( tech_id, acronyme, bus_p, etat );                                         /* Utilisation d'un boolean */
-    if (Dls_data_get_bool_up (tech_id, acronyme, bus_p))
-     { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, param1, strlen(param1)+1 ); }
+    if (Dls_data_get_bool_up(tech_id, acronyme, bus_p))
+     { if (param1)
+        { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, param1, strlen(param1)+1 ); }
+       else
+        { Send_zmq_with_tag ( Partage->com_dls.zmq_to_master, NULL, "dls", host, thread, tag, NULL, 0 ); }
+     }
     if (param1) g_free(param1);                                       /* Param1 est issu d'un g_strdup ou d'un Dls_dyn_string */
   }
 /******************************************************************************************************************************/

@@ -65,7 +65,7 @@
 /******************************************************************************************************************************/
  gint Ajouter_motifDB ( struct CMD_TYPE_MOTIF *motif )
   { gchar requete[1024];
-    gchar *libelle;
+    gchar *libelle, *tech_id, *acro;
     gboolean retour;
     struct DB *db;
     gint id;
@@ -76,25 +76,42 @@
        return(-1);
      }
 
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+    tech_id = Normaliser_chaine ( motif->clic_tech_id );                                     /* Formatage correct des chaines */
+    if (!tech_id)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
        g_free(libelle);
+       return(-1);
+     }
+
+    acro = Normaliser_chaine ( motif->clic_acronyme );                                       /* Formatage correct des chaines */
+    if (!tech_id)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
+       g_free(libelle);
+       g_free(tech_id);
        return(-1);
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "INSERT INTO %s SET icone='%d',syn_id='%d',libelle='%s',access_level='%d',bitctrl='%d',bitclic='%d',"
                 "posx='%d',posy='%d',larg='%f',haut='%f',angle='%f',"
-                "dialog='%d',gestion='%d',rouge='%d',vert='%d',bleu='%d',bitclic2='%d',rafraich='%d',layer='%d'",
+                "dialog='%d',gestion='%d',rouge='%d',vert='%d',bleu='%d',rafraich='%d',layer='%d',"
+                "clic_tech_id='%s',clic_acronyme='%s'",
                 NOM_TABLE_MOTIF,
                 motif->icone_id, motif->syn_id, libelle, motif->access_level,
                 motif->bit_controle, motif->bit_clic,
                 motif->position_x, motif->position_y, motif->largeur, motif->hauteur, motif->angle,
                 motif->type_dialog, motif->type_gestion,
-                motif->rouge0, motif->vert0, motif->bleu0, motif->bit_clic2, motif->rafraich,
-                motif->layer );
+                motif->rouge0, motif->vert0, motif->bleu0, motif->rafraich,
+                motif->layer, tech_id, acro );
     g_free(libelle);
+    g_free(tech_id);
+    g_free(acro);
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(-1);
+     }
     if (motif->mnemo_id>0)
      { gchar chaine[32];
        g_snprintf( chaine, sizeof(chaine), ",mnemo_id='%d'", motif->mnemo_id );
@@ -128,7 +145,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT sm.id,sm.libelle,icone,syn_id,access_level,bitctrl,bitclic,posx,posy,larg,haut,angle,"
-                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer,mnemo_id,m.libelle,m.type,m.acro_syn"
+                "dialog,gestion,rouge,vert,bleu,rafraich,layer,mnemo_id,m.libelle,m.type,m.acro_syn,"
+                "sm.clic_tech_id, sm.clic_acronyme"
                 " FROM syns_motifs AS sm LEFT JOIN mnemos AS m ON sm.mnemo_id = m.id"
                 " WHERE syn_id='%d' ORDER BY layer", id_syn );
 
@@ -164,7 +182,6 @@
        motif->access_level = atoi(db->row[4]);                                       /* Nom du groupe d'appartenance du motif */
        motif->bit_controle = atoi(db->row[5]);                                                                  /* Ixxx, Cxxx */
        motif->bit_clic     = atoi(db->row[6]);                    /* Bit à activer quand on clic avec le bouton gauche souris */
-       motif->bit_clic2    = atoi(db->row[17]);                      /* Bit à activer quand on clic avec bouton gauche souris */
        motif->position_x   = atoi(db->row[7]);                                                   /* en abscisses et ordonnées */
        motif->position_y   = atoi(db->row[8]);
        motif->largeur      = atof(db->row[9]);                                         /* Taille de l'image sur le synoptique */
@@ -175,14 +192,16 @@
        motif->rouge0       = atoi(db->row[14]);
        motif->vert0        = atoi(db->row[15]);
        motif->bleu0        = atoi(db->row[16]);
-       motif->rafraich     = atoi(db->row[18]);
-       motif->layer        = atoi(db->row[19]);
-       if (db->row[20])
-        { motif->mnemo_id = atoi(db->row[20]);
-          g_snprintf ( motif->mnemo_libelle, sizeof(motif->mnemo_libelle), "%s", db->row[21] );  /* Recopie dans la structure */
-          g_snprintf ( motif->mnemo_acro_syn, sizeof(motif->mnemo_acro_syn), "%s", db->row[23] );/* Recopie dans la structure */
-          motif->mnemo_type = atoi(db->row[22]);
+       motif->rafraich     = atoi(db->row[17]);
+       motif->layer        = atoi(db->row[18]);
+       if (db->row[19])
+        { motif->mnemo_id = atoi(db->row[19]);
+          g_snprintf ( motif->mnemo_libelle, sizeof(motif->mnemo_libelle), "%s", db->row[20] );  /* Recopie dans la structure */
+          g_snprintf ( motif->mnemo_acro_syn, sizeof(motif->mnemo_acro_syn), "%s", db->row[22] );/* Recopie dans la structure */
+          motif->mnemo_type = atoi(db->row[21]);
         } else motif->mnemo_id = 0;
+       g_snprintf ( motif->clic_tech_id, sizeof(motif->clic_tech_id), "%s", db->row[23] );       /* Recopie dans la structure */
+       g_snprintf ( motif->clic_acronyme, sizeof(motif->clic_acronyme), "%s", db->row[24] );     /* Recopie dans la structure */
      }
     return(motif);
   }
@@ -193,7 +212,7 @@
 /******************************************************************************************************************************/
  struct CMD_TYPE_MOTIF *Rechercher_motifDB ( guint id )
   { struct CMD_TYPE_MOTIF *motif;
-    gchar requete[512];
+    gchar requete[1024];
     struct DB *db;
 
     db = Init_DB_SQL();
@@ -204,7 +223,8 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT sm.id,sm.libelle,icone,syn_id,access_level,bitctrl,bitclic,posx,posy,larg,haut,angle,"
-                "dialog,gestion,rouge,vert,bleu,bitclic2,rafraich,layer,mnemo_id,m.libelle,m.type"
+                "dialog,gestion,rouge,vert,bleu,rafraich,layer,mnemo_id,m.libelle,m.type,"
+                "sm.clic_tech_id, sm.clic_acronyme"
                 " FROM syns_motifs AS sm LEFT JOIN mnemos AS m ON sm.mnemo_id = m.id"
                 " WHERE sm.id=%d", id );
 
@@ -231,7 +251,6 @@
        motif->access_level = atoi(db->row[4]);                                       /* Nom du groupe d'appartenance du motif */
        motif->bit_controle = atoi(db->row[5]);                                                                  /* Ixxx, Cxxx */
        motif->bit_clic     = atoi(db->row[6]);                    /* Bit à activer quand on clic avec le bouton gauche souris */
-       motif->bit_clic2    = atoi(db->row[17]);                      /* Bit à activer quand on clic avec bouton gauche souris */
        motif->position_x   = atoi(db->row[7]);                                                   /* en abscisses et ordonnées */
        motif->position_y   = atoi(db->row[8]);
        motif->largeur      = atof(db->row[9]);                                         /* Taille de l'image sur le synoptique */
@@ -242,8 +261,10 @@
        motif->rouge0       = atoi(db->row[14]);
        motif->vert0        = atoi(db->row[15]);
        motif->bleu0        = atoi(db->row[16]);
-       motif->rafraich     = atoi(db->row[18]);
-       motif->layer        = atoi(db->row[19]);
+       motif->rafraich     = atoi(db->row[17]);
+       motif->layer        = atoi(db->row[18]);
+       g_snprintf ( motif->clic_tech_id, sizeof(motif->clic_tech_id), "%s", db->row[19] );       /* Recopie dans la structure */
+       g_snprintf ( motif->clic_acronyme, sizeof(motif->clic_acronyme), "%s", db->row[20] );     /* Recopie dans la structure */
      }
     Libere_DB_SQL( &db );
     return(motif);
@@ -255,38 +276,54 @@
 /******************************************************************************************************************************/
  gboolean Modifier_motifDB( struct CMD_TYPE_MOTIF *motif )
   { gchar requete[1024];
-    gchar *libelle;
+    gchar *libelle, *tech_id, *acro;
     gboolean retour;
     struct DB *db;
 
     libelle = Normaliser_chaine ( motif->libelle );                                          /* Formatage correct des chaines */
     if (!libelle)
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
-       return(-1);
+       return(FALSE);
      }
 
-    db = Init_DB_SQL();
-    if (!db)
-     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+    tech_id = Normaliser_chaine ( motif->clic_tech_id );                                     /* Formatage correct des chaines */
+    if (!tech_id)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
        g_free(libelle);
        return(FALSE);
      }
 
+    acro = Normaliser_chaine ( motif->clic_acronyme );                                       /* Formatage correct des chaines */
+    if (!tech_id)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible", __func__ );
+       g_free(libelle);
+       g_free(tech_id);
+       return(FALSE);
+     }
+
+
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "UPDATE %s SET "
                 "libelle='%s',access_level='%d',bitctrl='%d',bitclic='%d',posx='%d',posy='%d',larg='%f',"
-                "haut='%f',angle='%f',dialog='%d',gestion='%d',rouge='%d',vert='%d',bleu='%d',bitclic2='%d',"
-                "rafraich='%d',layer='%d'"
+                "haut='%f',angle='%f',dialog='%d',gestion='%d',rouge='%d',vert='%d',bleu='%d',"
+                "rafraich='%d',layer='%d',clic_tech_id='%s',clic_acronyme='%s'"
                 " WHERE id=%d;", NOM_TABLE_MOTIF,
                 libelle, motif->access_level,
                 motif->bit_controle, motif->bit_clic,
                 motif->position_x, motif->position_y, motif->largeur, motif->hauteur, motif->angle,
                 motif->type_dialog, motif->type_gestion,
-                motif->rouge0, motif->vert0, motif->bleu0, motif->bit_clic2, motif->rafraich,
-                motif->layer,
+                motif->rouge0, motif->vert0, motif->bleu0, motif->rafraich,
+                motif->layer, tech_id, acro,
                 motif->id );
     g_free(libelle);
+    g_free(tech_id);
+    g_free(acro);
 
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
     return(retour);
