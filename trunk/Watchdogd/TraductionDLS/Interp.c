@@ -491,7 +491,7 @@
        g_snprintf( action->sinon, taille, "SM(%d,0);", alias->num );
      }
     else /* Alias par nom */
-     { taille = 100;
+     { taille = 256;
        action = New_action();
        action->alors = New_chaine( taille );
        action->sinon = New_chaine( taille );
@@ -524,7 +524,7 @@
        g_snprintf( action->sinon, taille, "SCH(%d,0,%d);", alias->num, reset );
      }
     else /* Alias par nom */
-     { taille = 100;
+     { taille = 256;
        action = New_action();
        action->alors = New_chaine( taille );
        action->sinon = New_chaine( taille );
@@ -558,7 +558,7 @@
        g_snprintf( action->sinon, taille, "SCI(%d,0,%d,%d);", alias->num, reset, ratio );
      }
     else /* Alias par nom */
-     { taille = 100;
+     { taille = 256;
        action = New_action();
        action->alors = New_chaine( taille );
        action->sinon = New_chaine( taille );
@@ -659,7 +659,7 @@
     random = Get_option_entier ( options, T_RANDOM );   if (random == -1) random = 0;
 
     action = New_action();
-    taille = 128;
+    taille = 256;
     if (alias->type == ALIAS_TYPE_DYNAMIC)
      { action->alors = New_chaine( taille );
        g_snprintf( action->alors, taille,
@@ -698,7 +698,7 @@
        g_snprintf( action->alors, taille, "SB(%d,%d);", alias->num, !barre );
      }
     else /* Alias par nom */
-     { taille = 100;
+     { taille = 256;
        action = New_action();
        action->alors = New_chaine( taille );
        g_snprintf( action->alors, taille, "   Dls_data_set_bool ( \"%s\", \"%s\", &_%s_%s, %d );\n",
