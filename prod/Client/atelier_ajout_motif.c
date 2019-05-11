@@ -285,11 +285,12 @@
                                  add_motif.icone_id = Trame_motif_p0->motif->icone_id;/* Correspond au .gif*/
                                  g_snprintf( add_motif.libelle, sizeof(add_motif.libelle),
                                              "%s" , Motif_preview0.libelle );
+                                 g_snprintf( add_motif.clic_tech_id, sizeof(add_motif.clic_tech_id), "NONE" );
+                                 g_snprintf( add_motif.clic_acronyme, sizeof(add_motif.clic_acronyme), "NONE" );
                                  add_motif.syn_id = infos->syn.id;
                                  add_motif.access_level = 0;     /* Nom du groupe d'appartenance du motif */
                                  add_motif.bit_controle = 0;                                /* Ixxx, Cxxx */
                                  add_motif.bit_clic = 0;        /* Bit à activer quand clic gauche souris */
-                                 add_motif.bit_clic2 = 0;       /* Bit à activer quand clic gauche souris */
                                  add_motif.angle = 0.0; /*infos->Adj_angle->value;*/
                                  add_motif.type_dialog = 0;               /* Type de la boite de dialogue */
                                  add_motif.type_gestion = 0;

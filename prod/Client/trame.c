@@ -626,7 +626,6 @@ printf("Charger_pixbuf_file: %s\n", fichier );
  static GdkPixbuf *Charger_svg_pixbuf ( gchar *nom, gchar *couleur, gint mode, gint taille_x, gint taille_y )
   { GdkPixbuf *pixbuf;
     gchar file[80];
-    gboolean local_found;
     if (mode==0) { g_snprintf(file, sizeof(file), "%s_%s.svg", nom, couleur ); }
             else { g_snprintf(file, sizeof(file), "%s_%d_%s.svg", nom, mode, couleur ); }
     pixbuf = gdk_pixbuf_new_from_file_at_size( file, taille_x, taille_y, NULL );
@@ -882,7 +881,6 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
  static struct TRAME_ITEM_SVG *Trame_new_SVG ( struct TRAME *trame, GooCanvasItem *item_groupe, gchar *nom, gchar *couleur,
                                                gint mode, gint taillex, gint tailley, gint posx, gint posy )
   { struct TRAME_ITEM_SVG *trame_svg;
-    GdkPixbuf *pixbuf;
     trame_svg = (struct TRAME_ITEM_SVG *)g_try_malloc0( sizeof(struct TRAME_ITEM_SVG) );
     if (!trame_svg) return(NULL);
     g_snprintf( trame_svg->svg_name, sizeof(trame_svg->svg_name), "%s", nom );
@@ -900,8 +898,6 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
 /******************************************************************************************************************************/
  struct TRAME_ITEM_PASS *Trame_ajout_passerelle ( gint flag, struct TRAME *trame, struct CMD_TYPE_PASSERELLE *pass )
   { struct TRAME_ITEM_PASS *trame_pass;
-    struct TRAME_ITEM_MOTIF *trame_motif;
-    struct CMD_TYPE_MOTIF *motif;
     gint taillex, tailley;
 
     if (!(trame && pass)) return(NULL);
@@ -1060,7 +1056,6 @@ printf("New comment %s %s \n", comm->libelle, comm->font );
     struct TRAME_ITEM_CADRAN *trame_cadran;
     struct TRAME_ITEM_CAMERA_SUP *trame_camera_sup;
     GList *objet;
-    GSList *liste;
 
     objet = trame->trame_items;                                              /* Destruction des items du synoptique precedent */
     while(objet)

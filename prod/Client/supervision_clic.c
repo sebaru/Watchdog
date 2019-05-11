@@ -42,7 +42,6 @@
  static struct TRAME_ITEM_MOTIF *appui = NULL;
  static struct TRAME_ITEM_CADRAN *appui_cadran = NULL;
  static struct TRAME_ITEM_CAMERA_SUP *appui_camera_sup = NULL;
- static struct TRAME_ITEM_SCENARIO *appui_scenario = NULL;
 
  static GtkWidget *F_set_registre;                                                         /* Widget de l'interface graphique */
  static GtkWidget *Spin_valeur;                                                                         /* Valeur du registre */
@@ -58,12 +57,17 @@
  static void Envoyer_action_immediate ( struct TRAME_ITEM_MOTIF *trame_motif )
   { struct CMD_SET_BIT_INTERNE bit;
     bit.type = MNEMO_MONOSTABLE;
-    if (trame_motif->motif->type_gestion == TYPE_BOUTON)
-     { bit.num = trame_motif->motif->bit_clic + (trame_motif->num_image / 3);
+    if (trame_motif->motif->bit_clic != -1)
+     { if (trame_motif->motif->type_gestion == TYPE_BOUTON)
+        { bit.num = trame_motif->motif->bit_clic + (trame_motif->num_image / 3); }
+       else
+        { bit.num = trame_motif->motif->bit_clic; }
      }
     else
-     { bit.num = trame_motif->motif->bit_clic; }
-
+     { bit.num = -1;
+       g_snprintf( bit.tech_id, sizeof(bit.tech_id), "%s", trame_motif->motif->clic_tech_id );
+       g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", trame_motif->motif->clic_acronyme );
+     }
     Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SET_BIT_INTERNE,
                    (gchar *)&bit, sizeof(struct CMD_SET_BIT_INTERNE) );
     printf("Envoi M%d = 1 au serveur \n", bit.num );

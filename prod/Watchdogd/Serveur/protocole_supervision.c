@@ -157,11 +157,19 @@
        case SSTAG_CLIENT_SET_BIT_INTERNE:
              { struct CMD_SET_BIT_INTERNE *bit;
                bit = (struct CMD_SET_BIT_INTERNE *)connexion->donnees;
-               switch( bit->type )
-                { case MNEMO_MONOSTABLE: Envoyer_commande_dls( bit->num );
-                                         break;
-                  case MNEMO_REGISTRE:   SR( bit->num, bit->valeur );
-                                         break;
+               if(bit->num!=-1)
+                { switch( bit->type )
+                   { case MNEMO_MONOSTABLE: Envoyer_commande_dls( bit->num );
+                                            break;
+                     case MNEMO_REGISTRE:   SR( bit->num, bit->valeur );
+                                            break;
+                   }
+                }
+               else
+                { switch( bit->type )
+                   { case MNEMO_MONOSTABLE: Envoyer_commande_dls_data (bit->tech_id, bit->acronyme );
+                                            break;
+                   }
                 }
              }
             break;
