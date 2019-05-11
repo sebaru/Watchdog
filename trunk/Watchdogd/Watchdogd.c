@@ -335,7 +335,7 @@
            } else
           if ( !strcmp(event->tag, "SNIPS_QUESTION") )
            { struct DB *db;
-             Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SNIPS_QUESTION from %s/%s to %s/%s/%s",
+             Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SNIPS_QUESTION from %s/%s to %s/%s : '%s'",
                        __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
 
              if ( ! Recuperer_mnemos_AI_by_map_snips ( &db, (gchar *)payload ) )
@@ -351,6 +351,7 @@
                                     "audio", "play_google", result_string, strlen(result_string)+1 );
                 Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,
                                     "audio", "play_google", result_string, strlen(result_string)+1 );
+                g_free(result_string);
               }
            } else
           if ( !strcmp(event->tag, "sudo") )
