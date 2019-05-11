@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Zmq.h      Déclarations générales des fonctions d'échanges intra process ou externes                             */
+/* Watchdogd/Zmq.h      DÃ©clarations gÃ©nÃ©rales des fonctions d'Ã©changes intra process ou externes                             */
 /* Projet WatchDog version 2.0       Gestion d'habitat                                                     08.01.2018 13:23:50*/
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #ifndef _ZMQ_H_
  #define _ZMQ_H_
 
@@ -48,7 +48,7 @@
     gchar src_thread[12];
     gchar dst_instance[24];
     gchar dst_thread[12];
-    gchar tag[12];
+    gchar tag[24];
   };
 
  struct ZMQ_SET_BIT
@@ -58,7 +58,7 @@
     gchar dls_tech_id [ NBR_CARAC_PLUGIN_DLS_TECHID ];
   };
 
-/************************************************ Définitions des prototypes **************************************************/
+/************************************************ DÃ©finitions des prototypes **************************************************/
  extern struct ZMQUEUE *Connect_zmq ( gint pattern, gchar *name, gchar *type, gchar *endpoint, gint port );     /* Dans zmq.c */
  extern struct ZMQUEUE *Bind_zmq ( gint pattern, gchar *name, gchar *type, gchar *endpoint, gint port );
  extern void Close_zmq ( struct ZMQUEUE *zmq );
