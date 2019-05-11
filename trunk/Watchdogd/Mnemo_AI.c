@@ -279,7 +279,7 @@
                 "SELECT a.min,a.max,a.type,a.unite"
                 " FROM mnemos_AI as a"
                 " INNER JOIN dls as d ON a.dls_id = d.id"
-                " WHERE d.tech_id='%s' AND m.acronyme='%s' LIMIT 1",
+                " WHERE d.tech_id='%s' AND a.acronyme='%s' LIMIT 1",
                 ai->tech_id, ai->acronyme
               );
 
