@@ -1011,7 +1011,6 @@
           Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding AI '%s:%s'", __func__, tech_id, acronyme );
-          Charger_conf_AI ( ai );                                                     /* Chargment de la conf AI depuis la DB */
         }
        if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */
       }
@@ -1548,13 +1547,21 @@
                g_snprintf( chaine, sizeof(chaine), "%d heure et %d minute", tm.tm_hour, tm.tm_min );
              }
             else
-             { Dls_data_get_AI ( tech_id, acronyme, dlsdata_p );
-               if (dlsdata_p && *dlsdata_p)
-                { struct ANALOG_INPUT *ai = *dlsdata_p;
-                  if (ai->val_ech-roundf(ai->val_ech) == 0.0)
-                   { g_snprintf( chaine, sizeof(chaine), "%.0f %s", ai->val_ech, ai->confDB.unite ); }
+             { gpointer *dlsdata_p2=NULL;
+               struct DLS_AI *ai;
+               if (dlsdata_p)
+                { Dls_data_get_AI ( tech_id, acronyme, dlsdata_p );
+                  ai = *dlsdata_p;
+                }
+               else
+                { Dls_data_get_AI ( tech_id, acronyme, dlsdata_p2 );
+                  ai = *dlsdata_p2;
+                }
+               if (ai)
+                { if (ai->val_ech-roundf(ai->val_ech) == 0.0)
+                   { g_snprintf( chaine, sizeof(chaine), "%.0f %s", ai->val_ech, ai->unite ); }
                   else
-                   { g_snprintf( chaine, sizeof(chaine), "%.2f %s", ai->val_ech, ai->confDB.unite ); }
+                   { g_snprintf( chaine, sizeof(chaine), "%.2f %s", ai->val_ech, ai->unite ); }
                 }
                else g_snprintf( chaine, sizeof(chaine), "erreur" );
              }
