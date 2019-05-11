@@ -1011,7 +1011,6 @@
           Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding AI '%s:%s'", __func__, tech_id, acronyme );
-          Charger_conf_AI ( ai );                                                     /* Chargment de la conf AI depuis la DB */
         }
        if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */
       }
@@ -1547,13 +1546,16 @@
                localtime_r( &temps, &tm );
                g_snprintf( chaine, sizeof(chaine), "%d heure et %d minute", tm.tm_hour, tm.tm_min );
              }
-            else if ( (db=Rechercher_AI ( tech_id, acronyme )) != NULL )
-             { gfloat valeur = Dls_data_get_AI ( tech_id, acronyme, dlsdata_p );
-               if (valeur-roundf(valeur) == 0.0)
-                { g_snprintf( chaine, sizeof(chaine), "%.0f %s", valeur, db->row[0] ); }                     /* Row0 = unite */
-               else
-                { g_snprintf( chaine, sizeof(chaine), "%.2f %s", valeur, db->row[0] ); }                     /* Row0 = unite */
-               Libere_DB_SQL (&db);
+            else
+             { Dls_data_get_AI ( tech_id, acronyme, dlsdata_p );
+               if (dlsdata_p && *dlsdata_p)
+                { struct ANALOG_INPUT *ai = *dlsdata_p;
+                  if (ai->val_ech-roundf(ai->val_ech) == 0.0)
+                   { g_snprintf( chaine, sizeof(chaine), "%.0f %s", ai->val_ech, ai->confDB.unite ); }
+                  else
+                   { g_snprintf( chaine, sizeof(chaine), "%.2f %s", ai->val_ech, ai->confDB.unite ); }
+                }
+               else g_snprintf( chaine, sizeof(chaine), "erreur" );
              }
             break;
        default: return(NULL);

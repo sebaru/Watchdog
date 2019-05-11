@@ -681,7 +681,9 @@
                  map_text, tech_id, acro, libelle );
        if ( sscanf ( map_text, "%[^:]:AI%d", debut, &num ) == 2 )                      /* Découpage de la ligne ev_text */
         { if (num<module->nbr_entree_ana)
-           { Dls_data_set_AI ( tech_id, acro, &module->AI[num], 0.0 ); }
+           { Dls_data_set_AI ( tech_id, acro, &module->AI[num], 0.0 );
+             Charger_conf_AI ( module->AI[num] );                                     /* Chargment de la conf AI depuis la DB */
+           }
           else Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING, "%s: map '%s': num %d out of range '%d'", __func__,
                          map_text, num, module->nbr_entree_ana );
         }
