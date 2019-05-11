@@ -192,7 +192,7 @@
     g_snprintf( requete, sizeof(requete),
                "SELECT d.tech_id, m.acronyme, m.map_text, m.libelle "
                "FROM mnemos_AI as m INNER JOIN dls as d ON d.id = m.dls_id "
-               " WHERE (m.src_host='*' OR m.src_host LIKE '%s') AND (m.src_thread='*' OR m.src_thread LIKE '%s')"
+               " WHERE (m.map_host='*' OR m.map_host LIKE '%s') AND (m.map_thread='*' OR m.map_thread LIKE '%s')"
                " AND m.map_text LIKE '%s'", g_get_host_name(), thread, commande );
 
     g_free(commande);
@@ -213,7 +213,7 @@
 /* Entrée: le map_snips a rechercher                                                                                          */
 /* Sortie: la struct DB                                                                                                       */
 /******************************************************************************************************************************/
- gboolean Recuperer_mnemos_AI_by_map_snips ( struct DB **db_retour, gchar *map_snips )
+ gboolean Recuperer_mnemos_AI_by_map_question_vocale ( struct DB **db_retour, gchar *map_snips )
   { gchar requete[1024];
     gchar *commande;
     gboolean retour;
@@ -226,9 +226,9 @@
      }
 
     g_snprintf( requete, sizeof(requete),
-               "SELECT d.tech_id, m.acronyme, m.libelle, m.map_snips, m.audio_format "
+               "SELECT d.tech_id, m.acronyme, m.libelle, m.map_question_vocale, m.map_reponse_vocale "
                "FROM mnemos_AI as m INNER JOIN dls as d ON d.id = m.dls_id"
-               " WHERE m.map_snips LIKE '%s'", commande );
+               " WHERE m.map_question_vocale LIKE '%s'", commande );
     g_free(commande);
 
     db = Init_DB_SQL();

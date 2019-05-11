@@ -338,15 +338,15 @@
              Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive SNIPS_QUESTION from %s/%s to %s/%s : '%s'",
                        __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread, payload );
 
-             if ( ! Recuperer_mnemos_AI_by_map_snips ( &db, (gchar *)payload ) )
+             if ( ! Recuperer_mnemos_AI_by_map_question_vocale ( &db, (gchar *)payload ) )
               { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Error searching Database for '%s'", __func__, payload ); }
              else while ( Recuperer_mnemos_AI_suite( &db ) )
               { gchar *tech_id = db->row[0], *acronyme = db->row[1], *libelle = db->row[2];
-                gchar *map_snips = db->row[3], *audio_format = db->row[4];
+                gchar *map_question_vocale = db->row[3], *map_reponse_vocale = db->row[4];
                 gchar *result_string;
                 Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s - %s", __func__,
-                          map_snips, tech_id, acronyme, libelle, audio_format );
-                result_string = Dls_dyn_string ( audio_format, MNEMO_ENTREE_ANA, tech_id, acronyme, NULL );
+                          map_question_vocale, tech_id, acronyme, libelle, map_reponse_vocale );
+                result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_ENTREE_ANA, tech_id, acronyme, NULL );
                 Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus, NULL, "msrv", event->src_instance,
                                     "audio", "play_google", result_string, strlen(result_string)+1 );
                 Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,

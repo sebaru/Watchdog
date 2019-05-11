@@ -1091,7 +1091,7 @@
                   "`map_host` VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',"
                   "`map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',"
                   "`map_text` VARCHAR(160) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
-                  "`map_snips` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+                  "`map_question_vocale` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
                   "PRIMARY KEY (`id`), "
                   "UNIQUE (`dls_id`,`acronyme`),"
                   "FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE"
@@ -1163,7 +1163,7 @@
 
     if (database_version < 4117)
      { g_snprintf( requete, sizeof(requete),
-                   "ALTER TABLE `mnemos_AI` ADD `audio_format` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'aucun';" );
+                   "ALTER TABLE `mnemos_AI` ADD `map_reponse_vocale` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'aucun';" );
        Lancer_requete_SQL ( db, requete );
      }
 
