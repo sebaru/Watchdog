@@ -1155,8 +1155,12 @@
 
     if (database_version < 4115)
      { g_snprintf( requete, sizeof(requete),
-                   "ALTER TABLE `syns_motifs` DROP `bitclic2`;"
-                   "ALTER TABLE `syns_motifs` ADD `clic_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '';"
+                   "ALTER TABLE `syns_motifs` DROP `bitclic2`;" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                   "ALTER TABLE `syns_motifs` ADD `clic_tech_id` VARCHAR(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '';" );
+       Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
                    "ALTER TABLE `syns_motifs` ADD `clic_acronyme` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '';" );
        Lancer_requete_SQL ( db, requete );
      }

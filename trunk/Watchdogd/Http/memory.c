@@ -87,7 +87,7 @@
      }
 /*----------------------------------------------- Entrée Analogique ----------------------------------------------------------*/
     else if (!strcasecmp(type,"EA"))
-     { struct ANALOG_INPUT *ai=NULL;
+     { struct DLS_AI *ai=NULL;
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                  "%s: HTTP/ request for GET EA %s:%s", __func__, tech_id, acronyme );
        Dls_data_get_AI ( tech_id, acronyme, (gpointer *)&ai );
@@ -99,7 +99,7 @@
        json_builder_set_member_name  ( builder, "valeur" );
        json_builder_add_double_value  ( builder, ai->val_ech );
        json_builder_set_member_name  ( builder, "type" );
-       json_builder_add_double_value  ( builder, ai->confDB.type );
+       json_builder_add_double_value  ( builder, ai->type );
      }
 /*----------------------------------------------- Bistable et Monostables ----------------------------------------------------*/
     else if (!strcasecmp(type,"B") || !!strcasecmp(type,"M"))
