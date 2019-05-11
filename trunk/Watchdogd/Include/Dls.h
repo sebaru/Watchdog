@@ -67,14 +67,25 @@
     gboolean state;
   };
 
+ struct DLS_AI
+  { gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
+    gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
+    gfloat  min;
+    gfloat  max;
+    guint   type;                                                                                  /* Type de gestion de l'EA */
+    gchar   unite[NBR_CARAC_UNITE_MNEMONIQUE_UTF8+1];                                                         /* Km, h, ° ... */
+    gfloat  val_ech;
+    gfloat  val_avant_ech;
+    guint   last_arch;                                                                         /* Date de la derniere archive */
+    guint   inrange;
+  };
+
  struct DIGITAL_INPUT
   { gboolean etat;
   };
 
  struct ANALOG_INPUT
   { struct CMD_TYPE_MNEMO_AI confDB;
-    gchar   acronyme[NBR_CARAC_ACRONYME_MNEMONIQUE_UTF8+1];
-    gchar   tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];
     gfloat  val_ech;
     gfloat  val_avant_ech;
     guint   last_arch;                                                                         /* Date de la derniere archive */

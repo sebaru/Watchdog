@@ -202,15 +202,15 @@
            }
           liste = Partage->Dls_data_AI;
           while (liste)
-           { struct ANALOG_INPUT *ai = liste->data;
+           { struct DLS_AI *ai = liste->data;
              liste = g_slist_next(liste);
              if (strcmp(ai->tech_id, tech_id)) continue;
              g_snprintf( chaine, sizeof(chaine),
                          " | - EA '%s:%s' = %8.2f %s, val_avant_ech=%8.2f, inrange=%d\n"
                          "                  type=%d, last_arch=%d (%ds ago), min=%8.2f, max=%8.2f",
-                         ai->tech_id, ai->acronyme, ai->val_ech, ai->confDB.unite, ai->val_avant_ech, ai->inrange,
-                         ai->confDB.type, ai->last_arch, (Partage->top - ai->last_arch)/10,
-                         ai->confDB.min, ai->confDB.max
+                         ai->tech_id, ai->acronyme, ai->val_ech, ai->unite, ai->val_avant_ech, ai->inrange,
+                         ai->type, ai->last_arch, (Partage->top - ai->last_arch)/10,
+                         ai->min, ai->max
                        );
              response = Admin_write ( response, chaine );
            }
