@@ -193,7 +193,7 @@
                "SELECT d.tech_id, m.acronyme, m.map_text, m.libelle "
                "FROM mnemos_AI as m INNER JOIN dls as d ON d.id = m.dls_id "
                " WHERE (m.src_host='*' OR m.src_host LIKE '%s') AND (m.src_thread='*' OR m.src_thread LIKE '%s')"
-               " WHERE m.map_text LIKE '%s'", g_get_host_name(), thread, commande );
+               " AND m.map_text LIKE '%s'", g_get_host_name(), thread, commande );
 
     g_free(commande);
 
