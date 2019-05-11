@@ -344,9 +344,10 @@
               { gchar *tech_id = db->row[0], *acronyme = db->row[1], *libelle = db->row[2];
                 gchar *map_question_vocale = db->row[3], *map_reponse_vocale = db->row[4];
                 gchar *result_string;
+                gpointer ai_p=NULL;
                 Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s - %s", __func__,
                           map_question_vocale, tech_id, acronyme, libelle, map_reponse_vocale );
-                result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_ENTREE_ANA, tech_id, acronyme, NULL );
+                result_string = Dls_dyn_string ( map_reponse_vocale, MNEMO_ENTREE_ANA, tech_id, acronyme, &ai_p );
                 Send_zmq_with_tag ( Partage->com_msrv.zmq_to_bus, NULL, "msrv", event->src_instance,
                                     "audio", "play_google", result_string, strlen(result_string)+1 );
                 Send_zmq_with_tag ( Partage->com_msrv.zmq_to_slave, NULL, "msrv", event->src_instance,

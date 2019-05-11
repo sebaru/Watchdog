@@ -1547,16 +1547,8 @@
                g_snprintf( chaine, sizeof(chaine), "%d heure et %d minute", tm.tm_hour, tm.tm_min );
              }
             else
-             { gpointer *dlsdata_p2=NULL;
-               struct DLS_AI *ai;
-               if (dlsdata_p)
-                { Dls_data_get_AI ( tech_id, acronyme, dlsdata_p );
-                  ai = *dlsdata_p;
-                }
-               else
-                { Dls_data_get_AI ( tech_id, acronyme, dlsdata_p2 );
-                  ai = *dlsdata_p2;
-                }
+             { Dls_data_get_AI ( tech_id, acronyme, dlsdata_p );
+               struct DLS_AI *ai = *dlsdata_p;
                if (ai)
                 { if (ai->val_ech-roundf(ai->val_ech) == 0.0)
                    { g_snprintf( chaine, sizeof(chaine), "%.0f %s", ai->val_ech, ai->unite ); }
