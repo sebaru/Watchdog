@@ -192,7 +192,43 @@
     g_snprintf( requete, sizeof(requete),
                "SELECT d.tech_id, m.acronyme, m.map_text, m.libelle "
                "FROM mnemos_AI as m INNER JOIN dls as d ON d.id = m.dls_id"
-               " WHERE m.map_text LIKE '%s'", commande );
+               " WHERE (m.src_host='*' OR m.src_host LIKE '%s') AND (m.src_thread='*' OR m.src_thread LIKE '%s')"
+               " WHERE m.map_text LIKE '%s'", g_get_host_name(), thread, commande );
+
+    g_free(commande);
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
+  }
+/******************************************************************************************************************************/
+/* Rechercher_AI_by_map_snips: Recupere l'AI lié au parametre snips                                                           */
+/* Entrée: le map_snips a rechercher                                                                                          */
+/* Sortie: la struct DB                                                                                                       */
+/******************************************************************************************************************************/
+ gboolean Recuperer_mnemos_AI_by_map_snips ( struct DB **db_retour, gchar *map_snips )
+  { gchar requete[1024];
+    gchar *commande;
+    gboolean retour;
+    struct DB *db;
+
+    commande = Normaliser_chaine ( map_snips );
+    if (!commande)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible commande", __func__ );
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),
+               "SELECT d.tech_id, m.acronyme, m.libelle, m.map_snips, m.audio_format "
+               "FROM mnemos_AI as m INNER JOIN dls as d ON d.id = m.dls_id"
+               " WHERE m.map_snips LIKE '%s'", commande );
     g_free(commande);
 
     db = Init_DB_SQL();

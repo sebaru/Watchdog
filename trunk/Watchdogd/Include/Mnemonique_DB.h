@@ -62,6 +62,7 @@
  extern gboolean Modifier_mnemo_aiDB( struct CMD_TYPE_MNEMO_FULL *option_mnemo );
  extern void Charger_conf_AI ( struct ANALOG_INPUT *ai );
  extern gboolean Recuperer_mnemos_AI_by_text ( struct DB **db_retour, gchar *thread, gchar *text );
+ extern gboolean Recuperer_mnemos_AI_by_map_snips ( struct DB **db_retour, gchar *map_snips );
  extern gboolean Recuperer_mnemos_AI_suite( struct DB **db_orig );
 
  extern gboolean Mnemo_auto_create_HORLOGE ( gint dls_id, gchar *acronyme, gchar *libelle_src );    /* Dans Mnemos_Horloges.c */

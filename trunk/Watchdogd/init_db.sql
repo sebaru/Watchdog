@@ -284,6 +284,7 @@ CREATE TABLE IF NOT EXISTS `mnemos_AI` (
   `map_thread` VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '*',
   `map_text` VARCHAR(160) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `map_snips` VARCHAR(64) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `audio_format` VARCHAR(128) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'aucun',
   PRIMARY KEY (`id`),
   UNIQUE (`dls_id`,`acronyme`),
   FOREIGN KEY (`dls_id`) REFERENCES `dls` (`id`) ON DELETE CASCADE

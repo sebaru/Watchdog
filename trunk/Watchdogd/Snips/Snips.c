@@ -74,11 +74,32 @@
 /* Entrée : L'évènement                                                                                                       */
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
- static void Snips_traiter_commande_vocale ( const gchar *intent, const gchar *quoi, const gchar *object, const gchar *room )
+ static void Snips_traiter_question_vocale ( const gchar *intent, const gchar *ai, const gchar *object, const gchar *room )
   { struct DB *db;
     gchar texte[80], insert[32];
 
-    g_snprintf ( texte, sizeof(texte), "%s,%s", intent, quoi );
+    g_snprintf ( texte, sizeof(texte), "%s,%s", intent, ai );
+    if (object)
+     { g_snprintf ( insert, sizeof(insert), ",%s", object );
+       g_strlcat( texte, insert, sizeof(texte) );
+     }
+    if (room)
+     { g_snprintf ( insert, sizeof(insert), ",%s", room );
+       g_strlcat( texte, insert, sizeof(texte) );
+     }
+
+    Send_zmq_with_tag ( Cfg_snips.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SNIPS_QUESTION", texte, strlen(texte)+1 );
+  }
+/******************************************************************************************************************************/
+/* Snips_traiter_commande_vocale: appeller pour faire correspondre une action a une demande vocale                            */
+/* Entrée : L'évènement                                                                                                       */
+/* Sortie : Néant                                                                                                             */
+/******************************************************************************************************************************/
+ static void Snips_traiter_commande_vocale ( const gchar *intent, const gchar *verbe, const gchar *object, const gchar *room )
+  { struct DB *db;
+    gchar texte[80], insert[32];
+
+    g_snprintf ( texte, sizeof(texte), "%s,%s", intent, verbe );
     if (object)
      { g_snprintf ( insert, sizeof(insert), ",%s", object );
        g_strlcat( texte, insert, sizeof(texte) );
@@ -113,7 +134,7 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Snips_message_CB(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message)
-  { const gchar *targetAction, *targetObject, *targetRoom, *targetAI;
+  { const gchar *targetVerbe, *targetObject, *targetRoom, *targetAI;
     const gchar *slotValue, *slotName;
     const gchar *intent;
     JsonArray *slotArray;
@@ -180,7 +201,7 @@
        return;
      }
 
-    targetAI = targetAction = targetObject = targetRoom = NULL;
+    targetAI = targetVerbe = targetObject = targetRoom = NULL;
     for( i=0;i<nbr_slots; i++)
      { JsonObject *slot = json_array_get_object_element ( slotArray, i );
        slotValue = json_object_get_string_member( json_object_get_object_member ( slot, "value" ), "value" );
@@ -188,14 +209,14 @@
        Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_DEBUG,
                  "%s: slot %d/%d trouvé: %s - %s", __func__, i+1, nbr_slots, slotName, slotValue );
        if (!strcmp(slotName,"targetAI")) targetAI = slotValue;
-       if (!strcmp(slotName,"targetAction")) targetAction = slotValue;
+       if (!strcmp(slotName,"targetVerbe")) targetVerbe = slotValue;
        if (!strcmp(slotName,"targetObject")) targetObject = slotValue;
        if (!strcmp(slotName,"targetRoom"))   targetRoom   = slotValue;
      }
     if (!strcmp(intent,"ACTION"))
-     { Snips_traiter_commande_vocale ( intent, targetAction, targetObject, targetRoom ); }
-    else if (!strcmp(intent,"QUESTION-AI"))
-     { Snips_traiter_commande_vocale ( intent, targetAI, targetObject, targetRoom ); }
+     { Snips_traiter_commande_vocale ( intent, targetVerbe, targetObject, targetRoom ); }
+    else if (!strcmp(intent,"QUESTION"))
+     { Snips_traiter_question_vocale ( intent, targetAI, targetObject, targetRoom ); }
     json_node_unref (Query);
     Cfg_snips.nbr_msg_recu++;
  	}
