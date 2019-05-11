@@ -277,11 +277,11 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT a.min,a.max,a.type,a.unite"
-                " FROM %s as a"
+                " FROM mnemos_AI as a"
                 " INNER JOIN mnemos as m ON a.id_mnemo = m.id"
                 " INNER JOIN dls as d ON m.dls_id = d.id"
                 " WHERE d.tech_id='%s' AND m.acronyme='%s' LIMIT 1",
-                NOM_TABLE_MNEMO_AI, ai->tech_id, ai->acronyme
+                ai->tech_id, ai->acronyme
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
