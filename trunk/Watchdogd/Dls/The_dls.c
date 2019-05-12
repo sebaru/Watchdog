@@ -1638,7 +1638,7 @@
           bit_defaut_fixe      |= plugin_actuel->vars.bit_defaut_fixe;
           bit_alarme           |= plugin_actuel->vars.bit_alarme;
           bit_alarme_fixe      |= plugin_actuel->vars.bit_alarme_fixe;
-          plugin_actuel->vars.bit_activite_down = bit_comm_out | bit_defaut | bit_defaut_fixe | bit_alarme | bit_alarme_fixe;
+          plugin_actuel->vars.bit_activite_up = !(bit_comm_out | bit_defaut | bit_defaut_fixe | bit_alarme | bit_alarme_fixe);
 
           bit_veille_partielle |= plugin_actuel->vars.bit_veille;
           bit_veille_totale    &= plugin_actuel->vars.bit_veille;

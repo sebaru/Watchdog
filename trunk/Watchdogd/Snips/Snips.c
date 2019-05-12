@@ -75,8 +75,7 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Snips_traiter_question_vocale ( const gchar *intent, const gchar *ai, const gchar *object, const gchar *room )
-  { struct DB *db;
-    gchar texte[80], insert[32];
+  { gchar texte[80], insert[32];
 
     g_snprintf ( texte, sizeof(texte), "%s,%s", intent, ai );
     if (object)

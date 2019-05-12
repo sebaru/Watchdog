@@ -46,7 +46,7 @@
 
 %token <val>    T_SBIEN_VEILLE T_SBIEN_ALE T_SBIEN_ALEF T_TOP_ALERTE
 %token <val>    T_SPERS_DER T_SPERS_DERF T_SPERS_DAN T_SPERS_DANF T_OSYN_ACQ
-%token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_DOWN
+%token <val>    T_ACT_COMOUT T_ACT_DEF T_ACT_ALA T_ACT_DEFF T_ACT_ALAF  T_ACT_UP
 %token <val>    T_BUS T_HOST T_THREAD T_TAG T_PARAM1
 
 %token <val>    MODE COLOR CLIGNO RESET RATIO T_LIBELLE T_ETIQUETTE T_UNITE
@@ -381,9 +381,9 @@ unite:          modulateur ENTIER HEURE ENTIER
                 | T_OSYN_ACQ
                 {{ $$ = g_strdup("vars->bit_acquit");
                 }}
-                | barre T_ACT_DOWN
-                {{ if ($1) $$ = g_strdup("!vars->bit_activite_down");
-                      else $$ = g_strdup("vars->bit_activite_down");
+                | barre T_ACT_UP
+                {{ if ($1) $$ = g_strdup("!vars->bit_activite_up");
+                      else $$ = g_strdup("vars->bit_activite_up");
                 }}
                 | barre T_BI ENTIER
                 {{ int taille;

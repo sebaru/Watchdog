@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <string.h>
  #include <unistd.h>
  #include <libxml/xmlwriter.h>
@@ -70,7 +70,7 @@
     json_builder_set_member_name  ( builder, "bit_danger" ); json_builder_add_boolean_value ( builder, dls->vars.bit_danger );
     json_builder_set_member_name  ( builder, "bit_danger_fixe" ); json_builder_add_boolean_value ( builder, dls->vars.bit_danger_fixe );
     json_builder_set_member_name  ( builder, "bit_acquit" ); json_builder_add_boolean_value ( builder, dls->vars.bit_acquit );
-    json_builder_set_member_name  ( builder, "bit_activite_down" ); json_builder_add_boolean_value ( builder, dls->vars.bit_activite_down );
+    json_builder_set_member_name  ( builder, "bit_activite_up" ); json_builder_add_boolean_value ( builder, dls->vars.bit_activite_up );
     json_builder_set_member_name  ( builder, "bit_veille" ); json_builder_add_boolean_value ( builder, dls->vars.bit_veille );
     json_builder_end_object (builder);
   }
@@ -105,7 +105,7 @@
     buf = json_generator_to_data (gen, &taille_buf);
     g_object_unref(builder);
     g_object_unref(gen);
-          
+
 /*************************************************** Envoi au client **********************************************************/
     return(Http_Send_response_code_with_buffer ( wsi, HTTP_200_OK, HTTP_CONTENT_JSON, buf, taille_buf ));
   }
@@ -154,7 +154,7 @@
 /* Sortie : FALSE si pb                                                                                                       */
 /******************************************************************************************************************************/
  gint Http_Traiter_request_getdls ( struct lws *wsi, gchar *url )
-  { 
+  {
     if ( ! strcasecmp( url, "debug_trad_on" ) )
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE, "%s: Setting Dls Trad Debug ON", __func__ );
        Trad_dls_set_debug ( TRUE );
