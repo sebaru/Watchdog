@@ -91,8 +91,7 @@
        system(chaine);
        fd_cible = open ( fichier, O_RDONLY, 0 );
        if (fd_cible < 0)
-        { gchar chaine[80];
-          Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
+        { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
                     "%s: '%s' not found (even after download)", __func__, fichier );
           return(FALSE);
         }
@@ -144,7 +143,7 @@
  gboolean Jouer_google_speech ( gchar *libelle_audio )
   { gint pid;
 
-    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_INFO, "%s: Send '%s'", __func__, libelle_audio );
+    Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_NOTICE, "%s: Send '%s'", __func__, libelle_audio );
     pid = fork();
     if (pid<0)
      { Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_ERR,
@@ -163,7 +162,7 @@
        waitpid(pid, NULL, 0 );
      }
     Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
-             "%s: google_speech '%s' finished pid=%d", __func__, libelle_audio, pid );
+             "%s: Wtd_play_google '%s' finished pid=%d", __func__, libelle_audio, pid );
     Cfg_audio.nbr_diffusion_google++;
     return(TRUE);
   }
@@ -222,7 +221,7 @@
            { gchar fichier[80];
              Info_new( Config.log, Cfg_audio.lib->Thread_debug, LOG_DEBUG,
                       "%s : Reception d'un message PLAY_WAV : %s", __func__, (gchar *)payload );
-             g_snprintf( fichier, sizeof(fichier), "%s", payload );
+             g_snprintf( fichier, sizeof(fichier), "%s", (gchar *)payload );
              Jouer_wav_by_file ( fichier );
            }
           else if ( !strcmp( event->tag, "play_google" ) )
