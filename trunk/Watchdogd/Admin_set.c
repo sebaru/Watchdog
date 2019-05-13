@@ -40,8 +40,8 @@
     sscanf ( ligne, "%s", commande );                                                    /* Découpage de la ligne de commande */
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, " | -- Watchdog ADMIN -- Help du mode 'SET'" );
-       response = Admin_write ( response, " | - new_b $name $owner $val - Set bistable $name_$owner to $val" );
-       response = Admin_write ( response, " | - new_m $name $owner      - Set monostablea $name_$owner to 1" );
+       response = Admin_write ( response, " | - new_b $tech_id $acro $val - Set bistable $name_$owner to $val" );
+       response = Admin_write ( response, " | - new_m $tech_id $acro    - Set monostablea $name_$owner to 1" );
        response = Admin_write ( response, " | - e num val               - Set E[num]   = val" );
        response = Admin_write ( response, " | - m num val               - Set M[num]   = val" );
        response = Admin_write ( response, " | - b num val               - Set B[num]   = val" );

@@ -869,7 +869,7 @@
        liste = Partage->Dls_data_BOOL;
        while (liste)
         { bool = (struct DLS_BOOL *)liste->data;
-          if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
+          if ( !strcasecmp ( bool->acronyme, acronyme ) && !strcasecmp( bool->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
 
@@ -910,7 +910,7 @@
     liste = Partage->Dls_data_BOOL;
     while (liste)
      { bool = (struct DLS_BOOL *)liste->data;
-       if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
+       if ( !strcasecmp ( bool->acronyme, acronyme ) && !strcasecmp( bool->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -934,7 +934,7 @@
     liste = Partage->Dls_data_BOOL;
     while (liste)
      { bool = (struct DLS_BOOL *)liste->data;
-       if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
+       if ( !strcasecmp ( bool->acronyme, acronyme ) && !strcasecmp( bool->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -958,7 +958,7 @@
     liste = Partage->Dls_data_BOOL;
     while (liste)
      { bool = (struct DLS_BOOL *)liste->data;
-       if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
+       if ( !strcasecmp ( bool->acronyme, acronyme ) && !strcasecmp( bool->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -995,7 +995,7 @@
        liste = Partage->Dls_data_AI;
        while (liste)
         { ai = (struct DLS_AI *)liste->data;
-          if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->tech_id, tech_id ) ) break;
+          if ( !strcasecmp ( ai->acronyme, acronyme ) && !strcasecmp( ai->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
 
@@ -1086,7 +1086,7 @@
        liste = Partage->Dls_data_CI;
        while (liste)
         { cpt_imp = (struct DLS_CI *)liste->data;
-          if ( !strcmp ( cpt_imp->acronyme, acronyme ) && !strcmp( cpt_imp->tech_id, tech_id ) ) break;
+          if ( !strcasecmp ( cpt_imp->acronyme, acronyme ) && !strcasecmp( cpt_imp->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
 
@@ -1147,7 +1147,7 @@
     liste = Partage->Dls_data_CI;
     while (liste)
      { cpt_imp = (struct DLS_CI *)liste->data;
-       if ( !strcmp ( cpt_imp->acronyme, acronyme ) && !strcmp( cpt_imp->tech_id, tech_id ) ) break;
+       if ( !strcasecmp ( cpt_imp->acronyme, acronyme ) && !strcasecmp( cpt_imp->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -1169,7 +1169,7 @@
        liste = Partage->Dls_data_CH;
        while (liste)
         { cpt_h = (struct DLS_CH *)liste->data;
-          if ( !strcmp ( cpt_h->acronyme, acronyme ) && !strcmp( cpt_h->tech_id, tech_id ) ) break;
+          if ( !strcasecmp ( cpt_h->acronyme, acronyme ) && !strcasecmp( cpt_h->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
 
@@ -1232,7 +1232,7 @@
     liste = Partage->Dls_data_CH;
     while (liste)
      { cpt_h = (struct DLS_CH *)liste->data;
-       if ( !strcmp ( cpt_h->acronyme, acronyme ) && !strcmp( cpt_h->tech_id, tech_id ) ) break;
+       if ( !strcasecmp ( cpt_h->acronyme, acronyme ) && !strcasecmp( cpt_h->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -1256,7 +1256,7 @@
     liste = Partage->Dls_data_AI;
     while (liste)
      { ai = (struct DLS_AI *)liste->data;
-       if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->tech_id, tech_id ) ) break;
+       if ( !strcasecmp ( ai->acronyme, acronyme ) && !strcasecmp( ai->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -1278,7 +1278,7 @@
        liste = Partage->Dls_data_TEMPO;
        while (liste)
         { tempo = (struct DLS_TEMPO *)liste->data;
-          if ( !strcmp ( tempo->acronyme, acronyme ) && !strcmp( tempo->tech_id, tech_id ) ) break;
+          if ( !strcasecmp ( tempo->acronyme, acronyme ) && !strcasecmp( tempo->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
 
@@ -1322,7 +1322,7 @@
     liste = Partage->Dls_data_TEMPO;
     while (liste)
      { tempo = (struct DLS_TEMPO *)liste->data;
-       if ( !strcmp ( tempo->acronyme, acronyme ) && !strcmp( tempo->tech_id, tech_id ) ) break;
+       if ( !strcasecmp ( tempo->acronyme, acronyme ) && !strcasecmp( tempo->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -1358,7 +1358,7 @@
        liste = Partage->Dls_data_MSG;
        while (liste)
         { msg = (struct DLS_MESSAGES *)liste->data;
-          if ( !strcmp ( msg->acronyme, acronyme ) && !strcmp( msg->tech_id, tech_id ) ) break;
+          if ( !strcasecmp ( msg->acronyme, acronyme ) && !strcasecmp( msg->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
 
@@ -1425,7 +1425,7 @@
     liste = Partage->Dls_data_MSG;
     while (liste)
      { msg = (struct DLS_MESSAGES *)liste->data;
-       if ( !strcmp ( msg->acronyme, acronyme ) && !strcmp( msg->tech_id, tech_id ) ) break;
+       if ( !strcasecmp ( msg->acronyme, acronyme ) && !strcasecmp( msg->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -1447,7 +1447,7 @@
        liste = Partage->Dls_data_VISUEL;
        while (liste)
         { visu = (struct DLS_VISUEL *)liste->data;
-          if ( !strcmp ( visu->acronyme, acronyme ) && !strcmp( visu->tech_id, tech_id ) ) break;
+          if ( !strcasecmp ( visu->acronyme, acronyme ) && !strcasecmp( visu->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
 
@@ -1486,8 +1486,7 @@
           visu->last_change = Partage->top;                               /* Date de la photo ! */
           #ifdef bouh
           pthread_mutex_lock( &Partage->com_msrv.synchro );                             /* Ajout dans la liste de i a traiter */
-          Partage->com_msrv.liste_i = g_slist_append( Partage->com_msrv.liste_i,
-                                                      GINT_TO_POINTER(num) );
+          Partage->com_msrv.liste_i = g_slist_append( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           #endif
         }
@@ -1511,7 +1510,7 @@
     liste = Partage->Dls_data_VISUEL;
     while (liste)
      { visu = (struct DLS_VISUEL *)liste->data;
-       if ( !strcmp ( visu->acronyme, acronyme ) && !strcmp( visu->tech_id, tech_id ) ) break;
+       if ( !strcasecmp ( visu->acronyme, acronyme ) && !strcasecmp( visu->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -1539,7 +1538,7 @@
              }
             break;
        case MNEMO_ENTREE_ANA:
-            if (!strcmp(tech_id, "SYS") && !strcmp(acronyme, "TIME"))
+            if (!strcasecmp(tech_id, "SYS") && !strcasecmp(acronyme, "TIME"))
              { struct tm tm;
                time_t temps;
                time(&temps);
