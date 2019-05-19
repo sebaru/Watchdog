@@ -1,5 +1,5 @@
 /******************************************************************************************************************************/
-/* Watchdogd/Mnemo_Horloges.c        Déclaration des fonctions pour la gestion des Horloges                                   */
+/* Watchdogd/Mnemo_Horloges.c        DÃ©claration des fonctions pour la gestion des Horloges                                   */
 /* Projet WatchDog version 3.0       Gestion d'habitat                                                    03.07.2018 21:25:00 */
 /* Auteur: LEFEVRE Sebastien                                                                                                  */
 /******************************************************************************************************************************/
@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <glib.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -37,7 +37,7 @@
 
 /******************************************************************************************************************************/
 /* Ajouter_Modifier_mnemo_baseDB: Ajout ou modifie le mnemo en parametre                                                      */
-/* Entrée: un mnemo, et un flag d'edition ou d'ajout                                                                          */
+/* EntrÃ©e: un mnemo, et un flag d'edition ou d'ajout                                                                          */
 /* Sortie: -1 si erreur, ou le nouvel id si ajout, ou 0 si modification OK                                                    */
 /******************************************************************************************************************************/
  gboolean Mnemo_auto_create_HORLOGE ( gint dls_id, gchar *acronyme, gchar *libelle_src )
@@ -46,7 +46,7 @@
     gboolean retour;
     struct DB *db;
 
-/******************************************** Préparation de la base du mnemo *************************************************/
+/******************************************** PrÃ©paration de la base du mnemo *************************************************/
     acro       = Normaliser_chaine ( acronyme );                                             /* Formatage correct des chaines */
     if ( !acro )
      { Info_new( Config.log, Config.log_msrv, LOG_WARNING,
@@ -79,26 +79,24 @@
     return (retour);
   }
 /******************************************************************************************************************************/
-/* Activer_holorgeDB: Recherche toutes les actives à date et les positionne dans la mémoire partagée                          */
-/* Entrée: rien                                                                                                               */
-/* Sortie: Les horloges sont directement pilotée dans la structure DLS_DATA                                                   */
+/* Activer_holorgeDB: Recherche toutes les actives Ã  date et les positionne dans la mÃ©moire partagÃ©e                          */
+/* EntrÃ©e: rien                                                                                                               */
+/* Sortie: Les horloges sont directement pilotÃ©e dans la structure DLS_DATA                                                   */
 /******************************************************************************************************************************/
  void Activer_horlogeDB ( void )
   { gchar requete[512];
     struct DB *db;
 
-    db = Init_DB_SQL();       
+    db = Init_DB_SQL();
     if (!db)
      { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
        return;
      }
- 
+
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT d.tech_id, m.acronyme"
                 " FROM mnemos_HORLOGE as m INNER JOIN dls as d ON m.dls_id = d.id"
-                " WHERE CURTIME() LIKE CONCAT(LPAD(h.heure,2,'0'),':',LPAD(h.minute,2,'0'),':%%')",
-                NOM_TABLE_MNEMO, NOM_TABLE_DLS
-              );
+                " WHERE CURTIME() LIKE CONCAT(LPAD(m.heure,2,'0'),':',LPAD(m.minute,2,'0'),':%%')" );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
      { Libere_DB_SQL (&db);
@@ -106,7 +104,7 @@
      }
 
     while (Recuperer_ligne_SQL(db))                                                        /* Chargement d'une ligne resultat */
-     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Mise à un de l'horloge %s:%s 1/2",
+     { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: Mise Ã  un de l'horloge %s:%s 1/2",
                  __func__, db->row[0], db->row[1] );
        Envoyer_commande_dls_data ( db->row[0], db->row[1] );
      }

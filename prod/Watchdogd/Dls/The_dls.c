@@ -869,7 +869,7 @@
        liste = Partage->Dls_data_BOOL;
        while (liste)
         { bool = (struct DLS_BOOL *)liste->data;
-          if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
+          if ( !strcasecmp ( bool->acronyme, acronyme ) && !strcasecmp( bool->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
 
@@ -910,7 +910,7 @@
     liste = Partage->Dls_data_BOOL;
     while (liste)
      { bool = (struct DLS_BOOL *)liste->data;
-       if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
+       if ( !strcasecmp ( bool->acronyme, acronyme ) && !strcasecmp( bool->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -934,7 +934,7 @@
     liste = Partage->Dls_data_BOOL;
     while (liste)
      { bool = (struct DLS_BOOL *)liste->data;
-       if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
+       if ( !strcasecmp ( bool->acronyme, acronyme ) && !strcasecmp( bool->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -958,7 +958,7 @@
     liste = Partage->Dls_data_BOOL;
     while (liste)
      { bool = (struct DLS_BOOL *)liste->data;
-       if ( !strcmp ( bool->acronyme, acronyme ) && !strcmp( bool->tech_id, tech_id ) ) break;
+       if ( !strcasecmp ( bool->acronyme, acronyme ) && !strcasecmp( bool->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -986,7 +986,7 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  void Dls_data_set_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p, float val_avant_ech )
-  { struct ANALOG_INPUT *ai;
+  { struct DLS_AI *ai;
     gboolean need_arch;
 
     if (!ai_p || !*ai_p)
@@ -994,13 +994,13 @@
        if ( !(acronyme && tech_id) ) return;
        liste = Partage->Dls_data_AI;
        while (liste)
-        { ai = (struct ANALOG_INPUT *)liste->data;
-          if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->tech_id, tech_id ) ) break;
+        { ai = (struct DLS_AI *)liste->data;
+          if ( !strcasecmp ( ai->acronyme, acronyme ) && !strcasecmp( ai->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
 
        if (!liste)
-        { ai = g_try_malloc0 ( sizeof(struct ANALOG_INPUT) );
+        { ai = g_try_malloc0 ( sizeof(struct DLS_AI) );
           if (!ai)
            { Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_ERR, "%s : Memory error for '%s:%s'", __func__, acronyme, tech_id );
              return;
@@ -1011,18 +1011,17 @@
           Partage->Dls_data_AI = g_slist_prepend ( Partage->Dls_data_AI, ai );
           pthread_mutex_unlock( &Partage->com_dls.synchro_data );
           Info_new( Config.log, Partage->com_dls.Thread_debug, LOG_DEBUG, "%s : adding AI '%s:%s'", __func__, tech_id, acronyme );
-          Charger_conf_AI ( ai );                                                     /* Chargment de la conf AI depuis la DB */
         }
        if (ai_p) *ai_p = (gpointer)ai;                                              /* Sauvegarde pour acceleration si besoin */
       }
-    else ai = (struct ANALOG_INPUT *)*ai_p;
+    else ai = (struct DLS_AI *)*ai_p;
 
     need_arch = FALSE;
     if (ai->val_avant_ech != val_avant_ech)
      { ai->val_avant_ech = val_avant_ech;                                           /* Archive au mieux toutes les 5 secondes */
        if ( ai->last_arch + ARCHIVE_EA_TEMPS_SI_VARIABLE < Partage->top ) { need_arch = TRUE; }
 
-       switch ( ai->confDB.type )
+       switch ( ai->type )
         { case ENTREEANA_NON_INTERP:
                ai->val_ech = val_avant_ech;                                                        /* Pas d'interprétation !! */
                ai->inrange = 1;
@@ -1034,7 +1033,7 @@
                 }
                else
                 { if (val_avant_ech < 204) val_avant_ech = 204;                                         /* Valeur à l'echelle */
-                  ai->val_ech = (gfloat) ((val_avant_ech-204)*(ai->confDB.max - ai->confDB.min))/820.0 + ai->confDB.min;
+                  ai->val_ech = (gfloat) ((val_avant_ech-204)*(ai->max - ai->min))/820.0 + ai->min;
                   ai->inrange = 1;
                 }
                break;
@@ -1045,12 +1044,12 @@
                 }
                else
                 { if (val_avant_ech < 816) val_avant_ech = 816;                                         /* Valeur à l'echelle */
-                  ai->val_ech = (gfloat) ((val_avant_ech-816)*(ai->confDB.max - ai->confDB.min))/3280.0 + ai->confDB.min;
+                  ai->val_ech = (gfloat) ((val_avant_ech-816)*(ai->max - ai->min))/3280.0 + ai->min;
                   ai->inrange = 1;
                 }
                break;
           case ENTREEANA_WAGO_750455:                                                                              /* 4/20 mA */
-               ai->val_ech = (gfloat) (val_avant_ech*(ai->confDB.max - ai->confDB.min))/4095.0 + ai->confDB.min;
+               ai->val_ech = (gfloat) (val_avant_ech*(ai->max - ai->min))/4095.0 + ai->min;
                ai->inrange = 1;
                break;
           case ENTREEANA_WAGO_750461:                                                                          /* Borne PT100 */
@@ -1087,7 +1086,7 @@
        liste = Partage->Dls_data_CI;
        while (liste)
         { cpt_imp = (struct DLS_CI *)liste->data;
-          if ( !strcmp ( cpt_imp->acronyme, acronyme ) && !strcmp( cpt_imp->tech_id, tech_id ) ) break;
+          if ( !strcasecmp ( cpt_imp->acronyme, acronyme ) && !strcasecmp( cpt_imp->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
 
@@ -1148,7 +1147,7 @@
     liste = Partage->Dls_data_CI;
     while (liste)
      { cpt_imp = (struct DLS_CI *)liste->data;
-       if ( !strcmp ( cpt_imp->acronyme, acronyme ) && !strcmp( cpt_imp->tech_id, tech_id ) ) break;
+       if ( !strcasecmp ( cpt_imp->acronyme, acronyme ) && !strcasecmp( cpt_imp->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -1170,7 +1169,7 @@
        liste = Partage->Dls_data_CH;
        while (liste)
         { cpt_h = (struct DLS_CH *)liste->data;
-          if ( !strcmp ( cpt_h->acronyme, acronyme ) && !strcmp( cpt_h->tech_id, tech_id ) ) break;
+          if ( !strcasecmp ( cpt_h->acronyme, acronyme ) && !strcasecmp( cpt_h->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
 
@@ -1233,7 +1232,7 @@
     liste = Partage->Dls_data_CH;
     while (liste)
      { cpt_h = (struct DLS_CH *)liste->data;
-       if ( !strcmp ( cpt_h->acronyme, acronyme ) && !strcmp( cpt_h->tech_id, tech_id ) ) break;
+       if ( !strcasecmp ( cpt_h->acronyme, acronyme ) && !strcasecmp( cpt_h->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -1246,18 +1245,18 @@
 /* Entrée : l'acronyme, le tech_id et le pointeur de raccourci                                                                */
 /******************************************************************************************************************************/
  gfloat Dls_data_get_AI ( gchar *tech_id, gchar *acronyme, gpointer *ai_p )
-  { struct ANALOG_INPUT *ai;
+  { struct DLS_AI *ai;
     GSList *liste;
     if (ai_p && *ai_p)                                                               /* Si pointeur d'acceleration disponible */
-     { ai = (struct ANALOG_INPUT *)*ai_p;
+     { ai = (struct DLS_AI *)*ai_p;
        return( ai->val_ech );
      }
     if (!tech_id || !acronyme) return(0.0);
 
     liste = Partage->Dls_data_AI;
     while (liste)
-     { ai = (struct ANALOG_INPUT *)liste->data;
-       if ( !strcmp ( ai->acronyme, acronyme ) && !strcmp( ai->tech_id, tech_id ) ) break;
+     { ai = (struct DLS_AI *)liste->data;
+       if ( !strcasecmp ( ai->acronyme, acronyme ) && !strcasecmp( ai->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -1279,7 +1278,7 @@
        liste = Partage->Dls_data_TEMPO;
        while (liste)
         { tempo = (struct DLS_TEMPO *)liste->data;
-          if ( !strcmp ( tempo->acronyme, acronyme ) && !strcmp( tempo->tech_id, tech_id ) ) break;
+          if ( !strcasecmp ( tempo->acronyme, acronyme ) && !strcasecmp( tempo->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
 
@@ -1323,7 +1322,7 @@
     liste = Partage->Dls_data_TEMPO;
     while (liste)
      { tempo = (struct DLS_TEMPO *)liste->data;
-       if ( !strcmp ( tempo->acronyme, acronyme ) && !strcmp( tempo->tech_id, tech_id ) ) break;
+       if ( !strcasecmp ( tempo->acronyme, acronyme ) && !strcasecmp( tempo->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -1359,7 +1358,7 @@
        liste = Partage->Dls_data_MSG;
        while (liste)
         { msg = (struct DLS_MESSAGES *)liste->data;
-          if ( !strcmp ( msg->acronyme, acronyme ) && !strcmp( msg->tech_id, tech_id ) ) break;
+          if ( !strcasecmp ( msg->acronyme, acronyme ) && !strcasecmp( msg->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
 
@@ -1426,7 +1425,7 @@
     liste = Partage->Dls_data_MSG;
     while (liste)
      { msg = (struct DLS_MESSAGES *)liste->data;
-       if ( !strcmp ( msg->acronyme, acronyme ) && !strcmp( msg->tech_id, tech_id ) ) break;
+       if ( !strcasecmp ( msg->acronyme, acronyme ) && !strcasecmp( msg->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -1448,7 +1447,7 @@
        liste = Partage->Dls_data_VISUEL;
        while (liste)
         { visu = (struct DLS_VISUEL *)liste->data;
-          if ( !strcmp ( visu->acronyme, acronyme ) && !strcmp( visu->tech_id, tech_id ) ) break;
+          if ( !strcasecmp ( visu->acronyme, acronyme ) && !strcasecmp( visu->tech_id, tech_id ) ) break;
           liste = g_slist_next(liste);
         }
 
@@ -1487,8 +1486,7 @@
           visu->last_change = Partage->top;                               /* Date de la photo ! */
           #ifdef bouh
           pthread_mutex_lock( &Partage->com_msrv.synchro );                             /* Ajout dans la liste de i a traiter */
-          Partage->com_msrv.liste_i = g_slist_append( Partage->com_msrv.liste_i,
-                                                      GINT_TO_POINTER(num) );
+          Partage->com_msrv.liste_i = g_slist_append( Partage->com_msrv.liste_i, GINT_TO_POINTER(num) );
           pthread_mutex_unlock( &Partage->com_msrv.synchro );
           #endif
         }
@@ -1512,7 +1510,7 @@
     liste = Partage->Dls_data_VISUEL;
     while (liste)
      { visu = (struct DLS_VISUEL *)liste->data;
-       if ( !strcmp ( visu->acronyme, acronyme ) && !strcmp( visu->tech_id, tech_id ) ) break;
+       if ( !strcasecmp ( visu->acronyme, acronyme ) && !strcasecmp( visu->tech_id, tech_id ) ) break;
        liste = g_slist_next(liste);
      }
 
@@ -1540,20 +1538,23 @@
              }
             break;
        case MNEMO_ENTREE_ANA:
-            if (!strcmp(tech_id, "SYS") && !strcmp(acronyme, "TIME"))
+            if (!strcasecmp(tech_id, "SYS") && !strcasecmp(acronyme, "TIME"))
              { struct tm tm;
                time_t temps;
                time(&temps);
                localtime_r( &temps, &tm );
                g_snprintf( chaine, sizeof(chaine), "%d heure et %d minute", tm.tm_hour, tm.tm_min );
              }
-            else if ( (db=Rechercher_AI ( tech_id, acronyme )) != NULL )
-             { gfloat valeur = Dls_data_get_AI ( tech_id, acronyme, dlsdata_p );
-               if (valeur-roundf(valeur) == 0.0)
-                { g_snprintf( chaine, sizeof(chaine), "%.0f %s", valeur, db->row[0] ); }                     /* Row0 = unite */
-               else
-                { g_snprintf( chaine, sizeof(chaine), "%.2f %s", valeur, db->row[0] ); }                     /* Row0 = unite */
-               Libere_DB_SQL (&db);
+            else
+             { Dls_data_get_AI ( tech_id, acronyme, dlsdata_p );
+               struct DLS_AI *ai = *dlsdata_p;
+               if (ai)
+                { if (ai->val_ech-roundf(ai->val_ech) == 0.0)
+                   { g_snprintf( chaine, sizeof(chaine), "%.0f %s", ai->val_ech, ai->unite ); }
+                  else
+                   { g_snprintf( chaine, sizeof(chaine), "%.2f %s", ai->val_ech, ai->unite ); }
+                }
+               else g_snprintf( chaine, sizeof(chaine), "erreur" );
              }
             break;
        default: return(NULL);
@@ -1636,7 +1637,7 @@
           bit_defaut_fixe      |= plugin_actuel->vars.bit_defaut_fixe;
           bit_alarme           |= plugin_actuel->vars.bit_alarme;
           bit_alarme_fixe      |= plugin_actuel->vars.bit_alarme_fixe;
-          plugin_actuel->vars.bit_activite_down = bit_comm_out | bit_defaut | bit_defaut_fixe | bit_alarme | bit_alarme_fixe;
+          plugin_actuel->vars.bit_activite_up = !(bit_comm_out | bit_defaut | bit_defaut_fixe | bit_alarme | bit_alarme_fixe);
 
           bit_veille_partielle |= plugin_actuel->vars.bit_veille;
           bit_veille_totale    &= plugin_actuel->vars.bit_veille;

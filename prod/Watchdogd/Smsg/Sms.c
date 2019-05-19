@@ -638,8 +638,10 @@
     Smsg_disconnect();                                                                                	/* Free up used memory */
     if (found) Traiter_commande_sms ( from, texte );
 
-    if (error == ERR_NONE) if (Cfg_smsg.bit_comm) SB ( Cfg_smsg.bit_comm, 1 );                            /* Communication OK */
-    else SB ( Cfg_smsg.bit_comm, 0 );                                                                    /* Communication NOK */
+    if (Cfg_smsg.bit_comm)
+     { if (error == ERR_NONE) SB ( Cfg_smsg.bit_comm, 1 );                                                /* Communication OK */
+       else SB ( Cfg_smsg.bit_comm, 0 );                                                                 /* Communication NOK */
+     }
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -662,7 +664,7 @@
     Cfg_smsg.lib->Thread_run = TRUE;                                                                     /* Le thread tourne ! */
 
     g_snprintf( Cfg_smsg.lib->admin_prompt, sizeof(Cfg_smsg.lib->admin_prompt), NOM_THREAD );
-    g_snprintf( Cfg_smsg.lib->admin_help,   sizeof(Cfg_smsg.lib->admin_help),   "Manage SMS system" );
+    g_snprintf( Cfg_smsg.lib->admin_help,   sizeof(Cfg_smsg.lib->admin_help),   "Manage SMS system (libgammu)" );
 
     if (!Cfg_smsg.enable)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE,
@@ -682,8 +684,7 @@
        void *payload;
 
        if (Cfg_smsg.lib->Thread_reload)                                                      /* A-t'on recu un signal USR1 ? */
-        { int nbr;
-          Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Thread Reload !", __func__ );
+        { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Thread Reload !", __func__ );
           Smsg_Lire_config();
           Cfg_smsg.lib->Thread_reload = FALSE;
         }

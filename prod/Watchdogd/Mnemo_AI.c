@@ -191,8 +191,44 @@
 
     g_snprintf( requete, sizeof(requete),
                "SELECT d.tech_id, m.acronyme, m.map_text, m.libelle "
+               "FROM mnemos_AI as m INNER JOIN dls as d ON d.id = m.dls_id "
+               " WHERE (m.map_host='*' OR m.map_host LIKE '%s') AND (m.map_thread='*' OR m.map_thread LIKE '%s')"
+               " AND m.map_text LIKE '%s'", g_get_host_name(), thread, commande );
+
+    g_free(commande);
+
+    db = Init_DB_SQL();
+    if (!db)
+     { Info_new( Config.log, Config.log_msrv, LOG_ERR, "%s: DB connexion failed", __func__ );
+       return(FALSE);
+     }
+
+    retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
+    if (retour == FALSE) Libere_DB_SQL (&db);
+    *db_retour = db;
+    return ( retour );
+  }
+/******************************************************************************************************************************/
+/* Rechercher_AI_by_map_snips: Recupere l'AI lié au parametre snips                                                           */
+/* Entrée: le map_snips a rechercher                                                                                          */
+/* Sortie: la struct DB                                                                                                       */
+/******************************************************************************************************************************/
+ gboolean Recuperer_mnemos_AI_by_map_question_vocale ( struct DB **db_retour, gchar *map_snips )
+  { gchar requete[1024];
+    gchar *commande;
+    gboolean retour;
+    struct DB *db;
+
+    commande = Normaliser_chaine ( map_snips );
+    if (!commande)
+     { Info_new( Config.log, Config.log_msrv, LOG_WARNING, "%s: Normalisation impossible commande", __func__ );
+       return(FALSE);
+     }
+
+    g_snprintf( requete, sizeof(requete),
+               "SELECT d.tech_id, m.acronyme, m.libelle, m.map_question_vocale, m.map_reponse_vocale "
                "FROM mnemos_AI as m INNER JOIN dls as d ON d.id = m.dls_id"
-               " WHERE m.map_text LIKE '%s'", commande );
+               " WHERE m.map_question_vocale LIKE '%s'", commande );
     g_free(commande);
 
     db = Init_DB_SQL();
@@ -229,7 +265,7 @@
 /* Entrée: l'id a récupérer                                                                                                   */
 /* Sortie: une structure hébergeant l'entrée analogique                                                                       */
 /******************************************************************************************************************************/
- void Charger_conf_AI ( struct ANALOG_INPUT *ai )
+ void Charger_conf_AI ( struct DLS_AI *ai )
   { gchar requete[512];
     struct DB *db;
 
@@ -241,11 +277,10 @@
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
                 "SELECT a.min,a.max,a.type,a.unite"
-                " FROM %s as a"
-                " INNER JOIN mnemos as m ON a.id_mnemo = m.id"
-                " INNER JOIN dls as d ON m.dls_id = d.id"
-                " WHERE d.tech_id='%s' AND m.acronyme='%s' LIMIT 1",
-                NOM_TABLE_MNEMO_AI, ai->tech_id, ai->acronyme
+                " FROM mnemos_AI as a"
+                " INNER JOIN dls as d ON a.dls_id = d.id"
+                " WHERE d.tech_id='%s' AND a.acronyme='%s' LIMIT 1",
+                ai->tech_id, ai->acronyme
               );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
@@ -259,24 +294,11 @@
        return;
      }
 
-    ai->confDB.min      = atof(db->row[0]);
-    ai->confDB.max      = atof(db->row[1]);
-    ai->confDB.type     = atoi(db->row[2]);
-    g_snprintf( ai->confDB.unite, sizeof(ai->confDB.unite), "%s", db->row[3] );
+    ai->min      = atof(db->row[0]);
+    ai->max      = atof(db->row[1]);
+    ai->type     = atoi(db->row[2]);
+    g_snprintf( ai->unite, sizeof(ai->unite), "%s", db->row[3] );
     Info_new( Config.log, Config.log_msrv, LOG_INFO, "%s: AI '%s:%s' loaded", __func__, ai->tech_id, ai->acronyme );
-  }
-/******************************************************************************************************************************/
-/* Dls_data_load_AI: Charge une configuration spécifique d'entrée analogique                                                  */
-/* Sortie : Néant                                                                                                             */
-/******************************************************************************************************************************/
- static void Charger_conf_AI_by_name ( gchar *tech_id, gchar *acronyme )
-  { GSList *liste;
-    liste = Partage->Dls_data_AI;
-    while (liste)
-     { struct ANALOG_INPUT *ai = liste->data;
-       if( !strcmp( ai->tech_id, tech_id ) && !strcmp( ai->acronyme, acronyme ) ) { Charger_conf_AI ( ai ); }
-       liste = g_slist_next(liste);
-     }
   }
 /******************************************************************************************************************************/
 /* Modifier_analogInputDB: Modification d'un entreeANA Watchdog                                                               */
@@ -314,7 +336,6 @@
     g_free(unite);
     retour = Lancer_requete_SQL ( db, requete );                                               /* Execution de la requete SQL */
     Libere_DB_SQL(&db);
-    Charger_conf_AI_by_name ( mnemo_full->mnemo_base.dls_tech_id, mnemo_full->mnemo_base.acronyme );
     return(retour);
   }
 /******************************************************************************************************************************/

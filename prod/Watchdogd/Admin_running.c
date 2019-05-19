@@ -43,6 +43,7 @@
     if ( ! strcmp ( commande, "help" ) )
      { response = Admin_write ( response, "  -- Watchdog ADMIN -- Help du mode 'running'" );
        response = Admin_write ( response, "  ident                 - ID du serveur Watchdog" );
+       response = Admin_write ( response, "  help $topic           - Affiche l'aide du topic, parmi les topics suivants" );
        response = Admin_write ( response, "  ping                  - Ping Watchdog" );
        response = Admin_write ( response, "  audit                 - Audit bit/s" );
        response = Admin_write ( response, "  dbcfg $thread         - Manage Threads Parameters in Database" );
