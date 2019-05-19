@@ -169,10 +169,9 @@
        return;                                                                                                 /* Bad Request */
      }
 
+    intent = g_strrstr ( intent, ":" ) + 1;
     Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Message recu from topic %s intent %s",
               __func__, message->topic, intent );
-
-    intent = g_strrstr ( intent, ":" ) + 1;
 
     slotArray = json_object_get_array_member ( object, "slots" );
     if (!slotArray)
@@ -208,9 +207,11 @@
        Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_DEBUG,
                  "%s: slot %d/%d trouvé: %s - %s", __func__, i+1, nbr_slots, slotName, slotValue );
        if (!strcmp(slotName,"targetAI")) targetAI = slotValue;
-       if (!strcmp(slotName,"targetVerbe")) targetVerbe = slotValue;
-       if (!strcmp(slotName,"targetObject")) targetObject = slotValue;
-       if (!strcmp(slotName,"targetRoom"))   targetRoom   = slotValue;
+       else if (!strcmp(slotName,"targetVerbe")) targetVerbe = slotValue;
+       else if (!strcmp(slotName,"targetObject")) targetObject = slotValue;
+       else if (!strcmp(slotName,"targetRoom"))   targetRoom   = slotValue;
+       else Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_WARNING,
+                     "%s: slot unknown: %s - %s", __func__, slotName, slotValue );
      }
     if (!strcmp(intent,"ACTION"))
      { Snips_traiter_commande_vocale ( intent, targetVerbe, targetObject, targetRoom ); }
