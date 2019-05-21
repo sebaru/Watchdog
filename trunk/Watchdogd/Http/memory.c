@@ -115,6 +115,26 @@
        json_builder_set_member_name  ( builder, "etat" );
        json_builder_add_boolean_value  ( builder, bool->etat );
      }
+/*---------------------------------------------------------- Tempo -----------------------------------------------------------*/
+    else if (!strcasecmp(type,"T"))
+     { struct DLS_TEMPO *tempo=NULL;
+       Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
+                 "%s: HTTP/ request for GET T %s:%s", __func__, tech_id, acronyme );
+       Dls_data_get_tempo ( tech_id, acronyme, (gpointer *)&tempo );
+       if (!tempo)
+        { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_ERR, "%s: bool non trouvé", __func__ );
+          g_object_unref(builder);
+          return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
+        }
+       json_builder_set_member_name  ( builder, "etat" );
+       json_builder_add_boolean_value  ( builder, tempo->state );
+       json_builder_set_member_name  ( builder, "status" );
+       json_builder_add_int_value  ( builder, tempo->status );
+       json_builder_set_member_name  ( builder, "date_on" );
+       json_builder_add_int_value  ( builder, tempo->date_on );
+       json_builder_set_member_name  ( builder, "date_off" );
+       json_builder_add_int_value  ( builder, tempo->date_off );
+     }
 /*---------------------------------------------------- Visuels ---------------------------------------------------------------*/
     else if (!strcasecmp(type,"I"))
      { Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG, "%s: HTTP/ request for GET I. cheking num", __func__ );
