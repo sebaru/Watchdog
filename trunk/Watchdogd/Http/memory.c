@@ -134,6 +134,8 @@
        json_builder_add_int_value  ( builder, tempo->date_on );
        json_builder_set_member_name  ( builder, "date_off" );
        json_builder_add_int_value  ( builder, tempo->date_off );
+       json_builder_set_member_name  ( builder, "top" );
+       json_builder_add_int_value  ( builder, Partage->top );
      }
 /*---------------------------------------------------- Visuels ---------------------------------------------------------------*/
     else if (!strcasecmp(type,"I"))
