@@ -102,7 +102,7 @@
        json_builder_add_double_value  ( builder, ai->type );
      }
 /*----------------------------------------------- Bistable et Monostables ----------------------------------------------------*/
-    else if (!strcasecmp(type,"B") || !!strcasecmp(type,"M"))
+    else if (!strcasecmp(type,"B") || !strcasecmp(type,"M"))
      { struct DLS_BOOL *bool=NULL;
        Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_DEBUG,
                  "%s: HTTP/ request for GET B/M %s:%s", __func__, tech_id, acronyme );
