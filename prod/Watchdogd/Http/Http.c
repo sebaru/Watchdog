@@ -398,7 +398,7 @@
                 }
 /****************************************** WS get Running config library *****************************************************/
                else if ( ! strncasecmp( url, "/library/", 9 ) )
-                { gchar *target = url+5;
+                { gchar *target = url+9;
                   GSList *liste;
                   Info_new( Config.log, Cfg_http.lib->Thread_debug, LOG_NOTICE,
                             "%s: Searching for CLI commande %s", __func__, target );

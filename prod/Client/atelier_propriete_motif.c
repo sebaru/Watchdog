@@ -21,10 +21,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
- 
+
  #include <gnome.h>
  #include <string.h>
  #include <stdlib.h>
@@ -55,7 +55,7 @@
  #define RESOLUTION_TIMER        500
  #define TIMER_OFF     0
  #define TIMER_ON      1
-    
+
  #define ROUGE1     0
  #define VERT1    255
  #define BLEU1      0
@@ -328,7 +328,7 @@ printf("Changer_couleur %p\n", data);
     gint i;
 
     Trame_motif = trame_motif;                  /* Sauvegarde pour les futurs changements d'environnement */
- 
+
     if (!F_propriete) return;
     motif = Trame_motif->motif;
 
@@ -347,13 +347,13 @@ printf("Changer_couleur %p\n", data);
        Trame_preview0->trame_items = g_list_remove( Trame_preview0->trame_items, Trame_motif_p0 );
        g_object_unref( Trame_motif_p0->pixbuf );
        g_free(Trame_motif_p0);
-     }    
+     }
     if (Trame_motif_p1)
      { goo_canvas_item_remove( Trame_motif_p1->item_groupe );
        Trame_preview1->trame_items = g_list_remove( Trame_preview1->trame_items, Trame_motif_p1 );
        g_object_unref( Trame_motif_p1->pixbuf );
        g_free(Trame_motif_p1);
-     }    
+     }
     Trame_motif_p0 = Trame_ajout_motif( TRUE, Trame_preview0, &Motif_preview0 );   /* Affichage à l'ecran */
     Trame_motif_p1 = Trame_ajout_motif( TRUE, Trame_preview1, &Motif_preview1 );
 
@@ -446,7 +446,7 @@ printf("Changer_couleur %p\n", data);
     mnemo.type = MNEMO_MOTIF;
     mnemo.num = gtk_spin_button_get_value_as_int ( GTK_SPIN_BUTTON(Spin_bit_ctrl) );
     Trame_motif->motif->bit_controle = mnemo.num;
-    
+
     Envoi_serveur( TAG_ATELIER, SSTAG_CLIENT_TYPE_NUM_MNEMO_CTRL,
                    (gchar *)&mnemo, sizeof( struct CMD_TYPE_NUM_MNEMONIQUE ) );
   }
@@ -471,7 +471,7 @@ printf("Changer_couleur %p\n", data);
      { case GTK_RESPONSE_OK:
        case GTK_RESPONSE_CANCEL: break;
      }
-    ok_timer = TIMER_OFF;                                                               /* Arret du timer */ 
+    ok_timer = TIMER_OFF;                                                               /* Arret du timer */
     gtk_widget_hide( F_propriete );
     return(TRUE);
   }
@@ -547,7 +547,7 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     gtk_table_set_row_spacings( GTK_TABLE(table), 5 );
     gtk_table_set_col_spacings( GTK_TABLE(table), 5 );
     gtk_box_pack_start( GTK_BOX(boite), table, TRUE, TRUE, 0 );
-    
+
     texte = gtk_label_new( _("Description") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 0, 1 );
 
@@ -607,11 +607,11 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 1, 5, 6 );
 
     Entry_clic_tech_id = gtk_entry_new();
-    gtk_entry_set_editable( GTK_ENTRY(Entry_clic_tech_id), FALSE );
+    gtk_entry_set_editable( GTK_ENTRY(Entry_clic_tech_id), TRUE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_clic_tech_id, 1, 2, 5, 6 );
 
     Entry_clic_acronyme = gtk_entry_new();
-    gtk_entry_set_editable( GTK_ENTRY(Entry_clic_acronyme), FALSE );
+    gtk_entry_set_editable( GTK_ENTRY(Entry_clic_acronyme), TRUE );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_clic_acronyme, 2, 4, 5, 6 );
 
     texte = gtk_label_new( _("Delai between frame") );

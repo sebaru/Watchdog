@@ -524,6 +524,25 @@
           g_free(mnemo);
         }
      }
+
+    if ( ! Recuperer_mnemos_DI_by_text ( &db, NOM_THREAD, texte ) )
+     { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s: Error searching Database for '%s'", __func__, texte ); }
+    else while ( Recuperer_mnemos_DI_suite( &db ) )
+     { gchar *tech_id = db->row[0], *acro = db->row[1], *libelle = db->row[3], *src_text = db->row[2];
+       Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_INFO, "%s: Match found '%s' '%s:%s' - %s", __func__,
+                 src_text, tech_id, acro, libelle );
+
+       if (Config.instance_is_master==TRUE)                                                       /* si l'instance est Maitre */
+        { Envoyer_commande_dls_data ( tech_id, acro ); }
+       else /* Envoi au master via thread HTTP */
+        { struct ZMQ_SET_BIT bit;
+          bit.type = 0;
+          bit.num = -1;
+          g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", tech_id );
+          g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", acro );
+          Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, NULL, NOM_THREAD, "*", "msrv", "SET_BIT", &bit, sizeof(struct ZMQ_SET_BIT) );
+        }
+     }
   }
 /******************************************************************************************************************************/
 /* Smsg_disconnect: Se deconnecte du telephone ou de la clef 3G                                                               */

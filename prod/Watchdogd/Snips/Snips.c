@@ -133,7 +133,7 @@
 /* Sortie : Néant                                                                                                             */
 /******************************************************************************************************************************/
  static void Snips_message_CB(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message)
-  { const gchar *targetVerbe, *targetObject, *targetRoom, *targetAI;
+  { const gchar *targetVerbe, *targetObject, *targetRoom, *targetAI, *targetMode;
     const gchar *slotValue, *slotName;
     const gchar *intent;
     JsonArray *slotArray;
@@ -187,12 +187,6 @@
        return;
      }
 
-    if (nbr_slots==1)
-     { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: Only one slot", __func__ );
-       json_node_unref (Query);
-       return;
-     }
-
     if (nbr_slots>3)
      { Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_NOTICE, "%s: %d slots -> Too many slots", __func__, nbr_slots );
        json_node_unref (Query);
@@ -210,11 +204,14 @@
        else if (!strcmp(slotName,"targetVerbe")) targetVerbe = slotValue;
        else if (!strcmp(slotName,"targetObject")) targetObject = slotValue;
        else if (!strcmp(slotName,"targetRoom"))   targetRoom   = slotValue;
+       else if (!strcmp(slotName,"targetMode"))   targetMode   = slotValue;
        else Info_new( Config.log, Cfg_snips.lib->Thread_debug, LOG_WARNING,
                      "%s: slot unknown: %s - %s", __func__, slotName, slotValue );
      }
     if (!strcmp(intent,"ACTION"))
      { Snips_traiter_commande_vocale ( intent, targetVerbe, targetObject, targetRoom ); }
+    if (!strcmp(intent,"MODE"))
+     { Snips_traiter_commande_vocale ( intent, targetMode, NULL, NULL ); }
     else if (!strcmp(intent,"QUESTION"))
      { Snips_traiter_question_vocale ( intent, targetAI, targetObject, targetRoom ); }
     json_node_unref (Query);

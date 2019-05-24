@@ -109,7 +109,7 @@
 /******************************************************************************************************************************/
  gint Http_Traiter_request_body_completion_postfile ( struct lws *wsi )
   { struct HTTP_PER_SESSION_DATA *pss;
-    gint retour, code, id;
+    gint code, id;
     const gchar *type;
 
     pss = lws_wsi_user ( wsi );

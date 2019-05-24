@@ -43,7 +43,7 @@
     JsonGenerator *gen;
     gsize taille_buf;
     struct tm *temps;
-    gint retour, num;
+    gint num;
 
 /************************************************ Préparation du buffer JSON **************************************************/
     builder = json_builder_new ();
