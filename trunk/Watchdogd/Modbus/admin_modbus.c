@@ -66,19 +66,8 @@
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static void Admin_json_list ( gchar **buffer_p, gint *taille_p )
+ static void Admin_json_list ( JsonBuilder *builder )
   { GSList *liste_modules;
-    JsonBuilder *builder;
-    JsonGenerator *gen;
-    gsize taille_buf;
-    gchar *buf;
-
-    builder = json_builder_new ();
-    if (builder == NULL)
-     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
-       return;
-     }
-
     json_builder_begin_array (builder);                                                                  /* Contenu du Status */
 
     pthread_mutex_lock( &Cfg_modbus.lib->synchro );
@@ -128,7 +117,31 @@
     pthread_mutex_unlock( &Cfg_modbus.lib->synchro );
 
     json_builder_end_array (builder);                                                                         /* End Document */
+  }
+/******************************************************************************************************************************/
+/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
+/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/******************************************************************************************************************************/
+ void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
+  { JsonBuilder *builder;
+    JsonGenerator *gen;
+    gsize taille_buf;
+    gchar *buf;
 
+    *buffer_p = NULL;
+    *taille_p = 0;
+
+    builder = json_builder_new ();
+    if (builder == NULL)
+     { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
+       return;
+     }
+/************************************************ Préparation du buffer JSON **************************************************/
+                                                                      /* Lancement de la requete de recuperation des messages */
+    if (!strcmp(commande, "/list")) { Admin_json_list ( builder ); }
+
+/************************************************ Génération du JSON **********************************************************/
     gen = json_generator_new ();
     json_generator_set_root ( gen, json_builder_get_root(builder) );
     json_generator_set_pretty ( gen, TRUE );
@@ -138,22 +151,6 @@
 
     *buffer_p = buf;
     *taille_p = taille_buf;
-  }
-/******************************************************************************************************************************/
-/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
-/******************************************************************************************************************************/
- void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
-  {
-    *buffer_p = NULL;
-    *taille_p = 0;
-
-/************************************************ Préparation du buffer JSON **************************************************/
-                                                                      /* Lancement de la requete de recuperation des messages */
-    if (!strcmp(commande, "/list"))
-     { Admin_json_list ( buffer_p, taille_p ); }
-
     return;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/
