@@ -30,7 +30,7 @@
 
 /******************************************************************************************************************************/
 /* Modbus_mode_to_string: Convertit le mode modbus (int) en sa version chaine de caractere                                    */
-/* Entrée : le module_modbus                                                                                                  */
+/* EntrÃ©e : le module_modbus                                                                                                  */
 /* Sortie : char *mode_char                                                                                                   */
 /******************************************************************************************************************************/
  static gchar *Modbus_mode_to_string ( struct MODULE_MODBUS *module )
@@ -62,9 +62,9 @@
      }
   }
 /******************************************************************************************************************************/
-/* Admin_json_list : fonction appelée pour lister les modules modbus                                                          */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/* Admin_json_list : fonction appelÃ©e pour lister les modules modbus                                                          */
+/* EntrÃ©e : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrÃ©e sont mis Ã  jour                                                                           */
 /******************************************************************************************************************************/
  static void Admin_json_list ( JsonBuilder *builder )
   { GSList *liste_modules;
@@ -119,9 +119,9 @@
     json_builder_end_array (builder);                                                                         /* End Document */
   }
 /******************************************************************************************************************************/
-/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/* Admin_json : fonction appelÃ© par le thread http lors d'une requete /run/                                                   */
+/* EntrÃ©e : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrÃ©e sont mis Ã  jour                                                                           */
 /******************************************************************************************************************************/
  void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
   { JsonBuilder *builder;
@@ -137,11 +137,11 @@
      { Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        return;
      }
-/************************************************ Préparation du buffer JSON **************************************************/
+/************************************************ PrÃ©paration du buffer JSON **************************************************/
                                                                       /* Lancement de la requete de recuperation des messages */
     if (!strcmp(commande, "/list")) { Admin_json_list ( builder ); }
 
-/************************************************ Génération du JSON **********************************************************/
+/************************************************ GÃ©nÃ©ration du JSON **********************************************************/
     gen = json_generator_new ();
     json_generator_set_root ( gen, json_builder_get_root(builder) );
     json_generator_set_pretty ( gen, TRUE );
