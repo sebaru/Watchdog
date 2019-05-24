@@ -2,8 +2,8 @@
 
  /* Bits de consommation du module */
  #define POS_TL         <-> _E(libelle="Position Télérupteur"); /* Position du Télérupteur des luminaires centre  */
- #define OSMS_TL_ON     <-> _M(libelle="Demande SMS d'allumage TL"); /* Ordre TL  ON */
- #define OSMS_TL_OFF    <-> _M(libelle="Demande SMS d'extinction TL"); /* Ordre TL  OFF */
+ #define OSMS_TL_ON     <-> _E(libelle="Demande SMS d'allumage TL"); /* Ordre TL  ON */
+ #define OSMS_TL_OFF    <-> _E(libelle="Demande SMS d'extinction TL"); /* Ordre TL  OFF */
  #define ODLS_TL_OFF    <-> _M(libelle="Demande DLS d'extinction TL");
  #define ODLS_TL_ON     <-> _M(libelle="Demande DLS d'allumage TL");
  #define OVOC_TL_OFF    <-> _E(libelle="Demande VOCALE d'extinction TL");
