@@ -9,7 +9,7 @@ then
         sudo cp /usr/local/etc/Watchdogd.service.system /etc/systemd/system/Watchdogd.service
         sudo systemctl daemon-reload
         sudo systemctl enable Watchdogd.service
-        sudo usermod -a -G audio,dialout,wheels $wtd_user
+        sudo usermod -a -G audio,dialout,wheel $wtd_user
         sudo loginctl enable-linger $wtd_user
 else
 	wtd_home=~/.watchdog
