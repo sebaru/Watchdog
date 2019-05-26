@@ -248,16 +248,6 @@
   { Trame_motif->motif->rafraich = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(Spin_rafraich));
   }
 /**********************************************************************************************************/
-/* Changer_libelle_motif: Change le libellé du motif en fonction de la saisie utilisateur                 */
-/* Entrée: widget/data                                                                                    */
-/* Sortie: Rien du tout                                                                                   */
-/**********************************************************************************************************/
- static void Changer_libelle_motif ( GtkWidget *widget, gpointer data )
-  { g_snprintf( Trame_motif->motif->libelle, sizeof(Trame_motif->motif->libelle),
-                "%s", gtk_entry_get_text( GTK_ENTRY(Entry_libelle) ) );
-    printf("Changer_libelle_motif: new=%s\n", Trame_motif->motif->libelle );
-  }
-/**********************************************************************************************************/
 /* Changer_couleur: Changement de la couleur du motif                                                     */
 /* Entrée: widget, data = 0 pour un chgmt via propriete DLS, 1 pour chgmt via Couleur par Def             */
 /* Sortie: la base de données est mise à jour                                                             */
@@ -357,11 +347,7 @@ printf("Changer_couleur %p\n", data);
     Trame_motif_p0 = Trame_ajout_motif( TRUE, Trame_preview0, &Motif_preview0 );   /* Affichage à l'ecran */
     Trame_motif_p1 = Trame_ajout_motif( TRUE, Trame_preview1, &Motif_preview1 );
 
-    g_signal_handlers_block_by_func( G_OBJECT( GTK_ENTRY(Entry_libelle) ),
-                                     G_CALLBACK( Changer_libelle_motif ), NULL );
     gtk_entry_set_text( GTK_ENTRY(Entry_libelle), motif->libelle );
-    g_signal_handlers_unblock_by_func( G_OBJECT( GTK_ENTRY(Entry_libelle) ),
-                                       G_CALLBACK( Changer_libelle_motif ), NULL );
 
     printf("Rafraichir_proprietes1:  ctrl=%d clic=%d\n", motif->bit_controle, motif->bit_clic );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON(Spin_bit_ctrl), motif->bit_controle );
@@ -471,6 +457,12 @@ printf("Changer_couleur %p\n", data);
      { case GTK_RESPONSE_OK:
        case GTK_RESPONSE_CANCEL: break;
      }
+    g_snprintf( Trame_motif->motif->libelle, sizeof(Trame_motif->motif->libelle),
+               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_libelle) ) );
+    g_snprintf( Trame_motif->motif->clic_tech_id, sizeof(Trame_motif->motif->clic_tech_id),
+               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_clic_tech_id) ) );
+    g_snprintf( Trame_motif->motif->clic_acronyme, sizeof(Trame_motif->motif->clic_acronyme),
+               "%s", gtk_entry_get_text( GTK_ENTRY(Entry_clic_acronyme) ) );
     ok_timer = TIMER_OFF;                                                               /* Arret du timer */
     gtk_widget_hide( F_propriete );
     return(TRUE);
@@ -508,10 +500,8 @@ printf("Changer_couleur %p\n", data);
                                                GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
                                                GTK_STOCK_OK, GTK_RESPONSE_OK,
                                                NULL);
-    g_signal_connect( F_propriete, "response",
-                      G_CALLBACK(CB_editer_propriete_TOR), FALSE );
-    g_signal_connect( F_propriete, "delete-event",
-                      G_CALLBACK(CB_editer_propriete_TOR), FALSE );
+    g_signal_connect( F_propriete, "response",     G_CALLBACK(CB_editer_propriete_TOR), FALSE );
+    g_signal_connect( F_propriete, "delete-event", G_CALLBACK(CB_editer_propriete_TOR), FALSE );
 
 /****************************************** Frame de representation du motif actif ********************************************/
     Frame = gtk_frame_new( _("Properties") );
@@ -554,8 +544,6 @@ printf("Creer_fenetre_propriete_TOR: trame_p0=%p, trame_p1=%p\n", Trame_preview0
     Entry_libelle = gtk_entry_new();
     gtk_entry_set_max_length( GTK_ENTRY(Entry_libelle), NBR_CARAC_LIBELLE_MOTIF );
     gtk_table_attach_defaults( GTK_TABLE(table), Entry_libelle, 1, 4, 0, 1 );
-    g_signal_connect( G_OBJECT(Entry_libelle), "changed",
-                      G_CALLBACK(Changer_libelle_motif), NULL );
 
     texte = gtk_label_new( _("Type of response") );
     gtk_table_attach_defaults( GTK_TABLE(table), texte, 0, 2, 1, 2 );
