@@ -21,20 +21,20 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
  #include <gnome.h>
  #include <sys/time.h>
- 
+
  #include "Reseaux.h"
  #include "client.h"
  #include "Config_cli.h"
  #include "trame.h"
 
  extern struct CLIENT Client;                                                        /* Identifiant de l'utilisateur en cours */
- extern GList *Liste_pages;                                                       /* Liste des pages ouvertes sur le notebook */  
+ extern GList *Liste_pages;                                                       /* Liste des pages ouvertes sur le notebook */
  extern GtkWidget *Notebook;                                                             /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                                         /* Widget Fenetre Client */
  extern struct CONFIG_CLI Config_cli;                                              /* Configuration generale cliente watchdog */
@@ -62,15 +62,16 @@
         { bit.num = trame_motif->motif->bit_clic + (trame_motif->num_image / 3); }
        else
         { bit.num = trame_motif->motif->bit_clic; }
+       printf("Envoi M%d = 1 au serveur \n", bit.num );
      }
-    else
+    if(strlen(trame_motif->motif->clic_tech_id)>0)
      { bit.num = -1;
        g_snprintf( bit.tech_id, sizeof(bit.tech_id), "%s", trame_motif->motif->clic_tech_id );
        g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", trame_motif->motif->clic_acronyme );
+       printf("Envoi _M %s:%s = 1 au serveur \n", bit.tech_id, bit.acronyme );
      }
     Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SET_BIT_INTERNE,
                    (gchar *)&bit, sizeof(struct CMD_SET_BIT_INTERNE) );
-    printf("Envoi M%d = 1 au serveur \n", bit.num );
   }
 /******************************************************************************************************************************/
 /* CB_Envoyer_action_confirme: Callback appelé lors de l'appui sur un des boutons de la fenetre de validation                 */
@@ -229,7 +230,7 @@
     Set_bit.type = MNEMO_REGISTRE;
     Set_bit.num = regnum;
     Set_bit.valeur = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON(Spin_valeur) );
-    
+
     switch(reponse)
      { case GTK_RESPONSE_OK:
              { Envoi_serveur( TAG_SUPERVISION, SSTAG_CLIENT_SET_BIT_INTERNE,
