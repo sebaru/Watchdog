@@ -6,15 +6,17 @@ then
         wtd_home=/home/watchdog
         wtd_user=watchdog
 	echo "Installation in standalone mode in $wtd_home for $wtd_user"
+        sleep 4
         sudo cp /usr/local/etc/Watchdogd.service.system /etc/systemd/system/Watchdogd.service
         sudo systemctl daemon-reload
         sudo systemctl enable Watchdogd.service
-        sudo usermod -a -G audio,dialout,wheel $wtd_user
+        sudo usermod -a -G audio,dialout $wtd_user
         sudo loginctl enable-linger $wtd_user
 else
 	wtd_home=~/.watchdog
         wtd_user=`whoami`
 	echo "Installation in user mode in $wtd_home for $wtd_user"
+        sleep 4
         sudo cp /usr/local/etc/Watchdogd.service.user /etc/systemd/user/Watchdogd.service
         sudo systemctl daemon-reload
         systemctl --user enable Watchdogd.service
@@ -28,9 +30,6 @@ echo "Copying data files"
 mkdir -p $wtd_home
 mkdir -p $wtd_home/Son
 mkdir -p $wtd_home/Dls
-cp Watchdogd/Voice/fr.dict $wtd_home/
-cp Watchdogd/Voice/wtd.gram $wtd_home/
-cp -r Watchdogd/Voice/cmusphinx-fr-5.2 $wtd_home/
 cp -r Son/* $wtd_home/Son
 mkdir -p $wtd_home/.pulse/
 echo "done."

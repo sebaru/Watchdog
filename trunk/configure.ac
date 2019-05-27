@@ -106,6 +106,5 @@ Watchdogd/TraductionDLS/Makefile \
 Watchdogd/Dls/Makefile \
 WatchdogdAdmin/Makefile \
 Watchdogd/Snips/Makefile \
-Watchdogd/Voice/Makefile \
 Watchdogd/Radio/Makefile \
 )
