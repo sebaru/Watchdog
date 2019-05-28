@@ -329,6 +329,24 @@
              if (bit->num != -1) Envoyer_commande_dls ( bit->num );
                             else Envoyer_commande_dls_data ( bit->dls_tech_id, bit->acronyme );
            } else
+          if ( !strcmp(event->tag,"SET_BIT_TO_1") )
+           { struct ZMQ_SET_BIT *bit;
+             bit = (struct ZMQ_SET_BIT *)payload;
+             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                       "%s: receive TAG_ZMQ_SET_BIT_TO_1 from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
+                       event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
+                       bit->dls_tech_id, bit->acronyme );
+             Dls_data_set_bool ( bit->dls_tech_id, bit->acronyme, NULL, TRUE );
+           } else
+          if ( !strcmp(event->tag,"SET_BIT_TO_0") )
+           { struct ZMQ_SET_BIT *bit;
+             bit = (struct ZMQ_SET_BIT *)payload;
+             Info_new( Config.log, Config.log_msrv, LOG_NOTICE,
+                       "%s: receive TAG_ZMQ_SET_BIT_TO_0 from %s/%s to %s/%s : bit techid %s acronyme %s", __func__,
+                       event->src_instance, event->src_thread, event->dst_instance, event->dst_thread,
+                       bit->dls_tech_id, bit->acronyme );
+             Dls_data_set_bool ( bit->dls_tech_id, bit->acronyme, NULL, FALSE );
+           } else
           if ( !strcmp(event->tag, "ping") )
            { Info_new( Config.log, Config.log_msrv, LOG_NOTICE, "%s: receive PING from %s/%s to %s/%s",
                        __func__, event->src_instance, event->src_thread, event->dst_instance, event->dst_thread );

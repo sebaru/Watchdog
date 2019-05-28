@@ -64,8 +64,8 @@
                 "%s: '%s' = %s", __func__, nom, valeur );
             if ( ! g_ascii_strcasecmp ( nom, "smsbox_apikey" ) )
         { g_snprintf( Cfg_smsg.smsbox_apikey, sizeof(Cfg_smsg.smsbox_apikey), "%s", valeur ); }
-       else if ( ! g_ascii_strcasecmp ( nom, "bit_comm" ) )
-        { Cfg_smsg.bit_comm = atoi ( valeur ); }
+       else if ( ! g_ascii_strcasecmp ( nom, "tech_id" ) )
+        { g_snprintf( Cfg_smsg.tech_id, sizeof(Cfg_smsg.tech_id), "%s", valeur ); }
        else if ( ! g_ascii_strcasecmp ( nom, "enable" ) )
         { if ( ! g_ascii_strcasecmp( valeur, "true" ) ) Cfg_smsg.enable = TRUE;  }
        else if ( ! g_ascii_strcasecmp ( nom, "debug" ) )
@@ -76,6 +76,26 @@
         }
      }
     return(TRUE);
+  }
+/******************************************************************************************************************************/
+/* Smsg_send_status_to_master: Envoie le bit de comm au master selon le status du GSM                                         */
+/* Entrée: le status du GSM                                                                                                   */
+/* Sortie: néant                                                                                                              */
+/******************************************************************************************************************************/
+ static void Smsg_send_status_to_master ( gboolean status )
+  { if (Config.instance_is_master==TRUE)                                                          /* si l'instance est Maitre */
+     { Dls_data_set_bool ( Cfg_smsg.tech_id, "COMM", &Cfg_smsg.bit_comm, status ); }                      /* Communication OK */
+    else /* Envoi au master via thread HTTP */
+     { struct ZMQ_SET_BIT bit;
+       bit.type = 0;
+       bit.num = -1;
+       g_snprintf( bit.dls_tech_id, sizeof(bit.dls_tech_id), "%s", Cfg_smsg.tech_id );
+       g_snprintf( bit.acronyme, sizeof(bit.acronyme), "COMM" );
+       Send_zmq_with_tag ( Cfg_smsg.zmq_to_master, NULL, NOM_THREAD, "*", "msrv",
+                           (status ? "SET_BIT_TO_1" : "SET_BIT_TO_0"),
+                           &bit, sizeof(struct ZMQ_SET_BIT) );
+     }
+    Cfg_smsg.comm_status = status;
   }
 /******************************************************************************************************************************/
 /* Recuperer_smsDB: récupère la liste des utilisateurs et de leur numéro de téléphone                                         */
@@ -657,10 +677,7 @@
     Smsg_disconnect();                                                                                	/* Free up used memory */
     if (found) Traiter_commande_sms ( from, texte );
 
-    if (Cfg_smsg.bit_comm)
-     { if (error == ERR_NONE) SB ( Cfg_smsg.bit_comm, 1 );                                                /* Communication OK */
-       else SB ( Cfg_smsg.bit_comm, 0 );                                                                 /* Communication NOK */
-     }
+    Smsg_send_status_to_master( (error == ERR_NONE ? TRUE : FALSE ) );
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
@@ -745,7 +762,7 @@
     Close_zmq ( Cfg_smsg.zmq_to_master );
 
 end:
-    if (Cfg_smsg.bit_comm) SB ( Cfg_smsg.bit_comm, 0 );                                                    /* Communication NOK */
+    Smsg_send_status_to_master( FALSE );
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_smsg.lib->Thread_run = FALSE;
     Cfg_smsg.lib->TID = 0;                                                     /* On indique au master que le thread est mort. */

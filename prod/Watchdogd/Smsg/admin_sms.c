@@ -34,26 +34,44 @@
 /* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
 /* Sortie : les parametres d'entrée sont mis à jour                                                                           */
 /******************************************************************************************************************************/
- static void Admin_json_status ( gchar **buffer_p, gint *taille_p )
+ static void Admin_json_status ( JsonBuilder *builder )
+  { json_builder_begin_object (builder);                                                       /* Création du noeud principal */
+
+    json_builder_set_member_name  ( builder, "tech_id" );
+    json_builder_add_string_value ( builder, Cfg_smsg.tech_id );
+
+    json_builder_set_member_name  ( builder, "comm_status" );
+    json_builder_add_boolean_value ( builder, Cfg_smsg.comm_status );
+
+    json_builder_set_member_name  ( builder, "nbr_sms" );
+    json_builder_add_int_value ( builder, Cfg_smsg.nbr_sms );
+
+    json_builder_end_object (builder);                                                                        /* End Document */
+  }
+/******************************************************************************************************************************/
+/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
+/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
+/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
+/******************************************************************************************************************************/
+ void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
   { JsonBuilder *builder;
     JsonGenerator *gen;
     gsize taille_buf;
-    gint retour, num;
     gchar *buf;
+
+    *buffer_p = NULL;
+    *taille_p = 0;
 
     builder = json_builder_new ();
     if (builder == NULL)
      { Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_ERR, "%s : JSon builder creation failed", __func__ );
        return;
      }
+/************************************************ Préparation du buffer JSON **************************************************/
+                                                                      /* Lancement de la requete de recuperation des messages */
+    if (!strcmp(commande, "/status")) { Admin_json_status ( builder ); }
 
-    json_builder_begin_object (builder);                                                       /* Création du noeud principal */
-
-    json_builder_set_member_name  ( builder, "nbr_sms" );
-    json_builder_add_int_value ( builder, Cfg_smsg.nbr_sms );
-
-    json_builder_end_object (builder);                                                                        /* End Document */
-
+/************************************************ Génération du JSON **********************************************************/
     gen = json_generator_new ();
     json_generator_set_root ( gen, json_builder_get_root(builder) );
     json_generator_set_pretty ( gen, TRUE );
@@ -63,21 +81,6 @@
 
     *buffer_p = buf;
     *taille_p = taille_buf;
-  }
-/******************************************************************************************************************************/
-/* Admin_json : fonction appelé par le thread http lors d'une requete /run/                                                   */
-/* Entrée : les adresses d'un buffer json et un entier pour sortir sa taille                                                  */
-/* Sortie : les parametres d'entrée sont mis à jour                                                                           */
-/******************************************************************************************************************************/
- void Admin_json ( gchar *commande, gchar **buffer_p, gint *taille_p )
-  { 
-    *buffer_p = NULL;
-    *taille_p = 0;
-/************************************************ Préparation du buffer JSON **************************************************/
-                                                                      /* Lancement de la requete de recuperation des messages */
-    if (!strcmp(commande, "/status"))
-     { Admin_json_status ( buffer_p, taille_p ); }
-    
     return;
   }
 /*----------------------------------------------------------------------------------------------------------------------------*/

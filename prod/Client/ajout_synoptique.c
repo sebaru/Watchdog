@@ -21,14 +21,14 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
  #include <gnome.h>
- 
+
  #include "Reseaux.h"
- 
+
 /****************************************** Définitions des prototypes programme **********************************************/
  #include "protocli.h"
 
@@ -49,12 +49,11 @@
 /* sortie: TRUE                                                                                                               */
 /******************************************************************************************************************************/
  static gboolean CB_ajouter_editer_synoptique ( GtkDialog *dialog, gint reponse, gboolean edition )
-  { gint index_groupe;
-    g_snprintf( Edit_syn.libelle, sizeof(Edit_syn.libelle), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
+  { g_snprintf( Edit_syn.libelle, sizeof(Edit_syn.libelle), "%s", gtk_entry_get_text( GTK_ENTRY(Entry_lib) ) );
     g_snprintf( Edit_syn.page, sizeof(Edit_syn.page),       "%s", gtk_entry_get_text( GTK_ENTRY(Entry_page) ) );
     Edit_syn.access_level = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_access_level) );
     Edit_syn.parent_id    = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON(Spin_parent_id) );
-                  
+
     switch(reponse)
      { case GTK_RESPONSE_OK:
              { Envoi_serveur( TAG_SYNOPTIQUE, (edition ? SSTAG_CLIENT_VALIDE_EDIT_SYNOPTIQUE
@@ -74,7 +73,7 @@
 /* sortie: rien                                                                                           */
 /**********************************************************************************************************/
  static void CB_valider ( void )
-  { gtk_dialog_response( GTK_DIALOG(F_ajout), GTK_RESPONSE_OK ); } 
+  { gtk_dialog_response( GTK_DIALOG(F_ajout), GTK_RESPONSE_OK ); }
 /**********************************************************************************************************/
 /* Ajouter_synoptique: Ajoute un synoptique au systeme                                                    */
 /* Entrée: rien                                                                                           */

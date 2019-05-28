@@ -43,7 +43,6 @@
     struct HTTP_PER_SESSION_DATA *pss;
     JsonObject *object;
     JsonNode *Query;
-    gint retour=1;
 
     pss = lws_wsi_user ( wsi );
     pss->post_data [ pss->post_data_length ] = 0;

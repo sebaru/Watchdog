@@ -289,7 +289,7 @@
      }
 
     database_version = 0;                                                                                /* valeur par défaut */
-    if ( ! Recuperer_configDB( &db, "global" ) )                                            /* Connexion a la base de données */
+    if ( ! Recuperer_configDB( &db, "msrv" ) )                                              /* Connexion a la base de données */
      { Info_new( Config.log, Config.log_db, LOG_WARNING,
                 "Update_database_schema: Database connexion failed" );
        return;
@@ -297,7 +297,7 @@
 
     while (Recuperer_configDB_suite( &db, &nom, &valeur ) )                           /* Récupération d'une config dans la DB */
      { Info_new( Config.log, Config.log_db, LOG_INFO,                                                         /* Print Config */
-                "Update_database_schema: found global param '%s' = %s in DB", nom, valeur );
+                "Update_database_schema: found MSRV param '%s' = %s in DB", nom, valeur );
        if ( ! g_ascii_strcasecmp ( nom, "database_version" ) )
         { database_version = atoi( valeur ); }
      }
@@ -1177,7 +1177,7 @@
 fin:
     database_version=4117;
     g_snprintf( chaine, sizeof(chaine), "%d", database_version );
-    if (Modifier_configDB ( "global", "database_version", chaine ))
+    if (Modifier_configDB ( "msrv", "database_version", chaine ))
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s OK", __func__, chaine ); }
     else
      { Info_new( Config.log, Config.log_db, LOG_NOTICE, "%s: updating Database_version to %s FAILED", __func__, chaine ); }
