@@ -66,6 +66,7 @@
      }
     if(strlen(trame_motif->motif->clic_tech_id)>0)
      { bit.num = -1;
+       bit.type= MNEMO_MONOSTABLE;
        g_snprintf( bit.tech_id, sizeof(bit.tech_id), "%s", trame_motif->motif->clic_tech_id );
        g_snprintf( bit.acronyme, sizeof(bit.acronyme), "%s", trame_motif->motif->clic_acronyme );
        printf("Envoi _M %s:%s = 1 au serveur \n", bit.tech_id, bit.acronyme );

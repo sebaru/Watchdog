@@ -21,7 +21,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Watchdog; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, 
+ * Foundation, Inc., 51 Franklin St, Fifth Floor,
  * Boston, MA  02110-1301  USA
  */
 
@@ -31,7 +31,7 @@
 
  static GtkWidget *Liste_plugin_dls;              /* GtkTreeView pour la gestion des plugin_dlss Watchdog */
                                  /* non static car reutilisable par l'utilitaire d'ajout d'un utilisateur */
- extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */  
+ extern GList *Liste_pages;                                   /* Liste des pages ouvertes sur le notebook */
  extern GtkWidget *Notebook;                                         /* Le Notebook de controle du client */
  extern GtkWidget *F_client;                                                     /* Widget Fenetre Client */
  extern struct CONFIG Config;                                          /* Configuration generale watchdog */
@@ -244,7 +244,7 @@
                                       GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
                                       GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO,
                                       _("Do you want to delete %d plugin%c ?"), nbr, (nbr>1 ? 's' : ' ') );
-     
+
     g_signal_connect( dialog, "response",
                       G_CALLBACK(CB_effacer_plugin_dls), NULL );
     gtk_widget_show_all( dialog );
@@ -433,7 +433,7 @@
        if (gtk_tree_selection_count_selected_rows(selection) == 0)
         { gtk_tree_view_get_path_at_pos ( GTK_TREE_VIEW(Liste_plugin_dls), event->x, event->y,
                                           &path, NULL, &cellx, &celly );
-          
+
           if (path)
            { gtk_tree_selection_select_path( selection, path );
              gtk_tree_path_free( path );
@@ -464,14 +464,14 @@
 
     page = (struct PAGE_NOTEBOOK *)g_try_malloc0( sizeof(struct PAGE_NOTEBOOK) );
     if (!page) return;
-    
+
     page->type  = TYPE_PAGE_PLUGIN_DLS;
     Liste_pages = g_list_append( Liste_pages, page );
 
     hboite = gtk_hbox_new( FALSE, 6 );
     page->child = hboite;
     gtk_container_set_border_width( GTK_CONTAINER(hboite), 6 );
-    
+
 /**************************************************** La liste des plugin_dlss ************************************************/
     scroll = gtk_scrolled_window_new( NULL, NULL );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW(scroll), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
@@ -604,7 +604,7 @@
     g_signal_connect( G_OBJECT(Liste_plugin_dls), "button_press_event",                              /* Gestion du menu popup */
                       G_CALLBACK(Gerer_popup_plugin_dls), NULL );
     g_object_unref (G_OBJECT (store));                                            /* nous n'avons plus besoin de notre modele */
-    
+
 /*********************************************** Les boutons de controles *****************************************************/
     boite = gtk_vbox_new( FALSE, 6 );
     gtk_box_pack_start( GTK_BOX(hboite), boite, FALSE, FALSE, 0 );
@@ -659,10 +659,8 @@
 /* Sortie: Néant                                                                                                              */
 /******************************************************************************************************************************/
  static void Rafraichir_visu_plugin_dls( GtkTreeIter *iter, struct CMD_TYPE_PLUGIN_DLS *plugin_dls )
-  { gchar chaine[128], groupe_page[512];
+  { gchar groupe_page[512];
     GtkTreeModel *store;
-    struct tm *temps;
-    time_t time;
 
     store = gtk_tree_view_get_model( GTK_TREE_VIEW(Liste_plugin_dls) );                              /* Acquisition du modele */
 
