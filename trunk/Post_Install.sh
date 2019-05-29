@@ -2,7 +2,12 @@
 
 echo "Creating systemd service"
 wtd_home=/var/lib/watchdog
-wtd_user=`whoami`
+
+echo "Quel user fera tourner Watchdog ?"
+read wtd_user
+
+echo "Dois-je installé la Database (oui/non) ?"
+read database
 
 echo "Installation in standalone mode in $wtd_home for $wtd_user"
 sleep 5
@@ -30,14 +35,14 @@ CONFFILE=/etc/watchdogd.conf
 if [ ! -f $CONFFILE ]
  then
     echo "Creating New watchdog database passwd"
-    if [ ! "$1" = "slave" ]
+    if [ "$database" = "oui" ]
     then 
       NEWPASSWORD=`openssl rand -base64 32`
       sed "/usr/local/etc/watchdogd.conf.sample" -e "s#dbpasstobechanged#$NEWPASSWORD#g" | \
     fi
     sed -e "s#usertobechanged#$wtd_user#g" | \
     sudo tee "$CONFFILE" > /dev/null
-    if [ ! "$1" = "slave" ]
+    if [ "$database" = "oui" ]
     then
      /usr/bin/mysqladmin -u root create WatchdogDB
      echo "CREATE USER 'watchdog' IDENTIFIED BY '$NEWPASSWORD'; GRANT ALL PRIVILEGES ON WatchdogDB.* TO watchdog; FLUSH PRIVILEGES; source /usr/local/share/Watchdog/init_db.sql;" | mysql -u root WatchdogDB
