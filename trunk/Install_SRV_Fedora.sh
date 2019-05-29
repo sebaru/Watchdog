@@ -7,5 +7,5 @@ dnf install -y libcurl-devel nut-devel mariadb-devel czmq-devel libpurple-devel
 dnf install -y lirc-devel libxml2-devel libgnomeui-devel popt-devel 
 dnf install -y gtksourceview2-devel goocanvas-devel libgnomeui-devel  json-glib-devel gammu-devel
 dnf install -y vlc alsa-utils alsa-firmware 
-dnf install -y sox pocketsphinx mosquitto-devel
+dnf install -y sox mosquitto-devel
 pip3 install gTTS

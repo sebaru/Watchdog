@@ -757,12 +757,12 @@
                     histo->msg.num, histo->alive, histo->msg.sms, histo->msg.libelle_sms );
         }
      }
+    Smsg_send_status_to_master( FALSE );
     Close_zmq ( zmq_msg );
     Close_zmq ( zmq_from_bus );
     Close_zmq ( Cfg_smsg.zmq_to_master );
 
 end:
-    Smsg_send_status_to_master( FALSE );
     Info_new( Config.log, Cfg_smsg.lib->Thread_debug, LOG_NOTICE, "%s: Down . . . TID = %p", __func__, pthread_self() );
     Cfg_smsg.lib->Thread_run = FALSE;
     Cfg_smsg.lib->TID = 0;                                                     /* On indique au master que le thread est mort. */
