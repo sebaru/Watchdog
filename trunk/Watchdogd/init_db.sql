@@ -619,7 +619,7 @@ CREATE TABLE IF NOT EXISTS `histo_msgs` (
 
 CREATE TABLE IF NOT EXISTS `ups` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT CONCAT("UPS",id),
+  `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT "NEW",
   `enable` tinyint(1) NOT NULL,
   `host` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `name` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
@@ -628,6 +628,7 @@ CREATE TABLE IF NOT EXISTS `ups` (
   `map_EA` int(11) NOT NULL,
   `map_E` int(11) NOT NULL,
   `map_A` int(11) NOT NULL,
+  `date_create` DATETIME NOT NULL DEFAULT NOW(),
 
   PRIMARY KEY (`id`)
 ) ENGINE=ARIA  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;

@@ -1173,9 +1173,9 @@
        Lancer_requete_SQL ( db, requete );
      }
 
-    if (database_version < 4171)
+    if (database_version < 4174)
      { g_snprintf( requete, sizeof(requete),
-                   "ALTER TABLE `ups` ADD `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT CONCAT('UPS',id);" );
+                   "ALTER TABLE `ups` ADD `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT 'NEW';" );
        Lancer_requete_SQL ( db, requete );
        g_snprintf( requete, sizeof(requete), "ALTER TABLE `ups` DROP `instance_id`;" );
        Lancer_requete_SQL ( db, requete );
@@ -1184,6 +1184,10 @@
        g_snprintf( requete, sizeof(requete),
                    "ALTER TABLE `ups` CHANGE `ups` `name` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL");
        Lancer_requete_SQL ( db, requete );
+       g_snprintf( requete, sizeof(requete),
+                   "ALTER TABLE `ups` ADD `date_create` DATETIME NOT NULL DEFAULT NOW()");
+       Lancer_requete_SQL ( db, requete );
+
      }
 
     Libere_DB_SQL(&db);
