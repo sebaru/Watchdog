@@ -96,6 +96,8 @@
           g_object_unref(builder);
           return(Http_Send_response_code ( wsi, HTTP_BAD_REQUEST ));                                           /* Bad Request */
         }
+       json_builder_set_member_name  ( builder, "valeur_brute" );
+       json_builder_add_double_value  ( builder, ai->val_avant_ech );
        json_builder_set_member_name  ( builder, "valeur" );
        json_builder_add_double_value  ( builder, ai->val_ech );
        json_builder_set_member_name  ( builder, "type" );
