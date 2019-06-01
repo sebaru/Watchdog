@@ -61,6 +61,7 @@
 
  struct MODULE_UPS
   { gboolean enable;                                                                   /* Le module doit-il tourner au boot ? */
+    gint  id;
     gchar tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];                                                          /* Tech_id du module */
     gchar libelle[NBR_CARAC_LIBELLE_UPS_UTF8+1];                                                           /* Libelle associé */
     gchar host[NBR_CARAC_HOST_UPS_UTF8+1];                                                       /* Adresses IP du module UPS */

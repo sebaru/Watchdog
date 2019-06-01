@@ -619,10 +619,10 @@ CREATE TABLE IF NOT EXISTS `histo_msgs` (
 
 CREATE TABLE IF NOT EXISTS `ups` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL,
+  `tech_id` VARCHAR(32) COLLATE utf8_unicode_ci UNIQUE NOT NULL DEFAULT CONCAT("UPS",id),
   `enable` tinyint(1) NOT NULL,
   `host` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `ups` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `name` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `username` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `password` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `map_EA` int(11) NOT NULL,

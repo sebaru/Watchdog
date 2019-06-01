@@ -107,7 +107,7 @@
      }
 
     g_snprintf( requete, sizeof(requete),                                                                      /* Requete SQL */
-                "SELECT tech_id,host,ups,username,password,enable,map_EA,map_E,map_A "
+                "SELECT id,tech_id,host,ups,username,password,enable,map_EA,map_E,map_A "
                 " FROM %s ORDER BY host,ups", NOM_TABLE_UPS );
 
     if (Lancer_requete_SQL ( db, requete ) == FALSE)                                           /* Execution de la requete SQL */
@@ -138,15 +138,16 @@
     ups = (struct MODULE_UPS *)g_try_malloc0( sizeof(struct MODULE_UPS) );
     if (!ups) Info_new( Config.log, Cfg_ups.lib->Thread_debug, LOG_ERR, "%s: Erreur allocation mémoire", __func__ );
     else
-     { g_snprintf( ups->tech_id,  sizeof(ups->tech_id),  "%s", db->row[0] );
-       g_snprintf( ups->host,     sizeof(ups->host),     "%s", db->row[1] );
-       g_snprintf( ups->ups,      sizeof(ups->ups),      "%s", db->row[2] );
-       g_snprintf( ups->username, sizeof(ups->username), "%s", db->row[3] );
-       g_snprintf( ups->password, sizeof(ups->password), "%s", db->row[4] );
-       ups->enable            = atoi(db->row[5]);
-       ups->map_EA            = atoi(db->row[6]);
-       ups->map_E             = atoi(db->row[7]);
-       ups->map_A             = atoi(db->row[8]);
+     { g_snprintf( ups->tech_id,  sizeof(ups->tech_id),  "%s", db->row[1] );
+       g_snprintf( ups->host,     sizeof(ups->host),     "%s", db->row[2] );
+       g_snprintf( ups->ups,      sizeof(ups->ups),      "%s", db->row[3] );
+       g_snprintf( ups->username, sizeof(ups->username), "%s", db->row[4] );
+       g_snprintf( ups->password, sizeof(ups->password), "%s", db->row[5] );
+       ups->enable            = atoi(db->row[6]);
+       ups->map_EA            = atoi(db->row[7]);
+       ups->map_E             = atoi(db->row[8]);
+       ups->map_A             = atoi(db->row[9]);
+       ups->id                = atoi(db->row[0]);
      }
     return(ups);
   }
