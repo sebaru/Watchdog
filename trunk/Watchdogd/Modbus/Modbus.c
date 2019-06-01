@@ -811,17 +811,14 @@
                           if ( ! (module->response.data[ 1 + (2*cpt + 1) ] & 0x03) )
                            { gfloat reponse;
                              reponse  = module->response.data[ 1 + (2*cpt + 0) ] << 5;                /* Valeur de poids fort */
-                             reponse |= module->response.data[ 1 + (2*cpt + 1) ] >> 3;               /* Valeur de poid faible */
-                             Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
-                              "%s: process EA '%s' = '%f'", __func__, ai->acronyme, reponse );
-sleep(1);
+                             reponse += module->response.data[ 1 + (2*cpt + 1) ] >> 3;               /* Valeur de poid faible */
                              Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse );
                            }
                           break;
                      case ENTREEANA_WAGO_750461:                                                               /* Borne PT100 */
                            { gfloat reponse;                                          /* data[0] est la taille de data recue. */
                              reponse  = module->response.data[ 2*cpt + 1 ] << 8;
-                             reponse |= module->response.data[ 2*cpt + 2 ];
+                             reponse += module->response.data[ 2*cpt + 2 ];
                              Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse );
                            }
                           break;
