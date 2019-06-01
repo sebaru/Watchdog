@@ -781,7 +781,7 @@
                break;
           case MODBUS_GET_AI:
                cpt_e = module->modbus.map_EA;
-               for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
+               for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)         /* Old style : positionnement par ancienne interface */
                 { switch(Partage->ea[cpt_e].confDB.type)
                    { case ENTREEANA_WAGO_750455:
                           if ( ! (module->response.data[ 2*cpt + 2 ] & 0x03) )
@@ -789,7 +789,6 @@
                              reponse  = module->response.data[ 2*cpt + 1 ] << 5;
                              reponse |= module->response.data[ 2*cpt + 2 ] >> 3;
                              SEA( cpt_e, reponse );
-                             Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse );
                            }
                           else SEA_range( cpt_e, 0 );
                           break;
@@ -798,6 +797,30 @@
                              reponse  = module->response.data[ 2*cpt + 1 ] << 8;
                              reponse |= module->response.data[ 2*cpt + 2 ];
                              SEA ( cpt_e, 1.0*reponse );
+                           }
+                          break;
+                     default : SEA_range( cpt_e, 0 );
+                   }
+                  cpt_e++;
+                }
+               for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
+                { struct DLS_AI *ai = module->AI[cpt];
+                  switch(ai->type)
+                   { case ENTREEANA_WAGO_750455:                                      /* data[0] est la taille de data recue. */
+                          if ( ! (module->response.data[ 1 + (2*cpt + 1) ] & 0x03) )
+                           { int reponse;
+                             reponse  = module->response.data[ 1 + (2*cpt + 0) ] << 5;                /* Valeur de poids fort */
+                             reponse |= module->response.data[ 1 + (2*cpt + 1) ] >> 3;               /* Valeur de poid faible */
+                             Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
+                              "%s: process EA '%s' = '%f'", __func__, ai->acronyme, reponse );
+sleep(1);
+                             Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse );
+                           }
+                          break;
+                     case ENTREEANA_WAGO_750461:                                                               /* Borne PT100 */
+                           { gint16 reponse;                                          /* data[0] est la taille de data recue. */
+                             reponse  = module->response.data[ 2*cpt + 1 ] << 8;
+                             reponse |= module->response.data[ 2*cpt + 2 ];
                              Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse );
                            }
                           break;
