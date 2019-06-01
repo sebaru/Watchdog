@@ -809,7 +809,7 @@
                   switch(ai->type)
                    { case ENTREEANA_WAGO_750455:                                      /* data[0] est la taille de data recue. */
                           if ( ! (module->response.data[ 1 + (2*cpt + 1) ] & 0x03) )
-                           { int reponse;
+                           { gfloat reponse;
                              reponse  = module->response.data[ 1 + (2*cpt + 0) ] << 5;                /* Valeur de poids fort */
                              reponse |= module->response.data[ 1 + (2*cpt + 1) ] >> 3;               /* Valeur de poid faible */
                              Info_new( Config.log, Cfg_modbus.lib->Thread_debug, LOG_WARNING,
@@ -819,7 +819,7 @@ sleep(1);
                            }
                           break;
                      case ENTREEANA_WAGO_750461:                                                               /* Borne PT100 */
-                           { gint16 reponse;                                          /* data[0] est la taille de data recue. */
+                           { gfloat reponse;                                          /* data[0] est la taille de data recue. */
                              reponse  = module->response.data[ 2*cpt + 1 ] << 8;
                              reponse |= module->response.data[ 2*cpt + 2 ];
                              Dls_data_set_AI ( NULL, NULL, &module->AI[cpt], reponse );
