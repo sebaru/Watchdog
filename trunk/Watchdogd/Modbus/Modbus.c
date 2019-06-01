@@ -805,6 +805,7 @@
                 }
                for ( cpt = 0; cpt<module->nbr_entree_ana; cpt++)
                 { struct DLS_AI *ai = module->AI[cpt];
+                  if (!ai) continue;
                   switch(ai->type)
                    { case ENTREEANA_WAGO_750455:                                      /* data[0] est la taille de data recue. */
                           if ( ! (module->response.data[ 1 + (2*cpt + 1) ] & 0x03) )
@@ -826,7 +827,6 @@ sleep(1);
                           break;
                      default : SEA_range( cpt_e, 0 );
                    }
-                  cpt_e++;
                 }
                module->mode = MODBUS_SET_DO;
                break;
