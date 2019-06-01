@@ -554,7 +554,11 @@
 
        if ( Recv_zmq ( zmq_msg, &histo_buf, sizeof(struct CMD_TYPE_HISTO) ) == sizeof(struct CMD_TYPE_HISTO) )
         { histo = &histo_buf;
-          if (histo->alive) Imsgp_Envoi_message_to_all_available ( histo->msg.libelle );
+          gchar chaine[256];
+          if (histo->alive)
+           { g_snprintf( chaine, sizeof(chaine), "%s : %s", histo->msg.dls_shortname, histo->msg.libelle );
+             Imsgp_Envoi_message_to_all_available ( histo->msg.libelle );
+           }
         }
 
        g_main_context_iteration ( g_main_loop_get_context (MainLoop), FALSE );

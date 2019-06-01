@@ -40,7 +40,7 @@
   { struct LIBRAIRIE *lib;
     gboolean enable;                                                                    /* Is this tread is enabled at boot ? */
     gchar smsbox_apikey[TAILLE_SMSBOX_APIKEY+1];                                                           /* Clef API SMSBOX */
-    gchar tech_id[32];                                                                                /* Tech_id du telephone */
+    gchar tech_id[NBR_CARAC_PLUGIN_DLS_TECHID];                                                       /* Tech_id du téléphone */
     gpointer bit_comm;                                                            /* Pointer de raccourci pour le bit de comm */
     gboolean comm_status;
     void *zmq_to_master;                                             /* Envoi des events au master si l'instance est un slave */

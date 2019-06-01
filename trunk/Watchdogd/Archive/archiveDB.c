@@ -97,9 +97,7 @@
 /* Sortie: false si probleme                                                                                                  */
 /******************************************************************************************************************************/
  void Ajouter_archDB ( struct DB *db, struct ARCHDB *arch )
-  { gchar requete[512], table[512];
-
-    if (arch->num == -1) Ajouter_archDB_by_nom ( db, arch );
+  { if (arch->num == -1) Ajouter_archDB_by_nom ( db, arch );
                     else Ajouter_archDB_by_num ( db, arch );
   }
 /******************************************************************************************************************************/
