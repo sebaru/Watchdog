@@ -677,7 +677,8 @@
     Smsg_disconnect();                                                                                	/* Free up used memory */
     if (found) Traiter_commande_sms ( from, texte );
 
-    Smsg_send_status_to_master( (error == ERR_NONE ? TRUE : FALSE ) );
+    if ( error == ERR_NONE || error == ERR_EMPTY ) { Smsg_send_status_to_master( TRUE  ); }
+                                              else { Smsg_send_status_to_master( FALSE ); }
   }
 /******************************************************************************************************************************/
 /* Envoyer_sms: Envoi un sms                                                                                                  */
